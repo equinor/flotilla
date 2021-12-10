@@ -18,6 +18,9 @@
     "typescript": "^4.5.2",
     "web-vitals": "^1.1.2"
   },
+  "devDependencies": {
+    "prettier": "^2.4.1"
+  },
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
     "build": "react-scripts build",

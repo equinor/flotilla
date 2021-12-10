@@ -1,27 +1,25 @@
 .app-ui {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(384px, 1fr));
-    grid-gap: 16px;
-    margin-left: 24px;
-    margin-top: 24px;
-  }
-  
-  .header {
-    grid-column-start: 1;
-    grid-column-end: -1;
-  }
-   
-  .robot-overview {
-    grid-column-end: span 2;
-    grid-row-end: span 2;
-    max-height: 500px;
-  }
-  
-  .mission-overview{
-    grid-column-end: span 2;
-    grid-row-end: span 2;
-    overflow: auto;
-    max-height: 500px;
-  }
-  
-  
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(384px, 1fr));
+  grid-gap: 16px;
+  margin-left: 24px;
+  margin-top: 24px;
+}
+
+.header {
+  grid-column-start: 1;
+  grid-column-end: -1;
+}
+
+.robot-overview {
+  grid-column-end: span 2;
+  grid-row-end: span 2;
+  max-height: 500px;
+}
+
+.mission-overview {
+  grid-column-end: span 2;
+  grid-row-end: span 2;
+  overflow: auto;
+  max-height: 500px;
+}

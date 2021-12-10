@@ -4,7 +4,7 @@ Flotilla is the main point of access for operators to interact with multiple rob
 
 ## Setup
 
-For development, please fork the repository. Then, clone the repository: 
+For development, please fork the repository. Then, clone the repository:
 
 ```
 $ git clone https://github.com/equinor/flotilla
@@ -12,10 +12,9 @@ $ git clone https://github.com/equinor/flotilla
 
 The app use TypeScript and React. For development, Node v17.x needs to be installed. Installation instructions can be found [here](https://github.com/nodesource/distributions/blob/master/README.md).
 
-
 ## Install
 
-To install the application, navigate to the root folder and run the following command: 
+To install the application, navigate to the root folder and run the following command:
 
 ```
 $ npm ci
