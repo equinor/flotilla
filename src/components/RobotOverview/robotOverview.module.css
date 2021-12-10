@@ -1,74 +1,74 @@
 .tableWrapper {
-    width: 100%;
-    margin-top: 20px;
+  width: 100%;
+  margin-top: 20px;
 }
 
 .tableCaption {
 }
 
 .tableHeadWrapper {
-    display: block;
-    width: 100%;
-    table-layout: fixed;
-    border-bottom: none !important;
+  display: block;
+  width: 100%;
+  table-layout: fixed;
+  border-bottom: none !important;
 }
 
 .tableBodyWrapper {
-    height: 30rem;
-    width: 100%;
-    overflow-y: auto;
-    display: block;
-    height: calc(100vh - 354px);
+  height: 30rem;
+  width: 100%;
+  overflow-y: auto;
+  display: block;
+  height: calc(100vh - 354px);
 }
 
 .tableRowWrapper {
-    display: table;
-    table-layout: fixed;
-    width: 100%;
-    cursor: pointer;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  cursor: pointer;
 }
 
 .tableCellWrapper {
-    overflow-x: hidden;
+  overflow-x: hidden;
 }
 
 .tableHeaderCell {
-    z-index: 2;
-    cursor: pointer;
-    overflow-x: hidden;
+  z-index: 2;
+  cursor: pointer;
+  overflow-x: hidden;
 }
 
 .tableNameCell {
-    width: 48px;
+  width: 48px;
 }
 
 .tableTypeCell {
-    width: 20%;
-    overflow-x: hidden;
+  width: 20%;
+  overflow-x: hidden;
 }
 
 .tableStatusCell {
-    width: 30%;
-    overflow-x: hidden;
+  width: 30%;
+  overflow-x: hidden;
 }
 
 .tableBatteryCell {
-    width: 10%;
-    overflow-x: hidden;
+  width: 10%;
+  overflow-x: hidden;
 }
 
 .tableInfoCell {
-    width: 10%;
-    overflow-x: hidden;
+  width: 10%;
+  overflow-x: hidden;
 }
 
 .activeTableHeaderCell {
-    background-color: var(--equiGray4) !important;
-    color: var(--asBuilt) !important;
-    border-bottom: 2px solid var(--asBuilt) !important;
-    overflow-x: hidden;
+  background-color: var(--equiGray4) !important;
+  color: var(--asBuilt) !important;
+  border-bottom: 2px solid var(--asBuilt) !important;
+  overflow-x: hidden;
 }
 
 .label {
-    margin-right: 24px;
+  margin-right: 24px;
 }
