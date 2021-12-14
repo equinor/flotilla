@@ -1,6 +1,7 @@
 import { Icon, Typography, Table } from "@equinor/eds-core-react";
 import { info_circle } from "@equinor/eds-icons";
 import { Robot } from "../../models/robot";
+import RobotInfoButton from "./RobotInfoButton";
 import styles from "./robotOverview.module.css";
 import RobotOverviewHeader from "./RobotOverviewHeader";
 
@@ -23,8 +24,8 @@ const RobotStatus: React.FC<RobotProps> = ({ robot }: RobotProps) => {
       <Table.Cell className={styles.tableBatteryCell} variant="numeric">
         {battery}
       </Table.Cell>
-      <Table.Cell className={styles.tableInfoCell} variant="icon">
-        <Icon name="info_circle" size={24} color="primary" />
+      <Table.Cell className={styles.tableInfoCell}>
+        <RobotInfoButton robot={robot} />
       </Table.Cell>
     </Table.Row>
   );
@@ -46,9 +47,7 @@ const RobotOverview: React.FC<RobotOverviewProps> = ({
         <Typography variant="h2">Robot Overview</Typography>
       </Table.Caption>
       <RobotOverviewHeader />
-      <Table.Body className={styles.tableBodyWrapper}>
-        {rows}
-      </Table.Body>
+      <Table.Body className={styles.tableBodyWrapper}>{rows}</Table.Body>
     </Table>
   );
 };
