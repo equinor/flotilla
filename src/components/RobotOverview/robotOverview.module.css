@@ -72,3 +72,19 @@
 .label {
   margin-right: 24px;
 }
+
+.poseItem {
+  margin-left: 12px;
+  margin-bottom: 12px;
+}
+
+.poseWrapper  {
+  margin: 12px;
+}
+
+.infoContentWrapper {
+  width: 90%;
+  max-height: 146px;
+  overflow-y: auto;
+  margin: 12px;
+}
