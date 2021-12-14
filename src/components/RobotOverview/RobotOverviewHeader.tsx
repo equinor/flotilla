@@ -7,10 +7,7 @@ interface RobotOverviewHeaderCellProps {
     overideClassName?: string
 }
 
-const RobotOverviewHeaderCell: React.FC<RobotOverviewHeaderCellProps> = ({
-    label,
-    overideClassName,
-}: RobotOverviewHeaderCellProps) => {
+const RobotOverviewHeaderCell = ({ label, overideClassName }: RobotOverviewHeaderCellProps): JSX.Element => {
     return (
         <Table.Cell className={overideClassName}>
             <span className={styles.label}>{label}</span>
@@ -18,30 +15,15 @@ const RobotOverviewHeaderCell: React.FC<RobotOverviewHeaderCellProps> = ({
     )
 }
 
-const RobotOverviewHeader = () => {
+const RobotOverviewHeader = (): JSX.Element => {
     return (
         <Table.Head className={styles.tableHeadWrapper}>
             <Table.Row className={styles.tableRowWrapper}>
-                <RobotOverviewHeaderCell
-                    label="Name"
-                    overideClassName={styles.tableNameCell}
-                />
-                <RobotOverviewHeaderCell
-                    label="Type"
-                    overideClassName={styles.tableTypeCell}
-                />
-                <RobotOverviewHeaderCell
-                    label="Status"
-                    overideClassName={styles.tableStatusCell}
-                />
-                <RobotOverviewHeaderCell
-                    label="Battery"
-                    overideClassName={styles.tableBatteryCell}
-                />
-                <RobotOverviewHeaderCell
-                    label="Info"
-                    overideClassName={styles.tableInfoCell}
-                />
+                <RobotOverviewHeaderCell label="Name" overideClassName={styles.tableNameCell} />
+                <RobotOverviewHeaderCell label="Type" overideClassName={styles.tableTypeCell} />
+                <RobotOverviewHeaderCell label="Status" overideClassName={styles.tableStatusCell} />
+                <RobotOverviewHeaderCell label="Battery" overideClassName={styles.tableBatteryCell} />
+                <RobotOverviewHeaderCell label="Info" overideClassName={styles.tableInfoCell} />
             </Table.Row>
         </Table.Head>
     )

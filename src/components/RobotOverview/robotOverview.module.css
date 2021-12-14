@@ -14,11 +14,10 @@
 }
 
 .tableBodyWrapper {
-    height: 30rem;
+    height: 100%;
     width: 100%;
     overflow-y: auto;
     display: block;
-    height: calc(100vh - 354px);
 }
 
 .tableRowWrapper {
@@ -39,7 +38,8 @@
 }
 
 .tableNameCell {
-    width: 48px;
+    width: 20%;
+    overflow-x: hidden;
 }
 
 .tableTypeCell {
@@ -48,8 +48,12 @@
 }
 
 .tableStatusCell {
-    width: 30%;
+    width: 20%;
     overflow-x: hidden;
+}
+
+.tableStatusCellDiv {
+    overflow-x: auto;
 }
 
 .tableBatteryCell {
@@ -87,4 +91,25 @@
     max-height: 146px;
     overflow-y: auto;
     margin: 12px;
+}
+
+.available {
+    background-color: #c1e7c1;
+    border-radius: 8px;
+    width: inherit;
+    justify-content: center;
+}
+
+.missionInProgress {
+    background-color: #ffdaa8;
+    border-radius: 8px;
+    width: inherit;
+    justify-content: center;
+}
+
+.offline {
+    background-color: #ff949b;
+    border-radius: 8px;
+    width: inherit;
+    justify-content: center;
 }
