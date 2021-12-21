@@ -2,8 +2,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(384px, 1fr));
     grid-gap: 16px;
-    margin-left: 24px;
-    margin-top: 24px;
+    margin: 24px;
 }
 
 .header {
@@ -20,6 +19,5 @@
 .mission-overview {
     grid-column-end: span 2;
     grid-row-end: span 2;
-    overflow: auto;
     max-height: 500px;
 }
