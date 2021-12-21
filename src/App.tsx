@@ -3,13 +3,13 @@ import { platform } from '@equinor/eds-icons'
 import { RobotOverview } from './components/RobotOverview'
 import { defaultRobots } from './models/robot'
 import './app.css'
+import { defaultMissions } from 'models/mission'
+import { MissionOverview } from 'components/MissionOverview'
 Icon.add({ platform })
 
-const robots = [
-    defaultRobots['taurob'],
-    defaultRobots['exRobotics'],
-    defaultRobots['turtle'],
-]
+const robots = [defaultRobots['taurob'], defaultRobots['exRobotics'], defaultRobots['turtle']]
+
+const missions = [defaultMissions['turtlebot'], defaultMissions['testplan']]
 
 function App() {
     return (
@@ -23,9 +23,7 @@ function App() {
                 <RobotOverview robots={robots}></RobotOverview>
             </div>
             <div className="mission-overview">
-                <Typography variant="h2" style={{ marginTop: '20px' }}>
-                    Mission Overview
-                </Typography>
+                <MissionOverview missions={missions}></MissionOverview>
             </div>
         </div>
     )

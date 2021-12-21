@@ -1,0 +1,81 @@
+.tableWrapper {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.tableCaption {
+}
+
+.tableHeadWrapper {
+    display: block;
+    width: 100%;
+    table-layout: fixed;
+    border-bottom: none !important;
+}
+
+.tableBodyWrapper {
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    display: block;
+}
+
+.tableRowWrapper {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    cursor: pointer;
+}
+
+.tableCellWrapper {
+    overflow-x: hidden;
+}
+
+.tableHeaderCell {
+    z-index: 2;
+    cursor: pointer;
+    overflow-x: hidden;
+}
+
+.tableNameCell {
+    width: 20%;
+    overflow-x: hidden;
+}
+
+.tableLinkCell {
+    width: 40%;
+    overflow-x: hidden;
+}
+
+.tableInfoCell {
+    width: 15%;
+    overflow-x: hidden;
+}
+
+.tableStartMissionCell {
+    width: 15%;
+    overflow-x: hidden;
+}
+
+.tableInfoCell {
+    width: 10%;
+    overflow-x: hidden;
+}
+
+.activeTableHeaderCell {
+    background-color: var(--equiGray4) !important;
+    color: var(--asBuilt) !important;
+    border-bottom: 2px solid var(--asBuilt) !important;
+    overflow-x: hidden;
+}
+
+.label {
+    margin-right: 24px;
+}
+
+.infoContentWrapper {
+    width: 90%;
+    max-height: 146px;
+    overflow-y: auto;
+    margin: 12px;
+}
