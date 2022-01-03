@@ -43,7 +43,7 @@ interface RobotOverviewProps {
 
 const RobotOverview = ({ robots }: RobotOverviewProps): JSX.Element => {
     var rows = robots.map(function (robot) {
-        return <RobotStatusRow robot={robot} />
+        return <RobotStatusRow robot={robot} key={robot.robotInfo.name} />
     })
     return (
         <Table className={styles.tableWrapper}>

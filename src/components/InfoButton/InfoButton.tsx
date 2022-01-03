@@ -19,7 +19,7 @@ const InfoButton = ({ title, content }: InfoButtonProps): JSX.Element => {
     return (
         <>
             <Button ref={anchorRef} variant="ghost_icon" onClick={toggleOpen}>
-                <Icon name="info_circle" size={24} color="primary" />
+                <Icon name="info_circle" size={24} />
             </Button>
             <Popover
                 id="click-popover"

@@ -4,16 +4,18 @@ import styles from './missionOverview.module.css'
 import MissionOverviewHeader from './MissionOverviewHeader'
 import { Mission } from 'models/mission'
 import MissionRow from './MissionRow'
+import { Robot } from 'models/robot'
 
 Icon.add({ info_circle })
 
 interface MissionOverviewProps {
     missions: Mission[]
+    robots: Robot[]
 }
 
-const MissionOverview = ({ missions }: MissionOverviewProps): JSX.Element => {
+const MissionOverview = ({ missions, robots }: MissionOverviewProps): JSX.Element => {
     var rows = missions.map(function (mission) {
-        return <MissionRow mission={mission} />
+        return <MissionRow mission={mission} robots={robots} key={mission.name} />
     })
     return (
         <Table className={styles.tableWrapper}>

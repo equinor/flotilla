@@ -23,7 +23,7 @@ function App() {
                 <RobotOverview robots={robots}></RobotOverview>
             </div>
             <div className="mission-overview">
-                <MissionOverview missions={missions}></MissionOverview>
+                <MissionOverview missions={missions} robots={robots}></MissionOverview>
             </div>
         </div>
     )
