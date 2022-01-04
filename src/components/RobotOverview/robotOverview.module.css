@@ -61,6 +61,19 @@
     overflow-x: hidden;
 }
 
+.batteryStatus {
+    display: flex;
+    align-items: center;
+}
+
+.batteryValue {
+    margin-left: auto;
+}
+
+.batteryIcon {
+    margin-left: auto;
+}
+
 .tableInfoCell {
     width: 10%;
     overflow-x: hidden;

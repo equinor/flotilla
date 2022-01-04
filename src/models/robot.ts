@@ -1,3 +1,4 @@
+import { Battery, BatteryStatus } from './battery'
 import { Pose, defaultPose } from './pose'
 
 export enum RobotStatus {
@@ -13,16 +14,11 @@ export interface RobotInfo {
 
 export class Robot {
     robotInfo: RobotInfo
-    battery: number = 100
+    battery: Battery
     pose: Pose = defaultPose
     status: RobotStatus = RobotStatus.Available
 
-    constructor(
-        robotInfo: RobotInfo,
-        battery: number,
-        pose: Pose,
-        status: RobotStatus
-    ) {
+    constructor(robotInfo: RobotInfo, battery: Battery, pose: Pose, status: RobotStatus) {
         this.robotInfo = robotInfo
         this.battery = battery
         this.pose = pose
@@ -46,12 +42,12 @@ const turtleRobotInfo: RobotInfo = {
 }
 
 export const defaultRobots: { [name: string]: Robot } = {
-    taurob: new Robot(taurobRobotInfo, 100, defaultPose, RobotStatus.Available),
+    taurob: new Robot(taurobRobotInfo, new Battery(BatteryStatus.Charging, 100), defaultPose, RobotStatus.Available),
     exRobotics: new Robot(
         exRobotInfo,
-        59,
+        new Battery(BatteryStatus.Normal, 59),
         defaultPose,
         RobotStatus.MissionInProgress
     ),
-    turtle: new Robot(turtleRobotInfo, 0, defaultPose, RobotStatus.Offline),
+    turtle: new Robot(turtleRobotInfo, new Battery(BatteryStatus.Error), defaultPose, RobotStatus.Offline),
 }
