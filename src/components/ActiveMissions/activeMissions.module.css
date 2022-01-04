@@ -42,7 +42,7 @@
     overflow-x: hidden;
 }
 
-.tableTypeCell {
+.tableRobotCell {
     width: 20%;
     overflow-x: hidden;
 }
@@ -52,24 +52,17 @@
     overflow-x: hidden;
 }
 
-.tableStatusCellDiv {
-    overflow-x: auto;
+.tableStatusColorBar {
+    width: 80%;
 }
 
-.tableBatteryCell {
-    width: 10%;
+.tableTaskCell {
+    width: 20%;
     overflow-x: hidden;
 }
 
-.batteryStatus {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-right: 20%;
-}
-
-.tableInfoCell {
-    width: 10%;
+.tablePlayButtonCell {
+    width: 20%;
     overflow-x: hidden;
 }
 
@@ -84,37 +77,35 @@
     margin-right: 24px;
 }
 
-.poseItem {
-    margin-left: 12px;
-    margin-bottom: 12px;
-}
-
-.poseWrapper  {
-    margin: 12px;
-}
-
-.infoContentWrapper {
-    width: 90%;
-    max-height: 146px;
-    overflow-y: auto;
-    margin: 12px;
-}
-
-.available {
+.active {
     background-color: #c1e7c1;
     border-radius: 8px;
     width: inherit;
     justify-content: center;
 }
 
-.missionInProgress {
-    background-color: #ffdaa8;
+.paused {
+    background-color: #dee5e7;
     border-radius: 8px;
     width: inherit;
     justify-content: center;
 }
 
-.offline {
+.completed {
+    background-color: #c1e7c1;
+    border-radius: 8px;
+    width: inherit;
+    justify-content: center;
+}
+
+.aborted {
+    background-color: #dee5e7;
+    border-radius: 8px;
+    width: inherit;
+    justify-content: center;
+}
+
+.error {
     background-color: #ff949b;
     border-radius: 8px;
     width: inherit;

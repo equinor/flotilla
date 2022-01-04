@@ -19,7 +19,7 @@ const BatteryStatusView = ({ battery } : BatteryStatusViewProps) : JSX.Element =
 
     
     if (!(battery.value))
-        battery_value = "--"
+        battery_value = "--%"
 
     if (battery.status === BatteryStatus.Normal){
         battery_icon = "battery"
@@ -33,15 +33,12 @@ const BatteryStatusView = ({ battery } : BatteryStatusViewProps) : JSX.Element =
     }
     else if (battery.status === BatteryStatus.Error){
         battery_icon = "battery_unknown"
-        icon_color = tokens.colors.interactive.secondary__resting.hex
     }
 
     return (
         <div className={styles.batteryStatus}>
-            <Typography className={styles.batteryValue} >
-                {battery_value}
-            </Typography>
-            <Icon name={battery_icon} color={icon_color} size={24} className={styles.batteryIcon}  />
+        <Typography>{battery_value}</Typography>
+        <Icon name={battery_icon} color={icon_color} size={24} />
         </div>
     )
 }

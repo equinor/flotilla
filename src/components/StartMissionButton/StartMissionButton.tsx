@@ -4,7 +4,6 @@ import { Mission } from 'models/mission'
 import { Robot, RobotStatus } from 'models/robot'
 import { UseComboboxStateChange } from 'downshift'
 import { useRef, useState } from 'react'
-import styles from './startMissionButton.module.css'
 
 interface StartMissionButtonProps {
     mission: Mission

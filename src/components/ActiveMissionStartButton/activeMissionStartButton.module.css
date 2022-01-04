@@ -1,0 +1,13 @@
+.infoContentWrapper {
+    max-height: 480px;
+    overflow-y: auto;
+    display: flex;
+    align-items: center;
+    margin: 12px;
+}
+
+.selector {
+}
+
+.playButton {
+}

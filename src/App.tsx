@@ -5,6 +5,7 @@ import { defaultRobots } from './models/robot'
 import './app.css'
 import { defaultMissions } from 'models/mission'
 import { MissionOverview } from 'components/MissionOverview'
+import { ActiveMissions } from 'components/ActiveMissions'
 Icon.add({ platform })
 
 const robots = [defaultRobots['taurob'], defaultRobots['exRobotics'], defaultRobots['turtle']]
@@ -21,6 +22,9 @@ function App() {
             </div>
             <div className="robot-overview">
                 <RobotOverview robots={robots}></RobotOverview>
+            </div>
+            <div className="active-missions">
+                <ActiveMissions missions={missions} robots={robots}></ActiveMissions> 
             </div>
             <div className="mission-overview">
                 <MissionOverview missions={missions} robots={robots}></MissionOverview>

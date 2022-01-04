@@ -16,6 +16,12 @@
     max-height: 500px;
 }
 
+.active-missions {
+    grid-column-end: span 2;
+    grid-row-end: span 2;
+    max-height: 500px;
+}
+
 .mission-overview {
     grid-column-end: span 2;
     grid-row-end: span 2;
