@@ -3,6 +3,8 @@ import { Button, Icon } from '@equinor/eds-core-react'
 import { Popover } from '@equinor/eds-core-react'
 import { useRef, useState } from 'react'
 
+import { tokens } from '@equinor/eds-tokens'
+
 Icon.add({ info_circle })
 
 interface InfoButtonProps {
@@ -19,7 +21,7 @@ const InfoButton = ({ title, content }: InfoButtonProps): JSX.Element => {
     return (
         <>
             <Button ref={anchorRef} variant="ghost_icon" onClick={toggleOpen}>
-                <Icon name="info_circle" size={24} color="primary" />
+                <Icon name="info_circle" size={24} color={tokens.colors.interactive.primary__resting.hex} />
             </Button>
             <Popover
                 id="click-popover"
