@@ -5,6 +5,7 @@
     "dependencies": {
         "@equinor/eds-core-react": "^0.14.3",
         "@equinor/eds-icons": "^0.8.0",
+        "@equinor/eds-tokens": "^0.7.0",
         "@testing-library/jest-dom": "^5.15.1",
         "@testing-library/react": "^11.2.7",
         "@testing-library/user-event": "^12.8.3",

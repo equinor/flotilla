@@ -61,9 +61,11 @@
     overflow-x: hidden;
 }
 
-.tableInfoCell {
-    width: 10%;
-    overflow-x: hidden;
+.batteryStatus {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-right: 20%;
 }
 
 .activeTableHeaderCell {
