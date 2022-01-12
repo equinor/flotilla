@@ -1,3 +1,4 @@
+import React from 'react';
 import { Typography } from '@equinor/eds-core-react'
 import { RobotStatus } from 'models/robot'
 import styles from './robotOverview.module.css'

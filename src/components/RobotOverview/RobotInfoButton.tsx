@@ -1,3 +1,4 @@
+import React from 'react';
 import { Typography } from '@equinor/eds-core-react'
 import { Pose } from 'models/pose'
 import { Robot } from 'models/robot'

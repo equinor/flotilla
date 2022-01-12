@@ -1,3 +1,4 @@
+import React from 'react';
 import { Icon, Typography, Table } from '@equinor/eds-core-react'
 import { info_circle } from '@equinor/eds-icons'
 import { Robot, RobotStatus } from 'models/robot'
@@ -30,7 +31,7 @@ const RobotStatusRow = ({ robot }: RobotProps): JSX.Element => {
                 </div>
             </Table.Cell>
             <Table.Cell className={styles.tableBatteryCell} variant="numeric">
-                <BatteryStatusView battery={battery}/>
+                <BatteryStatusView battery={battery} />
             </Table.Cell>
             <Table.Cell className={styles.tableInfoCell}>
                 <RobotInfoButton robot={robot} />

@@ -1,3 +1,4 @@
+import React from 'react';
 import { Icon, Typography } from '@equinor/eds-core-react'
 import { platform } from '@equinor/eds-icons'
 import { RobotOverview } from './components/RobotOverview'

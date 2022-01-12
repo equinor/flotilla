@@ -1,3 +1,4 @@
+import React from 'react';
 import { info_circle } from '@equinor/eds-icons'
 import { Button, Icon } from '@equinor/eds-core-react'
 import { Popover } from '@equinor/eds-core-react'
