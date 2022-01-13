@@ -1,0 +1,1112 @@
+openapi: 3.0.1
+info:
+  title: "Flotilla API"
+  version: "0.1.0"
+  contact:
+    email: "fg_robot_dev@equinor.com"
+
+  license:
+    name: Eclipse 2.0
+    url: https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt
+
+  description: |
+    The [Flotilla](https://github.com/equinor/flotilla) API is an open API monitoring robots on an Equinor asset..
+    We recommend using documentation published at [github.io](https://equinor.github.io/flotilla/) as it provides the best developer experience.
+    # Introduction
+    The API is designed and built according to [Equinor's API strategy](https://github.com/equinor/api-strategy).
+    The API is documented in OpenAPI 3.0 format and follows REST principles.
+
+    ## API versioning
+    The API follows the principles of [API evolution](https://apisyouwonthate.com/blog/api-evolution-for-rest-http-apis)
+
+    ## Authentication and authorization overview
+    The user executing the API requests will need to authenticate with OAuth 2.0 authorization code flow with Equinor Azure AD as the identity provider. 
+
+    ## Dates
+    All date and time information are based on UTC (Universal Time Coordinated) and formatted according to [RFC3339](https://www.ietf.org/rfc/rfc3339.txt)
+    This also applies to durations, such as 1 day or 2 hours, which are encoded as `P0Y0M1DT0H0M0S` and `P0Y0M0DT2H0M0S`.
+
+    ## Deprecation policy
+    The API will use the principles of [API evolution](https://apisyouwonthate.com/blog/api-evolution-for-rest-http-apis) instead of introducing a new api-version on every breaking change.
+
+    In order to achieve this, endpoints, query parameters and resource properties can become deprecated and will be marked so in the OpenAPI specification.
+
+    ## Endpoints with deprecation
+    None
+    # Feature requests
+    Feature requests are welcomed and can be submitted by creating issues on: [GitHub](https://github.com/equinor/flotilla)
+
+externalDocs:
+  description: API documentation
+  url: "https://equinor.github.io/api-first-workbench"
+
+tags:
+  - name: Robots
+    description: |
+      Robots represent all robots on asset
+  - name: Missions
+    description: |
+      Missions represent all available missions that can be started/scheduled on asset
+  - name: Reports
+    description: |
+      Reports represent the history of completed and active missions on asset
+  - name: Maps
+    description: |
+      Maps represents 2D-maps used to visualize pose of robot on asset
+
+paths:
+  /robots:
+    get:
+      operationId: getRobots
+      summary: List all robots on the asset.
+      description: |
+        ### Overview
+        List all robots on the asset
+      security:
+        - OAuth2:
+            - read
+            - write
+      tags:
+        - Robots
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Robot"
+          description: Request successful
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /robots/{robot_id}:
+    get:
+      operationId: getSingleRobot
+      summary: Lookup a single robot
+      description: |
+        ### Overview
+        Lookup a single robot.
+      tags:
+        - Robots
+      security:
+        - OAuth2:
+            - read
+            - write
+      parameters:
+        - in: path
+          name: robot_id
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 21
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Robot"
+          description: Request successful and robot returned
+        "404":
+          description: No robot with given id exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /robots/{robot_id}/streaming:
+    get:
+      operationId: getRobotStream
+      summary: Lookup information for streaming of real time data from robot
+      description: |
+        ### Overview
+        Lookup information of real-time data streaming. 
+
+        Describes the protocol used for distributing real time data and neccesary information for connecting to the information sources.
+      tags:
+        - Robots
+      security:
+        - OAuth2:
+            - read
+            - write
+      parameters:
+        - in: path
+          name: robot_id
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 21
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stream"
+          description: Request successful
+        "404":
+          description: Not found - No robot with id exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /robots/{robot_id}/schedule:
+    get:
+      operationId: getRobotSchedule
+      summary: Lookup the schedule for the robot
+      description: |
+        ### Overview
+        Get the current schedule of a robot. The schedule is a list of time entries where the robot is scheduled to perform a certain mission.
+
+        The minimum start time and maximum end time for the schedule entries can be specified in the query. If none is provided, the default start time is current time and default end time is start time + one week.
+      tags:
+        - Robots
+      security:
+      - OAuth2:
+          - read
+          - write
+      parameters:
+        - in: path
+          name: robot_id
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 21
+        - in: query
+          name: startTime
+          schema:
+            type: string
+            format: date-time
+            description: Earliest start time for scheduled missions
+          required: false
+        - in: query
+          name: endTime
+          schema:
+            type: string
+            format: date-time
+            description: Latest end time for scheduled missions
+          required: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+          description: Request successful
+        "404":
+          description: Not found - No robot with id exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /robots/{robot_id}/event:
+    post:
+      operationId: postRobotEvent
+      summary: Create new event for robot
+      description: |
+        ### Overview
+        Adds a new event to the robot schedule
+
+        New entries to the schedule can be added as long as they do not conflict with already scheduled events.
+      tags:
+        - Robots
+      security:
+        - OAuth2:
+            - write
+      parameters:
+        - in: path
+          name: robot_id
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 21
+      requestBody:
+        description: Time entry update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventRequest"
+            examples:
+              scheduleEvent:
+                $ref: "#/components/examples/scheduleEvent"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventResponse"
+          description: Request successful
+        "403":
+          description: Forbidden - Client not authorized to add events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /robots/{robot_id}/event/{event_id}:
+    delete:
+      operationId: deleteRobotEvent
+      summary: Remove an event from the robot schedule
+      description: |
+        ### Overview
+        Deletes an event from the robot schedule.
+
+        Can only be used for events that have not started yet.
+      tags:
+        - Robots
+      security:
+        - OAuth2:
+            - write
+      parameters:
+        - in: path
+          name: robot_id
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 21
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 102
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostResponse"
+          description: Request successful
+        "403":
+          description: Forbidden - Client not authorized to delete events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /robots/{robot_id}/start/{mission_id}:
+    post:
+      operationId: postStartRobot
+      summary: Start a mission with robot
+      description: |
+        ### Overview
+        Start a mission with given id using robot with robot id.
+      tags:
+        - Robots
+      security:
+        - OAuth2:
+            - write
+      parameters:
+        - in: path
+          name: robot_id
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 21
+        - in: path
+          name: mission_id
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 287
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+            examples:
+              start:
+                $ref: "#/components/examples/start"
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartResponse"
+          description: Mission succesfully started
+        "403":
+          description: Failed to start - Client is not authorized to start mission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        "409":
+          description: Failed to start - Conflict with the robot schedule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /robots/{robot_id}/stop:
+    post:
+      operationId: postStopRobot
+      summary: Stop robot
+      description: |
+        ### Overview
+        Stop the execution of the current active mission. 
+
+        If there is no active mission on robot, nothing happens.
+      tags:
+        - Robots
+      security:
+        - OAuth2:
+            - write
+      parameters:
+        - in: path
+          name: robot_id
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 21
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+            examples:
+              stop:
+                $ref: "#/components/examples/stop"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostResponse"
+          description: Robot succesfully stopped
+        "403":
+          description: Failed to stop - Client is not authorized to stop mission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /missions:
+    get:
+      operationId: getMissions
+      summary: List all available missions on the asset
+      description: |
+        ### Overview
+        List all available missions on the asset in the Echo mission planner
+      tags:
+        - Missions
+      security:
+        - OAuth2:
+            - read
+            - write
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mission"
+          description: Request successful
+        "404":
+          description: Not found - No missions available on the asset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /missions/{mission_id}:
+    get:
+      operationId: getSingleMission
+      summary: Lookup a single mission on the asset
+      description: |
+        ### Overview
+        Lookup a single mission on the asset
+      tags:
+        - Missions
+      security:
+        - OAuth2:
+            - read
+            - write
+      parameters:
+        - in: path
+          name: mission_id
+          required: true
+          schema:
+            type: integer
+            example: 271
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mission"
+          description: Request successful
+        "404":
+          description: Not found - The requested mission object does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /map/{x_coord}/{y_coord}/{z_coord}:
+    get:
+      operationId: getMap
+      summary: Find map based on coordinates
+      description: |
+        ### Overview
+        Finds the appropriate map based on the coordinates.
+      tags:
+        - Maps
+      security:
+        - OAuth2:
+            - read
+            - write
+      parameters:
+        - in: path
+          name: x_coord
+          required: true
+          schema:
+            type: number
+            format: float
+            example: 221.5
+        - in: path
+          name: y_coord
+          required: true
+          schema:
+            type: number
+            format: float
+            example: 537.5
+        - in: path
+          name: z_coord
+          required: true
+          schema:
+            type: number
+            format: float
+            example: 2.3
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Map"
+          description: Request successful
+        "404":
+          description: Not found - No map obejcts exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+  /reports:
+    get:
+      operationId: getReports
+      summary: List all available reports on the asset
+      description: |
+        ### Overview
+        List all available reports on the asset.
+      tags:
+        - Reports
+      security:
+        - OAuth2:
+            - read
+            - write
+      parameters:
+        - in: query
+          name: startTime
+          schema:
+            type: string
+            format: date-time
+            description: Earliest start time for returned reports
+          required: false
+        - in: query
+          name: endTime
+          schema:
+            type: string
+            format: date-time
+            description: Latest end time for returned reports
+          required: false
+        - in: query
+          name: status
+          schema:
+            $ref: "#/components/schemas/ReportStatus"
+          required: false
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            format: int32
+            description: Maximum number of returned reports
+          required: false
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            format: int32
+            description: Starting index of returned reports
+          required: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Report"
+          description: Request successful
+        "404":
+          description: Not found - No reports exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+  /reports/{report_id}:
+    get:
+      operationId: getSingleReport
+      summary: Lookup single report
+      description: |
+        ### Overview
+        Lookup a single report with given id
+      tags:
+        - Reports
+      security:
+        - OAuth2:
+            - read
+            - write
+      parameters:
+        - in: path
+          name: report_id
+          required: true
+          schema:
+            type: integer
+            example: 212
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+          description: Request successful
+        "404":
+          description: Not found - Report does not exist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetails"
+
+components:
+  parameters:
+    apiVersion:
+      name: api-version
+      in: query
+      required: true
+      description: api-version must be present in all request as part of the query string
+      schema:
+        type: string
+        enum: ["v1"]
+
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.windows.net/common/oauth2/authorize?resource=0e595101-1f08-4ce0-8684-148b2e2b8e18
+          tokenUrl: https://login.microsoftonline.com/common/oauth2/token
+          scopes:
+            read: Grants read access
+            write: Grants write access
+
+  schemas:
+    Robot:
+      type: object
+      required:
+        - id
+        - name
+        - model
+        - status
+        - capabilities
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Id of robot
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+        name:
+          type: string
+          description: Name of robot
+          example: "Terminator"
+        model:
+          type: string
+          description: Model of robot
+          example: "Turtlebot"
+        status:
+          $ref: "#/components/schemas/RobotStatus"
+        capabilities:
+          type: array
+          items:
+            $ref: "#/components/schemas/InspectionType"
+      additionalProperties: false
+    Mission:
+      type: object
+      required:
+        - id 
+        - name
+        - link
+        - tags
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Echo Mission Id
+          example: 122
+        name:
+          type: string
+          description: Name of mission in Echo
+          example: "Valve Inspection Round"
+        link:
+          type: string
+          format: uri
+          description: Link to mission in Echo
+          example: "https://echo.equinor.com/mp?editId=122"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tag"
+      additionalProperties: false
+    Report:
+      type: object
+      required:
+        - id 
+        - startTime
+        - endTime
+        - robotId
+        - missionId
+        - status
+        - entries
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Id of report
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+        startTime:
+          type: string
+          format: date-time
+          description: Start time of mission
+          example: "2022-01-12T10:33:33Z"
+        endTime:
+          type: string
+          format: date-time
+          description: End time of mission
+          example: "2022-01-12T10:33:33Z"
+          nullable: true
+        robotId:
+          type: string
+          format: uuid
+          description: Id of robot performing mission
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+        missionId:
+          type: integer
+          format: int32
+          description: Id of mission
+          example: 221
+        status:
+          $ref: "#/components/schemas/ReportStatus"
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReportEntry"
+      additionalProperties: false
+    Map:
+      type: object
+      required:
+        - id
+        - data
+        - coordinates
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Id of map\
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+        data:
+          type: string
+          format: binary
+          description: "Byte representation of image of 2D Map"
+          example: "b4345xbnf32b..."
+        coordinates:
+          $ref: "#/components/schemas/Coordinates"
+      additionalProperties: false
+    Tag:
+      type: object
+      required: 
+        - tagId
+        - inspectionTypes
+      properties:
+        tagId:
+          type: string
+          description: Stid Id for inspection tag
+          example: "123-AA-354"
+        link:
+          type: string
+          description: Link to tag in Echo
+          example: "https://echo.equinor.com/tag/313-AA-243"
+        inspectionTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/InspectionType"
+      additionalProperties: false
+    ReportEntry:
+      type: object
+      required:
+        - id
+        - tagId
+        - status
+        - inspectionType
+        - time
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Id of report entry
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+        tagId:
+          type: string
+          description: Tag Id of inspection
+          example: "123-AA-354"
+        status:
+          type: string
+          description: Status for inspection of tag
+          enum: ["completed", "failed"]
+        inspectionType:
+          $ref: "#/components/schemas/InspectionType"
+        time:
+          type: string
+          format: date-time
+          description: Time Stamp of inspection
+          example: "2022-01-12T10:33:33Z"
+        link:
+          type: string
+          format: uri
+          description: HTTPS link to inspection result
+          example: "https://equinor.com"
+      additionalProperties: false
+    Coordinates:
+      type: object
+      required:
+        - referenceSystem
+        - xMin
+        - xMax
+        - yMin
+        - yMax
+      properties:
+        referenceSystem:
+          type: string
+          description: Reference system for coordinates
+          example: "EQUINOR:4100001"
+        xMin:
+          type: number
+          format: float
+          description: Minimum x coordinate in asset frame covered by map
+          example: 25.4
+        xMax:
+          type: number
+          format: float
+          description: Maximum x-coordinate in asset frame covered by map
+          example: 254.3
+        yMin:
+          type: number
+          format: float
+          description: Minimum y-coordinate in asset frame covered by map
+          example: -10.3
+        yMax:
+          type: number
+          format: float
+          description: Maximum x-coordinate in asset frame covered by map
+      additionalProperties: false
+    Stream:
+      type: object
+      required:
+        - protocol
+        - host
+        - port
+        - topics
+      properties:
+        protocol:
+          type: string
+          description: Protocol used for streaming real time data
+          enum: ["MQTT"]
+        host:
+          type: string
+          format: ipv4
+          description: IP-address of host
+          example: "192.0.2.146"
+        port:
+          type: string
+          description: Port number used
+          example: "1888"
+        topics:
+          type: array
+          items:
+            $ref: "#/components/schemas/Topic"
+      additionalProperties: false
+    Topic:
+      type: object
+      required:
+        - path
+        - resource
+      properties:
+        path:
+          type: string
+          example: "robot/pose"
+        resource:
+          type: string
+          enum: ["battery", "pose"]
+      additionalProperties: false
+    Schedule:
+      type: object
+      required:
+        - robotId
+        - startDate
+        - endDate
+        - events
+      properties:
+        robotId:
+          type: string
+          format: uuid
+          description: Robot id for schedule
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+        startDate:
+          type: string
+          format: date
+          description: Start date for schedule
+          example: "2022-01-12"
+        endDate:
+          type: string
+          format: date
+          description: End date for schedule
+          example: "2022-01-19"
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
+      additionalProperties: false
+    Event:
+      type: object
+      required:
+        - id
+        - missionId
+        - startTime
+        - endTime
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Id of event
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+        seriesId:
+          type: string
+          format: uuid
+          description: Series id if the schedule entry is a part of a series
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+          nullable: true
+        missionId:
+          type: integer
+          format: int32
+          description: Id of mission in echo
+          example: 231
+        startTime:
+          type: string
+          format: date-time
+          description: Start time for scheduled mission in local time
+          example: "2022-01-12T10:33:33Z"
+        endTime:
+          type: string
+          format: date-time
+          description: Expected end time for scheduled mission in local time
+          example: "2022-01-13T10:33:33Z"
+      additionalProperties: false
+    InspectionType:
+      type: string
+      description: Valid inspection types
+      enum: ["thermal_image", "image", "audio"]
+    ReportStatus:
+      type: string
+      description: Status for mission
+      enum: ["completed", "active", "aborted"]
+    RobotStatus:
+      type: string
+      description: Status of robot
+      enum: ["available", "offline", "mission_in_progress"]
+    ProblemDetails:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Description of error
+          example: "One or more validation errors occurred."
+          nullable: true
+        status:
+          type: integer
+          description: HTTP status code
+          example: 400
+          format: int32
+          nullable: true
+        errors:
+          type: object
+          description: Detailed information about error
+          additionalProperties:
+            type: object
+            additionalProperties: false
+          nullable: true
+          readOnly: true
+      additionalProperties: false
+    PostResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["success"]
+    EventRequest:
+      type: object
+      required:
+        - missionId
+        - startTime
+      properties:
+        missionId:
+          type: string
+          format: uuid
+          description: Id of mission
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+        startTime:
+          type: string
+          format: date-time
+          description: Start time of event in local time 
+          example: "2022-01-01T08:33:33Z"
+      additionalProperties: false
+    EventResponse:
+      type: object
+      required:
+        - eventId
+      properties:
+        status:
+          type: string
+          description: Request status
+          enum: ["success"]
+        eventId:
+          type: string
+          format: uuid
+          description: Id of created event
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+      additionalProperties: false
+    StartResponse:
+      type: object
+      required:
+        - reportId
+      properties:
+        status:
+          type: string
+          description: Request status
+          enum: ["success"]
+        reportId:
+          type: string
+          format: uuid
+          description: Id of created event
+          example: "1b69b353-95ff-402e-9864-a5acf5bd9ddb"
+      additionalProperties: false
+  examples:
+    scheduleEvent:
+      summary: Add new event to robot schedule
+      value:
+        - missionId: 287
+          startTime: "2022-01-12T10:33:33Z"
+    start:
+      summary: Start mission
+      value: {}
+    stop:
+      summary: Stop robot
+      value: {}
