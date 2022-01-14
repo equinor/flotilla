@@ -23,6 +23,7 @@ setup(
         "fastapi",
         "uvicorn",
         "requests",
+        "SQLAlchemy",
     ],
     extras_require={
         "dev": [
