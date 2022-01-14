@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="flotilla",
-    version='0.0.0',
+    version="0.0.0",
     description="Backend for the Flotilla application",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -19,12 +19,7 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
     include_package_data=True,
-    install_requires=[
-        "fastapi",
-        "uvicorn",
-        "requests",
-        "SQLAlchemy",
-    ],
+    install_requires=["fastapi", "uvicorn", "requests", "SQLAlchemy", "pytz"],
     extras_require={
         "dev": [
             "pytest",
