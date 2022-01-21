@@ -17,7 +17,8 @@ from flotilla.database.models import (
 
 
 def populate_mock_db(session, engine, base) -> None:
-    base.metadata.create_all(engine)
+
+    base.metadata.create_all(bind=engine)
 
     robot_1 = Robot(
         name="Harald",
@@ -112,24 +113,16 @@ def populate_mock_db(session, engine, base) -> None:
         capability=InspectionType.image,
     )
 
-    topic_1 = Topic(
-        robot_id=robot_1.id,
-        path="/robot_1/pose",
-        resource=Resource.pose
-    )
+    topic_1 = Topic(robot_id=robot_1.id, path="/robot_1/pose", resource=Resource.pose)
 
     topic_2 = Topic(
-        robot_id=robot_1.id,
-        path="/robot_1/battery",
-        resource=Resource.battery
+        robot_id=robot_1.id, path="/robot_1/battery", resource=Resource.battery
     )
 
     topic_3 = Topic(
-        robot_id=robot_2.id,
-        path="/robot_2/pressure",
-        resource=Resource.pressure 
+        robot_id=robot_2.id, path="/robot_2/pressure", resource=Resource.pressure
     )
-    
+
     session.add_all(
         [
             entry_1,
@@ -142,7 +135,7 @@ def populate_mock_db(session, engine, base) -> None:
             capability_3,
             topic_1,
             topic_2,
-            topic_3
+            topic_3,
         ]
     )
     session.commit()

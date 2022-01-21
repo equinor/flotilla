@@ -1,7 +1,8 @@
 import datetime
 import enum
-import resource
+from os import name
 
+from flotilla_openapi.models.robot import Robot as RobotAPI
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, Interval, String
 from sqlalchemy.orm import backref, relationship
 
@@ -29,6 +30,7 @@ class EntryStatus(enum.Enum):
     failed = "Failed"
     completed = "Completed"
 
+
 class Resource(enum.Enum):
     pose = "pose"
     battery = "battery"
@@ -47,6 +49,15 @@ class Robot(Base):
     streams = relationship("VideoStream", backref=backref("robot"))
     capabilities = relationship("Capability", backref=backref("robot"))
     events = relationship("Event", backref=backref("robot"))
+
+    def get_api_robot(self) -> RobotAPI:
+        return RobotAPI(
+            id=self.id,
+            name=self.name,
+            model=self.model,
+            status=self.status.value,
+            capabilities=[cap.capability.value for cap in self.capabilities],
+        )
 
 
 class Report(Base):
@@ -101,7 +112,7 @@ class Event(Base):
         DateTime(timezone=True), default=datetime.datetime.now(tz=datetime.timezone.utc)
     )
     estimated_duration = Column(Interval)
-    # TODO: robot_id and report_id.robot_id can now point at different robots. 
+    # TODO: robot_id and report_id.robot_id can now point at different robots.
     # Should there be a constraint forcing an event to point at only one robot?
 
 
