@@ -20,6 +20,6 @@ setup(
     ],
     include_package_data=True,
     install_requires=["fastapi[all]", "uvicorn", "requests", "SQLAlchemy", "pytz"],
-    extras_require={"dev": ["pytest", "black"]},
+    extras_require={"dev": ["pytest", "black", "mypy"]},
     python_requires=">=3.9",
 )
