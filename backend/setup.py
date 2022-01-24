@@ -19,7 +19,14 @@ setup(
         "Topic :: Scientific/Engineering :: Physics",
     ],
     include_package_data=True,
-    install_requires=["fastapi[all]", "uvicorn", "requests", "SQLAlchemy", "pytz"],
+    install_requires=[
+        "fastapi[all]",
+        "fastapi-azure-auth",
+        "pytz",
+        "requests",
+        "SQLAlchemy",
+        "uvicorn",
+    ],
     extras_require={"dev": ["pytest", "black", "mypy"]},
     python_requires=">=3.9",
 )

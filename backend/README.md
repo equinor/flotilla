@@ -4,6 +4,7 @@
 
 ```bash
 pip install -e .[dev]
+pip install fastapi[all]
 pip install -i https://test.pypi.org/simple/ flotilla-openapi
 ```
 
@@ -12,7 +13,7 @@ pip install -i https://test.pypi.org/simple/ flotilla-openapi
 Start the API by running
 
 ```bash
-uvicorn flotilla.main:app --reload
+python src/flotilla/main.py
 ```
 
 The API is then available on

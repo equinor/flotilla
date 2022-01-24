@@ -1,10 +1,11 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Path, Response
+from fastapi import APIRouter, Depends, Path, Response, Security
 from flotilla_openapi.models.problem_details import ProblemDetails
 from flotilla_openapi.models.robot import Robot
 from pytest import Session
 
+from flotilla.api.authentication import authentication_scheme
 from flotilla.database.crud.crud import get_robot_by_id, get_robots
 from flotilla.database.db import SessionLocal
 from flotilla.database.models import Robot as RobotDB
@@ -27,6 +28,7 @@ def get_db():
     },
     tags=["Robots"],
     summary="List all robots on the asset.",
+    dependencies=[Security(authentication_scheme)],
 )
 async def read_robots(response: Response, db: Session = Depends(get_db)) -> List[Robot]:
     robots: List[RobotDB] = get_robots(db)
@@ -42,6 +44,7 @@ async def read_robots(response: Response, db: Session = Depends(get_db)) -> List
     },
     tags=["Robots"],
     summary="Lookup a single robot",
+    dependencies=[Security(authentication_scheme)],
 )
 async def read_robot(
     response: Response,
