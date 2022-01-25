@@ -20,6 +20,7 @@ setup(
     ],
     include_package_data=True,
     install_requires=[
+        "azure-identity",
         "fastapi[all]",
         "fastapi-azure-auth",
         "pytz",
