@@ -1,0 +1,153 @@
+[
+  {
+    "robotPlanId": 1,
+    "installationCode": "KAA",
+    "name": "Mission 1",
+    "status": "Draft",
+    "robotOperator": "Terminator",
+    "createdAt": "2021-06-18T10:10:33.0804873+00:00",
+    "lastModified": "2022-01-11T09:29:38.1026528+00:00",
+    "inspectionDate": "2021-06-18T22:00:00+00:00",
+    "planItems": [
+      {
+        "planItemId": 1,
+        "tag": "346-LD-1073",
+        "sortingOrder": 0,
+        "robotPlanId": 1,
+        "sensorTypes": []
+      },
+      {
+        "planItemId": 2,
+        "tag": "345-LD-1004",
+        "sortingOrder": 1,
+        "robotPlanId": 1,
+        "sensorTypes": []
+      },
+      {
+        "planItemId": 3,
+        "tag": "314-LD-1001",
+        "sortingOrder": 2,
+        "robotPlanId": 1,
+        "sensorTypes": []
+      }
+    ]
+  },
+  {
+    "robotPlanId": 122,
+    "installationCode": "KAA",
+    "name": "Mission 2",
+    "status": "Draft",
+    "robotOperator": "Terminator",
+    "createdAt": "2021-06-24T08:14:31.5954831+00:00",
+    "lastModified": "2021-07-28T08:25:13.7401297+00:00",
+    "inspectionDate": "2021-06-24T22:00:00+00:00",
+    "planItems": [
+      {
+        "planItemId": 263,
+        "tag": "15-LD-0059",
+        "sortingOrder": 0,
+        "robotPlanId": 122,
+        "sensorTypes": []
+      },
+      {
+        "planItemId": 264,
+        "tag": "346-LD-1073",
+        "sortingOrder": 1,
+        "robotPlanId": 122,
+        "sensorTypes": []
+      },
+      {
+        "planItemId": 265,
+        "tag": "345-LD-1004",
+        "sortingOrder": 2,
+        "robotPlanId": 122,
+        "sensorTypes": []
+      },
+      {
+        "planItemId": 266,
+        "tag": "344-LD-1001",
+        "sortingOrder": 3,
+        "robotPlanId": 122,
+        "sensorTypes": []
+      }
+    ]
+  },
+  {
+    "robotPlanId": 143,
+    "installationCode": "KAA",
+    "name": "Mission 3",
+    "status": "Draft",
+    "robotOperator": "Terminator",
+    "createdAt": "2021-07-07T11:35:35.0077049+00:00",
+    "lastModified": "2021-07-07T11:35:58.9087406+00:00",
+    "inspectionDate": "0001-01-01T00:00:00+00:00",
+    "planItems": [
+      {
+        "planItemId": 342,
+        "tag": "314-LD-005",
+        "sortingOrder": 0,
+        "robotPlanId": 143,
+        "sensorTypes": []
+      }
+    ]
+  },
+  {
+    "robotPlanId": 164,
+    "installationCode": "KAA",
+    "name": "Mission 4",
+    "status": "Draft",
+    "robotOperator": "Terminator",
+    "createdAt": "2021-08-02T11:51:40.3127082+00:00",
+    "lastModified": "2021-08-02T11:52:04.2984825+00:00",
+    "inspectionDate": "0001-01-01T00:00:00+00:00",
+    "planItems": [
+      {
+        "planItemId": 351,
+        "tag": "314-LD-005",
+        "sortingOrder": 0,
+        "robotPlanId": 164,
+        "sensorTypes": []
+      }
+    ]
+  },
+  {
+    "robotPlanId": 176,
+    "installationCode": "KAA",
+    "name": "Mission 5",
+    "status": "Draft",
+    "robotOperator": "Terminator",
+    "createdAt": "2021-08-14T19:03:59.5971871+00:00",
+    "lastModified": "2021-09-22T18:17:10.0292426+00:00",
+    "inspectionDate": "2021-08-14T22:00:00+00:00",
+    "planItems": [
+      {
+        "planItemId": 353,
+        "tag": "355-LD-1003",
+        "sortingOrder": 0,
+        "robotPlanId": 176,
+        "sensorTypes": []
+      },
+      {
+        "planItemId": 354,
+        "tag": "313-LD-1111",
+        "sortingOrder": 1,
+        "robotPlanId": 176,
+        "sensorTypes": []
+      },
+      {
+        "planItemId": 355,
+        "tag": "313-LD-1104",
+        "sortingOrder": 2,
+        "robotPlanId": 176,
+        "sensorTypes": []
+      },
+      {
+        "planItemId": 356,
+        "tag": "313-PA-101A",
+        "sortingOrder": 3,
+        "robotPlanId": 176,
+        "sensorTypes": []
+      }
+    ]
+  }
+]

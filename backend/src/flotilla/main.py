@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from flotilla.api.authentication import authenticator
+from flotilla.api.missions_api import router as missions_router
 from flotilla.api.robots_api import router as robots_router
 from flotilla.database.db import Base, SessionLocal, engine
 from flotilla.database.mock_database.mock_database import populate_mock_db
@@ -37,6 +38,7 @@ def startup_event():
 
 
 app.include_router(robots_router)
+app.include_router(missions_router)
 
 
 if __name__ == "__main__":

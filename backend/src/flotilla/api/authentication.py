@@ -38,8 +38,6 @@ class Authenticator:
     async def load_config(self):
         if self.authentication_enabled:
             await self.scheme.openid_config.load_config()
-        else:
-            pass
 
 
 authenticator = Authenticator()
