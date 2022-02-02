@@ -4,3 +4,9 @@ services:
     build: frontend
     ports:
       - '3001:3001'
+  broker:
+    build: broker
+    ports:
+    - '1883:1883'
+    - '9001:9001'
+    network_mode: host
