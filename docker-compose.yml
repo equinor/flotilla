@@ -9,4 +9,7 @@ services:
     ports:
     - '1883:1883'
     - '9001:9001'
-    network_mode: host
+  backend:
+    build: backend
+    ports:
+      - '8000:8000'
