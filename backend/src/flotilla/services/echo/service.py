@@ -1,20 +1,13 @@
 from abc import ABCMeta, abstractmethod
 
-from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
-from requests import Response, get
+from requests import Response
 
+from flotilla.services import RequestHandler, get_azure_credentials
 from flotilla.settings import settings
 
 
-def get_azure_credentials():
-    try:
-        return DefaultAzureCredential()
-    except ClientAuthenticationError as e:
-        raise e
-
-
-class EchoRequestsInteface(metaclass=ABCMeta):
+class EchoServiceInterface(metaclass=ABCMeta):
     @abstractmethod
     def get_missions(self) -> Response:
         pass
@@ -24,14 +17,16 @@ class EchoRequestsInteface(metaclass=ABCMeta):
         pass
 
 
-class EchoRequests(EchoRequestsInteface):
+class EchoService(EchoServiceInterface):
     def __init__(
         self,
+        request_handler: RequestHandler = RequestHandler(),
         client_id: str = settings.ECHO_CLIENT_ID,
         scope: str = settings.ECHO_APP_SCOPE,
         echo_api_url: str = settings.ECHO_API_URL,
         installation_code: str = settings.INSTALLATION_CODE,
     ) -> None:
+        self.request_handler: RequestHandler = request_handler
         self.client_id: str = client_id
         self.scope: str = scope
         self.request_scope: str = f"{client_id}/{scope}"
@@ -46,7 +41,7 @@ class EchoRequests(EchoRequestsInteface):
         params: dict = {
             "InstallationCode": self.installation_code,
         }
-        response: Response = get(
+        response: Response = self.request_handler.get(
             url=url, headers={"Authorization": f"Bearer {token}"}, params=params
         )
 
@@ -56,11 +51,13 @@ class EchoRequests(EchoRequestsInteface):
         token: str = self.credentials.get_token(self.request_scope).token
 
         url: str = f"{self.echo_api_url}/robots/robot-plan/{mission_id}"
-        response: Response = get(url=url, headers={"Authorization": f"Bearer {token}"})
+        response: Response = self.request_handler.get(
+            url=url, headers={"Authorization": f"Bearer {token}"}
+        )
 
         return response
 
 
-def get_echo_requests():
-    echo_requests: EchoRequests = EchoRequests()
+def get_echo_service():
+    echo_requests: EchoService = EchoService()
     yield echo_requests

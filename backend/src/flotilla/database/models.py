@@ -1,6 +1,5 @@
 import datetime
 import enum
-from os import name
 
 from flotilla_openapi.models.robot import Robot as RobotAPI
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, Interval, String
@@ -45,6 +44,8 @@ class Robot(Base):
     serial_number = Column(String)
     logs = Column(String)
     status = Column(Enum(RobotStatus))
+    host = Column(String)
+    port = Column(Integer)
     telemetry_topics = relationship("Topic", backref=backref("robot"))
     streams = relationship("VideoStream", backref=backref("robot"))
     capabilities = relationship("Capability", backref=backref("robot"))
@@ -68,6 +69,9 @@ class Report(Base):
     echo_mission_id = Column(Integer)
     log = Column(String)
     status = Column(Enum(ReportStatus))
+    start_time = Column(
+        DateTime(timezone=True), default=datetime.datetime.now(tz=datetime.timezone.utc)
+    )
     entries = relationship("Entry", backref=backref("report"))
 
 

@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     ECHO_APP_SCOPE: str = Field(default="", env="ECHO_APP_SCOPE")
     ECHO_API_URL: str = Field(default="", env="ECHO_API_URL")
     INSTALLATION_CODE: str = Field(default="", env="INSTALLATION_CODE")
+    REQUEST_TIMEOUT: float = Field(default=5, env="REQUEST_TIMEOUT")
+    ISAR_CLIENT_ID: str = Field(default="", env="ISAR_CLIENT_ID")
+    ISAR_APP_SCOPE: str = Field(default="", env="ISAR_APP_SCOPE")
 
     class Config:
         with pkg_resources.path("flotilla.settings", "settings.env") as path:

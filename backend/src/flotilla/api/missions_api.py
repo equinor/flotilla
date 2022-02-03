@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import List
 
 from fastapi import APIRouter, Depends, Path, Response, Security
@@ -7,8 +8,8 @@ from requests import RequestException
 from requests import Response as RequestResponse
 
 from flotilla.api.authentication import authentication_scheme
-from flotilla.echo.deserializers import mission_deserializer
-from flotilla.echo.requests import EchoRequests, get_echo_requests
+from flotilla.services.echo.deserializers import mission_deserializer
+from flotilla.services.echo.service import EchoService, get_echo_service
 
 router = APIRouter()
 
@@ -16,10 +17,9 @@ router = APIRouter()
 @router.get(
     "/missions",
     responses={
-        200: {"model": List[Mission], "description": "Request successful"},
-        404: {
-            "model": ProblemDetails,
-            "description": "Not found - No missions available on the asset",
+        HTTPStatus.OK.value: {
+            "model": List[Mission],
+            "description": "Request successful",
         },
     },
     tags=["Missions"],
@@ -27,18 +27,17 @@ router = APIRouter()
     dependencies=[Security(authentication_scheme)],
 )
 async def read_missions(
-    response: Response, echo_requests: EchoRequests = Depends(get_echo_requests)
+    response: Response, echo_requests: EchoService = Depends(get_echo_service)
 ) -> List[Mission]:
     """### Overview List all available missions on the asset in the Echo mission planner"""
     try:
         echo_response: RequestResponse = echo_requests.get_missions()
     except RequestException:
-        response.status_code = 404
-        return ProblemDetails(title="Not found - Could not contact echo", status=404)
-
-    if not echo_response.status_code == 200:
-        response.status_code = 404
-        return ProblemDetails(title="Not found - Could not contact echo", status=404)
+        response.status_code = HTTPStatus.BAD_GATEWAY.value
+        return ProblemDetails(
+            title="Not found - Could not contact echo",
+            status=HTTPStatus.BAD_GATEWAY.value,
+        )
     missions: List[Mission] = []
     for mission in echo_response.json():
         try:
@@ -51,11 +50,7 @@ async def read_missions(
 @router.get(
     "/missions/{mission_id}",
     responses={
-        200: {"model": Mission, "description": "Request successful"},
-        404: {
-            "model": ProblemDetails,
-            "description": "Not found - The requested mission object does not exist",
-        },
+        HTTPStatus.OK.value: {"model": Mission, "description": "Request successful"},
     },
     tags=["Missions"],
     summary="Lookup a single mission on the asset",
@@ -64,21 +59,23 @@ async def read_missions(
 async def read_single_mission(
     response: Response,
     mission_id: int = Path(None, description=""),
-    echo_requests: EchoRequests = Depends(get_echo_requests),
+    echo_requests: EchoService = Depends(get_echo_service),
 ) -> Mission:
     """### Overview Lookup a single mission on the asset"""
     try:
         echo_response: RequestResponse = echo_requests.get_mission(mission_id)
     except RequestException:
-        response.status_code = 404
-        return ProblemDetails(title="Not found - Could not contact echo", status=404)
-
-    if not echo_response.status_code == 200:
-        response.status_code = 404
-        return ProblemDetails(title="Not found - Could not contact echo", status=404)
+        response.status_code = HTTPStatus.BAD_GATEWAY.value
+        return ProblemDetails(
+            title="Not found - Could not contact echo",
+            status=HTTPStatus.BAD_GATEWAY.value,
+        )
     try:
         mission: Mission = mission_deserializer(echo_response.json())
     except Exception:
-        response.status_code = 404
-        return ProblemDetails(title="Could not decode response from echo", status=404)
+        response.status_code = HTTPStatus.NOT_FOUND.value
+        return ProblemDetails(
+            title="Could not decode response from echo",
+            status=HTTPStatus.NOT_FOUND.value,
+        )
     return mission

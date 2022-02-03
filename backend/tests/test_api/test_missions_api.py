@@ -1,14 +1,14 @@
 import json
 import os
+from http import HTTPStatus
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from requests import Response
 
-from flotilla.echo.requests import get_echo_requests
-from flotilla.main import app
-from tests.mocks.echo_requests_mock import EchoRequestsMock
+from flotilla.services.echo.service import get_echo_service
+from tests.mocks.echo_requests_mock import EchoServiceMock
 
 CURRENT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 
@@ -20,8 +20,8 @@ with open(file_missions) as file:
 @pytest.mark.parametrize(
     "request_status_code, request_json, expected_status_code",
     [
-        (200, missions_json, 200),
-        (404, dict(), 404),
+        (HTTPStatus.OK.value, missions_json, HTTPStatus.OK.value),
+        (HTTPStatus.NOT_FOUND.value, dict(), HTTPStatus.BAD_GATEWAY.value),
     ],
 )
 def test_read_missions(
@@ -33,13 +33,13 @@ def test_read_missions(
     mock_response = Response()
     mock_response.status_code = request_status_code
     mock_response.json = lambda: request_json
-    echo_requests_mock = EchoRequestsMock()
+    echo_requests_mock = EchoServiceMock()
     echo_requests_mock.add_missions_responses([mock_response])
 
     def get_echo_requests_mock():
         yield echo_requests_mock
 
-    app.dependency_overrides[get_echo_requests] = get_echo_requests_mock
+    test_app.dependency_overrides[get_echo_service] = get_echo_requests_mock
     with TestClient(test_app) as client:
         response = client.get("/missions")
         assert response.status_code == expected_status_code
@@ -57,9 +57,9 @@ with open(file_mission_success) as file:
 @pytest.mark.parametrize(
     "mission_id, request_status_code, request_json, expected_status_code",
     [
-        (84, 200, mission_success_json, 200),
-        (666, 404, dict(), 404),
-        (54, 200, mission_error_json, 404),
+        (84, HTTPStatus.OK.value, mission_success_json, HTTPStatus.OK.value),
+        (666, HTTPStatus.NOT_FOUND.value, dict(), HTTPStatus.BAD_GATEWAY.value),
+        (54, HTTPStatus.OK.value, mission_error_json, HTTPStatus.NOT_FOUND.value),
     ],
 )
 def test_read_single_mission(
@@ -72,13 +72,13 @@ def test_read_single_mission(
     mock_response = Response()
     mock_response.status_code = request_status_code
     mock_response.json = lambda: request_json
-    echo_requests_mock = EchoRequestsMock()
+    echo_requests_mock = EchoServiceMock()
     echo_requests_mock.add_mission_responses([mock_response])
 
     def get_echo_requests_mock():
         yield echo_requests_mock
 
-    app.dependency_overrides[get_echo_requests] = get_echo_requests_mock
+    test_app.dependency_overrides[get_echo_service] = get_echo_requests_mock
     with TestClient(test_app) as client:
         response = client.get(f"/missions/{mission_id}")
         assert response.status_code == expected_status_code
