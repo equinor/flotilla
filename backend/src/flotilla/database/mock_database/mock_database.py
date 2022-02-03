@@ -1,5 +1,4 @@
 import datetime
-import resource
 
 from flotilla.database.models import (
     Capability,
@@ -26,6 +25,8 @@ def populate_mock_db(session, engine, base) -> None:
         serial_number="V",
         logs="",
         status=RobotStatus.available,
+        host="localhost",
+        port=3000,
     )
 
     robot_2 = Robot(
@@ -34,6 +35,8 @@ def populate_mock_db(session, engine, base) -> None:
         serial_number="VII",
         logs="",
         status=RobotStatus.offline,
+        host="localhost",
+        port=3002,
     )
 
     session.add_all([robot_1, robot_2])
