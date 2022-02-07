@@ -1,4 +1,4 @@
-FROM node:lts-slim as build
+FROM node:current-slim as build
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ RUN npm install
 RUN mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
 COPY . ./
 
-FROM node:lts-slim
+FROM node:current-slim
 WORKDIR /app
 COPY --from=build /app ./
 EXPOSE 3001
