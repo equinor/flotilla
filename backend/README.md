@@ -16,13 +16,12 @@ Start the API by running
 python src/flotilla/main.py
 ```
 
-The API is then available on
-http://127.0.0.1:8000/docs
+The API is available at `localhost:8000/docs`.
 
 ## Running the tests
 
 The tests can be run with
 
 ```bash
-pytest
+pytest .
 ```
