@@ -1,8 +1,8 @@
 # Flotilla
 
 Flotilla is the main point of access for operators to interact with multiple robots in a facility. The application
-consists of a [frontend](frontend/README.md) in React, a [backend](backend/README.md) in Python using the FastAPI
-framework and a Mosquitto MQTT Broker.
+consists of a [frontend](frontend) in React, a [backend](backend) in Python using the FastAPI
+framework and a Mosquitto MQTT [Broker](broker).
 
 ## Setup
 
@@ -11,6 +11,8 @@ For development, please fork the repository. Then, clone the repository:
 ```
 git clone https://github.com/equinor/flotilla
 ```
+
+Please see separate installation and setup guides for [frontend](frontend), [backend](backend), and [Broker](broker).
 
 ## Run with docker
 
@@ -40,3 +42,9 @@ or
 ```
 docker-compose up --build
 ```
+
+## Contributing
+
+We welcome all kinds of contributions, including code, bug reports, issues, feature requests, and documentation. The preferred way of submitting a contribution is to either make an [issue](https://github.com/equinor/isar/issues) on github or by forking the project on github and making a pull requests.
+
+We write our commit messages according to [this guide](https://cbea.ms/git-commit/).
