@@ -26,17 +26,17 @@ sudo apt install docker-compose
 Build the docker container:
 
 ```
-sudo docker-compose build
+docker-compose build
 ```
 
 Start Flotilla by running:
 
 ```
-sudo docker-compose up
+docker-compose up
 ```
 
 or
 
 ```
-sudo docker-compose up --build
+docker-compose up --build
 ```
