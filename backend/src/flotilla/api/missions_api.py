@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from logging import getLogger
 from typing import List
 
 from fastapi import APIRouter, Depends, Path, Response, Security
@@ -10,6 +11,8 @@ from requests import Response as RequestResponse
 from flotilla.api.authentication import authentication_scheme
 from flotilla.services.echo.deserializers import mission_deserializer
 from flotilla.services.echo.service import EchoService, get_echo_service
+
+logger = getLogger("api")
 
 router = APIRouter()
 
@@ -33,6 +36,7 @@ async def read_missions(
     try:
         echo_response: RequestResponse = echo_requests.get_missions()
     except RequestException:
+        logger.exception("Could not get missions from echo.")
         response.status_code = HTTPStatus.BAD_GATEWAY.value
         return ProblemDetails(
             title="Not found - Could not contact echo",
@@ -42,7 +46,8 @@ async def read_missions(
     for mission in echo_response.json():
         try:
             missions.append(mission_deserializer(mission))
-        except Exception:
+        except Exception as e:
+            logger.warning("Could not deserialize mission.", e)
             continue
     return missions
 
@@ -65,6 +70,7 @@ async def read_single_mission(
     try:
         echo_response: RequestResponse = echo_requests.get_mission(mission_id)
     except RequestException:
+        logger.exception(f"Failed to get mission with id {mission_id}.")
         response.status_code = HTTPStatus.BAD_GATEWAY.value
         return ProblemDetails(
             title="Not found - Could not contact echo",
@@ -73,6 +79,7 @@ async def read_single_mission(
     try:
         mission: Mission = mission_deserializer(echo_response.json())
     except Exception:
+        logger.exception(f"Failed to get mission with id {mission_id}.")
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(
             title="Could not decode response from echo",

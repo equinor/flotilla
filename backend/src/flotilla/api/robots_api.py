@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from logging import getLogger
 from typing import List
 
 from fastapi import APIRouter, Depends, Path, Response, Security
@@ -15,6 +16,8 @@ from flotilla.database.crud.crud import create_report, read_robot_by_id, read_ro
 from flotilla.database.db import SessionLocal
 from flotilla.database.models import ReportStatus, RobotDBModel
 from flotilla.services.isar import IsarService, get_isar_service
+
+logger = getLogger("api")
 
 router = APIRouter()
 
@@ -67,6 +70,7 @@ async def get_robot(
 ) -> RobotDBModel:
     robot: RobotDBModel = read_robot_by_id(db=db, robot_id=robot_id)
     if not robot:
+        logger.error(f"Could not get robot with id {robot_id}.")
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(
             title=NOT_FOUND_DESCRIPTION, status=HTTPStatus.NOT_FOUND.value
@@ -97,6 +101,7 @@ async def post_start_robot(
     """Start a mission with given id using robot with robot id."""
     robot: RobotDBModel = read_robot_by_id(db, robot_id)
     if not robot:
+        logger.error(f"Could not get robot with id {robot_id}.")
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
 
@@ -105,6 +110,9 @@ async def post_start_robot(
             host=robot.host, port=robot.port, mission_id=mission_id
         )
     except RequestException:
+        logger.exception(
+            f"Could not start mission with id {mission_id} for robot with id {robot_id}."
+        )
         response.status_code = HTTPStatus.BAD_GATEWAY.value
         return ProblemDetails(title=BAD_GATEWAY_DESCRIPTION)
 
@@ -140,6 +148,7 @@ async def post_stop_robot(
     """Stop the execution of the current active mission. If there is no active mission on robot, nothing happens."""
     robot: RobotDBModel = read_robot_by_id(db, robot_id)
     if not robot:
+        logger.error(f"Could not get robot with id {robot_id}.")
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
     try:
@@ -147,6 +156,7 @@ async def post_stop_robot(
             host=robot.host, port=robot.port
         )
     except RequestException:
+        logger.exception(f"Could not stop robot with id {robot_id}.")
         response.status_code = HTTPStatus.BAD_GATEWAY.value
         return ProblemDetails(title=BAD_GATEWAY_DESCRIPTION)
 

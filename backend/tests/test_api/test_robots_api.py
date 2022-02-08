@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from typing import List
 
 import pytest
 from fastapi import FastAPI
