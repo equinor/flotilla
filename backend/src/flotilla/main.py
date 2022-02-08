@@ -1,3 +1,5 @@
+from logging.config import dictConfig
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from flotilla.api.authentication import authenticator
 from flotilla.api.missions_api import router as missions_router
 from flotilla.api.robots_api import router as robots_router
+from flotilla.config.log_config import LogConfig
 from flotilla.database.db import Base, SessionLocal, engine
 from flotilla.database.mock_database.mock_database import populate_mock_db
 from flotilla.settings import settings
@@ -16,6 +19,8 @@ app = FastAPI(
         "clientId": settings.OPENAPI_CLIENT_ID,
     },
 )
+
+dictConfig(LogConfig().dict())
 
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
