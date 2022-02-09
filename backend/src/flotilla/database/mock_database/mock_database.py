@@ -1,17 +1,17 @@
 import datetime
 
 from flotilla.database.models import (
-    Capability,
-    Entry,
-    EntryStatus,
-    Event,
+    CapabilityDBModel,
+    EventDBModel,
     InspectionType,
-    Report,
+    ReportDBModel,
+    ReportEntryDBModel,
+    ReportEntryStatus,
     ReportStatus,
     Resource,
-    Robot,
+    RobotDBModel,
     RobotStatus,
-    Topic,
+    TopicDBModel,
 )
 
 
@@ -19,7 +19,7 @@ def populate_mock_db(session, engine, base) -> None:
 
     base.metadata.create_all(bind=engine)
 
-    robot_1 = Robot(
+    robot_1 = RobotDBModel(
         name="Harald",
         model="King",
         serial_number="V",
@@ -29,7 +29,7 @@ def populate_mock_db(session, engine, base) -> None:
         port=3000,
     )
 
-    robot_2 = Robot(
+    robot_2 = RobotDBModel(
         name="Haakon",
         model="King",
         serial_number="VII",
@@ -42,14 +42,14 @@ def populate_mock_db(session, engine, base) -> None:
     session.add_all([robot_1, robot_2])
     session.commit()
 
-    report_1 = Report(
+    report_1 = ReportDBModel(
         robot_id=robot_1.id,
         isar_mission_id="isar_mission_id",
         echo_mission_id=1,
         log="",
         status=ReportStatus.in_progress,
     )
-    report_2 = Report(
+    report_2 = ReportDBModel(
         robot_id=robot_2.id,
         isar_mission_id="isar_mission_id",
         echo_mission_id=1,
@@ -60,69 +60,71 @@ def populate_mock_db(session, engine, base) -> None:
     session.add(report_1, report_2)
     session.commit()
 
-    entry_1 = Entry(
+    entry_1 = ReportEntryDBModel(
         report_id=report_1.id,
         tag_id="tag_id",
-        status=EntryStatus.completed,
+        status=ReportEntryStatus.completed,
         inspection_type=InspectionType.image,
         time=datetime.datetime.now(tz=datetime.timezone.utc),
         file_location="",
     )
 
-    entry_2 = Entry(
+    entry_2 = ReportEntryDBModel(
         report_id=report_2.id,
         tag_id="tag_id",
-        status=EntryStatus.failed,
+        status=ReportEntryStatus.failed,
         inspection_type=InspectionType.thermal_image,
         time=datetime.datetime.now(tz=datetime.timezone.utc),
         file_location="",
     )
 
-    entry_3 = Entry(
+    entry_3 = ReportEntryDBModel(
         report_id=report_2.id,
         tag_id="tag_id",
-        status=EntryStatus.completed,
+        status=ReportEntryStatus.completed,
         inspection_type=InspectionType.image,
         time=datetime.datetime.now(tz=datetime.timezone.utc),
         file_location="",
     )
 
-    event_1 = Event(
+    event_1 = EventDBModel(
         robot_id=robot_1.id,
         echo_mission_id=287,
         report_id=report_1.id,
         estimated_duration=datetime.timedelta(hours=1),
     )
 
-    event_2 = Event(
+    event_2 = EventDBModel(
         robot_id=robot_2.id,
         echo_mission_id=287,
         report_id=report_2.id,
         estimated_duration=datetime.timedelta(hours=2),
     )
 
-    capability_1 = Capability(
+    capability_1 = CapabilityDBModel(
         robot_id=robot_2.id,
         capability=InspectionType.image,
     )
 
-    capability_2 = Capability(
+    capability_2 = CapabilityDBModel(
         robot_id=robot_2.id,
         capability=InspectionType.thermal_image,
     )
 
-    capability_3 = Capability(
+    capability_3 = CapabilityDBModel(
         robot_id=robot_1.id,
         capability=InspectionType.image,
     )
 
-    topic_1 = Topic(robot_id=robot_1.id, path="/robot_1/pose", resource=Resource.pose)
+    topic_1 = TopicDBModel(
+        robot_id=robot_1.id, path="/robot_1/pose", resource=Resource.pose
+    )
 
-    topic_2 = Topic(
+    topic_2 = TopicDBModel(
         robot_id=robot_1.id, path="/robot_1/battery", resource=Resource.battery
     )
 
-    topic_3 = Topic(
+    topic_3 = TopicDBModel(
         robot_id=robot_2.id, path="/robot_2/pressure", resource=Resource.pressure
     )
 
