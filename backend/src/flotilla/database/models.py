@@ -1,7 +1,7 @@
 import datetime
 import enum
 
-from flotilla_openapi.models.robot import Robot as RobotAPI
+from flotilla_openapi.models.robot import Robot
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, Interval, String
 from sqlalchemy.orm import backref, relationship
 
@@ -25,7 +25,7 @@ class ReportStatus(enum.Enum):
     completed = "Completed"
 
 
-class EntryStatus(enum.Enum):
+class ReportEntryStatus(enum.Enum):
     failed = "Failed"
     completed = "Completed"
 
@@ -36,7 +36,7 @@ class Resource(enum.Enum):
     pressure = "pressure"
 
 
-class Robot(Base):
+class RobotDBModel(Base):
     __tablename__ = "robot"
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -46,13 +46,13 @@ class Robot(Base):
     status = Column(Enum(RobotStatus))
     host = Column(String)
     port = Column(Integer)
-    telemetry_topics = relationship("Topic", backref=backref("robot"))
-    streams = relationship("VideoStream", backref=backref("robot"))
-    capabilities = relationship("Capability", backref=backref("robot"))
-    events = relationship("Event", backref=backref("robot"))
+    telemetry_topics = relationship("TopicDBModel", backref=backref("robot"))
+    streams = relationship("VideoStreamDBModel", backref=backref("robot"))
+    capabilities = relationship("CapabilityDBModel", backref=backref("robot"))
+    events = relationship("EventDBModel", backref=backref("robot"))
 
-    def get_api_robot(self) -> RobotAPI:
-        return RobotAPI(
+    def get_api_robot(self) -> Robot:
+        return Robot(
             id=self.id,
             name=self.name,
             model=self.model,
@@ -61,7 +61,7 @@ class Robot(Base):
         )
 
 
-class Report(Base):
+class ReportDBModel(Base):
     __tablename__ = "report"
     id = Column(Integer, primary_key=True)
     robot_id = Column(Integer, ForeignKey("robot.id"))
@@ -72,17 +72,17 @@ class Report(Base):
     start_time = Column(
         DateTime(timezone=True), default=datetime.datetime.now(tz=datetime.timezone.utc)
     )
-    entries = relationship("Entry", backref=backref("report"))
+    entries = relationship("ReportEntryDBModel", backref=backref("report"))
 
 
-class Map(Base):
+class MapDBModel(Base):
     __tablename__ = "map"
     id = Column(Integer, primary_key=True)
     location = Column(String)
     coordinate_reference_system = Column(String)
 
 
-class Topic(Base):
+class TopicDBModel(Base):
     __tablename__ = "topic"
     id = Column(Integer, primary_key=True)
     robot_id = Column(Integer, ForeignKey("robot.id"))
@@ -90,7 +90,7 @@ class Topic(Base):
     resource = Column(Enum(Resource))
 
 
-class VideoStream(Base):
+class VideoStreamDBModel(Base):
     __tablename__ = "video_stream"
     id = Column(Integer, primary_key=True)
     robot_id = Column(Integer, ForeignKey("robot.id"))
@@ -99,14 +99,14 @@ class VideoStream(Base):
     camera_name = Column(String)
 
 
-class Capability(Base):
+class CapabilityDBModel(Base):
     __tablename__ = "capability"
     id = Column(Integer, primary_key=True)
     robot_id = Column(Integer, ForeignKey("robot.id"))
     capability = Column(Enum(InspectionType))
 
 
-class Event(Base):
+class EventDBModel(Base):
     __tablename__ = "event"
     id = Column(Integer, primary_key=True)
     robot_id = Column(Integer, ForeignKey("robot.id"))
@@ -120,12 +120,12 @@ class Event(Base):
     # Should there be a constraint forcing an event to point at only one robot?
 
 
-class Entry(Base):
+class ReportEntryDBModel(Base):
     __tablename__ = "entry"
     id = Column(Integer, primary_key=True)
     report_id = Column(Integer, ForeignKey("report.id"))
     tag_id = Column(String)
-    status = Column(Enum(EntryStatus))
+    status = Column(Enum(ReportEntryStatus))
     inspection_type = Column(Enum(InspectionType))
     time = Column(
         DateTime(timezone=True), default=datetime.datetime.now(tz=datetime.timezone.utc)

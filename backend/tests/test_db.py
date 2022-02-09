@@ -1,5 +1,5 @@
-from flotilla.database.models import Robot
+from flotilla.database.models import RobotDBModel
 
 
 def test_mock_db(session):
-    assert len(session.query(Robot.name).all()) == 2
+    assert len(session.query(RobotDBModel.name).all()) == 2

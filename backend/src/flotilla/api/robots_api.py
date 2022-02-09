@@ -13,8 +13,7 @@ from requests import Response as RequestResponse
 from flotilla.api.authentication import authentication_scheme
 from flotilla.database.crud.crud import create_report, read_robot_by_id, read_robots
 from flotilla.database.db import SessionLocal
-from flotilla.database.models import ReportStatus
-from flotilla.database.models import Robot as DBRobot
+from flotilla.database.models import ReportStatus, RobotDBModel
 from flotilla.services.isar import IsarService, get_isar_service
 
 router = APIRouter()
@@ -43,8 +42,8 @@ def get_db():
     summary="List all robots on the asset.",
     dependencies=[Security(authentication_scheme)],
 )
-async def get_robots(db: Session = Depends(get_db)) -> List[Robot]:
-    robots: List[DBRobot] = read_robots(db)
+async def get_robots(db: Session = Depends(get_db)) -> List[RobotDBModel]:
+    robots: List[RobotDBModel] = read_robots(db)
     robots_api: List[Robot] = [robot.get_api_robot() for robot in robots]
     return robots_api
 
@@ -52,7 +51,10 @@ async def get_robots(db: Session = Depends(get_db)) -> List[Robot]:
 @router.get(
     "/robots/{robot_id}",
     responses={
-        HTTPStatus.OK.value: {"model": Robot, "description": "Request successful"},
+        HTTPStatus.OK.value: {
+            "model": Robot,
+            "description": "Request successful",
+        },
     },
     tags=["Robots"],
     summary="Lookup a single robot",
@@ -62,8 +64,8 @@ async def get_robot(
     response: Response,
     robot_id: int = Path(None, description=""),
     db: Session = Depends(get_db),
-) -> Robot:
-    robot: DBRobot = read_robot_by_id(db=db, robot_id=robot_id)
+) -> RobotDBModel:
+    robot: RobotDBModel = read_robot_by_id(db=db, robot_id=robot_id)
     if not robot:
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(
@@ -93,7 +95,7 @@ async def post_start_robot(
     isar_service: IsarService = Depends(get_isar_service),
 ) -> StartResponse:
     """Start a mission with given id using robot with robot id."""
-    robot: DBRobot = read_robot_by_id(db, robot_id)
+    robot: RobotDBModel = read_robot_by_id(db, robot_id)
     if not robot:
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
@@ -136,7 +138,7 @@ async def post_stop_robot(
     isar_service: IsarService = Depends(get_isar_service),
 ) -> PostResponse:
     """Stop the execution of the current active mission. If there is no active mission on robot, nothing happens."""
-    robot: DBRobot = read_robot_by_id(db, robot_id)
+    robot: RobotDBModel = read_robot_by_id(db, robot_id)
     if not robot:
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
