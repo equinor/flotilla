@@ -8,8 +8,8 @@ from flotilla.database.mock_database.mock_database import populate_mock_db
 from flotilla.main import app
 from flotilla.services.echo import get_echo_service
 from flotilla.services.isar import get_isar_service
-from tests.mocks.echo_requests_mock import get_echo_service_mock
-from tests.mocks.isar_requests_mock import get_isar_service_mock
+from tests.mocks.echo_service_mock import get_echo_service_mock
+from tests.mocks.isar_service_mock import get_isar_service_mock
 
 mock_session: Session = SessionLocal()
 populate_mock_db(session=mock_session, engine=engine, base=Base)

@@ -5,12 +5,15 @@ from typing import List
 from fastapi import APIRouter, Depends, Path, Response, Security
 from flotilla_openapi.models.mission import Mission
 from flotilla_openapi.models.problem_details import ProblemDetails
-from requests import RequestException
+from requests import HTTPError, RequestException
 from requests import Response as RequestResponse
 
 from flotilla.api.authentication import authentication_scheme
-from flotilla.services.echo.deserializers import mission_deserializer
-from flotilla.services.echo.service import EchoService, get_echo_service
+from flotilla.services.echo import (
+    EchoDeserializerException,
+    EchoService,
+    get_echo_service,
+)
 
 logger = getLogger("api")
 
@@ -29,26 +32,27 @@ router = APIRouter()
     summary="List all available missions on the asset",
     dependencies=[Security(authentication_scheme)],
 )
-async def read_missions(
-    response: Response, echo_requests: EchoService = Depends(get_echo_service)
+async def get_missions(
+    response: Response, echo_service: EchoService = Depends(get_echo_service)
 ) -> List[Mission]:
     """### Overview List all available missions on the asset in the Echo mission planner"""
     try:
-        echo_response: RequestResponse = echo_requests.get_missions()
+        missions: List[Mission] = echo_service.get_missions()
+    except HTTPError as e:
+        response.status_code = e.response.status_code
+        return ProblemDetails(title=e.strerror)
+    except EchoDeserializerException:
+        logger.exception("Could not deserialize the response from Echo")
+        response.status_code = HTTPStatus.BAD_GATEWAY.value
+        return ProblemDetails(
+            title="Bad Gateway - Could not deserialize response from Echo"
+        )
     except RequestException:
         logger.exception("Could not get missions from echo.")
         response.status_code = HTTPStatus.BAD_GATEWAY.value
         return ProblemDetails(
-            title="Not found - Could not contact echo",
-            status=HTTPStatus.BAD_GATEWAY.value,
+            title="Bad Gateway - Could not contact echo",
         )
-    missions: List[Mission] = []
-    for mission in echo_response.json():
-        try:
-            missions.append(mission_deserializer(mission))
-        except Exception as e:
-            logger.warning("Could not deserialize mission.", e)
-            continue
     return missions
 
 
@@ -61,28 +65,28 @@ async def read_missions(
     summary="Lookup a single mission on the asset",
     dependencies=[Security(authentication_scheme)],
 )
-async def read_single_mission(
+async def get_single_mission(
     response: Response,
     mission_id: int = Path(None, description=""),
-    echo_requests: EchoService = Depends(get_echo_service),
+    echo_service: EchoService = Depends(get_echo_service),
 ) -> Mission:
     """### Overview Lookup a single mission on the asset"""
     try:
-        echo_response: RequestResponse = echo_requests.get_mission(mission_id)
+        mission: Mission = echo_service.get_mission(mission_id)
+    except HTTPError as e:
+        response.status_code = e.response.status_code
+        return ProblemDetails(title=e.strerror)
     except RequestException:
         logger.exception(f"Failed to get mission with id {mission_id}.")
         response.status_code = HTTPStatus.BAD_GATEWAY.value
         return ProblemDetails(
-            title="Not found - Could not contact echo",
+            title="Bad Gateway - Could not contact Echo",
             status=HTTPStatus.BAD_GATEWAY.value,
         )
-    try:
-        mission: Mission = mission_deserializer(echo_response.json())
-    except Exception:
-        logger.exception(f"Failed to get mission with id {mission_id}.")
-        response.status_code = HTTPStatus.NOT_FOUND.value
+    except EchoDeserializerException:
+        logger.exception(f"Could not deserialize mission with id {mission_id}.")
+        response.status_code = HTTPStatus.BAD_GATEWAY.value
         return ProblemDetails(
-            title="Could not decode response from echo",
-            status=HTTPStatus.NOT_FOUND.value,
+            title="Bad Gateway - Could not deserialize response from Echo",
         )
     return mission

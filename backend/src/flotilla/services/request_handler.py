@@ -4,7 +4,6 @@ import requests
 from requests.exceptions import (
     ConnectionError,
     ConnectTimeout,
-    HTTPError,
     RequestException,
     Timeout,
 )
@@ -41,20 +40,17 @@ class RequestHandler:
                 params=params,
                 **kwargs,
             )
+        except ConnectTimeout as e:
+            raise RequestException from e
         except Timeout as e:
             raise RequestException from e
         except ConnectionError as e:
-            raise RequestException from e
-        except ConnectTimeout as e:
             raise RequestException from e
         except RequestException as e:
             raise RequestException from e
         except Exception as e:
             raise RequestException from e
-        try:
-            response.raise_for_status()
-        except HTTPError as e:
-            raise RequestException from e
+        response.raise_for_status()
         return response
 
     def get(
@@ -68,20 +64,17 @@ class RequestHandler:
         params: Optional[dict] = None,
         **kwargs,
     ) -> Response:
-        try:
-            response = self.base_request(
-                url=url,
-                method="GET",
-                auth=auth,
-                headers=headers,
-                timeout=request_timeout,
-                json_body=json_body,
-                data=data,
-                params=params,
-                **kwargs,
-            )
-        except RequestException as e:
-            raise RequestException from e
+        response = self.base_request(
+            url=url,
+            method="GET",
+            auth=auth,
+            headers=headers,
+            timeout=request_timeout,
+            json_body=json_body,
+            data=data,
+            params=params,
+            **kwargs,
+        )
         return response
 
     def post(
@@ -95,20 +88,17 @@ class RequestHandler:
         params: Optional[dict] = None,
         **kwargs,
     ) -> Response:
-        try:
-            response = self.base_request(
-                url=url,
-                method="POST",
-                auth=auth,
-                headers=headers,
-                timeout=request_timeout,
-                json_body=json_body,
-                data=data,
-                params=params,
-                **kwargs,
-            )
-        except RequestException as e:
-            raise RequestException from e
+        response = self.base_request(
+            url=url,
+            method="POST",
+            auth=auth,
+            headers=headers,
+            timeout=request_timeout,
+            json_body=json_body,
+            data=data,
+            params=params,
+            **kwargs,
+        )
         return response
 
     def delete(
@@ -122,20 +112,17 @@ class RequestHandler:
         params: Optional[dict] = None,
         **kwargs,
     ) -> Response:
-        try:
-            response = self.base_request(
-                url=url,
-                method="DELETE",
-                auth=auth,
-                headers=headers,
-                timeout=request_timeout,
-                json_body=json_body,
-                data=data,
-                params=params,
-                **kwargs,
-            )
-        except RequestException as e:
-            raise RequestException from e
+        response = self.base_request(
+            url=url,
+            method="DELETE",
+            auth=auth,
+            headers=headers,
+            timeout=request_timeout,
+            json_body=json_body,
+            data=data,
+            params=params,
+            **kwargs,
+        )
         return response
 
     def put(
@@ -149,18 +136,15 @@ class RequestHandler:
         params: Optional[dict] = None,
         **kwargs,
     ) -> Response:
-        try:
-            response = self.base_request(
-                url=url,
-                method="PUT",
-                auth=auth,
-                headers=headers,
-                timeout=request_timeout,
-                json_body=json_body,
-                data=data,
-                params=params,
-                **kwargs,
-            )
-        except RequestException as e:
-            raise RequestException from e
+        response = self.base_request(
+            url=url,
+            method="PUT",
+            auth=auth,
+            headers=headers,
+            timeout=request_timeout,
+            json_body=json_body,
+            data=data,
+            params=params,
+            **kwargs,
+        )
         return response

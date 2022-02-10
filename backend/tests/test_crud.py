@@ -1,6 +1,6 @@
 from typing import List
 
-from flotilla.database.crud.crud import read_robots
+from flotilla.database.crud import read_robots
 from flotilla.database.models import RobotDBModel
 
 
