@@ -2,9 +2,9 @@ import json
 import os
 from typing import List
 
-from requests import HTTPError, RequestException, Response
+from requests import Response
 
-from flotilla.services.echo.service import EchoServiceInterface
+from flotilla.services.echo import EchoServiceInterface, mission_deserializer
 
 CURRENT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 
@@ -34,33 +34,43 @@ class EchoServiceMock(EchoServiceInterface):
 
         self.default_missions_response: Response = default_missions_response()
         self.default_mission_response: Response = default_mission_response()
+        self.exceptions: List[Exception] = []
 
     def get_missions(self) -> Response:
+        response: Response = self._get_missions_request()
+        return list(map(mission_deserializer, response.json()))
+
+    def get_mission(self, mission_id: int) -> Response:
+        response: Response = self._get_mission_request()
+        return mission_deserializer(response.json())
+
+    def _get_mission_request(self):
+        if self.exceptions:
+            raise self.exceptions.pop(0)
+        if self.mission_responses:
+            response: Response = self.mission_responses.pop(0)
+            response.raise_for_status()
+            return response
+        return self.default_mission_response
+
+    def _get_missions_request(self):
+        if self.exceptions:
+            raise self.exceptions.pop(0)
         if self.missions_responses:
             response: Response = self.missions_responses.pop(0)
-            try:
-                response.raise_for_status()
-            except HTTPError:
-                raise RequestException
+            response.raise_for_status()
             return response
 
         return self.default_missions_response
-
-    def get_mission(self, mission_id: int) -> Response:
-        if self.mission_responses:
-            response: Response = self.mission_responses.pop(0)
-            try:
-                response.raise_for_status()
-            except HTTPError:
-                raise RequestException
-            return response
-        return self.default_mission_response
 
     def add_missions_responses(self, responses: List[Response]):
         self.missions_responses += responses
 
     def add_mission_responses(self, responses: List[Response]):
         self.mission_responses += responses
+
+    def add_exceptions(self, exceptions: List[Exception]):
+        self.exceptions += exceptions
 
 
 def get_echo_service_mock():

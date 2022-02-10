@@ -6,7 +6,7 @@ from flotilla_openapi.models.mission import Mission
 from flotilla_openapi.models.tag import Tag
 
 from flotilla.database.models import InspectionType
-from flotilla.services.echo.deserializers import mission_deserializer, tag_deserializer
+from flotilla.services.echo import mission_deserializer, tag_deserializer
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 

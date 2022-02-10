@@ -1,17 +1,21 @@
 from http import HTTPStatus
+from typing import Optional
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from requests import Response
+from requests import RequestException, Response
 
+from flotilla.database.models import ReportDBModel
 from flotilla.services.isar import get_isar_service
-from tests.mocks.isar_requests_mock import IsarServiceMock
+from tests.mocks.isar_service_mock import IsarServiceMock
 
 
-def setup_isar_service_start(response: Response):
+def setup_isar_service_start(response: Response, exception: Optional[Exception] = None):
     isar_service_mock: IsarServiceMock = IsarServiceMock()
     isar_service_mock.add_start_mission_responses([response])
+    if exception:
+        isar_service_mock.add_exceptions(exceptions=[exception])
 
     def get_isar_requests_mock():
         yield isar_service_mock
@@ -19,14 +23,17 @@ def setup_isar_service_start(response: Response):
     return get_isar_requests_mock
 
 
-def setup_isar_service_stop(response: Response):
-    isar_request_mock: IsarServiceMock = IsarServiceMock()
-    isar_request_mock.add_stop_responses([response])
+def setup_isar_service_stop(response: Response, exception: Optional[Exception] = None):
+    isar_service_mock: IsarServiceMock = IsarServiceMock()
+    isar_service_mock.add_stop_responses([response])
 
-    def get_isar_requests_mock():
-        yield isar_request_mock
+    if exception:
+        isar_service_mock.add_exceptions(exceptions=[exception])
 
-    return get_isar_requests_mock
+    def get_isar_service_mock():
+        yield isar_service_mock
+
+    return get_isar_service_mock
 
 
 def test_get_robots(test_app: FastAPI):
@@ -61,40 +68,43 @@ json_unsuccessful_start_request = {
     "mission_id": None,
 }
 
-successful_start_response: Response = Response()
-successful_start_response.status_code = HTTPStatus.OK.value
-successful_start_response.json = lambda: json_successful_start_request
+start_response_ok: Response = Response()
+start_response_ok.status_code = HTTPStatus.OK.value
+start_response_ok.json = lambda: json_successful_start_request
 
-unsuccessful_start_response: Response = Response()
-unsuccessful_start_response.status_code = HTTPStatus.CONFLICT.value
-unsuccessful_start_response.json = lambda: json_unsuccessful_start_request
+start_response_conflict: Response = Response()
+start_response_conflict.status_code = HTTPStatus.CONFLICT.value
+start_response_conflict.json = lambda: json_unsuccessful_start_request
 
 
 @pytest.mark.parametrize(
-    "robot_id, isar_service_response, expected_status_code",
+    "robot_id, isar_service_response, exception, expected_status_code",
     [
-        (1, successful_start_response, HTTPStatus.OK.value),
+        (1, start_response_ok, None, HTTPStatus.OK.value),
         (
             23,
-            successful_start_response,
+            start_response_ok,
+            None,
             HTTPStatus.NOT_FOUND.value,
         ),
         (
             1,
-            unsuccessful_start_response,
-            HTTPStatus.BAD_GATEWAY.value,
+            start_response_conflict,
+            None,
+            HTTPStatus.CONFLICT.value,
         ),
+        (1, start_response_ok, RequestException, HTTPStatus.BAD_GATEWAY.value),
     ],
 )
 def test_post_start_robot(
     test_app: FastAPI,
     robot_id: int,
     isar_service_response: Response,
+    exception: Exception,
     expected_status_code: int,
 ):
-
     test_app.dependency_overrides[get_isar_service] = setup_isar_service_start(
-        response=isar_service_response
+        response=isar_service_response, exception=exception
     )
     with TestClient(test_app) as client:
         response = client.post(f"/robots/{robot_id}/start/1")
@@ -111,40 +121,44 @@ json_unsuccessful_stop_request = {
     "stopped": False,
 }
 
-successful_stop_response = Response()
-successful_stop_response.status_code = HTTPStatus.OK
-successful_stop_response.json = lambda: json_successful_stop_request
+stop_response_ok = Response()
+stop_response_ok.status_code = HTTPStatus.OK
+stop_response_ok.json = lambda: json_successful_stop_request
 
-unsuccessful_stop_response = Response()
-unsuccessful_stop_response.status_code = HTTPStatus.REQUEST_TIMEOUT.value
-unsuccessful_stop_response.json = lambda: json_unsuccessful_stop_request
+stop_response_timeout = Response()
+stop_response_timeout.status_code = HTTPStatus.REQUEST_TIMEOUT.value
+stop_response_timeout.json = lambda: json_unsuccessful_stop_request
 
 
 @pytest.mark.parametrize(
-    "robot_id, isar_response, expected_status_code",
+    "robot_id, isar_response, exception, expected_status_code",
     [
-        (1, successful_stop_response, HTTPStatus.OK.value),
+        (1, stop_response_ok, None, HTTPStatus.OK.value),
         (
             23,
-            successful_stop_response,
+            stop_response_ok,
+            None,
             HTTPStatus.NOT_FOUND.value,
         ),
         (
             1,
-            unsuccessful_stop_response,
-            HTTPStatus.BAD_GATEWAY.value,
+            stop_response_timeout,
+            None,
+            HTTPStatus.REQUEST_TIMEOUT.value,
         ),
+        (1, stop_response_ok, RequestException, HTTPStatus.BAD_GATEWAY.value),
     ],
 )
 def test_post_stop_robot(
     test_app: FastAPI,
     robot_id: int,
     isar_response: Response,
+    exception: Exception,
     expected_status_code: int,
 ):
 
     test_app.dependency_overrides[get_isar_service] = setup_isar_service_stop(
-        isar_response
+        isar_response, exception=exception
     )
     with TestClient(test_app) as client:
         response = client.post(f"/robots/{robot_id}/stop")

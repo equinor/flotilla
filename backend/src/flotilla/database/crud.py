@@ -1,16 +1,26 @@
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
 from flotilla.database.models import ReportDBModel, ReportStatus, RobotDBModel
 
 
+class DBException(Exception):
+    pass
+
+
 def read_robots(db: Session) -> List[RobotDBModel]:
-    return db.query(RobotDBModel).all()
+    robots: List[RobotDBModel] = db.query(RobotDBModel).all()
+    return robots
 
 
 def read_robot_by_id(db: Session, robot_id: int) -> RobotDBModel:
-    return db.query(RobotDBModel).filter(RobotDBModel.id == robot_id).first()
+    robot: Optional[RobotDBModel] = (
+        db.query(RobotDBModel).filter(RobotDBModel.id == robot_id).first()
+    )
+    if not robot:
+        raise DBException(f"No robot with id {robot_id}")
+    return robot
 
 
 def create_report(
