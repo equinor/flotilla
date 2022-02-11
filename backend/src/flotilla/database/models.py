@@ -1,6 +1,8 @@
 import datetime
 import enum
 
+from flotilla_openapi.models.report import Report
+from flotilla_openapi.models.report_entry import ReportEntry
 from flotilla_openapi.models.robot import Robot
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, Interval, String
 from sqlalchemy.orm import backref, relationship
@@ -74,6 +76,17 @@ class ReportDBModel(Base):
     )
     entries = relationship("ReportEntryDBModel", backref=backref("report"))
 
+    def get_api_report(self) -> Report:
+        return Report(
+            id=self.id,
+            start_time=self.start_time,
+            end_time=datetime.datetime.now(tz=datetime.timezone.utc),
+            robot_id=self.robot_id,
+            mission_id=self.echo_mission_id,
+            status=self.status.value,
+            entries=[entry.get_report_entry() for entry in self.entries],
+        )
+
 
 class MapDBModel(Base):
     __tablename__ = "map"
@@ -131,3 +144,13 @@ class ReportEntryDBModel(Base):
         DateTime(timezone=True), default=datetime.datetime.now(tz=datetime.timezone.utc)
     )
     file_location = Column(String)
+
+    def get_report_entry(self) -> ReportEntry:
+        return ReportEntry(
+            id=self.id,
+            tag_id=self.tag_id,
+            status=self.status.value,
+            inspection_type=self.inspection_type.value,
+            time=self.time,
+            link=None,
+        )
