@@ -6,7 +6,6 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from requests import RequestException, Response
 
-from flotilla.database.models import ReportDBModel
 from flotilla.services.isar import get_isar_service
 from tests.mocks.isar_service_mock import IsarServiceMock
 

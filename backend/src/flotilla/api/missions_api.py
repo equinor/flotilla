@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, Path, Response, Security
 from flotilla_openapi.models.mission import Mission
 from flotilla_openapi.models.problem_details import ProblemDetails
 from requests import HTTPError, RequestException
-from requests import Response as RequestResponse
 
 from flotilla.api.authentication import authentication_scheme
 from flotilla.services.echo import (
