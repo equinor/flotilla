@@ -23,6 +23,20 @@ def read_robot_by_id(db: Session, robot_id: int) -> RobotDBModel:
     return robot
 
 
+def read_reports(db: Session) -> List[ReportDBModel]:
+    reports: List[ReportDBModel] = db.query(ReportDBModel).all()
+    return reports
+
+
+def read_report_by_id(db: Session, report_id: int) -> ReportDBModel:
+    report: Optional[ReportDBModel] = (
+        db.query(ReportDBModel).filter(ReportDBModel.id == report_id).first()
+    )
+    if not report:
+        raise DBException(f"No report with id {report_id}")
+    return report
+
+
 def create_report(
     db: Session,
     robot_id: int,
