@@ -18,7 +18,7 @@ from flotilla.database.crud import (
     read_robot_by_id,
     read_robots,
 )
-from flotilla.database.db import SessionLocal
+from flotilla.database.db import get_db
 from flotilla.database.models import ReportStatus, RobotDBModel
 from flotilla.services.isar import IsarService, get_isar_service
 
@@ -28,14 +28,6 @@ router = APIRouter()
 
 BAD_GATEWAY_DESCRIPTION = "Failed to stop - Error while contacting ISAR"
 NOT_FOUND_DESCRIPTION = "Not Found - No robot with given id"
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.get(
