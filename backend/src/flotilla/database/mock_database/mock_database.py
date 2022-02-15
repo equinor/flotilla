@@ -49,6 +49,7 @@ def populate_mock_db(session, engine, base) -> None:
         log="",
         status=ReportStatus.in_progress,
     )
+
     report_2 = ReportDBModel(
         robot_id=robot_2.id,
         isar_mission_id="isar_mission_id",
@@ -57,7 +58,7 @@ def populate_mock_db(session, engine, base) -> None:
         status=ReportStatus.completed,
     )
 
-    session.add(report_1, report_2)
+    session.add_all([report_1, report_2])
     session.commit()
 
     entry_1 = ReportEntryDBModel(
