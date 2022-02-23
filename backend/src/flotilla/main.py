@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from flotilla.api.authentication import authenticator
+from flotilla.api.events_api import router as events_router
 from flotilla.api.missions_api import router as missions_router
 from flotilla.api.reports_api import router as reports_router
 from flotilla.api.robots_api import router as robots_router
@@ -46,6 +47,7 @@ def startup_event():
 app.include_router(robots_router)
 app.include_router(missions_router)
 app.include_router(reports_router)
+app.include_router(events_router)
 
 
 if __name__ == "__main__":
