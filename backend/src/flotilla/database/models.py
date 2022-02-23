@@ -1,6 +1,7 @@
 import datetime
 import enum
 
+from flotilla_openapi.models.event import Event
 from flotilla_openapi.models.report import Report
 from flotilla_openapi.models.report_entry import ReportEntry
 from flotilla_openapi.models.robot import Robot
@@ -131,6 +132,15 @@ class EventDBModel(Base):
     estimated_duration = Column(Interval)
     # TODO: robot_id and report_id.robot_id can now point at different robots.
     # Should there be a constraint forcing an event to point at only one robot?
+
+    def get_api_event(self) -> Event:
+        return Event(
+            id=self.id,
+            robot_id=self.robot_id,
+            mission_id=self.echo_mission_id,
+            start_time=self.start_time,
+            end_time=datetime.datetime.now(),
+        )
 
 
 class ReportEntryDBModel(Base):
