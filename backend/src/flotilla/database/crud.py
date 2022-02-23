@@ -1,8 +1,14 @@
+import datetime
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from flotilla.database.models import ReportDBModel, ReportStatus, RobotDBModel
+from flotilla.database.models import (
+    EventDBModel,
+    ReportDBModel,
+    ReportStatus,
+    RobotDBModel,
+)
 
 
 class DBException(Exception):
@@ -37,6 +43,20 @@ def read_report_by_id(db: Session, report_id: int) -> ReportDBModel:
     return report
 
 
+def read_events(db: Session) -> List[EventDBModel]:
+    events: List[EventDBModel] = db.query(EventDBModel).all()
+    return events
+
+
+def read_event_by_id(db: Session, event_id: int) -> EventDBModel:
+    event: Optional[EventDBModel] = (
+        db.query(EventDBModel).filter(EventDBModel.id == event_id).first()
+    )
+    if not event:
+        raise DBException(f"No event with id {event_id}")
+    return event
+
+
 def create_report(
     db: Session,
     robot_id: int,
@@ -54,3 +74,29 @@ def create_report(
     db.add(report)
     db.commit()
     return report.id
+
+
+def create_event(
+    db: Session,
+    robot_id: int,
+    echo_mission_id: int,
+    start_time: datetime.datetime,
+) -> int:
+
+    event: EventDBModel = EventDBModel(
+        robot_id=robot_id,
+        echo_mission_id=echo_mission_id,
+        report_id=None,
+        start_time=start_time,
+        estimated_duration=datetime.timedelta(hours=1),
+    )
+    db.add(event)
+    db.commit()
+    return event.id
+
+
+def remove_event(db: Session, event_id: int) -> None:
+    event: EventDBModel = read_event_by_id(db, event_id)
+    db.delete(event)
+    db.commit()
+    return
