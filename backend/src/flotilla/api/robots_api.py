@@ -42,9 +42,7 @@ NOT_FOUND_DESCRIPTION = "Not Found - No robot with given id"
     summary="List all robots on the asset.",
     dependencies=[Security(authentication_scheme)],
 )
-async def get_robots(
-    response: Response, db: Session = Depends(get_db)
-) -> List[RobotDBModel]:
+async def get_robots(db: Session = Depends(get_db)) -> List[Robot]:
     db_robots: List[RobotDBModel] = read_robots(db)
     robots: List[Robot] = [robot.get_api_robot() for robot in db_robots]
     return robots
@@ -66,7 +64,7 @@ async def get_robot(
     response: Response,
     robot_id: int = Path(None, description=""),
     db: Session = Depends(get_db),
-) -> RobotDBModel:
+) -> Robot:
     try:
         db_robot: RobotDBModel = read_robot_by_id(db=db, robot_id=robot_id)
         robot: Robot = db_robot.get_api_robot()
