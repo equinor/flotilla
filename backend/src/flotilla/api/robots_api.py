@@ -69,7 +69,7 @@ async def get_robot(
         db_robot: RobotDBModel = read_robot_by_id(db=db, robot_id=robot_id)
         robot: Robot = db_robot.get_api_robot()
     except DBException:
-        logger.error(f"Could not get robot with id {robot_id}.")
+        logger.exception(f"Could not get robot with id {robot_id}.")
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(
             title=NOT_FOUND_DESCRIPTION, status=HTTPStatus.NOT_FOUND.value
@@ -111,7 +111,7 @@ async def post_start_robot(
             report_status=ReportStatus.in_progress,
         )
     except DBException:
-        logger.error(f"Could not get robot with id {robot_id}.")
+        logger.exception(f"Could not get robot with id {robot_id}.")
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
     except HTTPError as e:
@@ -152,7 +152,7 @@ async def post_stop_robot(
             host=robot.host, port=robot.port
         )
     except DBException:
-        logger.error(f"Could not get robot with id {robot_id}.")
+        logger.exception(f"Could not get robot with id {robot_id}.")
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
     except HTTPError as e:
