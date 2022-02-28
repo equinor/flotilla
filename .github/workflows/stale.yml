@@ -30,3 +30,4 @@ jobs:
         close-issue-message: 'This issue has been closed automatically due to a lack of activity.'
         close-pr-message: 'This pull request has been closed automatically due to a lack of activity.'
         days-before-pr-stale: 30
+        days-before-close: -1
