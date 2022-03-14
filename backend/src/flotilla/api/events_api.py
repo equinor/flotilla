@@ -2,15 +2,13 @@ from http import HTTPStatus
 from logging import getLogger
 from typing import List
 
-from fastapi import APIRouter, Body, Depends, Path, Response, Security
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Response, Security
 from flotilla_openapi.models.event import Event
 from flotilla_openapi.models.event_request import EventRequest
-from flotilla_openapi.models.problem_details import ProblemDetails
 from pytest import Session
 
 from flotilla.api.authentication import authentication_scheme
 from flotilla.database.crud import (
-    DBException,
     create_event,
     read_event_by_id,
     read_events,
@@ -72,10 +70,9 @@ async def post_event(
         )
         db_event: EventDBModel = read_event_by_id(db, event_id)
         event: EventDBModel = db_event.get_api_event()
-    except DBException:
-        logger.exception(f"An error occured while creating event.")
-        response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
-        return ProblemDetails(title=INTERNAL_SERVER_ERROR_DESCRIPTION)
+    except HTTPException as e:
+        logger.error(f"An error occured while creating an event: {e.detail}")
+        raise
     response.status_code = HTTPStatus.CREATED.value
     return event
 
@@ -97,10 +94,9 @@ async def delete_event(
     """Deletes an event from the robot schedule. Can only be used for events that have not started yet."""
     try:
         remove_event(db, event_id)
-    except DBException:
-        logger.exception(f"Could not delete event with id {event_id}.")
-        response.status_code = HTTPStatus.NOT_FOUND.value
-        return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
+    except HTTPException as e:
+        logger.error(f"Failed to delete event with id {event_id}: {e.detail}")
+        raise
     response.status_code = HTTPStatus.NO_CONTENT.value
     return None
 
@@ -126,8 +122,7 @@ async def get_event(
     try:
         db_event: EventDBModel = read_event_by_id(db, event_id)
         event: EventDBModel = db_event.get_api_event()
-    except DBException:
-        logger.exception(f"Could not get event with id {event_id}.")
-        response.status_code = HTTPStatus.NOT_FOUND.value
-        return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
+    except HTTPException as e:
+        logger.error(f"Failed to get event with id {event_id}: {e.detail}")
+        raise
     return event

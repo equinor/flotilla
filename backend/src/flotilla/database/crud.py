@@ -1,6 +1,8 @@
 import datetime
+from http import HTTPStatus
 from typing import List, Optional
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from flotilla.database.models import (
@@ -9,10 +11,6 @@ from flotilla.database.models import (
     ReportStatus,
     RobotDBModel,
 )
-
-
-class DBException(Exception):
-    pass
 
 
 def read_robots(db: Session) -> List[RobotDBModel]:
@@ -25,7 +23,10 @@ def read_robot_by_id(db: Session, robot_id: int) -> RobotDBModel:
         db.query(RobotDBModel).filter(RobotDBModel.id == robot_id).first()
     )
     if not robot:
-        raise DBException(f"No robot with id {robot_id}")
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND.value,
+            detail=f"No robot with id {robot_id}",
+        )
     return robot
 
 
@@ -39,7 +40,10 @@ def read_report_by_id(db: Session, report_id: int) -> ReportDBModel:
         db.query(ReportDBModel).filter(ReportDBModel.id == report_id).first()
     )
     if not report:
-        raise DBException(f"No report with id {report_id}")
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND.value,
+            detail=f"No report with id {report_id}",
+        )
     return report
 
 
@@ -53,7 +57,10 @@ def read_event_by_id(db: Session, event_id: int) -> EventDBModel:
         db.query(EventDBModel).filter(EventDBModel.id == event_id).first()
     )
     if not event:
-        raise DBException(f"No event with id {event_id}")
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND.value,
+            detail=f"No event with id {event_id}",
+        )
     return event
 
 

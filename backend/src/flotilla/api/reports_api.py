@@ -2,13 +2,12 @@ from http import HTTPStatus
 from logging import getLogger
 from typing import List
 
-from fastapi import APIRouter, Depends, Path, Response, Security
-from flotilla_openapi.models.problem_details import ProblemDetails
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, Security
 from flotilla_openapi.models.report import Report
 from pytest import Session
 
 from flotilla.api.authentication import authentication_scheme
-from flotilla.database.crud import DBException, read_report_by_id, read_reports
+from flotilla.database.crud import read_report_by_id, read_reports
 from flotilla.database.db import get_db
 from flotilla.database.models import ReportDBModel
 
@@ -60,10 +59,7 @@ async def get_report(
     try:
         db_report: ReportDBModel = read_report_by_id(db=db, report_id=report_id)
         report: Report = db_report.get_api_report()
-    except DBException:
-        logger.exception(f"Could not get report with id {report_id}.")
-        response.status_code = HTTPStatus.NOT_FOUND.value
-        return ProblemDetails(
-            title=NOT_FOUND_DESCRIPTION, status=HTTPStatus.NOT_FOUND.value
-        )
+    except HTTPException as e:
+        logger.error(f"Failed to get report with id {report_id}: {e.detail}")
+        raise
     return report

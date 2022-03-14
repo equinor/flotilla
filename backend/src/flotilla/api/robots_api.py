@@ -4,20 +4,13 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Response, Security
 from flotilla_openapi.models.post_response import PostResponse
-from flotilla_openapi.models.problem_details import ProblemDetails
 from flotilla_openapi.models.robot import Robot
 from flotilla_openapi.models.start_response import StartResponse
 from pytest import Session
-from requests import HTTPError, RequestException
 from requests import Response as RequestResponse
 
 from flotilla.api.authentication import authentication_scheme
-from flotilla.database.crud import (
-    DBException,
-    create_report,
-    read_robot_by_id,
-    read_robots,
-)
+from flotilla.database.crud import create_report, read_robot_by_id, read_robots
 from flotilla.database.db import get_db
 from flotilla.database.models import ReportStatus, RobotDBModel
 from flotilla.services.isar import IsarService, get_isar_service
@@ -68,12 +61,9 @@ async def get_robot(
     try:
         db_robot: RobotDBModel = read_robot_by_id(db=db, robot_id=robot_id)
         robot: Robot = db_robot.get_api_robot()
-    except DBException:
-        logger.exception(f"Could not get robot with id {robot_id}.")
-        response.status_code = HTTPStatus.NOT_FOUND.value
-        return ProblemDetails(
-            title=NOT_FOUND_DESCRIPTION, status=HTTPStatus.NOT_FOUND.value
-        )
+    except HTTPException as e:
+        logger.error(f"Could not get robot with id {robot_id}: {e.detail}")
+        raise
     return robot
 
 
@@ -110,10 +100,6 @@ async def post_start_robot(
             echo_mission_id=mission_id,
             report_status=ReportStatus.in_progress,
         )
-    except DBException:
-        logger.exception(f"Could not get robot with id {robot_id}.")
-        response.status_code = HTTPStatus.NOT_FOUND.value
-        return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
     except HTTPException as e:
         logger.error(
             f"Could not start mission with id {mission_id} for robot with id {robot_id}: {e.detail}"
@@ -147,12 +133,8 @@ async def post_stop_robot(
         response_isar: RequestResponse = isar_service.stop(
             host=robot.host, port=robot.port
         )
-    except DBException:
-        logger.exception(f"Could not get robot with id {robot_id}.")
-        response.status_code = HTTPStatus.NOT_FOUND.value
-        return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
     except HTTPException as e:
-        logger.error(f"Could not stop robot with id {robot_id}: {e.detail}")
+        logger.error(f"Failed to stop robot with id {robot_id}: {e.detail}")
         raise
 
     response_isar_json: dict = response_isar.json()
