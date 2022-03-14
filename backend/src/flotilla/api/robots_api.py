@@ -2,7 +2,7 @@ from http import HTTPStatus
 from logging import getLogger
 from typing import List
 
-from fastapi import APIRouter, Depends, Path, Response, Security
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, Security
 from flotilla_openapi.models.post_response import PostResponse
 from flotilla_openapi.models.problem_details import ProblemDetails
 from flotilla_openapi.models.robot import Robot
@@ -114,15 +114,11 @@ async def post_start_robot(
         logger.exception(f"Could not get robot with id {robot_id}.")
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
-    except HTTPError as e:
-        response.status_code = e.response.status_code
-        return ProblemDetails(title=e.strerror)
-    except RequestException:
-        logger.exception(
-            f"Could not start mission with id {mission_id} for robot with id {robot_id}."
+    except HTTPException as e:
+        logger.error(
+            f"Could not start mission with id {mission_id} for robot with id {robot_id}: {e.detail}"
         )
-        response.status_code = HTTPStatus.BAD_GATEWAY.value
-        return ProblemDetails(title=BAD_GATEWAY_DESCRIPTION)
+        raise
 
     return StartResponse(status="started", report_id=report_id)
 
@@ -155,13 +151,9 @@ async def post_stop_robot(
         logger.exception(f"Could not get robot with id {robot_id}.")
         response.status_code = HTTPStatus.NOT_FOUND.value
         return ProblemDetails(title=NOT_FOUND_DESCRIPTION)
-    except HTTPError as e:
-        response.status_code = e.response.status_code
-        return ProblemDetails(title=e.strerror)
-    except RequestException:
-        logger.exception(f"Could not stop robot with id {robot_id}.")
-        response.status_code = HTTPStatus.BAD_GATEWAY.value
-        return ProblemDetails(title=BAD_GATEWAY_DESCRIPTION)
+    except HTTPException as e:
+        logger.error(f"Could not stop robot with id {robot_id}: {e.detail}")
+        raise
 
     response_isar_json: dict = response_isar.json()
     return PostResponse(status=response_isar_json["message"])
