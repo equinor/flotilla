@@ -25,3 +25,13 @@ The tests can be run with
 ```bash
 pytest .
 ```
+
+## API authentication
+
+To run the app locally and connect to upstream services, the following environment variables need to be set for authentication.
+
+```
+AZURE_CLIENT_ID
+AZURE_TENANT_ID
+AZURE_CLIENT_SECRET
+```
