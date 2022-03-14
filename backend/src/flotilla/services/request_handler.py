@@ -1,11 +1,15 @@
+from http import HTTPStatus
 from typing import Any, Optional
 
 import requests
+from fastapi import HTTPException
 from requests.exceptions import (
     ConnectionError,
     ConnectTimeout,
+    HTTPError,
     RequestException,
     Timeout,
+    TooManyRedirects,
 )
 from requests.models import Response
 
@@ -40,17 +44,32 @@ class RequestHandler:
                 params=params,
                 **kwargs,
             )
-        except ConnectTimeout as e:
-            raise RequestException from e
+            response.raise_for_status()
+        except HTTPError as e:
+            raise HTTPException(
+                status_code=e.response.status_code,
+                detail=e.response.reason,
+            ) from e
         except Timeout as e:
-            raise RequestException from e
+            raise HTTPException(
+                status_code=HTTPStatus.GATEWAY_TIMEOUT.value,
+                detail=f"The request '{method} {url}'  timed out",
+            ) from e
         except ConnectionError as e:
-            raise RequestException from e
-        except RequestException as e:
-            raise RequestException from e
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_GATEWAY.value,
+                detail=f"A connection error occurred during the request '{method} {url}'",
+            ) from e
+        except TooManyRedirects as e:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_GATEWAY.value,
+                detail=f"Too many redirects occurred during the request '{method} {url}'",
+            ) from e
         except Exception as e:
-            raise RequestException from e
-        response.raise_for_status()
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_GATEWAY.value,
+                detail=f"An ambiguous error occurred during the request '{method} {url}'",
+            ) from e
         return response
 
     def get(
