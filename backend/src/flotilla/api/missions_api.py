@@ -4,7 +4,6 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Response, Security
 from flotilla_openapi.models.mission import Mission
-from flotilla_openapi.models.problem_details import ProblemDetails
 
 from flotilla.api.authentication import authentication_scheme
 from flotilla.services.echo import (
@@ -41,9 +40,9 @@ async def get_missions(
         raise
     except EchoDeserializerException:
         logger.error("Could not deserialize the response from Echo")
-        response.status_code = HTTPStatus.BAD_GATEWAY.value
-        return ProblemDetails(
-            title="Bad Gateway - Could not deserialize response from Echo"
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_GATEWAY.value,
+            detail="Bad Gateway - Could not deserialize response from Echo",
         )
     return missions
 
@@ -70,8 +69,8 @@ async def get_single_mission(
         raise
     except EchoDeserializerException:
         logger.error(f"Could not deserialize mission with id {mission_id}.")
-        response.status_code = HTTPStatus.BAD_GATEWAY.value
-        return ProblemDetails(
-            title="Bad Gateway - Could not deserialize response from Echo",
+        raise HTTPException(
+            status_code=HTTPStatus.BAD_GATEWAY.value,
+            detail="Bad Gateway - Could not deserialize response from Echo",
         )
     return mission
