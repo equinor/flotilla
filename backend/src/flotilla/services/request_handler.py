@@ -48,7 +48,7 @@ class RequestHandler:
         except HTTPError as e:
             raise HTTPException(
                 status_code=e.response.status_code,
-                detail=e.response.reason,
+                detail=str(e),
             ) from e
         except Timeout as e:
             raise HTTPException(
