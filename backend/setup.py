@@ -28,6 +28,6 @@ setup(
         "SQLAlchemy",
         "uvicorn",
     ],
-    extras_require={"dev": ["pytest", "black", "mypy"]},
+    extras_require={"dev": ["pytest", "pytest-mock", "black", "mypy"]},
     python_requires=">=3.9",
 )

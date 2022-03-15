@@ -1,52 +1,18 @@
 import json
 import os
 from http import HTTPStatus
-from typing import Optional
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from pytest_mock import MockerFixture
 from requests import RequestException, Response
-
-from flotilla.services.echo.service import get_echo_service
-from tests.mocks.echo_service_mock import EchoServiceMock
 
 CURRENT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 
 file_missions: str = f"{CURRENT_DIR}/data/missions.json"
 with open(file_missions) as file:
     missions_json: dict = json.load(file)
-
-
-def setup_echo_service_read_missions(
-    response: Response, exception: Optional[Exception] = None
-):
-    echo_service_mock = EchoServiceMock()
-    echo_service_mock.add_missions_responses([response])
-
-    if exception:
-        echo_service_mock.add_exceptions(exceptions=[exception])
-
-    def get_echo_service_mock():
-        yield echo_service_mock
-
-    return get_echo_service_mock
-
-
-def setup_echo_service_read_mission(
-    response: Response, exception: Optional[Exception] = None
-):
-    echo_service_mock = EchoServiceMock()
-    echo_service_mock.add_mission_responses([response])
-
-    if exception:
-        echo_service_mock.add_exceptions(exceptions=[exception])
-
-    def get_echo_service_mock():
-        yield echo_service_mock
-
-    return get_echo_service_mock
-
 
 echo_missions_response_ok: Response = Response()
 echo_missions_response_ok.status_code = HTTPStatus.OK.value
@@ -70,10 +36,12 @@ def test_get_missions(
     echo_service_response: Response,
     exception: Exception,
     expected_status_code: int,
+    mocker: MockerFixture,
 ):
-    test_app.dependency_overrides[get_echo_service] = setup_echo_service_read_missions(
-        response=echo_service_response, exception=exception
-    )
+    mocker.patch("requests.request").return_value = echo_service_response
+    if exception:
+        mocker.patch("requests.request").side_effect = exception
+
     with TestClient(test_app) as client:
         response = client.get("/missions")
         assert response.status_code == expected_status_code
@@ -114,10 +82,11 @@ def test_get_single_mission(
     echo_service_response: Response,
     exception: Exception,
     expected_status_code: int,
+    mocker,
 ):
-    test_app.dependency_overrides[get_echo_service] = setup_echo_service_read_mission(
-        response=echo_service_response, exception=exception
-    )
+    mocker.patch("requests.request").return_value = echo_service_response
+    if exception:
+        mocker.patch("requests.request").side_effect = exception
     with TestClient(test_app) as client:
         response = client.get(f"/missions/0")
         assert response.status_code == expected_status_code
