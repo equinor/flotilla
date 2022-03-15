@@ -3,14 +3,7 @@ from typing import Any, Optional
 
 import requests
 from fastapi import HTTPException
-from requests.exceptions import (
-    ConnectionError,
-    ConnectTimeout,
-    HTTPError,
-    RequestException,
-    Timeout,
-    TooManyRedirects,
-)
+from requests.exceptions import ConnectionError, HTTPError, Timeout, TooManyRedirects
 from requests.models import Response
 
 from flotilla.settings import settings
