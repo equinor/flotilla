@@ -1,7 +1,9 @@
+import time
+from logging import getLogger
 from logging.config import dictConfig
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from flotilla.api.authentication import authenticator
@@ -32,6 +34,20 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+
+@app.middleware("http")
+async def log_api_endpoints(request: Request, call_next):
+    logger = getLogger("api")
+    start_time = time.time()
+    request_string: str = f'"{request.method} {request.url}"'
+    logger.info(f"Processing request: {request_string}")
+    response: Response = await call_next(request)
+    process_time = "{:.2f}".format((time.time() - start_time) * 1000)
+    logger.info(
+        f"Processed request: {request_string} - Result: {response.status_code} ({process_time} ms)"
+    )
+    return response
 
 
 @app.on_event("startup")
