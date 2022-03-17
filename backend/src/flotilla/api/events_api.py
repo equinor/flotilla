@@ -69,7 +69,7 @@ async def post_event(
             event_request.start_time,
         )
         db_event: EventDBModel = read_event_by_id(db, event_id)
-        event: EventDBModel = db_event.get_api_event()
+        event: Event = db_event.get_api_event()
     except HTTPException as e:
         logger.error(f"An error occured while creating an event: {e.detail}")
         raise
@@ -121,7 +121,7 @@ async def get_event(
     """Lookup event with specified id. Can only be used for events that have not started yet."""
     try:
         db_event: EventDBModel = read_event_by_id(db, event_id)
-        event: EventDBModel = db_event.get_api_event()
+        event: Event = db_event.get_api_event()
     except HTTPException as e:
         logger.error(f"Failed to get event with id {event_id}: {e.detail}")
         raise
