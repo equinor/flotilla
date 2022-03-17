@@ -12,7 +12,7 @@ from flotilla.api.missions_api import router as missions_router
 from flotilla.api.reports_api import router as reports_router
 from flotilla.api.robots_api import router as robots_router
 from flotilla.config.log_config import LogConfig
-from flotilla.database.db import Base, SessionLocal, engine
+from flotilla.database.db import Base, SessionLocal, connection
 from flotilla.database.mock_database.mock_database import populate_mock_db
 from flotilla.settings import settings
 
@@ -57,7 +57,7 @@ async def load_config() -> None:
 
 @app.on_event("startup")
 def startup_event():
-    populate_mock_db(session=SessionLocal(), engine=engine, base=Base)
+    populate_mock_db(session=SessionLocal(), connection=connection, base=Base)
 
 
 app.include_router(robots_router)
