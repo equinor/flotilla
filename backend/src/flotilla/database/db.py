@@ -5,11 +5,11 @@ from sqlalchemy.orm import sessionmaker
 # TODO: Move to config
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
-engine = create_engine(
+connection = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+).connect()
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=connection)
 
 Base = declarative_base()
 

@@ -15,9 +15,10 @@ from flotilla.database.models import (
 )
 
 
-def populate_mock_db(session, engine, base) -> None:
+def populate_mock_db(session, connection, base) -> None:
 
-    base.metadata.create_all(bind=engine)
+    base.metadata.bind = connection
+    base.metadata.create_all()
 
     robot_1 = RobotDBModel(
         name="Harald",
