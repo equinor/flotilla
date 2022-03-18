@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from requests import RequestException, Response
 
+from flotilla.database.crud import read_report_by_id
+
 
 def test_get_robots(test_app: FastAPI):
     with TestClient(test_app) as client:
@@ -73,6 +75,7 @@ def test_post_start_robot(
     exception: Exception,
     expected_status_code: int,
     mocker,
+    session,
 ):
     mocker.patch("requests.request").return_value = isar_service_response
     if exception:
@@ -80,6 +83,9 @@ def test_post_start_robot(
     with TestClient(test_app) as client:
         response = client.post(f"/robots/{robot_id}/start/1")
         assert response.status_code == expected_status_code
+        if expected_status_code == HTTPStatus.OK.value:
+            report_id = response.json().get("report_id")
+            assert read_report_by_id(db=session, report_id=report_id)
 
 
 json_successful_stop_request = {

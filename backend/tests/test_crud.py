@@ -23,8 +23,8 @@ from flotilla.database.models import (
     RobotDBModel,
 )
 
-good_ids: list[int] = [1, 2]
-bad_ids: list[int] = [-1, 13, 56]
+valid_ids: list[int] = [1, 2]
+invalid_ids: list[int] = [-1, 13, 56]
 
 
 def test_read_robots(session):
@@ -34,7 +34,7 @@ def test_read_robots(session):
 
 @pytest.mark.parametrize(
     "robot_id",
-    good_ids,
+    valid_ids,
 )
 def test_read_robot_by_id(robot_id: int, session):
     robot: RobotDBModel = read_robot_by_id(db=session, robot_id=robot_id)
@@ -43,7 +43,7 @@ def test_read_robot_by_id(robot_id: int, session):
 
 @pytest.mark.parametrize(
     "robot_id",
-    bad_ids,
+    invalid_ids,
 )
 def test_read_robot_by_id_throws_404(robot_id: int, session):
     with pytest.raises(HTTPException) as e:
@@ -58,7 +58,7 @@ def test_read_reports(session):
 
 @pytest.mark.parametrize(
     "report_id",
-    good_ids,
+    valid_ids,
 )
 def test_read_report_by_id(report_id: int, session):
     report: ReportDBModel = read_report_by_id(db=session, report_id=report_id)
@@ -67,7 +67,7 @@ def test_read_report_by_id(report_id: int, session):
 
 @pytest.mark.parametrize(
     "report_id",
-    bad_ids,
+    invalid_ids,
 )
 def test_read_report_by_id_throws_404(report_id: int, session):
     with pytest.raises(HTTPException) as e:
@@ -82,7 +82,7 @@ def test_read_events(session):
 
 @pytest.mark.parametrize(
     "event_id",
-    good_ids,
+    valid_ids,
 )
 def test_read_event_by_id(event_id: int, session):
     event: EventDBModel = read_event_by_id(db=session, event_id=event_id)
@@ -91,7 +91,7 @@ def test_read_event_by_id(event_id: int, session):
 
 @pytest.mark.parametrize(
     "event_id",
-    bad_ids,
+    invalid_ids,
 )
 def test_read_event_by_id_throws_404(event_id: int, session):
     with pytest.raises(HTTPException) as e:
@@ -100,7 +100,7 @@ def test_read_event_by_id_throws_404(event_id: int, session):
 
 
 def test_create_report(session):
-    robot_id = 1
+    robot_id: int = 1
     isar_mission_id: str = "isar_id_test"
     echo_mission_id: int = 12345
     report_status: ReportStatus = ReportStatus.in_progress
@@ -112,7 +112,7 @@ def test_create_report(session):
         echo_mission_id=echo_mission_id,
         report_status=report_status,
     )
-    post_count = len(read_reports(session))
+    post_count: int = len(read_reports(session))
     assert pre_count + 1 == post_count
     assert read_report_by_id(db=session, report_id=report_id)
 
@@ -128,7 +128,7 @@ def test_create_event(session):
         echo_mission_id=echo_mission_id,
         start_time=start_time,
     )
-    post_count = len(read_events(session))
+    post_count: int = len(read_events(session))
     assert pre_count + 1 == post_count
     assert read_event_by_id(db=session, event_id=event_id)
 

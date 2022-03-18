@@ -17,6 +17,10 @@ from flotilla.database.models import (
 
 def populate_mock_db(session, connection, base) -> None:
 
+    # If database already configured/populated - abort
+    if base.metadata.bind == connection:
+        return
+
     base.metadata.bind = connection
     base.metadata.create_all()
 
