@@ -24,7 +24,7 @@ EXPOSE 8000
 
 # Change user to avoid running as root
 # User needs to have an explicit guid for radix
-RUN useradd -ms /bin/bash --uid 1001 isar
+RUN useradd -ms /bin/bash --uid 1001 flotilla
 RUN chown -R 1001 /app
 RUN chmod 755 /app
 USER 1001

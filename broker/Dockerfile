@@ -5,4 +5,6 @@ COPY mosquitto/config/passwd_file mosquitto/config/passwd_file
 
 EXPOSE 1883 9001
 
+USER mosquitto
+
 CMD ["mosquitto", "-p", "1883", "-c", "mosquitto/config/mosquitto.conf"]
