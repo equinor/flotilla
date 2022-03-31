@@ -7,9 +7,11 @@ services:
   broker:
     build: broker
     ports:
-    - '1883:1883'
-    - '9001:9001'
+      - '1883:1883'
+      - '9001:9001'
   backend:
     build: backend
+    env_file:
+      - backend/.env
     ports:
       - '8000:8000'

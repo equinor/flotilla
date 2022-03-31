@@ -31,6 +31,14 @@ Build the docker container:
 docker-compose build
 ```
 
+Setup a .env file in the backend directory with the following environment variables:
+
+```
+AZURE_CLIENT_ID
+AZURE_TENANT_ID
+AZURE_CLIENT_SECRET
+```
+
 Start Flotilla by running:
 
 ```
