@@ -4,8 +4,7 @@ from pydantic import BaseModel
 class LogConfig(BaseModel):
     """Configuration for the backend api logger"""
 
-    LOGGER_NAME: str = "api"
-    LOG_FORMAT: str = "%(levelprefix)s %(asctime)s | %(message)s"
+    LOG_FORMAT: str = "%(levelprefix)s %(name)s | %(asctime)s | %(message)s"
     LOG_FORMAT_FILE: str = "%(asctime)s | %(levelname)s: %(message)s"
     LOG_LEVEL: str = "DEBUG"
 
@@ -34,7 +33,21 @@ class LogConfig(BaseModel):
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stderr",
         },
+        "event handler file": {
+            "formatter": "file_friendly",
+            "class": "logging.FileHandler",
+            "filename": "event.log",
+        },
+        "event handler stream": {
+            "formatter": "default",
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stderr",
+        },
     }
     loggers = {
         "api": {"handlers": ["api file", "api stream"], "level": LOG_LEVEL},
+        "event handler": {
+            "handlers": ["event handler file", "event handler stream"],
+            "level": LOG_LEVEL,
+        },
     }
