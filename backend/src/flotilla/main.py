@@ -56,7 +56,7 @@ async def load_config() -> None:
 
 
 @app.on_event("startup")
-def startup_event():
+def mock_db():
     populate_mock_db(session=SessionLocal(), connection=connection, base=Base)
 
 
