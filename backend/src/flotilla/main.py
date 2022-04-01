@@ -1,6 +1,7 @@
 import time
 from logging import getLogger
 from logging.config import dictConfig
+from threading import Thread
 
 import uvicorn
 from fastapi import FastAPI, Request, Response
@@ -14,6 +15,7 @@ from flotilla.api.robots_api import router as robots_router
 from flotilla.config.log_config import LogConfig
 from flotilla.database.db import Base, SessionLocal, connection
 from flotilla.database.mock_database.mock_database import populate_mock_db
+from flotilla.services.events.event_handler import start_event_handler
 from flotilla.settings import settings
 
 app = FastAPI(
@@ -58,6 +60,12 @@ async def load_config() -> None:
 @app.on_event("startup")
 def startup_event():
     populate_mock_db(session=SessionLocal(), connection=connection, base=Base)
+
+
+@app.on_event("startup")
+async def event_handler():
+    thread = Thread(target = start_event_handler)
+    thread.start()
 
 
 app.include_router(robots_router)
