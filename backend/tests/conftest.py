@@ -5,9 +5,9 @@ from pytest_mock import MockerFixture
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from flotilla.api.authentication import Authenticator, authentication_scheme
+from flotilla.api.main import app
 from flotilla.database.db import Base, SessionLocal, connection, get_db
 from flotilla.database.mock_database.mock_database import populate_mock_db
-from flotilla.main import app
 
 
 # Database setup is run once per test session
