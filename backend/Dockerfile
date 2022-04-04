@@ -30,4 +30,4 @@ RUN chmod 755 /app
 USER 1001
 
 
-CMD ["uvicorn", "--host", "0.0.0.0", "src.flotilla.main:app"]
+CMD ["python", "main.py"]

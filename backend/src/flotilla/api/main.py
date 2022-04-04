@@ -13,8 +13,6 @@ from flotilla.api.missions_api import router as missions_router
 from flotilla.api.reports_api import router as reports_router
 from flotilla.api.robots_api import router as robots_router
 from flotilla.config.log_config import LogConfig
-from flotilla.database.db import Base, SessionLocal, connection
-from flotilla.database.mock_database.mock_database import populate_mock_db
 from flotilla.services.events.event_handler import start_event_handler
 from flotilla.settings import settings
 
@@ -57,17 +55,6 @@ async def load_config() -> None:
     await authenticator.load_config()
 
 
-@app.on_event("startup")
-def mock_db():
-    populate_mock_db(session=SessionLocal(), connection=connection, base=Base)
-
-
-@app.on_event("startup")
-async def event_handler():
-    thread = Thread(target = start_event_handler)
-    thread.start()
-
-
 app.include_router(robots_router)
 app.include_router(missions_router)
 app.include_router(reports_router)
@@ -75,8 +62,4 @@ app.include_router(events_router)
 
 
 def run_app() -> None:
-    uvicorn.run(app, host="localhost", reload=False)
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", reload=False)
+    uvicorn.run(app, host="0.0.0.0", reload=False)
