@@ -66,5 +66,9 @@ app.include_router(reports_router)
 app.include_router(events_router)
 
 
+def run_app() -> None:
+    uvicorn.run(app, host="localhost", reload=False)
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="localhost", reload=False)
