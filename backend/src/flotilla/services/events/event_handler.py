@@ -1,5 +1,4 @@
 from logging import getLogger
-from token import OP
 from typing import List
 
 from pytest import Session
