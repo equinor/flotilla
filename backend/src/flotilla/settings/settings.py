@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     REQUEST_TIMEOUT: float = Field(default=5, env="REQUEST_TIMEOUT")
     ISAR_CLIENT_ID: str = Field(default="", env="ISAR_CLIENT_ID")
     ISAR_APP_SCOPE: str = Field(default="", env="ISAR_APP_SCOPE")
+    SQLALCHEMY_DATABASE_URL: str = Field(
+        default="sqlite:///:memory:", env="SQLALCHEMY_DATABSE_URL"
+    )
 
     class Config:
         with pkg_resources.path("flotilla.settings", "settings.env") as path:
