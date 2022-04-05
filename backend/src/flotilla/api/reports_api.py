@@ -7,6 +7,7 @@ from flotilla_openapi.models.report import Report
 from pytest import Session
 
 from flotilla.api.authentication import authentication_scheme
+from flotilla.api.pagination import PaginationParams
 from flotilla.database.crud import read_report_by_id, read_reports
 from flotilla.database.db import get_db
 from flotilla.database.models import ReportDBModel
@@ -32,9 +33,12 @@ NOT_FOUND_DESCRIPTION = "Not Found - No report with given id"
 )
 async def get_reports(
     db: Session = Depends(get_db),
+    params: PaginationParams = Depends(),
 ) -> List[Report]:
     """List all available reports on the asset."""
-    db_reports: List[ReportDBModel] = read_reports(db)
+    db_reports: List[ReportDBModel] = read_reports(
+        db, page=params.page, page_size=params.page_size
+    )
     reports: List[Report] = [report.get_api_report() for report in db_reports]
     return reports
 

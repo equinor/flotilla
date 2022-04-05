@@ -12,10 +12,15 @@ from flotilla.database.models import (
     ReportStatus,
     RobotDBModel,
 )
+from flotilla.settings import settings
 
 
-def read_robots(db: Session) -> List[RobotDBModel]:
-    robots: List[RobotDBModel] = db.query(RobotDBModel).all()
+def read_robots(
+    db: Session, page: int = settings.PAGE, page_size: int = settings.PAGE_SIZE
+) -> List[RobotDBModel]:
+    robots: List[RobotDBModel] = (
+        db.query(RobotDBModel).offset(page * page_size).limit(page_size).all()
+    )
     return robots
 
 
@@ -31,8 +36,12 @@ def read_robot_by_id(db: Session, robot_id: int) -> RobotDBModel:
     return robot
 
 
-def read_reports(db: Session) -> List[ReportDBModel]:
-    reports: List[ReportDBModel] = db.query(ReportDBModel).all()
+def read_reports(
+    db: Session, page: int = settings.PAGE, page_size: int = settings.PAGE_SIZE
+) -> List[ReportDBModel]:
+    reports: List[ReportDBModel] = (
+        db.query(ReportDBModel).offset(page * page_size).limit(page_size).all()
+    )
     return reports
 
 
@@ -48,8 +57,12 @@ def read_report_by_id(db: Session, report_id: int) -> ReportDBModel:
     return report
 
 
-def read_events(db: Session) -> List[EventDBModel]:
-    events: List[EventDBModel] = db.query(EventDBModel).all()
+def read_events(
+    db: Session, page: int = settings.PAGE, page_size: int = settings.PAGE_SIZE
+) -> List[EventDBModel]:
+    events: List[EventDBModel] = (
+        db.query(EventDBModel).offset(page).limit(page_size).all()
+    )
     return events
 
 

@@ -10,6 +10,7 @@ from pytest import Session
 from requests import Response as RequestResponse
 
 from flotilla.api.authentication import authentication_scheme
+from flotilla.api.pagination import PaginationParams
 from flotilla.database.crud import create_report, read_robot_by_id, read_robots
 from flotilla.database.db import get_db
 from flotilla.database.models import ReportStatus, RobotDBModel
@@ -35,8 +36,13 @@ NOT_FOUND_DESCRIPTION = "Not Found - No robot with given id"
     summary="List all robots on the asset.",
     dependencies=[Security(authentication_scheme)],
 )
-async def get_robots(db: Session = Depends(get_db)) -> List[Robot]:
-    db_robots: List[RobotDBModel] = read_robots(db)
+async def get_robots(
+    db: Session = Depends(get_db),
+    params: PaginationParams = Depends(),
+) -> List[Robot]:
+    db_robots: List[RobotDBModel] = read_robots(
+        db, page=params.page, page_size=params.page_size
+    )
     robots: List[Robot] = [robot.get_api_robot() for robot in db_robots]
     return robots
 
