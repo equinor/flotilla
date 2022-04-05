@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     SQLALCHEMY_DATABASE_URL: str = Field(
         default="sqlite:///:memory:", env="SQLALCHEMY_DATABSE_URL"
     )
+    PAGE: int = Field(default=0, env="PAGE")
+    MINIMUM_PAGE_NUMBER: int = Field(default=0, env="MINIMUM_PAGE_NUMBER")
+    PAGE_SIZE: int = Field(default=100, env="PAGE_SIZE")
+    MINIMUM_PAGE_SIZE: int = Field(default=0, env="MINIMUM_PAGE_SIZE")
+    MAX_PAGE_SIZE: int = Field(default=100, env="MAX_PAGE_SIZE")
 
     class Config:
         with pkg_resources.path("flotilla.settings", "settings.env") as path:

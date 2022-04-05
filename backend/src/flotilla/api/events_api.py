@@ -9,6 +9,7 @@ from flotilla_openapi.models.event_request import EventRequest
 from pytest import Session
 
 from flotilla.api.authentication import authentication_scheme
+from flotilla.api.pagination import PaginationParams
 from flotilla.database.crud import (
     create_event,
     read_event_by_id,
@@ -40,9 +41,12 @@ DEFAULT_EVENT_DURATION = timedelta(hours=1)
 )
 async def get_events(
     db: Session = Depends(get_db),
+    params: PaginationParams = Depends(),
 ) -> List[Event]:
     """Lookup events."""
-    db_events: List[EventDBModel] = read_events(db)
+    db_events: List[EventDBModel] = read_events(
+        db, page=params.page, page_size=params.page_size
+    )
     events: List[Event] = [event.get_api_event() for event in db_events]
     return events
 
