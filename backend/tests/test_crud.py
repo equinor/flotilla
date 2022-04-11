@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
 from typing import List
 
@@ -10,6 +10,7 @@ from flotilla.database.crud import (
     create_report,
     read_event_by_id,
     read_events,
+    read_events_by_robot_id_and_time_span,
     read_report_by_id,
     read_reports,
     read_robot_by_id,
@@ -90,6 +91,37 @@ def test_read_event_by_id(event_id: int, session):
 
 
 @pytest.mark.parametrize(
+    "start_time, duration, expected_len",
+    [
+        (datetime.now(tz=timezone.utc), timedelta(hours=1.5), 1),
+        (
+            datetime.now(tz=timezone.utc) - timedelta(days=1),
+            timedelta(hours=1),
+            0,
+        ),
+        (
+            datetime.now(tz=timezone.utc) - timedelta(hours=0.5),
+            timedelta(hours=1),
+            1,
+        ),
+        (
+            datetime.now(tz=timezone.utc) + timedelta(hours=1.5),
+            timedelta(hours=1),
+            0,
+        ),
+    ],
+)
+def test_read_event_by_robot_id_and_time_span(
+    start_time: datetime, duration: timedelta, expected_len: int, session
+):
+    end_time = start_time + duration
+    events: List[EventDBModel] = read_events_by_robot_id_and_time_span(
+        db=session, robot_id=1, start_time=start_time, end_time=end_time
+    )
+    assert len(events) == expected_len
+
+
+@pytest.mark.parametrize(
     "event_id",
     invalid_ids,
 )
@@ -120,13 +152,14 @@ def test_create_report(session):
 def test_create_event(session):
     robot_id: int = 1
     echo_mission_id: int = 12345
-    start_time = datetime.datetime.now()
+    start_time = datetime.now()
     pre_count: int = len(read_events(session))
     event_id: int = create_event(
         db=session,
         robot_id=robot_id,
         echo_mission_id=echo_mission_id,
         start_time=start_time,
+        estimated_duration=timedelta(hours=1),
     )
     post_count: int = len(read_events(session))
     assert pre_count + 1 == post_count
