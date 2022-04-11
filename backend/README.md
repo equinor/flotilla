@@ -4,8 +4,7 @@
 
 ```bash
 pip install -e .[dev]
-pip install fastapi[all]
-pip install -i https://test.pypi.org/simple/ flotilla-openapi
+pip install -U -i https://test.pypi.org/simple/ flotilla-openapi
 ```
 
 ## Running the API
@@ -13,7 +12,7 @@ pip install -i https://test.pypi.org/simple/ flotilla-openapi
 Start the API by running
 
 ```bash
-python src/flotilla/main.py
+python main.py
 ```
 
 The API is available at `localhost:8000/docs`.
