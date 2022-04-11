@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from http import HTTPStatus
 
 import pytest
@@ -8,7 +8,6 @@ from fastapi.testclient import TestClient
 from flotilla_openapi.models.event_request import EventRequest
 
 from flotilla.database.crud import read_event_by_id
-from flotilla.database.models import Event
 
 
 def test_get_events(test_app: FastAPI):
@@ -46,8 +45,20 @@ def test_get_event(
     "event_request, expected_status_code",
     [
         (
-            EventRequest(robot_id=1, mission_id=234, start_time=datetime.now()),
+            EventRequest(
+                robot_id=1,
+                mission_id=234,
+                start_time=datetime.utcnow() + timedelta(days=10),
+            ),
             HTTPStatus.CREATED.value,
+        ),
+        (
+            EventRequest(
+                robot_id=1,
+                mission_id=234,
+                start_time=datetime.utcnow() + timedelta(hours=0.5),
+            ),
+            HTTPStatus.CONFLICT.value,
         ),
     ],
 )

@@ -1,8 +1,9 @@
-import datetime
+from datetime import datetime, timedelta
 from http import HTTPStatus
 from typing import List, Optional
 
 from fastapi import HTTPException
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from flotilla.database.models import (
@@ -64,6 +65,52 @@ def read_event_by_id(db: Session, event_id: int) -> EventDBModel:
     return event
 
 
+def read_events_by_robot_id_and_time_span(
+    db: Session,
+    robot_id: int,
+    start_time: datetime,
+    end_time: datetime,
+) -> List[EventDBModel]:
+    return (
+        db.query(EventDBModel)
+        .filter(EventDBModel.robot_id == robot_id)
+        .filter(
+            and_(
+                EventDBModel.start_time < end_time,
+                EventDBModel.end_time > start_time,
+            )
+        )
+        .all()
+    )
+
+
+def create_event(
+    db: Session,
+    robot_id: int,
+    echo_mission_id: int,
+    start_time: datetime,
+    estimated_duration: timedelta,
+) -> int:
+
+    event: EventDBModel = EventDBModel(
+        robot_id=robot_id,
+        echo_mission_id=echo_mission_id,
+        report_id=None,
+        start_time=start_time,
+        estimated_duration=estimated_duration,
+    )
+    db.add(event)
+    db.commit()
+    return event.id
+
+
+def remove_event(db: Session, event_id: int) -> None:
+    event: EventDBModel = read_event_by_id(db, event_id)
+    db.delete(event)
+    db.commit()
+    return
+
+
 def create_report(
     db: Session,
     robot_id: int,
@@ -81,29 +128,3 @@ def create_report(
     db.add(report)
     db.commit()
     return report.id
-
-
-def create_event(
-    db: Session,
-    robot_id: int,
-    echo_mission_id: int,
-    start_time: datetime.datetime,
-) -> int:
-
-    event: EventDBModel = EventDBModel(
-        robot_id=robot_id,
-        echo_mission_id=echo_mission_id,
-        report_id=None,
-        start_time=start_time,
-        estimated_duration=datetime.timedelta(hours=1),
-    )
-    db.add(event)
-    db.commit()
-    return event.id
-
-
-def remove_event(db: Session, event_id: int) -> None:
-    event: EventDBModel = read_event_by_id(db, event_id)
-    db.delete(event)
-    db.commit()
-    return

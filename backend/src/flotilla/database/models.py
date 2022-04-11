@@ -1,5 +1,5 @@
-import datetime
 import enum
+from datetime import datetime, timezone
 
 from flotilla_openapi.models.event import Event
 from flotilla_openapi.models.report import Report
@@ -72,16 +72,14 @@ class ReportDBModel(Base):
     echo_mission_id = Column(Integer)
     log = Column(String)
     status = Column(Enum(ReportStatus))
-    start_time = Column(
-        DateTime(timezone=True), default=datetime.datetime.now(tz=datetime.timezone.utc)
-    )
+    start_time = Column(DateTime(timezone=True), default=datetime.now(tz=timezone.utc))
     entries = relationship("ReportEntryDBModel", backref=backref("report"))
 
     def get_api_report(self) -> Report:
         return Report(
             id=self.id,
             start_time=self.start_time,
-            end_time=datetime.datetime.now(tz=datetime.timezone.utc),
+            end_time=datetime.now(tz=timezone.utc),
             robot_id=self.robot_id,
             mission_id=self.echo_mission_id,
             status=self.status.value,
@@ -120,16 +118,21 @@ class CapabilityDBModel(Base):
     capability = Column(Enum(InspectionType))
 
 
+def event_end_time_default(context):
+    start_time = context.get_current_parameters()["start_time"]
+    duration = context.get_current_parameters()["estimated_duration"]
+    return start_time + duration
+
+
 class EventDBModel(Base):
     __tablename__ = "event"
     id = Column(Integer, primary_key=True)
     robot_id = Column(Integer, ForeignKey("robot.id"))
     echo_mission_id = Column(Integer)
     report_id = Column(Integer, ForeignKey("report.id"))
-    start_time = Column(
-        DateTime(timezone=True), default=datetime.datetime.now(tz=datetime.timezone.utc)
-    )
+    start_time = Column(DateTime(timezone=True), default=datetime.now(tz=timezone.utc))
     estimated_duration = Column(Interval)
+    end_time = Column(DateTime(timezone=True), default=event_end_time_default)
     # TODO: robot_id and report_id.robot_id can now point at different robots.
     # Should there be a constraint forcing an event to point at only one robot?
 
@@ -139,7 +142,7 @@ class EventDBModel(Base):
             robot_id=self.robot_id,
             mission_id=self.echo_mission_id,
             start_time=self.start_time,
-            end_time=datetime.datetime.now(),
+            end_time=self.end_time,
         )
 
 
@@ -150,9 +153,7 @@ class ReportEntryDBModel(Base):
     tag_id = Column(String)
     status = Column(Enum(ReportEntryStatus))
     inspection_type = Column(Enum(InspectionType))
-    time = Column(
-        DateTime(timezone=True), default=datetime.datetime.now(tz=datetime.timezone.utc)
-    )
+    time = Column(DateTime(timezone=True), default=datetime.now(tz=timezone.utc))
     file_location = Column(String)
 
     def get_report_entry(self) -> ReportEntry:

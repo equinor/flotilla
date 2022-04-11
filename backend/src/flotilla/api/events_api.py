@@ -1,3 +1,4 @@
+from datetime import timedelta
 from http import HTTPStatus
 from logging import getLogger
 from typing import List
@@ -12,6 +13,7 @@ from flotilla.database.crud import (
     create_event,
     read_event_by_id,
     read_events,
+    read_events_by_robot_id_and_time_span,
     remove_event,
 )
 from flotilla.database.db import get_db
@@ -21,8 +23,7 @@ logger = getLogger("api")
 
 router = APIRouter()
 
-NOT_FOUND_DESCRIPTION = "Not Found - No event with given id"
-INTERNAL_SERVER_ERROR_DESCRIPTION = "Internal Server Error"
+DEFAULT_EVENT_DURATION = timedelta(hours=1)
 
 
 @router.get(
@@ -62,11 +63,24 @@ async def post_event(
 ) -> Event:
     """Add a new event to the robot schedule"""
     try:
+        end_time = event_request.start_time + DEFAULT_EVENT_DURATION
+        overlapping_events: List[Event] = read_events_by_robot_id_and_time_span(
+            db=db,
+            robot_id=event_request.robot_id,
+            start_time=event_request.start_time,
+            end_time=end_time,
+        )
+        if overlapping_events:
+            raise HTTPException(
+                status_code=HTTPStatus.CONFLICT.value,
+                detail=f"Conflict with already existing event in the same time period. Events with id: {','.join(str(event.id) for event in overlapping_events)}",
+            )
         event_id: int = create_event(
             db,
             event_request.robot_id,
             event_request.mission_id,
             event_request.start_time,
+            DEFAULT_EVENT_DURATION,
         )
         db_event: EventDBModel = read_event_by_id(db, event_id)
         event: Event = db_event.get_api_event()
