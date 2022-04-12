@@ -5,7 +5,16 @@ from flotilla_openapi.models.event import Event
 from flotilla_openapi.models.report import Report
 from flotilla_openapi.models.report_entry import ReportEntry
 from flotilla_openapi.models.robot import Robot
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, Interval, String
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    Interval,
+    String,
+)
 from sqlalchemy.orm import backref, relationship
 
 from flotilla.database.db import Base
@@ -49,6 +58,7 @@ class RobotDBModel(Base):
     status = Column(Enum(RobotStatus))
     host = Column(String)
     port = Column(Integer)
+    enabled = Column(Boolean, default=True)
     telemetry_topics = relationship("TopicDBModel", backref=backref("robot"))
     streams = relationship("VideoStreamDBModel", backref=backref("robot"))
     capabilities = relationship("CapabilityDBModel", backref=backref("robot"))
@@ -61,6 +71,10 @@ class RobotDBModel(Base):
             model=self.model,
             status=self.status.value,
             capabilities=[cap.capability.value for cap in self.capabilities],
+            serial_number=self.serial_number,
+            host=self.host,
+            port=self.port,
+            enabled=self.enabled,
         )
 
 
