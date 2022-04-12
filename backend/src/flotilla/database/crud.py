@@ -1,81 +1,37 @@
 from datetime import datetime, timedelta
 from http import HTTPStatus
-from typing import List, Optional
+from typing import Generic, List, Optional, TypeVar
 
 from fastapi import HTTPException
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from flotilla.database.models import (
-    EventDBModel,
-    ReportDBModel,
-    ReportStatus,
-    RobotDBModel,
-)
-from flotilla.settings import settings
+from flotilla.api.pagination import PaginationParams
+from flotilla.database.db import Base
+from flotilla.database.models import EventDBModel, ReportDBModel, ReportStatus
+
+T = TypeVar("T", bound=Base)  # Generic type for db models
 
 
-def read_robots(
-    db: Session, page: int = settings.PAGE, page_size: int = settings.PAGE_SIZE
-) -> List[RobotDBModel]:
-    robots: List[RobotDBModel] = (
-        db.query(RobotDBModel).offset(page * page_size).limit(page_size).all()
+def get_list_paginated(
+    modelType: type[T], db: Session, params: PaginationParams = PaginationParams()
+) -> List[T]:  # Generic function to wrap pagination functionality
+    return (
+        db.query(modelType)
+        .offset(params.page * params.page_size)
+        .limit(params.page_size)
+        .all()
     )
-    return robots
 
 
-def read_robot_by_id(db: Session, robot_id: int) -> RobotDBModel:
-    robot: Optional[RobotDBModel] = (
-        db.query(RobotDBModel).filter(RobotDBModel.id == robot_id).first()
-    )
-    if not robot:
+def get_by_id(modelType: type[T], db: Session, item_id: int) -> T:
+    item: Optional[T] = db.query(modelType).filter(modelType.id == item_id).first()
+    if not item:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND.value,
-            detail=f"No robot with id {robot_id}",
+            detail=f"No item with id {item_id}",
         )
-    return robot
-
-
-def read_reports(
-    db: Session, page: int = settings.PAGE, page_size: int = settings.PAGE_SIZE
-) -> List[ReportDBModel]:
-    reports: List[ReportDBModel] = (
-        db.query(ReportDBModel).offset(page * page_size).limit(page_size).all()
-    )
-    return reports
-
-
-def read_report_by_id(db: Session, report_id: int) -> ReportDBModel:
-    report: Optional[ReportDBModel] = (
-        db.query(ReportDBModel).filter(ReportDBModel.id == report_id).first()
-    )
-    if not report:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND.value,
-            detail=f"No report with id {report_id}",
-        )
-    return report
-
-
-def read_events(
-    db: Session, page: int = settings.PAGE, page_size: int = settings.PAGE_SIZE
-) -> List[EventDBModel]:
-    events: List[EventDBModel] = (
-        db.query(EventDBModel).offset(page).limit(page_size).all()
-    )
-    return events
-
-
-def read_event_by_id(db: Session, event_id: int) -> EventDBModel:
-    event: Optional[EventDBModel] = (
-        db.query(EventDBModel).filter(EventDBModel.id == event_id).first()
-    )
-    if not event:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND.value,
-            detail=f"No event with id {event_id}",
-        )
-    return event
+    return item
 
 
 def read_events_by_robot_id_and_time_span(
@@ -118,7 +74,7 @@ def create_event(
 
 
 def remove_event(db: Session, event_id: int) -> None:
-    event: EventDBModel = read_event_by_id(db, event_id)
+    event: EventDBModel = get_by_id(EventDBModel, db, event_id)
     db.delete(event)
     db.commit()
     return

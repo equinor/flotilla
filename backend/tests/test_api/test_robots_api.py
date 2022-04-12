@@ -5,7 +5,8 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from requests import RequestException, Response
 
-from flotilla.database.crud import read_report_by_id
+from flotilla.database.crud import get_by_id
+from flotilla.database.models import ReportDBModel, RobotDBModel
 
 
 def test_get_robots(test_app: FastAPI):
@@ -85,7 +86,7 @@ def test_post_start_robot(
         assert response.status_code == expected_status_code
         if expected_status_code == HTTPStatus.OK.value:
             report_id = response.json().get("report_id")
-            assert read_report_by_id(db=session, report_id=report_id)
+            assert get_by_id(ReportDBModel, db=session, item_id=report_id)
 
 
 json_successful_stop_request = {

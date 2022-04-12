@@ -8,7 +8,7 @@ from pytest import Session
 
 from flotilla.api.authentication import authentication_scheme
 from flotilla.api.pagination import PaginationParams
-from flotilla.database.crud import read_report_by_id, read_reports
+from flotilla.database.crud import get_by_id, get_list_paginated
 from flotilla.database.db import get_db
 from flotilla.database.models import ReportDBModel
 
@@ -36,9 +36,7 @@ async def get_reports(
     params: PaginationParams = Depends(),
 ) -> List[Report]:
     """List all available reports on the asset."""
-    db_reports: List[ReportDBModel] = read_reports(
-        db, page=params.page, page_size=params.page_size
-    )
+    db_reports: List[ReportDBModel] = get_list_paginated(ReportDBModel, db, params)
     reports: List[Report] = [report.get_api_report() for report in db_reports]
     return reports
 
@@ -61,7 +59,7 @@ async def get_report(
 ) -> Report:
     """Lookup the report with the specified id"""
     try:
-        db_report: ReportDBModel = read_report_by_id(db=db, report_id=report_id)
+        db_report: ReportDBModel = get_by_id(ReportDBModel, db=db, item_id=report_id)
         report: Report = db_report.get_api_report()
     except HTTPException as e:
         logger.error(f"Failed to get report with id {report_id}: {e.detail}")

@@ -7,7 +7,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from flotilla_openapi.models.event_request import EventRequest
 
-from flotilla.database.crud import read_event_by_id
+from flotilla.database.crud import get_by_id
+from flotilla.database.models import EventDBModel
 
 
 def test_get_events(test_app: FastAPI):
@@ -74,7 +75,7 @@ def test_post_event(
         assert response.status_code == expected_status_code
         if expected_status_code == HTTPStatus.CREATED.value:
             event = response.json()
-            assert read_event_by_id(db=session, event_id=event.get("id"))
+            assert get_by_id(EventDBModel, db=session, item_id=event.get("id"))
 
 
 @pytest.mark.parametrize(
@@ -96,10 +97,10 @@ def test_delete_event(
 
     with TestClient(test_app) as client:
         if expected_status_code == HTTPStatus.NO_CONTENT.value:
-            assert read_event_by_id(db=session, event_id=event_id)
+            assert get_by_id(EventDBModel, db=session, item_id=event_id)
         response = client.delete(f"/events/{event_id}")
         assert response.status_code == expected_status_code
         if expected_status_code == HTTPStatus.NO_CONTENT.value:
             with pytest.raises(HTTPException) as e:
-                read_event_by_id(db=session, event_id=event_id)
+                get_by_id(EventDBModel, db=session, item_id=event_id)
                 assert e.value.status_code == HTTPStatus.NOT_FOUND.value
