@@ -12,8 +12,8 @@ from flotilla.api.authentication import authentication_scheme
 from flotilla.api.pagination import PaginationParams
 from flotilla.database.crud import (
     create_event,
-    read_event_by_id,
-    read_events,
+    get_by_id,
+    get_list_paginated,
     read_events_by_robot_id_and_time_span,
     remove_event,
 )
@@ -44,8 +44,8 @@ async def get_events(
     params: PaginationParams = Depends(),
 ) -> List[Event]:
     """Lookup events."""
-    db_events: List[EventDBModel] = read_events(
-        db, page=params.page, page_size=params.page_size
+    db_events: List[EventDBModel] = get_list_paginated(
+        db=db, params=params, modelType=EventDBModel
     )
     events: List[Event] = [event.get_api_event() for event in db_events]
     return events
@@ -86,7 +86,7 @@ async def post_event(
             event_request.start_time,
             DEFAULT_EVENT_DURATION,
         )
-        db_event: EventDBModel = read_event_by_id(db, event_id)
+        db_event: EventDBModel = get_by_id(EventDBModel, db, event_id)
         event: Event = db_event.get_api_event()
     except HTTPException as e:
         logger.error(f"An error occured while creating an event: {e.detail}")
@@ -138,7 +138,7 @@ async def get_event(
 ) -> Event:
     """Lookup event with specified id. Can only be used for events that have not started yet."""
     try:
-        db_event: EventDBModel = read_event_by_id(db, event_id)
+        db_event: EventDBModel = get_by_id(EventDBModel, db, event_id)
         event: Event = db_event.get_api_event()
     except HTTPException as e:
         logger.error(f"Failed to get event with id {event_id}: {e.detail}")
