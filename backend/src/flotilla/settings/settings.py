@@ -7,6 +7,7 @@ from pydantic import AnyHttpUrl, BaseSettings, Field
 class Settings(BaseSettings):
     AUTHENTICATION_ENABLED: bool = Field(default=True, env="AUTHENTICATION_ENABLED")
     BACKEND_CORS_ORIGINS: list[Union[str, AnyHttpUrl]] = ["http://localhost:8000"]
+    SQLALCHEMY_DATABASE_URL: str = Field(default="sqlite:///:memory:")
     OPENAPI_CLIENT_ID: str = Field(default="", env="OPENAPI_CLIENT_ID")
     APP_CLIENT_ID: str = Field(default="", env="APP_CLIENT_ID")
     TENANT_ID: str = Field(default="", env="TENANT_ID")
@@ -17,9 +18,7 @@ class Settings(BaseSettings):
     REQUEST_TIMEOUT: float = Field(default=5, env="REQUEST_TIMEOUT")
     ISAR_CLIENT_ID: str = Field(default="", env="ISAR_CLIENT_ID")
     ISAR_APP_SCOPE: str = Field(default="", env="ISAR_APP_SCOPE")
-    SQLALCHEMY_DATABASE_URL: str = Field(
-        default="sqlite:///:memory:", env="SQLALCHEMY_DATABSE_URL"
-    )
+
     PAGE: int = Field(default=0, env="PAGE")
     MINIMUM_PAGE_NUMBER: int = Field(default=0, env="MINIMUM_PAGE_NUMBER")
     PAGE_SIZE: int = Field(default=100, env="PAGE_SIZE")
