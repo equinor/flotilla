@@ -2,18 +2,33 @@ from http import HTTPStatus
 from logging import getLogger
 from typing import List
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Path, Response, Security
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    HTTPException,
+    Path,
+    Query,
+    Response,
+    Security,
+)
 from flotilla_openapi.models.create_robot_response import CreateRobotResponse
 from flotilla_openapi.models.error import Error
 from flotilla_openapi.models.post_response import PostResponse
 from flotilla_openapi.models.robot import Robot
 from flotilla_openapi.models.start_response import StartResponse
-from pytest import Session
+from flotilla_openapi.models.success import Success
 from requests import Response as RequestResponse
+from sqlalchemy.orm import Session
 
 from flotilla.api.authentication import authentication_scheme
 from flotilla.api.pagination import PaginationParams
-from flotilla.database.crud import create_report, create_robot, read_by_id, read_list_paginated
+from flotilla.database.crud import (
+    create_report,
+    create_robot,
+    read_by_id,
+    read_list_paginated,
+)
 from flotilla.database.db import get_db
 from flotilla.database.models import ReportStatus, RobotDBModel
 from flotilla.services.isar import IsarService, get_isar_service
@@ -187,3 +202,36 @@ async def post_stop_robot(
 
     response_isar_json: dict = response_isar.json()
     return PostResponse(status=response_isar_json["message"])
+
+
+@router.post(
+    "/robots/{robot_id}/enable",
+    responses={
+        HTTPStatus.OK.value: {
+            "model": Success,
+            "description": "Success",
+        },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.NOT_FOUND.value: {
+            "model": Error,
+            "description": "Not Found",
+        },
+    },
+    tags=["Robots"],
+    summary="Enable or disable an existing robot",
+    dependencies=[Security(authentication_scheme)],
+)
+async def post_enable_robot(
+    robot_id: int = Path(None, description=""),
+    enable: bool = Query(None, description=""),
+    db: Session = Depends(get_db),
+):
+    robot: RobotDBModel = read_by_id(modelType=RobotDBModel, db=db, item_id=robot_id)
+    robot.enabled = enable
+
+    db.commit()
+
+    return Success(detail="Success")
