@@ -1,9 +1,12 @@
+import json
 from http import HTTPStatus
 
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from requests import RequestException, Response
+from requests import RequestException, Response as RequestsResponse
+from sqlalchemy.orm import Session
+from starlette.responses import Response
 
 from flotilla.database.crud import read_by_id
 from flotilla.database.models import ReportDBModel, RobotDBModel
@@ -14,6 +17,86 @@ def test_get_robots(test_app: FastAPI):
         response = client.get("/robots")
         assert response.status_code == HTTPStatus.OK.value
         assert len(response.json()) == 2
+
+
+def test_create_robot_success(test_app: FastAPI, session: Session):
+    body: dict = {
+        "id": 0,
+        "name": "test_robot",
+        "model": "test_robot_model",
+        "serial_number": "test_robot_serial_number",
+        "host": "localhost",
+        "port": 3000,
+        "enabled": True,
+        "status": "available",
+        "capabilities": ["Image", "ThermalImage"],
+    }
+    with TestClient(test_app) as client:
+        response: Response = client.post(url="/robots", data=json.dumps(body))
+        assert response.status_code == HTTPStatus.OK.value
+        assert read_by_id(
+            modelType=RobotDBModel, db=session, item_id=response.json()["robot_id"]
+        )
+
+
+@pytest.mark.parametrize(
+    "expected_status_code, body",
+    [
+        (
+            HTTPStatus.BAD_REQUEST.value,
+            {  # Capabilities contain an invalid inspection type which should cause BAD REQUEST
+                "id": 0,
+                "name": "test_robot",
+                "model": "test_robot_model",
+                "serial_number": "test_robot_serial_number",
+                "host": "localhost",
+                "port": 3000,
+                "enabled": True,
+                "status": "available",
+                "capabilities": [
+                    "Image",
+                    "ThermalImage",
+                    "this_is_an_invalid_inspection",
+                ],
+            },
+        ),
+        (
+            HTTPStatus.CONFLICT.value,
+            {  # Name is a robot that already exists and this should cause CONFLICT
+                "id": 0,
+                "name": "Harald",
+                "model": "test_robot_model",
+                "serial_number": "test_robot_serial_number",
+                "host": "localhost",
+                "port": 3000,
+                "enabled": True,
+                "status": "available",
+                "capabilities": ["Image", "ThermalImage"],
+            },
+        ),
+        (
+            HTTPStatus.UNPROCESSABLE_ENTITY.value,
+            {  # Port is not an integer which should cause a validation error, UNPROCESSABLE_ENTITY
+                "id": 0,
+                "name": "test_robot",
+                "model": "test_robot_model",
+                "serial_number": "test_robot_serial_number",
+                "host": "localhost",
+                "port": "This is not an integer and should cause validation error",
+                "enabled": True,
+                "status": "available",
+                "capabilities": ["Image", "ThermalImage"],
+            },
+        ),
+    ],
+)
+def test_create_robot_fails_with_invalid_input(
+    test_app: FastAPI, expected_status_code: int, body: dict
+):
+    with TestClient(test_app) as client:
+        response: Response = client.post(url="/robots", data=json.dumps(body))
+
+        assert response.status_code == expected_status_code
 
 
 @pytest.mark.parametrize(
@@ -41,11 +124,11 @@ json_unsuccessful_start_request = {
     "mission_id": None,
 }
 
-start_response_ok: Response = Response()
+start_response_ok: RequestsResponse = RequestsResponse()
 start_response_ok.status_code = HTTPStatus.OK.value
 start_response_ok.json = lambda: json_successful_start_request
 
-start_response_conflict: Response = Response()
+start_response_conflict: RequestsResponse = RequestsResponse()
 start_response_conflict.status_code = HTTPStatus.CONFLICT.value
 start_response_conflict.json = lambda: json_unsuccessful_start_request
 
@@ -99,11 +182,11 @@ json_unsuccessful_stop_request = {
     "stopped": False,
 }
 
-stop_response_ok = Response()
+stop_response_ok: RequestsResponse = RequestsResponse()
 stop_response_ok.status_code = HTTPStatus.OK
 stop_response_ok.json = lambda: json_successful_stop_request
 
-stop_response_timeout = Response()
+stop_response_timeout: RequestsResponse = RequestsResponse()
 stop_response_timeout.status_code = HTTPStatus.REQUEST_TIMEOUT.value
 stop_response_timeout.json = lambda: json_unsuccessful_stop_request
 
@@ -142,3 +225,34 @@ def test_post_stop_robot(
     with TestClient(test_app) as client:
         response = client.post(f"/robots/{robot_id}/stop")
         assert response.status_code == expected_status_code
+
+
+@pytest.mark.parametrize("enable", [True, False])
+def test_enable_robot(test_app: FastAPI, session: Session, enable: bool):
+    robot_id: int = 1
+    robot: RobotDBModel = (
+        session.query(RobotDBModel).where(RobotDBModel.id == robot_id).first()
+    )
+
+    # Ensure the current status of enable is opposite of what we're setting so we can assert a change
+    robot.enabled = not enable
+    session.commit()
+
+    with TestClient(test_app) as client:
+        response: Response = client.post(
+            url=f"/robots/{robot_id}/enable", params={"enable": enable}
+        )
+
+        assert response.status_code == HTTPStatus.OK.value
+        assert robot.enabled == enable
+
+
+def test_enable_robot_throws_not_found(test_app: FastAPI, session: Session):
+    robot_id: int = 72  # Should not exist in database
+    enable: bool = True
+    with TestClient(test_app) as client:
+        response: Response = client.post(
+            url=f"/robots/{robot_id}/enable", params={"enable": enable}
+        )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND.value
