@@ -2,7 +2,9 @@ from http import HTTPStatus
 from logging import getLogger
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Response, Security
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Response, Security
+from flotilla_openapi.models.create_robot_response import CreateRobotResponse
+from flotilla_openapi.models.error import Error
 from flotilla_openapi.models.post_response import PostResponse
 from flotilla_openapi.models.robot import Robot
 from flotilla_openapi.models.start_response import StartResponse
@@ -11,7 +13,7 @@ from requests import Response as RequestResponse
 
 from flotilla.api.authentication import authentication_scheme
 from flotilla.api.pagination import PaginationParams
-from flotilla.database.crud import create_report, read_by_id, read_list_paginated
+from flotilla.database.crud import create_report, create_robot, read_by_id, read_list_paginated
 from flotilla.database.db import get_db
 from flotilla.database.models import ReportStatus, RobotDBModel
 from flotilla.services.isar import IsarService, get_isar_service
@@ -45,6 +47,44 @@ async def get_robots(
     )
     robots: List[Robot] = [robot.get_api_robot() for robot in db_robots]
     return robots
+
+
+@router.post(
+    "/robots",
+    responses={
+        HTTPStatus.OK.value: {
+            "model": CreateRobotResponse,
+            "description": "Successfully added robot to database",
+        },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+    },
+    tags=["Robots"],
+    summary="Create a new robot",
+    dependencies=[Security(authentication_scheme)],
+)
+async def post_robot(
+    db: Session = Depends(get_db),
+    robot: Robot = Body(None, description="New robot to be added"),
+) -> CreateRobotResponse:
+    try:
+        robot_id: int = create_robot(
+            db=db,
+            name=robot.name,
+            model=robot.model,
+            serial_number=robot.serial_number,
+            host=robot.host,
+            port=robot.port,
+            enabled=robot.enabled,
+            capabilities=robot.capabilities,
+        )
+    except HTTPException as e:
+        logger.exception(f"An error occurred while creating a robot: {e.detail}")
+        raise
+
+    return CreateRobotResponse(robot_id=robot_id)
 
 
 @router.get(

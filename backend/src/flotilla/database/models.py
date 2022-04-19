@@ -30,6 +30,10 @@ class InspectionType(enum.Enum):
     image = "Image"
     thermal_image = "ThermalImage"
 
+    @classmethod
+    def has_value(cls, value: str) -> bool:
+        return value in cls._value2member_map_
+
 
 class ReportStatus(enum.Enum):
     in_progress = "InProgress"

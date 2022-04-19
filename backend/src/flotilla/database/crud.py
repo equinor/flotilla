@@ -3,12 +3,21 @@ from http import HTTPStatus
 from typing import Generic, List, Optional, TypeVar
 
 from fastapi import HTTPException
-from sqlalchemy import and_
+from sqlalchemy import and_, exists
 from sqlalchemy.orm import Session
 
 from flotilla.api.pagination import PaginationParams
 from flotilla.database.db import Base
 from flotilla.database.models import EventDBModel, ReportDBModel, ReportStatus
+from flotilla.database.models import (
+    CapabilityDBModel,
+    EventDBModel,
+    InspectionType,
+    ReportDBModel,
+    ReportStatus,
+    RobotDBModel,
+    RobotStatus,
+)
 
 T = TypeVar("T", bound=Base)  # Generic type for db models
 
@@ -23,7 +32,6 @@ def read_list_paginated(
         .all()
     )
 
-
 def read_by_id(modelType: type[T], db: Session, item_id: int) -> T:
     item: Optional[T] = db.query(modelType).filter(modelType.id == item_id).first()
     if not item:
@@ -32,6 +40,63 @@ def read_by_id(modelType: type[T], db: Session, item_id: int) -> T:
             detail=f"No item with id {item_id}",
         )
     return item
+
+def create_robot(
+    db: Session,
+    name: str,
+    model: str,
+    serial_number: str,
+    host: str,
+    port: int,
+    enabled: bool,
+    capabilities: List[str],
+) -> int:
+
+    robot: RobotDBModel = RobotDBModel(
+        name=name,
+        model=model,
+        serial_number=serial_number,
+        host=host,
+        port=port,
+        status=RobotStatus.available,
+        enabled=enabled,
+    )
+
+    _check_non_duplicate_robot(db=db, robot=robot)
+
+    _add_capabilities_to_robot(robot=robot, capabilities=capabilities)
+
+    db.add(robot)
+    db.commit()
+
+    return robot.id
+
+
+def _add_capabilities_to_robot(robot: RobotDBModel, capabilities: List[str]) -> None:
+    for capability in capabilities:
+        if not InspectionType.has_value(capability):
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST.value,
+                detail="Invalid format for robot capabilities",
+            )
+
+        CapabilityDBModel(robot=robot, capability=InspectionType(capability))
+
+
+def _check_non_duplicate_robot(db: Session, robot: RobotDBModel):
+    name_exists: bool = db.query(
+        exists().where(RobotDBModel.name == robot.name)
+    ).scalar()
+
+    serial_number_exists: bool = db.query(
+        exists().where(RobotDBModel.serial_number == robot.serial_number)
+    ).scalar()
+
+    if name_exists or serial_number_exists:
+        raise HTTPException(
+            status_code=HTTPStatus.CONFLICT.value,
+            detail="A robot with that name/serial number already exists",
+        )
 
 
 def read_events_by_robot_id_and_time_span(
