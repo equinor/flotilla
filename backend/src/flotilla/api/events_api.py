@@ -142,7 +142,6 @@ async def delete_event(
     dependencies=[Security(authentication_scheme)],
 )
 async def get_event(
-    response: Response,
     db: Session = Depends(get_db),
     event_id: int = Path(None, description=""),
 ) -> Event:

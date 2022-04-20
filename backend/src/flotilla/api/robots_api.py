@@ -9,7 +9,6 @@ from fastapi import (
     HTTPException,
     Path,
     Query,
-    Response,
     Security,
 )
 from flotilla_openapi.models.create_robot_response import CreateRobotResponse
@@ -122,7 +121,6 @@ async def post_robot(
     dependencies=[Security(authentication_scheme)],
 )
 async def get_robot(
-    response: Response,
     robot_id: int = Path(None, description=""),
     db: Session = Depends(get_db),
 ) -> Robot:
@@ -153,7 +151,6 @@ async def get_robot(
     dependencies=[Security(authentication_scheme)],
 )
 async def post_start_robot(
-    response: Response,
     robot_id: int = Path(None, description=""),
     mission_id: int = Path(None, description=""),
     db: Session = Depends(get_db),
@@ -200,7 +197,6 @@ async def post_start_robot(
     dependencies=[Security(authentication_scheme)],
 )
 async def post_stop_robot(
-    response: Response,
     robot_id: int = Path(None, description=""),
     db: Session = Depends(get_db),
     isar_service: IsarService = Depends(get_isar_service),
