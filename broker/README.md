@@ -46,6 +46,7 @@ mosquitto -p 1883 -c mosquitto/config/mosquitto.conf
 ```
 
 ### Testing the broker
+
 To test that the broker functions as expected the `mosquitto_sub` and `mosquitto_pub` tools that are wrapped in the installation may be used.
 First, subscribe to a topic
 ```
