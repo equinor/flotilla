@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from http import HTTPStatus
-from typing import Generic, List, Optional, TypeVar
+from typing import List, Optional, TypeVar
 
 from fastapi import HTTPException
 from sqlalchemy import and_, exists
@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 
 from flotilla.api.pagination import PaginationParams
 from flotilla.database.db import Base
-from flotilla.database.models import EventDBModel, ReportDBModel, ReportStatus
 from flotilla.database.models import (
     CapabilityDBModel,
     EventDBModel,
@@ -32,6 +31,7 @@ def read_list_paginated(
         .all()
     )
 
+
 def read_by_id(modelType: type[T], db: Session, item_id: int) -> T:
     item: Optional[T] = db.query(modelType).filter(modelType.id == item_id).first()
     if not item:
@@ -40,6 +40,7 @@ def read_by_id(modelType: type[T], db: Session, item_id: int) -> T:
             detail=f"No item with id {item_id}",
         )
     return item
+
 
 def create_robot(
     db: Session,
