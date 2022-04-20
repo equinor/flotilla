@@ -27,6 +27,8 @@ router = APIRouter()
     },
     tags=["Missions"],
     summary="List all available missions on the asset",
+    description="""### Overview
+    List all available missions on the asset in the Echo mission planner.""",
     dependencies=[Security(authentication_scheme)],
 )
 async def get_missions(
@@ -54,6 +56,8 @@ async def get_missions(
     },
     tags=["Missions"],
     summary="Lookup a single mission on the asset",
+    description="""### Overview
+    Lookup a single mission on the asset.""",
     dependencies=[Security(authentication_scheme)],
 )
 async def get_single_mission(
