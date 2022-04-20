@@ -2,7 +2,7 @@ from http import HTTPStatus
 from logging import getLogger
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Response, Security
+from fastapi import APIRouter, Depends, HTTPException, Path, Security
 from flotilla_openapi.models.mission import Mission
 
 from flotilla.api.authentication import authentication_scheme
@@ -32,7 +32,7 @@ router = APIRouter()
     dependencies=[Security(authentication_scheme)],
 )
 async def get_missions(
-    response: Response, echo_service: EchoService = Depends(get_echo_service)
+    echo_service: EchoService = Depends(get_echo_service),
 ) -> List[Mission]:
     """### Overview List all available missions on the asset in the Echo mission planner"""
     try:
@@ -61,7 +61,6 @@ async def get_missions(
     dependencies=[Security(authentication_scheme)],
 )
 async def get_single_mission(
-    response: Response,
     mission_id: int = Path(None, description=""),
     echo_service: EchoService = Depends(get_echo_service),
 ) -> Mission:

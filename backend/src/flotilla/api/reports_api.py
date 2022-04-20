@@ -2,7 +2,7 @@ from http import HTTPStatus
 from logging import getLogger
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Response, Security
+from fastapi import APIRouter, Depends, HTTPException, Path, Security
 from flotilla_openapi.models.report import Report
 from pytest import Session
 
@@ -59,7 +59,6 @@ async def get_reports(
     Lookup the report with the specified id.""",
 )
 async def get_report(
-    response: Response,
     report_id: int = Path(None, description=""),
     db: Session = Depends(get_db),
 ) -> Report:
