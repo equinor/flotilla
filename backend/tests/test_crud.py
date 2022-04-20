@@ -8,8 +8,8 @@ from fastapi import HTTPException
 from flotilla.database.crud import (
     create_event,
     create_report,
-    get_by_id,
-    get_list_paginated,
+    read_by_id,
+    read_list_paginated,
     read_events_by_robot_id_and_time_span,
     remove_event,
 )
@@ -25,7 +25,7 @@ invalid_ids: list[int] = [-1, 13, 56]
 
 
 def test_read_robots(session):
-    robots: List[RobotDBModel] = get_list_paginated(RobotDBModel, session)
+    robots: List[RobotDBModel] = read_list_paginated(RobotDBModel, session)
     assert len(robots) > 0
 
 
@@ -34,7 +34,7 @@ def test_read_robots(session):
     valid_ids,
 )
 def test_read_robot_by_id(robot_id: int, session):
-    robot: RobotDBModel = get_by_id(RobotDBModel, db=session, item_id=robot_id)
+    robot: RobotDBModel = read_by_id(RobotDBModel, db=session, item_id=robot_id)
     assert robot
 
 
@@ -44,12 +44,12 @@ def test_read_robot_by_id(robot_id: int, session):
 )
 def test_read_robot_by_id_throws_404(robot_id: int, session):
     with pytest.raises(HTTPException) as e:
-        robot: RobotDBModel = get_by_id(RobotDBModel, db=session, item_id=robot_id)
+        robot: RobotDBModel = read_by_id(RobotDBModel, db=session, item_id=robot_id)
         assert e.value.status_code == HTTPStatus.NOT_FOUND.value
 
 
 def test_read_reports(session):
-    reports: List[ReportDBModel] = get_list_paginated(ReportDBModel, session)
+    reports: List[ReportDBModel] = read_list_paginated(ReportDBModel, session)
     assert len(reports) > 0
 
 
@@ -58,7 +58,7 @@ def test_read_reports(session):
     valid_ids,
 )
 def test_read_report_by_id(report_id: int, session):
-    report: ReportDBModel = get_by_id(ReportDBModel, db=session, item_id=report_id)
+    report: ReportDBModel = read_by_id(ReportDBModel, db=session, item_id=report_id)
     assert report
 
 
@@ -68,12 +68,12 @@ def test_read_report_by_id(report_id: int, session):
 )
 def test_read_report_by_id_throws_404(report_id: int, session):
     with pytest.raises(HTTPException) as e:
-        report: ReportDBModel = get_by_id(ReportDBModel, db=session, item_id=report_id)
+        report: ReportDBModel = read_by_id(ReportDBModel, db=session, item_id=report_id)
         assert e.value.status_code == HTTPStatus.NOT_FOUND.value
 
 
 def test_read_events(session):
-    events: List[EventDBModel] = get_list_paginated(EventDBModel, session)
+    events: List[EventDBModel] = read_list_paginated(EventDBModel, session)
     assert len(events) > 0
 
 
@@ -82,7 +82,7 @@ def test_read_events(session):
     valid_ids,
 )
 def test_read_event_by_id(event_id: int, session):
-    event: EventDBModel = get_by_id(EventDBModel, db=session, item_id=event_id)
+    event: EventDBModel = read_by_id(EventDBModel, db=session, item_id=event_id)
     assert event
 
 
@@ -123,7 +123,7 @@ def test_read_event_by_robot_id_and_time_span(
 )
 def test_read_event_by_id_throws_404(event_id: int, session):
     with pytest.raises(HTTPException) as e:
-        event: EventDBModel = get_by_id(EventDBModel, db=session, item_id=event_id)
+        event: EventDBModel = read_by_id(EventDBModel, db=session, item_id=event_id)
         assert e.value.status_code == HTTPStatus.NOT_FOUND.value
 
 
@@ -132,7 +132,7 @@ def test_create_report(session):
     isar_mission_id: str = "isar_id_test"
     echo_mission_id: int = 12345
     report_status: ReportStatus = ReportStatus.in_progress
-    pre_count: int = len(get_list_paginated(ReportDBModel, session))
+    pre_count: int = len(read_list_paginated(ReportDBModel, session))
     report_id: int = create_report(
         db=session,
         robot_id=robot_id,
@@ -140,16 +140,16 @@ def test_create_report(session):
         echo_mission_id=echo_mission_id,
         report_status=report_status,
     )
-    post_count: int = len(get_list_paginated(ReportDBModel, session))
+    post_count: int = len(read_list_paginated(ReportDBModel, session))
     assert pre_count + 1 == post_count
-    assert get_by_id(ReportDBModel, db=session, item_id=report_id)
+    assert read_by_id(ReportDBModel, db=session, item_id=report_id)
 
 
 def test_create_event(session):
     robot_id: int = 1
     echo_mission_id: int = 12345
     start_time = datetime.now()
-    pre_count: int = len(get_list_paginated(EventDBModel, session))
+    pre_count: int = len(read_list_paginated(EventDBModel, session))
     event_id: int = create_event(
         db=session,
         robot_id=robot_id,
@@ -157,15 +157,15 @@ def test_create_event(session):
         start_time=start_time,
         estimated_duration=timedelta(hours=1),
     )
-    post_count: int = len(get_list_paginated(EventDBModel, session))
+    post_count: int = len(read_list_paginated(EventDBModel, session))
     assert pre_count + 1 == post_count
-    assert get_by_id(EventDBModel, db=session, item_id=event_id)
+    assert read_by_id(EventDBModel, db=session, item_id=event_id)
 
 
 def test_remove_event(session):
     event_id: int = 1
-    assert get_by_id(EventDBModel, db=session, item_id=event_id)
+    assert read_by_id(EventDBModel, db=session, item_id=event_id)
     remove_event(db=session, event_id=event_id)
     with pytest.raises(HTTPException) as e:
-        get_by_id(EventDBModel, db=session, item_id=event_id)
+        read_by_id(EventDBModel, db=session, item_id=event_id)
         assert e.value.status_code == HTTPStatus.NOT_FOUND.value

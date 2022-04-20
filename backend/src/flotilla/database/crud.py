@@ -13,7 +13,7 @@ from flotilla.database.models import EventDBModel, ReportDBModel, ReportStatus
 T = TypeVar("T", bound=Base)  # Generic type for db models
 
 
-def get_list_paginated(
+def read_list_paginated(
     modelType: type[T], db: Session, params: PaginationParams = PaginationParams()
 ) -> List[T]:  # Generic function to wrap pagination functionality
     return (
@@ -24,7 +24,7 @@ def get_list_paginated(
     )
 
 
-def get_by_id(modelType: type[T], db: Session, item_id: int) -> T:
+def read_by_id(modelType: type[T], db: Session, item_id: int) -> T:
     item: Optional[T] = db.query(modelType).filter(modelType.id == item_id).first()
     if not item:
         raise HTTPException(
@@ -74,7 +74,7 @@ def create_event(
 
 
 def remove_event(db: Session, event_id: int) -> None:
-    event: EventDBModel = get_by_id(EventDBModel, db, event_id)
+    event: EventDBModel = read_by_id(EventDBModel, db, event_id)
     db.delete(event)
     db.commit()
     return
