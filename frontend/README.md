@@ -6,7 +6,7 @@ The app uses TypeScript and React. For development, Node v17.x needs to be insta
 
 ## Install
 
-To install the application, navigate to the root folder and run the following command:
+To install the application, navigate to the frontend folder and run the following command:
 
 ```
 npm ci
@@ -20,6 +20,20 @@ To start the app, run the following command in the root folder:
 npm start
 ```
 
-This command runs the app in the development mode. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+This command runs the app in the development mode. Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
 
 The page will reload if you make edits. You will also be able to see any lint errors in the console.
+
+## Authentication
+
+Authentication is implemented for the frontend following the [official Microsoft tutorial on Oauth2 flow in React](https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-react).
+
+
+## Automatically generated models
+
+The typescript models have been automatically generated using an [openapi-to-typescript npm package](https://www.npmjs.com/package/openapi-typescript).
+This can be updated by cloning the [flotilla-openapi](https://github.com/equinor/flotilla-openapi) repository and then running:
+
+```bash
+    npx openapi-typescript <path-to-flotilla-openapi>/openapi.yaml --output ./src/models/schema.ts
+```

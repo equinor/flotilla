@@ -6,7 +6,10 @@ from pydantic import AnyHttpUrl, BaseSettings, Field
 
 class Settings(BaseSettings):
     AUTHENTICATION_ENABLED: bool = Field(default=True)
-    BACKEND_CORS_ORIGINS: list[Union[str, AnyHttpUrl]] = ["http://localhost:8000"]
+    BACKEND_CORS_ORIGINS: list[Union[str, AnyHttpUrl]] = [
+        "http://localhost:8000",
+        "http://localhost:3001",
+    ]
     SQLALCHEMY_DATABASE_URL: str = Field(default="sqlite:///:memory:")
     OPENAPI_CLIENT_ID: str = Field(default="")
     APP_CLIENT_ID: str = Field(default="")

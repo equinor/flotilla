@@ -24,6 +24,7 @@ class Authenticator:
         if self.authentication_enabled:
             self.scheme = SingleTenantAzureAuthorizationCodeBearer(
                 app_client_id=self.app_client_id,
+                token_version=1,
                 tenant_id=self.tenant_id,
                 scopes={
                     f"api://{self.app_client_id}/user_impersonation": "user_impersonation",
