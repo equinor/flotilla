@@ -29,6 +29,10 @@ NOT_FOUND_DESCRIPTION = "Not Found - No report with given id"
     },
     tags=["Reports"],
     summary="List all available reports on the asset",
+    description="""### Overview 
+    List all available reports on the asset. `start_time` defaults to current time - 7 
+    days and `end_time` defaults to current time. If no value for `robot_id` is provided, reports for all robots on 
+    the asset is provided.""",
     dependencies=[Security(authentication_scheme)],
 )
 async def get_reports(
@@ -51,6 +55,8 @@ async def get_reports(
     },
     tags=["Reports"],
     summary="Lookup a single report",
+    description="""### Overview
+    Lookup the report with the specified id.""",
 )
 async def get_report(
     response: Response,

@@ -37,6 +37,9 @@ DEFAULT_EVENT_DURATION = timedelta(hours=1)
     },
     tags=["Events"],
     summary="Lookup events",
+    description="""### Overview 
+    Lookup events. The `start_time` defaults to the current time, `end_time` defaults to 
+    `start_time` + 7 days. If no `robot_id` is provided, events for all enabled robots on the asset is included.""",
     dependencies=[Security(authentication_scheme)],
 )
 async def get_events(
@@ -58,6 +61,9 @@ async def get_events(
     },
     tags=["Events"],
     summary="Create new event",
+    description="""### Overview 
+    Adds a new event to the robot schedule. New entries to the schedule can be added as 
+    long as they do not conflict with already scheduled events.""",
     dependencies=[Security(authentication_scheme)],
 )
 async def post_event(
@@ -102,6 +108,8 @@ async def post_event(
     },
     tags=["Events"],
     summary="Delete event with specified id",
+    description="""### Overview
+    Deletes an event from the robot schedule. Can only be used for events that have not started yet.""",
     dependencies=[Security(authentication_scheme)],
 )
 async def delete_event(
@@ -129,6 +137,8 @@ async def delete_event(
     },
     tags=["Events"],
     summary="Lookup event with specified id",
+    description="""### Overview
+    Lookup event with specified id. Can only be used for events that have not started yet.""",
     dependencies=[Security(authentication_scheme)],
 )
 async def get_event(
