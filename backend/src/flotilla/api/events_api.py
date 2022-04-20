@@ -4,6 +4,7 @@ from logging import getLogger
 from typing import List
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Path, Response, Security
+from flotilla_openapi.models.error import Error
 from flotilla_openapi.models.event import Event
 from flotilla_openapi.models.event_request import EventRequest
 from pytest import Session
@@ -34,6 +35,14 @@ DEFAULT_EVENT_DURATION = timedelta(hours=1)
             "model": List[Event],
             "description": "Request successful.",
         },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.NOT_FOUND.value: {
+            "model": Error,
+            "description": "Not Found",
+        },
     },
     tags=["Events"],
     summary="Lookup events",
@@ -58,6 +67,18 @@ async def get_events(
     "/events",
     responses={
         HTTPStatus.CREATED.value: {"model": Event, "description": "Request successful"},
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.NOT_FOUND.value: {
+            "model": Error,
+            "description": "Not Found",
+        },
+        HTTPStatus.CONFLICT.value: {
+            "model": Error,
+            "description": "Conflict",
+        },
     },
     tags=["Events"],
     summary="Create new event",
@@ -105,6 +126,14 @@ async def post_event(
     "/events/{event_id}",
     responses={
         HTTPStatus.NO_CONTENT.value: {"description": "Event successfully deleted"},
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.NOT_FOUND.value: {
+            "model": Error,
+            "description": "Not Found",
+        },
     },
     tags=["Events"],
     summary="Delete event with specified id",
@@ -133,6 +162,14 @@ async def delete_event(
         HTTPStatus.OK.value: {
             "model": Event,
             "description": "Request successful.",
+        },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.NOT_FOUND.value: {
+            "model": Error,
+            "description": "Not Found",
         },
     },
     tags=["Events"],

@@ -47,6 +47,10 @@ NOT_FOUND_DESCRIPTION = "Not Found - No robot with given id"
             "model": List[Robot],
             "description": "Request successful",
         },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
     },
     tags=["Robots"],
     summary="List all robots on the asset.",
@@ -113,6 +117,14 @@ async def post_robot(
             "model": Robot,
             "description": "Request successful",
         },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.NOT_FOUND.value: {
+            "model": Error,
+            "description": "Not Found",
+        },
     },
     tags=["Robots"],
     summary="Lookup a single robot",
@@ -141,6 +153,14 @@ async def get_robot(
         HTTPStatus.OK.value: {
             "model": StartResponse,
             "description": "Mission successfully started",
+        },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.CONFLICT.value: {
+            "model": Error,
+            "description": "Conflict",
         },
     },
     tags=["Robots"],
@@ -185,6 +205,10 @@ async def post_start_robot(
         HTTPStatus.OK.value: {
             "model": PostResponse,
             "description": "Robot successfully stopped",
+        },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
         },
     },
     tags=["Robots"],
