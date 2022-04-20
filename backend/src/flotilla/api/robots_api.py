@@ -36,9 +36,6 @@ logger = getLogger("api")
 
 router = APIRouter()
 
-BAD_GATEWAY_DESCRIPTION = "Failed to stop - Error while contacting ISAR"
-NOT_FOUND_DESCRIPTION = "Not Found - No robot with given id"
-
 
 @router.get(
     "/robots",

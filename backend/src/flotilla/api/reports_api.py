@@ -17,8 +17,6 @@ router = APIRouter()
 
 logger = getLogger("api")
 
-NOT_FOUND_DESCRIPTION = "Not Found - No report with given id"
-
 
 @router.get(
     "/reports",
