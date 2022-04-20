@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security
+from flotilla_openapi.models.error import Error
 from flotilla_openapi.models.report import Report
 from pytest import Session
 
@@ -25,6 +26,14 @@ NOT_FOUND_DESCRIPTION = "Not Found - No report with given id"
         HTTPStatus.OK.value: {
             "model": List[Report],
             "description": "Request successful",
+        },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.NOT_FOUND.value: {
+            "model": Error,
+            "description": "Not Found",
         },
     },
     tags=["Reports"],
@@ -51,6 +60,14 @@ async def get_reports(
         HTTPStatus.OK.value: {
             "model": Report,
             "description": "Request successful",
+        },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.NOT_FOUND.value: {
+            "model": Error,
+            "description": "Not Found",
         },
     },
     tags=["Reports"],

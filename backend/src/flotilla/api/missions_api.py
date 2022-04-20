@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security
+from flotilla_openapi.models.error import Error
 from flotilla_openapi.models.mission import Mission
 
 from flotilla.api.authentication import authentication_scheme
@@ -23,6 +24,14 @@ router = APIRouter()
         HTTPStatus.OK.value: {
             "model": List[Mission],
             "description": "Request successful",
+        },
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.NOT_FOUND.value: {
+            "model": Error,
+            "description": "Not Found",
         },
     },
     tags=["Missions"],
@@ -53,6 +62,14 @@ async def get_missions(
     "/missions/{mission_id}",
     responses={
         HTTPStatus.OK.value: {"model": Mission, "description": "Request successful"},
+        HTTPStatus.UNAUTHORIZED.value: {
+            "model": Error,
+            "description": "Unauthorized",
+        },
+        HTTPStatus.NOT_FOUND.value: {
+            "model": Error,
+            "description": "Not Found",
+        },
     },
     tags=["Missions"],
     summary="Lookup a single mission on the asset",
