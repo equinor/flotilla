@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from http import HTTPStatus
 
 import pytest
@@ -5,11 +6,20 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 
-def test_get_reports(test_app: FastAPI):
+@pytest.mark.parametrize(
+    "query_params, expected_len",
+    [
+        ("?robot_id=1", 1),
+        ("", 2),
+        (f"?min_start_time={datetime.max}", 0),
+        (f"?max_start_time={datetime.utcnow()-timedelta(hours=0.6)}", 1),
+    ],
+)
+def test_get_reports(test_app: FastAPI, query_params: str, expected_len: int):
     with TestClient(test_app) as client:
-        response = client.get("/reports")
+        response = client.get("/reports" + query_params)
         assert response.status_code == HTTPStatus.OK.value
-        assert len(response.json()) == 2
+        assert len(response.json()) == expected_len
 
 
 @pytest.mark.parametrize(

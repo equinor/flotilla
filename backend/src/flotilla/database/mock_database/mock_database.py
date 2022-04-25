@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta, timezone
 
 from flotilla.database.models import (
     CapabilityDBModel,
@@ -53,6 +53,7 @@ def populate_mock_db(session, connection, base) -> None:
         echo_mission_id=1,
         log="",
         status=ReportStatus.in_progress,
+        start_time=datetime.utcnow() - timedelta(hours=0.5),
     )
 
     report_2 = ReportDBModel(
@@ -61,6 +62,8 @@ def populate_mock_db(session, connection, base) -> None:
         echo_mission_id=1,
         log="",
         status=ReportStatus.completed,
+        start_time=datetime.utcnow() - timedelta(hours=2),
+        end_time=datetime.utcnow() - timedelta(hours=1),
     )
 
     session.add_all([report_1, report_2])
@@ -71,7 +74,7 @@ def populate_mock_db(session, connection, base) -> None:
         tag_id="tag_id",
         status=ReportEntryStatus.completed,
         inspection_type=InspectionType.image,
-        time=datetime.datetime.now(tz=datetime.timezone.utc),
+        time=datetime.now(tz=timezone.utc),
         file_location="",
     )
 
@@ -80,7 +83,7 @@ def populate_mock_db(session, connection, base) -> None:
         tag_id="tag_id",
         status=ReportEntryStatus.failed,
         inspection_type=InspectionType.thermal_image,
-        time=datetime.datetime.now(tz=datetime.timezone.utc),
+        time=datetime.now(tz=timezone.utc),
         file_location="",
     )
 
@@ -89,7 +92,7 @@ def populate_mock_db(session, connection, base) -> None:
         tag_id="tag_id",
         status=ReportEntryStatus.completed,
         inspection_type=InspectionType.image,
-        time=datetime.datetime.now(tz=datetime.timezone.utc),
+        time=datetime.now(tz=timezone.utc),
         file_location="",
     )
 
@@ -97,14 +100,14 @@ def populate_mock_db(session, connection, base) -> None:
         robot_id=robot_1.id,
         echo_mission_id=287,
         report_id=report_1.id,
-        estimated_duration=datetime.timedelta(hours=1),
+        estimated_duration=timedelta(hours=1),
     )
 
     event_2 = EventDBModel(
         robot_id=robot_2.id,
         echo_mission_id=287,
         report_id=report_2.id,
-        estimated_duration=datetime.timedelta(hours=2),
+        estimated_duration=timedelta(hours=2),
     )
 
     capability_1 = CapabilityDBModel(

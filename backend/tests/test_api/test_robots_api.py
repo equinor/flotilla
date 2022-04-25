@@ -4,11 +4,12 @@ from http import HTTPStatus
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from requests import RequestException, Response as RequestsResponse
+from requests import RequestException
+from requests import Response as RequestsResponse
 from sqlalchemy.orm import Session
 from starlette.responses import Response
 
-from flotilla.database.crud import read_by_id
+from flotilla.database.crud import read_report_by_id, read_robot_by_id
 from flotilla.database.models import ReportDBModel, RobotDBModel
 
 
@@ -34,9 +35,7 @@ def test_create_robot_success(test_app: FastAPI, session: Session):
     with TestClient(test_app) as client:
         response: Response = client.post(url="/robots", data=json.dumps(body))
         assert response.status_code == HTTPStatus.OK.value
-        assert read_by_id(
-            modelType=RobotDBModel, db=session, item_id=response.json()["robot_id"]
-        )
+        assert read_robot_by_id(db=session, id=response.json()["robot_id"])
 
 
 @pytest.mark.parametrize(
@@ -169,7 +168,7 @@ def test_post_start_robot(
         assert response.status_code == expected_status_code
         if expected_status_code == HTTPStatus.OK.value:
             report_id = response.json().get("report_id")
-            assert read_by_id(ReportDBModel, db=session, item_id=report_id)
+            assert read_report_by_id(db=session, id=report_id)
 
 
 json_successful_stop_request = {
