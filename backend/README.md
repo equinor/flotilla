@@ -25,6 +25,14 @@ The tests can be run with
 pytest .
 ```
 
+## Overwriting settings with environment variables
+
+The default settings [settings](src/flotilla/settings/settings.py) can be overwritten by environment variables using the prefix `FLOTILLA_`
+
+```
+export FLOTILLA_<VAR_NAME>=some_value
+```
+
 ## API authentication
 
 To run the app locally and connect to upstream services, the following environment variables need to be set for authentication.
