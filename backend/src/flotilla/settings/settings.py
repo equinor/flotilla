@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     class Config:
         with pkg_resources.path("flotilla.settings", "settings.env") as path:
             package_path = path
+        env_prefix = "FLOTILLA_"
         env_file = package_path
         env_file_encoding = "utf-8"
         case_sensitive = True
