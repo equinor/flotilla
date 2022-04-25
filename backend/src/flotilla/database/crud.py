@@ -11,6 +11,7 @@ from flotilla.database.db import Base
 from flotilla.database.models import (
     CapabilityDBModel,
     EventDBModel,
+    EventStatus,
     InspectionType,
     ReportDBModel,
     ReportStatus,
@@ -133,6 +134,13 @@ def read_events_by_time_overlap_and_robot_id(
     )
 
 
+def read_event_by_status(db: Session, event_status: EventStatus) -> EventDBModel:
+    event: Optional[EventDBModel] = (
+        db.query(EventDBModel).filter(EventDBModel.status == event_status).all()
+    )
+    return event
+
+
 def create_event(
     db: Session,
     robot_id: int,
@@ -177,3 +185,14 @@ def create_report(
     db.add(report)
     db.commit()
     return report.id
+
+
+def update_event_status(db: Session, event_id: int, new_status: EventStatus) -> None:
+    try:
+        event: EventDBModel = read_event_by_id(db=db, id=event_id)
+        event.status = new_status
+        db.commit()
+    except HTTPException as e:
+        raise HTTPException from e
+
+    return

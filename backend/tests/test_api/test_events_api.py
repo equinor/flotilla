@@ -67,7 +67,7 @@ def test_get_event(
             EventRequest(
                 robot_id=1,
                 mission_id=234,
-                start_time=datetime.utcnow() + timedelta(hours=0.5),
+                start_time=datetime.utcnow() - timedelta(hours=1.5),
             ),
             HTTPStatus.CONFLICT.value,
         ),

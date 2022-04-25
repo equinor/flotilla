@@ -26,6 +26,13 @@ class RobotStatus(enum.Enum):
     offline = "Offline"
 
 
+class EventStatus(enum.Enum):
+    pending = "Pending"
+    started = "Started"
+    completed = "Completed"
+    failed = "Failed"
+
+
 class InspectionType(enum.Enum):
     image = "Image"
     thermal_image = "ThermalImage"
@@ -155,6 +162,7 @@ class EventDBModel(Base):
     end_time = Column(DateTime(timezone=True), default=event_end_time_default)
     # TODO: robot_id and report_id.robot_id can now point at different robots.
     # Should there be a constraint forcing an event to point at only one robot?
+    status = Column(Enum(EventStatus), default=EventStatus.pending)
 
     def get_api_event(self) -> Event:
         return Event(
@@ -163,6 +171,7 @@ class EventDBModel(Base):
             mission_id=self.echo_mission_id,
             start_time=self.start_time,
             end_time=self.end_time,
+            status=self.status.value,
         )
 
 

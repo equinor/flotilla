@@ -137,14 +137,14 @@ def test_remove_event(session):
 @pytest.mark.parametrize(
     "start_time, duration, expected_len",
     [
-        (datetime.now(tz=timezone.utc), timedelta(hours=1.5), 1),
+        (datetime.now(tz=timezone.utc) - timedelta(hours=2), timedelta(hours=1.5), 1),
         (
             datetime.now(tz=timezone.utc) - timedelta(days=1),
             timedelta(hours=1),
             0,
         ),
         (
-            datetime.now(tz=timezone.utc) - timedelta(hours=0.5),
+            datetime.now(tz=timezone.utc) - timedelta(hours=2.5),
             timedelta(hours=1),
             1,
         ),

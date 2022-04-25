@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from flotilla.database.models import (
     CapabilityDBModel,
     EventDBModel,
+    EventStatus,
     InspectionType,
     ReportDBModel,
     ReportEntryDBModel,
@@ -98,9 +99,11 @@ def populate_mock_db(session, connection, base) -> None:
 
     event_1 = EventDBModel(
         robot_id=robot_1.id,
-        echo_mission_id=287,
+        echo_mission_id=1,
         report_id=report_1.id,
+        start_time=datetime.now(tz=timezone.utc) - timedelta(hours=2),
         estimated_duration=timedelta(hours=1),
+        status=EventStatus.completed,
     )
 
     event_2 = EventDBModel(
@@ -108,6 +111,7 @@ def populate_mock_db(session, connection, base) -> None:
         echo_mission_id=287,
         report_id=report_2.id,
         estimated_duration=timedelta(hours=2),
+        status=EventStatus.failed,
     )
 
     capability_1 = CapabilityDBModel(

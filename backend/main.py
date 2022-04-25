@@ -4,7 +4,7 @@ from typing import List
 from flotilla.api.main import run_app
 from flotilla.database.db import Base, SessionLocal, connection
 from flotilla.database.mock_database.mock_database import populate_mock_db
-from flotilla.services.events.event_handler import start_event_handler
+from flotilla.services.events.event_handler import run_event_handler
 
 if __name__ == "__main__":
     threads: List[Thread] = []
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     threads.append(api_thread)
 
     event_handler_thread: Thread = Thread(
-        target=start_event_handler, name="Event handler", daemon=True
+        target=run_event_handler, name="Event handler", daemon=True
     )
     threads.append(event_handler_thread)
 
