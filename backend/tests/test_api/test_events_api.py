@@ -7,15 +7,25 @@ from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from flotilla_openapi.models.event_request import EventRequest
 
-from flotilla.database.crud import read_by_id
+from flotilla.database.crud import read_by_id, read_event_by_id
 from flotilla.database.models import EventDBModel
 
 
-def test_get_events(test_app: FastAPI):
+@pytest.mark.parametrize(
+    "query_params, expected_len",
+    [
+        (f"?robot_id=1&min_start_time={datetime.utcnow()-timedelta(hours=0.5)}", 1),
+        (f"?min_start_time={datetime.min}", 0),
+        (f"?min_start_time={datetime.utcnow()-timedelta(hours=0.5)}", 2),
+        (f"?min_start_time={datetime.utcnow()-timedelta(days=6.9)}", 2),
+    ],
+)
+def test_get_events(test_app: FastAPI, query_params: str, expected_len: int):
 
     with TestClient(test_app) as client:
-        response = client.get("/events")
+        response = client.get("/events" + query_params)
         assert response.status_code == HTTPStatus.OK.value
+        assert len(response.json()) == expected_len
 
 
 @pytest.mark.parametrize(
@@ -75,7 +85,7 @@ def test_post_event(
         assert response.status_code == expected_status_code
         if expected_status_code == HTTPStatus.CREATED.value:
             event = response.json()
-            assert read_by_id(EventDBModel, db=session, item_id=event.get("id"))
+            assert read_event_by_id(db=session, id=event.get("id"))
 
 
 @pytest.mark.parametrize(
@@ -102,5 +112,5 @@ def test_delete_event(
         assert response.status_code == expected_status_code
         if expected_status_code == HTTPStatus.NO_CONTENT.value:
             with pytest.raises(HTTPException) as e:
-                read_by_id(EventDBModel, db=session, item_id=event_id)
+                read_event_by_id(db=session, id=event_id)
                 assert e.value.status_code == HTTPStatus.NOT_FOUND.value

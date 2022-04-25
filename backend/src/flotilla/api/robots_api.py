@@ -2,15 +2,7 @@ from http import HTTPStatus
 from logging import getLogger
 from typing import List
 
-from fastapi import (
-    APIRouter,
-    Body,
-    Depends,
-    HTTPException,
-    Path,
-    Query,
-    Security,
-)
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, Security
 from flotilla_openapi.models.create_robot_response import CreateRobotResponse
 from flotilla_openapi.models.error import Error
 from flotilla_openapi.models.post_response import PostResponse
@@ -25,8 +17,8 @@ from flotilla.api.pagination import PaginationParams
 from flotilla.database.crud import (
     create_report,
     create_robot,
-    read_by_id,
-    read_list_paginated,
+    read_robot_by_id,
+    read_robots,
 )
 from flotilla.database.db import get_db
 from flotilla.database.models import ReportStatus, RobotDBModel
@@ -59,9 +51,7 @@ async def get_robots(
     db: Session = Depends(get_db),
     pagination_params: PaginationParams = Depends(),
 ) -> List[Robot]:
-    db_robots: List[RobotDBModel] = read_list_paginated(
-        db=db, params=pagination_params, modelType=RobotDBModel
-    )
+    db_robots: List[RobotDBModel] = read_robots(db=db)
     robots: List[Robot] = [robot.get_api_robot() for robot in db_robots]
     return robots
 
@@ -134,9 +124,7 @@ async def get_robot(
     db: Session = Depends(get_db),
 ) -> Robot:
     try:
-        db_robot: RobotDBModel = read_by_id(
-            db=db, modelType=RobotDBModel, item_id=robot_id
-        )
+        db_robot: RobotDBModel = read_robot_by_id(db=db, id=robot_id)
         robot: Robot = db_robot.get_api_robot()
     except HTTPException as e:
         logger.error(f"Could not get robot with id {robot_id}: {e.detail}")
@@ -175,7 +163,7 @@ async def post_start_robot(
 ) -> StartResponse:
     """Start a mission with given id using robot with robot id."""
     try:
-        robot: RobotDBModel = read_by_id(RobotDBModel, db, robot_id)
+        robot: RobotDBModel = read_robot_by_id(db=db, id=robot_id)
         response_isar: RequestResponse = isar_service.start_mission(
             host=robot.host, port=robot.port, mission_id=mission_id
         )
@@ -224,7 +212,7 @@ async def post_stop_robot(
 ) -> PostResponse:
     """Stop the execution of the current active mission. If there is no active mission on robot, nothing happens."""
     try:
-        robot: RobotDBModel = read_by_id(RobotDBModel, db, robot_id)
+        robot: RobotDBModel = read_robot_by_id(db=db, id=robot_id)
         response_isar: RequestResponse = isar_service.stop(
             host=robot.host, port=robot.port
         )
@@ -265,7 +253,7 @@ async def post_enable_robot(
     enable: bool = Query(None, description=""),
     db: Session = Depends(get_db),
 ):
-    robot: RobotDBModel = read_by_id(modelType=RobotDBModel, db=db, item_id=robot_id)
+    robot: RobotDBModel = read_robot_by_id(db=db, id=robot_id)
     robot.enabled = enable
 
     db.commit()

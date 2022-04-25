@@ -8,8 +8,9 @@ from flotilla_openapi.models.report import Report
 from pytest import Session
 
 from flotilla.api.authentication import authentication_scheme
+from flotilla.api.filter import ReportFilter, ReportFilterParams
 from flotilla.api.pagination import PaginationParams
-from flotilla.database.crud import read_by_id, read_list_paginated
+from flotilla.database.crud import execute_paginated_query, read_by_id
 from flotilla.database.db import get_db
 from flotilla.database.models import ReportDBModel
 
@@ -44,10 +45,14 @@ logger = getLogger("api")
 )
 async def get_reports(
     db: Session = Depends(get_db),
-    params: PaginationParams = Depends(),
+    pagination_params: PaginationParams = Depends(),
+    filter_params: ReportFilterParams = Depends(),
 ) -> List[Report]:
     """List all available reports on the asset."""
-    db_reports: List[ReportDBModel] = read_list_paginated(ReportDBModel, db, params)
+    report_filter: ReportFilter = ReportFilter(params=filter_params)
+    db_reports: List[ReportDBModel] = execute_paginated_query(
+        report_filter.filter(db=db), params=pagination_params
+    )
     reports: List[Report] = [report.get_api_report() for report in db_reports]
     return reports
 

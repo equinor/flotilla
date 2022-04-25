@@ -91,13 +91,15 @@ class ReportDBModel(Base):
     log = Column(String)
     status = Column(Enum(ReportStatus))
     start_time = Column(DateTime(timezone=True), default=datetime.now(tz=timezone.utc))
+    end_time = Column(DateTime(timezone=True), default=None)
     entries = relationship("ReportEntryDBModel", backref=backref("report"))
 
     def get_api_report(self) -> Report:
+        end_time: datetime = self.end_time if self.end_time else datetime.min
         return Report(
             id=self.id,
             start_time=self.start_time,
-            end_time=datetime.now(tz=timezone.utc),
+            end_time=end_time,
             robot_id=self.robot_id,
             mission_id=self.echo_mission_id,
             status=self.status.value,

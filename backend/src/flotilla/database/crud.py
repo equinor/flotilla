@@ -4,7 +4,7 @@ from typing import List, Optional, TypeVar
 
 from fastapi import HTTPException
 from sqlalchemy import and_, exists
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Query, Session
 
 from flotilla.api.pagination import PaginationParams
 from flotilla.database.db import Base
@@ -21,19 +21,12 @@ from flotilla.database.models import (
 T = TypeVar("T", bound=Base)  # Generic type for db models
 
 
-def read_list_paginated(
-    modelType: type[T], db: Session, params: PaginationParams = PaginationParams()
-) -> List[T]:  # Generic function to wrap pagination functionality
-    return (
-        db.query(modelType)
-        .offset(params.page * params.page_size)
-        .limit(params.page_size)
-        .all()
-    )
+def execute_paginated_query(query: Query, params: PaginationParams):
+    return query.offset(params.page * params.page_size).limit(params.page_size).all()
 
 
-def read_by_id(modelType: type[T], db: Session, item_id: int) -> T:
-    item: Optional[T] = db.query(modelType).filter(modelType.id == item_id).first()
+def read_by_id(model_type: type[T], db: Session, item_id: int) -> T:
+    item: Optional[T] = db.query(model_type).filter(model_type.id == item_id).first()
     if not item:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND.value,
@@ -100,11 +93,32 @@ def _check_non_duplicate_robot(db: Session, robot: RobotDBModel):
         )
 
 
-def read_events_by_robot_id_and_time_span(
-    db: Session,
-    robot_id: int,
-    start_time: datetime,
-    end_time: datetime,
+def read_robot_by_id(db: Session, id: int) -> RobotDBModel:
+    return read_by_id(model_type=RobotDBModel, db=db, item_id=id)
+
+
+def read_report_by_id(db: Session, id: int) -> ReportDBModel:
+    return read_by_id(model_type=ReportDBModel, db=db, item_id=id)
+
+
+def read_event_by_id(db: Session, id: int) -> EventDBModel:
+    return read_by_id(model_type=EventDBModel, db=db, item_id=id)
+
+
+def read_by_model(model_type: type[T], db: Session) -> List[T]:
+    return db.query(model_type).all()
+
+
+def read_robots(db: Session) -> List[RobotDBModel]:
+    return read_by_model(model_type=RobotDBModel, db=db)
+
+
+def read_events(db: Session) -> List[EventDBModel]:
+    return read_by_model(model_type=EventDBModel, db=db)
+
+
+def read_events_by_time_overlap_and_robot_id(
+    start_time: datetime, end_time: datetime, robot_id: int, db: Session
 ) -> List[EventDBModel]:
     return (
         db.query(EventDBModel)
