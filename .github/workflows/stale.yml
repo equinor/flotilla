@@ -23,8 +23,8 @@ jobs:
       uses: actions/stale@v4.1.0
       with:
         repo-token: ${{ secrets.STALE_ISSUE_TOKEN }}
-        stale-issue-message: 'This issue has automatically been marked as stale as there has been no activity for 60 days. Remove stale label or comment or this will be closed in 7 days.'
-        stale-pr-message: 'This pull request has automatically been marked as stale as there has been no activity for 30 days. Remove stale label or comment or this will be closed in 7 days.'
+        stale-issue-message: 'This issue has automatically been marked as stale as there has been no activity for 60 days.'
+        stale-pr-message: 'This pull request has automatically been marked as stale as there has been no activity for 30 days.'
         stale-issue-label: 'stale'
         stale-pr-label: 'stale'
         close-issue-message: 'This issue has been closed automatically due to a lack of activity.'
