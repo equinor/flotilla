@@ -7,6 +7,7 @@ from flotilla_openapi.models.create_robot_response import CreateRobotResponse
 from flotilla_openapi.models.error import Error
 from flotilla_openapi.models.post_response import PostResponse
 from flotilla_openapi.models.robot import Robot
+from flotilla_openapi.models.robot_request import RobotRequest
 from flotilla_openapi.models.start_response import StartResponse
 from flotilla_openapi.models.success import Success
 from requests import Response as RequestResponse
@@ -76,7 +77,7 @@ async def get_robots(
 )
 async def post_robot(
     db: Session = Depends(get_db),
-    robot: Robot = Body(None, description="New robot to be added"),
+    robot: RobotRequest = Body(None, description="New robot to be added"),
 ) -> CreateRobotResponse:
     try:
         robot_id: int = create_robot(
