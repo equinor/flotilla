@@ -6,6 +6,7 @@ frontend/build/
 .vscode
 .idea
 *.log
+*.vs
 
 # Environment variables
 *.env
