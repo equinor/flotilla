@@ -1,9 +1,12 @@
+using api.Context;
+using api.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+builder.Services.AddDbContext<FlotillaDbContext>(options => options.UseInMemoryDatabase("flotilla"));
+builder.Services.AddScoped<RobotService>();
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
