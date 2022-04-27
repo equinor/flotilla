@@ -13,7 +13,6 @@ from requests import Response as RequestResponse
 from sqlalchemy.orm import Session
 
 from flotilla.api.authentication import authentication_scheme
-from flotilla.api.pagination import PaginationParams
 from flotilla.database.crud import (
     create_report,
     create_robot,
@@ -49,7 +48,6 @@ router = APIRouter()
 )
 async def get_robots(
     db: Session = Depends(get_db),
-    pagination_params: PaginationParams = Depends(),
 ) -> List[Robot]:
     db_robots: List[RobotDBModel] = read_robots(db=db)
     robots: List[Robot] = [robot.get_api_robot() for robot in db_robots]
@@ -71,8 +69,9 @@ async def get_robots(
     tags=["Robots"],
     summary="Create a new robot",
     description="""### Overview
-    Stop the execution of the current active mission.
-    If there is no active mission on robot, nothing happens.""",
+    Create a new robot entry in the database.
+    The robot will be added as an active robot and will be included in the frontend.
+    """,
     dependencies=[Security(authentication_scheme)],
 )
 async def post_robot(
@@ -151,8 +150,7 @@ async def get_robot(
     tags=["Robots"],
     summary="Start a mission with robot",
     description="""### Overview 
-    Lookup information of real-time data streaming. Describes the protocol used for 
-    distributing real time data and necessary information for connecting to the information sources.""",
+    Start a mission with given id using robot with robot id.""",
     dependencies=[Security(authentication_scheme)],
 )
 async def post_start_robot(
@@ -199,10 +197,9 @@ async def post_start_robot(
     tags=["Robots"],
     summary="Stop robot",
     description="""### Overview 
-    Get the current schedule of a robot. The schedule is a list of time entries where the 
-    robot is scheduled to perform a certain mission. The minimum start time and maximum end time for the schedule 
-    entries can be specified in the query. If none is provided, the default start time is current time and default 
-    end time is start time + one week.""",
+    Stop the execution of the current active mission.
+
+    If there is no active mission on robot, nothing happens.""",
     dependencies=[Security(authentication_scheme)],
 )
 async def post_stop_robot(
