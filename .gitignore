@@ -10,6 +10,7 @@ frontend/build/
 .vscode
 .idea
 *.log
+*.vs
 
 # Python
 *__pycache__
