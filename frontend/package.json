@@ -6,7 +6,7 @@
         "@equinor/eds-core-react": "^0.18.0",
         "@equinor/eds-icons": "^0.10.0",
         "@equinor/eds-tokens": "^0.7.0",
-        "@testing-library/jest-dom": "^5.16.3",
+        "@testing-library/jest-dom": "^5.16.4",
         "@testing-library/react": "^12.1.4",
         "@testing-library/user-event": "^13.0.0",
         "@types/jest": "^27.4.1",
