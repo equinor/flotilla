@@ -5,7 +5,9 @@ using Api.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace Api.Test
@@ -17,11 +19,20 @@ namespace Api.Test
 
         public TestRobotController()
         {
+            // Using Moq https://github.com/moq/moq4
+            var mockLogger = new Mock<ILogger<IsarService>>();
+
+            var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
             var options = new DbContextOptionsBuilder().UseInMemoryDatabase("flotilla").Options;
             var context = new FlotillaDbContext(options);
+
+            var reportService = new ReportService(context);
+            var isarService = new IsarService(config, mockLogger.Object, reportService);
             var service = new RobotService(context);
-            var logger = new LoggerFactory().CreateLogger<RobotController>();
-            _controller = new RobotController(logger, service);
+
+            var mockLoggerController = new Mock<ILogger<RobotController>>();
+            _controller = new RobotController(mockLoggerController.Object, service, isarService);
         }
 
         [Fact]
@@ -40,7 +51,7 @@ namespace Api.Test
         [Fact]
         public void GetRobotById_ShouldReturnNotFound()
         {
-            var actionResultType = typeof(NotFoundResult);
+            var actionResultType = typeof(NotFoundObjectResult);
             string robotId = "RandomString";
 
             IActionResult? result = _controller.GetRobotById(robotId).Result.Result;

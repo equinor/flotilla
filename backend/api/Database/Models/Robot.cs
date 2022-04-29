@@ -8,21 +8,38 @@ namespace Api.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Required]
         public string Id { get; set; }
+
         [MaxLength(128)]
         [Required]
         public string Name { get; set; }
+
         [MaxLength(128)]
         [Required]
         public string Model { get; set; }
+
         [MaxLength(128)]
         [Required]
         public string SerialNumber { get; set; }
+
+        [MaxLength(128)]
+        [Required]
+        public string Logs { get; set; }
+
+        [MaxLength(128)]
+        [Required]
+        public string Host { get; set; }
+
+        [Required]
+        public int Port { get; set; }
+
+        [Required]
+        public bool Enabled { get; set; }
+
         [Required]
         public RobotStatus Status { get; set; }
     }
-
-
 
     public enum RobotStatus
     {

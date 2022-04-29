@@ -6,6 +6,7 @@ namespace Api.Context;
 public class FlotillaDbContext : DbContext
 {
     public DbSet<Robot> Robots => Set<Robot>();
+    public DbSet<Report> Reports => Set<Report>();
 
     public DbSet<Event> Events => Set<Event>();
 

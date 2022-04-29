@@ -8,7 +8,8 @@ namespace Api.Services
     {
         private readonly FlotillaDbContext _context;
 
-        public RobotService(FlotillaDbContext context)
+        public RobotService(
+            FlotillaDbContext context)
         {
             _context = context;
         }

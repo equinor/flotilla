@@ -5,7 +5,6 @@ using Api.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Api.Test
@@ -20,8 +19,7 @@ namespace Api.Test
             var options = new DbContextOptionsBuilder().UseInMemoryDatabase("flotilla").Options;
             var context = new FlotillaDbContext(options);
             var service = new EventService(context);
-            var logger = new LoggerFactory().CreateLogger<EventController>();
-            _controller = new EventController(logger, service);
+            _controller = new EventController(service);
         }
 
         [Fact]
