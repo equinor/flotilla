@@ -13,7 +13,11 @@ public static class InitDb
             Name = "Robot1",
             Model = "Model1",
             SerialNumber = "123",
-            Status = RobotStatus.Available
+            Status = RobotStatus.Available,
+            Enabled = true,
+            Host = "localhost",
+            Logs = "logs",
+            Port = 3000
         };
 
         var robot2 = new Robot
@@ -21,7 +25,11 @@ public static class InitDb
             Name = "Robot2",
             Model = "Model2",
             SerialNumber = "456",
-            Status = RobotStatus.Busy
+            Status = RobotStatus.Busy,
+            Enabled = true,
+            Host = "localhost",
+            Logs = "logs",
+            Port = 3000
         };
 
         return new List<Robot>(new Robot[] { robot1, robot2 });
