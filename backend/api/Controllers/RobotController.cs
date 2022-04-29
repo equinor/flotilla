@@ -18,7 +18,7 @@ public class RobotController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Robot>>> GetRobots()
+    public async Task<ActionResult<IList<Robot>>> GetRobots()
     {
         IEnumerable<Robot> robots = await _robotService.ReadAll();
         return Ok(robots);
