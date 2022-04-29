@@ -7,14 +7,14 @@ public class FlotillaDbContext : DbContext
 {
     public DbSet<Robot> Robots => Set<Robot>();
 
-    public static bool Initialized = false;
+    private static bool _initialized = false;
 
     public FlotillaDbContext(DbContextOptions options) : base(options)
     {
-        if (Initialized == false)
+        if (_initialized == false)
         {
             InitDb.PopulateDb(this);
-            Initialized = true;
+            _initialized = true;
         }
     }
 }
