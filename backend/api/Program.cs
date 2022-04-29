@@ -1,4 +1,5 @@
-﻿using Api.Configurations;
+﻿using System.Text.Json.Serialization;
+using Api.Configurations;
 using Api.Context;
 using Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,7 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<FlotillaDbContext>(options => options.UseInMemoryDatabase("flotilla"));
 builder.Services.AddScoped<RobotService>();
 builder.Services.AddScoped<EventService>();
-builder.Services.AddControllers();
+builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<IsarService>();
+builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
