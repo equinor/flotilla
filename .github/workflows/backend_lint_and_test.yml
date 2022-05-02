@@ -1,0 +1,44 @@
+name: Backend
+
+on:
+  push:
+    branches:
+      - dotnet
+  pull_request:
+    branches:
+      - dotnet
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build_backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+      - name: Build project and dependencies
+        run: dotnet build
+
+  test_backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.1.0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Build project and dependencies
+        run: dotnet build
+
+      - name: Run tests
+        run: dotnet test
