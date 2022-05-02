@@ -1,8 +1,8 @@
-using api.Context;
-using api.Models;
+﻿using Api.Context;
+using Api.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace api.Services
+namespace Api.Services
 {
     public class RobotService
     {
@@ -26,7 +26,7 @@ namespace api.Services
 
         public async Task<Robot?> Read(string id)
         {
-            return await _context.Robots.FirstOrDefaultAsync(robot => robot.Id.Equals(id));
+            return await _context.Robots.FirstOrDefaultAsync(robot => robot.Id.Equals(id, StringComparison.Ordinal));
         }
     }
 }

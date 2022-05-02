@@ -1,6 +1,6 @@
-using api.Models;
+﻿using Api.Models;
 
-namespace api.Context;
+namespace Api.Context;
 
 public static class InitDb
 {
@@ -8,7 +8,7 @@ public static class InitDb
 
     private static List<Robot> GetRobots()
     {
-        Robot robot1 = new Robot
+        var robot1 = new Robot
         {
             Name = "Robot1",
             Model = "Model1",
@@ -16,7 +16,7 @@ public static class InitDb
             Status = RobotStatus.Available
         };
 
-        Robot robot2 = new Robot
+        var robot2 = new Robot
         {
             Name = "Robot2",
             Model = "Model2",

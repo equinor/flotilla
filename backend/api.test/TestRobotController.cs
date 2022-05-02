@@ -1,16 +1,14 @@
-using api.Context;
-using api.Controllers;
-using api.Models;
-using api.Services;
-using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
+using Api.Context;
+using Api.Controllers;
+using Api.Models;
+using Api.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Mvc;
 using Xunit;
-using System;
-using System.Collections.Generic;
 
-namespace api.test
+namespace Api.Test
 {
     public class TestRobotController
     {
@@ -18,7 +16,7 @@ namespace api.test
 
         public TestRobotController()
         {
-            DbContextOptions options = new DbContextOptionsBuilder().UseInMemoryDatabase("flotilla").Options;
+            var options = new DbContextOptionsBuilder().UseInMemoryDatabase("flotilla").Options;
             var context = new FlotillaDbContext(options);
             var service = new RobotService(context);
             var logger = new LoggerFactory().CreateLogger<RobotController>();
@@ -29,7 +27,7 @@ namespace api.test
         public void GetRobots()
         {
             var result = (OkObjectResult)_controller.GetRobots().Result.Result!;
-            IList<Robot>? robots = (IList<Robot>?)result.Value;
+            var robots = (IList<Robot>?)result.Value;
 
             Assert.NotNull(robots);
             if (robots is null)
@@ -41,7 +39,7 @@ namespace api.test
         [Fact]
         public void GetRobotById_ShouldReturnNotFound()
         {
-            Type actionResultType = typeof(NotFoundResult);
+            var actionResultType = typeof(NotFoundResult);
             string robotId = "RandomString";
 
             IActionResult? result = _controller.GetRobotById(robotId).Result.Result;
@@ -53,9 +51,9 @@ namespace api.test
         [Fact]
         public void GetRobotById_ShouldReturnOkObject()
         {
-            Type actionResultType = typeof(OkObjectResult);
+            var actionResultType = typeof(OkObjectResult);
             var result = (OkObjectResult)_controller.GetRobots().Result.Result!;
-            IList<Robot>? robots = (IList<Robot>?)result.Value;
+            var robots = (IList<Robot>?)result.Value;
             Assert.NotNull(robots);
 
             if (robots is null)
