@@ -1,20 +1,20 @@
+﻿using Api.Models;
 using Microsoft.EntityFrameworkCore;
-using api.Models;
 
-namespace api.Context;
+namespace Api.Context;
 
 public class FlotillaDbContext : DbContext
 {
     public DbSet<Robot> Robots => Set<Robot>();
 
-    private static bool _initialized = false;
+    private static bool initialized;
 
     public FlotillaDbContext(DbContextOptions options) : base(options)
     {
-        if (_initialized == false)
+        if (initialized == false)
         {
             InitDb.PopulateDb(this);
-            _initialized = true;
+            initialized = true;
         }
     }
 }

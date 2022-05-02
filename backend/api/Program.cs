@@ -1,10 +1,10 @@
+﻿using Api.Configurations;
+using Api.Context;
+using Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
-using api.Configurations;
-using api.Context;
-using api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +14,7 @@ builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.ConfigureSwagger(builder.Configuration);  
+builder.Services.ConfigureSwagger(builder.Configuration);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddAuthorization(options =>
@@ -31,10 +31,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => {
+    app.UseSwaggerUI(c =>
+    {
         c.OAuthClientId(builder.Configuration["AzureAd:ClientId"]);
         // The following parameter represents the "audience" of the access token.
-        c.OAuthAdditionalQueryStringParams(new Dictionary<string, string>{ {"Resource", builder.Configuration["AzureAd:ClientId"] } });
+        c.OAuthAdditionalQueryStringParams(new Dictionary<string, string> { { "Resource", builder.Configuration["AzureAd:ClientId"] } });
         c.OAuthUsePkce();
     });
 }
