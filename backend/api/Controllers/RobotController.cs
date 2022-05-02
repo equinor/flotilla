@@ -1,8 +1,8 @@
+﻿using Api.Models;
+using Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using api.Models;
-using api.Services;
 
-namespace api.Controllers;
+namespace Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -20,7 +20,7 @@ public class RobotController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IList<Robot>>> GetRobots()
     {
-        IEnumerable<Robot> robots = await _robotService.ReadAll();
+        var robots = await _robotService.ReadAll();
         return Ok(robots);
     }
 
@@ -28,7 +28,7 @@ public class RobotController : ControllerBase
     [Route("{id}")]
     public async Task<ActionResult<Robot>> GetRobotById([FromRoute] string id)
     {
-        Robot? robot = await _robotService.Read(id);
+        var robot = await _robotService.Read(id);
         if (robot == null)
         {
             return NotFound();
@@ -41,7 +41,7 @@ public class RobotController : ControllerBase
     {
         try
         {
-            Robot newRobot = await _robotService.Create(robot);
+            var newRobot = await _robotService.Create(robot);
             return CreatedAtAction(nameof(GetRobotById), new { id = newRobot.Id }, newRobot);
         }
         catch (Exception e)

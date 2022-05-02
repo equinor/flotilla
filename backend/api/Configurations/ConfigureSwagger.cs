@@ -1,6 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 
-namespace api.Configurations
+namespace Api.Configurations
 {
     public static class CustomServiceConfigurations
     {
