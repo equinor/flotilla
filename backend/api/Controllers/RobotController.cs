@@ -17,7 +17,27 @@ public class RobotController : ControllerBase
         _robotService = robotService;
     }
 
+    /// <summary>
+    /// Gets a list of the robots in the database.
+    /// </summary>
+    /// <remarks>
+    /// Responses are paginated.
+    ///
+    /// Example query:
+    ///
+    ///     /robots?
+    ///
+    /// <para> This query gets all robots (paginated) </para>
+    /// </remarks>
+    /// <returns> List of robots </returns>
+    /// <response code="200"> The list of robots was successfully returned </response>
+    /// <response code="400"> The query is invalid </response>
     [HttpGet]
+    [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IList<Robot>>> GetRobots()
     {
         var robots = await _robotService.ReadAll();

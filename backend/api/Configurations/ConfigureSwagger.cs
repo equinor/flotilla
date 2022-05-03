@@ -1,4 +1,5 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using System.Reflection;
+using Microsoft.OpenApi.Models;
 
 namespace Api.Configurations
 {
@@ -37,6 +38,11 @@ namespace Api.Configurations
                         Array.Empty<string>()
                     }
                 });
+
+                // Make swagger use xml comments from functions
+                string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
 
             return services;
