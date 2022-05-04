@@ -7,6 +7,8 @@ public class FlotillaDbContext : DbContext
 {
     public DbSet<Robot> Robots => Set<Robot>();
 
+    public DbSet<Event> Events => Set<Event>();
+
     private static bool initialized;
 
     public FlotillaDbContext(DbContextOptions options) : base(options)

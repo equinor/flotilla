@@ -27,9 +27,33 @@ public static class InitDb
         return new List<Robot>(new Robot[] { robot1, robot2 });
     }
 
+    public static readonly List<Event> Events = GetEvents();
+
+    private static List<Event> GetEvents()
+    {
+        var event1 = new Event
+        {
+            Robot = Robots[0],
+            IsarMissionId = "1",
+            StartTime = DateTimeOffset.UtcNow,
+            EndTime = DateTimeOffset.UtcNow,
+        };
+
+        var event2 = new Event
+        {
+            Robot = Robots[1],
+            IsarMissionId = "2",
+            StartTime = DateTimeOffset.UtcNow,
+            EndTime = DateTimeOffset.UtcNow,
+        };
+
+        return new List<Event>(new Event[] { event1, event2 });
+    }
+
     public static void PopulateDb(FlotillaDbContext context)
     {
         context.AddRange(Robots);
+        context.AddRange(Events);
 
         context.SaveChanges();
     }
