@@ -11,7 +11,8 @@ services:
       - '9001:9001'
   backend:
     build: backend
-    env_file:
-      - backend/.env
     ports:
       - '8000:8000'
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - AzureAd__ClientId=ea4c7b92-47b3-45fb-bd25-a8070f0c495c
