@@ -2,18 +2,34 @@
 using Api.Configurations;
 using Api.Context;
 using Api.Services;
+using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.Services.AddAzureClients(azureBuilder =>
+{
+    azureBuilder.AddSecretClient(builder.Configuration.GetSection("KeyVault"));
+
+    azureBuilder.UseCredential(new DefaultAzureCredential());
+});
+
 builder.Services.AddDbContext<FlotillaDbContext>(options => options.UseInMemoryDatabase("flotilla"));
+
+builder.Services.AddSingleton<DefaultAzureCredential>();
+builder.Services.AddSingleton<KeyVaultService>();
+
 builder.Services.AddScoped<RobotService>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<IsarService>();
+builder.Services.AddScoped<EchoService>();
+
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

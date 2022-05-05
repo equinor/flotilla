@@ -37,6 +37,20 @@ namespace Api.Models
 
     public enum InspectionType
     {
-        Image, ThermalImage
+        Image, ThermalImage, Audio
+    }
+
+    public class SelectInspectionType
+    {
+        public static InspectionType From(string sensorType)
+        {
+            return sensorType switch
+            {
+                "Picture" => InspectionType.Image,
+                "ThermicPicture" => InspectionType.ThermalImage,
+                "Audio" => InspectionType.Audio,
+                _ => InspectionType.Image,
+            };
+        }
     }
 }
