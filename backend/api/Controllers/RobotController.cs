@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("robots")]
 public class RobotController : ControllerBase
 {
     private readonly ILogger<RobotController> _logger;
@@ -18,7 +18,7 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
-    /// Gets a list of the robots in the database.
+    /// List all robots on the asset.
     /// </summary>
     /// <remarks>
     /// Responses are paginated.
@@ -44,8 +44,21 @@ public class RobotController : ControllerBase
         return Ok(robots);
     }
 
+    /// <summary>
+    /// Lookup robot by specified id.
+    /// </summary>
+    /// <remarks>
+    /// </remarks>
+    /// <returns> The robot, if it exists </returns>
+    /// <response code="200"> Request successful and robot returned </response>
+    /// <response code="404"> The requested resource was not found </response>
     [HttpGet]
     [Route("{id}")]
+    [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Robot>> GetRobotById([FromRoute] string id)
     {
         var robot = await _robotService.Read(id);
@@ -56,7 +69,20 @@ public class RobotController : ControllerBase
         return Ok(robot);
     }
 
+    /// <summary>
+    /// Register a new robot.
+    /// </summary>
+    /// <remarks>
+    /// </remarks>
+    /// <returns> A new robot </returns>
+    /// <response code="201"> Request successful and the new robot </response>
+    /// <response code="400"> The robot data is invalid </response>
     [HttpPost]
+    [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Robot>> PostRobot([FromBody] Robot robot)
     {
         try
