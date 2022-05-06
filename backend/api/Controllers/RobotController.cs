@@ -30,8 +30,6 @@ public class RobotController : ControllerBase
     /// <para> This query gets all robots (paginated) </para>
     /// </remarks>
     /// <returns> List of robots </returns>
-    /// <response code="200"> The list of robots was successfully returned </response>
-    /// <response code="400"> The query is invalid </response>
     [HttpGet]
     [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -43,15 +41,17 @@ public class RobotController : ControllerBase
         var robots = await _robotService.ReadAll();
         return Ok(robots);
     }
-
     /// <summary>
-    /// Lookup robot by specified id.
+    /// Gets the robot with the specified id
     /// </summary>
     /// <remarks>
+    /// Example query:
+    ///
+    ///     /robots/{id}
+    ///
+    /// <para> This query gets the robot with the specified id </para>
     /// </remarks>
-    /// <returns> The robot, if it exists </returns>
-    /// <response code="200"> Request successful and robot returned </response>
-    /// <response code="404"> The requested resource was not found </response>
+    /// <returns> Robot </returns>
     [HttpGet]
     [Route("{id}")]
     [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status200OK)]
@@ -70,13 +70,12 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
-    /// Register a new robot.
+    /// Create robot and add to database
     /// </summary>
     /// <remarks>
+    /// <para> This query creates a robot and adds it to the database </para>
     /// </remarks>
-    /// <returns> A new robot </returns>
-    /// <response code="201"> Request successful and the new robot </response>
-    /// <response code="400"> The robot data is invalid </response>
+    /// <returns> Robot </returns>
     [HttpPost]
     [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
