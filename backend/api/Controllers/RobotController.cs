@@ -32,7 +32,6 @@ public class RobotController : ControllerBase
     /// <returns> List of robots </returns>
     [HttpGet]
     [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -54,7 +53,7 @@ public class RobotController : ControllerBase
     /// <returns> Robot </returns>
     [HttpGet]
     [Route("{id}")]
-    [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Robot), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -77,7 +76,7 @@ public class RobotController : ControllerBase
     /// </remarks>
     /// <returns> Robot </returns>
     [HttpPost]
-    [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Robot), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
