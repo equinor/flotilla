@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Configurations;
 using Api.Context;
+using Api.Scheduler;
 using Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -15,6 +16,8 @@ builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<IsarService>();
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+builder.Services.AddHostedService<EventScheduler>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

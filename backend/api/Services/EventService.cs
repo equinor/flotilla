@@ -29,6 +29,21 @@ namespace Api.Services
             return await _context.Events.FirstOrDefaultAsync(ev => ev.Id.Equals(id, StringComparison.Ordinal));
         }
 
+        public async Task<Event?> NextPendingEvent()
+        {
+            var events = await ReadAll();
+            var pendingEvents = events.SkipWhile(ev => !ev.Status.Equals(EventStatus.Pending));
+            var pendingEventsOrderedByStartTime = pendingEvents.OrderBy(ev => ev.StartTime);
+            try
+            {
+                return pendingEventsOrderedByStartTime.First();
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
+        }
+
         public async Task<Event?> Delete(string id)
         {
             var evnt = await _context.Events.FirstOrDefaultAsync(ev => ev.Id.Equals(id, StringComparison.Ordinal));
