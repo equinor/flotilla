@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Api.Test
 {
+    [Collection("Database collection")]
     public class TestRobotController
     {
         private readonly RobotController _controller;
