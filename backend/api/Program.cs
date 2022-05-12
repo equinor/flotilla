@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Configurations;
 using Api.Context;
+using Api.Scheduler;
 using Api.Services;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -29,6 +30,8 @@ builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<IsarService>();
 builder.Services.AddScoped<EchoService>();
+
+builder.Services.AddHostedService<EventScheduler>();
 
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
