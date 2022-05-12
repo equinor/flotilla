@@ -18,5 +18,12 @@ namespace Api.Models
         public DateTimeOffset StartTime { get; set; }
         [Required]
         public DateTimeOffset EndTime { get; set; }
+        [Required]
+        public EventStatus Status { get; set; } = EventStatus.Pending;
+    }
+
+    public enum EventStatus
+    {
+        Pending, Started, Completed, Failed
     }
 }

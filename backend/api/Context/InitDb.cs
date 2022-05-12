@@ -45,6 +45,7 @@ public static class InitDb
             IsarMissionId = "1",
             StartTime = DateTimeOffset.UtcNow,
             EndTime = DateTimeOffset.UtcNow,
+            Status = EventStatus.Pending
         };
 
         var event2 = new Event
@@ -53,6 +54,7 @@ public static class InitDb
             IsarMissionId = "2",
             StartTime = DateTimeOffset.UtcNow,
             EndTime = DateTimeOffset.UtcNow,
+            Status = EventStatus.Completed
         };
 
         return new List<Event>(new Event[] { event1, event2 });
