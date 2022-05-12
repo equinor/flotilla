@@ -18,8 +18,9 @@ namespace Api.Test
         {
             var options = new DbContextOptionsBuilder().UseInMemoryDatabase("flotilla").Options;
             var context = new FlotillaDbContext(options);
-            var service = new EventService(context);
-            _controller = new EventController(service);
+            var eventService = new EventService(context);
+            var robotService = new RobotService(context);
+            _controller = new EventController(eventService: eventService, robotService: robotService);
         }
 
         [Fact]

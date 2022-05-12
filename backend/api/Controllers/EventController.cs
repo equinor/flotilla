@@ -1,7 +1,7 @@
-﻿using Api.Models;
+﻿using Api.Controllers.Models;
+using Api.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
-
 namespace Api.Controllers;
 
 [ApiController]
@@ -9,10 +9,12 @@ namespace Api.Controllers;
 public class EventController : ControllerBase
 {
     private readonly EventService _eventService;
+    private readonly RobotService _robotService;
 
-    public EventController(EventService eventService)
+    public EventController(EventService eventService, RobotService robotService)
     {
         _eventService = eventService;
+        _robotService = robotService;
     }
 
     /// <summary>
@@ -64,8 +66,20 @@ public class EventController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Event>> PostEvent([FromBody] Event evnt)
+    public async Task<ActionResult<Event>> PostEvent([FromBody] EventQuery eventQuery)
     {
+        var robot = await _robotService.Read(eventQuery.RobotId);
+        if (robot == null) return NotFound($"Could not find robot with id {eventQuery.RobotId}");
+
+        var evnt = new Event
+        {
+            Robot = robot,
+            IsarMissionId = eventQuery.IsarMissionId
+        };
+        if (eventQuery.StartTime is not null)
+        {
+            evnt.StartTime = (DateTimeOffset)eventQuery.StartTime;
+        }
         var newEvent = await _eventService.Create(evnt);
         return CreatedAtAction(nameof(GetEventById), new { id = newEvent.Id }, newEvent);
     }
