@@ -9,10 +9,12 @@ namespace Api.Controllers;
 public class EventController : ControllerBase
 {
     private readonly EventService _eventService;
+    private readonly RobotService _robotService;
 
-    public EventController(EventService eventService)
+    public EventController(EventService eventService, RobotService robotService)
     {
         _eventService = eventService;
+        _robotService = robotService;
     }
 
     /// <summary>
@@ -59,13 +61,18 @@ public class EventController : ControllerBase
     /// <para> This query creates a new event and adds it to the database </para>
     /// </remarks>
     [HttpPost]
+    [Route("{robotId}/{isarMissionId}")]
     [ProducesResponseType(typeof(Event), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Event>> PostEvent([FromBody] Event evnt)
+    public async Task<ActionResult<Event>> PostEvent([FromRoute] string robotId, [FromRoute] string isarMissionId)
     {
+        var robot = await _robotService.Read(robotId);
+        var evnt = new Event();
+        evnt.Robot = robot;
+        evnt.IsarMissionId = isarMissionId;
         var newEvent = await _eventService.Create(evnt);
         return CreatedAtAction(nameof(GetEventById), new { id = newEvent.Id }, newEvent);
     }
