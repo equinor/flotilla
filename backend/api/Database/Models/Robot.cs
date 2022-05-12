@@ -43,6 +43,8 @@ namespace Api.Models
 
     public enum RobotStatus
     {
-        Available, Busy, Offline
+        Available,
+        Busy,
+        Offline
     }
 }

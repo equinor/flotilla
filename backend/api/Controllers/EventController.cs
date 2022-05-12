@@ -2,6 +2,7 @@
 using Api.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
+
 namespace Api.Controllers;
 
 [ApiController]
@@ -50,7 +51,8 @@ public class EventController : ControllerBase
     public async Task<ActionResult<Event>> GetEventById([FromRoute] string id)
     {
         var evnt = await _eventService.Read(id);
-        if (evnt == null) return NotFound($"Event with id {id} not found");
+        if (evnt == null)
+            return NotFound($"Event with id {id} not found");
         return Ok(evnt);
     }
 
@@ -69,13 +71,10 @@ public class EventController : ControllerBase
     public async Task<ActionResult<Event>> PostEvent([FromBody] EventQuery eventQuery)
     {
         var robot = await _robotService.Read(eventQuery.RobotId);
-        if (robot == null) return NotFound($"Could not find robot with id {eventQuery.RobotId}");
+        if (robot == null)
+            return NotFound($"Could not find robot with id {eventQuery.RobotId}");
 
-        var evnt = new Event
-        {
-            Robot = robot,
-            IsarMissionId = eventQuery.IsarMissionId
-        };
+        var evnt = new Event { Robot = robot, IsarMissionId = eventQuery.IsarMissionId };
         if (eventQuery.StartTime is not null)
         {
             evnt.StartTime = (DateTimeOffset)eventQuery.StartTime;
@@ -100,7 +99,8 @@ public class EventController : ControllerBase
     public async Task<ActionResult<Event>> DeleteEvent([FromRoute] string id)
     {
         var evnt = await _eventService.Delete(id);
-        if (evnt == null) return NotFound($"Event with id {id} not found");
+        if (evnt == null)
+            return NotFound($"Event with id {id} not found");
         return Ok(evnt);
     }
 }

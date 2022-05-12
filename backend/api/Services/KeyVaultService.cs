@@ -2,7 +2,6 @@
 
 namespace Api.Services
 {
-
     public class KeyVaultService
     {
         private readonly ILogger<KeyVaultService> _logger;
@@ -23,7 +22,10 @@ namespace Api.Services
             }
             catch
             {
-                _logger.LogError("Failed to retrieve secret: {secretName} from keyvault", secretName);
+                _logger.LogError(
+                    "Failed to retrieve secret: {secretName} from keyvault",
+                    secretName
+                );
                 throw;
             }
         }

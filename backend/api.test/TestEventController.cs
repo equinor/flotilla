@@ -20,7 +20,10 @@ namespace Api.Test
             var context = new FlotillaDbContext(options);
             var eventService = new EventService(context);
             var robotService = new RobotService(context);
-            _controller = new EventController(eventService: eventService, robotService: robotService);
+            _controller = new EventController(
+                eventService: eventService,
+                robotService: robotService
+            );
         }
 
         [Fact]
