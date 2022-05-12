@@ -3,10 +3,10 @@ name: Backend
 on:
   push:
     branches:
-      - dotnet
+      - main
   pull_request:
     branches:
-      - dotnet
+      - main
 
 defaults:
   run:
