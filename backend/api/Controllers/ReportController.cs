@@ -45,7 +45,8 @@ public class ReportController : ControllerBase
     public async Task<ActionResult<Report>> GetReportById([FromRoute] string id)
     {
         var report = await _reportService.Read(id);
-        if (report == null) return NotFound($"Could not find report with id {id}");
+        if (report == null)
+            return NotFound($"Could not find report with id {id}");
         return Ok(report);
     }
 

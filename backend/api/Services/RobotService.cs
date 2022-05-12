@@ -8,11 +8,11 @@ namespace Api.Services
     {
         private readonly FlotillaDbContext _context;
 
-        public RobotService(
-            FlotillaDbContext context)
+        public RobotService(FlotillaDbContext context)
         {
             _context = context;
         }
+
         public async Task<Robot> Create(Robot robot)
         {
             await _context.Robots.AddAsync(robot);
@@ -27,7 +27,9 @@ namespace Api.Services
 
         public async Task<Robot?> Read(string id)
         {
-            return await _context.Robots.FirstOrDefaultAsync(robot => robot.Id.Equals(id, StringComparison.Ordinal));
+            return await _context.Robots.FirstOrDefaultAsync(
+                robot => robot.Id.Equals(id, StringComparison.Ordinal)
+            );
         }
     }
 }

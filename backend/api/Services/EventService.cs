@@ -12,6 +12,7 @@ namespace Api.Services
         {
             _context = context;
         }
+
         public async Task<Event> Create(Event evnt)
         {
             await _context.Events.AddAsync(evnt);
@@ -26,12 +27,16 @@ namespace Api.Services
 
         public async Task<Event?> Read(string id)
         {
-            return await _context.Events.FirstOrDefaultAsync(ev => ev.Id.Equals(id, StringComparison.Ordinal));
+            return await _context.Events.FirstOrDefaultAsync(
+                ev => ev.Id.Equals(id, StringComparison.Ordinal)
+            );
         }
 
         public async Task<Event?> Delete(string id)
         {
-            var evnt = await _context.Events.FirstOrDefaultAsync(ev => ev.Id.Equals(id, StringComparison.Ordinal));
+            var evnt = await _context.Events.FirstOrDefaultAsync(
+                ev => ev.Id.Equals(id, StringComparison.Ordinal)
+            );
             if (evnt == null)
             {
                 return null;

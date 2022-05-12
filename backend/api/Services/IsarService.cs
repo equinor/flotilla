@@ -12,7 +12,11 @@ namespace Api.Services
         private readonly ILogger<IsarService> _logger;
         private readonly ReportService _reportService;
 
-        public IsarService(IConfiguration configuration, ILogger<IsarService> logger, ReportService reportService)
+        public IsarService(
+            IConfiguration configuration,
+            ILogger<IsarService> logger,
+            ReportService reportService
+        )
         {
             _logger = logger;
             _reportService = reportService;
@@ -21,7 +25,11 @@ namespace Api.Services
 
         public async Task<Report> StartMission(Robot robot, string missionId)
         {
-            string uri = QueryHelpers.AddQueryString($"{_isarUri}/schedule/start-mission", "ID", missionId);
+            string uri = QueryHelpers.AddQueryString(
+                $"{_isarUri}/schedule/start-mission",
+                "ID",
+                missionId
+            );
             var response = await httpClient.PostAsync(uri, null);
             if (!response.IsSuccessStatusCode)
             {
@@ -33,7 +41,8 @@ namespace Api.Services
             {
                 throw new MissionException("Could not read content from mission");
             }
-            var responseContent = await response.Content.ReadFromJsonAsync<IsarStartMissionResponse>();
+            var responseContent =
+                await response.Content.ReadFromJsonAsync<IsarStartMissionResponse>();
             var report = new Report
             {
                 EchoMissionId = "1",
@@ -44,7 +53,11 @@ namespace Api.Services
                 Robot = robot,
                 Log = "log"
             };
-            _logger.LogInformation("Mission {missionId} started on robot {robotId}", missionId, robot.Id);
+            _logger.LogInformation(
+                "Mission {missionId} started on robot {robotId}",
+                missionId,
+                robot.Id
+            );
             return await _reportService.Create(report);
         }
 
@@ -53,7 +66,6 @@ namespace Api.Services
             var builder = new UriBuilder($"{_isarUri}/schedule/stop-mission");
             return await httpClient.PostAsync(builder.ToString(), null);
         }
-
     }
 
     public class IsarStartMissionResponse

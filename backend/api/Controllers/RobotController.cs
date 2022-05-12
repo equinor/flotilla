@@ -13,7 +13,11 @@ public class RobotController : ControllerBase
     private readonly RobotService _robotService;
     private readonly IsarService _isarService;
 
-    public RobotController(ILogger<RobotController> logger, RobotService robotService, IsarService isarService)
+    public RobotController(
+        ILogger<RobotController> logger,
+        RobotService robotService,
+        IsarService isarService
+    )
     {
         _logger = logger;
         _robotService = robotService;
@@ -36,6 +40,7 @@ public class RobotController : ControllerBase
         var robots = await _robotService.ReadAll();
         return Ok(robots);
     }
+
     /// <summary>
     /// Gets the robot with the specified id
     /// </summary>
@@ -52,7 +57,8 @@ public class RobotController : ControllerBase
     public async Task<ActionResult<Robot>> GetRobotById([FromRoute] string id)
     {
         var robot = await _robotService.Read(id);
-        if (robot == null) return NotFound($"Could not find robot with id {id}");
+        if (robot == null)
+            return NotFound($"Could not find robot with id {id}");
         return Ok(robot);
     }
 
@@ -89,10 +95,14 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Report>> StartMission([FromRoute] string robotId, [FromRoute] string missionId)
+    public async Task<ActionResult<Report>> StartMission(
+        [FromRoute] string robotId,
+        [FromRoute] string missionId
+    )
     {
         var robot = await _robotService.Read(robotId);
-        if (robot == null) return NotFound($"Could not find robot with robot id {robotId}");
+        if (robot == null)
+            return NotFound($"Could not find robot with robot id {robotId}");
         var report = await _isarService.StartMission(robot, missionId);
         return Ok(report);
     }
@@ -114,7 +124,8 @@ public class RobotController : ControllerBase
     public async Task<ActionResult<IsarStopMissionResponse>> StopMission([FromRoute] string robotId)
     {
         var response = await _isarService.StopMission();
-        if (!response.IsSuccessStatusCode) _logger.LogError("Could not stop mission with id {robotId}", robotId);
+        if (!response.IsSuccessStatusCode)
+            _logger.LogError("Could not stop mission with id {robotId}", robotId);
         if (response.Content != null)
         {
             string? responseContent = await response.Content.ReadAsStringAsync();

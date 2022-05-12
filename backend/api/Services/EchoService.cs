@@ -40,12 +40,17 @@ namespace Api.Services
             var response = await client.GetAsync(uri);
             if (!response.IsSuccessStatusCode)
             {
-                throw new MissionNotFoundException($"Failed to retrieve missions from Echo: {response.ReasonPhrase}");
+                throw new MissionNotFoundException(
+                    $"Failed to retrieve missions from Echo: {response.ReasonPhrase}"
+                );
             }
 
-            var echoMissions = await response.Content.ReadFromJsonAsync<List<EchoMissionResponse>>();
+            var echoMissions = await response.Content.ReadFromJsonAsync<
+                List<EchoMissionResponse>
+            >();
 
-            if (echoMissions is null) throw new JsonException("Failed to deserialize missions from Echo");
+            if (echoMissions is null)
+                throw new JsonException("Failed to deserialize missions from Echo");
 
             var missions = ProcessEchoMissions(echoMissions);
             return missions;
@@ -60,12 +65,15 @@ namespace Api.Services
             var response = await client.GetAsync(uri);
             if (!response.IsSuccessStatusCode)
             {
-                throw new MissionNotFoundException($"Failed to retrieve mission with ID: {missionId} from Echo: {response.ReasonPhrase}");
+                throw new MissionNotFoundException(
+                    $"Failed to retrieve mission with ID: {missionId} from Echo: {response.ReasonPhrase}"
+                );
             }
 
             var echoMission = await response.Content.ReadFromJsonAsync<EchoMissionResponse>();
 
-            if (echoMission is null) throw new JsonException("Failed to deserialize mission from Echo");
+            if (echoMission is null)
+                throw new JsonException("Failed to deserialize mission from Echo");
 
             var mission = ProcessEchoMission(echoMission);
             return mission;
@@ -81,8 +89,13 @@ namespace Api.Services
         private static void ConfigureRequest(AccessToken accessToken)
         {
             client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.Token);
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json")
+            );
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "Bearer",
+                accessToken.Token
+            );
         }
 
         private Uri ConstructGetMissionsRequestUri()
@@ -134,7 +147,9 @@ namespace Api.Services
                 var tag = new Tag()
                 {
                     TagId = planItem.Tag,
-                    URL = new Uri($"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"),
+                    URL = new Uri(
+                        $"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"
+                    ),
                     InspectionTypes = ProcessSensorTypes(planItem.SensorTypes)
                 };
 
@@ -152,17 +167,19 @@ namespace Api.Services
             {
                 var mission = ProcessEchoMission(echoMission);
 
-                if (mission is null) continue;
+                if (mission is null)
+                    continue;
 
                 missions.Add(ProcessEchoMission(echoMission));
-            };
+            }
 
             return missions;
         }
 
         private Mission ProcessEchoMission(EchoMissionResponse echoMission)
         {
-            if (echoMission.PlanItems is null) throw new MissionNotFoundException("Mission has no tags");
+            if (echoMission.PlanItems is null)
+                throw new MissionNotFoundException("Mission has no tags");
 
             var mission = new Mission()
             {

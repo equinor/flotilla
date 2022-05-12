@@ -40,6 +40,8 @@ namespace Api.Models
 
     public enum ReportStatus
     {
-        InProgress, Completed, Failed
+        InProgress,
+        Completed,
+        Failed
     }
 }

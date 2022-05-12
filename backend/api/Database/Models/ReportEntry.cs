@@ -32,12 +32,15 @@ namespace Api.Models
 
     public enum ReportEntryStatus
     {
-        Completed, Failed
+        Completed,
+        Failed
     }
 
     public enum InspectionType
     {
-        Image, ThermalImage, Audio
+        Image,
+        ThermalImage,
+        Audio
     }
 
     public class SelectInspectionType

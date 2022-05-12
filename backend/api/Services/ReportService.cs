@@ -20,7 +20,12 @@ namespace Api.Services
             return report;
         }
 
-        public async Task<Report> Create(string isarMissionId, string echoMissionId, string log, ReportStatus status)
+        public async Task<Report> Create(
+            string isarMissionId,
+            string echoMissionId,
+            string log,
+            ReportStatus status
+        )
         {
             var report = new Report
             {
@@ -41,7 +46,9 @@ namespace Api.Services
 
         public async Task<Report?> Read(string id)
         {
-            return await _context.Reports.FirstOrDefaultAsync(report => report.Id.Equals(id, StringComparison.Ordinal));
+            return await _context.Reports.FirstOrDefaultAsync(
+                report => report.Id.Equals(id, StringComparison.Ordinal)
+            );
         }
     }
 }
