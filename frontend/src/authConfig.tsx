@@ -13,12 +13,8 @@ export const msalConfig = {
     }
 };
 
-export const APIResourceIDs = {
-    backendAPIID: "ea4c7b92-47b3-45fb-bd25-a8070f0c495c"
-}
-
 export const loginRequest = {
-    scopes: ["api://" + APIResourceIDs.backendAPIID + "/user_impersonation"]
+    scopes: ["api://ea4c7b92-47b3-45fb-bd25-a8070f0c495c/user_impersonation"]
 }
 
 export const APIConfig = {
