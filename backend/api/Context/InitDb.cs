@@ -35,11 +35,11 @@ public static class InitDb
         return new List<Robot>(new Robot[] { robot1, robot2 });
     }
 
-    public static readonly List<Event> Events = GetEvents();
+    public static readonly List<ScheduledMission> ScheduledMissions = GetScheduledMissions();
 
-    private static List<Event> GetEvents()
+    private static List<ScheduledMission> GetScheduledMissions()
     {
-        var event1 = new Event
+        var scheduledMission1 = new ScheduledMission
         {
             Robot = Robots[0],
             IsarMissionId = "1",
@@ -47,7 +47,7 @@ public static class InitDb
             EndTime = DateTimeOffset.UtcNow,
         };
 
-        var event2 = new Event
+        var scheduledMission2 = new ScheduledMission
         {
             Robot = Robots[1],
             IsarMissionId = "2",
@@ -55,13 +55,13 @@ public static class InitDb
             EndTime = DateTimeOffset.UtcNow,
         };
 
-        return new List<Event>(new Event[] { event1, event2 });
+        return new List<ScheduledMission>(new ScheduledMission[] { scheduledMission1, scheduledMission2 });
     }
 
     public static void PopulateDb(FlotillaDbContext context)
     {
         context.AddRange(Robots);
-        context.AddRange(Events);
+        context.AddRange(ScheduledMissions);
 
         context.SaveChanges();
     }
