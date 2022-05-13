@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 # nullable disable
 namespace Api.Models
 {
-    public class Event
+    public class ScheduledMission
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

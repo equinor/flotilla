@@ -8,7 +8,7 @@ public class FlotillaDbContext : DbContext
     public DbSet<Robot> Robots => Set<Robot>();
     public DbSet<Report> Reports => Set<Report>();
 
-    public DbSet<Event> Events => Set<Event>();
+    public DbSet<ScheduledMission> ScheduledMissions => Set<ScheduledMission>();
 
     private static bool initialized;
 

@@ -28,7 +28,7 @@ builder.Services.AddSingleton<DefaultAzureCredential>();
 builder.Services.AddSingleton<KeyVaultService>();
 
 builder.Services.AddScoped<RobotService>();
-builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<ScheduledMissionService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<IsarService>();
 builder.Services.AddScoped<EchoService>();
