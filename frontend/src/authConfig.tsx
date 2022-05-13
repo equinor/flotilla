@@ -13,12 +13,16 @@ export const msalConfig = {
     }
 };
 
+export const APIResourceIDs = {
+    backendAPIID: "ea4c7b92-47b3-45fb-bd25-a8070f0c495c"
+}
+
 export const loginRequest = {
-    scopes: ["api://" + msalConfig.auth.clientId + "/user_impersonation"]
+    scopes: ["api://" + APIResourceIDs.backendAPIID + "/user_impersonation"]
 }
 
 export const APIConfig = {
-    backendAPIEndpoint: "http://localhost:8000",
+    backendAPIEndpoint: "https://localhost:8000",
     originList: "http://localhost:3001"
 };
 

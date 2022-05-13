@@ -77,6 +77,11 @@ if (app.Environment.IsDevelopment())
         }
     );
 }
+app.UseCors(corsBuilder =>
+       corsBuilder.WithOrigins(builder.Configuration.GetValue<string>("AllowedOrigins"))
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials());
 
 app.UseHttpsRedirection();
 
