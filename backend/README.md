@@ -15,6 +15,8 @@ To set up the backend on **Linux**, install .NET for linux
 For the configuration to be able to read secrets from the keyvault, you will need to have the client secret stored locally
 in your secret manager as described in the [Configuration Section](#Configuration).
 
+For the MQTT client to function, the application expects a config variable named `mqtt-broker-password`, containing the password for the mqtt broker. This must either be stored in a connected keyvault or in the ASP.NET secret manager. 
+
 ## Run
 
 To build and run the app, run the following command in the backend folder:
