@@ -38,6 +38,39 @@ To unit test the backend, run the following command in the backend folder:
 dotnet test
 ```
 
+## Components
+
+### MQTT Client
+The MQTT client is implemented in [MqttService.cs](api/MQTT/MqttService.cs)
+and runs as an ASP.NET
+[BackgroundService](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-6.0&tabs=visual-studio#backgroundservice-base-class).  
+Each MQTT message has its own class representation, and is linked to its respective topic pattern in [MqttTopics.cs](api/MQTT/MqttTopics.cs).  
+To match incoming topic messages against the topic patterns we use helper functions to convert from the
+[MQTT wildcards](https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901242)
+to regEx wildcards for the dictionnary lookup.
+
+Each topic then has it's respective [event](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/events/)
+which is triggered whenever a new message arrives in that topic.  
+The list of topics being subscribe to is defined as an array in
+[appsettings.Development.json](api/appsettings.Development.json).
+
+An example of the subscriber pattern for an MQTT event is implemented in
+[ReportService.cs](api/Services/ReportService.cs).
+
+## Configuration
+
+The project has two [appsettings](https://docs.microsoft.com/en-us/iis-administration/configuration/appsettings.json)
+files.  
+The base `appsettings.json` file is for common variables across all environments, while the
+`appsetings.Development.json` file is for variables specific to the Dev environments, such as the client ID's for the
+various app registrations used in development.
+
+The configuration will also read from a configured azure keyvault, which can then be accessed the same way as any other config variables.  
+For this to work you will need to have the client secret stored locally in the secret manager as described below.
+
+Any local secrets used for configuration should be added in the
+[ASP.NET Secret Manager](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-6.0&tabs=linux#secret-manager).
+
 ## Formatting
 
 ### CSharpier
@@ -46,7 +79,7 @@ In everyday development we use [CSharpier](https://csharpier.com/) to auto-forma
 
 ### Dotnet format
 
-The formatting of the backend is defined in the [.editorconfig file](../editorconfig).
+The formatting of the backend is defined in the [.editorconfig file](../.editorconfig).
 
 We use [dotnet format](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-format)
 to format and verify code style in backend based on the
@@ -67,16 +100,4 @@ dotnet format is used to detect naming conventions and other code-related issues
 dotnet format --severity info
 ```
 
-## Configuration
 
-The project has two [appsettings](https://docs.microsoft.com/en-us/iis-administration/configuration/appsettings.json)
-files.  
-The base `appsettings.json` file is for common variables across all environments, while the
-`appsetings.Development.json` file is for variables specific to the Dev environments, such as the client ID's for the
-various app registrations used in development.
-
-The configuration will also read from a configured azure keyvault, which can then be accessed the same way as any other config variables.  
-For this to work you will need to have the client secret stored locally in the secret manager as described below.
-
-Any local secrets used for configuration should be added in the
-[ASP.NET Secret Manager](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-6.0&tabs=linux#secret-manager).
