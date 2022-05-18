@@ -6,26 +6,15 @@ using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddAzureClients(
-    azureBuilder =>
-    {
-        azureBuilder.AddSecretClient(builder.Configuration.GetSection("KeyVault"));
-
-        azureBuilder.UseCredential(new DefaultAzureCredential());
-    }
-);
 
 builder.Services.AddDbContext<FlotillaDbContext>(
     options => options.UseInMemoryDatabase("flotilla")
 );
 
 builder.Services.AddSingleton<DefaultAzureCredential>();
-builder.Services.AddSingleton<KeyVaultService>();
 
 builder.Services.AddScoped<RobotService>();
 builder.Services.AddScoped<ScheduledMissionService>();
@@ -56,6 +45,11 @@ builder.Services.AddAuthorization(
     }
 );
 
+builder.Configuration.AddAzureKeyVault(
+    new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
+    new DefaultAzureCredential()
+);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -77,11 +71,14 @@ if (app.Environment.IsDevelopment())
         }
     );
 }
-app.UseCors(corsBuilder =>
-       corsBuilder.WithOrigins(builder.Configuration.GetValue<string>("AllowedOrigins"))
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials());
+app.UseCors(
+    corsBuilder =>
+        corsBuilder
+            .WithOrigins(builder.Configuration.GetValue<string>("AllowedOrigins"))
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+);
 
 app.UseHttpsRedirection();
 
