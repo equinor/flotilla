@@ -12,6 +12,9 @@ If you already have visual studio installed, you can open the "Visual Studio Ins
 To set up the backend on **Linux**, install .NET for linux
 [here](https://docs.microsoft.com/en-us/dotnet/core/install/linux).
 
+For the configuration to be able to read secrets from the keyvault, you will need to have the client secret stored locally
+in your secret manager as described in the [Configuration Section](#Configuration).
+
 ## Run
 
 To build and run the app, run the following command in the backend folder:
@@ -70,5 +73,8 @@ The base `appsettings.json` file is for common variables across all environments
 `appsetings.Development.json` file is for variables specific to the Dev environments, such as the client ID's for the
 various app registrations used in development.
 
-Any secrets used for configuration should be added in the
+The configuration will also read from a configured azure keyvault, which can then be accessed the same way as any other config variables.  
+For this to work you will need to have the client secret stored locally in the secret manager as described below.
+
+Any local secrets used for configuration should be added in the
 [ASP.NET Secret Manager](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-6.0&tabs=linux#secret-manager).
