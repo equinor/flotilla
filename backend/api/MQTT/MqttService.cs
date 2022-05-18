@@ -1,4 +1,5 @@
-﻿using Api.Mqtt.MessageModels;
+﻿using Api.Mqtt.Events;
+using Api.Mqtt.MessageModels;
 using Api.Utilities;
 using MQTTnet;
 using MQTTnet.Client.Connecting;
@@ -12,6 +13,12 @@ namespace Api.Mqtt
 {
     public class MqttService : BackgroundService
     {
+        #region Events
+        public event EventHandler<MqttReceivedArgs>? MqttIsarMissionReceived;
+        public event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
+        public event EventHandler<MqttReceivedArgs>? MqttIsarStepReceived;
+        #endregion
+
         public static MqttService? Instance { get; private set; }
 
         private readonly ILogger<MqttService> _logger;
@@ -163,6 +170,30 @@ namespace Api.Mqtt
                     nameof(T)
                 );
                 return;
+            }
+
+            var type = typeof(T);
+            try
+            {
+                var raiseEvent = type switch
+                {
+                    _ when type == typeof(IsarMission) => MqttIsarMissionReceived,
+                    _ when type == typeof(IsarTask) => MqttIsarTaskReceived,
+                    _ when type == typeof(IsarStep) => MqttIsarStepReceived,
+                    _
+                      => throw new NotImplementedException(
+                          $"No event defined for message type '{nameof(T)}'"
+                      ),
+                };
+                // Event will be null if there are no subscribers
+                if (raiseEvent is not null)
+                {
+                    raiseEvent(this, new MqttReceivedArgs(message));
+                }
+            }
+            catch (NotImplementedException e)
+            {
+                _logger.LogWarning("{msg}", e.Message);
             }
         }
     }
