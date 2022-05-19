@@ -22,5 +22,13 @@ namespace Api.Database.Models
 
         [Required]
         public DateTimeOffset EndTime { get; set; }
+
+        [Required]
+        public ScheduledMissionStatus Status { get; set; } = ScheduledMissionStatus.Pending;
+    }
+
+    public enum ScheduledMissionStatus
+    {
+        Pending, Started, Successful, Failed
     }
 }
