@@ -2,7 +2,11 @@
 
 ## Setup
 
-The app uses TypeScript and React. For development, Node v17.x needs to be installed. Installation instructions can be found [here](https://github.com/nodesource/distributions/blob/master/README.md).
+The app uses TypeScript and React. For development, Node v17.x needs to be installed. Installation instructions can be found
+[here](https://github.com/nodesource/distributions/blob/master/README.md).
+
+The application reads environment variables from the `.env` file in the `frontend` folder.  
+As a starting point, make a copy of the `.env.example` file and rename it to `.env`.
 
 ## Install
 
@@ -49,3 +53,7 @@ npm run prettier_check
 We recommend to install the [prettier extension for vs code](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 and set the `format on save` option for vs code to true.  
 You can do this by going to `File` -> `Preferences` -> `Settings` and then searching for "Format On Save" and tick the box.
+## Config
+
+The application reads custom environment variables from the `.env` file on startup. The files need to be prefixed `REACT_APP_` to be included in the application.  
+These are parsed and defined in [config.ts](./src/config.ts).
