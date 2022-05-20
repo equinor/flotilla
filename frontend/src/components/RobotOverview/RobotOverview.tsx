@@ -30,7 +30,7 @@ const RobotStatusRow = ({ robot }: RobotProps): JSX.Element => {
                 </div>
             </Table.Cell>
             <Table.Cell className={styles.tableBatteryCell} variant="numeric">
-                <BatteryStatusView battery={battery}/>
+                <BatteryStatusView battery={battery} />
             </Table.Cell>
             <Table.Cell className={styles.tableInfoCell}>
                 <RobotInfoButton robot={robot} />

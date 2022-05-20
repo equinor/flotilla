@@ -1,19 +1,22 @@
-import { AccessTokenContext } from "App";
-import { components} from "models/schema";
-import { useContext} from "react";
-import { APIConfig} from "../../authConfig";
+import { AccessTokenContext } from 'App'
+import { components } from 'models/schema'
+import { useContext } from 'react'
+import { APIConfig } from '../../authConfig'
 
-export class BackendAPICaller{
+export class BackendAPICaller {
     /* Implements the request sent to the backend api.
      */
     accessToken: string
 
-    constructor(accessToken: string){
+    constructor(accessToken: string) {
         this.accessToken = accessToken
     }
 
-    private async query<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', path: string, body?: T): Promise<{ body: T; headers: Headers }> {
-        
+    private async query<T>(
+        method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+        path: string,
+        body?: T
+    ): Promise<{ body: T; headers: Headers }> {
         const headers = {
             'content-type': 'application/json',
             Authorization: `Bearer ${this.accessToken}`,
@@ -31,16 +34,16 @@ export class BackendAPICaller{
 
         const response = await fetch(url, init)
         if (!response.ok)
-            return response.text().then(errorText => {
+            return response.text().then((errorText) => {
                 throw new Error(`Error with query: ${errorText}`)
             })
-        const responseBody = await response.json().catch(e => {
+        const responseBody = await response.json().catch((e) => {
             throw new Error(`Error getting json from response: ${e}`)
         })
         return { body: responseBody, headers: response.headers }
     }
 
-    private async GET<T>(path: string, ): Promise<{ body: T; headers: Headers }> {
+    private async GET<T>(path: string): Promise<{ body: T; headers: Headers }> {
         return this.query('GET', path)
     }
 
@@ -56,10 +59,10 @@ export class BackendAPICaller{
         return this.query('DELETE', path, body)
     }
 
-    async getRobots(){
-        const result = await this.GET<components["schemas"]["RobotRequest"][]>("robots").catch(e => {
-            throw new Error("Could not get robots : " + e)
-        });
+    async getRobots() {
+        const result = await this.GET<components['schemas']['RobotRequest'][]>('robots').catch((e) => {
+            throw new Error('Could not get robots : ' + e)
+        })
         console.log(result)
         return result
     }
@@ -67,5 +70,5 @@ export class BackendAPICaller{
 
 export const useApi = () => {
     const accessToken = useContext(AccessTokenContext)
-    return new BackendAPICaller(accessToken)    
+    return new BackendAPICaller(accessToken)
 }
