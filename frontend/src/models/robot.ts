@@ -42,22 +42,12 @@ const turtleRobotInfo: RobotInfo = {
 }
 
 export const defaultRobots: { [name: string]: Robot } = {
-    taurob: new Robot(
-        taurobRobotInfo,
-        new Battery(BatteryStatus.Charging, 100),
-        defaultPose,
-        RobotStatus.Available
-    ),
+    taurob: new Robot(taurobRobotInfo, new Battery(BatteryStatus.Charging, 100), defaultPose, RobotStatus.Available),
     exRobotics: new Robot(
         exRobotInfo,
         new Battery(BatteryStatus.Normal, 59),
         defaultPose,
         RobotStatus.MissionInProgress
     ),
-    turtle: new Robot(
-        turtleRobotInfo,
-        new Battery(BatteryStatus.Error),
-        defaultPose,
-        RobotStatus.Offline
-    ),
+    turtle: new Robot(turtleRobotInfo, new Battery(BatteryStatus.Error), defaultPose, RobotStatus.Offline),
 }

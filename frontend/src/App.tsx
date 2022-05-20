@@ -3,34 +3,29 @@ import { platform } from '@equinor/eds-icons'
 import { RobotOverview } from './components/RobotOverview'
 import { defaultRobots } from './models/robot'
 import './app.css'
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from "@azure/msal-react";
-import { SignInPage } from "./components/SignInPage/SignInPage";
-import { ProfileContent } from "components/SignInPage/ProfileContent";
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from '@azure/msal-react'
+import { SignInPage } from './components/SignInPage/SignInPage'
+import { ProfileContent } from 'components/SignInPage/ProfileContent'
 import { createContext, useEffect, useState } from 'react'
 import { fetchAccessToken } from 'authConfig'
 Icon.add({ platform })
 
-const robots = [
-    defaultRobots['taurob'],
-    defaultRobots['exRobotics'],
-    defaultRobots['turtle'],
-]
+const robots = [defaultRobots['taurob'], defaultRobots['exRobotics'], defaultRobots['turtle']]
 
-export const AccessTokenContext = createContext(""); 
-
+export const AccessTokenContext = createContext('')
 
 function App() {
-    const authContext = useMsal();
-    const [accessToken, setAccessToken] = useState("")
+    const authContext = useMsal()
+    const [accessToken, setAccessToken] = useState('')
     useEffect(() => {
         fetchAccessToken(authContext).then((accessToken) => {
             setAccessToken(accessToken)
         })
-    },[])
+    }, [])
     return (
-        <AccessTokenContext.Provider value = {accessToken}>
+        <AccessTokenContext.Provider value={accessToken}>
             <div className="app-ui">
-                <UnauthenticatedTemplate>    
+                <UnauthenticatedTemplate>
                     <div className="sign-in-page">
                         <SignInPage></SignInPage>
                     </div>
@@ -39,7 +34,7 @@ function App() {
                     <ProfileContent />
                     <div className="header">
                         <Typography color="primary" variant="h1" bold>
-                            Flotilla 
+                            Flotilla
                         </Typography>
                     </div>
                     <div className="robot-overview">
