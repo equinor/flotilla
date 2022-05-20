@@ -65,7 +65,7 @@ namespace Api.Mqtt
         {
             _logger.LogInformation("MQTT client STARTED");
             await _mqttClient.StartAsync(_options);
-            while (!stoppingToken.IsCancellationRequested) { }
+            await stoppingToken;
             await _mqttClient.StopAsync();
             _logger.LogInformation("MQTT client STOPPED");
         }
