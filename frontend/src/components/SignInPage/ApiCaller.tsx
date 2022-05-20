@@ -1,7 +1,7 @@
 import { AccessTokenContext } from 'App'
+import { config } from 'config'
 import { components } from 'models/schema'
 import { useContext } from 'react'
-import { APIConfig } from '../../authConfig'
 
 export class BackendAPICaller {
     /* Implements the request sent to the backend api.
@@ -30,7 +30,7 @@ export class BackendAPICaller {
             init.body = JSON.stringify(body)
         }
 
-        const url = `${APIConfig.backendAPIEndpoint}/${path}`
+        const url = `${config.BACKEND_URL}/${path}`
 
         const response = await fetch(url, init)
         if (!response.ok)
