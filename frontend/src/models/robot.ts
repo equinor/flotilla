@@ -7,9 +7,15 @@ export enum RobotStatus {
     MissionInProgress = 'Mission in progress',
 }
 
+export enum RobotType {
+    Taurob = 'Taurob',
+    ExRobotics = 'ExRobotics',
+    TurtleBot = 'TurtleBot',
+}
+
 export interface RobotInfo {
     name: string
-    type: string
+    type: RobotType
 }
 
 export class Robot {
@@ -28,17 +34,17 @@ export class Robot {
 
 const taurobRobotInfo: RobotInfo = {
     name: 'William',
-    type: 'Taurob',
+    type: RobotType.Taurob,
 }
 
 const exRobotInfo: RobotInfo = {
     name: 'Bertha',
-    type: 'ExRobotics',
+    type: RobotType.ExRobotics,
 }
 
 const turtleRobotInfo: RobotInfo = {
     name: 'Edward',
-    type: 'TurtleBot',
+    type: RobotType.TurtleBot,
 }
 
 export const defaultRobots: { [name: string]: Robot } = {

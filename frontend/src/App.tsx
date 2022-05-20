@@ -1,16 +1,15 @@
-import { Icon, Typography } from '@equinor/eds-core-react'
-import { platform } from '@equinor/eds-icons'
-import { RobotOverview } from './components/RobotOverview'
-import { defaultRobots } from './models/robot'
 import './app.css'
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from '@azure/msal-react'
 import { SignInPage } from './components/SignInPage/SignInPage'
-import { ProfileContent } from 'components/SignInPage/ProfileContent'
 import { createContext, useEffect, useState } from 'react'
 import { fetchAccessToken } from 'authConfig'
-Icon.add({ platform })
+import { BrowserRouter as Router, Routes, Route, Link, BrowserRouter } from 'react-router-dom'
+import { FrontPage } from 'components/FrontPage/FrontPage'
+import { TestPage } from 'components/FrontPage/TestPage'
 
-const robots = [defaultRobots['taurob'], defaultRobots['exRobotics'], defaultRobots['turtle']]
+// Icon.add({ platform })
+
+// const robots = [defaultRobots['taurob'], defaultRobots['exRobotics'], defaultRobots['turtle']]
 
 export const AccessTokenContext = createContext('')
 
@@ -31,20 +30,12 @@ function App() {
                     </div>
                 </UnauthenticatedTemplate>
                 <AuthenticatedTemplate>
-                    <ProfileContent />
-                    <div className="header">
-                        <Typography color="primary" variant="h1" bold>
-                            Flotilla
-                        </Typography>
-                    </div>
-                    <div className="robot-overview">
-                        <RobotOverview robots={robots}></RobotOverview>
-                    </div>
-                    <div className="mission-overview">
-                        <Typography variant="h2" style={{ marginTop: '20px' }}>
-                            Mission Overview
-                        </Typography>
-                    </div>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route path="/" element={<FrontPage />} />
+                            <Route path="test" element={<TestPage />} />
+                        </Routes>
+                    </BrowserRouter>
                 </AuthenticatedTemplate>
             </div>
         </AccessTokenContext.Provider>

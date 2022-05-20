@@ -53,6 +53,7 @@ npm run prettier_check
 We recommend to install the [prettier extension for vs code](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 and set the `format on save` option for vs code to true.  
 You can do this by going to `File` -> `Preferences` -> `Settings` and then searching for "Format On Save" and tick the box.
+
 ## Config
 
 The application reads custom environment variables from the `.env` file on startup. The files need to be prefixed `REACT_APP_` to be included in the application.  
