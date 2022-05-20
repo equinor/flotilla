@@ -32,14 +32,12 @@ export class BackendAPICaller {
 
         const url = `${config.BACKEND_URL}/${path}`
 
-        const response = await fetch(url, init)
-        if (!response.ok)
-            return response.text().then((errorText) => {
-                throw new Error(`Error with query: ${errorText}`)
-            })
+        const response: Response = await fetch(url, init)
+        if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`)
         const responseBody = await response.json().catch((e) => {
             throw new Error(`Error getting json from response: ${e}`)
         })
+        console.log(`response: ${response.statusText}`)
         return { body: responseBody, headers: response.headers }
     }
 
@@ -60,8 +58,9 @@ export class BackendAPICaller {
     }
 
     async getRobots() {
-        const result = await this.GET<components['schemas']['RobotRequest'][]>('robots').catch((e) => {
-            throw new Error('Could not get robots : ' + e)
+        const path: string = 'robots'
+        const result = await this.GET<components['schemas']['RobotRequest'][]>(path).catch((e) => {
+            throw new Error(`Failed to GET /${path}: ` + e)
         })
         console.log(result)
         return result
