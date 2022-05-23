@@ -13,13 +13,9 @@ namespace Api.Mqtt
 {
     public class MqttService : BackgroundService
     {
-        #region Events
-        public event EventHandler<MqttReceivedArgs>? MqttIsarMissionReceived;
-        public event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
-        public event EventHandler<MqttReceivedArgs>? MqttIsarStepReceived;
-        #endregion
-
-        public static MqttService? Instance { get; private set; }
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarMissionReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarStepReceived;
 
         private readonly ILogger<MqttService> _logger;
 
@@ -34,7 +30,6 @@ namespace Api.Mqtt
 
         public MqttService(ILogger<MqttService> logger, IConfiguration config)
         {
-            Instance = this;
             _logger = logger;
             var mqttFactory = new MqttFactory();
             _mqttClient = mqttFactory.CreateManagedMqttClient();

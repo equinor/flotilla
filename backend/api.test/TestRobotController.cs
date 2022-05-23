@@ -21,14 +21,13 @@ namespace Api.Test
         {
             // Using Moq https://github.com/moq/moq4
             var isarLogger = new Mock<ILogger<IsarService>>();
-            var reportLogger = new Mock<ILogger<ReportService>>();
 
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
             var options = new DbContextOptionsBuilder().UseInMemoryDatabase("flotilla").Options;
             var context = new FlotillaDbContext(options);
 
-            var reportService = new ReportService(context, reportLogger.Object);
+            var reportService = new ReportService(context);
             var isarService = new IsarService(config, isarLogger.Object, reportService);
             var service = new RobotService(context);
 
