@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Configurations;
 using Api.Context;
-using Api.MQTT;
+using Api.Mqtt;
 using Api.Services;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
