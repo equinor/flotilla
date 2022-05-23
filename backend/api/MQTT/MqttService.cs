@@ -1,4 +1,5 @@
-﻿using Api.Mqtt.Events;
+﻿using System.Text.Json;
+using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Utilities;
 using MQTTnet;
@@ -7,7 +8,6 @@ using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Extensions.ManagedClient;
-using System.Text.Json;
 
 namespace Api.Mqtt
 {
