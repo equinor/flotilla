@@ -86,11 +86,7 @@ namespace Api.Mqtt
                 return;
             }
 
-            _logger.LogInformation(
-                "Topic: {topic} - Message recieved: \n{payload}",
-                topic,
-                content
-            );
+            _logger.LogDebug("Topic: {topic} - Message recieved: \n{payload}", topic, content);
 
             switch (messageType)
             {
