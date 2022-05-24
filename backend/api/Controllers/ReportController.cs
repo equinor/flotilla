@@ -49,19 +49,4 @@ public class ReportController : ControllerBase
             return NotFound($"Could not find report with id {id}");
         return Ok(report);
     }
-
-    /// <summary>
-    /// Register a new report.
-    /// </summary>
-    [HttpPost]
-    [ProducesResponseType(typeof(Report), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Report>> PostReport([FromBody] Report report)
-    {
-        var newReport = await _reportService.Create(report);
-        return CreatedAtAction(nameof(GetReportById), new { id = newReport.Id }, newReport);
-    }
 }
