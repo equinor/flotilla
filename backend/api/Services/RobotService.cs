@@ -1,4 +1,5 @@
 ﻿using Api.Context;
+using Api.Controllers.Models;
 using Api.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,11 +14,23 @@ namespace Api.Services
             _context = context;
         }
 
-        public async Task<Robot> Create(Robot robot)
+        public async Task<Robot> Create(CreateRobotQuery robot)
         {
-            await _context.Robots.AddAsync(robot);
+            var newRobot = new Robot()
+            {
+                Name = robot.Name,
+                Model = robot.Model,
+                SerialNumber = robot.SerialNumber,
+                Logs = "",
+                Host = robot.Host,
+                Port = robot.Port,
+                Enabled = robot.Enabled,
+                Status = robot.Status
+            };
+
+            await _context.Robots.AddAsync(newRobot);
             await _context.SaveChangesAsync();
-            return robot;
+            return newRobot;
         }
 
         public async Task<IEnumerable<Robot>> ReadAll()
