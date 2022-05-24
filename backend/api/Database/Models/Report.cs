@@ -35,13 +35,15 @@ namespace Api.Models
         public DateTimeOffset EndTime { get; set; }
 
         [Required]
-        public virtual ICollection<ReportEntry> Entries { get; private set; }
+        public virtual IList<Task> Tasks { get; private set; }
     }
 
     public enum ReportStatus
     {
+        Successful,
+        NotStarted,
         InProgress,
-        Completed,
-        Failed
+        Failed,
+        Cancelled,
     }
 }

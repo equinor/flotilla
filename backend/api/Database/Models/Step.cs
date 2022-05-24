@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 # nullable disable
 namespace Api.Models
 {
-    public class ReportEntry
+    public class Step
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -12,28 +12,41 @@ namespace Api.Models
         public string Id { get; set; }
 
         [Required]
-        public virtual Report Report { get; set; }
+        public string IsarStepId { get; set; }
+
+        [Required]
+        public virtual Task task { get; set; }
 
         public string TagId { get; set; }
 
         [Required]
-        public ReportEntryStatus ReportEntryStatus { get; set; }
+        public StepStatus StepStatus { get; set; }
 
         [Required]
+        public StepType StepType { get; set; }
+
         public InspectionType InspectionType { get; set; }
 
         [Required]
         public DateTimeOffset Time { get; set; }
 
         [MaxLength(128)]
-        [Required]
         public string FileLocation { get; set; }
     }
 
-    public enum ReportEntryStatus
+    public enum StepStatus
     {
-        Completed,
-        Failed
+        Successful,
+        InProgress,
+        NotStarted,
+        Failed,
+        Cancelled
+    }
+
+    public enum StepType
+    {
+        Motion,
+        Inspection
     }
 
     public enum InspectionType
