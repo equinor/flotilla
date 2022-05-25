@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 # nullable disable
 namespace Api.Models
 {
-    public class Task
+    public class IsarTask
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -20,16 +20,16 @@ namespace Api.Models
         public string TagId { get; set; }
 
         [Required]
-        public TaskStatus TaskStatus { get; set; }
+        public IsarTaskStatus TaskStatus { get; set; }
 
         [Required]
         public DateTimeOffset Time { get; set; }
 
         [Required]
-        public virtual IList<Step> steps { get; set; }
+        public virtual IList<IsarStep> Steps { get; set; }
     }
 
-    public enum TaskStatus
+    public enum IsarTaskStatus
     {
         Successful,
         PartiallySuccessful,

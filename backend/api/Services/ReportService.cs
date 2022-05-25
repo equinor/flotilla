@@ -17,6 +17,7 @@ namespace Api.Services
         {
             await _context.Reports.AddAsync(report);
             await _context.SaveChangesAsync();
+
             return report;
         }
 
@@ -36,6 +37,7 @@ namespace Api.Services
                 StartTime = DateTimeOffset.UtcNow,
             };
             await Create(report);
+
             return report;
         }
 

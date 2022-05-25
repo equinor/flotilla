@@ -35,7 +35,7 @@ namespace Api.Models
         public DateTimeOffset EndTime { get; set; }
 
         [Required]
-        public virtual IList<Task> Tasks { get; private set; }
+        public virtual IList<IsarTask> Tasks { get; set; }
     }
 
     public enum ReportStatus

@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Api.Models;
 using Api.Utilities;
 using Microsoft.AspNetCore.WebUtilities;
@@ -30,7 +31,9 @@ namespace Api.Services
                 "ID",
                 missionId
             );
+
             var response = await httpClient.PostAsync(uri, null);
+
             if (!response.IsSuccessStatusCode)
             {
                 string msg = response.ToString();
@@ -41,18 +44,26 @@ namespace Api.Services
             {
                 throw new MissionException("Could not read content from mission");
             }
-            var responseContent =
+
+            var isarMissionResponse =
                 await response.Content.ReadFromJsonAsync<IsarStartMissionResponse>();
+            if (isarMissionResponse is null)
+                throw new JsonException("Failed to deserialize mission from Isar");
+
+            IList<IsarTask> tasks = ProcessIsarMissionResponse(isarMissionResponse);
+
             var report = new Report
             {
-                EchoMissionId = "1",
-                IsarMissionId = responseContent?.MissionId,
+                Robot = robot,
+                IsarMissionId = isarMissionResponse?.MissionId,
+                EchoMissionId = missionId,
+                Log = "",
+                ReportStatus = ReportStatus.NotStarted,
                 StartTime = DateTimeOffset.UtcNow,
                 EndTime = DateTimeOffset.UtcNow,
-                ReportStatus = ReportStatus.InProgress,
-                Robot = robot,
-                Log = "log"
+                Tasks = tasks,
             };
+
             _logger.LogInformation(
                 "Mission {missionId} started on robot {robotId}",
                 missionId,
@@ -66,18 +77,64 @@ namespace Api.Services
             var builder = new UriBuilder($"{_isarUri}/schedule/stop-mission");
             return await httpClient.PostAsync(builder.ToString(), null);
         }
-    }
 
-    public class IsarStartMissionResponse
-    {
-        [JsonPropertyName("message")]
-        public string? Message { get; set; }
+        public IList<IsarTask> ProcessIsarMissionResponse(
+            IsarStartMissionResponse isarMissionResponse
+        )
+        {
+            var tasks = new List<IsarTask>();
+            foreach (IsarTaskResponse taskResponse in isarMissionResponse.Tasks)
+            {
+                IList<IsarStep> steps = ProcessIsarTask(taskResponse);
 
-        [JsonPropertyName("started")]
-        public bool Started { get; set; }
+                var task = new IsarTask()
+                {
+                    IsarTaskId = taskResponse.IsarTaskId,
+                    TagId = taskResponse.TagId,
+                    TaskStatus = IsarTaskStatus.NotStarted,
+                    Time = DateTimeOffset.UtcNow,
+                    Steps = steps,
+                };
 
-        [JsonPropertyName("mission_id")]
-        public string? MissionId { get; set; }
+                tasks.Add(task);
+            }
+
+            return tasks;
+        }
+
+        public IList<IsarStep> ProcessIsarTask(IsarTaskResponse taskResponse)
+        {
+            var steps = new List<IsarStep>();
+
+            foreach (IsarStepResponse stepResponse in taskResponse.Steps)
+            {
+                StepType stepType;
+                bool success = Enum.TryParse<StepType>(stepResponse.Type, out stepType);
+                if (!success)
+                    throw new JsonException(
+                        $"Failed to parse step type. {stepResponse.Type} is not valid"
+                    );
+
+                if (stepType != StepType.DriveToPose)
+                {
+                    InspectionType inspectionType = SelectInspectionType.From(stepResponse.Type);
+                }
+
+                var step = new IsarStep()
+                {
+                    IsarStepId = stepResponse.IsarStepId,
+                    TagId = taskResponse.TagId,
+                    StepStatus = IsarStepStatus.NotStarted,
+                    StepType = stepType,
+                    Time = DateTimeOffset.UtcNow,
+                    FileLocation = "",
+                };
+
+                steps.Add(step);
+            }
+
+            return steps;
+        }
     }
 
     public class IsarStopMissionResponse
