@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 # nullable disable
 namespace Api.Models
 {
-    public class Step
+    public class IsarStep
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -15,12 +15,12 @@ namespace Api.Models
         public string IsarStepId { get; set; }
 
         [Required]
-        public virtual Task task { get; set; }
+        public virtual IsarTask Task { get; set; }
 
         public string TagId { get; set; }
 
         [Required]
-        public StepStatus StepStatus { get; set; }
+        public IsarStepStatus StepStatus { get; set; }
 
         [Required]
         public StepType StepType { get; set; }
@@ -34,7 +34,7 @@ namespace Api.Models
         public string FileLocation { get; set; }
     }
 
-    public enum StepStatus
+    public enum IsarStepStatus
     {
         Successful,
         InProgress,
@@ -45,8 +45,25 @@ namespace Api.Models
 
     public enum StepType
     {
-        Motion,
-        Inspection
+        DriveToPose,
+        TakeImage,
+        TakeThermalImage,
+        Audio
+    }
+
+    public class SelectStepType
+    {
+        public static StepType From(string sensorType)
+        {
+            return sensorType switch
+            {
+                "DriveToPose" => StepType.DriveToPose,
+                "Audio" => StepType.Audio,
+                "TakeImage" => StepType.TakeImage,
+                "TakeThermalImage" => StepType.TakeThermalImage,
+                _ => StepType.TakeImage,
+            };
+        }
     }
 
     public enum InspectionType
@@ -65,6 +82,8 @@ namespace Api.Models
                 "Picture" => InspectionType.Image,
                 "ThermicPicture" => InspectionType.ThermalImage,
                 "Audio" => InspectionType.Audio,
+                "TakeImage" => InspectionType.Image,
+                "TakeThermalImage" => InspectionType.ThermalImage,
                 _ => InspectionType.Image,
             };
         }
