@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Configurations;
 using Api.Context;
+using Api.EventHandlers;
 using Api.Mqtt;
 using Api.Services;
 using Azure.Identity;
@@ -22,6 +23,7 @@ builder.Services.AddScoped<ScheduledMissionService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<IsarService>();
 builder.Services.AddScoped<EchoService>();
+builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MqttService>();
 
 builder.Services
