@@ -1,7 +1,6 @@
 ﻿using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
-using Api.Services;
 using Api.Utilities;
 
 namespace Api.EventHandlers
@@ -12,12 +11,10 @@ namespace Api.EventHandlers
     public class MqttEventHandler : BackgroundService
     {
         private readonly ILogger<MqttEventHandler> _logger;
-        private readonly ReportService _reportService;
 
-        public MqttEventHandler(ReportService reportService, ILogger<MqttEventHandler> logger)
+        public MqttEventHandler(ILogger<MqttEventHandler> logger)
         {
             _logger = logger;
-            _reportService = reportService;
 
             MqttService.MqttIsarMissionReceived += OnMissionUpdate;
             MqttService.MqttIsarTaskReceived += OnTaskUpdate;
