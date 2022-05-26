@@ -85,14 +85,14 @@ namespace Api.Mqtt
 
             switch (messageType)
             {
-                case Type type when type == typeof(IsarMission):
-                    OnIsarTopicReceived<IsarMission>(content);
+                case Type type when type == typeof(IsarMissionMessage):
+                    OnIsarTopicReceived<IsarMissionMessage>(content);
                     break;
-                case Type type when type == typeof(IsarTask):
-                    OnIsarTopicReceived<IsarTask>(content);
+                case Type type when type == typeof(IsarTaskMessage):
+                    OnIsarTopicReceived<IsarTaskMessage>(content);
                     break;
-                case Type type when type == typeof(IsarStep):
-                    OnIsarTopicReceived<IsarStep>(content);
+                case Type type when type == typeof(IsarStepMessage):
+                    OnIsarTopicReceived<IsarStepMessage>(content);
                     break;
                 default:
                     _logger.LogWarning(
@@ -168,9 +168,9 @@ namespace Api.Mqtt
             {
                 var raiseEvent = type switch
                 {
-                    _ when type == typeof(IsarMission) => MqttIsarMissionReceived,
-                    _ when type == typeof(IsarTask) => MqttIsarTaskReceived,
-                    _ when type == typeof(IsarStep) => MqttIsarStepReceived,
+                    _ when type == typeof(IsarMissionMessage) => MqttIsarMissionReceived,
+                    _ when type == typeof(IsarTaskMessage) => MqttIsarTaskReceived,
+                    _ when type == typeof(IsarStepMessage) => MqttIsarStepReceived,
                     _
                       => throw new NotImplementedException(
                           $"No event defined for message type '{nameof(T)}'"

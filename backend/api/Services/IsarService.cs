@@ -50,7 +50,7 @@ namespace Api.Services
             if (isarMissionResponse is null)
                 throw new JsonException("Failed to deserialize mission from Isar");
 
-            IList<IsarTask> tasks = ProcessIsarMissionResponse(isarMissionResponse);
+            var tasks = ProcessIsarMissionResponse(isarMissionResponse);
 
             var report = new Report
             {
@@ -83,9 +83,9 @@ namespace Api.Services
         )
         {
             var tasks = new List<IsarTask>();
-            foreach (IsarTaskResponse taskResponse in isarMissionResponse.Tasks)
+            foreach (var taskResponse in isarMissionResponse.Tasks)
             {
-                IList<IsarStep> steps = ProcessIsarTask(taskResponse);
+                var steps = ProcessIsarTask(taskResponse);
 
                 var task = new IsarTask()
                 {
@@ -106,10 +106,9 @@ namespace Api.Services
         {
             var steps = new List<IsarStep>();
 
-            foreach (IsarStepResponse stepResponse in taskResponse.Steps)
+            foreach (var stepResponse in taskResponse.Steps)
             {
-                StepType stepType;
-                bool success = Enum.TryParse<StepType>(stepResponse.Type, out stepType);
+                bool success = Enum.TryParse<StepType>(stepResponse.Type, out var stepType);
                 if (!success)
                     throw new JsonException(
                         $"Failed to parse step type. {stepResponse.Type} is not valid"
@@ -117,7 +116,7 @@ namespace Api.Services
 
                 if (stepType != StepType.DriveToPose)
                 {
-                    InspectionType inspectionType = SelectInspectionType.From(stepResponse.Type);
+                    _ = SelectInspectionType.FromSensorTypeAsString(stepResponse.Type);
                 }
 
                 var step = new IsarStep()

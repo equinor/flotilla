@@ -7,7 +7,8 @@ public class FlotillaDbContext : DbContext
 {
     public DbSet<Robot> Robots => Set<Robot>();
     public DbSet<Report> Reports => Set<Report>();
-
+    public DbSet<IsarTask> Tasks => Set<IsarTask>();
+    public DbSet<IsarStep> Steps => Set<IsarStep>();
     public DbSet<ScheduledMission> ScheduledMissions => Set<ScheduledMission>();
 
     private static bool initialized;

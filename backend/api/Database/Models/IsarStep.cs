@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 # nullable disable
@@ -43,22 +43,39 @@ namespace Api.Models
         Cancelled
     }
 
+    public static class IsarStepStatusMethods
+    {
+        public static IsarStepStatus FromString(string status) =>
+            status switch
+            {
+                "successful" => IsarStepStatus.Successful,
+                "not_started" => IsarStepStatus.NotStarted,
+                "in_progress" => IsarStepStatus.InProgress,
+                "failed" => IsarStepStatus.Failed,
+                "cancelled" => IsarStepStatus.Cancelled,
+                _
+                  => throw new ArgumentException(
+                      $"Failed to parse report status {status} as it's not supported"
+                  )
+            };
+    }
+
     public enum StepType
     {
         DriveToPose,
         TakeImage,
         TakeThermalImage,
-        Audio
+        RecordAudio
     }
 
     public class SelectStepType
     {
-        public static StepType From(string sensorType)
+        public static StepType FromSensorTypeAsString(string sensorType)
         {
             return sensorType switch
             {
                 "DriveToPose" => StepType.DriveToPose,
-                "Audio" => StepType.Audio,
+                "RecordAudio" => StepType.RecordAudio,
                 "TakeImage" => StepType.TakeImage,
                 "TakeThermalImage" => StepType.TakeThermalImage,
                 _ => StepType.TakeImage,
@@ -75,7 +92,7 @@ namespace Api.Models
 
     public class SelectInspectionType
     {
-        public static InspectionType From(string sensorType)
+        public static InspectionType FromSensorTypeAsString(string sensorType)
         {
             return sensorType switch
             {
