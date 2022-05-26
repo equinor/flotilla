@@ -46,4 +46,21 @@ namespace Api.Models
         Failed,
         Cancelled,
     }
+
+    public static class ReportStatusMethods
+    {
+        public static ReportStatus FromString(string status) =>
+            status switch
+            {
+                "completed" => ReportStatus.Successful,
+                "not_started" => ReportStatus.NotStarted,
+                "in_progress" => ReportStatus.InProgress,
+                "failed" => ReportStatus.Failed,
+                "cancelled" => ReportStatus.Cancelled,
+                _
+                  => throw new ArgumentException(
+                      $"Failed to parse report status {status} as it's not supported"
+                  )
+            };
+    }
 }

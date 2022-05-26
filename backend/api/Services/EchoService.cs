@@ -130,7 +130,9 @@ namespace Api.Services
             {
                 foreach (var sensorType in sensorTypes)
                 {
-                    var inspectionType = SelectInspectionType.From(sensorType.Key);
+                    var inspectionType = SelectInspectionType.FromSensorTypeAsString(
+                        sensorType.Key
+                    );
                     inspectionTypes.Add(inspectionType);
                 }
             }

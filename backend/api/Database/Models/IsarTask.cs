@@ -37,5 +37,25 @@ namespace Api.Models
         InProgress,
         Failed,
         Cancelled,
+        Paused,
+    }
+
+    public static class IsarTaskStatusMethods
+    {
+        public static IsarTaskStatus FromString(string status) =>
+            status switch
+            {
+                "successful" => IsarTaskStatus.Successful,
+                "partially_successful" => IsarTaskStatus.PartiallySuccessful,
+                "not_started" => IsarTaskStatus.NotStarted,
+                "in_progress" => IsarTaskStatus.InProgress,
+                "failed" => IsarTaskStatus.Failed,
+                "cancelled" => IsarTaskStatus.Cancelled,
+                "paused" => IsarTaskStatus.Paused,
+                _
+                  => throw new ArgumentException(
+                      $"Failed to parse report status {status} as it's not supported"
+                  )
+            };
     }
 }

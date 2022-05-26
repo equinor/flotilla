@@ -14,9 +14,9 @@ namespace Api.Mqtt
         public static readonly Dictionary<string, Type> TopicsToMessages =
             new()
             {
-                { "isar/+/mission", typeof(IsarMission) },
-                { "isar/+/task", typeof(IsarTask) },
-                { "isar/+/step", typeof(IsarStep) },
+                { "isar/+/mission", typeof(IsarMissionMessage) },
+                { "isar/+/task", typeof(IsarTaskMessage) },
+                { "isar/+/step", typeof(IsarStepMessage) },
             };
 
         /// <summary>
