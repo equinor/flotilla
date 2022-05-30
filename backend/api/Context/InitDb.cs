@@ -1,5 +1,4 @@
 ﻿using Api.Database.Models;
-
 namespace Api.Context;
 
 public static class InitDb
@@ -42,9 +41,10 @@ public static class InitDb
         var scheduledMission1 = new ScheduledMission
         {
             Robot = Robots[0],
-            IsarMissionId = "1",
+            IsarMissionId = "2",
             StartTime = DateTimeOffset.UtcNow,
             EndTime = DateTimeOffset.UtcNow,
+            Status = ScheduledMissionStatus.Successful
         };
 
         var scheduledMission2 = new ScheduledMission
@@ -53,6 +53,7 @@ public static class InitDb
             IsarMissionId = "2",
             StartTime = DateTimeOffset.UtcNow,
             EndTime = DateTimeOffset.UtcNow,
+            Status = ScheduledMissionStatus.Successful
         };
 
         return new List<ScheduledMission>(
