@@ -25,6 +25,7 @@ builder.Services.AddScoped<EchoService>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MqttService>();
+builder.Services.AddHostedService<ScheduledMissionEventHandler>();
 
 builder.Services
     .AddControllers()
