@@ -47,7 +47,7 @@ namespace Api.Services
         public async Task<IEnumerable<Report>> ReadAll()
         {
             return await _context.Reports
-                .Include(report => report.Robot)
+                .Include(report => report.RobotId)
                 .Include(report => report.Tasks)
                 .ThenInclude(task => task.Steps)
                 .ToListAsync();
