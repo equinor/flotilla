@@ -1,8 +1,7 @@
 # Flotilla
 
 Flotilla is the main point of access for operators to interact with multiple robots in a facility. The application
-consists of a [frontend](frontend) in React, a [backend](backend) in Python using the FastAPI
-framework and a Mosquitto MQTT [Broker](broker).
+consists of a [frontend](frontend) in React, a [backend](backend) in ASP.NET and a Mosquitto MQTT [Broker](broker).
 
 ## Setup
 
