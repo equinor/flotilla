@@ -13,9 +13,7 @@ To set up the backend on **Linux**, install .NET for linux
 [here](https://docs.microsoft.com/en-us/dotnet/core/install/linux).
 
 For the configuration to be able to read secrets from the keyvault, you will need to have the client secret stored locally
-in your secret manager as described in the [Configuration Section](#Configuration).  
-By default, the application will only connect to the keyvault if the environment is set to production.  
-The environment can be changed locally by modifying the `launchSettings.json` file.  
+in your secret manager as described in the [Configuration Section](#Configuration).   
 
 For the MQTT client to function, the application expects a config variable named `mqtt-broker-password`, containing the password for the mqtt broker. This must either be stored in a connected keyvault or in the ASP.NET secret manager. 
 
@@ -57,7 +55,7 @@ The list of topics being subscribe to is defined as an array in
 [appsettings.Development.json](api/appsettings.Development.json).
 
 An example of the subscriber pattern for an MQTT event is implemented in
-[ReportService.cs](api/Services/ReportService.cs).
+[MqttEvenHandler.cs](api/EventHandlers/MqttEventHandler.cs).
 
 ## Configuration
 
@@ -68,7 +66,14 @@ The base `appsettings.json` file is for common variables across all environments
 various app registrations used in development.
 
 The configuration will also read from a configured azure keyvault, which can then be accessed the same way as any other config variables.  
-For this to work you will need to have the client secret stored locally in the secret manager as described below.
+For this to work you will need to have the client secret stored locally in the secret manager as described below.  
+The client secret should be in the following format: 
+```
+  "AzureAd": {
+    "ClientSecret": "SECRET"
+  }
+```
+
 
 Any local secrets used for configuration should be added in the
 [ASP.NET Secret Manager](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-6.0&tabs=linux#secret-manager).
