@@ -100,6 +100,7 @@ namespace Api.Services
             {
                 var tag = new EchoTag()
                 {
+                    Id = planItem.Id,
                     TagId = planItem.Tag,
                     URL = new Uri(
                         $"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"
@@ -137,6 +138,7 @@ namespace Api.Services
 
             var mission = new EchoMission()
             {
+                Id = echoMission.Id,
                 Name = echoMission.Name,
                 URL = new Uri($"https://echo.equinor.com/mp?editId={echoMission.Id}"),
                 Tags = ProcessPlanItems(echoMission.PlanItems)

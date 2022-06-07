@@ -5,7 +5,7 @@ namespace Api.Controllers.Models
 {
     public class EchoTag
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
 
         public string TagId { get; set; }
 
