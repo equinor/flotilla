@@ -16,8 +16,6 @@ builder.Services.AddDbContext<FlotillaDbContext>(
     options => options.UseInMemoryDatabase("flotilla")
 );
 
-builder.Services.AddSingleton<DefaultAzureCredential>();
-
 builder.Services.AddScoped<RobotService>();
 builder.Services.AddScoped<ScheduledMissionService>();
 builder.Services.AddScoped<ReportService>();
@@ -43,7 +41,11 @@ builder.Services.ConfigureSwagger(builder.Configuration);
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
+    .EnableTokenAcquisitionToCallDownstreamApi()
+    .AddInMemoryTokenCaches()
+    .AddDownstreamWebApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"));
+
 builder.Services.AddAuthorization(
     options =>
     {
