@@ -1,49 +1,37 @@
-﻿using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Web;
+﻿using System.Text.Json;
 using Api.Models;
 using Api.Utilities;
-using Azure.Core;
-using Azure.Identity;
 using Database.Models;
+using Microsoft.Identity.Web;
 
 namespace Api.Services
 {
     public class EchoService
     {
-        private readonly DefaultAzureCredential _credentials;
-        private readonly IConfiguration _config;
-        private static readonly HttpClient client = new();
-        private readonly string _echoApiUrl;
-        private readonly string[] _requestScope;
+        public const string ServiceName = "EchoApi";
+        private readonly IDownstreamWebApi _echoApi;
         private readonly string _installationCode;
 
-        public EchoService(DefaultAzureCredential credentials, IConfiguration config)
+        public EchoService(IConfiguration config, IDownstreamWebApi downstreamWebApi)
         {
-            _credentials = credentials;
-            _config = config;
-
-            _echoApiUrl = _config.GetSection("Echo").GetValue<string>("ApiUrl");
-            string echoAppScope = _config.GetSection("Echo").GetValue<string>("AppScope");
-            string echoClientId = _config.GetSection("Echo").GetValue<string>("ClientId");
+            _echoApi = downstreamWebApi;
             _installationCode = config.GetValue<string>("InstallationCode");
-
-            _requestScope = new string[1] { $"{echoClientId}/{echoAppScope}" };
         }
 
         public async Task<IList<Mission>> GetMissions()
         {
-            var accessToken = await AcquireAccessToken();
-            ConfigureRequest(accessToken);
-            var uri = ConstructGetMissionsRequestUri();
+            string relativePath = $"robots/robot-plan?InstallationCode={_installationCode}";
 
-            var response = await client.GetAsync(uri);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new MissionNotFoundException(
-                    $"Failed to retrieve missions from Echo: {response.ReasonPhrase}"
-                );
-            }
+            var response = await _echoApi.CallWebApiForAppAsync(
+                ServiceName,
+                options =>
+                {
+                    options.HttpMethod = HttpMethod.Get;
+                    options.RelativePath = relativePath;
+                }
+            );
+
+            response.EnsureSuccessStatusCode();
 
             var echoMissions = await response.Content.ReadFromJsonAsync<
                 List<EchoMissionResponse>
@@ -56,19 +44,21 @@ namespace Api.Services
             return missions;
         }
 
-        public async Task<Mission> GetMission(int missionId)
+        public async Task<Mission> GetMissionById(int missionId)
         {
-            var accessToken = await AcquireAccessToken();
-            ConfigureRequest(accessToken);
-            var uri = ConstructGetMissionRequestUri(missionId);
+            string relativePath =
+                $"robots/robot-plan/{missionId}?InstallationCode={_installationCode}";
 
-            var response = await client.GetAsync(uri);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new MissionNotFoundException(
-                    $"Failed to retrieve mission with ID: {missionId} from Echo: {response.ReasonPhrase}"
-                );
-            }
+            var response = await _echoApi.CallWebApiForAppAsync(
+                ServiceName,
+                options =>
+                {
+                    options.HttpMethod = HttpMethod.Get;
+                    options.RelativePath = relativePath;
+                }
+            );
+
+            response.EnsureSuccessStatusCode();
 
             var echoMission = await response.Content.ReadFromJsonAsync<EchoMissionResponse>();
 
@@ -77,44 +67,6 @@ namespace Api.Services
 
             var mission = ProcessEchoMission(echoMission);
             return mission;
-        }
-
-        private async Task<AccessToken> AcquireAccessToken()
-        {
-            var context = new TokenRequestContext(_requestScope);
-            var accessToken = await _credentials.GetTokenAsync(requestContext: context);
-            return accessToken;
-        }
-
-        private static void ConfigureRequest(AccessToken accessToken)
-        {
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json")
-            );
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                "Bearer",
-                accessToken.Token
-            );
-        }
-
-        private Uri ConstructGetMissionsRequestUri()
-        {
-            var builder = new UriBuilder($"{_echoApiUrl}/robots/robot-plan");
-            var query = HttpUtility.ParseQueryString(builder.Query);
-            query["InstallationCode"] = _installationCode;
-            builder.Query.ToString();
-            var uri = new Uri(builder.ToString());
-
-            return uri;
-        }
-
-        private Uri ConstructGetMissionRequestUri(int missionId)
-        {
-            var builder = new UriBuilder($"{_echoApiUrl}/robots/robot-plan/{missionId}");
-            var uri = new Uri(builder.ToString());
-
-            return uri;
         }
 
         private static IList<InspectionType> ProcessSensorTypes(List<SensorType> sensorTypes)

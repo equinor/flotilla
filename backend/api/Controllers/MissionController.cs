@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Api.Services;
-using Api.Utilities;
 using Database.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,6 +33,7 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<ActionResult<IList<Mission>>> GetMissions()
     {
         try
@@ -41,10 +41,22 @@ public class MissionController : ControllerBase
             var missions = await _echoService.GetMissions();
             return Ok(missions);
         }
-        catch (Exception e) when (e is MissionNotFoundException || e is JsonException)
+        catch (HttpRequestException e)
         {
-            _logger.LogError(e, "Missions not found");
-            return NotFound();
+            _logger.LogError(e, "Error retrieving missions from Echo");
+
+            int statusCode = (int?)e.StatusCode ?? StatusCodes.Status502BadGateway;
+
+            // If error is caused by user (400 codes), let them know
+            if (400 <= statusCode && statusCode < 500)
+                return new StatusCodeResult(statusCode);
+
+            return new StatusCodeResult(StatusCodes.Status502BadGateway);
+        }
+        catch (JsonException e)
+        {
+            _logger.LogError(e, "Error retrieving missions from Echo");
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 
@@ -65,17 +77,30 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<ActionResult<Mission>> GetMission([FromRoute] int missionId)
     {
         try
         {
-            var mission = await _echoService.GetMission(missionId);
+            var mission = await _echoService.GetMissionById(missionId);
             return Ok(mission);
         }
-        catch (Exception e) when (e is MissionNotFoundException || e is JsonException)
+        catch (HttpRequestException e)
         {
-            _logger.LogError(e, "Mission not found");
-            return NotFound();
+            _logger.LogError(e, "Error retrieving mission from Echo");
+
+            int statusCode = (int?)e.StatusCode ?? StatusCodes.Status502BadGateway;
+
+            // If error is caused by user (400 codes), let them know
+            if (400 <= statusCode && statusCode < 500)
+                return new StatusCodeResult(statusCode);
+
+            return new StatusCodeResult(StatusCodes.Status502BadGateway);
+        }
+        catch (JsonException e)
+        {
+            _logger.LogError(e, "Error retrieving mission from Echo");
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
 }
