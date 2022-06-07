@@ -1,4 +1,4 @@
-﻿using Api.Models;
+﻿using Api.Database.Models;
 
 namespace Api.Controllers.Models
 {

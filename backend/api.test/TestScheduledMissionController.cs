@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Api.Context;
 using Api.Controllers;
-using Api.Models;
+using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +45,9 @@ namespace Api.Test
             var actionResultType = typeof(NotFoundObjectResult);
             string scheduledMissionId = "RandomString";
 
-            IActionResult? result = _controller.GetScheduledMissionById(scheduledMissionId).Result.Result;
+            IActionResult? result = _controller
+                .GetScheduledMissionById(scheduledMissionId)
+                .Result.Result;
 
             // Check if the result is, or inherits from, the expected result type
             Assert.IsAssignableFrom(actionResultType, result);
@@ -64,7 +66,9 @@ namespace Api.Test
 
             string scheduledMissionId = scheduledMissions[0].Id;
 
-            IActionResult? actionResult = _controller.GetScheduledMissionById(scheduledMissionId).Result.Result;
+            IActionResult? actionResult = _controller
+                .GetScheduledMissionById(scheduledMissionId)
+                .Result.Result;
 
             // Check if the result is, or inherits from, the expected result type
             Assert.IsAssignableFrom(actionResultType, actionResult);
@@ -76,7 +80,9 @@ namespace Api.Test
             var actionResultType = typeof(NotFoundObjectResult);
             string scheduledMissionId = "RandomString";
 
-            IActionResult? result = _controller.DeleteScheduledMission(scheduledMissionId).Result.Result;
+            IActionResult? result = _controller
+                .DeleteScheduledMission(scheduledMissionId)
+                .Result.Result;
 
             // Check if the result is, or inherits from, the expected result type
             Assert.IsAssignableFrom(actionResultType, result);
@@ -95,7 +101,9 @@ namespace Api.Test
 
             string scheduledMissionsId = scheduledMissions[0].Id;
 
-            IActionResult? actionResult = _controller.DeleteScheduledMission(scheduledMissionsId).Result.Result;
+            IActionResult? actionResult = _controller
+                .DeleteScheduledMission(scheduledMissionsId)
+                .Result.Result;
 
             // Check if the result is, or inherits from, the expected result type
             Assert.IsAssignableFrom(actionResultType, actionResult);

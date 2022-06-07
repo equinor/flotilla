@@ -1,4 +1,4 @@
-﻿using Api.Models;
+﻿using Api.Database.Models;
 using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;

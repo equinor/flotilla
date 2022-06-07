@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using Api.Models;
+using Api.Controllers.Models;
+using Api.Database.Models;
 using Api.Utilities;
-using Database.Models;
 using Microsoft.Identity.Web;
 
 namespace Api.Services
@@ -18,7 +18,7 @@ namespace Api.Services
             _installationCode = config.GetValue<string>("InstallationCode");
         }
 
-        public async Task<IList<Mission>> GetMissions()
+        public async Task<IList<EchoMission>> GetMissions()
         {
             string relativePath = $"robots/robot-plan?InstallationCode={_installationCode}";
 
@@ -44,7 +44,7 @@ namespace Api.Services
             return missions;
         }
 
-        public async Task<Mission> GetMissionById(int missionId)
+        public async Task<EchoMission> GetMissionById(int missionId)
         {
             string relativePath =
                 $"robots/robot-plan/{missionId}?InstallationCode={_installationCode}";
@@ -92,13 +92,13 @@ namespace Api.Services
             return inspectionTypes;
         }
 
-        private List<Tag> ProcessPlanItems(List<PlanItem> planItems)
+        private List<EchoTag> ProcessPlanItems(List<PlanItem> planItems)
         {
-            var tags = new List<Tag>();
+            var tags = new List<EchoTag>();
 
             foreach (var planItem in planItems)
             {
-                var tag = new Tag()
+                var tag = new EchoTag()
                 {
                     TagId = planItem.Tag,
                     URL = new Uri(
@@ -113,9 +113,9 @@ namespace Api.Services
             return tags;
         }
 
-        private List<Mission> ProcessEchoMissions(List<EchoMissionResponse> echoMissions)
+        private List<EchoMission> ProcessEchoMissions(List<EchoMissionResponse> echoMissions)
         {
-            var missions = new List<Mission>();
+            var missions = new List<EchoMission>();
 
             foreach (var echoMission in echoMissions)
             {
@@ -130,12 +130,12 @@ namespace Api.Services
             return missions;
         }
 
-        private Mission ProcessEchoMission(EchoMissionResponse echoMission)
+        private EchoMission ProcessEchoMission(EchoMissionResponse echoMission)
         {
             if (echoMission.PlanItems is null)
                 throw new MissionNotFoundException("Mission has no tags");
 
-            var mission = new Mission()
+            var mission = new EchoMission()
             {
                 Name = echoMission.Name,
                 URL = new Uri($"https://echo.equinor.com/mp?editId={echoMission.Id}"),

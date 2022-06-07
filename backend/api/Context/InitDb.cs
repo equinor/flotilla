@@ -1,4 +1,4 @@
-﻿using Api.Models;
+﻿using Api.Database.Models;
 
 namespace Api.Context;
 
@@ -55,7 +55,9 @@ public static class InitDb
             EndTime = DateTimeOffset.UtcNow,
         };
 
-        return new List<ScheduledMission>(new ScheduledMission[] { scheduledMission1, scheduledMission2 });
+        return new List<ScheduledMission>(
+            new ScheduledMission[] { scheduledMission1, scheduledMission2 }
+        );
     }
 
     public static void PopulateDb(FlotillaDbContext context)

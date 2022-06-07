@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 # nullable disable
-namespace Api.Models
+namespace Api.Database.Models
 {
     public class Robot
     {

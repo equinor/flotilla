@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
+using Api.Controllers.Models;
 using Api.Services;
-using Database.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -28,13 +28,13 @@ public class MissionController : ControllerBase
     /// List all available missions on the asset in the Echo mission planner
     /// </remarks>
     [HttpGet]
-    [ProducesResponseType(typeof(List<Mission>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<EchoMission>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<IList<Mission>>> GetMissions()
+    public async Task<ActionResult<IList<EchoMission>>> GetMissions()
     {
         try
         {
@@ -71,14 +71,14 @@ public class MissionController : ControllerBase
     /// </remarks>
     [HttpGet]
     [Route("{missionId}")]
-    [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EchoMission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<Mission>> GetMission([FromRoute] int missionId)
+    public async Task<ActionResult<EchoMission>> GetMission([FromRoute] int missionId)
     {
         try
         {

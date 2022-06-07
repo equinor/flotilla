@@ -1,4 +1,4 @@
-﻿using Api.Models;
+﻿using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Context;
