@@ -1,5 +1,5 @@
 ﻿using Api.Controllers.Models;
-using Api.Models;
+using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +12,10 @@ public class ScheduledMissionController : ControllerBase
     private readonly ScheduledMissionService _scheduledMissionService;
     private readonly RobotService _robotService;
 
-    public ScheduledMissionController(ScheduledMissionService scheduledMissionService, RobotService robotService)
+    public ScheduledMissionController(
+        ScheduledMissionService scheduledMissionService,
+        RobotService robotService
+    )
     {
         _scheduledMissionService = scheduledMissionService;
         _robotService = robotService;
@@ -68,19 +71,29 @@ public class ScheduledMissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ScheduledMission>> PostScheduledMission([FromBody] ScheduledMissionQuery scheduledMissionQuery)
+    public async Task<ActionResult<ScheduledMission>> PostScheduledMission(
+        [FromBody] ScheduledMissionQuery scheduledMissionQuery
+    )
     {
         var robot = await _robotService.Read(scheduledMissionQuery.RobotId);
         if (robot is null)
             return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
 
-        var scheduledMission = new ScheduledMission { Robot = robot, IsarMissionId = scheduledMissionQuery.IsarMissionId };
+        var scheduledMission = new ScheduledMission
+        {
+            Robot = robot,
+            IsarMissionId = scheduledMissionQuery.IsarMissionId
+        };
         if (scheduledMissionQuery.StartTime is not null)
         {
             scheduledMission.StartTime = (DateTimeOffset)scheduledMissionQuery.StartTime;
         }
         var newScheduledMission = await _scheduledMissionService.Create(scheduledMission);
-        return CreatedAtAction(nameof(GetScheduledMissionById), new { id = newScheduledMission.Id }, newScheduledMission);
+        return CreatedAtAction(
+            nameof(GetScheduledMissionById),
+            new { id = newScheduledMission.Id },
+            newScheduledMission
+        );
     }
 
     /// <summary>

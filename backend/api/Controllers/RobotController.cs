@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 using Api.Controllers.Models;
-using Api.Models;
+using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 

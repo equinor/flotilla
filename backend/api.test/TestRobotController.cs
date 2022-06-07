@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Api.Context;
 using Api.Controllers;
-using Api.Models;
+using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

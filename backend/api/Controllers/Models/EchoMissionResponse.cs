@@ -1,7 +1,7 @@
 ﻿# nullable disable
 using System.Text.Json.Serialization;
 
-namespace Api.Models
+namespace Api.Controllers.Models
 {
     public class EchoMissionResponse
     {

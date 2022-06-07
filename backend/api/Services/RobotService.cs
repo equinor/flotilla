@@ -1,6 +1,6 @@
 ﻿using Api.Context;
 using Api.Controllers.Models;
-using Api.Models;
+using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services

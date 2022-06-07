@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using Api.Models;
+using Api.Controllers.Models;
+using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.AspNetCore.WebUtilities;
 
