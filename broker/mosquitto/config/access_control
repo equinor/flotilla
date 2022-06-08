@@ -1,0 +1,8 @@
+user admin
+topic readwrite #
+
+user isar
+topic readwrite isar/#
+
+user flotilla
+topic read isar/#
