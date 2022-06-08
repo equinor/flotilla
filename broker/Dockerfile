@@ -1,7 +1,6 @@
 FROM eclipse-mosquitto:latest
 
-COPY mosquitto/config/mosquitto.conf mosquitto/config/mosquitto.conf
-COPY mosquitto/config/passwd_file mosquitto/config/passwd_file
+COPY mosquitto/config/ mosquitto/config/
 
 EXPOSE 1883 9001
 
