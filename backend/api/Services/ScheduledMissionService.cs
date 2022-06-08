@@ -41,20 +41,15 @@ namespace Api.Services
             RaiseScheduledMissionUpdatedEvent();
         }
 
-        public async Task<ScheduledMission?> NextPendingScheduledMission()
+        public async Task<List<ScheduledMission>> GetUpcomingPendingScheduledMissions()
         {
-            var scheduledMissions = await ReadAll();
-            var pendingScheduledMissions = scheduledMissions.SkipWhile(ev => !ev.Status.Equals(ScheduledMissionStatus.Pending));
-            var pendingScheduledMissionsOrderedByStartTime = pendingScheduledMissions.OrderBy(ev => ev.StartTime);
-            try
-            {
-                return pendingScheduledMissionsOrderedByStartTime.First();
-            }
-            catch (InvalidOperationException)
-            {
-                return null;
-            }
+            return await _context.ScheduledMissions
+                .Include(sm => sm.Robot)
+                .Where(sm => sm.Status.Equals(ScheduledMissionStatus.Pending))
+                .OrderBy(sm => sm.StartTime)
+                .ToListAsync();
         }
+
         public async Task<ScheduledMission?> Delete(string id)
         {
             var scheduledMission = await _context.ScheduledMissions.FirstOrDefaultAsync(
