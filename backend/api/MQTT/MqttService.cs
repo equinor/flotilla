@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Utilities;
@@ -81,7 +82,11 @@ namespace Api.Mqtt
                 return;
             }
 
-            _logger.LogDebug("Topic: {topic} - Message recieved: \n{payload}", topic, content);
+            _logger.LogInformation(
+                "Topic: {topic} - Message recieved: \n{payload}",
+                topic,
+                content
+            );
 
             switch (messageType)
             {
@@ -147,18 +152,34 @@ namespace Api.Mqtt
         public void SubscribeToTopics(List<string> topics)
         {
             List<MqttTopicFilter> topicFilters = new();
-            topics.ForEach(topic => topicFilters.Add(new MqttTopicFilter() { Topic = topic }));
-            _mqttClient.SubscribeAsync(topicFilters);
+            StringBuilder sb = new();
+            sb.AppendLine("Mqtt service subscribing to the following topics:");
+            topics.ForEach(
+                topic =>
+                {
+                    topicFilters.Add(new MqttTopicFilter() { Topic = topic });
+                    sb.AppendLine(topic);
+                }
+            );
+            _logger.LogInformation("{topicContent}", sb.ToString());
+            _mqttClient.SubscribeAsync(topicFilters).Wait();
         }
 
         private void OnIsarTopicReceived<T>(string content) where T : MqttMessage
         {
-            var message = JsonSerializer.Deserialize<T>(content);
-            if (message is null)
+            T? message;
+            try
+            {
+                message = JsonSerializer.Deserialize<T>(content);
+                if (message is null)
+                    throw new JsonException();
+            }
+            catch (Exception ex)
+                when (ex is JsonException || ex is NotSupportedException || ex is ArgumentException)
             {
                 _logger.LogError(
                     "Could not create '{className}' object from MQTT message json",
-                    nameof(T)
+                    typeof(T).Name
                 );
                 return;
             }
@@ -173,7 +194,7 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarStepMessage) => MqttIsarStepReceived,
                     _
                       => throw new NotImplementedException(
-                          $"No event defined for message type '{nameof(T)}'"
+                          $"No event defined for message type '{typeof(T).Name}'"
                       ),
                 };
                 // Event will be null if there are no subscribers
