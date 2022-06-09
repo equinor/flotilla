@@ -1,9 +1,11 @@
-﻿using Api.Context;
+﻿using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1309:Use ordinal StringComparison",
+    Justification = "EF Core refrains from translating string comparison overloads to SQL")]
     public class ScheduledMissionService
     {
         private readonly FlotillaDbContext _context;
@@ -29,9 +31,9 @@ namespace Api.Services
 
         public async Task<ScheduledMission?> Read(string id)
         {
-            return await _context.ScheduledMissions
-                .Include(sm => sm.Robot)
-                .FirstOrDefaultAsync(ev => ev.Id.Equals(id, StringComparison.Ordinal));
+            return await _context.ScheduledMissions.Include(sm => sm.Robot).FirstOrDefaultAsync(
+                ev => ev.Id.Equals(id)
+            );
         }
 
         public void Update(ScheduledMission scheduledMission)
@@ -53,7 +55,7 @@ namespace Api.Services
         public async Task<ScheduledMission?> Delete(string id)
         {
             var scheduledMission = await _context.ScheduledMissions.FirstOrDefaultAsync(
-                ev => ev.Id.Equals(id, StringComparison.Ordinal)
+                ev => ev.Id.Equals(id)
             );
             if (scheduledMission is null)
             {

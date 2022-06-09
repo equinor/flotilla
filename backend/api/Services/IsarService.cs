@@ -58,7 +58,7 @@ namespace Api.Services
 
             var report = new Report
             {
-                RobotId = robot.Id,
+                Robot = robot,
                 IsarMissionId = isarMissionResponse?.MissionId,
                 EchoMissionId = echoMissionId,
                 Log = "",

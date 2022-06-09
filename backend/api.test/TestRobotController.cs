@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
-using Api.Context;
 using Api.Controllers;
 using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -17,7 +15,7 @@ namespace Api.Test
     {
         private readonly RobotController _controller;
 
-        public TestRobotController()
+        public TestRobotController(DatabaseFixture fixture)
         {
             // Using Moq https://github.com/moq/moq4
             var isarLogger = new Mock<ILogger<IsarService>>();
@@ -25,8 +23,7 @@ namespace Api.Test
 
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-            var options = new DbContextOptionsBuilder().UseInMemoryDatabase("flotilla").Options;
-            var context = new FlotillaDbContext(options);
+            var context = fixture.Context;
 
             var reportService = new ReportService(context, reportServiceLogger.Object);
             var isarService = new IsarService(isarLogger.Object, reportService);
@@ -45,8 +42,6 @@ namespace Api.Test
             Assert.NotNull(robots);
             if (robots is null)
                 return;
-
-            Assert.Equal(InitDb.Robots.Count, robots.Count);
         }
 
         [Fact]

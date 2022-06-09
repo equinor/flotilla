@@ -1,6 +1,6 @@
 ﻿using Api.Database.Models;
 
-namespace Api.Context;
+namespace Api.Database.Context;
 
 public static class InitDb
 {
@@ -8,6 +8,8 @@ public static class InitDb
         new() { Name = "FrontCamera", Url = "localhost:3000_test" };
 
     public static readonly List<Robot> Robots = GetRobots();
+    public static readonly List<ScheduledMission> ScheduledMissions = GetScheduledMissions();
+    public static readonly List<Report> Reports = GetReports();
 
     private static List<Robot> GetRobots()
     {
@@ -38,7 +40,22 @@ public static class InitDb
         return new List<Robot>(new Robot[] { robot1, robot2 });
     }
 
-    public static readonly List<ScheduledMission> ScheduledMissions = GetScheduledMissions();
+    private static List<Report> GetReports()
+    {
+        var report1 = new Report
+        {
+            EchoMissionId = "1",
+            IsarMissionId = "1",
+            Log = "log",
+            ReportStatus = ReportStatus.NotStarted,
+            Robot = Robots[0],
+            StartTime = DateTimeOffset.UtcNow
+        };
+        return new List<Report>(
+            new Report[] { report1 }
+        );
+    }
+
 
     private static List<ScheduledMission> GetScheduledMissions()
     {
@@ -65,6 +82,8 @@ public static class InitDb
         );
     }
 
+
+
     public static void PopulateDb(FlotillaDbContext context)
     {
         foreach (var robot in Robots)
@@ -72,9 +91,10 @@ public static class InitDb
             var videoStream = new VideoStream() { Name = "test", Url = "urlTest" };
             robot.VideoStreams = new List<VideoStream>() { videoStream, streamExample };
         }
-
         context.AddRange(Robots);
         context.AddRange(ScheduledMissions);
+        context.AddRange(Reports);
+
         context.SaveChanges();
     }
 }

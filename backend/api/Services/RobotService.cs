@@ -1,9 +1,11 @@
-﻿using Api.Context;
+﻿using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1309:Use ordinal StringComparison",
+    Justification = "EF Core refrains from translating string comparison overloads to SQL")]
     public class RobotService
     {
         private readonly FlotillaDbContext _context;
@@ -29,7 +31,7 @@ namespace Api.Services
         {
             return await _context.Robots
                 .Include(r => r.VideoStreams)
-                .FirstOrDefaultAsync(robot => robot.Id.Equals(id, StringComparison.Ordinal));
+                .FirstOrDefaultAsync(robot => robot.Id.Equals(id));
         }
 
         public async Task<Robot?> ReadByName(string name)
