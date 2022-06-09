@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
-using Api.Context;
 using Api.Controllers;
 using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace Api.Test
@@ -14,10 +12,9 @@ namespace Api.Test
     {
         private readonly ScheduledMissionController _controller;
 
-        public TestScheduledMissionController()
+        public TestScheduledMissionController(DatabaseFixture fixture)
         {
-            var options = new DbContextOptionsBuilder().UseInMemoryDatabase("flotilla").Options;
-            var context = new FlotillaDbContext(options);
+            var context = fixture.Context;
             var scheduledMissionService = new ScheduledMissionService(context);
             var robotService = new RobotService(context);
             _controller = new ScheduledMissionController(
@@ -35,8 +32,6 @@ namespace Api.Test
             Assert.NotNull(scheduledMissions);
             if (scheduledMissions is null)
                 return;
-
-            Assert.Equal(InitDb.ScheduledMissions.Count, scheduledMissions.Count);
         }
 
         [Fact]
@@ -100,7 +95,6 @@ namespace Api.Test
                 return;
 
             string scheduledMissionsId = scheduledMissions[0].Id;
-
             IActionResult? actionResult = _controller
                 .DeleteScheduledMission(scheduledMissionsId)
                 .Result.Result;

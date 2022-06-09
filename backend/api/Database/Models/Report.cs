@@ -12,7 +12,7 @@ namespace Api.Database.Models
         public string Id { get; set; }
 
         [Required]
-        public string RobotId { get; set; }
+        public Robot Robot { get; set; }
 
         [MaxLength(128)]
         [Required]

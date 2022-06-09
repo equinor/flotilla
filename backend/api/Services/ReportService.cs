@@ -1,9 +1,11 @@
-﻿using Api.Context;
+﻿using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1309:Use ordinal StringComparison",
+    Justification = "EF Core refrains from translating string comparison overloads to SQL")]
     public class ReportService
     {
         private readonly FlotillaDbContext _context;
@@ -28,7 +30,8 @@ namespace Api.Services
             string isarMissionId,
             string echoMissionId,
             string log,
-            ReportStatus status
+            ReportStatus status,
+            Robot robot
         )
         {
             var report = new Report
@@ -38,6 +41,7 @@ namespace Api.Services
                 Log = log,
                 ReportStatus = status,
                 StartTime = DateTimeOffset.UtcNow,
+                Robot = robot
             };
             await Create(report);
 
@@ -57,27 +61,27 @@ namespace Api.Services
             return await _context.Reports
                 .Include(report => report.Tasks)
                 .ThenInclude(task => task.Steps)
-                .FirstOrDefaultAsync(report => report.Id.Equals(id, StringComparison.Ordinal));
+                .FirstOrDefaultAsync(report => report.Id.Equals(id));
         }
 
         public async Task<Report?> ReadByIsarMissionId(string isarMissionId)
         {
             return await _context.Reports.FirstOrDefaultAsync(
-                report => report.IsarMissionId.Equals(isarMissionId, StringComparison.Ordinal)
+                report => report.IsarMissionId.Equals(isarMissionId)
             );
         }
 
         public async Task<IsarTask?> ReadIsarTaskById(string isarTaskId)
         {
             return await _context.Tasks.FirstOrDefaultAsync(
-                task => task.IsarTaskId.Equals(isarTaskId, StringComparison.Ordinal)
+                task => task.IsarTaskId.Equals(isarTaskId)
             );
         }
 
         public async Task<IsarStep?> ReadIsarStepById(string isarStepId)
         {
             return await _context.Steps.FirstOrDefaultAsync(
-                step => step.IsarStepId.Equals(isarStepId, StringComparison.Ordinal)
+                step => step.IsarStepId.Equals(isarStepId)
             );
         }
 

@@ -1,7 +1,7 @@
 ﻿using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Api.Context;
+namespace Api.Database.Context;
 
 public class FlotillaDbContext : DbContext
 {
@@ -12,14 +12,6 @@ public class FlotillaDbContext : DbContext
     public DbSet<ScheduledMission> ScheduledMissions => Set<ScheduledMission>();
     public DbSet<VideoStream> VideoStreams => Set<VideoStream>();
 
-    private static bool initialized;
-
     public FlotillaDbContext(DbContextOptions options) : base(options)
-    {
-        if (initialized == false)
-        {
-            InitDb.PopulateDb(this);
-            initialized = true;
-        }
-    }
+    { }
 }
