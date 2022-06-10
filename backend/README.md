@@ -13,9 +13,10 @@ To set up the backend on **Linux**, install .NET for linux
 [here](https://docs.microsoft.com/en-us/dotnet/core/install/linux).
 
 For the configuration to be able to read secrets from the keyvault, you will need to have the client secret stored locally
-in your secret manager as described in the [Configuration Section](#Configuration).   
+in your secret manager as described in the [Configuration Section](#Configuration).
 
-For the MQTT client to function, the application expects a config variable named `mqtt-broker-password`, containing the password for the mqtt broker. This must either be stored in a connected keyvault or in the ASP.NET secret manager. 
+For the MQTT client to function, the application expects a config variable named `mqtt-broker-password`, containing the password for the mqtt broker.
+This must either be stored in a connected keyvault or in the ASP.NET secret manager.
 
 ## Run
 
@@ -30,6 +31,22 @@ To change the ports of the application and various other launch settings (such a
 Read more about the `launchSettings.json` file
 [here](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments?view=aspnetcore-6.0&preserve-view=true&viewFallbackFrom=aspnetcore-2.2#lsj)
 
+### Run in Docker
+
+For the backend to work when dockerized, you need to have the client secret exposed as
+an environment variable named `FLOTILLA_CLIENT_SECRET`.
+The simplest way to do this in bash is to run
+
+```
+export FLOTILLA_CLIENT_SECRET=SuperSecret
+```
+
+To run the backend in docker, run the following command in the root folder of flotilla:
+
+```
+docker compose up backend --build
+```
+
 ## Test
 
 To unit test the backend, run the following command in the backend folder:
@@ -41,6 +58,7 @@ dotnet test
 ## Components
 
 ### MQTT Client
+
 The MQTT client is implemented in [MqttService.cs](api/MQTT/MqttService.cs)
 and runs as an ASP.NET
 [BackgroundService](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-6.0&tabs=visual-studio#backgroundservice-base-class).  
@@ -67,13 +85,13 @@ various app registrations used in development.
 
 The configuration will also read from a configured azure keyvault, which can then be accessed the same way as any other config variables.  
 For this to work you will need to have the client secret stored locally in the secret manager as described below.  
-The client secret should be in the following format: 
+The client secret should be in the following format:
+
 ```
   "AzureAd": {
     "ClientSecret": "SECRET"
   }
 ```
-
 
 Any local secrets used for configuration should be added in the
 [ASP.NET Secret Manager](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-6.0&tabs=linux#secret-manager).
@@ -106,5 +124,3 @@ dotnet format is used to detect naming conventions and other code-related issues
 ```
 dotnet format --severity info
 ```
-
-
