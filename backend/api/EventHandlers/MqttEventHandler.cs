@@ -51,15 +51,16 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await _reportService.UpdateMissionStatus(mission.MissionId, status);
+            bool success = await _reportService.UpdateMissionStatus(mission.MissionId, status);
 
-            _logger.LogInformation(
-                "{time} - Mission {id} updated to {status} for {robot}",
-                mission.Timestamp,
-                mission.MissionId,
-                mission.Status,
-                mission.RobotId
-            );
+            if (success)
+                _logger.LogInformation(
+                    "{time} - Mission {id} updated to {status} for {robot}",
+                    mission.Timestamp,
+                    mission.MissionId,
+                    mission.Status,
+                    mission.RobotId
+                );
         }
 
         private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
@@ -80,15 +81,16 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await _reportService.UpdateTaskStatus(task.TaskId, status);
+            bool success = await _reportService.UpdateTaskStatus(task.TaskId, status);
 
-            _logger.LogInformation(
-                "{time} - Task {id} updated to {status} for {robot}",
-                task.Timestamp,
-                task.TaskId,
-                task.Status,
-                task.RobotId
-            );
+            if (success)
+                _logger.LogInformation(
+                    "{time} - Task {id} updated to {status} for {robot}",
+                    task.Timestamp,
+                    task.TaskId,
+                    task.Status,
+                    task.RobotId
+                );
         }
 
         private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
@@ -109,15 +111,16 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await _reportService.UpdateStepStatus(step.StepId, status);
+            bool success = await _reportService.UpdateStepStatus(step.StepId, status);
 
-            _logger.LogInformation(
-                "{time} - Step {id} updated to {status} for {robot}",
-                step.Timestamp,
-                step.StepId,
-                step.Status,
-                step.RobotId
-            );
+            if (success)
+                _logger.LogInformation(
+                    "{time} - Step {id} updated to {status} for {robot}",
+                    step.Timestamp,
+                    step.StepId,
+                    step.Status,
+                    step.RobotId
+                );
         }
     }
 }
