@@ -10,6 +10,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "api.test", "api.test\api.te
 		{8AB478C5-C4C7-4CDC-A691-F99C4A5C407A} = {8AB478C5-C4C7-4CDC-A691-F99C4A5C407A}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DFD9CB9F-ADDF-4167-A11C-E8EE83EE0548}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
