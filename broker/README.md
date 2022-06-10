@@ -2,16 +2,10 @@
 
 ## Running the broker
 
-Start by building the docker image
+From the flotilla root directory, run the following command:
 
 ```
-docker build -t flotilla-broker .
-```
-
-The broker may be started as
-
-```
-docker run -it -p 1883:1883 -p 9001:9001 flotilla-broker:latest
+docker compose up broker --build
 ```
 
 ## Authentication
@@ -32,9 +26,12 @@ To change the roles see [this guide]()
 on how to manage the role based access control.
 They are defined in the [access_control file](./mosquitto/config/access_control).
 
-## Using broker locally
+## Installing broker outside of docker
 
-### Installation
+To test the dockerized broker, the functions `mosquitto_sub` and `mosquitto_pub` are useful.  
+To gain access to them on your machine you will need to install the mosquitto broker.
+
+### Linux installation
 
 To install the Mosquitto broker run the following commands
 
@@ -45,23 +42,35 @@ sudo apt-get install mosquitto
 sudo apt-get install mosquitto-clients
 ```
 
+### Windows installation
+
+Go to the [official Mosquitto download page](https://mosquitto.org/download/) and download and install the
+binaries for windows.
+
+Then add the installation folder to your PATH variable for the commands to be available from your terminal.
+
+### Start non-docker broker
+
 The broker may be started with
 
 ```
 mosquitto -p 1883 -c mosquitto/config/mosquitto.conf
 ```
 
-### Testing the broker
+## Testing the broker
 
-To test that the broker functions as expected the `mosquitto_sub` and `mosquitto_pub` tools that are wrapped in the installation may be used.
+To test that the broker functions as expected the `mosquitto_sub` and `mosquitto_pub` tools that are wrapped in the installation may be used.  
+For access to all topics, you need to use the admin user.  
+The password for the admin can be found in our keyvault.
+
 First, subscribe to a topic
 
 ```
-mosquitto_sub -t test -u mosquitto -P default
+mosquitto_sub -t topic_name -u admin -P secret_password
 ```
 
 Then attempt to publish something to the same topic in a different terminal
 
 ```
-mosquitto_pub -t test -m hei -u mosquitto -P default
+mosquitto_pub -t topic_name -m hei -u admin -P secret_password
 ```
