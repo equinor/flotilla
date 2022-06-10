@@ -81,7 +81,7 @@ namespace Api.Services
             );
         }
 
-        public async Task UpdateMissionStatus(string isarMissionId, ReportStatus reportStatus)
+        public async Task<bool> UpdateMissionStatus(string isarMissionId, ReportStatus reportStatus)
         {
             var report = await ReadByIsarMissionId(isarMissionId);
             if (report is null)
@@ -90,15 +90,17 @@ namespace Api.Services
                     "Could not update mission status for ISAR mission with id: {id} as the report was not found",
                     isarMissionId
                 );
-                return;
+                return false;
             }
 
             report.ReportStatus = reportStatus;
 
             await _context.SaveChangesAsync();
+
+            return true;
         }
 
-        public async Task UpdateTaskStatus(string isarTaskId, IsarTaskStatus taskStatus)
+        public async Task<bool> UpdateTaskStatus(string isarTaskId, IsarTaskStatus taskStatus)
         {
             var task = await ReadIsarTaskById(isarTaskId);
             if (task is null)
@@ -107,15 +109,17 @@ namespace Api.Services
                     "Could not update task status for ISAR task with id: {id} as the task was not found",
                     isarTaskId
                 );
-                return;
+                return false;
             }
 
             task.TaskStatus = taskStatus;
 
             await _context.SaveChangesAsync();
+
+            return true;
         }
 
-        public async Task UpdateStepStatus(string isarStepId, IsarStepStatus stepStatus)
+        public async Task<bool> UpdateStepStatus(string isarStepId, IsarStepStatus stepStatus)
         {
             var step = await ReadIsarStepById(isarStepId);
             if (step is null)
@@ -124,12 +128,14 @@ namespace Api.Services
                     "Could not update step status for ISAR step with id: {id} as the step was not found",
                     isarStepId
                 );
-                return;
+                return false;
             }
 
             step.StepStatus = stepStatus;
 
             await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }
