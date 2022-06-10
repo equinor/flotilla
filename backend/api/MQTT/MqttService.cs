@@ -1,6 +1,4 @@
-﻿using System.Text;
-using System.Text.Json;
-using Api.Mqtt.Events;
+﻿using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Utilities;
 using MQTTnet;
@@ -9,6 +7,8 @@ using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Extensions.ManagedClient;
+using System.Text;
+using System.Text.Json;
 
 namespace Api.Mqtt
 {
@@ -28,9 +28,13 @@ namespace Api.Mqtt
         private readonly int _serverPort;
 
         private readonly TimeSpan _reconnectDelay = TimeSpan.FromSeconds(5);
+        private const int MAX_RECONNECT_ATTEMPTS = 15;
+        private int _reconnectAttempts;
+        private CancellationToken _cancellationToken;
 
         public MqttService(ILogger<MqttService> logger, IConfiguration config)
         {
+            _reconnectAttempts = 0;
             _logger = logger;
             var mqttFactory = new MqttFactory();
             _mqttClient = mqttFactory.CreateManagedMqttClient();
@@ -59,9 +63,10 @@ namespace Api.Mqtt
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _cancellationToken = stoppingToken;
             _logger.LogInformation("MQTT client STARTED");
             await _mqttClient.StartAsync(_options);
-            await stoppingToken;
+            await _cancellationToken;
             await _mqttClient.StopAsync();
             _logger.LogInformation("MQTT client STOPPED");
         }
@@ -115,25 +120,54 @@ namespace Api.Mqtt
                 _serverHost,
                 _serverPort
             );
+            _reconnectAttempts = 0;
         }
 
         private void OnConnectingFailed(ManagedProcessFailedEventArgs obj)
         {
+            string errorMsg =
+                "Failed to connect to MQTT broker. Exception: " + obj.Exception.Message;
+
+            if (_reconnectAttempts >= MAX_RECONNECT_ATTEMPTS)
+            {
+                _logger.LogError("{errorMsg}\n      Exceeded max reconnect attempts.", errorMsg);
+
+                if (_shouldFailOnMaxRetries)
+                {
+                    _logger.LogError("Stopping MQTT client due to critical failure");
+                    StopAsync(_cancellationToken);
+                    return;
+                }
+            }
+
+            _reconnectAttempts++;
             _logger.LogWarning(
-                "Failed to connect to MQTT broker. Exception: {message}\n"
-                    + "      Retrying in {time}s",
-                obj.Exception.Message,
-                _reconnectDelay.Seconds
+                "{errorMsg}\n      Retrying in {time}s ({attempt}/{maxAttempts})",
+                errorMsg,
+                _reconnectDelay.Seconds,
+                _reconnectAttempts,
+                MAX_RECONNECT_ATTEMPTS
             );
         }
 
         private void OnDisconnected(MqttClientDisconnectedEventArgs obj)
         {
-            _logger.LogInformation(
-                "Successfully disconnected from broker at {host}:{port}.",
-                _serverHost,
-                _serverPort
-            );
+            // Only log a disconnect if previously connected (not on reconnect attempt)
+            if (obj.ClientWasConnected)
+            {
+                if (obj.Reason is MqttClientDisconnectReason.NormalDisconnection)
+                    _logger.LogInformation(
+                        "Successfully disconnected from broker at {host}:{port}",
+                        _serverHost,
+                        _serverPort
+                    );
+                else
+                    _logger.LogWarning(
+                        "Lost connection to broker at {host}:{port}",
+                        _serverHost,
+                        _serverPort
+                    );
+            }
         }
 
         private void RegisterCallbacks()
