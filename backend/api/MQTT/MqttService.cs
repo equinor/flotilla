@@ -1,4 +1,6 @@
-﻿using Api.Mqtt.Events;
+﻿using System.Text;
+using System.Text.Json;
+using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Utilities;
 using MQTTnet;
@@ -7,8 +9,6 @@ using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Receiving;
 using MQTTnet.Extensions.ManagedClient;
-using System.Text;
-using System.Text.Json;
 
 namespace Api.Mqtt
 {
@@ -28,7 +28,9 @@ namespace Api.Mqtt
         private readonly int _serverPort;
 
         private readonly TimeSpan _reconnectDelay = TimeSpan.FromSeconds(5);
-        private const int MAX_RECONNECT_ATTEMPTS = 15;
+        private readonly int _maxRetryAttempts;
+        private readonly bool _shouldFailOnMaxRetries;
+
         private int _reconnectAttempts;
         private CancellationToken _cancellationToken;
 
@@ -45,6 +47,8 @@ namespace Api.Mqtt
             string username = mqttConfig.GetValue<string>("Username");
             _serverHost = mqttConfig.GetValue<string>("Host");
             _serverPort = mqttConfig.GetValue<int>("Port");
+            _maxRetryAttempts = mqttConfig.GetValue<int>("MaxRetryAttempts");
+            _shouldFailOnMaxRetries = mqttConfig.GetValue<bool>("ShouldFailOnMaxRetries");
 
             var builder = new MqttClientOptionsBuilder()
                 .WithTcpServer(_serverHost, _serverPort)
@@ -128,7 +132,7 @@ namespace Api.Mqtt
             string errorMsg =
                 "Failed to connect to MQTT broker. Exception: " + obj.Exception.Message;
 
-            if (_reconnectAttempts >= MAX_RECONNECT_ATTEMPTS)
+            if (_reconnectAttempts >= _maxRetryAttempts)
             {
                 _logger.LogError("{errorMsg}\n      Exceeded max reconnect attempts.", errorMsg);
 
@@ -146,7 +150,7 @@ namespace Api.Mqtt
                 errorMsg,
                 _reconnectDelay.Seconds,
                 _reconnectAttempts,
-                MAX_RECONNECT_ATTEMPTS
+                _maxRetryAttempts
             );
         }
 
