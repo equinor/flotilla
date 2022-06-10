@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddAzureEnvironmentVariables();
 
 builder.Services.AddDbContext<FlotillaDbContext>(
     options => options.UseInMemoryDatabase("flotilla")
@@ -56,9 +57,13 @@ builder.Services.AddAuthorization(
     }
 );
 
+// The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
+// See https://github.com/Azure/azure-sdk-for-net/issues/17052
 builder.Configuration.AddAzureKeyVault(
     new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
-    new DefaultAzureCredential()
+    new DefaultAzureCredential(
+        new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
+    )
 );
 
 var app = builder.Build();

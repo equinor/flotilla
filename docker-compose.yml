@@ -1,18 +1,20 @@
-version: '3.7'
+version: "3.7"
 services:
   frontend:
     build: frontend
     ports:
-      - '3001:3001'
+      - "3001:3001"
   broker:
     build: broker
     ports:
-      - '1883:1883'
-      - '9001:9001'
+      - "1883:1883"
+      - "9001:9001"
   backend:
     build: backend
     ports:
-      - '8000:8000'
+      - "8000:8000"
     environment:
+      # Overwrites the ip address for the Mqtt service to connect to the Mqtt container:
+      - Mqtt__Host=broker
       - ASPNETCORE_ENVIRONMENT=Development
-      - AzureAd__ClientId=ea4c7b92-47b3-45fb-bd25-a8070f0c495c
+      - AZURE_CLIENT_SECRET=${FLOTILLA_CLIENT_SECRET}
