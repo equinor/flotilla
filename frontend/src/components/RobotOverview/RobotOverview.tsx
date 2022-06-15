@@ -49,7 +49,7 @@ const RobotOverview = ({ robots }: RobotOverviewProps): JSX.Element => {
     })
     return (
         <Table className={styles.tableWrapper}>
-            <Table.Caption captionSide className={styles.tableCaption}>
+            <Table.Caption captionSide="top" className={styles.tableCaption}>
                 <Typography variant="h2">Robot Overview</Typography>
             </Table.Caption>
             <RobotOverviewHeader />
