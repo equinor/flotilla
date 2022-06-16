@@ -2,9 +2,9 @@ import { Card, Typography } from '@equinor/eds-core-react'
 import { Robot } from 'models/robot'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from './RobotStatusChip'
-import { RobotImage } from './RobotImage'
 import BatteryStatusView from './BatteryStatusView'
 import styled from 'styled-components'
+import { RobotImage } from './RobotImage'
 
 interface RobotProps {
     robot: Robot
