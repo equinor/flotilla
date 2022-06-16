@@ -1,6 +1,6 @@
 import { AccessTokenContext } from 'App'
 import { config } from 'config'
-import { components } from 'models/schema'
+import { Robot } from 'models/robot'
 import { useContext } from 'react'
 
 export class BackendAPICaller {
@@ -59,7 +59,7 @@ export class BackendAPICaller {
 
     async getRobots() {
         const path: string = 'robots'
-        const result = await this.GET<components['schemas']['RobotRequest'][]>(path).catch((e) => {
+        const result = await this.GET<Robot>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
         console.log(result)
