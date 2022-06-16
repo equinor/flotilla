@@ -7,7 +7,7 @@ import styles from './robotOverview.module.css'
 import RobotOverviewHeader from './RobotOverviewHeader'
 
 import RobotStatusView from './RobotStatusView'
-import BatteryStatusView from './BatteryStatusView'
+import BatteryStatusView from '../RobotCards/BatteryStatusView'
 
 Icon.add({ info_circle })
 

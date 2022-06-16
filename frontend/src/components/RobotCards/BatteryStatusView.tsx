@@ -1,11 +1,17 @@
 import { Battery, BatteryStatus } from 'models/battery'
 import { battery, battery_charging, battery_alert, battery_unknown } from '@equinor/eds-icons'
-import styles from './robotOverview.module.css'
 import { tokens } from '@equinor/eds-tokens'
 
 import { Icon, Typography } from '@equinor/eds-core-react'
+import styled from 'styled-components'
 
 Icon.add({ battery, battery_charging, battery_unknown, battery_alert })
+
+const BatteryStatusTile = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+`
 
 export interface BatteryStatusViewProps {
     battery: Battery
@@ -30,10 +36,10 @@ const BatteryStatusView = ({ battery }: BatteryStatusViewProps): JSX.Element => 
     }
 
     return (
-        <div className={styles.batteryStatus}>
+        <BatteryStatusTile>
             <Typography>{battery_value}</Typography>
             <Icon name={battery_icon} color={icon_color} size={24} />
-        </div>
+        </BatteryStatusTile>
     )
 }
 
