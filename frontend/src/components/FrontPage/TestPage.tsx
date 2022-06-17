@@ -1,6 +1,7 @@
 import { Button } from '@equinor/eds-core-react'
 import { MissionQueueTable } from 'components/MissionOverview/MissionQueue'
 import { RobotStatusCard } from 'components/RobotCards/RobotStatusCard'
+import { RobotStatusSection } from 'components/RobotCards/RobotStatusSection'
 import { useApi } from 'components/SignInPage/ApiCaller'
 import { defaultRobots } from 'models/robot'
 import styled from 'styled-components'
@@ -8,6 +9,8 @@ const robots = [defaultRobots['taurob'], defaultRobots['exRobotics'], defaultRob
 
 const FrontPage = styled.div`
     display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
 `
 
 export function TestPage() {
@@ -21,7 +24,7 @@ export function TestPage() {
             <div>
                 <h1>This is a test page</h1>
             </div>
-            {defaultRobots}
+            <RobotStatusSection />
             <div>
                 <Button
                     variant="contained"
