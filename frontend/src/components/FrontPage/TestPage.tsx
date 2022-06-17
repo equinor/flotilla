@@ -1,5 +1,5 @@
 import { Button } from '@equinor/eds-core-react'
-import { MissionQueueTable } from 'components/MissionOverview/MissionQueue'
+import { MissionView } from 'components/MissionOverview/MissionView'
 import { RobotStatusCard } from 'components/RobotCards/RobotStatusCard'
 import { RobotStatusSection } from 'components/RobotCards/RobotStatusSection'
 import { useApi } from 'components/SignInPage/ApiCaller'
@@ -35,7 +35,7 @@ export function TestPage() {
                     Test Backend
                 </Button>
             </div>
-            <MissionQueueTable />
+            <MissionView />
 
             {/* <RobotStatusCard robot={robots[0]} /> */}
         </FrontPage>

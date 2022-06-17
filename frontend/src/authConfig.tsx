@@ -19,15 +19,19 @@ export const loginRequest = {
 
 export async function fetchAccessToken(context: IMsalContext): Promise<string> {
     // Silently acquires an access token which is then attached to a request for Microsoft Graph data
+    const account = context.accounts[0]
     return context.instance
-        .acquireTokenSilent(loginRequest)
+        .acquireTokenSilent({ ...loginRequest, account })
         .then((response) => {
             const accessToken: string = response.accessToken ?? ''
+            console.log('Fetched cached token')
             return accessToken
         })
-        .catch(() => {
-            return context.instance.acquireTokenPopup(loginRequest).then((response) => {
-                return response.accessToken
+        .catch((e) => {
+            console.log(e)
+            return context.instance.acquireTokenRedirect(loginRequest).then((response) => {
+                console.log('THIS SHOULD NOT HAPPEN LOLOLOOLOLOL')
+                return 'The page should be refreshed automatically.'
             })
         })
 }

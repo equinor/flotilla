@@ -15,8 +15,6 @@ export const card_width = 200
 const StyledCard = styled(Card)`
     width: 200px;
     padding: 8px;
-    display: flex;
-    flex-direction: column;
 `
 
 const HorisontalContent = styled.div`
