@@ -1,4 +1,3 @@
-import React from 'react'
 import { useMsal } from '@azure/msal-react'
 import { loginRequest } from '../../authConfig'
 import { Button, Icon } from '@equinor/eds-core-react'

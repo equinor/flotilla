@@ -1,4 +1,4 @@
-import { AccessTokenContext } from 'App'
+import { AccessTokenContext } from 'components/FrontPage/FlotillaSite'
 import { config } from 'config'
 import { Robot } from 'models/robot'
 import { useContext } from 'react'

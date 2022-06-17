@@ -14,7 +14,6 @@ ReactDom.render(
         <MsalProvider instance={msalInstance}>
             <App />
         </MsalProvider>
-        ,
     </React.StrictMode>,
     document.getElementById('root')
 )
