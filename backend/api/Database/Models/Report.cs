@@ -45,6 +45,7 @@ namespace Api.Database.Models
         InProgress,
         Failed,
         Cancelled,
+        Paused
     }
 
     public static class ReportStatusMethods
@@ -57,6 +58,7 @@ namespace Api.Database.Models
                 "in_progress" => ReportStatus.InProgress,
                 "failed" => ReportStatus.Failed,
                 "cancelled" => ReportStatus.Cancelled,
+                "paused" => ReportStatus.Paused,
                 _
                   => throw new ArgumentException(
                       $"Failed to parse report status {status} as it's not supported"
