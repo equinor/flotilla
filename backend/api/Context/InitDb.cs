@@ -1,8 +1,12 @@
 ﻿using Api.Database.Models;
+
 namespace Api.Context;
 
 public static class InitDb
 {
+    private static readonly VideoStream streamExample =
+        new() { Name = "FrontCamera", Url = "localhost:3000_test" };
+
     public static readonly List<Robot> Robots = GetRobots();
 
     private static List<Robot> GetRobots()
@@ -16,7 +20,7 @@ public static class InitDb
             Enabled = true,
             Host = "localhost",
             Logs = "logs",
-            Port = 3000
+            Port = 3000,
         };
 
         var robot2 = new Robot
@@ -63,9 +67,14 @@ public static class InitDb
 
     public static void PopulateDb(FlotillaDbContext context)
     {
+        foreach (var robot in Robots)
+        {
+            var videoStream = new VideoStream() { Name = "test", Url = "urlTest" };
+            robot.VideoStreams = new List<VideoStream>() { videoStream, streamExample };
+        }
+
         context.AddRange(Robots);
         context.AddRange(ScheduledMissions);
-
         context.SaveChanges();
     }
 }
