@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Api.Database.Models;
 using Api.Services;
+using Api.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -243,7 +244,7 @@ public class RobotController : ControllerBase
     /// <para> Retrieves the video streams available for the given robot </para>
     /// </remarks>
     [HttpGet]
-    [Route("{robotId}/video_streams/")]
+    [Route("{robotId}/video-streams/")]
     [ProducesResponseType(typeof(IList<VideoStream>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -270,7 +271,7 @@ public class RobotController : ControllerBase
     /// </remarks>
     /// <returns> The updated robot </returns>
     [HttpPost]
-    [Route("{robotId}/video_streams/")]
+    [Route("{robotId}/video-streams/")]
     [ProducesResponseType(typeof(Robot), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -312,6 +313,66 @@ public class RobotController : ControllerBase
         {
             _logger.LogError(ex, "Error adding video stream to robot");
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Pause current mission
+    /// </summary>
+    /// <remarks>
+    /// <para> This query pauses the currently executing mission for a robot </para>
+    /// </remarks>
+    [HttpPost]
+    [Route("{robotId}/pause/")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<string>> PauseMission()
+    {
+        try
+        {
+            var response = await _isarService.PauseMission();
+            string? responseContent = await response.Content.ReadAsStringAsync();
+            string? isarResponse = JsonSerializer.Deserialize<string>(responseContent);
+            return Ok(isarResponse);
+        }
+        catch (MissionException e)
+        {
+            _logger.LogError(e, "Error while pausing isar mission");
+            return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Resume paused mission
+    /// </summary>
+    /// <remarks>
+    /// <para> This query resumes the currently paused mission for a robot </para>
+    /// </remarks>
+    [HttpPost]
+    [Route("{robotId}/resume/")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<string>> ResumeMission()
+    {
+        try
+        {
+            var response = await _isarService.ResumeMission();
+            string? responseContent = await response.Content.ReadAsStringAsync();
+            string? isarResponse = JsonSerializer.Deserialize<string>(responseContent);
+            return Ok(isarResponse);
+        }
+        catch (MissionException e)
+        {
+            _logger.LogError(e, "Error while resuming isar mission");
+            return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
         }
     }
 }

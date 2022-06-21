@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Api.Controllers.Models;
 using Api.Database.Models;
@@ -83,6 +84,36 @@ namespace Api.Services
             return await httpClient.PostAsync(builder.ToString(), null);
         }
 
+        public async Task<HttpResponseMessage> PauseMission()
+        {
+            var builder = new UriBuilder($"{_isarUri}/schedule/pause-mission");
+            var response = await httpClient.PostAsync(builder.ToString(), null);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string message = GetLogMessageForFailedIsarRequest(response.StatusCode);
+                _logger.LogError("{message}", message);
+                throw new MissionException(message);
+            }
+
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> ResumeMission()
+        {
+            var builder = new UriBuilder($"{_isarUri}/schedule/resume-mission");
+            var response = await httpClient.PostAsync(builder.ToString(), null);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string message = GetLogMessageForFailedIsarRequest(response.StatusCode);
+                _logger.LogError("{message}", message);
+                throw new MissionException(message);
+            }
+
+            return response;
+        }
+
         public IList<IsarTask> ProcessIsarMissionResponse(
             IsarStartMissionResponse isarMissionResponse
         )
@@ -139,6 +170,18 @@ namespace Api.Services
 
             return steps;
         }
+
+        private static string GetLogMessageForFailedIsarRequest(HttpStatusCode statusCode) =>
+            (int)statusCode switch
+            {
+                StatusCodes.Status408RequestTimeout
+                  => "A timeout ocurred when communicating with the ISAR state machine",
+                StatusCodes.Status409Conflict
+                  => "A conflict ocurred when interacting with the ISAR state machine. This could imply the state machine is in a state that does not allow the current action you attempted.",
+                StatusCodes.Status500InternalServerError
+                  => "An internal server error ocurred in ISAR",
+                _ => $"An unexpected status code: {statusCode} was received from ISAR"
+            };
     }
 
     public class IsarStopMissionResponse
