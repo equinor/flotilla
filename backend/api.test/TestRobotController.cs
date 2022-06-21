@@ -52,7 +52,7 @@ namespace Api.Test
         [Fact]
         public void GetRobotById_ShouldReturnNotFound()
         {
-            var actionResultType = typeof(NotFoundObjectResult);
+            var actionResultType = typeof(NotFoundResult);
             string robotId = "RandomString";
 
             IActionResult? result = _controller.GetRobotById(robotId).Result.Result;

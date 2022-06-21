@@ -37,8 +37,18 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IList<Robot>>> GetRobots()
     {
-        var robots = await _robotService.ReadAll();
-        return Ok(robots);
+        _logger.LogInformation("Getting robots from database");
+        try
+        {
+            var robots = await _robotService.ReadAll();
+            _logger.LogInformation("Successful GET of robots from database");
+            return Ok(robots);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error during GET of robots  from database");
+            throw;
+        }
     }
 
     /// <summary>
@@ -56,10 +66,24 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Robot>> GetRobotById([FromRoute] string id)
     {
-        var robot = await _robotService.Read(id);
-        if (robot == null)
-            return NotFound($"Could not find robot with id {id}");
-        return Ok(robot);
+        _logger.LogInformation("Getting robot with id={id}", id);
+        try
+        {
+            var robot = await _robotService.Read(id);
+            if (robot == null)
+            {
+                _logger.LogWarning("Could not find robot with id={id}", id);
+                return NotFound();
+            }
+
+            _logger.LogInformation("Successful GET of robot with id={id}", id);
+            return Ok(robot);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error during GET of robot with id={id}", id);
+            throw;
+        }
     }
 
     /// <summary>
@@ -77,8 +101,18 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Robot>> PostRobot([FromBody] Robot robot)
     {
-        var newRobot = await _robotService.Create(robot);
-        return CreatedAtAction(nameof(GetRobotById), new { id = newRobot.Id }, newRobot);
+        _logger.LogInformation("Creating new robot");
+        try
+        {
+            var newRobot = await _robotService.Create(robot);
+            _logger.LogInformation("Succesfully created new robot");
+            return CreatedAtAction(nameof(GetRobotById), new { id = newRobot.Id }, newRobot);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while creating new robot");
+            throw;
+        }
     }
 
     /// <summary>
@@ -103,14 +137,14 @@ public class RobotController : ControllerBase
         [FromBody] Robot robot
     )
     {
-        _logger.LogInformation("Updating robot with id: {id}", id);
+        _logger.LogInformation("Updating robot with id={id}", id);
 
         if (!ModelState.IsValid)
             return BadRequest("Invalid data.");
 
         if (id != robot.Id)
         {
-            _logger.LogError("Id: {id} not corresponding to updated robot", id);
+            _logger.LogWarning("Id: {id} not corresponding to updated robot", id);
             return BadRequest("Inconsistent Id");
         }
 
@@ -118,13 +152,13 @@ public class RobotController : ControllerBase
         {
             var updatedRobot = await _robotService.Update(robot);
 
-            _logger.LogInformation($"Successful PUT of robot to database");
+            _logger.LogInformation("Successful PUT of robot to database");
 
             return Ok(updatedRobot);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, $"PUTing robot to database");
+            _logger.LogError(e, "Error while updating robot with id={id}", id);
             throw;
         }
     }
@@ -150,9 +184,21 @@ public class RobotController : ControllerBase
     {
         var robot = await _robotService.Read(robotId);
         if (robot == null)
-            return NotFound($"Could not find robot with robot id {robotId}");
-        var report = await _isarService.StartMission(robot, missionId);
-        return Ok(report);
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound("Robot not found");
+        }
+
+        try
+        {
+            var report = await _isarService.StartMission(robot, missionId);
+            return Ok(report);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while starting isar mission");
+            throw;
+        }
     }
 
     /// <summary>
@@ -172,15 +218,22 @@ public class RobotController : ControllerBase
     public async Task<ActionResult<IsarStopMissionResponse>> StopMission([FromRoute] string robotId)
     {
         var response = await _isarService.StopMission();
-        if (!response.IsSuccessStatusCode)
-            _logger.LogError("Could not stop mission with id {robotId}", robotId);
-        if (response.Content != null)
+        if (!response.IsSuccessStatusCode || response.Content is null)
         {
-            string? responseContent = await response.Content.ReadAsStringAsync();
-            var isarResponse = JsonSerializer.Deserialize<IsarStopMissionResponse>(responseContent);
-            return Ok(isarResponse);
+            _logger.LogError("Could not stop mission on robot: {robotId}", robotId);
+
+            int statusCode = (int)response.StatusCode;
+
+            // If error is caused by user (400 codes), let them know
+            if (400 <= statusCode && statusCode < 500)
+                return new StatusCodeResult(statusCode);
+
+            return new StatusCodeResult(StatusCodes.Status502BadGateway);
         }
-        return NotFound($"Could not stop mission on robot: {robotId}");
+
+        string? responseContent = await response.Content.ReadAsStringAsync();
+        var isarResponse = JsonSerializer.Deserialize<IsarStopMissionResponse>(responseContent);
+        return Ok(isarResponse);
     }
 
     /// <summary>
@@ -201,7 +254,10 @@ public class RobotController : ControllerBase
     {
         var robot = await _robotService.Read(robotId);
         if (robot == null)
-            return NotFound($"Could not find robot with id {robotId}");
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound();
+        }
 
         return Ok(robot.VideoStreams);
     }
@@ -228,7 +284,10 @@ public class RobotController : ControllerBase
     {
         var robot = await _robotService.Read(robotId);
         if (robot == null)
-            return NotFound($"Could not find robot with id {robotId}");
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound();
+        }
 
         if (robot.VideoStreams is null)
             robot.VideoStreams = new List<VideoStream>();
