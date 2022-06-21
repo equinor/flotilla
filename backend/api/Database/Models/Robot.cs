@@ -8,7 +8,6 @@ namespace Api.Database.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Required]
         public string Id { get; set; }
 
         [MaxLength(128)]
@@ -23,8 +22,6 @@ namespace Api.Database.Models
         [Required]
         public string SerialNumber { get; set; }
 
-        [MaxLength(128)]
-        [Required]
         public string Logs { get; set; }
 
         public virtual IList<VideoStream> VideoStreams { get; set; }
