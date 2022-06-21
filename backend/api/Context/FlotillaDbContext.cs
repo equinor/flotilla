@@ -10,6 +10,7 @@ public class FlotillaDbContext : DbContext
     public DbSet<IsarTask> Tasks => Set<IsarTask>();
     public DbSet<IsarStep> Steps => Set<IsarStep>();
     public DbSet<ScheduledMission> ScheduledMissions => Set<ScheduledMission>();
+    public DbSet<VideoStream> VideoStreams => Set<VideoStream>();
 
     private static bool initialized;
 

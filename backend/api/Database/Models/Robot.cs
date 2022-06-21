@@ -27,6 +27,8 @@ namespace Api.Database.Models
         [Required]
         public string Logs { get; set; }
 
+        public virtual IList<VideoStream> VideoStreams { get; set; }
+
         [MaxLength(128)]
         [Required]
         public string Host { get; set; }

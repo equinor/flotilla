@@ -35,14 +35,21 @@ namespace Api.Services
 
         public async Task<IEnumerable<Robot>> ReadAll()
         {
-            return await _context.Robots.ToListAsync();
+            return await _context.Robots.Include(r => r.VideoStreams).ToListAsync();
         }
 
         public async Task<Robot?> Read(string id)
         {
-            return await _context.Robots.FirstOrDefaultAsync(
-                robot => robot.Id.Equals(id, StringComparison.Ordinal)
-            );
+            return await _context.Robots
+                .Include(r => r.VideoStreams)
+                .FirstOrDefaultAsync(robot => robot.Id.Equals(id, StringComparison.Ordinal));
+        }
+
+        public async Task<Robot> Update(Robot robot)
+        {
+            var entry = _context.Update(robot);
+            await _context.SaveChangesAsync();
+            return entry.Entity;
         }
     }
 }
