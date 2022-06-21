@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -76,7 +75,7 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Robot>> PostRobot([FromBody] CreateRobotQuery robot)
+    public async Task<ActionResult<Robot>> PostRobot([FromBody] Robot robot)
     {
         var newRobot = await _robotService.Create(robot);
         return CreatedAtAction(nameof(GetRobotById), new { id = newRobot.Id }, newRobot);
