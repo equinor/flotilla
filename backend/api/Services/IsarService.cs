@@ -38,18 +38,22 @@ namespace Api.Services
             if (!response.IsSuccessStatusCode)
             {
                 string msg = response.ToString();
-                _logger.LogWarning("Error in ISAR: {msg}", msg);
+                _logger.LogError("Error in ISAR: {msg}", msg);
                 throw new MissionException($"Could not start mission with id: {missionId}");
             }
             if (response.Content is null)
             {
+                _logger.LogError("Could not read content from mission");
                 throw new MissionException("Could not read content from mission");
             }
 
             var isarMissionResponse =
                 await response.Content.ReadFromJsonAsync<IsarStartMissionResponse>();
             if (isarMissionResponse is null)
+            {
+                _logger.LogError("Could not read content from mission");
                 throw new JsonException("Failed to deserialize mission from Isar");
+            }
 
             var tasks = ProcessIsarMissionResponse(isarMissionResponse);
 
