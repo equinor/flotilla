@@ -52,7 +52,7 @@ namespace Api.EventHandlers
 
         private async void UpdateUpcomingScheduledMissions()
         {
-            _upcomingScheduledMissions = await _scheduledMissionService.GetUpcomingPendingScheduledMissions();
+            _upcomingScheduledMissions = await _scheduledMissionService.GetUpcomingScheduledMissions();
         }
 
         private async Task<bool> StartScheduledMission(ScheduledMission scheduledMission)
