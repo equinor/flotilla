@@ -24,13 +24,11 @@ export async function fetchAccessToken(context: IMsalContext): Promise<string> {
         .acquireTokenSilent({ ...loginRequest, account })
         .then((response) => {
             const accessToken: string = response.accessToken ?? ''
-            console.log('Fetched cached token')
             return accessToken
         })
         .catch((e) => {
             console.log(e)
-            return context.instance.acquireTokenRedirect(loginRequest).then((response) => {
-                console.log('THIS SHOULD NOT HAPPEN LOLOLOOLOLOL')
+            return context.instance.acquireTokenRedirect(loginRequest).then(() => {
                 return 'The page should be refreshed automatically.'
             })
         })

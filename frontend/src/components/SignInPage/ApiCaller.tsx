@@ -37,7 +37,6 @@ export class BackendAPICaller {
         const responseBody = await response.json().catch((e) => {
             throw new Error(`Error getting json from response: ${e}`)
         })
-        console.log(`response: ${response.statusText}`)
         return { body: responseBody, headers: response.headers }
     }
 
