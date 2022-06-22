@@ -41,7 +41,7 @@ namespace Api.Services
             RaiseScheduledMissionUpdatedEvent();
         }
 
-        public async Task<List<ScheduledMission>> GetUpcomingPendingScheduledMissions()
+        public async Task<List<ScheduledMission>> GetUpcomingScheduledMissions()
         {
             return await _context.ScheduledMissions
                 .Include(sm => sm.Robot)
