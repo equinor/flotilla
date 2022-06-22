@@ -19,8 +19,8 @@ const RobotView = styled.div`
 export function RobotStatusSection() {
     const apiCaller = useApi()
     // var backendRobots = apiCaller.getRobots()
-    var defaultRobots = robots.map(function (robot) {
-        return <RobotStatusCard robot={robot} />
+    var defaultRobots = robots.map(function (robot, index) {
+        return <RobotStatusCard key={index} robot={robot} />
     })
     return (
         <RobotView>
