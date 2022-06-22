@@ -1,6 +1,5 @@
 import { Button } from '@equinor/eds-core-react'
 import { MissionView } from 'components/MissionOverview/MissionView'
-import { RobotStatusCard } from 'components/RobotCards/RobotStatusCard'
 import { RobotStatusSection } from 'components/RobotCards/RobotStatusSection'
 import { useApi } from 'components/SignInPage/ApiCaller'
 import { defaultRobots } from 'models/robot'
