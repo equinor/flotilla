@@ -60,6 +60,25 @@ public class ScheduledMissionController : ControllerBase
     }
 
     /// <summary>
+    /// Lookup upcoming scheduled missions
+    /// </summary>
+    /// <remarks>
+    /// <para> This query gets upcoming scheduled missions </para>
+    /// </remarks>
+    [HttpGet]
+    [Route("upcoming")]
+    [ProducesResponseType(typeof(IList<ScheduledMission>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ScheduledMission>> GetUpcomingScheduledMissions()
+    {
+        var upcomingScheduledMissions = await _scheduledMissionService.GetUpcomingScheduledMissions();
+        return Ok(upcomingScheduledMissions);
+    }
+
+    /// <summary>
     /// Create and add new scheduled mission to database
     /// </summary>
     /// <remarks>
