@@ -1,6 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
-import { useApi } from 'components/SignInPage/ApiCaller'
-import { defaultRobots, Robot } from 'models/robot'
+import { defaultRobots } from 'models/robot'
 import styled from 'styled-components'
 import { RobotStatusCard } from './RobotStatusCard'
 const robots = [defaultRobots['taurob'], defaultRobots['exRobotics'], defaultRobots['turtle']]
@@ -17,8 +16,6 @@ const RobotView = styled.div`
 `
 
 export function RobotStatusSection() {
-    const apiCaller = useApi()
-    // var backendRobots = apiCaller.getRobots()
     var defaultRobots = robots.map(function (robot, index) {
         return <RobotStatusCard key={index} robot={robot} />
     })
