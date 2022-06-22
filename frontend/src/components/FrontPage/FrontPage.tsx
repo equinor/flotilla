@@ -12,7 +12,6 @@ const StyledFrontPage = styled.div`
 
 export function FrontPage() {
     const apiCaller = useApi()
-    var backendRobots
     return (
         <StyledFrontPage>
             <MissionView />
@@ -21,8 +20,10 @@ export function FrontPage() {
                 <Button
                     variant="contained"
                     onClick={() => {
-                        backendRobots = apiCaller.getRobots()
-                        console.log(backendRobots)
+                        apiCaller.getRobots().then((robots) => {
+                            console.log(robots)
+                        })
+
                     }}
                 >
                     Test Backend
