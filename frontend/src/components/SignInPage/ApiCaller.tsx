@@ -1,6 +1,7 @@
 import { AccessTokenContext } from 'components/FrontPage/FlotillaSite'
 import { config } from 'config'
 import { Robot } from 'models/robot'
+import { ScheduledMission } from 'models/scheduledMission'
 import { useContext } from 'react'
 
 export class BackendAPICaller {
@@ -61,7 +62,14 @@ export class BackendAPICaller {
         const result = await this.GET<Robot>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
-        console.log(result)
+        return result
+    }
+
+    async getUpcomingMissions() {
+        const path: string = 'scheduled-missions'
+        const result = await this.GET<ScheduledMission[]>(path).catch((e) => {
+            throw new Error(`Failed to GET /${path}: ` + e)
+        })
         return result
     }
 }

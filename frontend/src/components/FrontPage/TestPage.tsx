@@ -15,14 +15,12 @@ const FrontPage = styled.div`
 export function TestPage() {
     const apiCaller = useApi()
     var backendRobots
-    var defaultRobots = robots.map(function (robot) {
-        return <RobotStatusCard robot={robot} />
-    })
     return (
         <FrontPage>
             <div>
                 <h1>This is a test page</h1>
             </div>
+            <MissionView />
             <RobotStatusSection />
             <div>
                 <Button
@@ -34,9 +32,6 @@ export function TestPage() {
                     Test Backend
                 </Button>
             </div>
-            <MissionView />
-
-            {/* <RobotStatusCard robot={robots[0]} /> */}
         </FrontPage>
     )
 }
