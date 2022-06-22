@@ -1,30 +1,33 @@
-import { Typography, Button } from '@equinor/eds-core-react'
-import { RobotOverview } from 'components/RobotOverview'
-import { ProfileContent } from 'components/SignInPage/ProfileContent'
-import { defaultRobots } from 'models/robot'
+import { Button } from '@equinor/eds-core-react'
+import { MissionView } from 'components/MissionOverview/MissionView'
+import { RobotStatusSection } from 'components/RobotCards/RobotStatusSection'
+import { useApi } from 'components/SignInPage/ApiCaller'
+import styled from 'styled-components'
 
-const robots = [defaultRobots['taurob'], defaultRobots['exRobotics'], defaultRobots['turtle']]
+const StyledFrontPage = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+`
 
 export function FrontPage() {
+    const apiCaller = useApi()
+    var backendRobots
     return (
-        <>
-            <ProfileContent />
-            <div className="test-button">
-                <Button href="test">To Test Page</Button>
+        <StyledFrontPage>
+            <MissionView />
+            <RobotStatusSection />
+            <div>
+                <Button
+                    variant="contained"
+                    onClick={() => {
+                        backendRobots = apiCaller.getRobots()
+                        console.log(backendRobots)
+                    }}
+                >
+                    Test Backend
+                </Button>
             </div>
-            <div className="header">
-                <Typography color="primary" variant="h1" bold>
-                    Flotilla
-                </Typography>
-            </div>
-            <div className="robot-overview">
-                <RobotOverview robots={robots}></RobotOverview>
-            </div>
-            <div className="mission-overview">
-                <Typography variant="h2" style={{ marginTop: '20px' }}>
-                    Mission Overview
-                </Typography>
-            </div>
-        </>
+        </StyledFrontPage>
     )
 }

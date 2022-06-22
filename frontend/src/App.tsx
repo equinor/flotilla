@@ -1,4 +1,3 @@
-import './app.css'
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
 import { SignInPage } from './components/SignInPage/SignInPage'
 import { FlotillaSite } from 'components/FrontPage/FlotillaSite'

@@ -1,4 +1,4 @@
-import { Button, Card, Typography } from '@equinor/eds-core-react'
+import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { MissionCard } from './MissionCard'
 import { useApi } from 'components/SignInPage/ApiCaller'

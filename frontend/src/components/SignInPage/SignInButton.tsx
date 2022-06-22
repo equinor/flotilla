@@ -1,6 +1,6 @@
 import { useMsal } from '@azure/msal-react'
 import { loginRequest } from '../../authConfig'
-import { Button, Icon } from '@equinor/eds-core-react'
+import { Button } from '@equinor/eds-core-react'
 import { IPublicClientApplication } from '@azure/msal-browser'
 
 function handleLogin(instance: IPublicClientApplication) {
