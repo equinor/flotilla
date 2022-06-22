@@ -3,7 +3,6 @@ import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-reac
 import { SignInPage } from './components/SignInPage/SignInPage'
 import { FlotillaSite } from 'components/FrontPage/FlotillaSite'
 
-
 function App() {
     return (
         <div className="app-ui">

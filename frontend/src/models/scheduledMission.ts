@@ -1,4 +1,4 @@
-import { Robot } from "models/robot"
+import { Robot } from 'models/robot'
 
 export class ScheduledMission {
     id: string

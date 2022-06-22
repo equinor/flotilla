@@ -41,17 +41,15 @@ export function MissionView() {
             </Typography>
             <MissionTable>
                 <UpcomingMissionCards>
-                    {
-                        upcomingMissions.map(function (scheduledMission, index) {
-                            return <MissionCard key={index} scheduledMission={scheduledMission} />
-                        })
-                    }
+                    {upcomingMissions.map(function (scheduledMission, index) {
+                        return <MissionCard key={index} scheduledMission={scheduledMission} />
+                    })}
                 </UpcomingMissionCards>
             </MissionTable>
             <MissionButtonView>
                 <Button>Schedule mission</Button>
                 <Button>Make new mission in Echo</Button>
             </MissionButtonView>
-        </StyledMissionView >
+        </StyledMissionView>
     )
 }
