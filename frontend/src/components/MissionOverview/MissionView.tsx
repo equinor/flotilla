@@ -10,14 +10,11 @@ const StyledMissionView = styled.div`
     grid-column: 1/ -1;
     gap: 1rem;
 `
-const UpcomingMissionCards = styled.div`
-    width: 400px;
-`
 
 const MissionTable = styled.div`
     display: grid;
     grid-template-rows: repeat(auto-fill);
-    gap: 0.5rem;
+    gap: 1rem;
 `
 
 const MissionButtonView = styled.div`
@@ -40,11 +37,9 @@ export function MissionView() {
                 Upcoming missions
             </Typography>
             <MissionTable>
-                <UpcomingMissionCards>
-                    {upcomingMissions.map(function (scheduledMission, index) {
-                        return <MissionCard key={index} scheduledMission={scheduledMission} />
-                    })}
-                </UpcomingMissionCards>
+                {upcomingMissions.map(function (scheduledMission, index) {
+                    return <MissionCard key={index} scheduledMission={scheduledMission} />
+                })}
             </MissionTable>
             <MissionButtonView>
                 <Button>Schedule mission</Button>

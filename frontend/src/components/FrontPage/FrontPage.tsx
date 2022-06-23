@@ -23,7 +23,6 @@ export function FrontPage() {
                         apiCaller.getRobots().then((robots) => {
                             console.log(robots)
                         })
-
                     }}
                 >
                     Test Backend
