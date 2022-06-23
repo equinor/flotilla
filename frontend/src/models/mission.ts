@@ -1,6 +1,6 @@
 import { defaultRobots, Robot } from './robot'
 
-export enum ScheduledMissionStatus {
+export enum MissionStatus {
     Pending = 'Pending',
     Started = 'Started',
     Successful = 'Successful',
@@ -13,7 +13,7 @@ export class Mission {
     isarMissionId: string
     startTime: Date
     endTime: Date
-    status: ScheduledMissionStatus
+    status: MissionStatus
 
     constructor(
         id: string,
@@ -21,7 +21,7 @@ export class Mission {
         isarMissionId: string,
         startTime: Date,
         endTime: Date,
-        status: ScheduledMissionStatus
+        status: MissionStatus
     ) {
         this.id = id
         this.robot = robot
@@ -33,12 +33,5 @@ export class Mission {
 }
 
 export const defaultMission: { [name: string]: Mission } = {
-    test1: new Mission(
-        '1',
-        defaultRobots['Taurob'],
-        '2',
-        new Date(),
-        new Date(500000000),
-        ScheduledMissionStatus.Pending
-    ),
+    test1: new Mission('1', defaultRobots['Taurob'], '2', new Date(), new Date(500000000), MissionStatus.Pending),
 }

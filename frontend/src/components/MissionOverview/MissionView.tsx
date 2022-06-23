@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { MissionCard } from './MissionCard'
 import { useApi } from 'components/SignInPage/ApiCaller'
 import { useEffect, useState } from 'react'
-import { ScheduledMission } from 'models/scheduledMission'
+import { Mission } from 'models/mission'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -24,7 +24,7 @@ const MissionButtonView = styled.div`
 
 export function MissionView() {
     const apiCaller = useApi()
-    const [upcomingMissions, setUpcomingMissions] = useState<ScheduledMission[]>([])
+    const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
     useEffect(() => {
         apiCaller.getUpcomingMissions().then((result) => {
             setUpcomingMissions(result.body)
@@ -37,8 +37,8 @@ export function MissionView() {
                 Upcoming missions
             </Typography>
             <MissionTable>
-                {upcomingMissions.map(function (scheduledMission, index) {
-                    return <MissionCard key={index} scheduledMission={scheduledMission} />
+                {upcomingMissions.map(function (mission, index) {
+                    return <MissionCard key={index} mission={mission} />
                 })}
             </MissionTable>
             <MissionButtonView>
