@@ -4,7 +4,7 @@ import { FlotillaSite } from 'components/Pages/FlotillaSite'
 
 function App() {
     return (
-        <div className="app-ui">
+        <div>
             <UnauthenticatedTemplate>
                 <div className="sign-in-page">
                     <SignInPage></SignInPage>
