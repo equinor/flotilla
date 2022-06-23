@@ -66,7 +66,7 @@ export class BackendAPICaller {
     }
 
     async getUpcomingMissions() {
-        const path: string = 'scheduled-missions'
+        const path: string = 'scheduled-missions/upcoming'
         const result = await this.GET<ScheduledMission[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
