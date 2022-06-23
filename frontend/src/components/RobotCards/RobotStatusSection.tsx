@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import { RobotStatusCard } from './RobotStatusCard'
 const robots = [defaultRobots['taurob'], defaultRobots['exRobotics'], defaultRobots['turtle']]
 
-const RobotCards = styled.div`
+const RobotCardSection = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 2rem;
@@ -24,7 +24,7 @@ export function RobotStatusSection() {
             <Typography color="resting" variant="h2">
                 Robot status
             </Typography>
-            <RobotCards>{defaultRobots}</RobotCards>
+            <RobotCardSection>{defaultRobots}</RobotCardSection>
         </RobotView>
     )
 }
