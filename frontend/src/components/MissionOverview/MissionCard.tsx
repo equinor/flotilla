@@ -1,10 +1,10 @@
 import { Button, Card, Checkbox, Icon, Typography } from '@equinor/eds-core-react'
 import { more_vertical } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
-import { ScheduledMission } from 'models/scheduledMission'
+import { Mission } from 'models/mission'
 import styled from 'styled-components'
-interface ScheduledMissionProps {
-    scheduledMission: ScheduledMission
+interface MissionProps {
+    mission: Mission
 }
 
 const StyledMissionCard = styled(Card)`
@@ -24,12 +24,12 @@ const StyledMissionCardRight = styled(Card)`
 
 Icon.add({ more_vertical })
 
-export function MissionCard({ scheduledMission }: ScheduledMissionProps) {
+export function MissionCard({ mission }: MissionProps) {
     return (
-        <StyledMissionCard key={scheduledMission.id} variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
+        <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
             <StyledMissionCardLeft>
                 <Checkbox />
-                <Typography variant="body_short_bold">{scheduledMission.isarMissionId}</Typography>
+                <Typography variant="body_short_bold">{mission.isarMissionId}</Typography>
             </StyledMissionCardLeft>
             <StyledMissionCardRight>
                 <Typography>Start: 00:00</Typography>
