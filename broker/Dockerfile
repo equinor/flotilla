@@ -2,7 +2,11 @@ FROM eclipse-mosquitto:latest
 
 COPY mosquitto/config/ mosquitto/config/
 
-EXPOSE 1883 9001
+ARG TLS_SERVER_KEY
+
+RUN echo "${TLS_SERVER_KEY}" > mosquitto/config/certs/server-key.pem
+
+EXPOSE 1883
 
 USER 1883
 

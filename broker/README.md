@@ -1,5 +1,13 @@
 # Mosquitto MQTT Broker
 
+## Set up the broker
+
+The broker expects a private key for its server x509 certificate used for TLS.  
+This must be provided through an environment variable called `FLOTILLA_BROKER_SERVER_KEY`.  
+This is a secret, and should be treated as such.  
+The best way to pass this is to store it in a `.env` file in the root of flotilla, and docker compose loads this by default on startup.  
+See [Using the “--env-file” option](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) for more information.
+
 ## Running the broker
 
 From the flotilla root directory, run the following command:
