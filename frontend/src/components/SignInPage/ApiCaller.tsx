@@ -2,7 +2,7 @@ import { AccessTokenContext } from 'components/FrontPage/FlotillaSite'
 import { config } from 'config'
 import { Robot } from 'models/robot'
 import { ScheduledMission } from 'models/scheduledMission'
-import { useContext } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 
 export class BackendAPICaller {
     /* Implements the request sent to the backend api.
@@ -77,4 +77,25 @@ export class BackendAPICaller {
 export const useApi = () => {
     const accessToken = useContext(AccessTokenContext)
     return new BackendAPICaller(accessToken)
+}
+
+export function useInterval(callbackFunction: () => void, delay: number) {
+    // Used to call a function at a fixed intervall
+    const savedCallback = useRef<() => void>(Function)
+    // Remember the latest callback function
+    useEffect(() => {
+        savedCallback.current = callbackFunction
+    }, [callbackFunction])
+
+    useEffect(() => {
+        function tick() {
+            savedCallback.current()
+        }
+        if (delay != null) {
+            const id = setInterval(tick, delay)
+            return () => {
+                clearInterval(id)
+            }
+        }
+    }, [callbackFunction, delay])
 }

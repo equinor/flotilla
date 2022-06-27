@@ -1,9 +1,11 @@
 import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { MissionCard } from './MissionCard'
-import { useApi } from 'components/SignInPage/ApiCaller'
+import { useApi, useInterval } from 'components/SignInPage/ApiCaller'
 import { useEffect, useState } from 'react'
 import { ScheduledMission } from 'models/scheduledMission'
+
+const refreshTimer = 5000
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -30,6 +32,11 @@ export function MissionView() {
             setUpcomingMissions(result.body)
         })
     }, [])
+    useInterval(async () => {
+        apiCaller.getUpcomingMissions().then((result) => {
+            setUpcomingMissions(result.body)
+        })
+    }, refreshTimer)
 
     return (
         <StyledMissionView>
