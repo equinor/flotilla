@@ -1,5 +1,6 @@
 import { useMsal } from '@azure/msal-react'
 import { fetchAccessToken } from 'api/AuthConfig'
+import { Header } from 'components/Header/Header'
 import { createContext, useEffect, useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { FrontPage } from './FrontPage'
@@ -21,6 +22,7 @@ export function FlotillaSite() {
             {accessToken !== '' && (
                 <>
                     <AccessTokenContext.Provider value={accessToken}>
+                        <Header/>
                         <BrowserRouter>
                             <Routes>
                                 <Route path="/" element={<FrontPage />} />
