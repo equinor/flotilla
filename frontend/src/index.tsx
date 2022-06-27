@@ -3,7 +3,7 @@ import ReactDom from 'react-dom'
 import React from 'react'
 import { PublicClientApplication } from '@azure/msal-browser'
 import { MsalProvider } from '@azure/msal-react'
-import { msalConfig } from 'authConfig'
+import { msalConfig } from 'api/AuthConfig'
 
 // ========================================
 

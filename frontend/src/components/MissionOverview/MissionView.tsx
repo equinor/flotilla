@@ -1,7 +1,7 @@
 import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { MissionCard } from './MissionCard'
-import { useApi, useInterval } from 'components/SignInPage/ApiCaller'
+import { useApi,  useInterval } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
 import { ScheduledMission } from 'models/scheduledMission'
 

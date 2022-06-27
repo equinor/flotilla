@@ -1,8 +1,10 @@
 import { Button } from '@equinor/eds-core-react'
 import { MissionView } from 'components/MissionOverview/MissionView'
 import { RobotStatusSection } from 'components/RobotCards/RobotStatusSection'
-import { useApi } from 'components/SignInPage/ApiCaller'
+import { useApi } from 'api/ApiCaller'
 import styled from 'styled-components'
+import path from 'path'
+import { Link } from 'react-router-dom'
 
 const StyledFrontPage = styled.div`
     display: grid;
@@ -26,6 +28,11 @@ export function FrontPage() {
                     }}
                 >
                     Test Backend
+                </Button>
+                <Button
+                    href="mission"
+                >
+                    Mission Page
                 </Button>
             </div>
         </StyledFrontPage>

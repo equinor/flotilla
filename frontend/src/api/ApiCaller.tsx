@@ -1,4 +1,4 @@
-import { AccessTokenContext } from 'components/FrontPage/FlotillaSite'
+import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
 import { Robot } from 'models/robot'
 import { ScheduledMission } from 'models/scheduledMission'
