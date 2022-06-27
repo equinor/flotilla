@@ -1,5 +1,5 @@
 import { useMsal } from '@azure/msal-react'
-import { loginRequest } from '../../authConfig'
+import { loginRequest } from '../../api/AuthConfig'
 import { Button } from '@equinor/eds-core-react'
 import { IPublicClientApplication } from '@azure/msal-browser'
 
