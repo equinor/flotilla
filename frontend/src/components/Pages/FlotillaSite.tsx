@@ -3,10 +3,15 @@ import { fetchAccessToken } from 'api/AuthConfig'
 import { Header } from 'components/Header/Header'
 import { createContext, useEffect, useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import styled from 'styled-components'
 import { FrontPage } from './FrontPage'
 import { MissionPage } from './MissionPage'
 
 export const AccessTokenContext = createContext('')
+
+const StyledPages = styled.div`
+    margin: 2rem;
+`
 
 export function FlotillaSite() {
     const authContext = useMsal()
@@ -22,13 +27,15 @@ export function FlotillaSite() {
             {accessToken !== '' && (
                 <>
                     <AccessTokenContext.Provider value={accessToken}>
-                        <Header/>
-                        <BrowserRouter>
-                            <Routes>
-                                <Route path="/" element={<FrontPage />} />
-                                <Route path="/mission" element={<MissionPage />} />
-                            </Routes>
-                        </BrowserRouter>
+                        <Header />
+                        <StyledPages>
+                            <BrowserRouter>
+                                <Routes>
+                                    <Route path="/" element={<FrontPage />} />
+                                    <Route path="/mission" element={<MissionPage />} />
+                                </Routes>
+                            </BrowserRouter>
+                        </StyledPages>
                     </AccessTokenContext.Provider>
                 </>
             )}
