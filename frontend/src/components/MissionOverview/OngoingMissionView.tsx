@@ -2,7 +2,13 @@ import { Typography } from '@equinor/eds-core-react'
 import { defaultMission } from 'models/mission'
 import styled from 'styled-components'
 import { OngoingMissionCard } from './OngoingMissionCard'
-const testMissions = [defaultMission['test1']]
+const testMissions = [
+    defaultMission['Pending'],
+    defaultMission['Started'],
+    defaultMission['Warning'],
+    defaultMission['Failed'],
+    defaultMission['Successful'],
+]
 
 const StyledOngoingMissionView = styled.div`
     display: grid;
@@ -15,15 +21,16 @@ const OngoingMissionSection = styled.div`
 `
 
 export function OngoingMissionView() {
+    var OngoingMissions = testMissions.map(function (mission, index) {
+        return <OngoingMissionCard key={index} mission={mission} />
+    })
     return (
         <StyledOngoingMissionView>
             <Typography variant="h2" color="resting">
                 {' '}
                 Ongoing Missions
             </Typography>
-            <OngoingMissionSection>
-                <OngoingMissionCard mission={testMissions[0]} />
-            </OngoingMissionSection>
+            <OngoingMissionSection>{OngoingMissions}</OngoingMissionSection>
         </StyledOngoingMissionView>
     )
 }
