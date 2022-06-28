@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Security;
+using System.Text;
 using System.Text.Json;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
@@ -24,14 +25,16 @@ namespace Api.Mqtt
 
         private readonly ManagedMqttClientOptions _options;
 
+        private readonly bool _isDevelopment;
+
         private readonly string _serverHost;
         private readonly int _serverPort;
 
         private readonly TimeSpan _reconnectDelay = TimeSpan.FromSeconds(5);
         private readonly int _maxRetryAttempts;
         private readonly bool _shouldFailOnMaxRetries;
-
         private int _reconnectAttempts;
+
         private CancellationToken _cancellationToken;
 
         public MqttService(ILogger<MqttService> logger, IConfiguration config)
@@ -42,6 +45,9 @@ namespace Api.Mqtt
             _mqttClient = mqttFactory.CreateManagedMqttClient();
 
             string password = config.GetValue<string>("mqtt-broker-password");
+            _isDevelopment = (
+                config.GetValue<string?>("ASPNETCORE_ENVIRONMENT") ?? "Production"
+            ).Equals("Development", StringComparison.OrdinalIgnoreCase);
 
             var mqttConfig = config.GetSection("Mqtt");
             string username = mqttConfig.GetValue<string>("Username");
@@ -52,6 +58,15 @@ namespace Api.Mqtt
 
             var builder = new MqttClientOptionsBuilder()
                 .WithTcpServer(_serverHost, _serverPort)
+                .WithTls(
+                    o =>
+                    {
+                        o.UseTls = true;
+                        o.CertificateValidationHandler = CustomCertificateHandler;
+                        if (_isDevelopment)
+                            o.IgnoreCertificateChainErrors = true;
+                    }
+                )
                 .WithCredentials(username, password);
 
             _options = new ManagedMqttClientOptionsBuilder()
@@ -245,6 +260,32 @@ namespace Api.Mqtt
             {
                 _logger.LogWarning("{msg}", e.Message);
             }
+        }
+
+        /// <summary>
+        /// A workaround for a bug in the MQTTNet framework where the IgnoreCertificateChainErrors option is not being considered.
+        /// </summary>
+        /// <remarks>
+        /// Proposed solution in MQTTNet: <see href="https://github.com/dotnet/MQTTnet/pull/1447"/>
+        /// </remarks>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private bool CustomCertificateHandler(
+            MqttClientCertificateValidationCallbackContext context
+        )
+        {
+            bool approved;
+            if (context.ClientOptions.TlsOptions.IgnoreCertificateChainErrors)
+                approved =
+                    context.SslPolicyErrors == SslPolicyErrors.RemoteCertificateChainErrors
+                    || context.SslPolicyErrors == SslPolicyErrors.None;
+            else
+                approved = context.SslPolicyErrors == SslPolicyErrors.None;
+
+            if (!approved)
+                _logger.LogError("Error with remote certificate: {error}", context.SslPolicyErrors);
+
+            return approved;
         }
     }
 }

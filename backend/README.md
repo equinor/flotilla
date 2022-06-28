@@ -35,11 +35,8 @@ Read more about the `launchSettings.json` file
 
 For the backend to work when dockerized, you need to have the client secret exposed as
 an environment variable named `FLOTILLA_CLIENT_SECRET`.
-The simplest way to do this in bash is to run
-
-```
-export FLOTILLA_CLIENT_SECRET=SuperSecret
-```
+The best way to do this is to store it in an `.env` file in the root of the flotilla repository.
+See [Using the “--env-file” option](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) for more information.
 
 To run the backend in docker, run the following command in the root folder of flotilla:
 
