@@ -8,6 +8,14 @@ This is a secret, and should be treated as such. It can be found in our keyvault
 The best way to pass this is to store it in a `.env` file in the root of flotilla, and docker compose loads this by default on startup.  
 See [Using the “--env-file” option](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) for more information.
 
+The key has to be in the following format (Important that the first line is on its own line):
+
+```
+-----BEGIN PRIVATE KEY-----
+contentcontentcontentvwroighwrofgnsg
+-----END PRIVATE KEY-----
+```
+
 ## Running the broker
 
 From the flotilla root directory, run the following command:
