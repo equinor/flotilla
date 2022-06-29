@@ -4,7 +4,7 @@
 
 The broker expects a private key for its server x509 certificate used for TLS.  
 This must be provided through an environment variable called `FLOTILLA_BROKER_SERVER_KEY`.  
-This is a secret, and should be treated as such.  
+This is a secret, and should be treated as such. It can be found in our keyvault.  
 The best way to pass this is to store it in a `.env` file in the root of flotilla, and docker compose loads this by default on startup.  
 See [Using the “--env-file” option](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) for more information.
 
@@ -59,7 +59,11 @@ Then add the installation folder to your PATH variable for the commands to be av
 
 ### Start non-docker broker
 
-The broker may be started with
+If running the broker outside docker, you will need to manually create the `server-key.pem` file, containing the secret server key
+mentioned in the [setup section](#set-up-the-broker).  
+The mosquitto config file expects this file to be stored in the [mosquitto/config/certs](./mosquitto/config/certs) folder.
+
+The broker may then be started with
 
 ```
 mosquitto -p 1883 -c mosquitto/config/mosquitto.conf
@@ -71,14 +75,16 @@ To test that the broker functions as expected the `mosquitto_sub` and `mosquitto
 For access to all topics, you need to use the admin user.  
 The password for the admin can be found in our keyvault.
 
+For the TLS encryption, you will need to reference the CA certificate. This is not a secret and can be found in [mosquitto/config/certs](./mosquitto/config/certs).
+
 First, subscribe to a topic
 
 ```
-mosquitto_sub -t topic_name -u admin -P secret_password
+mosquitto_sub -t topic_name -u admin -P secret_password --cafile ca-cert.pem
 ```
 
 Then attempt to publish something to the same topic in a different terminal
 
 ```
-mosquitto_pub -t topic_name -m hei -u admin -P secret_password
+mosquitto_pub -t topic_name -m hei -u admin -P secret_password --cafile ca-cert.pem
 ```
