@@ -2,10 +2,11 @@ import { defaultRobots, Robot } from './robot'
 
 export enum MissionStatus {
     Pending = 'Pending',
-    Started = 'Started',
+    Ongoing = 'Ongoing',
     Successful = 'Successful',
-    Failed = 'Failed',
+    Aborted = 'Aborted',
     Warning = 'Warning',
+    Paused = 'Paused'
 }
 
 export class Mission {
@@ -55,23 +56,23 @@ export const defaultMission: { [name: string]: Mission } = {
         new Date(500000000),
         MissionStatus.Warning
     ),
-    Started: new Mission(
+    Ongoing: new Mission(
         '1',
-        'Test Mission Started',
+        'Test Mission Ongoing',
         defaultRobots['Taurob'],
         '2',
         new Date(),
         new Date(500000000),
-        MissionStatus.Started
+        MissionStatus.Ongoing
     ),
-    Failed: new Mission(
+    Aborted: new Mission(
         '1',
-        'Test Mission Failed',
+        'Test Mission Aborted',
         defaultRobots['Taurob'],
         '2',
         new Date(),
         new Date(500000000),
-        MissionStatus.Failed
+        MissionStatus.Aborted
     ),
     Successful: new Mission(
         '1',
@@ -81,5 +82,14 @@ export const defaultMission: { [name: string]: Mission } = {
         new Date(),
         new Date(500000000),
         MissionStatus.Successful
+    ),
+    Paused: new Mission(
+        '1',
+        'Test Mission Paused',
+        defaultRobots['Taurob'],
+        '2',
+        new Date(),
+        new Date(500000000),
+        MissionStatus.Paused
     ),
 }

@@ -21,7 +21,7 @@ function displayIcon(status: MissionStatus) {
         case MissionStatus.Pending: {
             return <Icon name="time" style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
         }
-        case MissionStatus.Started: {
+        case MissionStatus.Ongoing: {
             return <Icon name="time" style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
         }
         case MissionStatus.Warning: {
