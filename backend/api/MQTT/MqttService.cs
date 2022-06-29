@@ -18,6 +18,7 @@ namespace Api.Mqtt
         public static event EventHandler<MqttReceivedArgs>? MqttIsarMissionReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarStepReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarBatteryReceived;
 
         private readonly ILogger<MqttService> _logger;
 
@@ -122,6 +123,9 @@ namespace Api.Mqtt
                     break;
                 case Type type when type == typeof(IsarStepMessage):
                     OnIsarTopicReceived<IsarStepMessage>(content);
+                    break;
+                case Type type when type == typeof(IsarBatteryMessage):
+                    OnIsarTopicReceived<IsarBatteryMessage>(content);
                     break;
                 default:
                     _logger.LogWarning(
@@ -245,6 +249,7 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarMissionMessage) => MqttIsarMissionReceived,
                     _ when type == typeof(IsarTaskMessage) => MqttIsarTaskReceived,
                     _ when type == typeof(IsarStepMessage) => MqttIsarStepReceived,
+                    _ when type == typeof(IsarBatteryMessage) => MqttIsarBatteryReceived,
                     _
                       => throw new NotImplementedException(
                           $"No event defined for message type '{typeof(T).Name}'"

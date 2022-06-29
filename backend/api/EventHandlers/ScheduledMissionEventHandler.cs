@@ -78,7 +78,7 @@ namespace Api.EventHandlers
                 _logger.LogError(e, "Failed to start mission {id}", scheduledMission.Id);
                 return false;
             }
-            scheduledMission.Status = ScheduledMissionStatus.Started;
+            scheduledMission.Status = ScheduledMissionStatus.Ongoing;
             _scheduledMissionService.Update(scheduledMission);
             return true;
         }

@@ -6,10 +6,11 @@ import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { OngoingMissionCard } from './OngoingMissionCard'
 var testMissions = [
     defaultMission['Pending'],
-    defaultMission['Started'],
+    defaultMission['Ongoing'],
     defaultMission['Warning'],
-    defaultMission['Failed'],
+    defaultMission['Aborted'],
     defaultMission['Successful'],
+    defaultMission['Paused'],
 ]
 
 const StyledOngoingMissionView = styled.div`
