@@ -59,7 +59,7 @@ export class BackendAPICaller {
 
     async getRobots() {
         const path: string = 'robots'
-        const result = await this.GET<Robot>(path).catch((e) => {
+        const result = await this.GET<Robot[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
         return result

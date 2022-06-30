@@ -1,8 +1,10 @@
 import { Typography } from '@equinor/eds-core-react'
-import { defaultMission } from 'models/mission'
+import { defaultMission, Mission } from 'models/mission'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { OngoingMissionCard } from './OngoingMissionCard'
-const testMissions = [
+var testMissions = [
     defaultMission['Pending'],
     defaultMission['Started'],
     defaultMission['Warning'],
@@ -17,20 +19,29 @@ const StyledOngoingMissionView = styled.div`
 `
 const OngoingMissionSection = styled.div`
     display: flex;
+    flex-wrap: wrap;
     gap: 2rem;
 `
 
 export function OngoingMissionView() {
-    var OngoingMissions = testMissions.map(function (mission, index) {
+    const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
+    useEffect(() => {
+        setOngoingMissions(testMissions)
+    }, [])
+    console.log(ongoingMissions)
+    var missionDisplay = ongoingMissions.map(function (mission, index) {
         return <OngoingMissionCard key={index} mission={mission} />
     })
+
     return (
         <StyledOngoingMissionView>
             <Typography variant="h2" color="resting">
-                {' '}
                 Ongoing Missions
             </Typography>
-            <OngoingMissionSection>{OngoingMissions}</OngoingMissionSection>
+            <OngoingMissionSection>
+                {ongoingMissions.length > 0 && missionDisplay}
+                {ongoingMissions.length === 0 && <NoOngoingMissionsPlaceholder />}
+            </OngoingMissionSection>
         </StyledOngoingMissionView>
     )
 }

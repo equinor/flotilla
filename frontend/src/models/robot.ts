@@ -11,6 +11,7 @@ export enum RobotType {
     Taurob = 'Taurob',
     ExRobotics = 'ExRobotics',
     TurtleBot = 'TurtleBot',
+    NoneType = 'NoneType',
 }
 
 export interface RobotInfo {
