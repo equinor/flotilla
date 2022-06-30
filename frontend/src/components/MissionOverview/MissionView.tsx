@@ -6,8 +6,6 @@ import { useEffect, useState } from 'react'
 import { Mission } from 'models/mission'
 import { NoUpcomingMissionsPlaceholder } from './NoMissionPlaceholder'
 
-const refreshTimer = 5000
-
 const StyledMissionView = styled.div`
     display: grid;
     grid-column: 1/ -1;
@@ -37,7 +35,7 @@ export function MissionView() {
         apiCaller.getUpcomingMissions().then((result) => {
             setUpcomingMissions(result.body)
         })
-    }, refreshTimer)
+    })
 
     var missionDisplay = upcomingMissions.map(function (mission, index) {
         return <MissionCard key={index} mission={mission} />

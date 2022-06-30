@@ -79,8 +79,9 @@ export const useApi = () => {
     return new BackendAPICaller(accessToken)
 }
 
-export function useInterval(callbackFunction: () => void, delay: number) {
+export function useInterval(callbackFunction: () => void) {
     // Used to call a function at a fixed intervall
+    const delay = 5000
     const savedCallback = useRef<() => void>(Function)
     // Remember the latest callback function
     useEffect(() => {

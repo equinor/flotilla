@@ -24,6 +24,8 @@ namespace Api.Database.Models
 
         public string Logs { get; set; }
 
+        public float Battery { get; set; }
+
         public virtual IList<VideoStream> VideoStreams { get; set; }
 
         [MaxLength(128)]
