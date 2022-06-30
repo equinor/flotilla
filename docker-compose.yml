@@ -21,3 +21,4 @@ services:
       - Mqtt__Host=broker
       - ASPNETCORE_ENVIRONMENT=Development
       - AZURE_CLIENT_SECRET=${FLOTILLA_CLIENT_SECRET}
+      

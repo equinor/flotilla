@@ -32,6 +32,13 @@ namespace Api.Services
                 .FirstOrDefaultAsync(robot => robot.Id.Equals(id, StringComparison.Ordinal));
         }
 
+        public async Task<Robot?> ReadByName(string name)
+        {
+            return await _context.Robots
+                .Include(r => r.VideoStreams)
+                .FirstOrDefaultAsync(robot => robot.Name.Equals(name, StringComparison.Ordinal));
+        }
+
         public async Task<Robot> Update(Robot robot)
         {
             var entry = _context.Update(robot);

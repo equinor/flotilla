@@ -14,6 +14,7 @@ namespace Api.EventHandlers
     {
         private readonly ILogger<MqttEventHandler> _logger;
         private readonly ReportService _reportService;
+        private readonly RobotService _robotService;
 
         public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory factory)
         {
@@ -23,9 +24,14 @@ namespace Api.EventHandlers
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<ReportService>();
 
+            _robotService = factory
+                .CreateScope()
+                .ServiceProvider.GetRequiredService<RobotService>();
+
             MqttService.MqttIsarMissionReceived += OnMissionUpdate;
             MqttService.MqttIsarTaskReceived += OnTaskUpdate;
             MqttService.MqttIsarStepReceived += OnStepUpdate;
+            MqttService.MqttIsarBatteryReceived += OnBatteryUpdate;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -121,6 +127,20 @@ namespace Api.EventHandlers
                     step.Status,
                     step.RobotId
                 );
+        }
+
+        private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
+            Robot? robot = await _robotService.ReadByName(batteryStatus.RobotId);
+            if(robot == null){
+                _logger.LogWarning("Could not find corresponding robot for battery update");
+            }
+            else {
+                robot.Battery = batteryStatus.BatteryLevel;
+                await _robotService.Update(robot);
+                _logger.LogInformation("Updated battery on robot " + robot.Name);
+            }
         }
     }
 }

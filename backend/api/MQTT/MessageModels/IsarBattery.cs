@@ -6,7 +6,7 @@ namespace Api.Mqtt.MessageModels
     public class IsarBatteryMessage : MqttMessage
     {
         [JsonPropertyName("battery_level")]
-        public string BatteryLevel { get; set; }
+        public float BatteryLevel { get; set; }
 
         [JsonPropertyName("robot_id")]
         public string RobotId { get; set; }
