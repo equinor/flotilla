@@ -39,3 +39,23 @@ export function RobotStatusCard({ robot }: RobotProps) {
         </StyledCard>
     )
 }
+
+export function RobotStatusCardPlaceholder() {
+    return (
+        <StyledCard variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
+            <div>
+                <RobotImage />
+                <Typography variant="h5" color="disabled">
+                    No robot connected
+                </Typography>
+                <Typography variant="body_short" color="disabled">
+                    ----
+                </Typography>
+                <HorisontalContent>
+                    <RobotStatusChip />
+                    <BatteryStatusView />
+                </HorisontalContent>
+            </div>
+        </StyledCard>
+    )
+}

@@ -3,7 +3,7 @@ import { RobotStatus } from 'models/robot'
 import { tokens } from '@equinor/eds-tokens'
 
 interface StatusProps {
-    status: RobotStatus
+    status?: RobotStatus
 }
 
 enum StatusColors {
@@ -17,17 +17,15 @@ export function RobotStatusChip({ status }: StatusProps) {
     switch (status) {
         case RobotStatus.Available: {
             chipColor = StatusColors.Available
-
             break
         }
         case RobotStatus.MissionInProgress: {
             chipColor = StatusColors.MissionInProgress
-
             break
         }
         default: {
             chipColor = StatusColors.Offline
-
+            status = RobotStatus.Offline
             break
         }
     }
