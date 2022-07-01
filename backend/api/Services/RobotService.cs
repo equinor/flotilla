@@ -34,6 +34,7 @@ namespace Api.Services
 
         public async Task<Robot?> ReadByName(string name)
         {
+            //TODO: replace with ReadByIsarID
             return await _context.Robots
                 .Include(r => r.VideoStreams)
                 .FirstOrDefaultAsync(robot => robot.Name.Equals(name, StringComparison.Ordinal));

@@ -18,7 +18,6 @@ namespace Api.Mqtt
                 { "isar/+/task", typeof(IsarTaskMessage) },
                 { "isar/+/step", typeof(IsarStepMessage) },
                 { "isar/+/battery", typeof(IsarBatteryMessage) },
-
             };
 
         /// <summary>

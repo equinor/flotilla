@@ -29,13 +29,11 @@ builder.Services.AddHostedService<ScheduledMissionEventHandler>();
 
 builder.Services
     .AddControllers()
-    .AddJsonOptions(
-        options =>
-        {
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        }
-    );
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -48,15 +46,13 @@ builder.Services
     .AddInMemoryTokenCaches()
     .AddDownstreamWebApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"));
 
-builder.Services.AddAuthorization(
-    options =>
-    {
-        options.FallbackPolicy = new AuthorizationPolicyBuilder()
-            .RequireAuthenticatedUser()
-            .RequireRole(builder.Configuration.GetSection("Authorization")["Roles"])
-            .Build();
-    }
-);
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .RequireRole(builder.Configuration.GetSection("Authorization")["Roles"])
+        .Build();
+});
 
 // The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
 // See https://github.com/Azure/azure-sdk-for-net/issues/17052
@@ -73,20 +69,18 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(
-        c =>
-        {
-            c.OAuthClientId(builder.Configuration["AzureAd:ClientId"]);
-            // The following parameter represents the "audience" of the access token.
-            c.OAuthAdditionalQueryStringParams(
-                new Dictionary<string, string>
-                {
-                    { "Resource", builder.Configuration["AzureAd:ClientId"] }
-                }
-            );
-            c.OAuthUsePkce();
-        }
-    );
+    app.UseSwaggerUI(c =>
+    {
+        c.OAuthClientId(builder.Configuration["AzureAd:ClientId"]);
+        // The following parameter represents the "audience" of the access token.
+        c.OAuthAdditionalQueryStringParams(
+            new Dictionary<string, string>
+            {
+                { "Resource", builder.Configuration["AzureAd:ClientId"] }
+            }
+        );
+        c.OAuthUsePkce();
+    });
 }
 app.UseCors(
     corsBuilder =>

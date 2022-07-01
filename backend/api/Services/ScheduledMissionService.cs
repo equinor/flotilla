@@ -29,9 +29,9 @@ namespace Api.Services
 
         public async Task<ScheduledMission?> Read(string id)
         {
-            return await _context.ScheduledMissions.Include(sm => sm.Robot).FirstOrDefaultAsync(
-                ev => ev.Id.Equals(id, StringComparison.Ordinal)
-            );
+            return await _context.ScheduledMissions
+                .Include(sm => sm.Robot)
+                .FirstOrDefaultAsync(ev => ev.Id.Equals(id, StringComparison.Ordinal));
         }
 
         public void Update(ScheduledMission scheduledMission)

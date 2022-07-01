@@ -1,17 +1,9 @@
 import { Typography } from '@equinor/eds-core-react'
-import { defaultMission, Mission } from 'models/mission'
+import { Mission } from 'models/mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { OngoingMissionCard } from './OngoingMissionCard'
-var testMissions = [
-    defaultMission['Pending'],
-    defaultMission['Ongoing'],
-    defaultMission['Warning'],
-    defaultMission['Aborted'],
-    defaultMission['Successful'],
-    defaultMission['Paused'],
-]
 
 const StyledOngoingMissionView = styled.div`
     display: grid;
@@ -27,7 +19,8 @@ const OngoingMissionSection = styled.div`
 export function OngoingMissionView() {
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     useEffect(() => {
-        setOngoingMissions(testMissions)
+        // Intentionally left blank until we have test missions in backend
+        // setOngoingMissions(testMissions)
     }, [])
     console.log(ongoingMissions)
     var missionDisplay = ongoingMissions.map(function (mission, index) {

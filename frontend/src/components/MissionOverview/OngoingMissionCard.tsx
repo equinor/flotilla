@@ -1,11 +1,9 @@
 import { Card, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/mission'
-import { defaultRobots } from 'models/robot'
 import styled from 'styled-components'
 import { MissionProgressDisplay } from './MissionTagDisplay'
 import { MissionStatusDisplay } from './MissionStatusDisplay'
-const robots = [defaultRobots['taurob'], defaultRobots['exRobotics']]
 
 interface MissionProps {
     mission: Mission

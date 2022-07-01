@@ -53,9 +53,9 @@ namespace Api.Database.Models
                 "cancelled" => IsarTaskStatus.Cancelled,
                 "paused" => IsarTaskStatus.Paused,
                 _
-                  => throw new ArgumentException(
-                      $"Failed to parse report status {status} as it's not supported"
-                  )
+                    => throw new ArgumentException(
+                        $"Failed to parse report status {status} as it's not supported"
+                    )
             };
     }
 }

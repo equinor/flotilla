@@ -59,15 +59,13 @@ namespace Api.Mqtt
 
             var builder = new MqttClientOptionsBuilder()
                 .WithTcpServer(_serverHost, _serverPort)
-                .WithTls(
-                    o =>
-                    {
-                        o.UseTls = true;
-                        o.CertificateValidationHandler = CustomCertificateHandler;
-                        if (_isDevelopment)
-                            o.IgnoreCertificateChainErrors = true;
-                    }
-                )
+                .WithTls(o =>
+                {
+                    o.UseTls = true;
+                    o.CertificateValidationHandler = CustomCertificateHandler;
+                    if (_isDevelopment)
+                        o.IgnoreCertificateChainErrors = true;
+                })
                 .WithCredentials(username, password);
 
             _options = new ManagedMqttClientOptionsBuilder()
@@ -211,13 +209,11 @@ namespace Api.Mqtt
             List<MqttTopicFilter> topicFilters = new();
             StringBuilder sb = new();
             sb.AppendLine("Mqtt service subscribing to the following topics:");
-            topics.ForEach(
-                topic =>
-                {
-                    topicFilters.Add(new MqttTopicFilter() { Topic = topic });
-                    sb.AppendLine(topic);
-                }
-            );
+            topics.ForEach(topic =>
+            {
+                topicFilters.Add(new MqttTopicFilter() { Topic = topic });
+                sb.AppendLine(topic);
+            });
             _logger.LogInformation("{topicContent}", sb.ToString());
             _mqttClient.SubscribeAsync(topicFilters).Wait();
         }
@@ -251,9 +247,9 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarStepMessage) => MqttIsarStepReceived,
                     _ when type == typeof(IsarBatteryMessage) => MqttIsarBatteryReceived,
                     _
-                      => throw new NotImplementedException(
-                          $"No event defined for message type '{typeof(T).Name}'"
-                      ),
+                        => throw new NotImplementedException(
+                            $"No event defined for message type '{typeof(T).Name}'"
+                        ),
                 };
                 // Event will be null if there are no subscribers
                 if (raiseEvent is not null)
