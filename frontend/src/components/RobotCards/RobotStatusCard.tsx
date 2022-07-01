@@ -5,8 +5,8 @@ import { RobotStatusChip } from './RobotStatusChip'
 import BatteryStatusView from './BatteryStatusView'
 import styled from 'styled-components'
 import { RobotImage } from './RobotImage'
-import { Link, useHref, useNavigate } from 'react-router-dom'
-import { Mission } from 'models/mission'
+import { useNavigate } from 'react-router-dom'
+import { BatteryStatus } from 'models/battery'
 
 interface RobotProps {
     robot: Robot
@@ -21,8 +21,8 @@ const StyledCard = styled(Card)`
 const HoverableStyledCard = styled(Card)`
     width: 200px;
     padding: 8px;
-    :hover{
-        background-color: #DEEDEE;
+    :hover {
+        background-color: #deedee;
     }
 `
 
@@ -36,33 +36,33 @@ const HorisontalContent = styled.div`
 function cardContent({ robot }: RobotProps) {
     return (
         <div>
-            <RobotImage robotType={robot.robotInfo.type} />
-            <Typography variant="h5">{robot.robotInfo.name}</Typography>
-            <Typography variant="body_short">{robot.robotInfo.type}</Typography>
+            <RobotImage robotType={robot.model} />
+            <Typography variant="h5">{robot.name}</Typography>
+            <Typography variant="body_short">{robot.model}</Typography>
             <HorisontalContent>
                 <RobotStatusChip status={robot.status} />
-                <BatteryStatusView battery={robot.battery} />
+                <BatteryStatusView battery={robot.battery} batteryStatus={BatteryStatus.Normal} />
             </HorisontalContent>
         </div>
     )
 }
 
 export function RobotStatusCard({ robot }: RobotProps) {
-    let navigate = useNavigate(); 
-    const goToMission = () => { 
-        let path = `mission`;
-        navigate(path);
+    let navigate = useNavigate()
+    const goToMission = () => {
+        let path = `mission`
+        navigate(path)
     }
     if (robot.status == RobotStatus.MissionInProgress) {
         return (
             <HoverableStyledCard variant="default" style={{ boxShadow: tokens.elevation.sticky }} onClick={goToMission}>
-                {cardContent({robot})}
+                {cardContent({ robot })}
             </HoverableStyledCard>
         )
     }
     return (
         <StyledCard variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
-            {cardContent({robot})}
+            {cardContent({ robot })}
         </StyledCard>
     )
 }

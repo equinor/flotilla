@@ -13,15 +13,22 @@ namespace Api.EventHandlers
         private readonly RobotService _robotService;
         private readonly ScheduledMissionService _scheduledMissionService;
 
-        public ScheduledMissionEventHandler(ILogger<ScheduledMissionEventHandler> logger, IServiceScopeFactory factory)
+        public ScheduledMissionEventHandler(
+            ILogger<ScheduledMissionEventHandler> logger,
+            IServiceScopeFactory factory
+        )
         {
             _logger = logger;
             ScheduledMissionService.ScheduledMissionUpdated += OnScheduledMissionUpdated;
 
             _timeDelay = 1000; // 1 second
             _isarService = factory.CreateScope().ServiceProvider.GetRequiredService<IsarService>();
-            _robotService = factory.CreateScope().ServiceProvider.GetRequiredService<RobotService>();
-            _scheduledMissionService = factory.CreateScope().ServiceProvider.GetRequiredService<ScheduledMissionService>();
+            _robotService = factory
+                .CreateScope()
+                .ServiceProvider.GetRequiredService<RobotService>();
+            _scheduledMissionService = factory
+                .CreateScope()
+                .ServiceProvider.GetRequiredService<ScheduledMissionService>();
             UpdateUpcomingScheduledMissions();
         }
 
@@ -33,12 +40,30 @@ namespace Api.EventHandlers
                 {
                     foreach (var upcomingScheduledMission in _upcomingScheduledMissions)
                     {
-                        if (upcomingScheduledMission.Robot.Status is not RobotStatus.Available) { continue; }
-                        if (upcomingScheduledMission.StartTime > DateTimeOffset.UtcNow) { break; }
+                        if (upcomingScheduledMission.Robot.Status is not RobotStatus.Available)
+                        {
+                            continue;
+                        }
+                        if (upcomingScheduledMission.StartTime > DateTimeOffset.UtcNow)
+                        {
+                            break;
+                        }
 
-                        bool startedSuccessfull = await StartScheduledMission(upcomingScheduledMission);
-                        if (startedSuccessfull) { UpdateUpcomingScheduledMissions(); }
-                        else { _logger.LogWarning("Mission {id} was not started successfully.", upcomingScheduledMission.Id); };
+                        bool startedSuccessfull = await StartScheduledMission(
+                            upcomingScheduledMission
+                        );
+                        if (startedSuccessfull)
+                        {
+                            UpdateUpcomingScheduledMissions();
+                        }
+                        else
+                        {
+                            _logger.LogWarning(
+                                "Mission {id} was not started successfully.",
+                                upcomingScheduledMission.Id
+                            );
+                        }
+                        ;
                     }
                 }
                 await Task.Delay(_timeDelay, stoppingToken);
@@ -52,7 +77,8 @@ namespace Api.EventHandlers
 
         private async void UpdateUpcomingScheduledMissions()
         {
-            _upcomingScheduledMissions = await _scheduledMissionService.GetUpcomingScheduledMissions();
+            _upcomingScheduledMissions =
+                await _scheduledMissionService.GetUpcomingScheduledMissions();
         }
 
         private async Task<bool> StartScheduledMission(ScheduledMission scheduledMission)
@@ -70,7 +96,10 @@ namespace Api.EventHandlers
             }
             try
             {
-                var report = await _isarService.StartMission(robot: scheduledMission.Robot, missionId: scheduledMission.IsarMissionId);
+                var report = await _isarService.StartMission(
+                    robot: scheduledMission.Robot,
+                    missionId: scheduledMission.IsarMissionId
+                );
                 _logger.LogInformation("Started mission {id}", scheduledMission.Id);
             }
             catch (MissionException e)

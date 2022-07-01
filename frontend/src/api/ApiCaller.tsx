@@ -26,6 +26,7 @@ export class BackendAPICaller {
         const init: RequestInit = {
             method,
             headers,
+            mode: 'cors',
         }
         if (body !== undefined) {
             init.body = JSON.stringify(body)
@@ -57,12 +58,12 @@ export class BackendAPICaller {
         return this.query('DELETE', path, body)
     }
 
-    async getRobots() {
+    async getRobots(): Promise<Robot[]> {
         const path: string = 'robots'
         const result = await this.GET<Robot[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
-        return result
+        return result.body
     }
 
     async getUpcomingMissions() {

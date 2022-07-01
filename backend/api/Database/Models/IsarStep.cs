@@ -54,9 +54,9 @@ namespace Api.Database.Models
                 "failed" => IsarStepStatus.Failed,
                 "cancelled" => IsarStepStatus.Cancelled,
                 _
-                  => throw new ArgumentException(
-                      $"Failed to parse report status {status} as it's not supported"
-                  )
+                    => throw new ArgumentException(
+                        $"Failed to parse report status {status} as it's not supported"
+                    )
             };
     }
 

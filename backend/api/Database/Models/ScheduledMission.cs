@@ -29,6 +29,11 @@ namespace Api.Database.Models
 
     public enum ScheduledMissionStatus
     {
-        Pending, Ongoing, Successful, Aborted, Paused, Warning
+        Pending,
+        Ongoing,
+        Successful,
+        Aborted,
+        Paused,
+        Warning
     }
 }

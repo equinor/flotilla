@@ -14,10 +14,11 @@ const BatteryStatusTile = styled.div`
 `
 
 export interface BatteryStatusViewProps {
-    battery?: Battery
+    battery?: number
+    batteryStatus?: BatteryStatus
 }
 
-const BatteryStatusView = ({ battery }: BatteryStatusViewProps): JSX.Element => {
+const BatteryStatusView = ({ battery, batteryStatus }: BatteryStatusViewProps): JSX.Element => {
     let battery_icon
     let icon_color: string = tokens.colors.interactive.primary__resting.hex
     let battery_value: string
@@ -26,8 +27,8 @@ const BatteryStatusView = ({ battery }: BatteryStatusViewProps): JSX.Element => 
         battery_value = '---%'
         battery_icon = 'battery_unknown'
     } else {
-        battery_value = `${battery.value}%`
-        switch (battery.status) {
+        battery_value = `${battery}%`
+        switch (batteryStatus) {
             case BatteryStatus.Normal:
                 battery_icon = 'battery'
                 break
@@ -38,7 +39,7 @@ const BatteryStatusView = ({ battery }: BatteryStatusViewProps): JSX.Element => 
                 battery_icon = 'battery_alert'
                 icon_color = tokens.colors.interactive.danger__resting.hex
                 break
-            case BatteryStatus.Error:
+            default:
                 battery_icon = 'battery_unknown'
                 battery_value = '---%'
                 break

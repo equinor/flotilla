@@ -132,14 +132,19 @@ namespace Api.EventHandlers
         private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
-            Robot? robot = await _robotService.ReadByName(batteryStatus.RobotId);
-            if(robot == null){
-                _logger.LogWarning("Could not find corresponding robot for battery update");
+            var robot = await _robotService.ReadByName(batteryStatus.RobotId);
+            if (robot == null)
+            {
+                _logger.LogWarning(
+                    "Could not find corresponding robot for battery update with ID {id} ",
+                    batteryStatus.RobotId
+                );
             }
-            else {
-                robot.Battery = batteryStatus.BatteryLevel;
+            else
+            {
+                robot.BatteryLevel = batteryStatus.BatteryLevel;
                 await _robotService.Update(robot);
-                _logger.LogInformation("Updated battery on robot " + robot.Name);
+                _logger.LogInformation("Updated battery on robot {name} ", robot.Name);
             }
         }
     }

@@ -175,11 +175,11 @@ namespace Api.Services
             (int)statusCode switch
             {
                 StatusCodes.Status408RequestTimeout
-                  => "A timeout ocurred when communicating with the ISAR state machine",
+                    => "A timeout ocurred when communicating with the ISAR state machine",
                 StatusCodes.Status409Conflict
-                  => "A conflict ocurred when interacting with the ISAR state machine. This could imply the state machine is in a state that does not allow the current action you attempted.",
+                    => "A conflict ocurred when interacting with the ISAR state machine. This could imply the state machine is in a state that does not allow the current action you attempted.",
                 StatusCodes.Status500InternalServerError
-                  => "An internal server error ocurred in ISAR",
+                    => "An internal server error ocurred in ISAR",
                 _ => $"An unexpected status code: {statusCode} was received from ISAR"
             };
     }
