@@ -9,10 +9,22 @@ flotilla_dir=$(dirname $0)
 echo "-------- FRONTEND -----------"
 echo -e "Setting up frontend ..."
 
-cp $flotilla_dir/frontend/.env.example $flotilla_dir/frontend/.env
-echo -e "Created frontend/.env file from frontend/.env.example"
+if [ -f $flotilla_dir/frontend/.env ]; then
+    echo -e "WARNING: The file '$flotilla_dir/frontend/.env' already exists, it will be overwritten if the operation continues."
+    echo -e "Is this ok? (Y/n)"
 
-echo -e "Frontend setup - Done!"
+    read reply
+    if [ "$reply" = "n" ] || [ "$reply" = "N" ]; then
+        echo -e "\nFrontend setup - Aborted!"
+        frontend_abort="true"
+    fi
+fi
+if [ "$frontend_abort" != "true" ]; then
+    cp $flotilla_dir/frontend/.env.example $flotilla_dir/frontend/.env
+    echo -e "Created frontend/.env file from frontend/.env.example"
+    echo -e "Frontend setup - Done!"
+fi
+
 echo -e "-----------------------------\n"
 #-----------------------------
 
