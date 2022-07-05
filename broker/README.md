@@ -4,7 +4,14 @@
 
 The broker expects a private key for its server x509 certificate used for TLS.  
 This must be provided through an environment variable called `FLOTILLA_BROKER_SERVER_KEY`.  
-This is a secret, and should be treated as such. It can be found in our keyvault.  
+This is a secret, and should be treated as such. It can be found in our keyvault.
+
+### Automatic environment setup
+
+See [Flotilla readme](../README.md#automatic-environment-setup)
+
+### Manual environment setup
+
 The best way to pass this is to store it in a `.env` file in the root of flotilla, and docker compose loads this by default on startup.  
 See [Using the “--env-file” option](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) for more information.
 
