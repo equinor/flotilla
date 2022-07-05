@@ -12,11 +12,18 @@ If you already have visual studio installed, you can open the "Visual Studio Ins
 To set up the backend on **Linux**, install .NET for linux
 [here](https://docs.microsoft.com/en-us/dotnet/core/install/linux).
 
-For the configuration to be able to read secrets from the keyvault, you will need to have the client secret stored locally
-in your secret manager as described in the [Configuration Section](#Configuration).
+For the configuration to be able to read secrets from the keyvault, you will need to have the client secret stored locally in your secret manager.
 
 For the MQTT client to function, the application expects a config variable named `mqtt-broker-password`, containing the password for the mqtt broker.
 This must either be stored in a connected keyvault or in the ASP.NET secret manager.
+
+### Automatic environment setup
+
+See [Flotilla readme](../README.md#automatic-environment-setup)
+
+### Manual environment setup
+
+Add the client secret as described in the [Configuration Section](#Configuration).
 
 ## Run
 

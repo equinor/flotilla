@@ -11,7 +11,13 @@ For development, please fork the repository. Then, clone the repository:
 git clone https://github.com/equinor/flotilla
 ```
 
-Please see separate installation and setup guides for [frontend](frontend), [backend](backend), and [Broker](broker).
+Please see separate installation guides for [frontend](frontend), [backend](backend), and [Broker](broker).  
+For the environment setup, either run the script as described below or do it manually as described in each component.
+
+### Automatic environment setup
+
+Run the [setup.sh](./setup.sh) to automatically set up your dev environment for the components.  
+This script will ask you for the `Client Secret` for the backend and the `MQTT broker server key` for the MQTT broker.
 
 ## Run with docker
 

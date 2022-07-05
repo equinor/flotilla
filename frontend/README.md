@@ -5,7 +5,14 @@
 The app uses TypeScript and React. For development, Node v17.x needs to be installed. Installation instructions can be found
 [here](https://github.com/nodesource/distributions/blob/master/README.md).
 
-The application reads environment variables from the `.env` file in the `frontend` folder.  
+The application reads environment variables from the `.env` file in the `frontend` folder.
+
+### Automatic environment setup
+
+See [Flotilla readme](../README.md#automatic-environment-setup)
+
+### Manual environment setup
+
 As a starting point, make a copy of the `.env.example` file and rename it to `.env`.
 
 ## Install
