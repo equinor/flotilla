@@ -95,7 +95,7 @@ public class ScheduledMissionController : ControllerBase
         [FromBody] ScheduledMissionQuery scheduledMissionQuery
     )
     {
-        var robot = await _robotService.Read(scheduledMissionQuery.RobotId);
+        var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
         if (robot is null)
             return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
 

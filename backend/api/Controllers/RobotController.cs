@@ -70,7 +70,7 @@ public class RobotController : ControllerBase
         _logger.LogInformation("Getting robot with id={id}", id);
         try
         {
-            var robot = await _robotService.Read(id);
+            var robot = await _robotService.ReadById(id);
             if (robot == null)
             {
                 _logger.LogWarning("Could not find robot with id={id}", id);
@@ -183,7 +183,7 @@ public class RobotController : ControllerBase
         [FromRoute] string echoMissionId
     )
     {
-        var robot = await _robotService.Read(robotId);
+        var robot = await _robotService.ReadById(robotId);
         if (robot == null)
         {
             _logger.LogWarning("Could not find robot with id={id}", robotId);
@@ -253,7 +253,7 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IList<VideoStream>>> GetVideoStreams([FromRoute] string robotId)
     {
-        var robot = await _robotService.Read(robotId);
+        var robot = await _robotService.ReadById(robotId);
         if (robot == null)
         {
             _logger.LogWarning("Could not find robot with id={id}", robotId);
@@ -283,7 +283,7 @@ public class RobotController : ControllerBase
         [FromBody] VideoStream videoStream
     )
     {
-        var robot = await _robotService.Read(robotId);
+        var robot = await _robotService.ReadById(robotId);
         if (robot == null)
         {
             _logger.LogWarning("Could not find robot with id={id}", robotId);

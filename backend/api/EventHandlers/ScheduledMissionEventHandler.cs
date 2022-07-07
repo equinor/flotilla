@@ -83,7 +83,7 @@ namespace Api.EventHandlers
 
         private async Task<bool> StartScheduledMission(ScheduledMission scheduledMission)
         {
-            var robot = await _robotService.Read(scheduledMission.Robot.Id);
+            var robot = await _robotService.ReadById(scheduledMission.Robot.Id);
             if (robot is null)
             {
                 _logger.LogWarning("Could not find robot {id}", scheduledMission.Robot.Id);
