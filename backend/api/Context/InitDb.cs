@@ -13,7 +13,7 @@ public static class InitDb
     {
         var robot1 = new Robot
         {
-            Name = "TestRobot",
+            Name = "william",
             Model = "Model1",
             SerialNumber = "123",
             Status = RobotStatus.Available,

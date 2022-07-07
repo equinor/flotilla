@@ -4,6 +4,7 @@ using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
 using Api.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Api.EventHandlers
 {
@@ -23,6 +24,9 @@ namespace Api.EventHandlers
             _reportService = factory
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<ReportService>();
+            _robotService = factory
+                .CreateScope()
+                .ServiceProvider.GetRequiredService<RobotService>();
 
             _robotService = factory
                 .CreateScope()
@@ -67,6 +71,25 @@ namespace Api.EventHandlers
                     mission.Status,
                     mission.RobotId
                 );
+
+            var robot = await _robotService.ReadByName(mission.RobotId);
+            if (robot == null)
+            {
+                _logger.LogError("Could not find robot with name {id}. The robot status is not updated.", mission.RobotId);
+            }
+            else if (mission.Status.Equals("in_progress", StringComparison.OrdinalIgnoreCase))
+            {
+                robot.Status = RobotStatus.Busy;
+                await _robotService.Update(robot);
+                _logger.LogInformation("Mission with ISAR mission id {id} is started by the robot {name}. Robot status set to Busy.", mission.MissionId, mission.RobotId);
+
+            }
+            else if (mission.Status.Equals("completed", StringComparison.OrdinalIgnoreCase))
+            {
+                robot.Status = RobotStatus.Available;
+                await _robotService.Update(robot);
+                _logger.LogInformation("Mission with ISAR mission id {id} is completed by the robot {name}. Robot status set to Available.", mission.MissionId, mission.RobotId);
+            }
         }
 
         private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)

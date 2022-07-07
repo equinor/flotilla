@@ -193,6 +193,8 @@ public class RobotController : ControllerBase
         try
         {
             var report = await _isarService.StartMission(robot, echoMissionId);
+            robot.Status = RobotStatus.Busy;
+            await _robotService.Update(robot);
             return Ok(report);
         }
         catch (Exception e)
