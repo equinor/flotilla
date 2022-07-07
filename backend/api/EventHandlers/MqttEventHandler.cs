@@ -4,7 +4,6 @@ using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
 using Api.Utilities;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Api.EventHandlers
 {
@@ -16,6 +15,7 @@ namespace Api.EventHandlers
         private readonly ILogger<MqttEventHandler> _logger;
         private readonly ReportService _reportService;
         private readonly RobotService _robotService;
+        private readonly ScheduledMissionService _scheduledMissionService;
 
         public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory factory)
         {
@@ -31,6 +31,9 @@ namespace Api.EventHandlers
             _robotService = factory
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<RobotService>();
+            _scheduledMissionService = factory
+                .CreateScope()
+                .ServiceProvider.GetRequiredService<ScheduledMissionService>();
 
             MqttService.MqttIsarMissionReceived += OnMissionUpdate;
             MqttService.MqttIsarTaskReceived += OnTaskUpdate;
@@ -89,6 +92,20 @@ namespace Api.EventHandlers
                 robot.Status = RobotStatus.Available;
                 await _robotService.Update(robot);
                 _logger.LogInformation("Mission with ISAR mission id {id} is completed by the robot {name}. Robot status set to Available.", mission.MissionId, mission.RobotId);
+
+                var scheduledMissions = await _scheduledMissionService.GetScheduledMissionsByStatus(ScheduledMissionStatus.Ongoing);
+                if (scheduledMissions is not null)
+                {
+                    foreach (var sm in scheduledMissions)
+                    {
+                        if (sm.Robot.Name == robot.Name)
+                        {
+                            await _scheduledMissionService.Delete(sm.Id);
+                            _logger.LogInformation("Mission with ISAR mission id {id} is completed by the robot {name}. Matching scheduledMission with id {id} is deleted.", mission.MissionId, mission.RobotId, sm.Id);
+                        }
+
+                    }
+                }
             }
         }
 

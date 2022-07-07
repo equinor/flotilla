@@ -46,18 +46,18 @@ public static class InitDb
         {
             Robot = Robots[0],
             EchoMissionId = "2",
-            StartTime = DateTimeOffset.UtcNow,
-            EndTime = DateTimeOffset.UtcNow,
-            Status = ScheduledMissionStatus.Successful
+            StartTime = DateTimeOffset.UtcNow.AddMinutes(1),
+            EndTime = DateTimeOffset.UtcNow.AddMinutes(5),
+            Status = ScheduledMissionStatus.Pending
         };
 
         var scheduledMission2 = new ScheduledMission
         {
             Robot = Robots[1],
             EchoMissionId = "2",
-            StartTime = DateTimeOffset.UtcNow,
-            EndTime = DateTimeOffset.UtcNow,
-            Status = ScheduledMissionStatus.Successful
+            StartTime = DateTimeOffset.UtcNow.AddMinutes(2),
+            EndTime = DateTimeOffset.UtcNow.AddMinutes(5),
+            Status = ScheduledMissionStatus.Pending
         };
 
         return new List<ScheduledMission>(
