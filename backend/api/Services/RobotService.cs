@@ -25,7 +25,7 @@ namespace Api.Services
             return await _context.Robots.Include(r => r.VideoStreams).ToListAsync();
         }
 
-        public async Task<Robot?> Read(string id)
+        public async Task<Robot?> ReadById(string id)
         {
             return await _context.Robots
                 .Include(r => r.VideoStreams)
