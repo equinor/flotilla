@@ -45,7 +45,7 @@ public static class InitDb
         var scheduledMission1 = new ScheduledMission
         {
             Robot = Robots[0],
-            IsarMissionId = "2",
+            EchoMissionId = "2",
             StartTime = DateTimeOffset.UtcNow,
             EndTime = DateTimeOffset.UtcNow,
             Status = ScheduledMissionStatus.Successful
@@ -54,7 +54,7 @@ public static class InitDb
         var scheduledMission2 = new ScheduledMission
         {
             Robot = Robots[1],
-            IsarMissionId = "2",
+            EchoMissionId = "2",
             StartTime = DateTimeOffset.UtcNow,
             EndTime = DateTimeOffset.UtcNow,
             Status = ScheduledMissionStatus.Successful

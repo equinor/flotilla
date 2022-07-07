@@ -15,7 +15,7 @@ namespace Api.Database.Models
 
         [MaxLength(128)]
         [Required]
-        public string IsarMissionId { get; set; }
+        public string EchoMissionId { get; set; }
 
         [Required]
         public DateTimeOffset StartTime { get; set; }
