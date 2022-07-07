@@ -96,10 +96,8 @@ namespace Api.EventHandlers
             }
             try
             {
-                var report = await _isarService.StartMission(
-                    robot: scheduledMission.Robot,
-                    missionId: scheduledMission.IsarMissionId
-                );
+
+                var report = await _isarService.StartMission(robot: scheduledMission.Robot, echoMissionId: scheduledMission.EchoMissionId);
                 _logger.LogInformation("Started mission {id}", scheduledMission.Id);
             }
             catch (MissionException e)

@@ -102,7 +102,7 @@ public class ScheduledMissionController : ControllerBase
         var scheduledMission = new ScheduledMission
         {
             Robot = robot,
-            IsarMissionId = scheduledMissionQuery.IsarMissionId
+            EchoMissionId = scheduledMissionQuery.EchoMissionId
         };
         if (scheduledMissionQuery.StartTime is not null)
         {

@@ -26,12 +26,12 @@ namespace Api.Services
             _isarUri = configuration.GetSection("Isar")["Url"];
         }
 
-        public async Task<Report> StartMission(Robot robot, string missionId)
+        public async Task<Report> StartMission(Robot robot, string echoMissionId)
         {
             string uri = QueryHelpers.AddQueryString(
                 $"{_isarUri}/schedule/start-mission",
                 "ID",
-                missionId
+                echoMissionId
             );
 
             var response = await httpClient.PostAsync(uri, null);
@@ -40,7 +40,7 @@ namespace Api.Services
             {
                 string msg = response.ToString();
                 _logger.LogError("Error in ISAR: {msg}", msg);
-                throw new MissionException($"Could not start mission with id: {missionId}");
+                throw new MissionException($"Could not start mission with id: {echoMissionId}");
             }
             if (response.Content is null)
             {
@@ -62,7 +62,7 @@ namespace Api.Services
             {
                 RobotId = robot.Id,
                 IsarMissionId = isarMissionResponse?.MissionId,
-                EchoMissionId = missionId,
+                EchoMissionId = echoMissionId,
                 Log = "",
                 ReportStatus = ReportStatus.NotStarted,
                 StartTime = DateTimeOffset.UtcNow,
@@ -71,8 +71,8 @@ namespace Api.Services
             };
 
             _logger.LogInformation(
-                "Mission {missionId} started on robot {robotId}",
-                missionId,
+                "Mission {echoMissionId} started on robot {robotId}",
+                echoMissionId,
                 robot.Id
             );
             return await _reportService.Create(report);
