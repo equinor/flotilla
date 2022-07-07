@@ -171,7 +171,7 @@ public class RobotController : ControllerBase
     /// <para> This query starts a mission for a given robot and creates a report </para>
     /// </remarks>
     [HttpPost]
-    [Route("{robotId}/start/{missionId}")]
+    [Route("{robotId}/start/{echoMissionId}")]
     [ProducesResponseType(typeof(Report), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -180,7 +180,7 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Report>> StartMission(
         [FromRoute] string robotId,
-        [FromRoute] string missionId
+        [FromRoute] string echoMissionId
     )
     {
         var robot = await _robotService.Read(robotId);
@@ -192,7 +192,7 @@ public class RobotController : ControllerBase
 
         try
         {
-            var report = await _isarService.StartMission(robot, missionId);
+            var report = await _isarService.StartMission(robot, echoMissionId);
             return Ok(report);
         }
         catch (Exception e)
