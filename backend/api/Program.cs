@@ -1,51 +1,18 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Configurations;
-using Api.Database.Context;
 using Api.EventHandlers;
 using Api.Mqtt;
 using Api.Services;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddAzureEnvironmentVariables();
 
-SqliteConnection connectionToInMemorySqlite = null!;
-string sqlConnectionString = builder.Configuration.GetSection("Database").GetValue<string>("ConnectionString");
-if (string.IsNullOrEmpty(sqlConnectionString))
-{
-    var dbBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
-    sqlConnectionString = new SqliteConnectionStringBuilder { DataSource = "file::memory:", Cache = SqliteCacheMode.Shared }.ToString();
-
-    // In-memory sqlite requires an open connection throughout the whole lifetime of the database
-    connectionToInMemorySqlite = new SqliteConnection(sqlConnectionString);
-    connectionToInMemorySqlite.Open();
-    dbBuilder.UseSqlite(connectionToInMemorySqlite);
-
-    using var context = new FlotillaDbContext(dbBuilder.Options);
-    context.Database.EnsureCreated();
-    InitDb.PopulateDb(context);
-}
-
-if (connectionToInMemorySqlite == null)
-{
-    // Setting splitting behavior explicitly to avoid warning
-    builder.Services.AddDbContext<FlotillaDbContext>(
-        options => options.UseSqlServer(sqlConnectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery))
-    );
-}
-else
-{
-    // Setting splitting behavior explicitly to avoid warning
-    builder.Services.AddDbContext<FlotillaDbContext>(
-        options => options.UseSqlite(sqlConnectionString, o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery))
-    );
-}
+builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.IsDevelopment());
 
 builder.Services.AddScoped<RobotService>();
 builder.Services.AddScoped<ScheduledMissionService>();
