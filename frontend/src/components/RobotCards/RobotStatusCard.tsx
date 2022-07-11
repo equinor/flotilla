@@ -1,5 +1,5 @@
 import { Card, Typography } from '@equinor/eds-core-react'
-import { Robot, RobotStatus } from 'models/robot'
+import { Robot, RobotStatus, RobotType } from 'models/robot'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from './RobotStatusChip'
 import BatteryStatusView from './BatteryStatusView'
@@ -41,7 +41,7 @@ function cardContent({ robot }: RobotProps) {
             <Typography variant="body_short">{robot.model}</Typography>
             <HorisontalContent>
                 <RobotStatusChip status={robot.status} />
-                <BatteryStatusView battery={robot.battery} batteryStatus={BatteryStatus.Normal} />
+                <BatteryStatusView battery={robot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
             </HorisontalContent>
         </div>
     )
@@ -71,7 +71,7 @@ export function RobotStatusCardPlaceholder() {
     return (
         <StyledCard variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
             <div>
-                <RobotImage />
+                <RobotImage robotType={RobotType.NoneType} />
                 <Typography variant="h5" color="disabled">
                     No robot connected
                 </Typography>

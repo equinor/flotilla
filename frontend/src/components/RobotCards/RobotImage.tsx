@@ -4,9 +4,9 @@ import exRobotics from 'mediaAssets/ExRobotics.webp'
 import turtleBot from 'mediaAssets/turtlebot.webp'
 import styled from 'styled-components'
 import { Icon } from '@equinor/eds-core-react'
-import { cloud_off } from '@equinor/eds-icons'
+import { cloud_off, image } from '@equinor/eds-icons'
 
-Icon.add({ cloud_off })
+Icon.add({ cloud_off, image })
 interface TypeProps {
     robotType?: RobotType
 }
@@ -27,24 +27,26 @@ const StyledIcon = styled(Icon)`
 `
 
 export function RobotImage({ robotType }: TypeProps) {
-    var image
+    var robotImage
     switch (robotType) {
         case RobotType.Taurob: {
-            image = taurobInspector
+            robotImage = taurobInspector
             break
         }
         case RobotType.ExRobotics: {
-            image = exRobotics
+            robotImage = exRobotics
             break
         }
         case RobotType.TurtleBot: {
-            image = turtleBot
+            robotImage = turtleBot
             break
         }
-        default: {
-            robotType = RobotType.NoneType
+        case RobotType.NoneType: {
             return <StyledIcon name="cloud_off" title={robotType} />
         }
+        default: {
+            return <StyledIcon name="image" title={robotType} />
+        }
     }
-    return <StyledImage alt={robotType} src={image} />
+    return <StyledImage alt={robotType} src={robotImage} />
 }
