@@ -20,7 +20,7 @@ export interface Robot {
     name?: string
     model: RobotType
     serialNumber?: string
-    battery?: number
+    batteryLevel?: number
     batteryStatus?: BatteryStatus
     pose?: Pose
     status?: RobotStatus
