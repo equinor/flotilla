@@ -74,8 +74,7 @@ public class ScheduledMissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ScheduledMission>> GetUpcomingScheduledMissions()
     {
-        var upcomingScheduledMissions =
-            await _scheduledMissionService.GetUpcomingScheduledMissions();
+        var upcomingScheduledMissions = await _scheduledMissionService.GetScheduledMissionsByStatus(ScheduledMissionStatus.Pending);
         return Ok(upcomingScheduledMissions);
     }
 

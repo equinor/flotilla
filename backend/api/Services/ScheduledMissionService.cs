@@ -41,11 +41,11 @@ namespace Api.Services
             RaiseScheduledMissionUpdatedEvent();
         }
 
-        public async Task<List<ScheduledMission>> GetUpcomingScheduledMissions()
+        public async Task<List<ScheduledMission>> GetScheduledMissionsByStatus(ScheduledMissionStatus status)
         {
             return await _context.ScheduledMissions
                 .Include(sm => sm.Robot)
-                .Where(sm => sm.Status.Equals(ScheduledMissionStatus.Pending))
+                .Where(sm => sm.Status.Equals(status))
                 .OrderBy(sm => sm.StartTime)
                 .ToListAsync();
         }
