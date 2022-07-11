@@ -27,10 +27,6 @@ namespace Api.EventHandlers
             _robotService = factory
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<RobotService>();
-
-            _robotService = factory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<RobotService>();
             _scheduledMissionService = factory
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<ScheduledMissionService>();
