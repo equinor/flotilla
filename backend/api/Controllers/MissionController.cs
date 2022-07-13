@@ -44,13 +44,6 @@ public class MissionController : ControllerBase
         catch (HttpRequestException e)
         {
             _logger.LogError(e, "Error retrieving missions from Echo");
-
-            int statusCode = (int?)e.StatusCode ?? StatusCodes.Status502BadGateway;
-
-            // If error is caused by user (400 codes), let them know
-            if (400 <= statusCode && statusCode < 500)
-                return new StatusCodeResult(statusCode);
-
             return new StatusCodeResult(StatusCodes.Status502BadGateway);
         }
         catch (JsonException e)
@@ -87,19 +80,18 @@ public class MissionController : ControllerBase
         }
         catch (HttpRequestException e)
         {
-            _logger.LogError(e, "Error retrieving mission from Echo");
+            if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
+            {
+                _logger.LogWarning("Could not find echo mission with id={id}", missionId);
+                return NotFound("Echo mission not found");
+            }
 
-            int statusCode = (int?)e.StatusCode ?? StatusCodes.Status502BadGateway;
-
-            // If error is caused by user (400 codes), let them know
-            if (400 <= statusCode && statusCode < 500)
-                return new StatusCodeResult(statusCode);
-
+            _logger.LogError(e, "Error getting mission from Echo");
             return new StatusCodeResult(StatusCodes.Status502BadGateway);
         }
         catch (JsonException e)
         {
-            _logger.LogError(e, "Error retrieving mission from Echo");
+            _logger.LogError(e, "Error deserializing mission from Echo");
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
