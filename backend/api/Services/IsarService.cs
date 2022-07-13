@@ -145,22 +145,22 @@ namespace Api.Services
 
             foreach (var stepResponse in taskResponse.Steps)
             {
-                bool success = Enum.TryParse<StepType>(stepResponse.Type, out var stepType);
+                bool success = Enum.TryParse<IsarStep.StepTypeEnum>(stepResponse.Type, out var stepType);
                 if (!success)
                     throw new JsonException(
                         $"Failed to parse step type. {stepResponse.Type} is not valid"
                     );
 
-                if (stepType != StepType.DriveToPose)
+                if (stepType != IsarStep.StepTypeEnum.DriveToPose)
                 {
-                    _ = SelectInspectionType.FromSensorTypeAsString(stepResponse.Type);
+                    _ = IsarStep.StepTypeFromString(stepResponse.Type);
                 }
 
                 var step = new IsarStep()
                 {
                     IsarStepId = stepResponse.IsarStepId,
                     TagId = taskResponse.TagId,
-                    StepStatus = IsarStepStatus.NotStarted,
+                    StepStatus = IsarStep.IsarStepStatus.NotStarted,
                     StepType = stepType,
                     Time = DateTimeOffset.UtcNow,
                     FileLocation = "",

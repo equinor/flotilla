@@ -125,7 +125,7 @@ namespace Api.Services
             return true;
         }
 
-        public async Task<bool> UpdateStepStatus(string isarStepId, IsarStepStatus stepStatus)
+        public async Task<bool> UpdateStepStatus(string isarStepId, IsarStep.IsarStepStatus stepStatus)
         {
             var step = await ReadIsarStepById(isarStepId);
             if (step is null)

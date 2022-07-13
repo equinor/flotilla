@@ -185,10 +185,10 @@ namespace Api.EventHandlers
         private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var step = (IsarStepMessage)mqttArgs.Message;
-            IsarStepStatus status;
+            IsarStep.IsarStepStatus status;
             try
             {
-                status = IsarStepStatusMethods.FromString(step.Status);
+                status = IsarStep.StatusFromString(step.Status);
             }
             catch (ArgumentException e)
             {
