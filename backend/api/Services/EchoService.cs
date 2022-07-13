@@ -69,27 +69,27 @@ namespace Api.Services
             return mission;
         }
 
-        private static IList<InspectionType> ProcessSensorTypes(List<SensorType> sensorTypes)
+        private static IList<EchoInspection> ProcessSensorTypes(List<SensorType> sensorTypes)
         {
-            var inspectionTypes = new List<InspectionType>();
+            var inspections = new List<EchoInspection>();
 
             bool isEmpty = !sensorTypes.Any();
             if (isEmpty)
             {
-                inspectionTypes.Add(InspectionType.Image);
+                inspections.Add(new EchoInspection(InspectionTypeEnum.Image, null));
             }
             else
             {
                 foreach (var sensorType in sensorTypes)
                 {
-                    var inspectionType = SelectInspectionType.FromSensorTypeAsString(
+                    var inspectionType = InspectionTypeFromString(
                         sensorType.Key
                     );
-                    inspectionTypes.Add(inspectionType);
+                    inspections.Add(new EchoInspection(inspectionType, (float?)sensorType.TimeInSeconds));
                 }
             }
 
-            return inspectionTypes;
+            return inspections;
         }
 
         private List<EchoTag> ProcessPlanItems(List<PlanItem> planItems)
@@ -105,7 +105,7 @@ namespace Api.Services
                     URL = new Uri(
                         $"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"
                     ),
-                    InspectionTypes = ProcessSensorTypes(planItem.SensorTypes)
+                    Inspections = ProcessSensorTypes(planItem.SensorTypes)
                 };
 
                 tags.Add(tag);

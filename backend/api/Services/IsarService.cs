@@ -4,7 +4,6 @@ using System.Text.Json.Serialization;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Utilities;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace Api.Services
 {

@@ -1,6 +1,4 @@
-﻿using Api.Database.Models;
-
-#nullable disable
+﻿#nullable disable
 namespace Api.Controllers.Models
 {
     public class EchoTag
@@ -11,6 +9,6 @@ namespace Api.Controllers.Models
 
         public Uri URL { get; set; }
 
-        public virtual IList<InspectionType> InspectionTypes { get; set; }
+        public virtual IList<EchoInspection> Inspections { get; set; }
     }
 }
