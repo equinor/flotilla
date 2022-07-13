@@ -23,30 +23,47 @@ namespace Api.Database.Models
         public IsarStepStatus StepStatus { get; set; }
 
         [Required]
-        public StepType StepType { get; set; }
+        public StepTypeEnum StepType { get; set; }
 
-        public InspectionType InspectionType { get; set; }
+        public InspectionTypeEnum InspectionType { get; set; }
 
         [Required]
         public DateTimeOffset Time { get; set; }
 
         [MaxLength(128)]
         public string FileLocation { get; set; }
-    }
 
-    public enum IsarStepStatus
-    {
-        Successful,
-        InProgress,
-        NotStarted,
-        Failed,
-        Cancelled
-    }
+        public enum IsarStepStatus
+        {
+            Successful,
+            InProgress,
+            NotStarted,
+            Failed,
+            Cancelled
+        }
 
-    public static class IsarStepStatusMethods
-    {
-        public static IsarStepStatus FromString(string status) =>
-            status switch
+        public enum StepTypeEnum
+        {
+            DriveToPose,
+            TakeImage,
+            TakeVideo,
+            TakeThermalImage,
+            TakeThermalVideo,
+            RecordAudio
+        }
+
+        public enum InspectionTypeEnum
+        {
+            Image,
+            ThermalImage,
+            Video,
+            ThermalVideo,
+            Audio
+        }
+
+        public static IsarStepStatus StatusFromString(string status)
+        {
+            return status switch
             {
                 "successful" => IsarStepStatus.Successful,
                 "not_started" => IsarStepStatus.NotStarted,
@@ -58,50 +75,32 @@ namespace Api.Database.Models
                         $"Failed to parse report status {status} as it's not supported"
                     )
             };
-    }
-
-    public enum StepType
-    {
-        DriveToPose,
-        TakeImage,
-        TakeThermalImage,
-        RecordAudio
-    }
-
-    public class SelectStepType
-    {
-        public static StepType FromSensorTypeAsString(string sensorType)
+        }
+        public static StepTypeEnum StepTypeFromString(string sensorType)
         {
             return sensorType switch
             {
-                "DriveToPose" => StepType.DriveToPose,
-                "RecordAudio" => StepType.RecordAudio,
-                "TakeImage" => StepType.TakeImage,
-                "TakeThermalImage" => StepType.TakeThermalImage,
-                _ => StepType.TakeImage,
+                "DriveToPose" => StepTypeEnum.DriveToPose,
+                "RecordAudio" => StepTypeEnum.RecordAudio,
+                "TakeImage" => StepTypeEnum.TakeImage,
+                "TakeVideo" => StepTypeEnum.TakeVideo,
+                "TakeThermalImage" => StepTypeEnum.TakeThermalImage,
+                "TakeThermalVideo" => StepTypeEnum.TakeThermalVideo,
+                _ => StepTypeEnum.TakeImage,
             };
         }
-    }
-
-    public enum InspectionType
-    {
-        Image,
-        ThermalImage,
-        Audio
-    }
-
-    public class SelectInspectionType
-    {
-        public static InspectionType FromSensorTypeAsString(string sensorType)
+        public static InspectionTypeEnum InspectionTypeFromString(string sensorType)
         {
             return sensorType switch
             {
-                "Picture" => InspectionType.Image,
-                "ThermicPicture" => InspectionType.ThermalImage,
-                "Audio" => InspectionType.Audio,
-                "TakeImage" => InspectionType.Image,
-                "TakeThermalImage" => InspectionType.ThermalImage,
-                _ => InspectionType.Image,
+                "Picture" => InspectionTypeEnum.Image,
+                "ThermicPicture" => InspectionTypeEnum.ThermalImage,
+                "Audio" => InspectionTypeEnum.Audio,
+                "TakeImage" => InspectionTypeEnum.Image,
+                "TakeVideo" => InspectionTypeEnum.Video,
+                "TakeThermalImage" => InspectionTypeEnum.ThermalImage,
+                "TakeThermalVideo" => InspectionTypeEnum.ThermalVideo,
+                _ => InspectionTypeEnum.Image,
             };
         }
     }
