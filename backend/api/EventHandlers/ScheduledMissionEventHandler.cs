@@ -93,9 +93,13 @@ namespace Api.EventHandlers
                 _logger.LogWarning("Robot {id} is not available", scheduledMission.Robot.Id);
                 return false;
             }
+            if (robot.Enabled is false)
+            {
+                _logger.LogError("Robot with name {name} is not enabled. Could not start mission.", scheduledMission.Robot.Name);
+                return false;
+            }
             try
             {
-
                 var report = await _isarService.StartMission(robot: scheduledMission.Robot, echoMissionId: scheduledMission.EchoMissionId);
                 _logger.LogInformation("Started mission {id}", scheduledMission.Id);
             }
