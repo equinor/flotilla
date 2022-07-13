@@ -3,6 +3,7 @@ using Api.Controllers;
 using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -21,6 +22,7 @@ namespace Api.Test
             var reportServiceLogger = new Mock<ILogger<ReportService>>();
 
             var context = fixture.Context;
+            var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
             var reportService = new ReportService(context, reportServiceLogger.Object);
             var isarService = new IsarService(isarLogger.Object, reportService);

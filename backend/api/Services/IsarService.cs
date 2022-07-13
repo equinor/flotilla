@@ -1,9 +1,9 @@
-﻿using System.Net;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Api.Controllers.Models;
+﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Utilities;
+using System.Net;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Api.Services
 {
@@ -22,22 +22,17 @@ namespace Api.Services
             _reportService = reportService;
         }
 
-        public async Task<Report> StartMission(Robot robot, string echoMissionId)
+        public async Task<Report> StartMission(Robot robot, IsarMissionDefinition missionDefinition)
         {
-            string uri = QueryHelpers.AddQueryString(
-                $"{robot.IsarUri}/schedule/start-mission",
-                "ID",
-                echoMissionId
-            );
-            _logger.LogInformation("Starting mission on robot '{id}' on ISAR at '{uri}'", robot.Id, uri);
+            string uri = $"{robot.IsarUri}/schedule/start-mission";
 
-            var response = await httpClient.PostAsync(uri, null);
+            var response = await httpClient.PostAsync(uri, JsonContent.Create(new { mission_definition = missionDefinition }));
 
             if (!response.IsSuccessStatusCode)
             {
-                string msg = response.ToString();
-                _logger.LogError("Error in ISAR: {msg}", msg);
-                throw new MissionException($"Could not start mission with id: {echoMissionId}");
+                string? msg = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Error from ISAR: {code} {error} - {msg}", (int)response.StatusCode, response.StatusCode.ToString(), msg);
+                throw new MissionException($"Could not start mission for robot '{robot.Id}': {msg}");
             }
             if (response.Content is null)
             {
@@ -59,17 +54,15 @@ namespace Api.Services
             {
                 Robot = robot,
                 IsarMissionId = isarMissionResponse?.MissionId,
-                EchoMissionId = echoMissionId,
                 Log = "",
                 ReportStatus = ReportStatus.NotStarted,
                 StartTime = DateTimeOffset.UtcNow,
-                EndTime = DateTimeOffset.UtcNow,
                 Tasks = tasks,
             };
 
             _logger.LogInformation(
-                "Mission {echoMissionId} started on robot {robotId}",
-                echoMissionId,
+                "ISAR Mission '{missionId}' started on robot '{robotId}'",
+                isarMissionResponse.MissionId,
                 robot.Id
             );
             return await _reportService.Create(report);

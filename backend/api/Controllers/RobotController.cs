@@ -1,8 +1,9 @@
-﻿using System.Text.Json;
+﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Utilities;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace Api.Controllers;
 
@@ -13,16 +14,19 @@ public class RobotController : ControllerBase
     private readonly ILogger<RobotController> _logger;
     private readonly RobotService _robotService;
     private readonly IsarService _isarService;
+    private readonly EchoService _echoService;
 
     public RobotController(
         ILogger<RobotController> logger,
         RobotService robotService,
-        IsarService isarService
+        IsarService isarService,
+        EchoService echoService
     )
     {
         _logger = logger;
         _robotService = robotService;
         _isarService = isarService;
+        _echoService = echoService;
     }
 
     /// <summary>
@@ -165,7 +169,7 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
-    /// Start a mission for a given robot
+    /// Start the echo mission with the corresponding 'missionId' for the robot with id 'robotId'
     /// </summary>
     /// <remarks>
     /// <para> This query starts a mission for a given robot and creates a report </para>
@@ -180,7 +184,7 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Report>> StartMission(
         [FromRoute] string robotId,
-        [FromRoute] string echoMissionId
+        [FromRoute] int missionId
     )
     {
         var robot = await _robotService.ReadById(robotId);
@@ -190,8 +194,31 @@ public class RobotController : ControllerBase
             return NotFound("Robot not found");
         }
 
+        EchoMission? echoMission;
         try
         {
+            echoMission = await _echoService.GetMissionById(missionId);
+        }
+        catch (HttpRequestException e)
+        {
+            if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
+            {
+                _logger.LogWarning("Could not find echo mission with id={id}", missionId);
+                return NotFound("Echo mission not found");
+            }
+
+            _logger.LogError(e, "Error getting mission from Echo");
+            return new StatusCodeResult(StatusCodes.Status502BadGateway);
+        }
+        catch (JsonException e)
+        {
+            _logger.LogError(e, "Error deserializing mission from Echo");
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+
+        try
+        {
+            var report = await _isarService.StartMission(robot, new IsarMissionDefinition(echoMission));
             var report = await _isarService.StartMission(robot, echoMissionId);
             robot.Status = RobotStatus.Busy;
             await _robotService.Update(robot);
