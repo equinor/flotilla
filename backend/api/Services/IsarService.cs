@@ -10,29 +10,27 @@ namespace Api.Services
 {
     public class IsarService
     {
-        private readonly string _isarUri;
         private static readonly HttpClient httpClient = new();
         private readonly ILogger<IsarService> _logger;
         private readonly ReportService _reportService;
 
         public IsarService(
-            IConfiguration configuration,
             ILogger<IsarService> logger,
             ReportService reportService
         )
         {
             _logger = logger;
             _reportService = reportService;
-            _isarUri = configuration.GetSection("Isar")["Url"];
         }
 
         public async Task<Report> StartMission(Robot robot, string echoMissionId)
         {
             string uri = QueryHelpers.AddQueryString(
-                $"{_isarUri}/schedule/start-mission",
+                $"{robot.IsarUri}/schedule/start-mission",
                 "ID",
                 echoMissionId
             );
+            _logger.LogInformation("Starting mission on robot '{id}' on ISAR at '{uri}'", robot.Id, uri);
 
             var response = await httpClient.PostAsync(uri, null);
 
@@ -78,16 +76,18 @@ namespace Api.Services
             return await _reportService.Create(report);
         }
 
-        public async Task<HttpResponseMessage> StopMission()
+        public async Task<HttpResponseMessage> StopMission(Robot robot)
         {
-            var builder = new UriBuilder($"{_isarUri}/schedule/stop-mission");
-            return await httpClient.PostAsync(builder.ToString(), null);
+            string url = new UriBuilder($"{robot.IsarUri}/schedule/stop-mission").ToString();
+            _logger.LogInformation("Stopping mission on robot '{id}' on ISAR at '{uri}'", robot.Id, url);
+            return await httpClient.PostAsync(url, null);
         }
 
-        public async Task<HttpResponseMessage> PauseMission()
+        public async Task<HttpResponseMessage> PauseMission(Robot robot)
         {
-            var builder = new UriBuilder($"{_isarUri}/schedule/pause-mission");
-            var response = await httpClient.PostAsync(builder.ToString(), null);
+            string url = new UriBuilder($"{robot.IsarUri}/schedule/pause-mission").ToString();
+            _logger.LogInformation("Pausing mission on robot '{id}' on ISAR at '{uri}'", robot.Id, url);
+            var response = await httpClient.PostAsync(url, null);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -99,10 +99,11 @@ namespace Api.Services
             return response;
         }
 
-        public async Task<HttpResponseMessage> ResumeMission()
+        public async Task<HttpResponseMessage> ResumeMission(Robot robot)
         {
-            var builder = new UriBuilder($"{_isarUri}/schedule/resume-mission");
-            var response = await httpClient.PostAsync(builder.ToString(), null);
+            string url = new UriBuilder($"{robot.IsarUri}/schedule/resume-mission").ToString();
+            _logger.LogInformation("Resuming mission on robot '{id}' on ISAR at '{uri}'", robot.Id, url);
+            var response = await httpClient.PostAsync(url, null);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -171,8 +172,9 @@ namespace Api.Services
             return steps;
         }
 
-        private static string GetLogMessageForFailedIsarRequest(HttpStatusCode statusCode) =>
-            (int)statusCode switch
+        private static string GetLogMessageForFailedIsarRequest(HttpStatusCode statusCode)
+        {
+            return (int)statusCode switch
             {
                 StatusCodes.Status408RequestTimeout
                     => "A timeout ocurred when communicating with the ISAR state machine",
@@ -182,6 +184,7 @@ namespace Api.Services
                     => "An internal server error ocurred in ISAR",
                 _ => $"An unexpected status code: {statusCode} was received from ISAR"
             };
+        }
     }
 
     public class IsarStopMissionResponse

@@ -29,7 +29,7 @@ namespace Api.Test
             var context = new FlotillaDbContext(options);
 
             var reportService = new ReportService(context, reportServiceLogger.Object);
-            var isarService = new IsarService(config, isarLogger.Object, reportService);
+            var isarService = new IsarService(isarLogger.Object, reportService);
             var service = new RobotService(context);
 
             var mockLoggerController = new Mock<ILogger<RobotController>>();

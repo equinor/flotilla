@@ -220,7 +220,13 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IsarStopMissionResponse>> StopMission([FromRoute] string robotId)
     {
-        var response = await _isarService.StopMission();
+        var robot = await _robotService.ReadById(robotId);
+        if (robot == null)
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound();
+        }
+        var response = await _isarService.StopMission(robot);
         if (!response.IsSuccessStatusCode || response.Content is null)
         {
             _logger.LogError("Could not stop mission on robot: {robotId}", robotId);
@@ -332,11 +338,17 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<string>> PauseMission()
+    public async Task<ActionResult<string>> PauseMission([FromRoute] string robotId)
     {
+        var robot = await _robotService.ReadById(robotId);
+        if (robot == null)
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound();
+        }
         try
         {
-            var response = await _isarService.PauseMission();
+            var response = await _isarService.PauseMission(robot);
             string? responseContent = await response.Content.ReadAsStringAsync();
             string? isarResponse = JsonSerializer.Deserialize<string>(responseContent);
             return Ok(isarResponse);
@@ -362,11 +374,17 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<string>> ResumeMission()
+    public async Task<ActionResult<string>> ResumeMission([FromRoute] string robotId)
     {
+        var robot = await _robotService.ReadById(robotId);
+        if (robot == null)
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound();
+        }
         try
         {
-            var response = await _isarService.ResumeMission();
+            var response = await _isarService.ResumeMission(robot);
             string? responseContent = await response.Content.ReadAsStringAsync();
             string? isarResponse = JsonSerializer.Deserialize<string>(responseContent);
             return Ok(isarResponse);

@@ -17,7 +17,7 @@ public static class InitDb
             Model = "Model1",
             SerialNumber = "123",
             Status = RobotStatus.Available,
-            Enabled = true,
+            Enabled = false,
             Host = "localhost",
             Logs = "logs",
             Port = 3000,
@@ -29,7 +29,7 @@ public static class InitDb
             Model = "Model2",
             SerialNumber = "456",
             Status = RobotStatus.Busy,
-            Enabled = true,
+            Enabled = false,
             Host = "localhost",
             Logs = "logs",
             Port = 3000

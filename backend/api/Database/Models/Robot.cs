@@ -40,6 +40,17 @@ namespace Api.Database.Models
 
         [Required]
         public RobotStatus Status { get; set; }
+
+        public string IsarUri
+        {
+            get
+            {
+                string host = Host;
+                if (host == "0.0.0.0")
+                    host = "localhost";
+                return $"http://{host}:{Port}";
+            }
+        }
     }
 
     public enum RobotStatus
