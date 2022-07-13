@@ -15,6 +15,7 @@ namespace Api.Mqtt
 {
     public class MqttService : BackgroundService
     {
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarConnectReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarMissionReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarStepReceived;
@@ -113,6 +114,9 @@ namespace Api.Mqtt
 
             switch (messageType)
             {
+                case Type type when type == typeof(IsarConnectMessage):
+                    OnIsarTopicReceived<IsarConnectMessage>(content);
+                    break;
                 case Type type when type == typeof(IsarMissionMessage):
                     OnIsarTopicReceived<IsarMissionMessage>(content);
                     break;
@@ -242,6 +246,7 @@ namespace Api.Mqtt
             {
                 var raiseEvent = type switch
                 {
+                    _ when type == typeof(IsarConnectMessage) => MqttIsarConnectReceived,
                     _ when type == typeof(IsarMissionMessage) => MqttIsarMissionReceived,
                     _ when type == typeof(IsarTaskMessage) => MqttIsarTaskReceived,
                     _ when type == typeof(IsarStepMessage) => MqttIsarStepReceived,

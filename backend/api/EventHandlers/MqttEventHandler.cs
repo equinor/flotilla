@@ -31,6 +31,7 @@ namespace Api.EventHandlers
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<ScheduledMissionService>();
 
+            MqttService.MqttIsarConnectReceived += OnIsarConnect;
             MqttService.MqttIsarMissionReceived += OnMissionUpdate;
             MqttService.MqttIsarTaskReceived += OnTaskUpdate;
             MqttService.MqttIsarStepReceived += OnStepUpdate;
@@ -40,6 +41,38 @@ namespace Api.EventHandlers
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await stoppingToken;
+        }
+
+        private async void OnIsarConnect(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var isarRobot = (IsarConnectMessage)mqttArgs.Message;
+            var robot = await _robotService.ReadByName(isarRobot.RobotId);
+            _logger.LogError("ISAR CONNECT");
+            if (robot == null)
+            {
+                _logger.LogError(
+                    "ISAR instance for robot {name} connected. Could not find robot {name} in the database.",
+                    isarRobot.RobotId,
+                    isarRobot.RobotId
+                );
+                return;
+            }
+            else
+            {
+                robot.Host = isarRobot.Host;
+                robot.Port = isarRobot.Port;
+                robot.Enabled = true;
+                await _robotService.Update(robot);
+                _logger.LogInformation(
+                    "ISAR instance for robot {name} with id {id} is connected. Robot is enabled and host ({host}) and port ({port}) is updated.",
+                    isarRobot.RobotId,
+                    robot.Id,
+                    isarRobot.Host,
+                    isarRobot.Port
+                );
+            }
+
+
         }
 
         private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
