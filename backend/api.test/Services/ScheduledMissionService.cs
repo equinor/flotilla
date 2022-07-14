@@ -55,7 +55,7 @@ namespace Api.Test
             await scheduledMissionService.Create(new ScheduledMission()
             {
                 Robot = robot,
-                EchoMissionId = "",
+                EchoMissionId = 49385643,
                 StartTime = System.DateTimeOffset.UtcNow
             });
             int nScheduledMissionsAfter = scheduledMissionService.ReadAll().Result.Count();

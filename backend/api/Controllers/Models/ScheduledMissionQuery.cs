@@ -3,7 +3,7 @@
     public struct ScheduledMissionQuery
     {
         public string RobotId { get; set; }
-        public string EchoMissionId { get; set; }
+        public int EchoMissionId { get; set; }
         public DateTimeOffset? StartTime { get; set; }
     }
 }

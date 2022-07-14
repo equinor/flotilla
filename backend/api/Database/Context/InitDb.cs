@@ -62,7 +62,7 @@ public static class InitDb
         var scheduledMission1 = new ScheduledMission
         {
             Robot = Robots[0],
-            EchoMissionId = "2",
+            EchoMissionId = 2,
             StartTime = DateTimeOffset.UtcNow.AddMinutes(1),
             EndTime = DateTimeOffset.UtcNow.AddMinutes(5),
             Status = ScheduledMissionStatus.Pending
@@ -71,7 +71,7 @@ public static class InitDb
         var scheduledMission2 = new ScheduledMission
         {
             Robot = Robots[1],
-            EchoMissionId = "2",
+            EchoMissionId = 2,
             StartTime = DateTimeOffset.UtcNow.AddMinutes(2),
             EndTime = DateTimeOffset.UtcNow.AddMinutes(5),
             Status = ScheduledMissionStatus.Pending
