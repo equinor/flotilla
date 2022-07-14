@@ -15,7 +15,7 @@ namespace Api.Database.Models
 
         [MaxLength(128)]
         [Required]
-        public string EchoMissionId { get; set; }
+        public int EchoMissionId { get; set; }
 
         [Required]
         public DateTimeOffset StartTime { get; set; }
