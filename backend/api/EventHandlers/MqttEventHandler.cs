@@ -107,20 +107,31 @@ namespace Api.EventHandlers
             var robot = await _robotService.ReadByName(mission.RobotId);
             if (robot == null)
             {
-                _logger.LogError("Could not find robot with name {id}. The robot status is not updated.", mission.RobotId);
+                _logger.LogError(
+                    "Could not find robot with name {id}. The robot status is not updated.",
+                    mission.RobotId
+                );
             }
             else if (mission.Status.Equals("in_progress", StringComparison.OrdinalIgnoreCase))
             {
                 robot.Status = RobotStatus.Busy;
                 await _robotService.Update(robot);
-                _logger.LogInformation("Mission with ISAR mission id {id} is started by the robot {name}. Robot status set to Busy.", mission.MissionId, mission.RobotId);
+                _logger.LogInformation(
+                    "Mission with ISAR mission id {id} is started by the robot {name}. Robot status set to Busy.",
+                    mission.MissionId,
+                    mission.RobotId
+                );
 
             }
             else if (mission.Status.Equals("completed", StringComparison.OrdinalIgnoreCase))
             {
                 robot.Status = RobotStatus.Available;
                 await _robotService.Update(robot);
-                _logger.LogInformation("Mission with ISAR mission id {id} is completed by the robot {name}. Robot status set to Available.", mission.MissionId, mission.RobotId);
+                _logger.LogInformation(
+                    "Mission with ISAR mission id {id} is completed by the robot {name}. Robot status set to Available.",
+                    mission.MissionId,
+                    mission.RobotId
+                );
 
                 var scheduledMissions = await _scheduledMissionService.GetScheduledMissionsByStatus(ScheduledMissionStatus.Ongoing);
                 if (scheduledMissions is not null)
@@ -130,7 +141,11 @@ namespace Api.EventHandlers
                         if (sm.Robot.Name == robot.Name)
                         {
                             await _scheduledMissionService.Delete(sm.Id);
-                            _logger.LogInformation("Mission with ISAR mission id {id} is completed by the robot {name}. Matching scheduledMission with id {id} is deleted.", mission.MissionId, mission.RobotId, sm.Id);
+                            _logger.LogInformation(
+                                "Mission with ISAR mission id {id} is completed by the robot {name}. Matching scheduledMission with id {id} is deleted.",
+                                mission.MissionId,
+                                mission.RobotId, sm.Id
+                            );
                         }
 
                     }
