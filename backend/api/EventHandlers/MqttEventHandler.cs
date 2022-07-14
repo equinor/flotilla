@@ -13,9 +13,9 @@ namespace Api.EventHandlers
     public class MqttEventHandler : BackgroundService
     {
         private readonly ILogger<MqttEventHandler> _logger;
-        private readonly ReportService _reportService;
-        private readonly RobotService _robotService;
-        private readonly ScheduledMissionService _scheduledMissionService;
+        private readonly IReportService _reportService;
+        private readonly IRobotService _robotService;
+        private readonly IScheduledMissionService _scheduledMissionService;
 
         public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory factory)
         {
@@ -23,13 +23,13 @@ namespace Api.EventHandlers
             // Reason for using factory: https://www.thecodebuzz.com/using-dbcontext-instance-in-ihostedservice/
             _reportService = factory
                 .CreateScope()
-                .ServiceProvider.GetRequiredService<ReportService>();
+                .ServiceProvider.GetRequiredService<IReportService>();
             _robotService = factory
                 .CreateScope()
-                .ServiceProvider.GetRequiredService<RobotService>();
+                .ServiceProvider.GetRequiredService<IRobotService>();
             _scheduledMissionService = factory
                 .CreateScope()
-                .ServiceProvider.GetRequiredService<ScheduledMissionService>();
+                .ServiceProvider.GetRequiredService<IScheduledMissionService>();
 
             MqttService.MqttIsarConnectReceived += OnIsarConnect;
             MqttService.MqttIsarMissionReceived += OnMissionUpdate;
@@ -132,7 +132,7 @@ namespace Api.EventHandlers
                     mission.RobotId
                 );
 
-                var scheduledMissions = await _scheduledMissionService.GetScheduledMissionsByStatus(ScheduledMissionStatus.Ongoing);
+                var scheduledMissions = await _scheduledMissionService.ReadByStatus(ScheduledMissionStatus.Ongoing);
                 if (scheduledMissions is not null)
                 {
                     foreach (var sm in scheduledMissions)

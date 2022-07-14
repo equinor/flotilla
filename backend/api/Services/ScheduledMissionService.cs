@@ -4,9 +4,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
 {
+    public interface IScheduledMissionService
+    {
+        public abstract Task<ScheduledMission> Create(ScheduledMission scheduledMission);
+
+        public abstract Task<IEnumerable<ScheduledMission>> ReadAll();
+
+        public abstract Task<ScheduledMission?> ReadById(string id);
+
+        public abstract Task<List<ScheduledMission>> ReadByStatus(ScheduledMissionStatus status);
+
+        public abstract void Update(ScheduledMission scheduledMission);
+
+        public abstract Task<ScheduledMission?> Delete(string id);
+    }
+
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1309:Use ordinal StringComparison",
     Justification = "EF Core refrains from translating string comparison overloads to SQL")]
-    public class ScheduledMissionService
+    public class ScheduledMissionService : IScheduledMissionService
     {
         private readonly FlotillaDbContext _context;
         public static event EventHandler? ScheduledMissionUpdated;
@@ -29,21 +44,14 @@ namespace Api.Services
             return await _context.ScheduledMissions.Include(sm => sm.Robot).ToListAsync();
         }
 
-        public async Task<ScheduledMission?> Read(string id)
+        public async Task<ScheduledMission?> ReadById(string id)
         {
             return await _context.ScheduledMissions.Include(sm => sm.Robot).FirstOrDefaultAsync(
                 ev => ev.Id.Equals(id)
             );
         }
 
-        public void Update(ScheduledMission scheduledMission)
-        {
-            _context.ScheduledMissions.Update(scheduledMission);
-            _context.SaveChanges();
-            RaiseScheduledMissionUpdatedEvent();
-        }
-
-        public async Task<List<ScheduledMission>> GetScheduledMissionsByStatus(ScheduledMissionStatus status)
+        public async Task<List<ScheduledMission>> ReadByStatus(ScheduledMissionStatus status)
         {
             // EF Core cannot translate DateTimeOffset ordering to SQL,
             // so we need to do this on the client side (After getting list from database)
@@ -52,6 +60,13 @@ namespace Api.Services
                 .Where(sm => sm.Status.Equals(status))
                 .ToListAsync();
             return list.OrderBy(sm => sm.StartTime).ToList();
+        }
+
+        public void Update(ScheduledMission scheduledMission)
+        {
+            _context.ScheduledMissions.Update(scheduledMission);
+            _context.SaveChanges();
+            RaiseScheduledMissionUpdatedEvent();
         }
 
         public async Task<ScheduledMission?> Delete(string id)
@@ -71,7 +86,7 @@ namespace Api.Services
             return scheduledMission;
         }
 
-        public void RaiseScheduledMissionUpdatedEvent()
+        private void RaiseScheduledMissionUpdatedEvent()
         {
             if (ScheduledMissionUpdated is not null)
             {

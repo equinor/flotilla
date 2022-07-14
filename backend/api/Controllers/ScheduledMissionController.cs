@@ -9,12 +9,12 @@ namespace Api.Controllers;
 [Route("scheduled-missions")]
 public class ScheduledMissionController : ControllerBase
 {
-    private readonly ScheduledMissionService _scheduledMissionService;
-    private readonly RobotService _robotService;
+    private readonly IScheduledMissionService _scheduledMissionService;
+    private readonly IRobotService _robotService;
 
     public ScheduledMissionController(
-        ScheduledMissionService scheduledMissionService,
-        RobotService robotService
+        IScheduledMissionService scheduledMissionService,
+        IRobotService robotService
     )
     {
         _scheduledMissionService = scheduledMissionService;
@@ -53,7 +53,7 @@ public class ScheduledMissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ScheduledMission>> GetScheduledMissionById([FromRoute] string id)
     {
-        var scheduledMission = await _scheduledMissionService.Read(id);
+        var scheduledMission = await _scheduledMissionService.ReadById(id);
         if (scheduledMission is null)
             return NotFound($"Scheduled mission with id {id} not found");
         return Ok(scheduledMission);
@@ -74,7 +74,7 @@ public class ScheduledMissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ScheduledMission>> GetUpcomingScheduledMissions()
     {
-        var upcomingScheduledMissions = await _scheduledMissionService.GetScheduledMissionsByStatus(ScheduledMissionStatus.Pending);
+        var upcomingScheduledMissions = await _scheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending);
         return Ok(upcomingScheduledMissions);
     }
 

@@ -14,11 +14,11 @@ builder.AddAzureEnvironmentVariables();
 
 builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.IsDevelopment());
 
-builder.Services.AddScoped<RobotService>();
-builder.Services.AddScoped<ScheduledMissionService>();
-builder.Services.AddScoped<ReportService>();
-builder.Services.AddScoped<IsarService>();
-builder.Services.AddScoped<EchoService>();
+builder.Services.AddScoped<IRobotService, RobotService>();
+builder.Services.AddScoped<IScheduledMissionService, ScheduledMissionService>();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IIsarService, IsarService>();
+builder.Services.AddScoped<IEchoService, EchoService>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MqttService>();

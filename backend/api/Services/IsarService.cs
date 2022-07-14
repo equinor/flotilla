@@ -1,21 +1,32 @@
-﻿using Api.Controllers.Models;
-using Api.Database.Models;
-using Api.Utilities;
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Api.Controllers.Models;
+using Api.Database.Models;
+using Api.Utilities;
 
 namespace Api.Services
 {
-    public class IsarService
+    public interface IIsarService
+    {
+        public abstract Task<Report> StartMission(Robot robot, IsarMissionDefinition missionDefinition);
+
+        public abstract Task<HttpResponseMessage> StopMission(Robot robot);
+
+        public abstract Task<HttpResponseMessage> PauseMission(Robot robot);
+
+        public abstract Task<HttpResponseMessage> ResumeMission(Robot robot);
+    }
+
+    public class IsarService : IIsarService
     {
         private static readonly HttpClient httpClient = new();
         private readonly ILogger<IsarService> _logger;
-        private readonly ReportService _reportService;
+        private readonly IReportService _reportService;
 
         public IsarService(
             ILogger<IsarService> logger,
-            ReportService reportService
+            IReportService reportService
         )
         {
             _logger = logger;
@@ -62,7 +73,7 @@ namespace Api.Services
 
             _logger.LogInformation(
                 "ISAR Mission '{missionId}' started on robot '{robotId}'",
-                isarMissionResponse.MissionId,
+                isarMissionResponse?.MissionId,
                 robot.Id
             );
             return await _reportService.Create(report);
@@ -107,7 +118,7 @@ namespace Api.Services
             return response;
         }
 
-        public IList<IsarTask> ProcessIsarMissionResponse(
+        private static IList<IsarTask> ProcessIsarMissionResponse(
             IsarStartMissionResponse isarMissionResponse
         )
         {
@@ -131,7 +142,7 @@ namespace Api.Services
             return tasks;
         }
 
-        public IList<IsarStep> ProcessIsarTask(IsarTaskResponse taskResponse)
+        private static IList<IsarStep> ProcessIsarTask(IsarTaskResponse taskResponse)
         {
             var steps = new List<IsarStep>();
 
