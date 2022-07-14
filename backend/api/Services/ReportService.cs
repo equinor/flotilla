@@ -51,6 +51,7 @@ namespace Api.Services
         public async Task<IEnumerable<Report>> ReadAll()
         {
             return await _context.Reports
+                .Include(r => r.Robot)
                 .Include(report => report.Tasks)
                 .ThenInclude(task => task.Steps)
                 .ToListAsync();
@@ -59,6 +60,7 @@ namespace Api.Services
         public async Task<Report?> Read(string id)
         {
             return await _context.Reports
+                .Include(r => r.Robot)
                 .Include(report => report.Tasks)
                 .ThenInclude(task => task.Steps)
                 .FirstOrDefaultAsync(report => report.Id.Equals(id));
@@ -66,7 +68,7 @@ namespace Api.Services
 
         public async Task<Report?> ReadByIsarMissionId(string isarMissionId)
         {
-            return await _context.Reports.FirstOrDefaultAsync(
+            return await _context.Reports.Include(r => r.Robot).FirstOrDefaultAsync(
                 report => report.IsarMissionId.Equals(isarMissionId)
             );
         }

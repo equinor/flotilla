@@ -31,7 +31,7 @@ namespace Api.Test
             var robotService = new RobotService(_fixture.Context);
             var robots = await robotService.ReadAll();
             var firstRobot = robots.First();
-            var robotById = await robotService.Read(firstRobot.Id);
+            var robotById = await robotService.ReadById(firstRobot.Id);
 
             Assert.Equal(firstRobot, robotById);
         }
@@ -40,7 +40,7 @@ namespace Api.Test
         public async Task ReadIdDoesNotExist()
         {
             var robotService = new RobotService(_fixture.Context);
-            var robot = await robotService.Read("some_id_that_does_not_exist");
+            var robot = await robotService.ReadById("some_id_that_does_not_exist");
             Assert.Null(robot);
         }
 

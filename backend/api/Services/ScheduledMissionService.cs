@@ -45,11 +45,13 @@ namespace Api.Services
 
         public async Task<List<ScheduledMission>> GetScheduledMissionsByStatus(ScheduledMissionStatus status)
         {
-            return await _context.ScheduledMissions
+            // EF Core cannot translate DateTimeOffset ordering to SQL,
+            // so we need to do this on the client side (After getting list from database)
+            var list = await _context.ScheduledMissions
                 .Include(sm => sm.Robot)
                 .Where(sm => sm.Status.Equals(status))
-                .OrderBy(sm => sm.StartTime)
                 .ToListAsync();
+            return list.OrderBy(sm => sm.StartTime).ToList();
         }
 
         public async Task<ScheduledMission?> Delete(string id)
