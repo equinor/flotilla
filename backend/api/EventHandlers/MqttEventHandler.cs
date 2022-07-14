@@ -47,7 +47,6 @@ namespace Api.EventHandlers
         {
             var isarRobot = (IsarConnectMessage)mqttArgs.Message;
             var robot = await _robotService.ReadByName(isarRobot.RobotId);
-            _logger.LogError("ISAR CONNECT");
             if (robot == null)
             {
                 _logger.LogError(
