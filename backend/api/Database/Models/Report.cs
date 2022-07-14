@@ -50,8 +50,9 @@ namespace Api.Database.Models
 
     public static class ReportStatusMethods
     {
-        public static ReportStatus FromString(string status) =>
-            status switch
+        public static ReportStatus FromString(string status)
+        {
+            return status switch
             {
                 "completed" => ReportStatus.Successful,
                 "not_started" => ReportStatus.NotStarted,
@@ -64,5 +65,6 @@ namespace Api.Database.Models
                         $"Failed to parse report status {status} as it's not supported"
                     )
             };
+        }
     }
 }

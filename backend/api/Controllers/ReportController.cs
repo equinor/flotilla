@@ -8,9 +8,9 @@ namespace Api.Controllers;
 [Route("reports")]
 public class ReportController : ControllerBase
 {
-    private readonly ReportService _reportService;
+    private readonly IReportService _reportService;
 
-    public ReportController(ReportService reportService)
+    public ReportController(IReportService reportService)
     {
         _reportService = reportService;
     }

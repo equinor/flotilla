@@ -4,9 +4,38 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
 {
+    public interface IReportService
+    {
+        public abstract Task<Report> Create(Report report);
+
+        public abstract Task<Report> Create(
+            string isarMissionId,
+            string echoMissionId,
+            string log,
+            ReportStatus status,
+            Robot robot
+        );
+
+        public abstract Task<IEnumerable<Report>> ReadAll();
+
+        public abstract Task<Report?> Read(string id);
+
+        public abstract Task<Report?> ReadByIsarMissionId(string isarMissionId);
+
+        public abstract Task<IsarTask?> ReadIsarTaskById(string isarTaskId);
+
+        public abstract Task<IsarStep?> ReadIsarStepById(string isarStepId);
+
+        public abstract Task<bool> UpdateMissionStatus(string isarMissionId, ReportStatus reportStatus);
+
+        public abstract Task<bool> UpdateTaskStatus(string isarTaskId, IsarTaskStatus taskStatus);
+
+        public abstract Task<bool> UpdateStepStatus(string isarStepId, IsarStep.IsarStepStatus stepStatus);
+    }
+
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1309:Use ordinal StringComparison",
     Justification = "EF Core refrains from translating string comparison overloads to SQL")]
-    public class ReportService
+    public class ReportService : IReportService
     {
         private readonly FlotillaDbContext _context;
 

@@ -11,7 +11,7 @@ namespace Api.EventHandlers
         private List<ScheduledMission>? _upcomingScheduledMissions;
         private readonly IsarService _isarService;
         private readonly RobotService _robotService;
-        private readonly ScheduledMissionService _scheduledMissionService;
+        private readonly IScheduledMissionService _scheduledMissionService;
 
         public ScheduledMissionEventHandler(
             ILogger<ScheduledMissionEventHandler> logger,
@@ -28,7 +28,7 @@ namespace Api.EventHandlers
                 .ServiceProvider.GetRequiredService<RobotService>();
             _scheduledMissionService = factory
                 .CreateScope()
-                .ServiceProvider.GetRequiredService<ScheduledMissionService>();
+                .ServiceProvider.GetRequiredService<IScheduledMissionService>();
             UpdateUpcomingScheduledMissions();
         }
 

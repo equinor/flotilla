@@ -6,7 +6,14 @@ using static Api.Database.Models.IsarStep;
 
 namespace Api.Services
 {
-    public class EchoService
+    public interface IEchoService
+    {
+        public abstract Task<IList<EchoMission>> GetMissions();
+
+        public abstract Task<EchoMission> GetMissionById(int missionId);
+    }
+
+    public class EchoService : IEchoService
     {
         public const string ServiceName = "EchoApi";
         private readonly IDownstreamWebApi _echoApi;

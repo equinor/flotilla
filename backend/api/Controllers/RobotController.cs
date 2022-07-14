@@ -1,9 +1,9 @@
-﻿using Api.Controllers.Models;
+﻿using System.Text.Json;
+using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Utilities;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace Api.Controllers;
 
@@ -12,15 +12,15 @@ namespace Api.Controllers;
 public class RobotController : ControllerBase
 {
     private readonly ILogger<RobotController> _logger;
-    private readonly RobotService _robotService;
-    private readonly IsarService _isarService;
-    private readonly EchoService _echoService;
+    private readonly IRobotService _robotService;
+    private readonly IIsarService _isarService;
+    private readonly IEchoService _echoService;
 
     public RobotController(
         ILogger<RobotController> logger,
-        RobotService robotService,
-        IsarService isarService,
-        EchoService echoService
+        IRobotService robotService,
+        IIsarService isarService,
+        IEchoService echoService
     )
     {
         _logger = logger;

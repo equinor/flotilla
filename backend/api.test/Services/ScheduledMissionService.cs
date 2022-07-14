@@ -31,7 +31,7 @@ namespace Api.Test
             var scheduledMissionService = new ScheduledMissionService(_fixture.Context);
             var scheduledMissions = await scheduledMissionService.ReadAll();
             var firstScheduledMission = scheduledMissions.First();
-            var scheduledMissionById = await scheduledMissionService.Read(firstScheduledMission.Id);
+            var scheduledMissionById = await scheduledMissionService.ReadById(firstScheduledMission.Id);
 
             Assert.Equal(firstScheduledMission, scheduledMissionById);
         }
@@ -40,7 +40,7 @@ namespace Api.Test
         public async Task ReadIdDoesNotExist()
         {
             var scheduledMissionService = new ScheduledMissionService(_fixture.Context);
-            var scheduledMission = await scheduledMissionService.Read("some_id_that_does_not_exist");
+            var scheduledMission = await scheduledMissionService.ReadById("some_id_that_does_not_exist");
             Assert.Null(scheduledMission);
         }
 

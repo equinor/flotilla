@@ -11,9 +11,9 @@ public class MissionController : ControllerBase
 {
     private readonly ILogger<MissionController> _logger;
 
-    private readonly EchoService _echoService;
+    private readonly IEchoService _echoService;
 
-    public MissionController(ILogger<MissionController> logger, EchoService echoService)
+    public MissionController(ILogger<MissionController> logger, IEchoService echoService)
     {
         _logger = logger;
         _echoService = echoService;
