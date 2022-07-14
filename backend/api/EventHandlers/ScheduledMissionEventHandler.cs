@@ -1,6 +1,8 @@
-﻿using Api.Database.Models;
+﻿using Api.Controllers;
+using Api.Database.Models;
 using Api.Services;
 using Api.Utilities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Api.EventHandlers
 {
@@ -9,9 +11,8 @@ namespace Api.EventHandlers
         private readonly ILogger<ScheduledMissionEventHandler> _logger;
         private readonly int _timeDelay;
         private List<ScheduledMission>? _upcomingScheduledMissions;
-        private readonly IsarService _isarService;
-        private readonly RobotService _robotService;
         private readonly IScheduledMissionService _scheduledMissionService;
+        private readonly RobotController _robotController;
 
         public ScheduledMissionEventHandler(
             ILogger<ScheduledMissionEventHandler> logger,
@@ -22,13 +23,12 @@ namespace Api.EventHandlers
             ScheduledMissionService.ScheduledMissionUpdated += OnScheduledMissionUpdated;
 
             _timeDelay = 1000; // 1 second
-            _isarService = factory.CreateScope().ServiceProvider.GetRequiredService<IsarService>();
-            _robotService = factory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<RobotService>();
             _scheduledMissionService = factory
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<IScheduledMissionService>();
+            _robotController = factory
+                .CreateScope()
+                .ServiceProvider.GetRequiredService<RobotController>();
             UpdateUpcomingScheduledMissions();
         }
 
@@ -77,35 +77,23 @@ namespace Api.EventHandlers
 
         private async void UpdateUpcomingScheduledMissions()
         {
-            _upcomingScheduledMissions = await _scheduledMissionService.GetScheduledMissionsByStatus(ScheduledMissionStatus.Pending);
+            _upcomingScheduledMissions = await _scheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending);
         }
 
         private async Task<bool> StartScheduledMission(ScheduledMission scheduledMission)
         {
-            var robot = await _robotService.ReadById(scheduledMission.Robot.Id);
-            if (robot is null)
-            {
-                _logger.LogWarning("Could not find robot {id}", scheduledMission.Robot.Id);
-                return false;
-            }
-            if (robot.Status is not RobotStatus.Available)
-            {
-                _logger.LogWarning("Robot {id} is not available", scheduledMission.Robot.Id);
-                return false;
-            }
-            if (robot.Enabled is false)
-            {
-                _logger.LogError("Robot with name {name} is not enabled. Could not start mission.", scheduledMission.Robot.Name);
-                return false;
-            }
             try
             {
-                var report = await _isarService.StartMission(robot: scheduledMission.Robot, echoMissionId: scheduledMission.EchoMissionId);
-                _logger.LogInformation("Started mission {id}", scheduledMission.Id);
+                var result = await _robotController.StartMission(scheduledMission.Robot.Id, scheduledMission.EchoMissionId);
+                if (result.Result is not OkObjectResult)
+                {
+                    throw new MissionException(result?.Result?.ToString() ?? "Unknown error from robot controller");
+                }
+                _logger.LogInformation("Started mission '{id}'", scheduledMission.Id);
             }
             catch (MissionException e)
             {
-                _logger.LogError(e, "Failed to start mission {id}", scheduledMission.Id);
+                _logger.LogError(e, "Failed to start mission '{id}'", scheduledMission.Id);
                 return false;
             }
             scheduledMission.Status = ScheduledMissionStatus.Ongoing;

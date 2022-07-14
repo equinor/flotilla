@@ -194,6 +194,12 @@ public class RobotController : ControllerBase
             return NotFound("Robot not found");
         }
 
+        if (robot.Status is not RobotStatus.Available)
+        {
+            _logger.LogWarning("Robot '{id}' is not available ({status})", missionId, robot.Status.ToString());
+            return Conflict($"The Robot is not available ({robot.Status})");
+        }
+
         EchoMission? echoMission;
         try
         {
@@ -219,7 +225,6 @@ public class RobotController : ControllerBase
         try
         {
             var report = await _isarService.StartMission(robot, new IsarMissionDefinition(echoMission));
-            var report = await _isarService.StartMission(robot, echoMissionId);
             robot.Status = RobotStatus.Busy;
             await _robotService.Update(robot);
             return Ok(report);
@@ -261,7 +266,7 @@ public class RobotController : ControllerBase
             int statusCode = (int)response.StatusCode;
 
             // If error is caused by user (400 codes), let them know
-            if (400 <= statusCode && statusCode < 500)
+            if (statusCode is >= 400 and < 500)
                 return new StatusCodeResult(statusCode);
 
             return new StatusCodeResult(StatusCodes.Status502BadGateway);
