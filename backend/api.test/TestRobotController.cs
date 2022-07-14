@@ -3,7 +3,6 @@ using Api.Controllers;
 using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -20,8 +19,6 @@ namespace Api.Test
             // Using Moq https://github.com/moq/moq4
             var isarLogger = new Mock<ILogger<IsarService>>();
             var reportServiceLogger = new Mock<ILogger<ReportService>>();
-
-            var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
             var context = fixture.Context;
 
