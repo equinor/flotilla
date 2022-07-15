@@ -10,7 +10,7 @@ namespace Api.EventHandlers
     /// <summary>
     /// A background service which listens to events and performs callback functions.
     /// </summary>
-    public class MqttEventHandler : BackgroundService
+    public class MqttEventHandler : EventHandlerBase
     {
         private readonly ILogger<MqttEventHandler> _logger;
         private readonly IReportService _reportService;
@@ -31,11 +31,26 @@ namespace Api.EventHandlers
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<IScheduledMissionService>();
 
+            Subscribe();
+        }
+
+
+        public override void Subscribe()
+        {
             MqttService.MqttIsarConnectReceived += OnIsarConnect;
             MqttService.MqttIsarMissionReceived += OnMissionUpdate;
             MqttService.MqttIsarTaskReceived += OnTaskUpdate;
             MqttService.MqttIsarStepReceived += OnStepUpdate;
             MqttService.MqttIsarBatteryReceived += OnBatteryUpdate;
+        }
+
+        public override void Unsubscribe()
+        {
+            MqttService.MqttIsarConnectReceived -= OnIsarConnect;
+            MqttService.MqttIsarMissionReceived -= OnMissionUpdate;
+            MqttService.MqttIsarTaskReceived -= OnTaskUpdate;
+            MqttService.MqttIsarStepReceived -= OnStepUpdate;
+            MqttService.MqttIsarBatteryReceived -= OnBatteryUpdate;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

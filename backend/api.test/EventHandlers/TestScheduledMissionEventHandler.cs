@@ -99,6 +99,7 @@ namespace Api.Test.EventHandlers
         public void Dispose()
         {
             _context.Dispose();
+            _scheduledMissionEventHandler.Dispose();
             GC.SuppressFinalize(this);
         }
         [Fact]
