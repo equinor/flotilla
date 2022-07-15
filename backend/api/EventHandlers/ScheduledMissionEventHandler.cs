@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.EventHandlers
 {
-    public class ScheduledMissionEventHandler : BackgroundService
+    public class ScheduledMissionEventHandler : EventHandlerBase
     {
         private readonly ILogger<ScheduledMissionEventHandler> _logger;
         private readonly int _timeDelay;
@@ -19,9 +19,9 @@ namespace Api.EventHandlers
             IServiceScopeFactory factory
         )
         {
-            _logger = logger;
-            ScheduledMissionService.ScheduledMissionUpdated += OnScheduledMissionUpdated;
+            Subscribe();
 
+            _logger = logger;
             _timeDelay = 1000; // 1 second
             _scheduledMissionService = factory
                 .CreateScope()
@@ -30,6 +30,17 @@ namespace Api.EventHandlers
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<RobotController>();
             UpdateUpcomingScheduledMissions();
+
+        }
+
+        public override void Subscribe()
+        {
+            ScheduledMissionService.ScheduledMissionUpdated += OnScheduledMissionUpdated;
+        }
+
+        public override void Unsubscribe()
+        {
+            ScheduledMissionService.ScheduledMissionUpdated -= OnScheduledMissionUpdated;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
