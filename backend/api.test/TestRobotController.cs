@@ -1,4 +1,5 @@
-﻿using Api.Controllers;
+﻿using System.Collections.Generic;
+using Api.Controllers;
 using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Web;
 using Moq;
-using System.Collections.Generic;
 using Xunit;
 
 namespace Api.Test
@@ -23,7 +23,7 @@ namespace Api.Test
             var reportServiceLogger = new Mock<ILogger<ReportService>>();
             var echoDownstreamApi = new Mock<IDownstreamWebApi>();
 
-            var context = fixture.Context;
+            var context = fixture.NewContext;
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
             var reportService = new ReportService(context, reportServiceLogger.Object);

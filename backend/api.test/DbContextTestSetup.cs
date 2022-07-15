@@ -9,27 +9,42 @@ namespace Api.Test
     // Class for building and disposing dbcontext
     public class DatabaseFixture : IDisposable
     {
-        public FlotillaDbContext Context { get; private set; }
-        private readonly SqliteConnection _connection;
+        public FlotillaDbContext NewContext => CreateContext();
+        private SqliteConnection? _connection;
 
-        public DatabaseFixture()
+        private DbContextOptions<FlotillaDbContext> CreateOptions()
         {
-            var builder = new DbContextOptionsBuilder<FlotillaDbContext>();
+            //if (_connection is null)
+            //{
             string connectionString = new SqliteConnectionStringBuilder { DataSource = ":memory:", Cache = SqliteCacheMode.Shared }.ToString();
             _connection = new SqliteConnection(connectionString);
             _connection.Open();
+            //}
+            var builder = new DbContextOptionsBuilder<FlotillaDbContext>();
             builder.EnableSensitiveDataLogging();
             builder.UseSqlite(_connection);
-            Context = new FlotillaDbContext(builder.Options);
-            Context.Database.EnsureCreated();
-            InitDb.PopulateDb(Context);
+            return builder.Options;
+        }
+
+        public FlotillaDbContext CreateContext()
+        {
+            var options = CreateOptions();
+            var context = new FlotillaDbContext(options);
+            context.Database.EnsureCreated();
+            InitDb.PopulateDb(context);
+            return context;
         }
 
         public void Dispose()
         {
-            _connection.Close();
+            if (_connection != null)
+            {
+                _connection.Dispose();
+                _connection = null;
+            }
             GC.SuppressFinalize(this);
         }
+
     }
 
     [CollectionDefinition("Database collection")]
