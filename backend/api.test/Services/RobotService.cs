@@ -1,25 +1,33 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
 using Xunit;
 
-namespace Api.Test
+namespace Api.Test.Services
 {
     [Collection("Database collection")]
-    public class RobotServiceTest
+    public class RobotServiceTest : IDisposable
     {
-        private readonly DatabaseFixture _fixture;
+        private readonly FlotillaDbContext _context;
 
         public RobotServiceTest(DatabaseFixture fixture)
         {
-            _fixture = fixture;
+            _context = fixture.NewContext;
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         [Fact]
         public async Task ReadAll()
         {
-            var robotService = new RobotService(_fixture.Context);
+            var robotService = new RobotService(_context);
             var robots = await robotService.ReadAll();
 
             Assert.True(robots.Any());
@@ -28,7 +36,7 @@ namespace Api.Test
         [Fact]
         public async Task Read()
         {
-            var robotService = new RobotService(_fixture.Context);
+            var robotService = new RobotService(_context);
             var robots = await robotService.ReadAll();
             var firstRobot = robots.First();
             var robotById = await robotService.ReadById(firstRobot.Id);
@@ -39,7 +47,7 @@ namespace Api.Test
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var robotService = new RobotService(_fixture.Context);
+            var robotService = new RobotService(_context);
             var robot = await robotService.ReadById("some_id_that_does_not_exist");
             Assert.Null(robot);
         }
@@ -47,7 +55,7 @@ namespace Api.Test
         [Fact]
         public async Task Create()
         {
-            var robotService = new RobotService(_fixture.Context);
+            var robotService = new RobotService(_context);
             int nRobotsBefore = robotService.ReadAll().Result.Count();
             var robot = new Robot()
             {

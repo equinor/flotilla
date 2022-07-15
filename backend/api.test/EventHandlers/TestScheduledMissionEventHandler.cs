@@ -18,13 +18,12 @@ using Xunit;
 namespace Api.Test.EventHandlers
 {
     [Collection("Database collection")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "Test class")]
-    public class TestScheduledMissionEventHandler
+    public class TestScheduledMissionEventHandler : IDisposable
     {
         private readonly ScheduledMissionEventHandler _scheduledMissionEventHandler;
         private readonly IScheduledMissionService _scheduledMissionService;
         private readonly RobotControllerMock _robotControllerMock;
-        private readonly DatabaseFixture _fixture;
+        private readonly FlotillaDbContext _context;
 
         private static readonly Robot robot = new()
         {
@@ -65,15 +64,14 @@ namespace Api.Test.EventHandlers
 
         public TestScheduledMissionEventHandler(DatabaseFixture fixture)
         {
-            _fixture = fixture;
             // Using Moq https://github.com/moq/moq4
 
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
             var logger = new Mock<ILogger<ScheduledMissionEventHandler>>().Object;
 
             // Mock ScheduledMissionService:
-            var context = _fixture.Context;
-            _scheduledMissionService = new ScheduledMissionService(context);
+            _context = fixture.NewContext;
+            _scheduledMissionService = new ScheduledMissionService(_context);
             _robotControllerMock = new RobotControllerMock();
 
             var mockServiceProvider = new Mock<IServiceProvider>();
@@ -86,7 +84,7 @@ namespace Api.Test.EventHandlers
                 .Returns(_robotControllerMock.Mock.Object);
             // Mock injection of Database context
             mockServiceProvider.Setup(p => p.GetService(typeof(FlotillaDbContext)))
-                .Returns(context);
+                .Returns(_context);
 
             // Mock service injector
             var mockScope = new Mock<IServiceScope>();
@@ -98,6 +96,11 @@ namespace Api.Test.EventHandlers
             _scheduledMissionEventHandler = new ScheduledMissionEventHandler(logger, mockFactory.Object);
         }
 
+        public void Dispose()
+        {
+            _context.Dispose();
+            GC.SuppressFinalize(this);
+        }
         [Fact]
         public async void ScheduledMissionSetToOngoing()
         {

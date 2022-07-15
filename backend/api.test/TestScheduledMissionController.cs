@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using Api.Controllers;
+﻿using Api.Controllers;
 using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Api.Test
@@ -14,7 +14,7 @@ namespace Api.Test
 
         public TestScheduledMissionController(DatabaseFixture fixture)
         {
-            var context = fixture.Context;
+            var context = fixture.NewContext;
             var scheduledMissionService = new ScheduledMissionService(context);
             var robotService = new RobotService(context);
             _controller = new ScheduledMissionController(
