@@ -55,6 +55,13 @@ export function Header() {
 
 function AssetPicker() {
     const { asset, switchAsset } = useAssetContext();
+    let savedAsset = sessionStorage.getItem('asset');
+    let initialOption = ''
+    if (savedAsset != null) {
+        initialOption = savedAsset
+        switchAsset(savedAsset)
+    }
+
     const options = [
         "Test",
         "Kårstø",
@@ -64,7 +71,7 @@ function AssetPicker() {
         <Autocomplete
             label="Select asset"
             options={options}
-            initialSelectedOptions={[asset]}
+            initialSelectedOptions={[initialOption]}
             onOptionsChange={({ selectedItems }) => {
                 switchAsset(selectedItems[0])
                 console.log(selectedItems[0])
