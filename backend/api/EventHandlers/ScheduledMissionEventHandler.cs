@@ -73,6 +73,8 @@ namespace Api.EventHandlers
                                 "Mission {id} was not started successfully.",
                                 upcomingScheduledMission.Id
                             );
+                            upcomingScheduledMission.Status = ScheduledMissionStatus.Warning;
+                            _scheduledMissionService.Update(upcomingScheduledMission);
                         }
                         ;
                     }
