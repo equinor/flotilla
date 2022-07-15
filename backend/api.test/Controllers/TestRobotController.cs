@@ -9,7 +9,7 @@ using Microsoft.Identity.Web;
 using Moq;
 using Xunit;
 
-namespace Api.Test
+namespace Api.Test.Controllers
 {
     [Collection("Database collection")]
     public class TestRobotController
