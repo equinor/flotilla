@@ -1,7 +1,8 @@
+
 import { useMsal } from '@azure/msal-react'
 import { fetchAccessToken } from 'api/AuthConfig'
 import { Header } from 'components/Header/Header'
-import { createContext, useEffect, useState } from 'react'
+import { createContext, Dispatch, SetStateAction, useContext, useEffect, useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import styled from 'styled-components'
 import { FrontPage } from './FrontPage'
@@ -42,3 +43,13 @@ export function FlotillaSite() {
         </>
     )
 }
+
+
+// export function AssetState() {
+//     return (
+//         <AssetContext.Provider value={{ asset, setAsset }}>
+
+//         </AssetContext.Provider>
+
+//     )
+// }
