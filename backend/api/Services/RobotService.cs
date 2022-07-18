@@ -38,7 +38,7 @@ namespace Api.Services
         {
             return await _context.Robots
                 .Include(r => r.VideoStreams)
-                .FirstOrDefaultAsync(robot => robot.Name.Equals(name, StringComparison.Ordinal));
+                .FirstOrDefaultAsync(robot => robot.Name.Equals(name));
         }
 
         public async Task<Robot> Update(Robot robot)
