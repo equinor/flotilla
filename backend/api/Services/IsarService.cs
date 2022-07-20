@@ -9,7 +9,7 @@ namespace Api.Services
 {
     public interface IIsarService
     {
-        public abstract Task<Report> StartMission(Robot robot, IsarMissionDefinition missionDefinition);
+        public abstract Task<Report> StartMission(Robot robot, int echoMissionId, IsarMissionDefinition missionDefinition);
 
         public abstract Task<HttpResponseMessage> StopMission(Robot robot);
 
@@ -33,7 +33,7 @@ namespace Api.Services
             _reportService = reportService;
         }
 
-        public async Task<Report> StartMission(Robot robot, IsarMissionDefinition missionDefinition)
+        public async Task<Report> StartMission(Robot robot, int echoMissionId, IsarMissionDefinition missionDefinition)
         {
             string uri = $"{robot.IsarUri}/schedule/start-mission";
 
@@ -65,7 +65,7 @@ namespace Api.Services
             {
                 Robot = robot,
                 IsarMissionId = isarMissionResponse?.MissionId,
-                Log = "",
+                EchoMissionId = echoMissionId,
                 ReportStatus = ReportStatus.NotStarted,
                 StartTime = DateTimeOffset.UtcNow,
                 Tasks = tasks,

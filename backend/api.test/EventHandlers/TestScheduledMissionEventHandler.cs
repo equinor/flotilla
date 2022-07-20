@@ -54,7 +54,7 @@ namespace Api.Test.EventHandlers
             Id = "id",
             Robot = Robot,
             IsarMissionId = "isarId",
-            EchoMissionId = "echoId",
+            EchoMissionId = 0,
             Log = "",
             ReportStatus = ReportStatus.InProgress,
             StartTime = DateTimeOffset.Now,
@@ -146,7 +146,7 @@ namespace Api.Test.EventHandlers
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
             _robotControllerMock.RobotServiceMock.Setup(r => r.ReadById(Robot.Id)).Returns(async () => Robot);
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            _robotControllerMock.IsarServiceMock.Setup(i => i.StartMission(Robot, It.IsAny<IsarMissionDefinition>()).Result).Returns(TestReport);
+            _robotControllerMock.IsarServiceMock.Setup(i => i.StartMission(Robot, It.IsAny<int>(), It.IsAny<IsarMissionDefinition>()).Result).Returns(TestReport);
             _robotControllerMock.EchoServiceMock.Setup(i => i.GetMissionById(It.IsAny<int>()).Result).Returns(EchoMission);
 
             AssertExpectedStatusChange(ScheduledMissionStatus.Pending, ScheduledMissionStatus.Ongoing);

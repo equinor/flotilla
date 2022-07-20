@@ -184,7 +184,7 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Report>> StartMission(
         [FromRoute] string robotId,
-        [FromRoute] int missionId
+        [FromRoute] int echoMissionId
     )
     {
         var robot = await _robotService.ReadById(robotId);
@@ -196,20 +196,20 @@ public class RobotController : ControllerBase
 
         if (robot.Status is not RobotStatus.Available)
         {
-            _logger.LogWarning("Robot '{id}' is not available ({status})", missionId, robot.Status.ToString());
+            _logger.LogWarning("Robot '{id}' is not available ({status})", echoMissionId, robot.Status.ToString());
             return Conflict($"The Robot is not available ({robot.Status})");
         }
 
         EchoMission? echoMission;
         try
         {
-            echoMission = await _echoService.GetMissionById(missionId);
+            echoMission = await _echoService.GetMissionById(echoMissionId);
         }
         catch (HttpRequestException e)
         {
             if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
             {
-                _logger.LogWarning("Could not find echo mission with id={id}", missionId);
+                _logger.LogWarning("Could not find echo mission with id={id}", echoMissionId);
                 return NotFound("Echo mission not found");
             }
 
@@ -224,7 +224,7 @@ public class RobotController : ControllerBase
 
         try
         {
-            var report = await _isarService.StartMission(robot, new IsarMissionDefinition(echoMission));
+            var report = await _isarService.StartMission(robot, echoMissionId, new IsarMissionDefinition(echoMission));
             robot.Status = RobotStatus.Busy;
             await _robotService.Update(robot);
             return Ok(report);

@@ -44,7 +44,7 @@ public static class InitDb
     {
         var report1 = new Report
         {
-            EchoMissionId = "1",
+            EchoMissionId = 1,
             IsarMissionId = "1",
             Log = "log",
             ReportStatus = ReportStatus.NotStarted,
