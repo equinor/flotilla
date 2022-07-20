@@ -61,7 +61,7 @@ namespace Api.Test.Services
             int nReportsBefore = _reportService.ReadAll().Result.Count();
             await _reportService.Create(
                 isarMissionId: "",
-                echoMissionId: "",
+                echoMissionId: 0,
                 log: "",
                 status: ReportStatus.InProgress,
                 robot: robot

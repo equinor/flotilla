@@ -10,7 +10,7 @@ namespace Api.Services
 
         public abstract Task<Report> Create(
             string isarMissionId,
-            string echoMissionId,
+            int echoMissionId,
             string log,
             ReportStatus status,
             Robot robot
@@ -57,7 +57,7 @@ namespace Api.Services
 
         public async Task<Report> Create(
             string isarMissionId,
-            string echoMissionId,
+            int echoMissionId,
             string log,
             ReportStatus status,
             Robot robot
