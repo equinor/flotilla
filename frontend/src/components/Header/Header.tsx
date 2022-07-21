@@ -1,6 +1,6 @@
 import { Button, Icon, Search, TopBar, Autocomplete } from '@equinor/eds-core-react'
 import { accessible, account_circle, notifications } from '@equinor/eds-icons'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { assetOptions, useAssetContext } from 'components/Contexts/AssetContext'
 import styled from 'styled-components'
 
 Icon.add({ account_circle, accessible, notifications })
@@ -24,8 +24,6 @@ const StyledTopBarContent = styled(TopBar.CustomContent)`
     align-items: end;
     gap: 0px 3rem;
 `
-
-
 
 export function Header() {
     return (
@@ -54,23 +52,19 @@ export function Header() {
 }
 
 function AssetPicker() {
-    const { asset, switchAsset } = useAssetContext();
-    let savedAsset = sessionStorage.getItem('asset');
+    const { asset, switchAsset } = useAssetContext()
+    let savedAsset = sessionStorage.getItem('assetString')
     let initialOption = ''
     if (savedAsset != null) {
         initialOption = savedAsset
         switchAsset(savedAsset)
     }
 
-    const options = [
-        "Test",
-        "Kårstø",
-        "Johan Sverdrup"
-    ]
+    const options = ['Test', 'Kårstø', 'Johan Sverdrup']
     return (
         <Autocomplete
             label="Select asset"
-            options={options}
+            options={Array.from(assetOptions.keys())}
             initialSelectedOptions={[initialOption]}
             onOptionsChange={({ selectedItems }) => {
                 switchAsset(selectedItems[0])

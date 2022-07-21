@@ -1,31 +1,38 @@
-import { createContext, FC, useContext, useState } from "react";
+import { createContext, FC, useContext, useState } from 'react'
 
 interface IAssetContext {
-    asset: string,
-    switchAsset: (newAsset: string) => void;
+    asset: string
+    switchAsset: (newAsset: string) => void
 }
 
 interface Props {
-    children: React.ReactNode;
+    children: React.ReactNode
 }
 
 const defaultAsset = {
-    asset: 'Test',
-    switchAsset: (newAsset: string) => { }
+    asset: 'test',
+    switchAsset: (newAsset: string) => {},
 }
 
+export const assetOptions = new Map<string, string>([
+    ['Test', 'test'],
+    ['Kårstø', 'kaa'],
+    ['Johan Sverdrup', 'js'],
+])
 
-
-export const AssetContext = createContext<IAssetContext>(defaultAsset);
+export const AssetContext = createContext<IAssetContext>(defaultAsset)
 
 export const AssetProvider: FC<Props> = ({ children }) => {
-    const [asset, setAsset] = useState(defaultAsset.asset);
+    const [asset, setAsset] = useState(defaultAsset.asset)
 
     const switchAsset = (newAsset: string) => {
-        setAsset(newAsset);
-        sessionStorage.setItem('asset', newAsset)
-        console.log('Saved asset: ', sessionStorage.getItem('asset'))
-    };
+        assetOptions.has(newAsset)
+            ? setAsset(assetOptions.get(newAsset)!)
+            : console.log('Could not find asset: ', newAsset)
+
+        sessionStorage.setItem('assetString', newAsset)
+        console.log('Saved asset: ', sessionStorage.getItem('assetString'))
+    }
 
     return (
         <AssetContext.Provider
@@ -36,7 +43,7 @@ export const AssetProvider: FC<Props> = ({ children }) => {
         >
             {children}
         </AssetContext.Provider>
-    );
-};
+    )
+}
 
-export const useAssetContext = () => useContext(AssetContext);
+export const useAssetContext = () => useContext(AssetContext)
