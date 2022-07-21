@@ -12,6 +12,9 @@ namespace Api.Database.Models
         public string Id { get; set; }
 
         [Required]
+        public string AssetCode { get; set; }
+
+        [Required]
         public Robot Robot { get; set; }
 
         [MaxLength(128)]

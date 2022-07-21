@@ -6,11 +6,11 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("reports")]
-public class ReportController : ControllerBase
+public class ReportsController : ControllerBase
 {
     private readonly IReportService _reportService;
 
-    public ReportController(IReportService reportService)
+    public ReportsController(IReportService reportService)
     {
         _reportService = reportService;
     }
@@ -26,9 +26,15 @@ public class ReportController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<Report>>> GetReports()
+    public async Task<ActionResult<IList<Report>>> GetReports([FromQuery] string assetCode)
     {
-        var reports = await _reportService.ReadAll();
+        IList<Report> reports;
+        if (assetCode != null)
+            reports = await _reportService.ReadAll(assetCode);
+        else
+            reports = await _reportService.ReadAll();
+        if (reports == null)
+            return NotFound($"Could not find any reports with assetCode {assetCode}");
         return Ok(reports);
     }
 

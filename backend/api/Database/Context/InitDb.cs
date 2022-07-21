@@ -44,6 +44,7 @@ public static class InitDb
     {
         var report1 = new Report
         {
+            AssetCode = "test",
             EchoMissionId = 1,
             IsarMissionId = "1",
             Log = "log",
