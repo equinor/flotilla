@@ -1,7 +1,7 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
 import { check_circle_outlined, error_outlined, time, warning_outlined } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
-import { MissionStatus } from 'models/mission'
+import { MissionStatus } from 'models/Mission'
 import styled from 'styled-components'
 
 Icon.add({ check_circle_outlined, error_outlined, warning_outlined, time })

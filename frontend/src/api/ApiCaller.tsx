@@ -1,7 +1,7 @@
 import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
-import { Mission } from 'models/mission'
-import { Robot } from 'models/robot'
+import { Mission } from 'models/Mission'
+import { Robot } from 'models/Robot'
 import { useContext, useEffect, useRef } from 'react'
 
 export class BackendAPICaller {

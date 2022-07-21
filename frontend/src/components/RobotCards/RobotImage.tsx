@@ -1,4 +1,4 @@
-import { RobotType } from 'models/robot'
+import { RobotType } from 'models/Robot'
 import taurobInspector from 'mediaAssets/taurob_inspector.jpg'
 import exRobotics from 'mediaAssets/ExRobotics.webp'
 import turtleBot from 'mediaAssets/turtlebot.webp'

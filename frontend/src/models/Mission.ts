@@ -1,4 +1,4 @@
-import { Robot } from './robot'
+import { Robot } from './Robot'
 
 export enum MissionStatus {
     Pending = 'Pending',

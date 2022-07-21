@@ -1,7 +1,7 @@
 import { Button, Card, Checkbox, Icon, Typography } from '@equinor/eds-core-react'
 import { more_vertical } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
-import { Mission } from 'models/mission'
+import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 interface MissionProps {
     mission: Mission

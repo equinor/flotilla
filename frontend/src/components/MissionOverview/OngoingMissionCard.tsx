@@ -1,6 +1,6 @@
 import { Card, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { Mission } from 'models/mission'
+import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { MissionProgressDisplay } from './MissionTagDisplay'
 import { MissionStatusDisplay } from './MissionStatusDisplay'

@@ -1,4 +1,4 @@
-import { Battery, BatteryStatus } from 'models/battery'
+import { Battery, BatteryStatus } from 'models/Battery'
 import { battery, battery_charging, battery_alert, battery_unknown } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
 

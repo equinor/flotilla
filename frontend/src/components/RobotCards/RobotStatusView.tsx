@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useApi, useInterval } from 'api/ApiCaller'
-import { Robot } from 'models/robot'
+import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
