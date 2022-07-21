@@ -73,6 +73,14 @@ export class BackendAPICaller {
         })
         return result
     }
+
+    async getReports(asset: string): Promise<Report[]> {
+        const path: string = 'reports?assetCode=' + asset
+        const result = await this.GET<Report[]>(path).catch((e) => {
+            throw new Error(`Failed to GET /${path}: ` + e)
+        })
+        return result.body
+    }
 }
 
 export const useApi = () => {
