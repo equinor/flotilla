@@ -61,7 +61,6 @@ namespace Api.Mqtt
                     o =>
                     {
                         o.UseTls = true;
-                        o.CertificateValidationHandler = CustomCertificateHandler;
                         if (_isDevelopment)
                             o.IgnoreCertificateChainErrors = true;
                     }
