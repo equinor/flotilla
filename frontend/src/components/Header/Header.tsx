@@ -52,8 +52,8 @@ export function Header() {
 }
 
 function AssetPicker() {
-    const { asset, switchAsset } = useAssetContext()
-    let savedAsset = sessionStorage.getItem('assetString')
+    const { asset, switchAsset } = useAssetContext();
+    let savedAsset = sessionStorage.getItem('assetString');
     let initialOption = ''
     if (savedAsset != null) {
         initialOption = savedAsset
