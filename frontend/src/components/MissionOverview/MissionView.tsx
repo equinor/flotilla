@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { MissionCard } from './MissionCard'
 import { useApi, useInterval } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
-import { Mission } from 'models/mission'
+import { Mission } from 'models/Mission'
 import { NoUpcomingMissionsPlaceholder } from './NoMissionPlaceholder'
 
 const StyledMissionView = styled.div`

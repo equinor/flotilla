@@ -1,8 +1,8 @@
-import { Table, Typography } from '@equinor/eds-core-react'
-import { Mission } from 'models/mission'
-import styled from 'styled-components'
-import { useContext } from 'react'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { Table, Typography } from "@equinor/eds-core-react";
+import { Mission } from "models/Mission";
+import styled from "styled-components";
+import { useContext } from "react";
+import { useAssetContext } from "components/Contexts/AssetContext";
 
 const StyledTable = styled(Table)`
     grid-column: 1/ -1;

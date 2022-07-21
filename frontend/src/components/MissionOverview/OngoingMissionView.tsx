@@ -1,5 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
-import { Mission } from 'models/mission'
+import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'

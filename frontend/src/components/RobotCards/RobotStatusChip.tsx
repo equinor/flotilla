@@ -1,5 +1,5 @@
 import { Chip } from '@equinor/eds-core-react'
-import { RobotStatus } from 'models/robot'
+import { RobotStatus } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 
 interface StatusProps {

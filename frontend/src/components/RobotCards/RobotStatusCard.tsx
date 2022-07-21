@@ -1,12 +1,12 @@
 import { Card, Typography } from '@equinor/eds-core-react'
-import { Robot, RobotStatus, RobotType } from 'models/robot'
+import { Robot, RobotStatus, RobotType } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from './RobotStatusChip'
 import BatteryStatusView from './BatteryStatusView'
 import styled from 'styled-components'
 import { RobotImage } from './RobotImage'
 import { useNavigate } from 'react-router-dom'
-import { BatteryStatus } from 'models/battery'
+import { BatteryStatus } from 'models/Battery'
 
 interface RobotProps {
     robot: Robot

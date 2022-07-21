@@ -1,5 +1,5 @@
-import { BatteryStatus } from './battery'
-import { Pose } from './pose'
+import { BatteryStatus } from './Battery'
+import { Pose } from './Pose'
 import { VideoStream } from './VideoStream'
 
 export enum RobotStatus {
