@@ -63,8 +63,8 @@ public static class InitDb
         {
             Robot = Robots[0],
             EchoMissionId = 2,
-            StartTime = DateTimeOffset.UtcNow.AddMinutes(1),
-            EndTime = DateTimeOffset.UtcNow.AddMinutes(5),
+            StartTime = DateTimeOffset.UtcNow.AddHours(8),
+            EndTime = DateTimeOffset.UtcNow.AddHours(9),
             Status = ScheduledMissionStatus.Pending
         };
 
@@ -72,8 +72,8 @@ public static class InitDb
         {
             Robot = Robots[1],
             EchoMissionId = 2,
-            StartTime = DateTimeOffset.UtcNow.AddMinutes(2),
-            EndTime = DateTimeOffset.UtcNow.AddMinutes(5),
+            StartTime = DateTimeOffset.UtcNow.AddHours(8),
+            EndTime = DateTimeOffset.UtcNow.AddHours(9),
             Status = ScheduledMissionStatus.Pending
         };
 
