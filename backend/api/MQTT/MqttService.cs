@@ -17,6 +17,7 @@ namespace Api.Mqtt
         public static event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarStepReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarBatteryReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
 
         private readonly ILogger<MqttService> _logger;
 
@@ -57,14 +58,14 @@ namespace Api.Mqtt
 
             var builder = new MqttClientOptionsBuilder()
                 .WithTcpServer(_serverHost, _serverPort)
-                .WithTls(
-                    o =>
-                    {
-                        o.UseTls = true;
-                        if (_isDevelopment)
-                            o.IgnoreCertificateChainErrors = true;
-                    }
-                )
+                // .WithTls(
+                //     o =>
+                //     {
+                //         o.UseTls = true;
+                //         if (_isDevelopment)
+                //             o.IgnoreCertificateChainErrors = true;
+                //     }
+                // )
                 .WithCredentials(username, password);
 
             _options = new ManagedMqttClientOptionsBuilder()
@@ -126,6 +127,9 @@ namespace Api.Mqtt
                     break;
                 case Type type when type == typeof(IsarBatteryMessage):
                     OnIsarTopicReceived<IsarBatteryMessage>(content);
+                    break;
+                case Type type when type == typeof(IsarPoseMessage):
+                    OnIsarTopicReceived<IsarPoseMessage>(content);
                     break;
                 default:
                     _logger.LogWarning(
@@ -254,6 +258,7 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarTaskMessage) => MqttIsarTaskReceived,
                     _ when type == typeof(IsarStepMessage) => MqttIsarStepReceived,
                     _ when type == typeof(IsarBatteryMessage) => MqttIsarBatteryReceived,
+                    _ when type == typeof(IsarPoseMessage) => MqttIsarPoseReceived,
                     _
                       => throw new NotImplementedException(
                           $"No event defined for message type '{typeof(T).Name}'"

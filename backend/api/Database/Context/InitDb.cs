@@ -34,7 +34,7 @@ public static class InitDb
             Enabled = false,
             Host = "localhost",
             Logs = "logs",
-            Port = 3000
+            Port = 3000,
         };
 
         return new List<Robot>(new Robot[] { robot1, robot2 });
@@ -50,7 +50,7 @@ public static class InitDb
             Log = "log",
             ReportStatus = ReportStatus.NotStarted,
             Robot = Robots[0],
-            StartTime = DateTimeOffset.UtcNow
+            StartTime = DateTimeOffset.UtcNow,
         };
         return new List<Report>(
             new Report[] { report1 }

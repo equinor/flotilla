@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 # nullable disable
@@ -41,6 +42,9 @@ namespace Api.Database.Models
         [Required]
         public RobotStatus Status { get; set; }
 
+        [Required]
+        public virtual Pose Pose { get; set; }
+
         public string IsarUri
         {
             get
@@ -51,8 +55,19 @@ namespace Api.Database.Models
                 return $"http://{host}:{Port}";
             }
         }
+        public Robot()
+        {
+            this.Name = "defaultId";
+            this.Model = "defaultModel";
+            SerialNumber = "defaultSerialNumber";
+            Status = RobotStatus.Busy;
+            Enabled = false;
+            Host = "localhost";
+            Logs = "logs";
+            Port = 3000;
+            Pose = new Pose();
+        }
     }
-
     public enum RobotStatus
     {
         Available,
@@ -60,3 +75,4 @@ namespace Api.Database.Models
         Offline
     }
 }
+

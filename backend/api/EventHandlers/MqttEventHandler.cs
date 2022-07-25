@@ -42,6 +42,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarTaskReceived += OnTaskUpdate;
             MqttService.MqttIsarStepReceived += OnStepUpdate;
             MqttService.MqttIsarBatteryReceived += OnBatteryUpdate;
+            MqttService.MqttIsarPoseReceived += OnPoseUpdate;
         }
 
         public override void Unsubscribe()
@@ -51,6 +52,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarTaskReceived -= OnTaskUpdate;
             MqttService.MqttIsarStepReceived -= OnStepUpdate;
             MqttService.MqttIsarBatteryReceived -= OnBatteryUpdate;
+            MqttService.MqttIsarPoseReceived -= OnPoseUpdate;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -243,6 +245,26 @@ namespace Api.EventHandlers
                 robot.BatteryLevel = batteryStatus.BatteryLevel;
                 await _robotService.Update(robot);
                 _logger.LogInformation("Updated battery on robot {name} ", robot.Name);
+            }
+        }
+
+        private async void OnPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var poseStatus = (IsarPoseMessage)mqttArgs.Message;
+            var robot = await _robotService.ReadByName(poseStatus.RobotId);
+            if (robot == null)
+            {
+                _logger.LogWarning(
+                    "Could not find corresponding robot for pose update with ID {id} ",
+                    poseStatus.RobotId
+                );
+            }
+            else
+            {
+                robot.Pose = poseStatus.Pose;
+                await _robotService.Update(robot);
+                _logger.LogInformation("Updated pose on robot {name} ", robot.Name);
+                _logger.LogInformation("Pose:  ", poseStatus.Pose);
             }
         }
     }
