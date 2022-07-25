@@ -43,12 +43,12 @@ namespace Api.Mqtt
             var mqttFactory = new MqttFactory();
             _mqttClient = mqttFactory.CreateManagedMqttClient();
 
-            string password = config.GetValue<string>("mqtt-broker-password");
             _isDevelopment = (
                 config.GetValue<string?>("ASPNETCORE_ENVIRONMENT") ?? "Production"
             ).Equals("Development", StringComparison.OrdinalIgnoreCase);
 
             var mqttConfig = config.GetSection("Mqtt");
+            string password = mqttConfig.GetValue<string>("Password");
             string username = mqttConfig.GetValue<string>("Username");
             _serverHost = mqttConfig.GetValue<string>("Host");
             _serverPort = mqttConfig.GetValue<int>("Port");
