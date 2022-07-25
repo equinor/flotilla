@@ -58,7 +58,7 @@ namespace Api.Test.Services
         public async Task Create()
         {
             var robot = _context.Robots.First();
-            int nReportsBefore = _reportService.ReadAll().Result.Count();
+            int nReportsBefore = _reportService.ReadAll().Result.Count;
             await _reportService.Create(
                 isarMissionId: "",
                 echoMissionId: 0,
@@ -66,7 +66,7 @@ namespace Api.Test.Services
                 status: ReportStatus.InProgress,
                 robot: robot
             );
-            int nReportsAfter = _reportService.ReadAll().Result.Count();
+            int nReportsAfter = _reportService.ReadAll().Result.Count;
 
             Assert.Equal(nReportsBefore + 1, nReportsAfter);
         }
