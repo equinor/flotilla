@@ -11,7 +11,6 @@ namespace Api.Database.Models
         [Required]
         public string Id { get; set; }
 
-        [Required]
         public string AssetCode { get; set; }
 
         [Required]

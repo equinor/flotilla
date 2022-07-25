@@ -34,7 +34,7 @@ public class ReportsController : ControllerBase
         else
             reports = await _reportService.ReadAll();
         if (reports == null)
-            return NotFound($"Could not find any reports with assetCode {assetCode}");
+            return NotFound($"Could not find any reports matching the query");
         return Ok(reports);
     }
 

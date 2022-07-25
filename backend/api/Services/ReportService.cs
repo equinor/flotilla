@@ -17,6 +17,7 @@ namespace Api.Services
         );
 
         public abstract Task<IList<Report>> ReadAll();
+
         public abstract Task<IList<Report>> ReadAll(string assetCode);
 
         public abstract Task<Report?> Read(string id);
@@ -87,15 +88,6 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task<Report?> Read(string id)
-        {
-            return await _context.Reports
-                .Include(r => r.Robot)
-                .Include(report => report.Tasks)
-                .ThenInclude(task => task.Steps)
-                .FirstOrDefaultAsync(report => report.Id.Equals(id));
-        }
-
         public async Task<IList<Report>> ReadAll(string assetCode)
         {
             return await _context.Reports
@@ -103,6 +95,15 @@ namespace Api.Services
                 .Include(report => report.Tasks)
                 .ThenInclude(task => task.Steps)
                 .Where(report => report.AssetCode.Equals(assetCode)).ToListAsync();
+        }
+
+        public async Task<Report?> Read(string id)
+        {
+            return await _context.Reports
+                .Include(r => r.Robot)
+                .Include(report => report.Tasks)
+                .ThenInclude(task => task.Steps)
+                .FirstOrDefaultAsync(report => report.Id.Equals(id));
         }
 
         public async Task<Report?> ReadByIsarMissionId(string isarMissionId)

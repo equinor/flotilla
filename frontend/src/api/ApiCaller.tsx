@@ -1,6 +1,7 @@
 import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
 import { Mission } from 'models/Mission'
+import { Report } from 'models/Report'
 import { Robot } from 'models/Robot'
 import { useContext, useEffect, useRef } from 'react'
 

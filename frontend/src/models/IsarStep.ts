@@ -1,38 +1,38 @@
-import { IsarTask } from "./IsarTask"
+import { IsarTask } from './IsarTask'
 
 export interface IsarStep {
     id: string
-    IsarStepId: string 
-    Task: IsarTask 
-    TagId: string 
-    StepStatus: IsarStepStatus 
-    StepType: StepTypeEnum 
-    InspectionType: InspectionTypeEnum 
-    Time: Date 
-    FileLocation: string 
+    IsarStepId: string
+    Task: IsarTask
+    TagId: string
+    StepStatus: IsarStepStatus
+    StepType: StepTypeEnum
+    InspectionType: InspectionTypeEnum
+    Time: Date
+    FileLocation: string
 }
 
-enum IsarStepStatus{
+enum IsarStepStatus {
     Successful,
     InProgress,
     NotStarted,
     Failed,
-    Cancelled
+    Cancelled,
 }
 
-enum StepTypeEnum{
+enum StepTypeEnum {
     DriveToPose,
     TakeImage,
     TakeVideo,
     TakeThermalImage,
     TakeThermalVideo,
-    RecordAudio
+    RecordAudio,
 }
 
-enum InspectionTypeEnum{
+enum InspectionTypeEnum {
     Image,
     ThermalImage,
     Video,
     ThermalVideo,
-    Audio
+    Audio,
 }

@@ -4,6 +4,7 @@ import { OngoingMissionView } from 'components/MissionOverview/OngoingMissionVie
 import { RobotStatusSection } from 'components/RobotCards/RobotStatusView'
 import { useApi } from 'api/ApiCaller'
 import styled from 'styled-components'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledFrontPage = styled.div`
     display: grid;
@@ -13,6 +14,7 @@ const StyledFrontPage = styled.div`
 
 export function FrontPage() {
     const apiCaller = useApi()
+    const { asset, switchAsset } = useAssetContext()
     return (
         <StyledFrontPage>
             <OngoingMissionView />
@@ -22,8 +24,8 @@ export function FrontPage() {
                 <Button
                     variant="contained"
                     onClick={() => {
-                        apiCaller.getRobots().then((robots) => {
-                            console.log(robots)
+                        apiCaller.getReports(asset).then((reports) => {
+                            console.log(reports)
                         })
                     }}
                 >
