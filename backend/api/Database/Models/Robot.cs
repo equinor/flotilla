@@ -42,7 +42,6 @@ namespace Api.Database.Models
         [Required]
         public RobotStatus Status { get; set; }
 
-        [Required]
         public virtual Pose Pose { get; set; }
 
         public string IsarUri

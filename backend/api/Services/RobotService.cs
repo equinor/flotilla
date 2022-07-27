@@ -24,6 +24,19 @@ namespace Api.Services
             _context = context;
         }
 
+        private Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Api.Database.Models.Robot, Api.Database.Models.Pose> getRobotObject()
+        {
+            return _context.Robots
+                .Include(r => r.VideoStreams)
+                .Include(r => r.Pose)
+                .Include(r => r.Pose.Frame)
+                .Include(r => r.Pose.Orientation)
+                .Include(r => r.Pose.Orientation.Frame)
+                .Include(r => r.Pose.Position)
+                .Include(r => r.Pose.Position.Frame)
+                .Include(r => r.Pose);
+        }
+
         public async Task<Robot> Create(Robot newRobot)
         {
             await _context.Robots.AddAsync(newRobot);
@@ -33,21 +46,17 @@ namespace Api.Services
 
         public async Task<IEnumerable<Robot>> ReadAll()
         {
-            return await _context.Robots.Include(r => r.VideoStreams).ToListAsync();
+            return await getRobotObject().ToListAsync();
         }
 
         public async Task<Robot?> ReadById(string id)
         {
-            return await _context.Robots
-                .Include(r => r.VideoStreams)
-                .FirstOrDefaultAsync(robot => robot.Id.Equals(id));
+            return await getRobotObject().FirstOrDefaultAsync(robot => robot.Id.Equals(id));
         }
 
         public async Task<Robot?> ReadByName(string name)
         {
-            return await _context.Robots
-                .Include(r => r.VideoStreams)
-                .FirstOrDefaultAsync(robot => robot.Name.Equals(name));
+            return await getRobotObject().FirstOrDefaultAsync(robot => robot.Name.Equals(name));
         }
 
         public async Task<Robot> Update(Robot robot)

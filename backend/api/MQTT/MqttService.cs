@@ -58,14 +58,14 @@ namespace Api.Mqtt
 
             var builder = new MqttClientOptionsBuilder()
                 .WithTcpServer(_serverHost, _serverPort)
-                // .WithTls(
-                //     o =>
-                //     {
-                //         o.UseTls = true;
-                //         if (_isDevelopment)
-                //             o.IgnoreCertificateChainErrors = true;
-                //     }
-                // )
+                .WithTls(
+                    o =>
+                    {
+                        o.UseTls = true;
+                        if (_isDevelopment)
+                            o.IgnoreCertificateChainErrors = true;
+                    }
+                )
                 .WithCredentials(username, password);
 
             _options = new ManagedMqttClientOptionsBuilder()
