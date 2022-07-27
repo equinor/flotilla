@@ -11,6 +11,10 @@ public class FlotillaDbContext : DbContext
     public DbSet<IsarStep> Steps => Set<IsarStep>();
     public DbSet<ScheduledMission> ScheduledMissions => Set<ScheduledMission>();
     public DbSet<VideoStream> VideoStreams => Set<VideoStream>();
+    public DbSet<Pose> Poses => Set<Pose>();
+    public DbSet<Frame> Frames => Set<Frame>();
+    public DbSet<Position> Positions => Set<Position>();
+    public DbSet<Orientation> Orientations => Set<Orientation>();
 
     public FlotillaDbContext(DbContextOptions options) : base(options)
     { }

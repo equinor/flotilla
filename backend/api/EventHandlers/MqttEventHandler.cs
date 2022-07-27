@@ -261,10 +261,9 @@ namespace Api.EventHandlers
             }
             else
             {
-                robot.Pose = poseStatus.Pose;
+                robot.Pose.Position.X = poseStatus.Pose.position.x;
                 await _robotService.Update(robot);
                 _logger.LogInformation("Updated pose on robot {name} ", robot.Name);
-                _logger.LogInformation("Pose:  ", poseStatus.Pose);
             }
         }
     }
