@@ -1,7 +1,20 @@
 # Flotilla
 
+![Backend](https://github.com/equinor/flotilla/actions/workflows/backend_lint_and_test.yml/badge.svg)
+![Frontend](https://github.com/equinor/flotilla/actions/workflows/frontend_lint_and_test.yml/badge.svg)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0b37a44f66044dbc81fff906344b476e)](https://www.codacy.com/gh/equinor/flotilla/dashboard?utm_source=github.com&utm_medium=referral&utm_content=equinor/flotilla&utm_campaign=Badge_Grade)
+
 Flotilla is the main point of access for operators to interact with multiple robots in a facility. The application
 consists of a [frontend](frontend) in React, a [backend](backend) in ASP.NET and a Mosquitto MQTT [Broker](broker).
+
+## Deployments
+
+We currently have 1 environment (Dev) deployed to Radix for demo purposes.
+
+| Environment | Deployment                                                                                                                                              | Status                                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Dev         | [Frontend](https://frontend-flotilla-dev.playground.radix.equinor.com/)<br>[Backend](https://backend-flotilla-dev.playground.radix.equinor.com/swagger) | ![Dev](https://api.playground.radix.equinor.com/api/v1/applications/flotilla/environments/dev/buildstatus) |
+|             |
 
 ## Setup
 
