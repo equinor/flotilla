@@ -1,0 +1,35 @@
+apiVersion: radix.equinor.com/v1
+kind: RadixApplication
+metadata:
+  name: myapp
+spec:
+  build:
+    secrets:
+      - TLS_SERVER_KEY
+  environments:
+    - name: dev
+      build:
+        from: main
+  components:
+    - name: frontend
+      src: frontend
+      ports:
+        - name: http
+          port: 3001
+    - name: backend
+      src: backend
+      ports:
+        - name: http
+          port: 8000
+      environmentConfig:
+        - environment: dev
+          variables:
+            Mqtt__Host: "broker"
+            ASPNETCORE_ENVIRONMENT: "Development"
+      secrets:
+        - AZURE_CLIENT_SECRET
+    - name: broker
+      src: broker
+      ports:
+        - name: http
+          port: 1883
