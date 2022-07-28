@@ -91,7 +91,7 @@ public static class InitDb
         {
             var videoStream = new VideoStream() { Name = "test", Url = "urlTest" };
             robot.VideoStreams = new List<VideoStream>() { videoStream, streamExample };
-            robot.Pose = new Pose() {};
+            robot.Pose = new Pose() { };
         }
         context.AddRange(Robots);
         context.AddRange(ScheduledMissions);

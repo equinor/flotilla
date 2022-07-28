@@ -34,7 +34,6 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
-
         public override void Subscribe()
         {
             MqttService.MqttIsarConnectReceived += OnIsarConnect;
@@ -87,8 +86,6 @@ namespace Api.EventHandlers
                     isarRobot.Port
                 );
             }
-
-
         }
 
         private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
@@ -137,7 +134,6 @@ namespace Api.EventHandlers
                     mission.MissionId,
                     mission.RobotId
                 );
-
             }
             else if (mission.Status.Equals("completed", StringComparison.OrdinalIgnoreCase))
             {
@@ -149,7 +145,9 @@ namespace Api.EventHandlers
                     mission.RobotId
                 );
 
-                var scheduledMissions = await _scheduledMissionService.ReadByStatus(ScheduledMissionStatus.Ongoing);
+                var scheduledMissions = await _scheduledMissionService.ReadByStatus(
+                    ScheduledMissionStatus.Ongoing
+                );
                 if (scheduledMissions is not null)
                 {
                     foreach (var sm in scheduledMissions)
@@ -160,10 +158,10 @@ namespace Api.EventHandlers
                             _logger.LogInformation(
                                 "Mission with ISAR mission id {id} is completed by the robot {name}. Matching scheduledMission with id {id} is deleted.",
                                 mission.MissionId,
-                                mission.RobotId, sm.Id
+                                mission.RobotId,
+                                sm.Id
                             );
                         }
-
                     }
                 }
             }
@@ -261,7 +259,7 @@ namespace Api.EventHandlers
             }
             else
             {
-                robot.Pose.Position.X = poseStatus.Pose.position.x;
+                poseStatus.Pose.CopyIsarPoseToRobotPose(robot.Pose);
                 await _robotService.Update(robot);
                 _logger.LogInformation("Updated pose on robot {name} ", robot.Name);
             }

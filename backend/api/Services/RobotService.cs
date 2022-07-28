@@ -13,8 +13,11 @@ namespace Api.Services
         public abstract Task<Robot> Update(Robot robot);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1309:Use ordinal StringComparison",
-    Justification = "EF Core refrains from translating string comparison overloads to SQL")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Globalization",
+        "CA1309:Use ordinal StringComparison",
+        Justification = "EF Core refrains from translating string comparison overloads to SQL"
+    )]
     public class RobotService : IRobotService
     {
         private readonly FlotillaDbContext _context;
@@ -24,17 +27,14 @@ namespace Api.Services
             _context = context;
         }
 
-        private Microsoft.EntityFrameworkCore.Query.IIncludableQueryable<Api.Database.Models.Robot, Api.Database.Models.Pose> getRobotObject()
+        private IQueryable<Robot> GetRobotsWithSubModels()
         {
             return _context.Robots
                 .Include(r => r.VideoStreams)
                 .Include(r => r.Pose)
-                .Include(r => r.Pose.Frame)
-                .Include(r => r.Pose.Orientation)
-                .Include(r => r.Pose.Orientation.Frame)
-                .Include(r => r.Pose.Position)
-                .Include(r => r.Pose.Position.Frame)
-                .Include(r => r.Pose);
+                .ThenInclude(p => p.Orientation)
+                .Include(r => r.Pose)
+                .ThenInclude(p => p.Position);
         }
 
         public async Task<Robot> Create(Robot newRobot)
@@ -46,17 +46,18 @@ namespace Api.Services
 
         public async Task<IEnumerable<Robot>> ReadAll()
         {
-            return await getRobotObject().ToListAsync();
+            return await GetRobotsWithSubModels().ToListAsync();
         }
 
         public async Task<Robot?> ReadById(string id)
         {
-            return await getRobotObject().FirstOrDefaultAsync(robot => robot.Id.Equals(id));
+            return await GetRobotsWithSubModels().FirstOrDefaultAsync(robot => robot.Id.Equals(id));
         }
 
         public async Task<Robot?> ReadByName(string name)
         {
-            return await getRobotObject().FirstOrDefaultAsync(robot => robot.Name.Equals(name));
+            return await GetRobotsWithSubModels()
+                .FirstOrDefaultAsync(robot => robot.Name.Equals(name));
         }
 
         public async Task<Robot> Update(Robot robot)

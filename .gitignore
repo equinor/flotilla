@@ -14,3 +14,7 @@ frontend/build/
 # Backend
 backend/*/bin
 backend/*/obj
+
+#Broker
+broker/mosquitto/config/certs/server-key.pem
+*.DS_Store
