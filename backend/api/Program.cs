@@ -87,10 +87,12 @@ if (app.Environment.IsDevelopment())
         }
     );
 }
+
 app.UseCors(
     corsBuilder =>
         corsBuilder
-            .WithOrigins(builder.Configuration.GetValue<string>("AllowedOrigins"))
+            .WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>())
+            .SetIsOriginAllowedToAllowWildcardSubdomains()
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()
