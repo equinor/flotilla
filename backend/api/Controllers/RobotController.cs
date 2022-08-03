@@ -214,26 +214,46 @@ public class RobotController : ControllerBase
             }
 
             _logger.LogError(e, "Error getting mission from Echo");
-            return new StatusCodeResult(StatusCodes.Status502BadGateway);
+            return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
         }
         catch (JsonException e)
         {
-            _logger.LogError(e, "Error deserializing mission from Echo");
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            string message = "Error deserializing mission from Echo";
+            _logger.LogError(e, "{message}", message);
+            return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 
+        Report report;
         try
         {
-            var report = await _isarService.StartMission(robot, echoMissionId, new IsarMissionDefinition(echoMission));
-            robot.Status = RobotStatus.Busy;
-            await _robotService.Update(robot);
-            return Ok(report);
+            report = await _isarService.StartMission(robot, echoMissionId, new IsarMissionDefinition(echoMission));
         }
-        catch (Exception e)
+        catch (HttpRequestException e)
         {
-            _logger.LogError(e, "Error while starting isar mission");
-            throw;
+            string message = "Error connecting to ISAR while starting mission";
+            _logger.LogError(e, "{message}", message);
+            robot.Enabled = false;
+            robot.Status = RobotStatus.Offline;
+            await _robotService.Update(robot);
+
+            return StatusCode(StatusCodes.Status502BadGateway, message);
         }
+        catch (MissionException e)
+        {
+            _logger.LogError(e, "Error while starting ISAR mission");
+            return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+        }
+        catch (JsonException e)
+        {
+            string message = "Error while processing of the response from ISAR";
+            _logger.LogError(e, "{message}", message);
+            return StatusCode(StatusCodes.Status500InternalServerError, message);
+        }
+
+        robot.Status = RobotStatus.Busy;
+        await _robotService.Update(robot);
+
+        return Ok(report);
     }
 
     /// <summary>
@@ -258,23 +278,35 @@ public class RobotController : ControllerBase
             _logger.LogWarning("Could not find robot with id={id}", robotId);
             return NotFound();
         }
-        var response = await _isarService.StopMission(robot);
-        if (!response.IsSuccessStatusCode || response.Content is null)
+
+        IsarStopMissionResponse response;
+        try
         {
-            _logger.LogError("Could not stop mission on robot: {robotId}", robotId);
+            response = await _isarService.StopMission(robot);
+        }
+        catch (HttpRequestException e)
+        {
+            string message = "Error connecting to ISAR while stopping mission";
+            _logger.LogError(e, "{message}", message);
+            robot.Enabled = false;
+            robot.Status = RobotStatus.Offline;
+            await _robotService.Update(robot);
 
-            int statusCode = (int)response.StatusCode;
-
-            // If error is caused by user (400 codes), let them know
-            if (statusCode is >= 400 and < 500)
-                return new StatusCodeResult(statusCode);
-
-            return new StatusCodeResult(StatusCodes.Status502BadGateway);
+            return StatusCode(StatusCodes.Status502BadGateway, message);
+        }
+        catch (MissionException e)
+        {
+            _logger.LogError(e, "Error while stopping ISAR mission");
+            return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+        }
+        catch (JsonException e)
+        {
+            string message = "Error while processing of the response from ISAR";
+            _logger.LogError(e, "{message}", message);
+            return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 
-        string? responseContent = await response.Content.ReadAsStringAsync();
-        var isarResponse = JsonSerializer.Deserialize<IsarStopMissionResponse>(responseContent);
-        return Ok(isarResponse);
+        return Ok(response);
     }
 
     /// <summary>
@@ -378,18 +410,34 @@ public class RobotController : ControllerBase
             _logger.LogWarning("Could not find robot with id={id}", robotId);
             return NotFound();
         }
+
+        HttpResponseMessage response;
         try
         {
-            var response = await _isarService.PauseMission(robot);
-            string? responseContent = await response.Content.ReadAsStringAsync();
-            string? isarResponse = JsonSerializer.Deserialize<string>(responseContent);
-            return Ok(isarResponse);
+            response = await _isarService.PauseMission(robot);
+        }
+        catch (HttpRequestException e)
+        {
+            string message = "Error connecting to ISAR while pausing mission";
+            _logger.LogError(e, "{message}", message);
+            robot.Enabled = false;
+            robot.Status = RobotStatus.Offline;
+            await _robotService.Update(robot);
+            return StatusCode(StatusCodes.Status502BadGateway, message);
         }
         catch (MissionException e)
         {
-            _logger.LogError(e, "Error while pausing isar mission");
+            _logger.LogError(e, "Error while pausing ISAR mission");
             return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
         }
+        catch (JsonException e)
+        {
+            string message = "Error while processing of the response from ISAR";
+            _logger.LogError(e, "{message}", message);
+            return StatusCode(StatusCodes.Status500InternalServerError, message);
+        }
+
+        return Ok(response);
     }
 
     /// <summary>
@@ -414,17 +462,33 @@ public class RobotController : ControllerBase
             _logger.LogWarning("Could not find robot with id={id}", robotId);
             return NotFound();
         }
+
+        HttpResponseMessage response;
         try
         {
-            var response = await _isarService.ResumeMission(robot);
-            string? responseContent = await response.Content.ReadAsStringAsync();
-            string? isarResponse = JsonSerializer.Deserialize<string>(responseContent);
-            return Ok(isarResponse);
+            response = await _isarService.ResumeMission(robot);
+        }
+        catch (HttpRequestException e)
+        {
+            string message = "Error connecting to ISAR while resuming mission";
+            _logger.LogError(e, "{message}", message);
+            robot.Enabled = false;
+            robot.Status = RobotStatus.Offline;
+            await _robotService.Update(robot);
+            return StatusCode(StatusCodes.Status502BadGateway, message);
         }
         catch (MissionException e)
         {
-            _logger.LogError(e, "Error while resuming isar mission");
+            _logger.LogError(e, "Error while resuming ISAR mission");
             return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
         }
+        catch (JsonException e)
+        {
+            string message = "Error while processing of the response from ISAR";
+            _logger.LogError(e, "{message}", message);
+            return StatusCode(StatusCodes.Status500InternalServerError, message);
+        }
+
+        return Ok(response);
     }
 }

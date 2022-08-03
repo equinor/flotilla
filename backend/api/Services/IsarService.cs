@@ -11,7 +11,7 @@ namespace Api.Services
     {
         public abstract Task<Report> StartMission(Robot robot, int echoMissionId, IsarMissionDefinition missionDefinition);
 
-        public abstract Task<HttpResponseMessage> StopMission(Robot robot);
+        public abstract Task<IsarStopMissionResponse> StopMission(Robot robot);
 
         public abstract Task<HttpResponseMessage> PauseMission(Robot robot);
 
@@ -41,9 +41,9 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                string? msg = await response.Content.ReadAsStringAsync();
-                _logger.LogError("Error from ISAR: {code} {error} - {msg}", (int)response.StatusCode, response.StatusCode.ToString(), msg);
-                throw new MissionException($"Could not start mission for robot '{robot.Id}': {msg}");
+                string? message = GetLogMessageForFailedIsarRequest(response.StatusCode);
+                _logger.LogError("{message}", message);
+                throw new MissionException(message);
             }
             if (response.Content is null)
             {
@@ -55,8 +55,8 @@ namespace Api.Services
                 await response.Content.ReadFromJsonAsync<IsarStartMissionResponse>();
             if (isarMissionResponse is null)
             {
-                _logger.LogError("Could not read content from mission");
-                throw new JsonException("Failed to deserialize mission from Isar");
+                _logger.LogError("Failed to deserialize mission from ISAR");
+                throw new JsonException("Failed to deserialize mission from ISAR");
             }
 
             var tasks = ProcessIsarMissionResponse(isarMissionResponse);
@@ -79,11 +79,34 @@ namespace Api.Services
             return await _reportService.Create(report);
         }
 
-        public async Task<HttpResponseMessage> StopMission(Robot robot)
+        public async Task<IsarStopMissionResponse> StopMission(Robot robot)
         {
+
             string url = new UriBuilder($"{robot.IsarUri}/schedule/stop-mission").ToString();
             _logger.LogInformation("Stopping mission on robot '{id}' on ISAR at '{uri}'", robot.Id, url);
-            return await httpClient.PostAsync(url, null);
+            var response = await httpClient.PostAsync(url, null);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string? message = GetLogMessageForFailedIsarRequest(response.StatusCode);
+                _logger.LogError("{message}", message);
+                throw new MissionException(message);
+            }
+            if (response.Content is null)
+            {
+                _logger.LogError("Could not read content from mission");
+                throw new MissionException("Could not read content from mission");
+            }
+
+            var isarMissionResponse =
+                await response.Content.ReadFromJsonAsync<IsarStopMissionResponse>();
+            if (isarMissionResponse is null)
+            {
+                _logger.LogError("Failed to deserialize mission from ISAR");
+                throw new JsonException("Failed to deserialize mission from ISAR");
+            }
+
+            return isarMissionResponse;
         }
 
         public async Task<HttpResponseMessage> PauseMission(Robot robot)
@@ -98,8 +121,21 @@ namespace Api.Services
                 _logger.LogError("{message}", message);
                 throw new MissionException(message);
             }
+            if (response.Content is null)
+            {
+                _logger.LogError("Could not read content from mission");
+                throw new MissionException("Could not read content from mission");
+            }
 
-            return response;
+            var isarMissionResponse =
+                await response.Content.ReadFromJsonAsync<HttpResponseMessage>();
+            if (isarMissionResponse is null)
+            {
+                _logger.LogError("Failed to deserialize mission from ISAR");
+                throw new JsonException("Failed to deserialize mission from ISAR");
+            }
+
+            return isarMissionResponse;
         }
 
         public async Task<HttpResponseMessage> ResumeMission(Robot robot)
@@ -113,6 +149,19 @@ namespace Api.Services
                 string message = GetLogMessageForFailedIsarRequest(response.StatusCode);
                 _logger.LogError("{message}", message);
                 throw new MissionException(message);
+            }
+            if (response.Content is null)
+            {
+                _logger.LogError("Could not read content from mission");
+                throw new MissionException("Could not read content from mission");
+            }
+
+            var isarMissionResponse =
+                await response.Content.ReadFromJsonAsync<HttpResponseMessage>();
+            if (isarMissionResponse is null)
+            {
+                _logger.LogError("Failed to deserialize mission from ISAR");
+                throw new JsonException("Failed to deserialize mission from ISAR");
             }
 
             return response;
