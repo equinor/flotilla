@@ -4,9 +4,6 @@ namespace Api.Database.Context;
 
 public static class InitDb
 {
-    private static readonly VideoStream streamExample =
-        new() { Name = "FrontCamera", Url = "localhost:3000_test" };
-
     public static readonly List<Robot> Robots = GetRobots();
     public static readonly List<ScheduledMission> ScheduledMissions = GetScheduledMissions();
     public static readonly List<Report> Reports = GetReports();
