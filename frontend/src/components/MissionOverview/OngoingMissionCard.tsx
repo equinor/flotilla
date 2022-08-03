@@ -4,6 +4,7 @@ import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { MissionProgressDisplay } from './MissionTagDisplay'
 import { MissionStatusDisplay } from './MissionStatusDisplay'
+import { useNavigate } from "react-router-dom";
 
 interface MissionProps {
     mission: Mission
@@ -20,8 +21,13 @@ const HorisontalContent = styled.div`
 `
 
 export function OngoingMissionCard({ mission }: MissionProps) {
+    let navigate = useNavigate()
+    const routeChange = () => {
+        let path = "/mission/" + mission.id
+        navigate(path)
+    }
     return (
-        <StyledMissionCard variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
+        <StyledMissionCard variant="default" style={{ boxShadow: tokens.elevation.sticky }} onClick={routeChange}>
             <Typography variant="h6">INSPECTION</Typography>
             <Typography>{mission.name}</Typography>
             <HorisontalContent>

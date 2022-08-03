@@ -34,7 +34,7 @@ export function FlotillaSite() {
                                 <BrowserRouter>
                                     <Routes>
                                         <Route path="/" element={<FrontPage />} />
-                                        <Route path="/mission" element={<MissionPage />} />
+                                        <Route path="/mission/:missionId" element={<MissionPage />} />
                                     </Routes>
                                 </BrowserRouter>
                             </StyledPages>
