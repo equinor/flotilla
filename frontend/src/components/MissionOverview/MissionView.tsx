@@ -27,13 +27,13 @@ export function MissionView() {
     const apiCaller = useApi()
     const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
     useEffect(() => {
-        apiCaller.getUpcomingMissions().then((result) => {
-            setUpcomingMissions(result.body)
+        apiCaller.getUpcomingMissions().then((missions) => {
+            setUpcomingMissions(missions)
         })
     }, [])
     useInterval(async () => {
-        apiCaller.getUpcomingMissions().then((result) => {
-            setUpcomingMissions(result.body)
+        apiCaller.getUpcomingMissions().then((missions) => {
+            setUpcomingMissions(missions)
         })
     })
 

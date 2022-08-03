@@ -67,12 +67,12 @@ export class BackendAPICaller {
         return result.body
     }
 
-    async getUpcomingMissions() {
+    async getUpcomingMissions(): Promise<Mission[]> {
         const path: string = 'scheduled-missions/upcoming'
         const result = await this.GET<Mission[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
-        return result
+        return result.body
     }
 
     async getReports(asset: string): Promise<Report[]> {
