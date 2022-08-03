@@ -35,9 +35,7 @@ export function MissionPage() {
     })
     return (
         <StyledMissionPage>
-            <VideoStreamSection>
-                {videoStreams.length > 0 && videoDisplay}
-            </VideoStreamSection>
+            <VideoStreamSection>{videoStreams.length > 0 && videoDisplay}</VideoStreamSection>
             <TaskTable />
             <Button href="..">FrontPage</Button>
         </StyledMissionPage>
