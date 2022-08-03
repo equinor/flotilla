@@ -1,4 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
+import { useApi } from 'api/ApiCaller'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -17,12 +18,15 @@ const OngoingMissionSection = styled.div`
 `
 
 export function OngoingMissionView() {
+    const apiCaller = useApi()
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     useEffect(() => {
-        // Intentionally left blank until we have test missions in backend
-        // setOngoingMissions(testMissions)
+        // Temporarily using the upcoming dummy missions for ongoing dummy missions
+        apiCaller.getUpcomingMissions().then((missions) => {
+            setOngoingMissions(missions)
+        })
     }, [])
-    console.log(ongoingMissions)
+
     var missionDisplay = ongoingMissions.map(function (mission, index) {
         return <OngoingMissionCard key={index} mission={mission} />
     })

@@ -31,7 +31,6 @@ export function FrontPage() {
                 >
                     Test Backend
                 </Button>
-                <Button href="mission">Mission Page</Button>
             </div>
         </StyledFrontPage>
     )
