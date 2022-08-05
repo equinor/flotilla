@@ -14,8 +14,10 @@ namespace Api.Configurations
             bool isDevelopment
         )
         {
-            string sqlConnectionString = configuration.GetSection("Database").GetValue<string>("ConnectionString");
-            if (isDevelopment)
+            string sqlConnectionString = configuration
+                .GetSection("Database")
+                .GetValue<string>("ConnectionString");
+            if (String.IsNullOrEmpty(sqlConnectionString))
             {
                 var dbBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
                 sqlConnectionString = new SqliteConnectionStringBuilder
@@ -35,16 +37,22 @@ namespace Api.Configurations
 
                 // Setting splitting behavior explicitly to avoid warning
                 services.AddDbContext<FlotillaDbContext>(
-                    options => options.UseSqlite(sqlConnectionString,
-                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery))
+                    options =>
+                        options.UseSqlite(
+                            sqlConnectionString,
+                            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                        )
                 );
             }
             else
             {
                 // Setting splitting behavior explicitly to avoid warning
                 services.AddDbContext<FlotillaDbContext>(
-                    options => options.UseSqlServer(sqlConnectionString,
-                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery))
+                    options =>
+                        options.UseSqlServer(
+                            sqlConnectionString,
+                            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                        )
                 );
             }
             return services;
@@ -55,58 +63,60 @@ namespace Api.Configurations
             IConfiguration configuration
         )
         {
-            services.AddSwaggerGen(c =>
-            {
-                // Add Authorization button in UI
-                c.AddSecurityDefinition(
-                    "oauth2",
-                    new OpenApiSecurityScheme
-                    {
-                        Type = SecuritySchemeType.OAuth2,
-                        Flows = new OpenApiOAuthFlows
+            services.AddSwaggerGen(
+                c =>
+                {
+                    // Add Authorization button in UI
+                    c.AddSecurityDefinition(
+                        "oauth2",
+                        new OpenApiSecurityScheme
                         {
-                            AuthorizationCode = new OpenApiOAuthFlow
+                            Type = SecuritySchemeType.OAuth2,
+                            Flows = new OpenApiOAuthFlows
                             {
-                                TokenUrl = new Uri(
-                                    $"{configuration["AzureAd:Instance"]}/{configuration["AzureAd:TenantId"]}/oauth2/token"
-                                ),
-                                AuthorizationUrl = new Uri(
-                                    $"{configuration["AzureAd:Instance"]}/{configuration["AzureAd:TenantId"]}/oauth2/authorize"
-                                ),
-                                Scopes = new Dictionary<string, string>
+                                AuthorizationCode = new OpenApiOAuthFlow
                                 {
+                                    TokenUrl = new Uri(
+                                        $"{configuration["AzureAd:Instance"]}/{configuration["AzureAd:TenantId"]}/oauth2/token"
+                                    ),
+                                    AuthorizationUrl = new Uri(
+                                        $"{configuration["AzureAd:Instance"]}/{configuration["AzureAd:TenantId"]}/oauth2/authorize"
+                                    ),
+                                    Scopes = new Dictionary<string, string>
                                     {
-                                        "api://ea4c7b92-47b3-45fb-bd25-a8070f0c495c/user_impersonation",
-                                        "User Impersonation"
-                                    }
-                                },
+                                        {
+                                            "api://ea4c7b92-47b3-45fb-bd25-a8070f0c495c/user_impersonation",
+                                            "User Impersonation"
+                                        }
+                                    },
+                                }
                             }
                         }
-                    }
-                );
-                // Show which endpoints have authorization in the UI
-                c.AddSecurityRequirement(
-                    new OpenApiSecurityRequirement
-                    {
+                    );
+                    // Show which endpoints have authorization in the UI
+                    c.AddSecurityRequirement(
+                        new OpenApiSecurityRequirement
                         {
-                            new OpenApiSecurityScheme()
                             {
-                                Reference = new OpenApiReference
+                                new OpenApiSecurityScheme()
                                 {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "oauth2"
-                                }
-                            },
-                            Array.Empty<string>()
+                                    Reference = new OpenApiReference
+                                    {
+                                        Type = ReferenceType.SecurityScheme,
+                                        Id = "oauth2"
+                                    }
+                                },
+                                Array.Empty<string>()
+                            }
                         }
-                    }
-                );
+                    );
 
-                // Make swagger use xml comments from functions
-                string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
-            });
+                    // Make swagger use xml comments from functions
+                    string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                    string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                    c.IncludeXmlComments(xmlPath);
+                }
+            );
 
             return services;
         }

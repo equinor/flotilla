@@ -22,9 +22,9 @@ builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<RobotController>();
 
-builder.Services.AddHostedService<MqttEventHandler>();
-builder.Services.AddHostedService<MqttService>();
-builder.Services.AddHostedService<ScheduledMissionEventHandler>();
+//builder.Services.AddHostedService<MqttEventHandler>();
+//builder.Services.AddHostedService<MqttService>();
+//builder.Services.AddHostedService<ScheduledMissionEventHandler>();
 
 builder.Services
     .AddControllers()

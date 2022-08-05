@@ -104,7 +104,7 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Robot>> PostRobot([FromBody] Robot robot)
+    public async Task<ActionResult<Robot>> PostRobot([FromBody] CreateRobotQuery robot)
     {
         _logger.LogInformation("Creating new robot");
         try
@@ -196,7 +196,11 @@ public class RobotController : ControllerBase
 
         if (robot.Status is not RobotStatus.Available)
         {
-            _logger.LogWarning("Robot '{id}' is not available ({status})", robotId, robot.Status.ToString());
+            _logger.LogWarning(
+                "Robot '{id}' is not available ({status})",
+                robotId,
+                robot.Status.ToString()
+            );
             return Conflict($"The Robot is not available ({robot.Status})");
         }
 
@@ -226,7 +230,11 @@ public class RobotController : ControllerBase
         Report report;
         try
         {
-            report = await _isarService.StartMission(robot, echoMissionId, new IsarMissionDefinition(echoMission));
+            report = await _isarService.StartMission(
+                robot,
+                echoMissionId,
+                new IsarMissionDefinition(echoMission)
+            );
         }
         catch (HttpRequestException e)
         {

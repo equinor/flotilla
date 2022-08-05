@@ -1,4 +1,5 @@
-﻿using Api.Database.Context;
+﻿using Api.Controllers.Models;
+using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +7,7 @@ namespace Api.Services
 {
     public interface IRobotService
     {
-        public abstract Task<Robot> Create(Robot newRobot);
+        public abstract Task<Robot> Create(CreateRobotQuery newRobot);
         public abstract Task<IEnumerable<Robot>> ReadAll();
         public abstract Task<Robot?> ReadById(string id);
         public abstract Task<Robot?> ReadByName(string name);
@@ -37,11 +38,34 @@ namespace Api.Services
                 .ThenInclude(p => p.Position);
         }
 
-        public async Task<Robot> Create(Robot newRobot)
+        public async Task<Robot> Create(CreateRobotQuery newRobot)
         {
-            await _context.Robots.AddAsync(newRobot);
+            var videoStreams = new List<VideoStream>();
+            foreach (CreateVideoStreamQuery videoStreamQuery in newRobot.VideoStreams)
+            {
+                var videoStream = new VideoStream
+                {
+                    Name = videoStreamQuery.Name,
+                    Url = videoStreamQuery.Url
+                };
+                videoStreams.Add(videoStream);
+            }
+
+            var robot = new Robot
+            {
+                Name = newRobot.Name,
+                Model = newRobot.Model,
+                SerialNumber = newRobot.SerialNumber,
+                VideoStreams = videoStreams,
+                Host = newRobot.Host,
+                Port = newRobot.Port,
+                Enabled = newRobot.Enabled,
+                Status = newRobot.Status
+            };
+
+            await _context.Robots.AddAsync(robot);
             await _context.SaveChangesAsync();
-            return newRobot;
+            return robot;
         }
 
         public async Task<IEnumerable<Robot>> ReadAll()

@@ -8,6 +8,7 @@ namespace Api.Database.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Required]
         public string Id { get; set; }
 
         [MaxLength(128)]
