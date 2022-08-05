@@ -30,8 +30,6 @@ const FullscreenButton = styled(Button)`
 
 Icon.add({ fullscreen })
 
-
-
 export function VideoStreamWindow({ videoStream }: VideoStreamProps) {
     const [fullScreenMode, setFullScreenMode] = useState<boolean>(false)
     const toggleFullScreenMode = () => {
@@ -47,6 +45,6 @@ export function VideoStreamWindow({ videoStream }: VideoStreamProps) {
                 </FullscreenButton>
             </VideoSection>
             <Typography variant="h5">{videoStream.name}</Typography>
-        </VideoCard >
+        </VideoCard>
     )
 }
