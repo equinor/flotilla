@@ -86,8 +86,9 @@ public static class InitDb
     {
         foreach (var robot in Robots)
         {
-            var videoStream = new VideoStream() { Name = "turtlebot", Url = "http://localhost:5000/stream?topic=/camera/rgb/image_raw" };
-            robot.VideoStreams = new List<VideoStream>() { videoStream };
+            var videoStream1 = new VideoStream() { Name = "turtlebot1", Url = "http://localhost:5000/stream?topic=/camera/rgb/image_raw" };
+            var videoStream2 = new VideoStream() { Name = "turtlebot2", Url = "http://localhost:5000/stream?topic=/camera/rgb/image_raw" };
+            robot.VideoStreams = new List<VideoStream>() { videoStream1, videoStream2 };
             robot.Pose = new Pose() { };
         }
         context.AddRange(Robots);
