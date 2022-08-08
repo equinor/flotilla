@@ -13,7 +13,8 @@ const StyledMissionPage = styled.div`
     gap: 3rem;
 `
 const VideoStreamSection = styled.div`
-    display: flex;
+    display: grid;
+    gap: 1rem;
 `
 
 export function MissionPage() {
