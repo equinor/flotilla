@@ -28,19 +28,27 @@ namespace Api.Services
 
         public abstract Task<IsarStep?> ReadIsarStepById(string isarStepId);
 
-        public abstract Task<bool> UpdateMissionStatus(string isarMissionId, ReportStatus reportStatus);
+        public abstract Task<bool> UpdateMissionStatus(
+            string isarMissionId,
+            ReportStatus reportStatus
+        );
 
         public abstract Task<bool> UpdateTaskStatus(string isarTaskId, IsarTaskStatus taskStatus);
 
-        public abstract Task<bool> UpdateStepStatus(string isarStepId, IsarStep.IsarStepStatus stepStatus);
+        public abstract Task<bool> UpdateStepStatus(
+            string isarStepId,
+            IsarStep.IsarStepStatus stepStatus
+        );
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1309:Use ordinal StringComparison",
-    Justification = "EF Core refrains from translating string comparison overloads to SQL")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Globalization",
+        "CA1309:Use ordinal StringComparison",
+        Justification = "EF Core refrains from translating string comparison overloads to SQL"
+    )]
     public class ReportService : IReportService
     {
         private readonly FlotillaDbContext _context;
-
         private readonly ILogger<ReportService> _logger;
 
         public ReportService(FlotillaDbContext context, ILogger<ReportService> logger)
@@ -94,7 +102,8 @@ namespace Api.Services
                 .Include(r => r.Robot)
                 .Include(report => report.Tasks)
                 .ThenInclude(task => task.Steps)
-                .Where(report => report.AssetCode.Equals(assetCode)).ToListAsync();
+                .Where(report => report.AssetCode.Equals(assetCode))
+                .ToListAsync();
         }
 
         public async Task<Report?> Read(string id)
@@ -108,9 +117,9 @@ namespace Api.Services
 
         public async Task<Report?> ReadByIsarMissionId(string isarMissionId)
         {
-            return await _context.Reports.Include(r => r.Robot).FirstOrDefaultAsync(
-                report => report.IsarMissionId.Equals(isarMissionId)
-            );
+            return await _context.Reports
+                .Include(r => r.Robot)
+                .FirstOrDefaultAsync(report => report.IsarMissionId.Equals(isarMissionId));
         }
 
         public async Task<IsarTask?> ReadIsarTaskById(string isarTaskId)
@@ -165,7 +174,10 @@ namespace Api.Services
             return true;
         }
 
-        public async Task<bool> UpdateStepStatus(string isarStepId, IsarStep.IsarStepStatus stepStatus)
+        public async Task<bool> UpdateStepStatus(
+            string isarStepId,
+            IsarStep.IsarStepStatus stepStatus
+        )
         {
             var step = await ReadIsarStepById(isarStepId);
             if (step is null)

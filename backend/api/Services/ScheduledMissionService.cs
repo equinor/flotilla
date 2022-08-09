@@ -19,8 +19,11 @@ namespace Api.Services
         public abstract Task<ScheduledMission?> Delete(string id);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1309:Use ordinal StringComparison",
-    Justification = "EF Core refrains from translating string comparison overloads to SQL")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Globalization",
+        "CA1309:Use ordinal StringComparison",
+        Justification = "EF Core refrains from translating string comparison overloads to SQL"
+    )]
     public class ScheduledMissionService : IScheduledMissionService
     {
         private readonly FlotillaDbContext _context;
@@ -46,9 +49,9 @@ namespace Api.Services
 
         public async Task<ScheduledMission?> ReadById(string id)
         {
-            return await _context.ScheduledMissions.Include(sm => sm.Robot).FirstOrDefaultAsync(
-                ev => ev.Id.Equals(id)
-            );
+            return await _context.ScheduledMissions
+                .Include(sm => sm.Robot)
+                .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
         }
 
         public async Task<List<ScheduledMission>> ReadByStatus(ScheduledMissionStatus status)

@@ -13,23 +13,23 @@ namespace Api.EventHandlers
     public class MqttEventHandler : EventHandlerBase
     {
         private readonly ILogger<MqttEventHandler> _logger;
-        private readonly IReportService _reportService;
-        private readonly IRobotService _robotService;
-        private readonly IScheduledMissionService _scheduledMissionService;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory factory)
-        {
-            _logger = logger;
-            // Reason for using factory: https://www.thecodebuzz.com/using-dbcontext-instance-in-ihostedservice/
-            _reportService = factory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<IReportService>();
-            _robotService = factory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<IRobotService>();
-            _scheduledMissionService = factory
+        private IReportService ReportService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IReportService>();
+        private IRobotService RobotService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+        private IScheduledMissionService ScheduledMissionService =>
+            _scopeFactory
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<IScheduledMissionService>();
+
+        public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory scopeFactory)
+        {
+            _logger = logger;
+
+            // Reason for using factory: https://www.thecodebuzz.com/using-dbcontext-instance-in-ihostedservice/
+            _scopeFactory = scopeFactory;
 
             Subscribe();
         }
@@ -62,7 +62,7 @@ namespace Api.EventHandlers
         private async void OnIsarConnect(object? sender, MqttReceivedArgs mqttArgs)
         {
             var isarRobot = (IsarConnectMessage)mqttArgs.Message;
-            var robot = await _robotService.ReadByName(isarRobot.RobotId);
+            var robot = await RobotService.ReadByName(isarRobot.RobotId);
             if (robot == null)
             {
                 _logger.LogError(
@@ -77,7 +77,7 @@ namespace Api.EventHandlers
                 robot.Host = isarRobot.Host;
                 robot.Port = isarRobot.Port;
                 robot.Enabled = true;
-                await _robotService.Update(robot);
+                await RobotService.Update(robot);
                 _logger.LogInformation(
                     "ISAR instance for robot {name} with id {id} is connected. Robot is enabled and host ({host}) and port ({port}) is updated.",
                     isarRobot.RobotId,
@@ -106,7 +106,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            bool success = await _reportService.UpdateMissionStatus(mission.MissionId, status);
+            bool success = await ReportService.UpdateMissionStatus(mission.MissionId, status);
 
             if (success)
                 _logger.LogInformation(
@@ -117,7 +117,7 @@ namespace Api.EventHandlers
                     mission.RobotId
                 );
 
-            var robot = await _robotService.ReadByName(mission.RobotId);
+            var robot = await RobotService.ReadByName(mission.RobotId);
             if (robot == null)
             {
                 _logger.LogError(
@@ -128,7 +128,7 @@ namespace Api.EventHandlers
             else if (mission.Status.Equals("in_progress", StringComparison.OrdinalIgnoreCase))
             {
                 robot.Status = RobotStatus.Busy;
-                await _robotService.Update(robot);
+                await RobotService.Update(robot);
                 _logger.LogInformation(
                     "Mission with ISAR mission id {id} is started by the robot {name}. Robot status set to Busy.",
                     mission.MissionId,
@@ -138,14 +138,14 @@ namespace Api.EventHandlers
             else if (mission.Status.Equals("completed", StringComparison.OrdinalIgnoreCase))
             {
                 robot.Status = RobotStatus.Available;
-                await _robotService.Update(robot);
+                await RobotService.Update(robot);
                 _logger.LogInformation(
                     "Mission with ISAR mission id {id} is completed by the robot {name}. Robot status set to Available.",
                     mission.MissionId,
                     mission.RobotId
                 );
 
-                var scheduledMissions = await _scheduledMissionService.ReadByStatus(
+                var scheduledMissions = await ScheduledMissionService.ReadByStatus(
                     ScheduledMissionStatus.Ongoing
                 );
                 if (scheduledMissions is not null)
@@ -154,7 +154,7 @@ namespace Api.EventHandlers
                     {
                         if (sm.Robot.Name == robot.Name)
                         {
-                            await _scheduledMissionService.Delete(sm.Id);
+                            await ScheduledMissionService.Delete(sm.Id);
                             _logger.LogInformation(
                                 "Mission with ISAR mission id {id} is completed by the robot {name}. Matching scheduledMission with id {id} is deleted.",
                                 mission.MissionId,
@@ -185,7 +185,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            bool success = await _reportService.UpdateTaskStatus(task.TaskId, status);
+            bool success = await ReportService.UpdateTaskStatus(task.TaskId, status);
 
             if (success)
                 _logger.LogInformation(
@@ -215,7 +215,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            bool success = await _reportService.UpdateStepStatus(step.StepId, status);
+            bool success = await ReportService.UpdateStepStatus(step.StepId, status);
 
             if (success)
                 _logger.LogInformation(
@@ -230,7 +230,7 @@ namespace Api.EventHandlers
         private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
-            var robot = await _robotService.ReadByName(batteryStatus.RobotId);
+            var robot = await RobotService.ReadByName(batteryStatus.RobotId);
             if (robot == null)
             {
                 _logger.LogWarning(
@@ -241,7 +241,7 @@ namespace Api.EventHandlers
             else
             {
                 robot.BatteryLevel = batteryStatus.BatteryLevel;
-                await _robotService.Update(robot);
+                await RobotService.Update(robot);
                 _logger.LogInformation("Updated battery on robot {name} ", robot.Name);
             }
         }
@@ -249,7 +249,7 @@ namespace Api.EventHandlers
         private async void OnPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var poseStatus = (IsarPoseMessage)mqttArgs.Message;
-            var robot = await _robotService.ReadByName(poseStatus.RobotId);
+            var robot = await RobotService.ReadByName(poseStatus.RobotId);
             if (robot == null)
             {
                 _logger.LogWarning(
@@ -260,7 +260,7 @@ namespace Api.EventHandlers
             else
             {
                 poseStatus.Pose.CopyIsarPoseToRobotPose(robot.Pose);
-                await _robotService.Update(robot);
+                await RobotService.Update(robot);
                 _logger.LogInformation("Updated pose on robot {name} ", robot.Name);
             }
         }

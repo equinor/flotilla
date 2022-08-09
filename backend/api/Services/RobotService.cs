@@ -41,7 +41,7 @@ namespace Api.Services
         public async Task<Robot> Create(CreateRobotQuery newRobot)
         {
             var videoStreams = new List<VideoStream>();
-            foreach (CreateVideoStreamQuery videoStreamQuery in newRobot.VideoStreams)
+            foreach (var videoStreamQuery in newRobot.VideoStreams)
             {
                 var videoStream = new VideoStream
                 {

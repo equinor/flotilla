@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
@@ -57,17 +59,24 @@ namespace Api.Test.Services
         {
             var robotService = new RobotService(_context);
             int nRobotsBefore = robotService.ReadAll().Result.Count();
-            var robot = new Robot()
+            var videoStreamQuery = new CreateVideoStreamQuery()
+            {
+                Name = "Front Camera",
+                Url = "localhost:5000"
+            };
+            var robotQuery = new CreateRobotQuery()
             {
                 Name = "",
                 Model = "",
                 SerialNumber = "",
+                VideoStreams = new List<CreateVideoStreamQuery>() { videoStreamQuery },
                 Host = "",
                 Port = 1,
                 Enabled = true,
                 Status = RobotStatus.Available
             };
-            await robotService.Create(robot);
+
+            await robotService.Create(robotQuery);
             int nRobotsAfter = robotService.ReadAll().Result.Count();
 
             Assert.Equal(nRobotsBefore + 1, nRobotsAfter);

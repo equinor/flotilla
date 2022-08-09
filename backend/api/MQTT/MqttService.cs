@@ -25,7 +25,7 @@ namespace Api.Mqtt
 
         private readonly ManagedMqttClientOptions _options;
 
-        private readonly bool _isDevelopment;
+        private readonly bool _notProduction;
 
         private readonly string _serverHost;
         private readonly int _serverPort;
@@ -44,9 +44,9 @@ namespace Api.Mqtt
             var mqttFactory = new MqttFactory();
             _mqttClient = mqttFactory.CreateManagedMqttClient();
 
-            _isDevelopment = (
+            _notProduction = !(
                 config.GetValue<string?>("ASPNETCORE_ENVIRONMENT") ?? "Production"
-            ).Equals("Development", StringComparison.OrdinalIgnoreCase);
+            ).Equals("Production", StringComparison.OrdinalIgnoreCase);
 
             var mqttConfig = config.GetSection("Mqtt");
             string password = mqttConfig.GetValue<string>("Password");
@@ -62,7 +62,7 @@ namespace Api.Mqtt
                     o =>
                     {
                         o.UseTls = true;
-                        if (_isDevelopment)
+                        if (_notProduction)
                             o.IgnoreCertificateChainErrors = true;
                     }
                 )
@@ -140,7 +140,6 @@ namespace Api.Mqtt
             }
 
             return Task.CompletedTask;
-
         }
 
         private Task OnConnected(MqttClientConnectedEventArgs obj)
