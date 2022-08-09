@@ -11,36 +11,37 @@ namespace Api.EventHandlers
         private readonly ILogger<ScheduledMissionEventHandler> _logger;
         private readonly int _timeDelay;
         private List<ScheduledMission>? _upcomingScheduledMissions;
-        private readonly IScheduledMissionService _scheduledMissionService;
+        private readonly IServiceScopeFactory _scopeFactory;
+        private IScheduledMissionService ScheduledMissionService =>
+            _scopeFactory
+                .CreateScope()
+                .ServiceProvider.GetRequiredService<IScheduledMissionService>();
         private readonly RobotController _robotController;
 
         public ScheduledMissionEventHandler(
             ILogger<ScheduledMissionEventHandler> logger,
-            IServiceScopeFactory factory
+            IServiceScopeFactory scopeFactory
         )
         {
             Subscribe();
+            _scopeFactory = scopeFactory;
 
             _logger = logger;
             _timeDelay = 1000; // 1 second
-            _scheduledMissionService = factory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<IScheduledMissionService>();
-            _robotController = factory
+            _robotController = scopeFactory
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<RobotController>();
             UpdateUpcomingScheduledMissions();
-
         }
 
         public override void Subscribe()
         {
-            ScheduledMissionService.ScheduledMissionUpdated += OnScheduledMissionUpdated;
+            Services.ScheduledMissionService.ScheduledMissionUpdated += OnScheduledMissionUpdated;
         }
 
         public override void Unsubscribe()
         {
-            ScheduledMissionService.ScheduledMissionUpdated -= OnScheduledMissionUpdated;
+            Services.ScheduledMissionService.ScheduledMissionUpdated -= OnScheduledMissionUpdated;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -74,7 +75,7 @@ namespace Api.EventHandlers
                                 upcomingScheduledMission.Id
                             );
                             upcomingScheduledMission.Status = ScheduledMissionStatus.Warning;
-                            _scheduledMissionService.Update(upcomingScheduledMission);
+                            ScheduledMissionService.Update(upcomingScheduledMission);
                         }
                         ;
                     }
@@ -90,17 +91,24 @@ namespace Api.EventHandlers
 
         private async void UpdateUpcomingScheduledMissions()
         {
-            _upcomingScheduledMissions = await _scheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending);
+            _upcomingScheduledMissions = await ScheduledMissionService.ReadByStatus(
+                ScheduledMissionStatus.Pending
+            );
         }
 
         private async Task<bool> StartScheduledMission(ScheduledMission scheduledMission)
         {
             try
             {
-                var result = await _robotController.StartMission(scheduledMission.Robot.Id, scheduledMission.EchoMissionId);
+                var result = await _robotController.StartMission(
+                    scheduledMission.Robot.Id,
+                    scheduledMission.EchoMissionId
+                );
                 if (result.Result is not OkObjectResult)
                 {
-                    throw new MissionException(result?.Result?.ToString() ?? "Unknown error from robot controller");
+                    throw new MissionException(
+                        result?.Result?.ToString() ?? "Unknown error from robot controller"
+                    );
                 }
                 _logger.LogInformation("Started mission '{id}'", scheduledMission.Id);
             }
@@ -110,7 +118,7 @@ namespace Api.EventHandlers
                 return false;
             }
             scheduledMission.Status = ScheduledMissionStatus.Ongoing;
-            _scheduledMissionService.Update(scheduledMission);
+            ScheduledMissionService.Update(scheduledMission);
             return true;
         }
     }

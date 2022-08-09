@@ -10,17 +10,18 @@ namespace Api.Configurations
     {
         public static IServiceCollection ConfigureDatabase(
             this IServiceCollection services,
-            IConfiguration configuration,
-            bool isDevelopment
+            IConfiguration configuration
         )
         {
-            string sqlConnectionString = configuration
+            bool useInMemoryDatabase = configuration
                 .GetSection("Database")
-                .GetValue<string>("ConnectionString");
-            if (String.IsNullOrEmpty(sqlConnectionString))
+                .GetValue<bool>("UseInMemoryDatabase");
+
+            if (useInMemoryDatabase)
             {
-                var dbBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
-                sqlConnectionString = new SqliteConnectionStringBuilder
+                DbContextOptionsBuilder dbBuilder =
+                    new DbContextOptionsBuilder<FlotillaDbContext>();
+                string sqlConnectionString = new SqliteConnectionStringBuilder
                 {
                     DataSource = "file::memory:",
                     Cache = SqliteCacheMode.Shared
@@ -50,7 +51,7 @@ namespace Api.Configurations
                 services.AddDbContext<FlotillaDbContext>(
                     options =>
                         options.UseSqlServer(
-                            sqlConnectionString,
+                            configuration["Database:ConnectionString"],
                             o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
                         )
                 );
