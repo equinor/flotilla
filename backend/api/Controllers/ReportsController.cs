@@ -26,7 +26,7 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IList<Report>>> GetReports([FromQuery] string assetCode)
+    public async Task<ActionResult<IList<Report>>> GetReports([FromQuery] string? assetCode)
     {
         IList<Report> reports;
         if (assetCode != null)
