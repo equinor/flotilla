@@ -31,7 +31,6 @@ namespace Api.EventHandlers
             _robotController = scopeFactory
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<RobotController>();
-            UpdateUpcomingScheduledMissions();
         }
 
         public override void Subscribe()
@@ -48,6 +47,7 @@ namespace Api.EventHandlers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                _upcomingScheduledMissions = await ScheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending);
                 if (_upcomingScheduledMissions is not null)
                 {
                     foreach (var upcomingScheduledMission in _upcomingScheduledMissions)
@@ -64,11 +64,7 @@ namespace Api.EventHandlers
                         bool startedSuccessfull = await StartScheduledMission(
                             upcomingScheduledMission
                         );
-                        if (startedSuccessfull)
-                        {
-                            UpdateUpcomingScheduledMissions();
-                        }
-                        else
+                        if (!startedSuccessfull)
                         {
                             _logger.LogWarning(
                                 "Mission {id} was not started successfully.",
@@ -86,15 +82,9 @@ namespace Api.EventHandlers
 
         private void OnScheduledMissionUpdated(object? sender, EventArgs eventArgs)
         {
-            UpdateUpcomingScheduledMissions();
+            // Insert behaviour to be run on changes in ScheduledMission here.
         }
 
-        private async void UpdateUpcomingScheduledMissions()
-        {
-            _upcomingScheduledMissions = await ScheduledMissionService.ReadByStatus(
-                ScheduledMissionStatus.Pending
-            );
-        }
 
         private async Task<bool> StartScheduledMission(ScheduledMission scheduledMission)
         {
