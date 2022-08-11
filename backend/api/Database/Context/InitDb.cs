@@ -10,31 +10,55 @@ public static class InitDb
 
     private static List<Robot> GetRobots()
     {
+        var videoStream = new VideoStream()
+        {
+            Name = "Front camera",
+            Url = "http://localhost:5000/stream?topic=/camera/rgb/image_raw"
+        };
+
         var robot1 = new Robot
         {
-            Name = "william",
-            Model = "Model1",
-            SerialNumber = "123",
+            Name = "R2-D2",
+            Model = "R2",
+            SerialNumber = "D2",
+            Status = RobotStatus.Available,
+            Enabled = true,
+            Host = "localhost",
+            Logs = "",
+            Port = 3000,
+            VideoStreams = new List<VideoStream>() { videoStream },
+            Pose = new Pose() { }
+        };
+
+        var robot2 = new Robot
+        {
+            Name = "Shockwave",
+            Model = "Decepticon",
+            SerialNumber = "SS79",
+            Status = RobotStatus.Busy,
+            Enabled = true,
+            Host = "localhost",
+            Logs = "logs",
+            Port = 3000,
+            VideoStreams = new List<VideoStream>() { videoStream },
+            Pose = new Pose() { }
+        };
+
+        var robot3 = new Robot
+        {
+            Name = "Ultron",
+            Model = "AISATW",
+            SerialNumber = "Earth616",
             Status = RobotStatus.Available,
             Enabled = false,
             Host = "localhost",
             Logs = "logs",
             Port = 3000,
+            VideoStreams = new List<VideoStream>() { videoStream },
+            Pose = new Pose() { }
         };
 
-        var robot2 = new Robot
-        {
-            Name = "Robot2",
-            Model = "Model2",
-            SerialNumber = "456",
-            Status = RobotStatus.Busy,
-            Enabled = false,
-            Host = "localhost",
-            Logs = "logs",
-            Port = 3000,
-        };
-
-        return new List<Robot>(new Robot[] { robot1, robot2 });
+        return new List<Robot>(new Robot[] { robot1, robot2, robot3 });
     }
 
     private static List<Report> GetReports()
@@ -49,11 +73,8 @@ public static class InitDb
             Robot = Robots[0],
             StartTime = DateTimeOffset.UtcNow,
         };
-        return new List<Report>(
-            new Report[] { report1 }
-        );
+        return new List<Report>(new Report[] { report1 });
     }
-
 
     private static List<ScheduledMission> GetScheduledMissions()
     {
@@ -80,17 +101,8 @@ public static class InitDb
         );
     }
 
-
-
     public static void PopulateDb(FlotillaDbContext context)
     {
-        foreach (var robot in Robots)
-        {
-            var videoStream1 = new VideoStream() { Name = "turtlebot1", Url = "http://localhost:5000/stream?topic=/camera/rgb/image_raw" };
-            var videoStream2 = new VideoStream() { Name = "turtlebot2", Url = "http://localhost:5000/stream?topic=/camera/rgb/image_raw" };
-            robot.VideoStreams = new List<VideoStream>() { videoStream1, videoStream2 };
-            robot.Pose = new Pose() { };
-        }
         context.AddRange(Robots);
         context.AddRange(ScheduledMissions);
         context.AddRange(Reports);
