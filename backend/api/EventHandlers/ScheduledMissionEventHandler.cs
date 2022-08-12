@@ -10,12 +10,13 @@ namespace Api.EventHandlers
     {
         private readonly ILogger<ScheduledMissionEventHandler> _logger;
         private readonly int _timeDelay;
-        private List<ScheduledMission>? _upcomingScheduledMissions;
         private readonly IServiceScopeFactory _scopeFactory;
         private IScheduledMissionService ScheduledMissionService =>
             _scopeFactory
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<IScheduledMissionService>();
+        private List<ScheduledMission>? _upcomingScheduledMissions => ScheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending).Result;
+
         private readonly RobotController _robotController;
 
         public ScheduledMissionEventHandler(
@@ -47,7 +48,6 @@ namespace Api.EventHandlers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _upcomingScheduledMissions = await ScheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending);
                 if (_upcomingScheduledMissions is not null)
                 {
                     foreach (var upcomingScheduledMission in _upcomingScheduledMissions)
