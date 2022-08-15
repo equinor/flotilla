@@ -15,7 +15,9 @@ namespace Api.EventHandlers
             _scopeFactory
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<IScheduledMissionService>();
-        private List<ScheduledMission>? _upcomingScheduledMissions => ScheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending).Result;
+
+        private List<ScheduledMission>? _upcomingScheduledMissions =>
+            ScheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending).Result;
 
         private readonly RobotController _robotController;
 
@@ -84,7 +86,6 @@ namespace Api.EventHandlers
         {
             // Insert behaviour to be run on changes in ScheduledMission here.
         }
-
 
         private async Task<bool> StartScheduledMission(ScheduledMission scheduledMission)
         {
