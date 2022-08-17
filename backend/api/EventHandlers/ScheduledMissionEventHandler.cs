@@ -16,9 +16,9 @@ namespace Api.EventHandlers
                 .CreateScope()
                 .ServiceProvider.GetRequiredService<IScheduledMissionService>();
 
-        private List<ScheduledMission>? _upcomingScheduledMissions =>
-            ScheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending).Result;
 
+        private List<ScheduledMission>? UpcomingScheduledMissions =>
+            ScheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending).Result;
         private readonly RobotController _robotController;
 
         public ScheduledMissionEventHandler(
@@ -50,9 +50,9 @@ namespace Api.EventHandlers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (_upcomingScheduledMissions is not null)
+                if (UpcomingScheduledMissions is not null)
                 {
-                    foreach (var upcomingScheduledMission in _upcomingScheduledMissions)
+                    foreach (var upcomingScheduledMission in UpcomingScheduledMissions)
                     {
                         if (upcomingScheduledMission.Robot.Status is not RobotStatus.Available)
                         {
