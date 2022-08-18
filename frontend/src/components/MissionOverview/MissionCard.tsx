@@ -26,7 +26,7 @@ Icon.add({ more_vertical })
 
 export function MissionCard({ mission }: MissionProps) {
     return (
-        <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
+        <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <StyledMissionCardLeft>
                 <Checkbox />
                 <Typography variant="body_short_bold">{mission.isarMissionId}</Typography>

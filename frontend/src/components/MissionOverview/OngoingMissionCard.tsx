@@ -27,7 +27,7 @@ export function OngoingMissionCard({ mission }: MissionProps) {
         navigate(path)
     }
     return (
-        <StyledMissionCard variant="default" style={{ boxShadow: tokens.elevation.sticky }} onClick={routeChange}>
+        <StyledMissionCard variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={routeChange}>
             <Typography variant="h6">INSPECTION</Typography>
             <Typography>{mission.name}</Typography>
             <HorisontalContent>

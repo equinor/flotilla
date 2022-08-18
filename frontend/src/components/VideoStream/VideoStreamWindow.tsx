@@ -33,7 +33,7 @@ export function VideoStreamWindow({ videoStream }: VideoStreamWindowProps) {
 
     return (
         <>
-            <VideoCard variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
+            <VideoCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
                 <VideoSection videoStream={videoStream} toggleFullScreenModeFunction={toggleFullScreenMode} />
                 <Typography variant="h5">{videoStream.name}</Typography>
             </VideoCard>
@@ -43,7 +43,7 @@ export function VideoStreamWindow({ videoStream }: VideoStreamWindowProps) {
                     setFullScreenMode(false)
                 }}
             >
-                <VideoCard variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
+                <VideoCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
                     <Typography variant="h5">{videoStream.name}</Typography>
                     <VideoSection videoStream={videoStream} toggleFullScreenModeFunction={toggleFullScreenMode} />
                 </VideoCard>
