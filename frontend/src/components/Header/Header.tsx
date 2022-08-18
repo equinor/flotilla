@@ -28,7 +28,7 @@ const StyledTopBarContent = styled(TopBar.CustomContent)`
 export function Header() {
     return (
         <StyledTopBar>
-            <TopBar.Header>Flotilla - Robot Planner</TopBar.Header>
+            <TopBar.Header>Flotilla</TopBar.Header>
             <StyledTopBarContent>
                 {AssetPicker()}
 
@@ -63,9 +63,10 @@ function AssetPicker() {
     const options = ['Test', 'Kårstø', 'Johan Sverdrup']
     return (
         <Autocomplete
-            label="Select asset"
             options={Array.from(assetOptions.keys())}
+            label=""
             initialSelectedOptions={[initialOption]}
+            placeholder="Select asset"
             onOptionsChange={({ selectedItems }) => {
                 switchAsset(selectedItems[0])
                 console.log(selectedItems[0])

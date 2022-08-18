@@ -34,7 +34,7 @@ export function OngoingMissionView() {
     return (
         <StyledOngoingMissionView>
             <Typography variant="h2" color="resting">
-                Ongoing Missions
+                Ongoing missions
             </Typography>
             <OngoingMissionSection>
                 {ongoingMissions.length > 0 && missionDisplay}
