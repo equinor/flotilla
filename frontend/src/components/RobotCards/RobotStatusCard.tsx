@@ -55,13 +55,13 @@ export function RobotStatusCard({ robot }: RobotProps) {
     }
     if (robot.status == RobotStatus.MissionInProgress) {
         return (
-            <HoverableStyledCard variant="default" style={{ boxShadow: tokens.elevation.sticky }} onClick={goToMission}>
+            <HoverableStyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={goToMission}>
                 {cardContent({ robot })}
             </HoverableStyledCard>
         )
     }
     return (
-        <StyledCard variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
+        <StyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             {cardContent({ robot })}
         </StyledCard>
     )
@@ -69,7 +69,7 @@ export function RobotStatusCard({ robot }: RobotProps) {
 
 export function RobotStatusCardPlaceholder() {
     return (
-        <StyledCard variant="default" style={{ boxShadow: tokens.elevation.sticky }}>
+        <StyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <div>
                 <RobotImage robotType={RobotType.NoneType} />
                 <Typography variant="h5" color="disabled">
