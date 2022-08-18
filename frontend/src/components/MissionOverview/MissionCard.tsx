@@ -8,13 +8,12 @@ interface MissionProps {
 }
 
 const StyledMissionCard = styled(Card)`
-    width: 600px;
+    width: 800px;
     display: flex;
 `
 const StyledMissionCardLeft = styled(Card)`
-    width: 200px;
+    width: 50px;
     display: flex;
-    justify-content: flex-start;
 `
 const StyledMissionCardRight = styled(Card)`
     width: 400px;
