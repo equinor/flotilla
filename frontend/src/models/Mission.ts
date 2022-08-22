@@ -13,7 +13,7 @@ export interface Mission {
     id: string
     name: string
     robot: Robot
-    isarMissionId: string
+    echoMissionId: string
     startTime: Date
     endTime: Date
     status: MissionStatus
