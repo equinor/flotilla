@@ -1,6 +1,6 @@
 import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { MissionCard } from './MissionCard'
+import { UpcomingMissionCard } from './UpcomingMissionCard'
 import { useApi, useInterval } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
 import { Mission } from 'models/Mission'
@@ -37,8 +37,8 @@ export function MissionView() {
         })
     })
 
-    var missionDisplay = upcomingMissions.map(function (mission, index) {
-        return <MissionCard key={index} mission={mission} />
+    var upcomingMissionDisplay = upcomingMissions.map(function (mission, index) {
+        return <UpcomingMissionCard key={index} mission={mission} />
     })
 
     return (
@@ -47,7 +47,7 @@ export function MissionView() {
                 Upcoming missions
             </Typography>
             <MissionTable>
-                {upcomingMissions.length > 0 && missionDisplay}
+                {upcomingMissions.length > 0 && upcomingMissionDisplay}
                 {upcomingMissions.length === 0 && <NoUpcomingMissionsPlaceholder />}
             </MissionTable>
             <MissionButtonView>
