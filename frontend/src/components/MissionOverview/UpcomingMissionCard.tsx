@@ -23,7 +23,7 @@ const StyledMissionCardRight = styled(Card)`
 
 Icon.add({ more_vertical })
 
-export function MissionCard({ mission }: MissionProps) {
+export function UpcomingMissionCard({ mission }: MissionProps) {
     return (
         <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <StyledMissionCardLeft>
