@@ -82,7 +82,7 @@ public static class InitDb
         {
             Robot = Robots[0],
             EchoMissionId = 2,
-            StartTime = DateTimeOffset.UtcNow.AddHours(8),
+            StartTime = DateTimeOffset.UtcNow.AddHours(7),
             EndTime = DateTimeOffset.UtcNow.AddHours(9),
             Status = ScheduledMissionStatus.Pending
         };
