@@ -105,11 +105,7 @@ namespace Api.Mqtt
                 return Task.CompletedTask;
             }
 
-            _logger.LogInformation(
-                "Topic: {topic} - Message recieved: \n{payload}",
-                topic,
-                content
-            );
+            _logger.LogInformation("Topic: {topic} - Message recieved: \n{payload}", topic, content);
 
             switch (messageType)
             {
