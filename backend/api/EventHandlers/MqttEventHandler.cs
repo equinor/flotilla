@@ -242,7 +242,7 @@ namespace Api.EventHandlers
             {
                 robot.BatteryLevel = batteryStatus.BatteryLevel;
                 await RobotService.Update(robot);
-                _logger.LogInformation("Updated battery on robot {name} ", robot.Name);
+                _logger.LogDebug("Updated battery on robot {name} ", robot.Name);
             }
         }
 
@@ -261,7 +261,7 @@ namespace Api.EventHandlers
             {
                 poseStatus.Pose.CopyIsarPoseToRobotPose(robot.Pose);
                 await RobotService.Update(robot);
-                _logger.LogInformation("Updated pose on robot {name} ", robot.Name);
+                _logger.LogDebug("Updated pose on robot {name} ", robot.Name);
             }
         }
     }
