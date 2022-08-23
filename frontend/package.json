@@ -16,7 +16,6 @@
         "@types/react": "^18.0.15",
         "@types/react-dom": "^18.0.6",
         "date-fns": "^2.29.2",
-        "openapi-typescript": "^5.4.1",
         "prettier": "^2.7.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
