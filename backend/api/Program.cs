@@ -45,7 +45,8 @@ builder.Services
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
     .EnableTokenAcquisitionToCallDownstreamApi()
     .AddInMemoryTokenCaches()
-    .AddDownstreamWebApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"));
+    .AddDownstreamWebApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
+    .AddDownstreamWebApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
 builder.Services.AddAuthorization(
     options =>
