@@ -22,17 +22,27 @@ namespace Api.Test.Controllers
             var isarLogger = new Mock<ILogger<IsarService>>();
             var reportServiceLogger = new Mock<ILogger<ReportService>>();
             var echoDownstreamApi = new Mock<IDownstreamWebApi>();
+            var isarDownstreamApi = new Mock<IDownstreamWebApi>();
 
             var context = fixture.NewContext;
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
             var reportService = new ReportService(context, reportServiceLogger.Object);
-            var isarService = new IsarService(isarLogger.Object, reportService);
+            var isarService = new IsarService(
+                isarLogger.Object,
+                reportService,
+                isarDownstreamApi.Object
+            );
             var echoService = new EchoService(config, echoDownstreamApi.Object);
             var service = new RobotService(context);
 
             var mockLoggerController = new Mock<ILogger<RobotController>>();
-            _controller = new RobotController(mockLoggerController.Object, service, isarService, echoService);
+            _controller = new RobotController(
+                mockLoggerController.Object,
+                service,
+                isarService,
+                echoService
+            );
         }
 
         [Fact]
