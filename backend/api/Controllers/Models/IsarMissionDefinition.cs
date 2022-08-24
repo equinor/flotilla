@@ -8,6 +8,7 @@ namespace Api.Controllers.Models
     /// </summary>
     public class IsarMissionDefinition
     {
+        [JsonPropertyName("tasks")]
         public List<IsarTaskDefinition> Tasks { get; set; }
 
         public IsarMissionDefinition(List<IsarTaskDefinition> tasks)
@@ -107,7 +108,13 @@ namespace Api.Controllers.Models
         [JsonPropertyName("video_duration")]
         public float? VideoDuration { get; set; }
 
-        public IsarTaskDefinition(IsarPose pose, string tag, IsarPosition inspectionTarget, List<string> sensorTypes, float? videoDuration)
+        public IsarTaskDefinition(
+            IsarPose pose,
+            string tag,
+            IsarPosition inspectionTarget,
+            List<string> sensorTypes,
+            float? videoDuration
+        )
         {
             Pose = pose;
             Tag = tag;
@@ -122,7 +129,10 @@ namespace Api.Controllers.Models
             InspectionTypes = echoTag.Inspections.Select(t => t.InspectionType.ToString()).ToList();
             Pose = TagPositioner.GetPoseFromTag(echoTag);
             InspectionTarget = TagPositioner.GetTagPositionFromTag(echoTag);
-            VideoDuration = echoTag.Inspections.Where(t => t.TimeInSeconds.HasValue).FirstOrDefault()?.TimeInSeconds;
+            VideoDuration = echoTag.Inspections
+                .Where(t => t.TimeInSeconds.HasValue)
+                .FirstOrDefault()
+                ?.TimeInSeconds;
         }
     }
 }

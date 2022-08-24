@@ -4,12 +4,17 @@ using System.Text.Json.Serialization;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Utilities;
+using Microsoft.Identity.Web;
 
 namespace Api.Services
 {
     public interface IIsarService
     {
-        public abstract Task<Report> StartMission(Robot robot, int echoMissionId, IsarMissionDefinition missionDefinition);
+        public abstract Task<Report> StartMission(
+            Robot robot,
+            int echoMissionId,
+            IsarMissionDefinition missionDefinition
+        );
 
         public abstract Task<IsarStopMissionResponse> StopMission(Robot robot);
 
@@ -20,24 +25,69 @@ namespace Api.Services
 
     public class IsarService : IIsarService
     {
-        private static readonly HttpClient httpClient = new();
+        public const string ServiceName = "IsarApi";
+        private readonly IDownstreamWebApi _isarApi;
         private readonly ILogger<IsarService> _logger;
         private readonly IReportService _reportService;
 
         public IsarService(
             ILogger<IsarService> logger,
-            IReportService reportService
+            IReportService reportService,
+            IDownstreamWebApi downstreamWebApi
         )
         {
             _logger = logger;
             _reportService = reportService;
+            _isarApi = downstreamWebApi;
         }
 
-        public async Task<Report> StartMission(Robot robot, int echoMissionId, IsarMissionDefinition missionDefinition)
+        /// <summary>
+        /// Helper method to call the downstream API
+        /// </summary>
+        /// <param name="method"> The HttpMethod to use</param>
+        /// <param name="isarBaseUri">The base uri from ISAR (Should come from robot object)</param>
+        /// <param name="relativeUri">The endpoint at ISAR (Ex: schedule/start-mission) </param>
+        /// <param name="contentObject">The object to send in a post method call</param>
+        /// <returns></returns>
+        private async Task<HttpResponseMessage> CallApi(
+            HttpMethod method,
+            string isarBaseUri,
+            string relativeUri,
+            object? contentObject = null
+        )
         {
-            string uri = $"{robot.IsarUri}/schedule/start-mission";
+            var content = contentObject is null
+                ? null
+                : new StringContent(
+                      JsonSerializer.Serialize(contentObject),
+                      null,
+                      "application/json"
+                  );
 
-            var response = await httpClient.PostAsync(uri, JsonContent.Create(new { mission_definition = missionDefinition }));
+            return await _isarApi.CallWebApiForAppAsync(
+                ServiceName,
+                options =>
+                {
+                    options.HttpMethod = method;
+                    options.BaseUrl = isarBaseUri;
+                    options.RelativePath = relativeUri;
+                },
+                content
+            );
+        }
+
+        public async Task<Report> StartMission(
+            Robot robot,
+            int echoMissionId,
+            IsarMissionDefinition missionDefinition
+        )
+        {
+            var response = await CallApi(
+                HttpMethod.Post,
+                robot.IsarUri,
+                "schedule/start-mission",
+                new { mission_definition = missionDefinition }
+            );
 
             if (!response.IsSuccessStatusCode)
             {
@@ -81,10 +131,12 @@ namespace Api.Services
 
         public async Task<IsarStopMissionResponse> StopMission(Robot robot)
         {
-
-            string url = new UriBuilder($"{robot.IsarUri}/schedule/stop-mission").ToString();
-            _logger.LogInformation("Stopping mission on robot '{id}' on ISAR at '{uri}'", robot.Id, url);
-            var response = await httpClient.PostAsync(url, null);
+            _logger.LogInformation(
+                "Stopping mission on robot '{id}' on ISAR at '{uri}'",
+                robot.Id,
+                robot.IsarUri
+            );
+            var response = await CallApi(HttpMethod.Post, robot.IsarUri, "schedule/stop-mission");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -111,9 +163,12 @@ namespace Api.Services
 
         public async Task<HttpResponseMessage> PauseMission(Robot robot)
         {
-            string url = new UriBuilder($"{robot.IsarUri}/schedule/pause-mission").ToString();
-            _logger.LogInformation("Pausing mission on robot '{id}' on ISAR at '{uri}'", robot.Id, url);
-            var response = await httpClient.PostAsync(url, null);
+            _logger.LogInformation(
+                "Pausing mission on robot '{id}' on ISAR at '{uri}'",
+                robot.Id,
+                robot.IsarUri
+            );
+            var response = await CallApi(HttpMethod.Post, robot.IsarUri, "schedule/pause-mission");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -140,9 +195,12 @@ namespace Api.Services
 
         public async Task<HttpResponseMessage> ResumeMission(Robot robot)
         {
-            string url = new UriBuilder($"{robot.IsarUri}/schedule/resume-mission").ToString();
-            _logger.LogInformation("Resuming mission on robot '{id}' on ISAR at '{uri}'", robot.Id, url);
-            var response = await httpClient.PostAsync(url, null);
+            _logger.LogInformation(
+                "Resuming mission on robot '{id}' on ISAR at '{uri}'",
+                robot.Id,
+                robot.IsarUri
+            );
+            var response = await CallApi(HttpMethod.Post, robot.IsarUri, "schedule/resume-mission");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -197,7 +255,10 @@ namespace Api.Services
 
             foreach (var stepResponse in taskResponse.Steps)
             {
-                bool success = Enum.TryParse<IsarStep.StepTypeEnum>(stepResponse.Type, out var stepType);
+                bool success = Enum.TryParse<IsarStep.StepTypeEnum>(
+                    stepResponse.Type,
+                    out var stepType
+                );
                 if (!success)
                     throw new JsonException(
                         $"Failed to parse step type. {stepResponse.Type} is not valid"
@@ -229,11 +290,11 @@ namespace Api.Services
             return (int)statusCode switch
             {
                 StatusCodes.Status408RequestTimeout
-                    => "A timeout ocurred when communicating with the ISAR state machine",
+                  => "A timeout ocurred when communicating with the ISAR state machine",
                 StatusCodes.Status409Conflict
-                    => "A conflict ocurred when interacting with the ISAR state machine. This could imply the state machine is in a state that does not allow the current action you attempted.",
+                  => "A conflict ocurred when interacting with the ISAR state machine. This could imply the state machine is in a state that does not allow the current action you attempted.",
                 StatusCodes.Status500InternalServerError
-                    => "An internal server error ocurred in ISAR",
+                  => "An internal server error ocurred in ISAR",
                 _ => $"An unexpected status code: {statusCode} was received from ISAR"
             };
         }
