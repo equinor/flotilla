@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Api.Controllers.Models;
 
-# nullable disable
+#nullable disable
 namespace Api.Database.Models
 {
     public class Mission
@@ -17,7 +18,6 @@ namespace Api.Database.Models
         public virtual Robot Robot { get; set; }
 
         [MaxLength(128)]
-        [Required]
         public string IsarMissionId { get; set; }
 
         [MaxLength(128)]
@@ -34,6 +34,9 @@ namespace Api.Database.Models
 
         [Required]
         public virtual IList<IsarTask> Tasks { get; set; }
+
+        [Required]
+        public IList<PlannedTask> PlannedTasks { get; set; }
 
         public static MissionStatus MissionStatusFromString(string status)
         {
