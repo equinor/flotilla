@@ -16,7 +16,6 @@ builder.AddAzureEnvironmentVariables();
 builder.Services.ConfigureDatabase(builder.Configuration);
 
 builder.Services.AddScoped<IRobotService, RobotService>();
-builder.Services.AddScoped<IScheduledMissionService, ScheduledMissionService>();
 builder.Services.AddScoped<IMissionService, MissionService>();
 builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
@@ -24,7 +23,7 @@ builder.Services.AddScoped<RobotController>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MqttService>();
-builder.Services.AddHostedService<ScheduledMissionEventHandler>();
+builder.Services.AddHostedService<MissionScheduler>();
 
 builder.Services
     .AddControllers()

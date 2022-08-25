@@ -5,7 +5,7 @@ namespace Api.Database.Context;
 public static class InitDb
 {
     public static readonly List<Robot> Robots = GetRobots();
-    public static readonly List<ScheduledMission> ScheduledMissions = GetScheduledMissions();
+    public static readonly List<Mission> ScheduledMissions = GetScheduledMissions();
     public static readonly List<Mission> Reports = GetReports();
 
     private static List<Robot> GetRobots()
@@ -75,29 +75,27 @@ public static class InitDb
         return new List<Mission>(new Mission[] { mission1 });
     }
 
-    private static List<ScheduledMission> GetScheduledMissions()
+    private static List<Mission> GetScheduledMissions()
     {
-        var scheduledMission1 = new ScheduledMission
+        var scheduledMission1 = new Mission
         {
             Robot = Robots[0],
             EchoMissionId = 2,
             StartTime = DateTimeOffset.UtcNow.AddHours(7),
             EndTime = DateTimeOffset.UtcNow.AddHours(9),
-            Status = ScheduledMissionStatus.Pending
+            MissionStatus = MissionStatus.Pending
         };
 
-        var scheduledMission2 = new ScheduledMission
+        var scheduledMission2 = new Mission
         {
             Robot = Robots[1],
             EchoMissionId = 2,
             StartTime = DateTimeOffset.UtcNow.AddHours(8),
             EndTime = DateTimeOffset.UtcNow.AddHours(9),
-            Status = ScheduledMissionStatus.Pending
+            MissionStatus = MissionStatus.Pending
         };
 
-        return new List<ScheduledMission>(
-            new ScheduledMission[] { scheduledMission1, scheduledMission2 }
-        );
+        return new List<Mission>(new Mission[] { scheduledMission1, scheduledMission2 });
     }
 
     public static void PopulateDb(FlotillaDbContext context)

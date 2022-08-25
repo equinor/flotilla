@@ -9,7 +9,7 @@ public class FlotillaDbContext : DbContext
     public DbSet<Mission> Missions => Set<Mission>();
     public DbSet<IsarTask> Tasks => Set<IsarTask>();
     public DbSet<IsarStep> Steps => Set<IsarStep>();
-    public DbSet<ScheduledMission> ScheduledMissions => Set<ScheduledMission>();
+    public DbSet<Mission> ScheduledMissions => Set<Mission>();
     public DbSet<VideoStream> VideoStreams => Set<VideoStream>();
     public DbSet<Pose> Poses => Set<Pose>();
     public DbSet<Position> Positions => Set<Position>();
