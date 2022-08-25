@@ -15,8 +15,8 @@ namespace Api.EventHandlers
         private readonly ILogger<MqttEventHandler> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        private IReportService ReportService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IReportService>();
+        private IMissionService MissionService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionService>();
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
         private IScheduledMissionService ScheduledMissionService =>
@@ -91,22 +91,25 @@ namespace Api.EventHandlers
         private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var mission = (IsarMissionMessage)mqttArgs.Message;
-            ReportStatus status;
+            MissionStatus status;
             try
             {
-                status = ReportStatusMethods.FromString(mission.Status);
+                status = Mission.MissionStatusFromString(mission.Status);
             }
             catch (ArgumentException e)
             {
                 _logger.LogError(
                     e,
-                    "Failed to parse report status from MQTT message. Report: {id} was not updated.",
+                    "Failed to parse mission status from MQTT message. Report: {id} was not updated.",
                     mission.MissionId
                 );
                 return;
             }
 
-            bool success = await ReportService.UpdateMissionStatus(mission.MissionId, status);
+            bool success = await MissionService.UpdateMissionStatusByIsarMissionId(
+                mission.MissionId,
+                status
+            );
 
             if (success)
                 _logger.LogInformation(
@@ -179,13 +182,13 @@ namespace Api.EventHandlers
             {
                 _logger.LogError(
                     e,
-                    "Failed to parse report status from MQTT message. Report: {id} was not updated.",
+                    "Failed to parse mission status from MQTT message. Report: {id} was not updated.",
                     task.MissionId
                 );
                 return;
             }
 
-            bool success = await ReportService.UpdateTaskStatus(task.TaskId, status);
+            bool success = await MissionService.UpdateTaskStatusByIsarTaskId(task.TaskId, status);
 
             if (success)
                 _logger.LogInformation(
@@ -209,13 +212,13 @@ namespace Api.EventHandlers
             {
                 _logger.LogError(
                     e,
-                    "Failed to parse report status from MQTT message. Report: {id} was not updated.",
+                    "Failed to parse mission status from MQTT message. Report: {id} was not updated.",
                     step.MissionId
                 );
                 return;
             }
 
-            bool success = await ReportService.UpdateStepStatus(step.StepId, status);
+            bool success = await MissionService.UpdateStepStatusByIsarStepId(step.StepId, status);
 
             if (success)
                 _logger.LogInformation(

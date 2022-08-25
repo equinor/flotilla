@@ -4,38 +4,41 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
 {
-    public interface IReportService
+    public interface IMissionService
     {
-        public abstract Task<Report> Create(Report report);
+        public abstract Task<Mission> Create(Mission mission);
 
-        public abstract Task<Report> Create(
+        public abstract Task<Mission> Create(
             string isarMissionId,
             int echoMissionId,
             string log,
-            ReportStatus status,
+            MissionStatus status,
             Robot robot
         );
 
-        public abstract Task<IList<Report>> ReadAll();
+        public abstract Task<IList<Mission>> ReadAll();
 
-        public abstract Task<IList<Report>> ReadAll(string assetCode);
+        public abstract Task<IList<Mission>> ReadAll(string assetCode);
 
-        public abstract Task<Report?> Read(string id);
+        public abstract Task<Mission?> Read(string id);
 
-        public abstract Task<Report?> ReadByIsarMissionId(string isarMissionId);
+        public abstract Task<Mission?> ReadByIsarMissionId(string isarMissionId);
 
         public abstract Task<IsarTask?> ReadIsarTaskById(string isarTaskId);
 
         public abstract Task<IsarStep?> ReadIsarStepById(string isarStepId);
 
-        public abstract Task<bool> UpdateMissionStatus(
+        public abstract Task<bool> UpdateMissionStatusByIsarMissionId(
             string isarMissionId,
-            ReportStatus reportStatus
+            MissionStatus missionStatus
         );
 
-        public abstract Task<bool> UpdateTaskStatus(string isarTaskId, IsarTaskStatus taskStatus);
+        public abstract Task<bool> UpdateTaskStatusByIsarTaskId(
+            string isarTaskId,
+            IsarTaskStatus taskStatus
+        );
 
-        public abstract Task<bool> UpdateStepStatus(
+        public abstract Task<bool> UpdateStepStatusByIsarStepId(
             string isarStepId,
             IsarStep.IsarStepStatus stepStatus
         );
@@ -46,80 +49,79 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class ReportService : IReportService
+    public class MissionService : IMissionService
     {
         private readonly FlotillaDbContext _context;
-        private readonly ILogger<ReportService> _logger;
+        private readonly ILogger<MissionService> _logger;
 
-        public ReportService(FlotillaDbContext context, ILogger<ReportService> logger)
+        public MissionService(FlotillaDbContext context, ILogger<MissionService> logger)
         {
             _context = context;
             _logger = logger;
         }
 
-        public async Task<Report> Create(Report report)
+        public async Task<Mission> Create(Mission mission)
         {
-            await _context.Reports.AddAsync(report);
+            await _context.Reports.AddAsync(mission);
             await _context.SaveChangesAsync();
 
-            return report;
+            return mission;
         }
 
-        public async Task<Report> Create(
+        public async Task<Mission> Create(
             string isarMissionId,
             int echoMissionId,
             string log,
-            ReportStatus status,
+            MissionStatus status,
             Robot robot
         )
         {
-            var report = new Report
+            var mission = new Mission
             {
                 IsarMissionId = isarMissionId,
                 EchoMissionId = echoMissionId,
-                Log = log,
-                ReportStatus = status,
+                MissionStatus = status,
                 StartTime = DateTimeOffset.UtcNow,
                 Robot = robot
             };
-            await Create(report);
+            await Create(mission);
 
-            return report;
+            return mission;
         }
 
-        public async Task<IList<Report>> ReadAll()
+        public async Task<IList<Mission>> ReadAll()
         {
             return await _context.Reports
                 .Include(r => r.Robot)
-                .Include(report => report.Tasks)
+                .Include(mission => mission.Tasks)
                 .ThenInclude(task => task.Steps)
                 .ToListAsync();
         }
 
-        public async Task<IList<Report>> ReadAll(string assetCode)
+        public async Task<IList<Mission>> ReadAll(string assetCode)
         {
             return await _context.Reports
                 .Include(r => r.Robot)
-                .Include(report => report.Tasks)
+                .Include(mission => mission.Tasks)
                 .ThenInclude(task => task.Steps)
-                .Where(report => report.AssetCode.Equals(assetCode))
+                .Where(mission => mission.AssetCode.Equals(assetCode))
                 .ToListAsync();
         }
 
-        public async Task<Report?> Read(string id)
+        public async Task<Mission?> Read(string id)
         {
             return await _context.Reports
                 .Include(r => r.Robot)
-                .Include(report => report.Tasks)
+                .Include(mission => mission.Tasks)
                 .ThenInclude(task => task.Steps)
-                .FirstOrDefaultAsync(report => report.Id.Equals(id));
+                .FirstOrDefaultAsync(mission => mission.Id.Equals(id));
         }
 
-        public async Task<Report?> ReadByIsarMissionId(string isarMissionId)
+        public async Task<Mission?> ReadByIsarMissionId(string isarMissionId)
         {
             return await _context.Reports
                 .Include(r => r.Robot)
-                .FirstOrDefaultAsync(report => report.IsarMissionId.Equals(isarMissionId));
+                .FirstOrDefaultAsync(mission => mission.IsarMissionId.Equals(isarMissionId));
         }
 
         public async Task<IsarTask?> ReadIsarTaskById(string isarTaskId)
@@ -136,26 +138,32 @@ namespace Api.Services
             );
         }
 
-        public async Task<bool> UpdateMissionStatus(string isarMissionId, ReportStatus reportStatus)
+        public async Task<bool> UpdateMissionStatusByIsarMissionId(
+            string isarMissionId,
+            MissionStatus missionStatus
+        )
         {
-            var report = await ReadByIsarMissionId(isarMissionId);
-            if (report is null)
+            var mission = await ReadByIsarMissionId(isarMissionId);
+            if (mission is null)
             {
                 _logger.LogWarning(
-                    "Could not update mission status for ISAR mission with id: {id} as the report was not found",
+                    "Could not update mission status for ISAR mission with id: {id} as the mission was not found",
                     isarMissionId
                 );
                 return false;
             }
 
-            report.ReportStatus = reportStatus;
+            mission.MissionStatus = missionStatus;
 
             await _context.SaveChangesAsync();
 
             return true;
         }
 
-        public async Task<bool> UpdateTaskStatus(string isarTaskId, IsarTaskStatus taskStatus)
+        public async Task<bool> UpdateTaskStatusByIsarTaskId(
+            string isarTaskId,
+            IsarTaskStatus taskStatus
+        )
         {
             var task = await ReadIsarTaskById(isarTaskId);
             if (task is null)
@@ -174,7 +182,7 @@ namespace Api.Services
             return true;
         }
 
-        public async Task<bool> UpdateStepStatus(
+        public async Task<bool> UpdateStepStatusByIsarStepId(
             string isarStepId,
             IsarStep.IsarStepStatus stepStatus
         )

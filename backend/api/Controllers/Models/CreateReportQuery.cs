@@ -9,6 +9,6 @@ namespace Api.Controllers.Models
         public string EchoMissionId { get; set; }
         public string Log { get; set; }
         public DateTimeOffset StartTime { get; set; }
-        public ReportStatus ReportStatus { get; set; }
+        public MissionStatus ReportStatus { get; set; }
     }
 }

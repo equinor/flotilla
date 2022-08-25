@@ -10,7 +10,7 @@ namespace Api.Services
 {
     public interface IIsarService
     {
-        public abstract Task<Report> StartMission(
+        public abstract Task<Mission> StartMission(
             Robot robot,
             int echoMissionId,
             IsarMissionDefinition missionDefinition
@@ -28,16 +28,16 @@ namespace Api.Services
         public const string ServiceName = "IsarApi";
         private readonly IDownstreamWebApi _isarApi;
         private readonly ILogger<IsarService> _logger;
-        private readonly IReportService _reportService;
+        private readonly IMissionService _missionService;
 
         public IsarService(
             ILogger<IsarService> logger,
-            IReportService reportService,
+            IMissionService missionService,
             IDownstreamWebApi downstreamWebApi
         )
         {
             _logger = logger;
-            _reportService = reportService;
+            _missionService = missionService;
             _isarApi = downstreamWebApi;
         }
 
@@ -76,7 +76,7 @@ namespace Api.Services
             );
         }
 
-        public async Task<Report> StartMission(
+        public async Task<Mission> StartMission(
             Robot robot,
             int echoMissionId,
             IsarMissionDefinition missionDefinition
@@ -111,12 +111,12 @@ namespace Api.Services
 
             var tasks = ProcessIsarMissionResponse(isarMissionResponse);
 
-            var report = new Report
+            var mission = new Mission
             {
                 Robot = robot,
                 IsarMissionId = isarMissionResponse?.MissionId,
                 EchoMissionId = echoMissionId,
-                ReportStatus = ReportStatus.NotStarted,
+                MissionStatus = MissionStatus.Pending,
                 StartTime = DateTimeOffset.UtcNow,
                 Tasks = tasks,
             };
@@ -126,7 +126,7 @@ namespace Api.Services
                 isarMissionResponse?.MissionId,
                 robot.Id
             );
-            return await _reportService.Create(report);
+            return await _missionService.Create(mission);
         }
 
         public async Task<IsarStopMissionResponse> StopMission(Robot robot)

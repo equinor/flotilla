@@ -17,7 +17,7 @@ builder.Services.ConfigureDatabase(builder.Configuration);
 
 builder.Services.AddScoped<IRobotService, RobotService>();
 builder.Services.AddScoped<IScheduledMissionService, ScheduledMissionService>();
-builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IMissionService, MissionService>();
 builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<RobotController>();

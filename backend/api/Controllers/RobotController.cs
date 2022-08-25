@@ -172,17 +172,17 @@ public class RobotController : ControllerBase
     /// Start the echo mission with the corresponding 'missionId' for the robot with id 'robotId'
     /// </summary>
     /// <remarks>
-    /// <para> This query starts a mission for a given robot and creates a report </para>
+    /// <para> This query starts a mission for a given robot and creates a mission </para>
     /// </remarks>
     [HttpPost]
     [Route("{robotId}/start/{echoMissionId}")]
-    [ProducesResponseType(typeof(Report), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Report>> StartMission(
+    public async Task<ActionResult<Mission>> StartMission(
         [FromRoute] string robotId,
         [FromRoute] int echoMissionId
     )
@@ -227,10 +227,10 @@ public class RobotController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 
-        Report report;
+        Mission mission;
         try
         {
-            report = await _isarService.StartMission(
+            mission = await _isarService.StartMission(
                 robot,
                 echoMissionId,
                 new IsarMissionDefinition(echoMission)
@@ -261,7 +261,7 @@ public class RobotController : ControllerBase
         robot.Status = RobotStatus.Busy;
         await _robotService.Update(robot);
 
-        return Ok(report);
+        return Ok(mission);
     }
 
     /// <summary>

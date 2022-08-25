@@ -89,10 +89,10 @@ namespace Api.Services
             {
                 foreach (var sensorType in sensorTypes)
                 {
-                    var inspectionType = InspectionTypeFromString(
-                        sensorType.Key
+                    var inspectionType = InspectionTypeFromString(sensorType.Key);
+                    inspections.Add(
+                        new EchoInspection(inspectionType, (float?)sensorType.TimeInSeconds)
                     );
-                    inspections.Add(new EchoInspection(inspectionType, (float?)sensorType.TimeInSeconds));
                 }
             }
 

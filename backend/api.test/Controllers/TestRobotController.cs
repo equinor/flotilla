@@ -20,17 +20,17 @@ namespace Api.Test.Controllers
         {
             // Using Moq https://github.com/moq/moq4
             var isarLogger = new Mock<ILogger<IsarService>>();
-            var reportServiceLogger = new Mock<ILogger<ReportService>>();
+            var missionServiceLogger = new Mock<ILogger<MissionService>>();
             var echoDownstreamApi = new Mock<IDownstreamWebApi>();
             var isarDownstreamApi = new Mock<IDownstreamWebApi>();
 
             var context = fixture.NewContext;
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-            var reportService = new ReportService(context, reportServiceLogger.Object);
+            var missionService = new MissionService(context, missionServiceLogger.Object);
             var isarService = new IsarService(
                 isarLogger.Object,
-                reportService,
+                missionService,
                 isarDownstreamApi.Object
             );
             var echoService = new EchoService(config, echoDownstreamApi.Object);
