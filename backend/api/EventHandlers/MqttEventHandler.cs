@@ -19,10 +19,6 @@ namespace Api.EventHandlers
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionService>();
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
-        private IScheduledMissionService ScheduledMissionService =>
-            _scopeFactory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<IScheduledMissionService>();
 
         public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory scopeFactory)
         {
@@ -100,7 +96,7 @@ namespace Api.EventHandlers
             {
                 _logger.LogError(
                     e,
-                    "Failed to parse mission status from MQTT message. Report: {id} was not updated.",
+                    "Failed to parse mission status from MQTT message. Mission: '{id}' was not updated.",
                     mission.MissionId
                 );
                 return;
@@ -113,7 +109,7 @@ namespace Api.EventHandlers
 
             if (success)
                 _logger.LogInformation(
-                    "{time} - Mission {id} updated to {status} for {robot}",
+                    "{time} - Mission '{id}' status updated to '{status}' for robot '{robot}'",
                     mission.Timestamp,
                     mission.MissionId,
                     mission.Status,
@@ -121,52 +117,36 @@ namespace Api.EventHandlers
                 );
 
             var robot = await RobotService.ReadByName(mission.RobotId);
-            if (robot == null)
+            if (robot is null)
             {
                 _logger.LogError(
                     "Could not find robot with name {id}. The robot status is not updated.",
                     mission.RobotId
                 );
+                return;
             }
-            else if (mission.Status.Equals("in_progress", StringComparison.OrdinalIgnoreCase))
+
+            if (status == MissionStatus.Ongoing)
             {
                 robot.Status = RobotStatus.Busy;
                 await RobotService.Update(robot);
                 _logger.LogInformation(
-                    "Mission with ISAR mission id {id} is started by the robot {name}. Robot status set to Busy.",
+                    "Mission with ISAR mission id '{id}' is started by the robot '{name}'. Robot status set to '{status}'.",
                     mission.MissionId,
-                    mission.RobotId
+                    mission.RobotId,
+                    robot.Status
                 );
             }
-            else if (mission.Status.Equals("completed", StringComparison.OrdinalIgnoreCase))
+            else
             {
                 robot.Status = RobotStatus.Available;
                 await RobotService.Update(robot);
                 _logger.LogInformation(
-                    "Mission with ISAR mission id {id} is completed by the robot {name}. Robot status set to Available.",
+                    "Mission with ISAR mission id '{id}' is completed by the robot '{name}'. Robot status set to '{status}'.",
                     mission.MissionId,
-                    mission.RobotId
+                    mission.RobotId,
+                    robot.Status
                 );
-
-                var scheduledMissions = await ScheduledMissionService.ReadByStatus(
-                    ScheduledMissionStatus.Ongoing
-                );
-                if (scheduledMissions is not null)
-                {
-                    foreach (var sm in scheduledMissions)
-                    {
-                        if (sm.Robot.Name == robot.Name)
-                        {
-                            await ScheduledMissionService.Delete(sm.Id);
-                            _logger.LogInformation(
-                                "Mission with ISAR mission id {id} is completed by the robot {name}. Matching scheduledMission with id {id} is deleted.",
-                                mission.MissionId,
-                                mission.RobotId,
-                                sm.Id
-                            );
-                        }
-                    }
-                }
             }
         }
 

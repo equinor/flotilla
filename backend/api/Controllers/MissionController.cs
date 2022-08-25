@@ -62,7 +62,7 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Mission>> GetMissionById([FromRoute] string id)
     {
-        var mission = await _missionService.Read(id);
+        var mission = await _missionService.ReadById(id);
         if (mission == null)
             return NotFound($"Could not find mission with id {id}");
         return Ok(mission);

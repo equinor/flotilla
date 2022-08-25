@@ -1,7 +1,6 @@
 ﻿using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 
 namespace Api.Services
 {
@@ -22,13 +21,15 @@ namespace Api.Services
             MissionStatus? status = null
         );
 
-        public abstract Task<Mission?> Read(string id);
+        public abstract Task<Mission?> ReadById(string id);
 
         public abstract Task<Mission?> ReadByIsarMissionId(string isarMissionId);
 
         public abstract Task<IsarTask?> ReadIsarTaskById(string isarTaskId);
 
         public abstract Task<IsarStep?> ReadIsarStepById(string isarStepId);
+
+        public abstract Task<Mission> Update(Mission mission);
 
         public abstract Task<bool> UpdateMissionStatusByIsarMissionId(
             string isarMissionId,
@@ -112,7 +113,7 @@ namespace Api.Services
             return await query.ToListAsync();
         }
 
-        public async Task<Mission?> Read(string id)
+        public async Task<Mission?> ReadById(string id)
         {
             return await _context.Missions
                 .Include(r => r.Robot)
@@ -219,6 +220,13 @@ namespace Api.Services
             await _context.SaveChangesAsync();
 
             return mission;
+        }
+
+        public async Task<Mission> Update(Mission mission)
+        {
+            var entry = _context.Update(mission);
+            await _context.SaveChangesAsync();
+            return entry.Entity;
         }
     }
 }
