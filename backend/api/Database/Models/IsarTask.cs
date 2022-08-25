@@ -15,7 +15,7 @@ namespace Api.Database.Models
         public string IsarTaskId { get; set; }
 
         [Required]
-        public virtual Report Report { get; set; }
+        public virtual Mission Mission { get; set; }
 
         public string TagId { get; set; }
 
@@ -53,9 +53,9 @@ namespace Api.Database.Models
                 "cancelled" => IsarTaskStatus.Cancelled,
                 "paused" => IsarTaskStatus.Paused,
                 _
-                    => throw new ArgumentException(
-                        $"Failed to parse report status {status} as it's not supported"
-                    )
+                  => throw new ArgumentException(
+                      $"Failed to parse mission status {status} as it's not supported"
+                  )
             };
     }
 }

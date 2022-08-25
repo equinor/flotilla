@@ -6,7 +6,7 @@ namespace Api.Database.Context;
 public class FlotillaDbContext : DbContext
 {
     public DbSet<Robot> Robots => Set<Robot>();
-    public DbSet<Report> Reports => Set<Report>();
+    public DbSet<Mission> Reports => Set<Mission>();
     public DbSet<IsarTask> Tasks => Set<IsarTask>();
     public DbSet<IsarStep> Steps => Set<IsarStep>();
     public DbSet<ScheduledMission> ScheduledMissions => Set<ScheduledMission>();
@@ -15,6 +15,5 @@ public class FlotillaDbContext : DbContext
     public DbSet<Position> Positions => Set<Position>();
     public DbSet<Orientation> Orientations => Set<Orientation>();
 
-    public FlotillaDbContext(DbContextOptions options) : base(options)
-    { }
+    public FlotillaDbContext(DbContextOptions options) : base(options) { }
 }

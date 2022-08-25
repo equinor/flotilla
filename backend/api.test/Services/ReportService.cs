@@ -14,14 +14,14 @@ namespace Api.Test.Services
     public class ReportServiceTest : IDisposable
     {
         private readonly FlotillaDbContext _context;
-        private readonly Mock<ILogger<ReportService>> _logger;
-        private readonly ReportService _reportService;
+        private readonly Mock<ILogger<MissionService>> _logger;
+        private readonly MissionService _missionService;
 
         public ReportServiceTest(DatabaseFixture fixture)
         {
             _context = fixture.NewContext;
-            _logger = new Mock<ILogger<ReportService>>();
-            _reportService = new ReportService(_context, _logger.Object);
+            _logger = new Mock<ILogger<MissionService>>();
+            _missionService = new MissionService(_context, _logger.Object);
         }
 
         public void Dispose()
@@ -33,40 +33,40 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadAll()
         {
-            var reports = await _reportService.ReadAll();
-            Assert.True(reports.Any());
+            var missions = await _missionService.ReadAll();
+            Assert.True(missions.Any());
         }
 
         [Fact]
         public async Task Read()
         {
-            var reports = await _reportService.ReadAll();
-            var firstReport = reports.First();
-            var reportById = await _reportService.Read(firstReport.Id);
+            var missions = await _missionService.ReadAll();
+            var firstReport = missions.First();
+            var missionById = await _missionService.Read(firstReport.Id);
 
-            Assert.Equal(firstReport, reportById);
+            Assert.Equal(firstReport, missionById);
         }
 
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var report = await _reportService.Read("some_id_that_does_not_exist");
-            Assert.Null(report);
+            var mission = await _missionService.Read("some_id_that_does_not_exist");
+            Assert.Null(mission);
         }
 
         [Fact]
         public async Task Create()
         {
             var robot = _context.Robots.First();
-            int nReportsBefore = _reportService.ReadAll().Result.Count;
-            await _reportService.Create(
+            int nReportsBefore = _missionService.ReadAll().Result.Count;
+            await _missionService.Create(
                 isarMissionId: "",
                 echoMissionId: 0,
                 log: "",
-                status: ReportStatus.InProgress,
+                status: MissionStatus.Ongoing,
                 robot: robot
             );
-            int nReportsAfter = _reportService.ReadAll().Result.Count;
+            int nReportsAfter = _missionService.ReadAll().Result.Count;
 
             Assert.Equal(nReportsBefore + 1, nReportsAfter);
         }

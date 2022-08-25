@@ -6,7 +6,7 @@ public static class InitDb
 {
     public static readonly List<Robot> Robots = GetRobots();
     public static readonly List<ScheduledMission> ScheduledMissions = GetScheduledMissions();
-    public static readonly List<Report> Reports = GetReports();
+    public static readonly List<Mission> Reports = GetReports();
 
     private static List<Robot> GetRobots()
     {
@@ -61,19 +61,18 @@ public static class InitDb
         return new List<Robot>(new Robot[] { robot1, robot2, robot3 });
     }
 
-    private static List<Report> GetReports()
+    private static List<Mission> GetReports()
     {
-        var report1 = new Report
+        var mission1 = new Mission
         {
             AssetCode = "test",
             EchoMissionId = 1,
             IsarMissionId = "1",
-            Log = "log",
-            ReportStatus = ReportStatus.NotStarted,
+            MissionStatus = MissionStatus.Pending,
             Robot = Robots[0],
             StartTime = DateTimeOffset.UtcNow,
         };
-        return new List<Report>(new Report[] { report1 });
+        return new List<Mission>(new Mission[] { mission1 });
     }
 
     private static List<ScheduledMission> GetScheduledMissions()

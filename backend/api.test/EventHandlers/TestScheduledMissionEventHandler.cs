@@ -25,42 +25,54 @@ namespace Api.Test.EventHandlers
         private readonly RobotControllerMock _robotControllerMock;
         private readonly FlotillaDbContext _context;
 
-        private static Robot Robot => new()
-        {
-            Id = "IamTestRobot",
-            Status = RobotStatus.Available,
-            Host = "localhost",
-            Model = "TesTModel",
-            Name = "TestosteroneTesty",
-            SerialNumber = "12354"
-        };
-        private static ScheduledMission ScheduledMission => new()
-        {
-            Id = "testScheduledMission",
-            EchoMissionId = 2,
-            Robot = Robot,
-            Status = ScheduledMissionStatus.Pending,
-            StartTime = DateTimeOffset.Now
-        };
-        private static EchoMission EchoMission => new()
-        {
-            Tags = new List<EchoTag>() {
-                            new EchoTag() { Id = 1,
-                                Inspections = new List<EchoInspection>() {
-                                new EchoInspection(IsarStep.InspectionTypeEnum.Image, null) }, TagId = "123", URL = new Uri("http://localhost:3000") } }
-        };
-        private static Report TestReport => new()
-        {
-            Id = "id",
-            Robot = Robot,
-            IsarMissionId = "isarId",
-            EchoMissionId = 0,
-            Log = "",
-            ReportStatus = ReportStatus.InProgress,
-            StartTime = DateTimeOffset.Now,
-            EndTime = DateTimeOffset.Now.AddMinutes(3),
-            Tasks = new List<IsarTask>()
-        };
+        private static Robot Robot =>
+            new()
+            {
+                Id = "IamTestRobot",
+                Status = RobotStatus.Available,
+                Host = "localhost",
+                Model = "TesTModel",
+                Name = "TestosteroneTesty",
+                SerialNumber = "12354"
+            };
+        private static ScheduledMission ScheduledMission =>
+            new()
+            {
+                Id = "testScheduledMission",
+                EchoMissionId = 2,
+                Robot = Robot,
+                Status = ScheduledMissionStatus.Pending,
+                StartTime = DateTimeOffset.Now
+            };
+        private static EchoMission EchoMission =>
+            new()
+            {
+                Tags = new List<EchoTag>()
+                {
+                    new EchoTag()
+                    {
+                        Id = 1,
+                        Inspections = new List<EchoInspection>()
+                        {
+                            new EchoInspection(IsarStep.InspectionTypeEnum.Image, null)
+                        },
+                        TagId = "123",
+                        URL = new Uri("http://localhost:3000")
+                    }
+                }
+            };
+        private static Mission TestMission =>
+            new()
+            {
+                Id = "id",
+                Robot = Robot,
+                IsarMissionId = "isarId",
+                EchoMissionId = 0,
+                MissionStatus = MissionStatus.Ongoing,
+                StartTime = DateTimeOffset.Now,
+                EndTime = DateTimeOffset.Now.AddMinutes(3),
+                Tasks = new List<IsarTask>()
+            };
 
         public TestScheduledMissionEventHandler(DatabaseFixture fixture)
         {
@@ -77,23 +89,28 @@ namespace Api.Test.EventHandlers
             var mockServiceProvider = new Mock<IServiceProvider>();
 
             // Mock injection of ScheduledMissionService:
-            mockServiceProvider.Setup(p => p.GetService(typeof(IScheduledMissionService)))
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(IScheduledMissionService)))
                 .Returns(_scheduledMissionService);
             // Mock injection of Robot Controller
-            mockServiceProvider.Setup(p => p.GetService(typeof(RobotController)))
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(RobotController)))
                 .Returns(_robotControllerMock.Mock.Object);
             // Mock injection of Database context
-            mockServiceProvider.Setup(p => p.GetService(typeof(FlotillaDbContext)))
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(FlotillaDbContext)))
                 .Returns(_context);
 
             // Mock service injector
             var mockScope = new Mock<IServiceScope>();
-            mockScope.Setup(scope => scope.ServiceProvider)
-                .Returns(mockServiceProvider.Object);
+            mockScope.Setup(scope => scope.ServiceProvider).Returns(mockServiceProvider.Object);
             var mockFactory = new Mock<IServiceScopeFactory>();
             mockFactory.Setup(f => f.CreateScope()).Returns(mockScope.Object);
 
-            _scheduledMissionEventHandler = new ScheduledMissionEventHandler(logger, mockFactory.Object);
+            _scheduledMissionEventHandler = new ScheduledMissionEventHandler(
+                logger,
+                mockFactory.Object
+            );
         }
 
         public void Dispose()
@@ -109,7 +126,10 @@ namespace Api.Test.EventHandlers
         /// </summary>
         /// <param name="preStatus"></param>
         /// <param name="postStatus"></param>
-        private async void AssertExpectedStatusChange(ScheduledMissionStatus preStatus, ScheduledMissionStatus postStatus)
+        private async void AssertExpectedStatusChange(
+            ScheduledMissionStatus preStatus,
+            ScheduledMissionStatus postStatus
+        )
         {
             // ARRANGE
 
@@ -125,7 +145,7 @@ namespace Api.Test.EventHandlers
 
             // ACT
 
-            // Start / Stop eventhandler 
+            // Start / Stop eventhandler
             await _scheduledMissionEventHandler.StartAsync(cts.Token);
             await Task.Delay(100);
             await _scheduledMissionEventHandler.StopAsync(cts.Token);
@@ -144,12 +164,28 @@ namespace Api.Test.EventHandlers
             // Mock happy path of 'RobotController.StartMission'
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-            _robotControllerMock.RobotServiceMock.Setup(r => r.ReadById(Robot.Id)).Returns(async () => Robot);
+            _robotControllerMock.RobotServiceMock
+                .Setup(r => r.ReadById(Robot.Id))
+                .Returns(async () => Robot);
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            _robotControllerMock.IsarServiceMock.Setup(i => i.StartMission(Robot, It.IsAny<int>(), It.IsAny<IsarMissionDefinition>()).Result).Returns(TestReport);
-            _robotControllerMock.EchoServiceMock.Setup(i => i.GetMissionById(It.IsAny<int>()).Result).Returns(EchoMission);
+            _robotControllerMock.IsarServiceMock
+                .Setup(
+                    i =>
+                        i.StartMission(
+                            Robot,
+                            It.IsAny<int>(),
+                            It.IsAny<IsarMissionDefinition>()
+                        ).Result
+                )
+                .Returns(TestMission);
+            _robotControllerMock.EchoServiceMock
+                .Setup(i => i.GetMissionById(It.IsAny<int>()).Result)
+                .Returns(EchoMission);
 
-            AssertExpectedStatusChange(ScheduledMissionStatus.Pending, ScheduledMissionStatus.Ongoing);
+            AssertExpectedStatusChange(
+                ScheduledMissionStatus.Pending,
+                ScheduledMissionStatus.Ongoing
+            );
         }
 
         [Fact]
@@ -158,11 +194,15 @@ namespace Api.Test.EventHandlers
             // Mock bad path of 'RobotController.StartMission'
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-            _robotControllerMock.RobotServiceMock.Setup(r => r.ReadById(Robot.Id)).Returns(async () => null);
+            _robotControllerMock.RobotServiceMock
+                .Setup(r => r.ReadById(Robot.Id))
+                .Returns(async () => null);
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
-            AssertExpectedStatusChange(ScheduledMissionStatus.Pending, ScheduledMissionStatus.Warning);
+            AssertExpectedStatusChange(
+                ScheduledMissionStatus.Pending,
+                ScheduledMissionStatus.Warning
+            );
         }
-
     }
 }

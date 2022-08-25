@@ -71,11 +71,12 @@ namespace Api.Database.Models
                 "failed" => IsarStepStatus.Failed,
                 "cancelled" => IsarStepStatus.Cancelled,
                 _
-                    => throw new ArgumentException(
-                        $"Failed to parse report status {status} as it's not supported"
-                    )
+                  => throw new ArgumentException(
+                      $"Failed to parse mission status {status} as it's not supported"
+                  )
             };
         }
+
         public static StepTypeEnum StepTypeFromString(string sensorType)
         {
             return sensorType switch
@@ -89,6 +90,7 @@ namespace Api.Database.Models
                 _ => StepTypeEnum.TakeImage,
             };
         }
+
         public static InspectionTypeEnum InspectionTypeFromString(string sensorType)
         {
             return sensorType switch
