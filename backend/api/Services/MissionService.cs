@@ -1,6 +1,7 @@
 ﻿using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Api.Services
 {
@@ -16,9 +17,10 @@ namespace Api.Services
             Robot robot
         );
 
-        public abstract Task<IList<Mission>> ReadAll();
-
-        public abstract Task<IList<Mission>> ReadAll(string assetCode);
+        public abstract Task<IList<Mission>> ReadAll(
+            string? assetCode = null,
+            MissionStatus? status = null
+        );
 
         public abstract Task<Mission?> Read(string id);
 
@@ -42,6 +44,8 @@ namespace Api.Services
             string isarStepId,
             IsarStep.IsarStepStatus stepStatus
         );
+
+        public abstract Task<Mission?> Delete(string id);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -62,7 +66,7 @@ namespace Api.Services
 
         public async Task<Mission> Create(Mission mission)
         {
-            await _context.Reports.AddAsync(mission);
+            await _context.Missions.AddAsync(mission);
             await _context.SaveChangesAsync();
 
             return mission;
@@ -89,28 +93,28 @@ namespace Api.Services
             return mission;
         }
 
-        public async Task<IList<Mission>> ReadAll()
+        public async Task<IList<Mission>> ReadAll(
+            string? assetCode = null,
+            MissionStatus? status = null
+        )
         {
-            return await _context.Reports
+            IQueryable<Mission> query = _context.Missions
                 .Include(r => r.Robot)
                 .Include(mission => mission.Tasks)
-                .ThenInclude(task => task.Steps)
-                .ToListAsync();
-        }
+                .ThenInclude(task => task.Steps);
 
-        public async Task<IList<Mission>> ReadAll(string assetCode)
-        {
-            return await _context.Reports
-                .Include(r => r.Robot)
-                .Include(mission => mission.Tasks)
-                .ThenInclude(task => task.Steps)
-                .Where(mission => mission.AssetCode.Equals(assetCode))
-                .ToListAsync();
+            if (assetCode is not null)
+                query = query.Where(mission => mission.AssetCode.Equals(assetCode));
+
+            if (status is not null)
+                query = query.Where(mission => mission.MissionStatus.Equals(status));
+
+            return await query.ToListAsync();
         }
 
         public async Task<Mission?> Read(string id)
         {
-            return await _context.Reports
+            return await _context.Missions
                 .Include(r => r.Robot)
                 .Include(mission => mission.Tasks)
                 .ThenInclude(task => task.Steps)
@@ -119,7 +123,7 @@ namespace Api.Services
 
         public async Task<Mission?> ReadByIsarMissionId(string isarMissionId)
         {
-            return await _context.Reports
+            return await _context.Missions
                 .Include(r => r.Robot)
                 .FirstOrDefaultAsync(mission => mission.IsarMissionId.Equals(isarMissionId));
         }
@@ -202,6 +206,19 @@ namespace Api.Services
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<Mission?> Delete(string id)
+        {
+            var mission = await _context.Missions.FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            if (mission is null)
+            {
+                return null;
+            }
+            _context.Missions.Remove(mission);
+            await _context.SaveChangesAsync();
+
+            return mission;
         }
     }
 }

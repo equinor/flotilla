@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("echomissions")]
+[Route("echo-missions")]
 public class EchoMissionController : ControllerBase
 {
     private readonly ILogger<EchoMissionController> _logger;

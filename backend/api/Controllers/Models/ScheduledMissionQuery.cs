@@ -4,6 +4,6 @@
     {
         public string RobotId { get; set; }
         public int EchoMissionId { get; set; }
-        public DateTimeOffset? StartTime { get; set; }
+        public DateTimeOffset StartTime { get; set; }
     }
 }
