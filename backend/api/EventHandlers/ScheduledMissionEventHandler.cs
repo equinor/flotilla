@@ -10,6 +10,7 @@ namespace Api.EventHandlers
     {
         private readonly ILogger<ScheduledMissionEventHandler> _logger;
         private readonly int _timeDelay;
+
         private readonly IServiceScopeFactory _scopeFactory;
         private IScheduledMissionService ScheduledMissionService =>
             _scopeFactory
@@ -19,7 +20,12 @@ namespace Api.EventHandlers
 
         private List<ScheduledMission>? UpcomingScheduledMissions =>
             ScheduledMissionService.ReadByStatus(ScheduledMissionStatus.Pending).Result;
-        private readonly RobotController _robotController;
+
+        private RobotController RobotController =>
+            _scopeFactory
+                .CreateScope()
+                .ServiceProvider.GetRequiredService<RobotController>();
+
 
         public ScheduledMissionEventHandler(
             ILogger<ScheduledMissionEventHandler> logger,
@@ -31,9 +37,6 @@ namespace Api.EventHandlers
 
             _logger = logger;
             _timeDelay = 1000; // 1 second
-            _robotController = scopeFactory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<RobotController>();
         }
 
         public override void Subscribe()
@@ -91,7 +94,7 @@ namespace Api.EventHandlers
         {
             try
             {
-                var result = await _robotController.StartMission(
+                var result = await RobotController.StartMission(
                     scheduledMission.Robot.Id,
                     scheduledMission.EchoMissionId
                 );
