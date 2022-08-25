@@ -6,14 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("missions")]
-public class MissionController : ControllerBase
+[Route("echomissions")]
+public class EchoMissionController : ControllerBase
 {
-    private readonly ILogger<MissionController> _logger;
+    private readonly ILogger<EchoMissionController> _logger;
 
     private readonly IEchoService _echoService;
 
-    public MissionController(ILogger<MissionController> logger, IEchoService echoService)
+    public EchoMissionController(ILogger<EchoMissionController> logger, IEchoService echoService)
     {
         _logger = logger;
         _echoService = echoService;
@@ -34,7 +34,7 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<IList<EchoMission>>> GetMissions()
+    public async Task<ActionResult<IList<EchoMission>>> GetEchoMissions()
     {
         try
         {
@@ -71,7 +71,7 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<EchoMission>> GetMission([FromRoute] int missionId)
+    public async Task<ActionResult<EchoMission>> GetEchoMission([FromRoute] int missionId)
     {
         try
         {
