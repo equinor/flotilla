@@ -11,13 +11,13 @@ using Xunit;
 namespace Api.Test.Services
 {
     [Collection("Database collection")]
-    public class ReportServiceTest : IDisposable
+    public class MissionServiceTest : IDisposable
     {
         private readonly FlotillaDbContext _context;
         private readonly Mock<ILogger<MissionService>> _logger;
         private readonly MissionService _missionService;
 
-        public ReportServiceTest(DatabaseFixture fixture)
+        public MissionServiceTest(DatabaseFixture fixture)
         {
             _context = fixture.NewContext;
             _logger = new Mock<ILogger<MissionService>>();
@@ -42,7 +42,7 @@ namespace Api.Test.Services
         {
             var missions = await _missionService.ReadAll();
             var firstReport = missions.First();
-            var missionById = await _missionService.Read(firstReport.Id);
+            var missionById = await _missionService.ReadById(firstReport.Id);
 
             Assert.Equal(firstReport, missionById);
         }
@@ -50,7 +50,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var mission = await _missionService.Read("some_id_that_does_not_exist");
+            var mission = await _missionService.ReadById("some_id_that_does_not_exist");
             Assert.Null(mission);
         }
 
