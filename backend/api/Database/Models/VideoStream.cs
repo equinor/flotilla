@@ -1,17 +1,16 @@
-﻿#nullable disable
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
+#nullable disable
 namespace Api.Database.Models
 {
+    [Owned]
     public class VideoStream
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Required]
         public string Id { get; set; }
-
-        public string RobotId { get; set; }
 
         [MaxLength(64)]
         [Required]

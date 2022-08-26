@@ -1,14 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
-# nullable disable
+#nullable disable
 namespace Api.Database.Models
 {
+    [Owned]
     public class IsarTask
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Required]
         public string Id { get; set; }
 
         [Required]
@@ -26,7 +27,16 @@ namespace Api.Database.Models
         public DateTimeOffset Time { get; set; }
 
         [Required]
-        public virtual IList<IsarStep> Steps { get; set; }
+        public IList<IsarStep> Steps { get; set; }
+
+#nullable enable
+        public IsarStep? ReadIsarStepById(string isarStepId)
+        {
+            return Steps.FirstOrDefault(
+                step => step.IsarStepId.Equals(isarStepId, StringComparison.Ordinal)
+            );
+        }
+#nullable disable
     }
 
     public enum IsarTaskStatus
@@ -42,8 +52,9 @@ namespace Api.Database.Models
 
     public static class IsarTaskStatusMethods
     {
-        public static IsarTaskStatus FromString(string status) =>
-            status switch
+        public static IsarTaskStatus FromString(string status)
+        {
+            return status switch
             {
                 "successful" => IsarTaskStatus.Successful,
                 "partially_successful" => IsarTaskStatus.PartiallySuccessful,
@@ -57,5 +68,6 @@ namespace Api.Database.Models
                       $"Failed to parse mission status {status} as it's not supported"
                   )
             };
+        }
     }
 }

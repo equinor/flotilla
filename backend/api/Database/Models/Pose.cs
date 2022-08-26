@@ -1,15 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
-# nullable disable
+#nullable disable
 namespace Api.Database.Models
 {
+    [Owned]
     public class Orientation
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Required]
-        public string Id { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
         public float Z { get; set; }
@@ -32,11 +29,9 @@ namespace Api.Database.Models
         }
     }
 
+    [Owned]
     public class Position
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
         public float X { get; set; }
         public float Y { get; set; }
         public float Z { get; set; }
@@ -56,14 +51,17 @@ namespace Api.Database.Models
         }
     }
 
+    [Owned]
     public class Pose
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
-        public virtual Position Position { get; set; }
-        public virtual Orientation Orientation { get; set; }
-        public virtual string Frame { get; set; }
+        [Required]
+        public Position Position { get; set; }
+
+        [Required]
+        public Orientation Orientation { get; set; }
+
+        [MaxLength(64)]
+        public string Frame { get; set; }
 
         public Pose()
         {

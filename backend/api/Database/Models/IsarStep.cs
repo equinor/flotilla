@@ -1,14 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
-# nullable disable
+#nullable disable
 namespace Api.Database.Models
 {
+    [Owned]
     public class IsarStep
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Required]
         public string Id { get; set; }
 
         [Required]
