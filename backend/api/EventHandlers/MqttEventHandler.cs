@@ -168,7 +168,11 @@ namespace Api.EventHandlers
                 return;
             }
 
-            bool success = await MissionService.UpdateTaskStatusByIsarTaskId(task.TaskId, status);
+            bool success = await MissionService.UpdateTaskStatusByIsarTaskId(
+                task.MissionId,
+                task.TaskId,
+                status
+            );
 
             if (success)
                 _logger.LogInformation(
@@ -198,7 +202,12 @@ namespace Api.EventHandlers
                 return;
             }
 
-            bool success = await MissionService.UpdateStepStatusByIsarStepId(step.StepId, status);
+            bool success = await MissionService.UpdateStepStatusByIsarStepId(
+                step.MissionId,
+                step.TaskId,
+                step.StepId,
+                status
+            );
 
             if (success)
                 _logger.LogInformation(

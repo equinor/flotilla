@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Api.Controllers.Models;
 
 #nullable disable
 namespace Api.Database.Models
@@ -33,10 +32,20 @@ namespace Api.Database.Models
         public DateTimeOffset EndTime { get; set; }
 
         [Required]
-        public virtual IList<IsarTask> Tasks { get; set; }
+        public IList<IsarTask> Tasks { get; set; }
 
         [Required]
         public IList<PlannedTask> PlannedTasks { get; set; }
+
+#nullable enable
+        public IsarTask? ReadIsarTaskById(string isarTaskId)
+        {
+            return Tasks.FirstOrDefault(
+                task => task.IsarTaskId.Equals(isarTaskId, StringComparison.Ordinal)
+            );
+        }
+
+#nullable disable
 
         public static MissionStatus MissionStatusFromString(string status)
         {

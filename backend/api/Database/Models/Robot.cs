@@ -27,7 +27,8 @@ namespace Api.Database.Models
 
         public float BatteryLevel { get; set; }
 
-        public virtual IList<VideoStream> VideoStreams { get; set; }
+        [Required]
+        public IList<VideoStream> VideoStreams { get; set; }
 
         [MaxLength(128)]
         [Required]
@@ -42,7 +43,8 @@ namespace Api.Database.Models
         [Required]
         public RobotStatus Status { get; set; }
 
-        public virtual Pose Pose { get; set; }
+        [Required]
+        public Pose Pose { get; set; }
 
         public string IsarUri
         {

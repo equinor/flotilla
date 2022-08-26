@@ -7,13 +7,6 @@ public class FlotillaDbContext : DbContext
 {
     public DbSet<Robot> Robots => Set<Robot>();
     public DbSet<Mission> Missions => Set<Mission>();
-    public DbSet<IsarTask> Tasks => Set<IsarTask>();
-    public DbSet<IsarStep> Steps => Set<IsarStep>();
-    public DbSet<Mission> ScheduledMissions => Set<Mission>();
-    public DbSet<VideoStream> VideoStreams => Set<VideoStream>();
-    public DbSet<Pose> Poses => Set<Pose>();
-    public DbSet<Position> Positions => Set<Position>();
-    public DbSet<Orientation> Orientations => Set<Orientation>();
 
     public FlotillaDbContext(DbContextOptions options) : base(options) { }
 
@@ -27,5 +20,10 @@ public class FlotillaDbContext : DbContext
             .Entity<Mission>()
             .OwnsMany(m => m.PlannedTasks)
             .OwnsMany(t => t.Inspections);
+
+        modelBuilder.Entity<Mission>().OwnsMany(m => m.Tasks).OwnsMany(t => t.Steps);
+        modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
+        modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
+        modelBuilder.Entity<Robot>().OwnsMany(r => r.VideoStreams);
     }
 }
