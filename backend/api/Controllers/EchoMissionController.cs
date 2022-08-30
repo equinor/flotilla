@@ -95,4 +95,37 @@ public class EchoMissionController : ControllerBase
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }
+    [HttpGet]
+    [Route("installation/{installationCode}")]
+    [ProducesResponseType(typeof(EchoMission), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult<EchoMission>> GetEchoMissionsFromInstallation([FromRoute] string installationCode)
+    {
+        try
+        {
+            var mission = await _echoService.GetMissionsByInstallation(installationCode);
+            return Ok(mission);
+        }
+        catch (HttpRequestException e)
+        {
+            if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
+            {
+                _logger.LogWarning("Could not find echo mission from installation with installationCode={installationCode}", installationCode);
+                return NotFound("Echo mission not found");
+            }
+
+            _logger.LogError(e, "Error getting mission from Echo");
+            return new StatusCodeResult(StatusCodes.Status502BadGateway);
+        }
+        catch (JsonException e)
+        {
+            _logger.LogError(e, "Error deserializing mission from Echo");
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
 }
