@@ -11,6 +11,8 @@ namespace Api.Services
         public abstract Task<IList<EchoMission>> GetMissions();
 
         public abstract Task<EchoMission> GetMissionById(int missionId);
+
+        public abstract Task<IList<EchoMission>> GetMissionsByInstallation(string installationCode);
     }
 
     public class EchoService : IEchoService
@@ -27,7 +29,32 @@ namespace Api.Services
 
         public async Task<IList<EchoMission>> GetMissions()
         {
-            string relativePath = $"robots/robot-plan?InstallationCode={_installationCode}";
+            string relativePath = $"robots/robot-plan";
+
+            var response = await _echoApi.CallWebApiForAppAsync(
+                ServiceName,
+                options =>
+                {
+                    options.HttpMethod = HttpMethod.Get;
+                    options.RelativePath = relativePath;
+                }
+            );
+
+            response.EnsureSuccessStatusCode();
+
+            var echoMissions = await response.Content.ReadFromJsonAsync<
+                List<EchoMissionResponse>
+            >();
+
+            if (echoMissions is null)
+                throw new JsonException("Failed to deserialize missions from Echo");
+
+            var missions = ProcessEchoMissions(echoMissions);
+            return missions;
+        }
+        public async Task<IList<EchoMission>> GetMissionsByInstallation(string installationCode)
+        {
+            string relativePath = $"robots/robot-plan?InstallationCode={installationCode}";
 
             var response = await _echoApi.CallWebApiForAppAsync(
                 ServiceName,
@@ -54,7 +81,7 @@ namespace Api.Services
         public async Task<EchoMission> GetMissionById(int missionId)
         {
             string relativePath =
-                $"robots/robot-plan/{missionId}?InstallationCode={_installationCode}";
+                $"robots/robot-plan/{missionId}";
 
             var response = await _echoApi.CallWebApiForAppAsync(
                 ServiceName,
