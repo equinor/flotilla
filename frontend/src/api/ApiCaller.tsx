@@ -84,6 +84,21 @@ export class BackendAPICaller {
         return result.body
     }
 
+    async getAllEchoMissions(): Promise<Mission[]> {
+        const path: string = 'echo-missions'
+        const result = await this.GET<Mission[]>(path).catch((e) => {
+            throw new Error(`Failed to GET /${path}: ` + e)
+        })
+        return result.body
+    }
+
+    async getEchoMissionsForPlant(installationCode: string): Promise<Mission[]> {
+        const path: string = 'echo-missions/installation/' + installationCode;
+        const result = await this.GET<Mission[]>(path).catch((e) => {
+            throw new Error(`Failed to GET /${path}: ` + e)
+        })
+        return result.body
+    }
     async getMissionById(missionId: string): Promise<Mission> {
         const path: string = 'missions/' + missionId
         const result = await this.GET<Mission>(path).catch((e) => {

@@ -5,6 +5,7 @@ import { useApi, useInterval } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { NoUpcomingMissionsPlaceholder } from './NoMissionPlaceholder'
+import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -22,15 +23,42 @@ const MissionButtonView = styled.div`
     display: flex;
     gap: 2rem;
 `
+const processEchoMissions = (missions: Mission[]): string[] => {
+    const stringifiedArray: string[] = [];
+    missions.map((mission: Mission) => {
+        stringifiedArray.push(mission.id + ": " + mission.name);
+    })
+    return stringifiedArray;
+}
+
+const mapNameToIdentifier = (name: string | null): string => {
+    //replace with fetching names and identifiers(as Enum?)
+    const namesAndIdentifiers: Array<Array<string>> = [["Kårstø", "kaa"], ["Test", "test"], ["Johan Sverdrup", "jsv"]];
+    var installationCode: string = ""
+    namesAndIdentifiers.map((nameAndIdentifier: Array<string>) => {
+        if (nameAndIdentifier[0] == name) {
+            installationCode = nameAndIdentifier[1];
+        }
+    })
+    return installationCode
+}
 
 export function UpcomingMissionView() {
     const apiCaller = useApi()
     const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
+    const [echoMissions, setEchoMissions] = useState<Mission[]>([]);
     useEffect(() => {
         apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
             setUpcomingMissions(missions)
         })
     }, [])
+    useEffect(() => {
+        const installationName = sessionStorage.getItem('assetString');
+        const installationCode = mapNameToIdentifier(installationName);
+        apiCaller.getEchoMissionsForPlant(installationCode).then((missions) => {
+            setEchoMissions(missions)
+        })
+    }, [sessionStorage.getItem('assetString')])
     useInterval(async () => {
         apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
             setUpcomingMissions(missions)
@@ -40,7 +68,6 @@ export function UpcomingMissionView() {
     var upcomingMissionDisplay = upcomingMissions.map(function (mission, index) {
         return <UpcomingMissionCard key={index} mission={mission} />
     })
-
     return (
         <StyledMissionView>
             <Typography variant="h2" color="resting">
@@ -51,7 +78,7 @@ export function UpcomingMissionView() {
                 {upcomingMissions.length === 0 && <NoUpcomingMissionsPlaceholder />}
             </MissionTable>
             <MissionButtonView>
-                <Button>Schedule mission</Button>
+                <ScheduleMissionDialog options={processEchoMissions(echoMissions)}></ScheduleMissionDialog>
                 <Button>Make new mission in Echo</Button>
             </MissionButtonView>
         </StyledMissionView>

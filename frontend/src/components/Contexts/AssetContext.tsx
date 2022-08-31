@@ -11,7 +11,7 @@ interface Props {
 
 const defaultAsset = {
     asset: 'test',
-    switchAsset: (newAsset: string) => {},
+    switchAsset: (newAsset: string) => { },
 }
 
 export const assetOptions = new Map<string, string>([
