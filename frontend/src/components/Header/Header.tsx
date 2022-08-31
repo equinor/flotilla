@@ -1,6 +1,9 @@
 import { Button, Icon, Search, TopBar, Autocomplete } from '@equinor/eds-core-react'
 import { accessible, account_circle, notifications } from '@equinor/eds-icons'
+import { useApi } from 'api/ApiCaller'
 import { assetOptions, useAssetContext } from 'components/Contexts/AssetContext'
+import { EchoPlantInfo } from 'models/EchoPlantInfo'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 Icon.add({ account_circle, accessible, notifications })
@@ -52,23 +55,37 @@ export function Header() {
 }
 
 function AssetPicker() {
+    const apiCaller = useApi();
+    const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>();
     const { asset, switchAsset } = useAssetContext()
+    useEffect(() => {
+        apiCaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
+            var temporaryMap = new Map<string, string>()
+            response.map((echoPlantInfo: EchoPlantInfo) => {
+                temporaryMap.set(echoPlantInfo.projectDescription, echoPlantInfo.installationCode)
+            })
+            setAllPlantsMap(temporaryMap);
+        });
+    }, [])
     let savedAsset = sessionStorage.getItem('assetString')
     let initialOption = ''
     if (savedAsset != null) {
         initialOption = savedAsset
         switchAsset(savedAsset)
     }
-
-    const options = ['Test', 'Kårstø', 'Johan Sverdrup']
+    const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
     return (
         <Autocomplete
-            options={Array.from(assetOptions.keys())}
+            options={Array.from(mappedOptions.keys())}
             label=""
             initialSelectedOptions={[initialOption]}
             placeholder="Select asset"
             onOptionsChange={({ selectedItems }) => {
-                switchAsset(selectedItems[0])
+                const mapKey = mappedOptions.get(selectedItems[0])
+                if (mapKey != undefined)
+                    switchAsset(mapKey)
+                else
+                    switchAsset("")
             }}
         />
     )

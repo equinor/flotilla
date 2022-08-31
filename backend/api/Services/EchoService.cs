@@ -13,6 +13,7 @@ namespace Api.Services
         public abstract Task<EchoMission> GetMissionById(int missionId);
 
         public abstract Task<IList<EchoMission>> GetMissionsByInstallation(string installationCode);
+        public abstract Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
     }
 
     public class EchoService : IEchoService
@@ -103,6 +104,25 @@ namespace Api.Services
             return mission;
         }
 
+        public async Task<IList<EchoPlantInfo>> GetEchoPlantInfos()
+        {
+            string relativePath = "plantinfo";
+            var response = await _echoApi.CallWebApiForAppAsync(
+                ServiceName,
+                options =>
+                {
+                    options.HttpMethod = HttpMethod.Get;
+                    options.RelativePath = relativePath;
+                }
+            );
+
+            response.EnsureSuccessStatusCode();
+            var echoPlantInfoResponse = await response.Content.ReadFromJsonAsync<List<EchoPlantInfoResponse>>();
+            if (echoPlantInfoResponse is null)
+                throw new JsonException("Failed to deserialize plant information from Echo");
+            var installations = ProcessEchoPlantInfos(echoPlantInfoResponse);
+            return installations;
+        }
         private static IList<EchoInspection> ProcessSensorTypes(List<SensorType> sensorTypes)
         {
             var inspections = new List<EchoInspection>();
@@ -179,6 +199,25 @@ namespace Api.Services
             };
 
             return mission;
+        }
+
+        private List<EchoPlantInfo> ProcessEchoPlantInfos(List<EchoPlantInfoResponse> echoPlantInfoResponse)
+        {
+            var echoPlantInfos = new List<EchoPlantInfo>();
+            foreach (var plant in echoPlantInfoResponse)
+            {
+                if (plant.InstallationCode is null || plant.ProjectDescription is null)
+                    continue;
+
+                var echoPlantInfo = new EchoPlantInfo()
+                {
+                    InstallationCode = plant.InstallationCode,
+                    ProjectDescription = plant.ProjectDescription
+                };
+
+                echoPlantInfos.Add(echoPlantInfo);
+            }
+            return echoPlantInfos;
         }
     }
 }
