@@ -69,8 +69,6 @@ function AssetPicker() {
             placeholder="Select asset"
             onOptionsChange={({ selectedItems }) => {
                 switchAsset(selectedItems[0])
-                console.log(selectedItems[0])
-                console.log(asset)
             }}
         />
     )
