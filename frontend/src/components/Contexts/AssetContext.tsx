@@ -26,10 +26,6 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     const [asset, setAsset] = useState(defaultAsset.asset)
 
     const switchAsset = (newAsset: string) => {
-        assetOptions.has(newAsset)
-            ? setAsset(assetOptions.get(newAsset)!)
-            : console.log('Could not find asset: ', newAsset)
-
         sessionStorage.setItem('assetString', newAsset)
         console.log('Saved asset: ', sessionStorage.getItem('assetString'))
     }

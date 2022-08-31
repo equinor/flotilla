@@ -2,6 +2,8 @@ import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
 import { EchoMission } from 'models/EchoMission'
 import { Mission, MissionStatus } from 'models/Mission'
+import { EchoPlantInfo } from 'models/EchoPlantInfo'
+import { Report } from 'models/Report'
 import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
 import { useContext, useEffect, useRef } from 'react'
@@ -93,11 +95,15 @@ export class BackendAPICaller {
     }
 
     async getEchoMissionsForPlant(installationCode: string): Promise<Mission[]> {
-        const path: string = 'echo-missions/installation/' + installationCode;
-        const result = await this.GET<Mission[]>(path).catch((e) => {
-            throw new Error(`Failed to GET /${path}: ` + e)
-        })
-        return result.body
+        if (installationCode) {
+            const path: string = 'echo-missions/installation/' + installationCode;
+            const result = await this.GET<Mission[]>(path).catch((e) => {
+                throw new Error(`Failed to GET /${path}: ` + e)
+            })
+            return result.body
+        }
+        else
+            return this.getAllEchoMissions()
     }
     async getMissionById(missionId: string): Promise<Mission> {
         const path: string = 'missions/' + missionId
@@ -110,6 +116,13 @@ export class BackendAPICaller {
     async getVideoStreamsByRobotId(robotId: string): Promise<VideoStream[]> {
         const path: string = 'robots/' + robotId + '/video-streams'
         const result = await this.GET<VideoStream[]>(path).catch((e) => {
+            throw new Error(`Failed to GET /${path}: ` + e)
+        })
+        return result.body
+    }
+    async getEchoPlantInfo(): Promise<EchoPlantInfo[]> {
+        const path: string = "echo-missions/echo-plant-info";
+        const result = await this.GET<EchoPlantInfo[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
         return result.body
