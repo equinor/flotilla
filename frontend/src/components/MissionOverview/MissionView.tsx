@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from 'react'
 import { Mission } from 'models/Mission'
 import { NoUpcomingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
+import { Header } from 'components/Header/Header'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -31,17 +32,6 @@ const processEchoMissions = (missions: Mission[]): string[] => {
     return stringifiedArray;
 }
 
-const mapNameToIdentifier = (name: string | null): string => {
-    //replace with fetching names and identifiers(as Enum?)
-    const namesAndIdentifiers: Array<Array<string>> = [["Kårstø", "kaa"], ["Test", "test"], ["Johan Sverdrup", "jsv"]];
-    var installationCode: string = ""
-    namesAndIdentifiers.map((nameAndIdentifier: Array<string>) => {
-        if (nameAndIdentifier[0] == name) {
-            installationCode = nameAndIdentifier[1];
-        }
-    })
-    return installationCode
-}
 
 export function MissionView() {
     const apiCaller = useApi()
@@ -52,13 +42,14 @@ export function MissionView() {
             setUpcomingMissions(missions)
         })
     }, [])
+
     useEffect(() => {
-        const installationName = sessionStorage.getItem('assetString');
-        const installationCode = mapNameToIdentifier(installationName);
-        apiCaller.getEchoMissionsForPlant(installationCode).then((missions) => {
+        const installationCode = sessionStorage.getItem('assetString')
+        apiCaller.getEchoMissionsForPlant(installationCode as string).then((missions) => {
             setEchoMissions(missions)
         })
-    }, [sessionStorage.getItem('assetString')])
+    }, [apiCaller])
+
     useInterval(async () => {
         apiCaller.getUpcomingMissions().then((missions) => {
             setUpcomingMissions(missions)
