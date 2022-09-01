@@ -1,6 +1,6 @@
 import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
-import { Mission } from 'models/Mission'
+import { Mission, MissionStatus } from 'models/Mission'
 import { Report } from 'models/Report'
 import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
@@ -68,8 +68,8 @@ export class BackendAPICaller {
         return result.body
     }
 
-    async getUpcomingMissions(): Promise<Mission[]> {
-        const path: string = 'scheduled-missions/upcoming'
+    async getMissionsByStatus(status: MissionStatus): Promise<Mission[]> {
+        const path: string = 'missions?status=' + status
         const result = await this.GET<Mission[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
@@ -77,7 +77,7 @@ export class BackendAPICaller {
     }
 
     async getMissionById(missionId: string): Promise<Mission> {
-        const path: string = 'scheduled-missions/' + missionId
+        const path: string = 'missions/' + missionId
         const result = await this.GET<Mission>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
