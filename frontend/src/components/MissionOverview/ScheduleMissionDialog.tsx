@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Dialog } from "@equinor/eds-core-react";
+import { Autocomplete, Button, Card, Checkbox, Dialog, Typography } from "@equinor/eds-core-react";
 import { useState } from "react";
 import styled from "styled-components";
 
@@ -7,14 +7,18 @@ interface IProps {
 }
 
 const StyledMissionDialog = styled.div`
-display: flex;
-justify-content: center;
+    display: flex;
+    justify-content: center;
 `
-const StyledAutoComplete = styled.div`
-display: flex;
-justify-content: center;
-min-width: 200px;
-min-height: 200px;
+const StyledAutoComplete = styled(Card)`
+    display: flex;
+    justify-content: center;
+    padding: 8px;
+`
+
+const StyledMissionSection = styled.div`
+    margin-left: auto;
+    margin-right: 0;
 `
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
@@ -26,9 +30,16 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             <StyledMissionDialog>
                 <Dialog open={isOpen} isDismissable>
                     <StyledAutoComplete>
-                        <Autocomplete options={props.options} label={"Schedule Missions"}></Autocomplete>
+                        <Typography variant="h5">Schedule mission</Typography>
+                        <Autocomplete
+                            options={props.options}
+                            label={"Schedule Missions"}
+                        />
+                        <StyledMissionSection>
+                            <Button onClick={() => { setIsOpen(false) }} variant="outlined" color="secondary"> Cancel </Button>
+                            <Button onClick={() => { setIsOpen(false) }}> Schedule mission</Button>
+                        </StyledMissionSection>
                     </StyledAutoComplete>
-                    <Button onClick={() => { setIsOpen(false) }}> Close </Button>
                 </Dialog>
             </StyledMissionDialog>
         </>
