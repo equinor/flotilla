@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useApi } from 'api/ApiCaller'
-import { Mission } from 'models/Mission'
+import { Mission, MissionStatus } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
@@ -22,7 +22,7 @@ export function OngoingMissionView() {
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     useEffect(() => {
         // Temporarily using the upcoming dummy missions for ongoing dummy missions
-        apiCaller.getUpcomingMissions().then((missions) => {
+        apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
             setOngoingMissions(missions)
         })
     }, [])

@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { UpcomingMissionCard } from './UpcomingMissionCard'
 import { useApi, useInterval } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
-import { Mission } from 'models/Mission'
+import { Mission, MissionStatus } from 'models/Mission'
 import { NoUpcomingMissionsPlaceholder } from './NoMissionPlaceholder'
 
 const StyledMissionView = styled.div`
@@ -27,12 +27,12 @@ export function MissionView() {
     const apiCaller = useApi()
     const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
     useEffect(() => {
-        apiCaller.getUpcomingMissions().then((missions) => {
+        apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
             setUpcomingMissions(missions)
         })
     }, [])
     useInterval(async () => {
-        apiCaller.getUpcomingMissions().then((missions) => {
+        apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
             setUpcomingMissions(missions)
         })
     })
