@@ -1,8 +1,8 @@
 import { Button, Icon, Search, TopBar, Autocomplete } from '@equinor/eds-core-react'
 import { accessible, account_circle, notifications } from '@equinor/eds-icons'
 import { useApi } from 'api/ApiCaller'
-import { assetOptions, useAssetContext } from 'components/Contexts/AssetContext'
-import { EchoPlantInfo } from 'models/EchoPlantInfo'
+import { useAssetContext } from 'components/Contexts/AssetContext'
+import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
@@ -55,17 +55,14 @@ export function Header() {
 }
 
 function AssetPicker() {
-    const apiCaller = useApi();
-    const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>();
+    const apiCaller = useApi()
+    const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
     const { asset, switchAsset } = useAssetContext()
     useEffect(() => {
         apiCaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
-            var temporaryMap = new Map<string, string>()
-            response.map((echoPlantInfo: EchoPlantInfo) => {
-                temporaryMap.set(echoPlantInfo.projectDescription, echoPlantInfo.installationCode)
-            })
-            setAllPlantsMap(temporaryMap);
-        });
+            const mapping = mapAssetCodeToName(response)
+            setAllPlantsMap(mapping)
+        })
     }, [])
     let savedAsset = sessionStorage.getItem('assetString')
     let initialOption = ''
@@ -82,11 +79,17 @@ function AssetPicker() {
             placeholder="Select asset"
             onOptionsChange={({ selectedItems }) => {
                 const mapKey = mappedOptions.get(selectedItems[0])
-                if (mapKey != undefined)
-                    switchAsset(mapKey)
-                else
-                    switchAsset("")
+                if (mapKey != undefined) switchAsset(mapKey)
+                else switchAsset('')
             }}
         />
     )
+}
+
+const mapAssetCodeToName = (echoPlantInfoArray: EchoPlantInfo[]): Map<string, string> => {
+    var mapping = new Map<string, string>()
+    echoPlantInfoArray.map((echoPlantInfo: EchoPlantInfo) => {
+        mapping.set(echoPlantInfo.projectDescription, echoPlantInfo.installationCode)
+    })
+    return mapping
 }

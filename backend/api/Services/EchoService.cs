@@ -8,11 +8,10 @@ namespace Api.Services
 {
     public interface IEchoService
     {
-        public abstract Task<IList<EchoMission>> GetMissions();
+        public abstract Task<IList<EchoMission>> GetMissions(string? installationCode);
 
         public abstract Task<EchoMission> GetMissionById(int missionId);
 
-        public abstract Task<IList<EchoMission>> GetMissionsByInstallation(string installationCode);
         public abstract Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
     }
 
@@ -28,9 +27,11 @@ namespace Api.Services
             _installationCode = config.GetValue<string>("InstallationCode");
         }
 
-        public async Task<IList<EchoMission>> GetMissions()
+        public async Task<IList<EchoMission>> GetMissions(string? installationCode)
         {
-            string relativePath = $"robots/robot-plan";
+            string relativePath = string.IsNullOrEmpty(installationCode) ?
+            $"robots/robot-plan" :
+            $"robots/robot-plan?InstallationCode={installationCode}";
 
             var response = await _echoApi.CallWebApiForAppAsync(
                 ServiceName,
@@ -51,31 +52,7 @@ namespace Api.Services
                 throw new JsonException("Failed to deserialize missions from Echo");
 
             var missions = ProcessEchoMissions(echoMissions);
-            return missions;
-        }
-        public async Task<IList<EchoMission>> GetMissionsByInstallation(string installationCode)
-        {
-            string relativePath = $"robots/robot-plan?InstallationCode={installationCode}";
 
-            var response = await _echoApi.CallWebApiForAppAsync(
-                ServiceName,
-                options =>
-                {
-                    options.HttpMethod = HttpMethod.Get;
-                    options.RelativePath = relativePath;
-                }
-            );
-
-            response.EnsureSuccessStatusCode();
-
-            var echoMissions = await response.Content.ReadFromJsonAsync<
-                List<EchoMissionResponse>
-            >();
-
-            if (echoMissions is null)
-                throw new JsonException("Failed to deserialize missions from Echo");
-
-            var missions = ProcessEchoMissions(echoMissions);
             return missions;
         }
 
@@ -201,7 +178,7 @@ namespace Api.Services
             return mission;
         }
 
-        private List<EchoPlantInfo> ProcessEchoPlantInfos(List<EchoPlantInfoResponse> echoPlantInfoResponse)
+        private static List<EchoPlantInfo> ProcessEchoPlantInfos(List<EchoPlantInfoResponse> echoPlantInfoResponse)
         {
             var echoPlantInfos = new List<EchoPlantInfo>();
             foreach (var plant in echoPlantInfoResponse)

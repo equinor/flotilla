@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System.Text.Json.Serialization;
 namespace Api.Controllers.Models
 {
@@ -14,7 +14,7 @@ namespace Api.Controllers.Models
         public string? ProjectDescription { get; set; }
 
         [JsonPropertyName("plantDirectory")]
-        public string? plantDirectory { get; set; }
+        public string? PlantDirectory { get; set; }
 
         [JsonPropertyName("availableInEcho3D")]
         public bool AvailableInEcho3D { get; set; }

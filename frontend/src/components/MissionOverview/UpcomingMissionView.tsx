@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { NoUpcomingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
-import { Header } from 'components/Header/Header'
+import { EchoMission } from 'models/EchoMission'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -24,19 +24,33 @@ const MissionButtonView = styled.div`
     display: flex;
     gap: 2rem;
 `
-const processEchoMissions = (missions: Mission[]): string[] => {
-    const stringifiedArray: string[] = [];
-    missions.map((mission: Mission) => {
-        stringifiedArray.push(mission.id + ": " + mission.name);
+const mapEchoMissionToString = (missions: EchoMission[]): Map<string, EchoMission> => {
+    var missionMap = new Map<string, EchoMission>()
+    missions.map((mission: EchoMission) => {
+        missionMap.set(mission.id + ': ' + mission.name, mission)
     })
-    return stringifiedArray;
+    return missionMap
 }
-
 
 export function UpcomingMissionView() {
     const apiCaller = useApi()
     const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
-    const [echoMissions, setEchoMissions] = useState<Mission[]>([]);
+    const [selectedEchoMission, setSelectedEchoMissions] = useState<EchoMission[]>([])
+    const [echoMissions, setEchoMissions] = useState<Map<string, EchoMission>>()
+    const [assetString, setAssetString] = useState<string>('')
+
+    const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
+        var echoMissionsToSchedule: EchoMission[] = []
+        selectedEchoMissions.map((selectedEchoMission: string) => {
+            if (echoMissions) echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as EchoMission)
+        })
+        setSelectedEchoMissions(echoMissionsToSchedule)
+    }
+    const onScheduleButtonPress = () => {
+        selectedEchoMission.map((mission: EchoMission) => {
+            apiCaller.postMission(mission.id, new Date())
+        })
+    }
     useEffect(() => {
         apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
             setUpcomingMissions(missions)
@@ -45,8 +59,15 @@ export function UpcomingMissionView() {
 
     useEffect(() => {
         const installationCode = sessionStorage.getItem('assetString')
-        apiCaller.getEchoMissionsForPlant(installationCode as string).then((missions) => {
-            setEchoMissions(missions)
+        if (installationCode != assetString) {
+            setAssetString(installationCode as string)
+        }
+    }, [sessionStorage.getItem('assetString')])
+
+    useEffect(() => {
+        apiCaller.getEchoMissions(assetString).then((missions) => {
+            const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
+            setEchoMissions(mappedEchoMissions)
         })
     }, [apiCaller])
 
@@ -69,8 +90,16 @@ export function UpcomingMissionView() {
                 {upcomingMissions.length === 0 && <NoUpcomingMissionsPlaceholder />}
             </MissionTable>
             <MissionButtonView>
-                <ScheduleMissionDialog options={processEchoMissions(echoMissions)}></ScheduleMissionDialog>
-                <Button>Make new mission in Echo</Button>
+                {echoMissions && (
+                    <>
+                        <ScheduleMissionDialog
+                            options={Array.from(echoMissions.keys())}
+                            onSelectedMissions={onSelectedEchoMissions}
+                            onScheduleButtonPress={onScheduleButtonPress}
+                        ></ScheduleMissionDialog>
+                        <Button>Make new mission in Echo</Button>
+                    </>
+                )}
             </MissionButtonView>
         </StyledMissionView>
     )
