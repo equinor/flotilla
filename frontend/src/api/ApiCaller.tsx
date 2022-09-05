@@ -1,12 +1,11 @@
 import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
-import { EchoMission } from 'models/EchoMission'
+import { EchoMission, EchoPlantInfo } from 'models/EchoMission'
 import { Mission, MissionStatus } from 'models/Mission'
-import { EchoPlantInfo } from 'models/EchoPlantInfo'
-import { Report } from 'models/Report'
 import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
 import { useContext, useEffect, useRef } from 'react'
+import { filterRobots } from 'utils/scheduleMission'
 
 export class BackendAPICaller {
     /* Implements the request sent to the backend api.
@@ -86,25 +85,14 @@ export class BackendAPICaller {
         return result.body
     }
 
-    async getAllEchoMissions(): Promise<Mission[]> {
-        const path: string = 'echo-missions'
-        const result = await this.GET<Mission[]>(path).catch((e) => {
+    async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
+        const path: string = 'echo-missions?installationCode=' + installationCode
+        const result = await this.GET<EchoMission[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
         return result.body
     }
 
-    async getEchoMissionsForPlant(installationCode: string): Promise<Mission[]> {
-        if (installationCode) {
-            const path: string = 'echo-missions/installation/' + installationCode;
-            const result = await this.GET<Mission[]>(path).catch((e) => {
-                throw new Error(`Failed to GET /${path}: ` + e)
-            })
-            return result.body
-        }
-        else
-            return this.getAllEchoMissions()
-    }
     async getMissionById(missionId: string): Promise<Mission> {
         const path: string = 'missions/' + missionId
         const result = await this.GET<Mission>(path).catch((e) => {
@@ -121,9 +109,19 @@ export class BackendAPICaller {
         return result.body
     }
     async getEchoPlantInfo(): Promise<EchoPlantInfo[]> {
-        const path: string = "echo-missions/echo-plant-info";
-        const result = await this.GET<EchoPlantInfo[]>(path).catch((e) => {
+        const path: string = 'all-plants-info'
+        const result = await this.GET<EchoPlantInfo[]>(path).catch((e: Error) => {
             throw new Error(`Failed to GET /${path}: ` + e)
+        })
+        return result.body
+    }
+    async postMission(echoMissionId: number, startTime: Date) {
+        const path: string = 'missions'
+        const robots: Robot[] = await this.getRobots()
+        const desiredRobot = filterRobots(robots, 'R2-D2')
+        const body = { robotId: desiredRobot[0].id, echoMissionId: echoMissionId, startTime: startTime }
+        const result = await this.POST<unknown>(path, body).catch((e) => {
+            throw new Error(`Failed to POST /${path}: ` + e)
         })
         return result.body
     }

@@ -16,3 +16,8 @@ export interface Inspection {
     inspectionType: string
     timeInSeconds: number
 }
+
+export interface EchoPlantInfo {
+    installationCode: string
+    projectDescription: string
+}

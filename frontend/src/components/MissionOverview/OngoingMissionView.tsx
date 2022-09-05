@@ -21,8 +21,7 @@ export function OngoingMissionView() {
     const apiCaller = useApi()
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     useEffect(() => {
-        // Temporarily using the upcoming dummy missions for ongoing dummy missions
-        apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
+        apiCaller.getMissionsByStatus(MissionStatus.Ongoing).then((missions) => {
             setOngoingMissions(missions)
         })
     }, [])

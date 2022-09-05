@@ -1,4 +1,4 @@
-#nullable disable
+﻿#nullable disable
 namespace Api.Controllers.Models
 {
     public class EchoPlantInfo
