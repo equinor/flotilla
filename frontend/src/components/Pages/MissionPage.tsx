@@ -26,7 +26,7 @@ export function MissionPage() {
     useEffect(() => {
         if (missionId) {
             apiCaller.getMissionById(missionId).then((mission) => {
-                setSelectedMission(mission);
+                setSelectedMission(mission)
                 apiCaller.getVideoStreamsByRobotId(mission.robot.id).then((streams) => {
                     setVideoStreams(streams)
                 })
@@ -37,10 +37,11 @@ export function MissionPage() {
     var videoDisplay = videoStreams.map(function (videoStream, index) {
         return <VideoStreamWindow key={index} videoStream={videoStream} />
     })
+
     return (
         <StyledMissionPage>
             <VideoStreamSection>{videoStreams.length > 0 && videoDisplay}</VideoStreamSection>
-            <TaskTable mission={selectedMission}/>
+            <TaskTable mission={selectedMission} />
             <Button href="..">FrontPage</Button>
         </StyledMissionPage>
     )

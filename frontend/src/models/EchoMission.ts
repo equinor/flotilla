@@ -12,7 +12,7 @@ export interface EchoTag {
     inspections: Inspection[]
 }
 
-export interface Inspection{
+export interface Inspection {
     inspectionType: string
     timeInSeconds: number
 }

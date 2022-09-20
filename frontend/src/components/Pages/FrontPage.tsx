@@ -24,8 +24,8 @@ export function FrontPage() {
                 <Button
                     variant="contained"
                     onClick={() => {
-                        apiCaller.getAllEchoMissions().then((robots) => {
-                            console.log(robots)
+                        apiCaller.getAllEchoMissions().then((missions) => {
+                            console.log(missions)
                         })
                     }}
                 >

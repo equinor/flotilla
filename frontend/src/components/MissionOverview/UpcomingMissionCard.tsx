@@ -32,13 +32,20 @@ export function UpcomingMissionCard({ mission }: MissionProps) {
         let path = '/mission/' + mission.id
         navigate(path)
     }
+    var numberOfTasks = 0
+    mission.plannedTasks.forEach((task) => (numberOfTasks += task.inspections.length))
     return (
-        <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={routeChange}>
+        <StyledMissionCard
+            key={mission.id}
+            variant="default"
+            style={{ boxShadow: tokens.elevation.raised }}
+            onClick={routeChange}
+        >
             <HorizontalContent>
                 <Checkbox />
                 <Typography variant="h6">Mission name</Typography>
                 <MissionStartTimeDisplay mission={mission} />
-                <Typography>Tags: 17</Typography>
+                <Typography>Tasks: {numberOfTasks}</Typography>
                 <MissionDurationDisplay mission={mission} />
                 <Button variant="ghost_icon">
                     <Icon name="more_vertical" size={24} title="more action" />
@@ -58,13 +65,12 @@ function MissionStartTimeDisplay({ mission }: MissionProps) {
 }
 
 function MissionDurationDisplay({ mission }: MissionProps) {
-    if(mission.endTime)
-    {
+    if (mission.endTime) {
         return (
             <Typography>
                 Estimated duration: {differenceInHours(new Date(mission.endTime), new Date(mission.startTime))} h
             </Typography>
         )
     }
-    return(<></>)
+    return <></>
 }
