@@ -31,7 +31,7 @@ export function OngoingMissionCard({ mission }: MissionProps) {
             <Typography variant="h6">INSPECTION</Typography>
             <Typography>{mission.name}</Typography>
             <HorisontalContent>
-                <MissionStatusDisplay status={mission.status} />
+                <MissionStatusDisplay status={mission.missionStatus} />
                 <MissionProgressDisplay />
             </HorisontalContent>
         </StyledMissionCard>

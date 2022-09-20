@@ -1,17 +1,16 @@
 import { Table, Typography } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
-import { useContext } from 'react'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledTable = styled(Table)`
     grid-column: 1/ -1;
 `
 interface TaskProps {
-    tasks?: Mission[]
+    mission?: Mission
 }
 
-export function TaskTable({ tasks }: TaskProps) {
+export function TaskTable({ mission }: TaskProps) {
     const { asset, switchAsset } = useAssetContext()
 
     return (
@@ -28,7 +27,7 @@ export function TaskTable({ tasks }: TaskProps) {
                 </Table.Row>
             </Table.Head>
             <Table.Row>
-                <Table.Cell>Hello</Table.Cell>
+                <Table.Cell>{mission?.echoMissionId}</Table.Cell>
                 <Table.Cell>{asset}</Table.Cell>
             </Table.Row>
         </StyledTable>
