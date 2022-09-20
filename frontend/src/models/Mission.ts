@@ -14,6 +14,7 @@ export enum MissionStatus {
 
 export interface Mission {
     id: string
+    name?: string
     assetCode?: string
     robot: Robot
     isarMissionId?: string

@@ -52,9 +52,13 @@ function MissionStartTimeDisplay({ mission }: MissionProps) {
 }
 
 function MissionDurationDisplay({ mission }: MissionProps) {
-    return (
-        <Typography>
-            Estimated duration: {differenceInHours(new Date(mission.endTime), new Date(mission.startTime))} h
-        </Typography>
-    )
+    if(mission.endTime)
+    {
+        return (
+            <Typography>
+                Estimated duration: {differenceInHours(new Date(mission.endTime), new Date(mission.startTime))} h
+            </Typography>
+        )
+    }
+    return(<></>)
 }

@@ -2,6 +2,7 @@ import { Button } from '@equinor/eds-core-react'
 import { useApi } from 'api/ApiCaller'
 import { TaskTable } from 'components/TaskOverview/TaskTable'
 import { VideoStreamWindow } from 'components/VideoStream/VideoStreamWindow'
+import { Mission } from 'models/Mission'
 import { VideoStream } from 'models/VideoStream'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -21,9 +22,11 @@ export function MissionPage() {
     const { missionId } = useParams()
     const apiCaller = useApi()
     const [videoStreams, setVideoStreams] = useState<VideoStream[]>([])
+    const [selectedMission, setSelectedMission] = useState<Mission>()
     useEffect(() => {
         if (missionId) {
             apiCaller.getMissionById(missionId).then((mission) => {
+                setSelectedMission(mission);
                 apiCaller.getVideoStreamsByRobotId(mission.robot.id).then((streams) => {
                     setVideoStreams(streams)
                 })
@@ -37,7 +40,7 @@ export function MissionPage() {
     return (
         <StyledMissionPage>
             <VideoStreamSection>{videoStreams.length > 0 && videoDisplay}</VideoStreamSection>
-            <TaskTable />
+            <TaskTable mission={selectedMission}/>
             <Button href="..">FrontPage</Button>
         </StyledMissionPage>
     )
