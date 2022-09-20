@@ -2,10 +2,10 @@ export interface EchoMission {
     id: number
     name: string
     url: string
-    tags: Tag[]
+    tags: EchoTag[]
 }
 
-export interface Tag {
+export interface EchoTag {
     id: number
     tagId: string
     url: string

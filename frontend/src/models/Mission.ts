@@ -1,3 +1,5 @@
+import { EchoTag } from './EchoMission'
+import { IsarTask } from './IsarTask'
 import { Robot } from './Robot'
 
 export enum MissionStatus {
@@ -7,14 +9,18 @@ export enum MissionStatus {
     Aborted = 'Aborted',
     Warning = 'Warning',
     Paused = 'Paused',
+    Cancelled = 'Cancelled'
 }
 
 export interface Mission {
     id: string
-    name: string
+    assetCode?: string
     robot: Robot
-    echoMissionId: string
+    isarMissionId?: string
+    echoMissionId: number
+    missionStatus: MissionStatus
     startTime: Date
-    endTime: Date
-    status: MissionStatus
+    endTime?: Date
+    tasks: IsarTask[]
+    plannedTasks: EchoTag[]
 }

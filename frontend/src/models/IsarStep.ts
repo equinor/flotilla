@@ -2,14 +2,14 @@ import { IsarTask } from './IsarTask'
 
 export interface IsarStep {
     id: string
-    IsarStepId: string
-    Task: IsarTask
-    TagId: string
-    StepStatus: IsarStepStatus
-    StepType: StepTypeEnum
-    InspectionType: InspectionTypeEnum
-    Time: Date
-    FileLocation: string
+    isarStepId: string
+    task: IsarTask
+    tagId?: string
+    stepStatus: IsarStepStatus
+    stepType: StepTypeEnum
+    inspectionType?: InspectionTypeEnum
+    time: Date
+    fileLocation?: string
 }
 
 enum IsarStepStatus {

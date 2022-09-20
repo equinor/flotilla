@@ -29,4 +29,5 @@ export interface Robot {
     logs?: string
     port?: number
     videoStreams?: VideoStream[]
+    isarUri?: string
 }

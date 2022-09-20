@@ -1,14 +1,14 @@
 import { IsarStep } from './IsarStep'
-import { Report } from './Report'
+import { Mission } from './Mission'
 
 export interface IsarTask {
-    Id: string
-    IsarTaskId: string
-    Report: Report
-    TagId: string
-    TaskStatus: IsarTaskStatus
-    Time: Date
-    Steps: IsarStep[]
+    id: string
+    isarTaskId: string
+    mission: Mission
+    tagId?: string
+    taskStatus: IsarTaskStatus
+    time: Date
+    steps: IsarStep[]
 }
 
 enum IsarTaskStatus {
