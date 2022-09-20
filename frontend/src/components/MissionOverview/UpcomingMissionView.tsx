@@ -23,7 +23,7 @@ const MissionButtonView = styled.div`
     gap: 2rem;
 `
 
-export function MissionView() {
+export function UpcomingMissionView() {
     const apiCaller = useApi()
     const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
     useEffect(() => {

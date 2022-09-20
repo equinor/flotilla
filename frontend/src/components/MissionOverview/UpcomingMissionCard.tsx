@@ -4,6 +4,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import { format, differenceInHours } from 'date-fns'
 import styled from 'styled-components'
+import { useNavigate } from 'react-router-dom'
 interface MissionProps {
     mission: Mission
 }
@@ -26,8 +27,13 @@ const StyledMissionStartTime = styled.div`
 Icon.add({ more_vertical })
 
 export function UpcomingMissionCard({ mission }: MissionProps) {
+    let navigate = useNavigate()
+    const routeChange = () => {
+        let path = '/mission/' + mission.id
+        navigate(path)
+    }
     return (
-        <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }}>
+        <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={routeChange}>
             <HorizontalContent>
                 <Checkbox />
                 <Typography variant="h6">Mission name</Typography>
