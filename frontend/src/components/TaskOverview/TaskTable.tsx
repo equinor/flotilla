@@ -12,7 +12,20 @@ interface TaskProps {
 
 export function TaskTable({ mission }: TaskProps) {
     const { asset, switchAsset } = useAssetContext()
-
+    console.log(mission)
+    var indexCounter = 0;
+    var rows = mission?.tasks.map(function (task) {
+        indexCounter++
+        return (
+            <Table.Row>
+                <Table.Cell>{indexCounter}</Table.Cell>
+                <Table.Cell>{asset}</Table.Cell>
+                <Table.Cell></Table.Cell>
+                <Table.Cell></Table.Cell>
+                <Table.Cell></Table.Cell>
+            </Table.Row>
+        )
+    })
     return (
         <StyledTable>
             <Table.Caption>
@@ -24,12 +37,12 @@ export function TaskTable({ mission }: TaskProps) {
                     <Table.Cell>Tag-ID</Table.Cell>
                     <Table.Cell>Inspection Type</Table.Cell>
                     <Table.Cell>Status</Table.Cell>
+                    <Table.Cell>Data Link</Table.Cell>
                 </Table.Row>
             </Table.Head>
-            <Table.Row>
-                <Table.Cell>{mission?.echoMissionId}</Table.Cell>
-                <Table.Cell>{asset}</Table.Cell>
-            </Table.Row>
+            <Table.Body>
+                {rows}
+            </Table.Body>
         </StyledTable>
     )
 }

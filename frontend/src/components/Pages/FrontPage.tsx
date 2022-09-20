@@ -1,5 +1,5 @@
 import { Button } from '@equinor/eds-core-react'
-import { MissionView } from 'components/MissionOverview/MissionView'
+import { UpcomingMissionView } from 'components/MissionOverview/UpcomingMissionView'
 import { OngoingMissionView } from 'components/MissionOverview/OngoingMissionView'
 import { RobotStatusSection } from 'components/RobotCards/RobotStatusView'
 import { useApi } from 'api/ApiCaller'
@@ -18,7 +18,7 @@ export function FrontPage() {
     return (
         <StyledFrontPage>
             <OngoingMissionView />
-            <MissionView />
+            <UpcomingMissionView />
             <RobotStatusSection />
             <div>
                 <Button

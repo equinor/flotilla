@@ -78,7 +78,7 @@ public static class InitDb
         {
             Robot = Robots[0],
             AssetCode = "test",
-            EchoMissionId = 1,
+            EchoMissionId = 95,
             IsarMissionId = "1",
             MissionStatus = MissionStatus.Pending,
             StartTime = DateTimeOffset.UtcNow,
