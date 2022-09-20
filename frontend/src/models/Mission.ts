@@ -9,7 +9,7 @@ export enum MissionStatus {
     Aborted = 'Aborted',
     Warning = 'Warning',
     Paused = 'Paused',
-    Cancelled = 'Cancelled'
+    Cancelled = 'Cancelled',
 }
 
 export interface Mission {

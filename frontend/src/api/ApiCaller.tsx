@@ -71,7 +71,7 @@ export class BackendAPICaller {
     async getAllEchoMissions(): Promise<EchoMission[]> {
         const path: string = 'echo-missions'
         const result = await this.GET<EchoMission[]>(path).catch((e) => {
-            throw new Error (`Failed to GET /${path}: ` + e)
+            throw new Error(`Failed to GET /${path}: ` + e)
         })
         return result.body
     }

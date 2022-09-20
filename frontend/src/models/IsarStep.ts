@@ -30,9 +30,9 @@ enum StepTypeEnum {
 }
 
 enum InspectionTypeEnum {
-    Image,
-    ThermalImage,
-    Video,
-    ThermalVideo,
-    Audio,
+    Image = 'Image',
+    ThermalImage = 'ThermalImage',
+    Video = 'Video',
+    ThermalVideo = 'ThermalVideo',
+    Audio = 'Audio',
 }

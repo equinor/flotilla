@@ -16,6 +16,8 @@ public static class InitDb
 
     private static PlannedInspection PlannedInspection =>
         new() { InspectionType = IsarStep.InspectionTypeEnum.Image, TimeInSeconds = 0.5f };
+    private static PlannedInspection PlannedInspection2 =>
+        new() { InspectionType = IsarStep.InspectionTypeEnum.ThermalImage, TimeInSeconds = 0.5f };
 
     private static PlannedTask PlannedTask =>
         new()
@@ -89,7 +91,7 @@ public static class InitDb
         {
             Robot = Robots[1],
             AssetCode = "test",
-            EchoMissionId = 1,
+            EchoMissionId = 95,
             IsarMissionId = "1",
             MissionStatus = MissionStatus.Pending,
             StartTime = DateTimeOffset.UtcNow.AddHours(7),
@@ -123,6 +125,7 @@ public static class InitDb
         {
             var plannedTask = PlannedTask;
             plannedTask.Inspections.Add(PlannedInspection);
+            plannedTask.Inspections.Add(PlannedInspection2);
             mission.PlannedTasks.Add(plannedTask);
         }
         context.AddRange(Robots);
