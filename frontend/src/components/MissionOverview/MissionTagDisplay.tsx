@@ -6,6 +6,9 @@ import styled from 'styled-components'
 const StyledTagCount = styled.div`
     display: flex;
 `
+interface TaskProps {
+    tasks: IsarTask[]
+}
 
 interface TaskProps {
     tasks: IsarTask[]
