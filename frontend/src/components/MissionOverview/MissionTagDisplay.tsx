@@ -9,16 +9,17 @@ interface TaskProps {
     tasks: IsarTask[]
 }
 
-export function MissionProgressDisplay({tasks}: TaskProps) {
+export function MissionProgressDisplay({ tasks }: TaskProps) {
     var numberOfTasks = tasks.length
     var numberOfCompletedTasks = 0
     tasks.forEach((task) => {
-        if(task.taskStatus == IsarTaskStatus.Successful)
-            numberOfCompletedTasks++
+        if (task.taskStatus == IsarTaskStatus.Successful) numberOfCompletedTasks++
     })
     return (
         <StyledTagCount>
-            <Typography>Tag {numberOfCompletedTasks}/{numberOfTasks}</Typography>
+            <Typography>
+                Tag {numberOfCompletedTasks}/{numberOfTasks}
+            </Typography>
         </StyledTagCount>
     )
 }
