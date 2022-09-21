@@ -108,6 +108,7 @@ export class BackendAPICaller {
         })
         return result.body
     }
+
     async getEchoPlantInfo(): Promise<EchoPlantInfo[]> {
         const path: string = 'all-plants-info'
         const result = await this.GET<EchoPlantInfo[]>(path).catch((e: Error) => {
@@ -124,6 +125,27 @@ export class BackendAPICaller {
             throw new Error(`Failed to POST /${path}: ` + e)
         })
         return result.body
+    }
+
+    async pauseMission(robotId: string) {
+        const path: string = 'robots/' + robotId + '/pause'
+        await this.POST(path, '').catch((e) => {
+            throw new Error(`Failed to POST /${path}: ` + e)
+        })
+    }
+
+    async resumeMission(robotId: string) {
+        const path: string = 'robots/' + robotId + '/resume'
+        await this.POST(path, '').catch((e) => {
+            throw new Error(`Failed to POST /${path}: ` + e)
+        })
+    }
+
+    async stopMission(robotId: string) {
+        const path: string = 'robots/' + robotId + '/stop'
+        await this.POST(path, '').catch((e) => {
+            throw new Error(`Failed to POST /${path}: ` + e)
+        })
     }
 }
 
