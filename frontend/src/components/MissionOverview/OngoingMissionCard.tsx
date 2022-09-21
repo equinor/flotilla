@@ -7,6 +7,7 @@ import { MissionStatusDisplay } from './MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { pause_circle, stop, play_circle, pause } from '@equinor/eds-icons'
 import { useEffect, useState } from 'react'
+import { useApi } from 'api/ApiCaller'
 
 Icon.add({ pause_circle, play_circle, stop })
 interface MissionProps {
@@ -19,7 +20,7 @@ const StyledMissionCard = styled(Card)`
 `
 const HorisontalContent = styled.div`
     display: grid;
-    grid-template-columns: auto auto 40px 40px ;
+    grid-template-columns: auto auto 40px 40px;
     align-items: end;
 `
 
@@ -45,23 +46,30 @@ export function OngoingMissionCard({ mission }: MissionProps) {
 }
 
 function MissionControlButtons({ mission }: MissionProps) {
-    const [status, setStatus] = useState(MissionStatus.Ongoing);
-    enum ControlButton { Pause, Stop, Play }
+    const [status, setStatus] = useState(MissionStatus.Ongoing)
+    const apiCaller = useApi()
+    enum ControlButton {
+        Pause,
+        Stop,
+        Resume,
+    }
 
     const handleClick = (button: ControlButton) => {
         switch (button) {
             case ControlButton.Pause: {
+                apiCaller.pauseMission(mission.robot.id)
                 setStatus(MissionStatus.Paused)
-                break;
+                break
             }
-            case ControlButton.Play: {
+            case ControlButton.Resume: {
+                apiCaller.resumeMission(mission.robot.id)
                 setStatus(MissionStatus.Ongoing)
-                break;
-
+                break
             }
             case ControlButton.Stop: {
+                apiCaller.resumeMission(mission.robot.id)
                 setStatus(MissionStatus.Cancelled)
-                break;
+                break
             }
         }
     }
@@ -70,20 +78,30 @@ function MissionControlButtons({ mission }: MissionProps) {
         if (status == MissionStatus.Paused) {
             return (
                 <>
-                    <Icon name="play_circle" style={{ color: tokens.colors.interactive.primary__resting.rgba }} size={32} onClick={() => handleClick(ControlButton.Play)} />
-                    <Icon name="stop" style={{ color: tokens.colors.interactive.primary__resting.rgba }} size={32} onClick={() => handleClick(ControlButton.Stop)} />
+                    <Icon
+                        name="play_circle"
+                        style={{ color: tokens.colors.interactive.primary__resting.rgba }}
+                        size={32}
+                        onClick={() => handleClick(ControlButton.Resume)}
+                    />
+                    <Icon
+                        name="stop"
+                        style={{ color: tokens.colors.interactive.primary__resting.rgba }}
+                        size={32}
+                        onClick={() => handleClick(ControlButton.Stop)}
+                    />
                 </>
             )
         }
         return (
-            <Icon name="pause_circle" style={{ color: tokens.colors.interactive.primary__resting.rgba }} size={32} onClick={() => handleClick(ControlButton.Pause)} />
+            <Icon
+                name="pause_circle"
+                style={{ color: tokens.colors.interactive.primary__resting.rgba }}
+                size={32}
+                onClick={() => handleClick(ControlButton.Pause)}
+            />
         )
     }
 
-    return (
-        <>
-            {renderControlIcon(status)}
-        </>
-    )
-
+    return <>{renderControlIcon(status)}</>
 }
