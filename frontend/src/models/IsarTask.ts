@@ -11,7 +11,7 @@ export interface IsarTask {
     steps: IsarStep[]
 }
 
-enum IsarTaskStatus {
+export enum IsarTaskStatus {
     Successful,
     PartiallySuccessful,
     NotStarted,
