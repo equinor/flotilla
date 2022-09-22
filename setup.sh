@@ -38,49 +38,67 @@ if [ -f $flotilla_dir/.env ]; then
 
     read reply
     if [ "$reply" = "n" ] || [ "$reply" = "N" ]; then
-        echo -e "\nSETUP ABORTED\n"
-        exit 1
+        echo -e "\nBackend setup - Aborted!\n"
+        backend_abort="true"
     fi
 fi
-echo -e "Flotilla azure client secret needed for backend dockerization."
-echo -en "Input Flotilla Azure Client Secret (copy-paste from KeyVault):\n" 
+if [ "$frontend_abort" != "true" ]; then
+    echo -e "Flotilla azure client secret needed for backend dockerization."
+    echo -en "Input Flotilla Azure Client Secret (copy-paste from KeyVault):\n" 
 
-while [ true ]
-do
-    read -s az_client_secret
+    while [ true ]
+    do
+        read -s az_client_secret
 
-    if [ -z "$az_client_secret" ]; then
-        echo "Azure client secret cannot be empty"
-        echo "Try again:"
-    else
-        break
-    fi
-done
+        if [ -z "$az_client_secret" ]; then
+            echo "Azure client secret cannot be empty"
+            echo "Try again:"
+        else
+            break
+        fi
+    done
 
-echo "FLOTILLA_CLIENT_SECRET='$az_client_secret'" > $flotilla_dir/.env
-echo -e "Added client secret to .env file"
-dotnet user-secrets set "AzureAd:ClientSecret" $az_client_secret --project backend/api > /dev/null
-echo -e "Added client secret to ASP.NET secret manager"
 
-echo -e "Backup setup - Done!"
-echo -e "-----------------------------\n"
+    echo "FLOTILLA_CLIENT_SECRET='$az_client_secret'" > $flotilla_dir/.env
+    echo -e "Added client secret to .env file"
+    dotnet user-secrets set "AzureAd:ClientSecret" $az_client_secret --project backend/api > /dev/null
+    echo -e "Added client secret to ASP.NET secret manager"
+
+    echo -e "Backup setup - Done!"
+    echo -e "-----------------------------\n"
+fi
+
 #-----------------------------
 
 #--------- BROKER ------------
 echo "--------- BROKER ------------"
 echo -e "Setting up broker ..."
-echo -e "MQTT TLS Server key needed for the broker to communicate using TLS"
-echo -en "Input MQTT broker server key (copy-paste from KeyVault):\n" 
-read -s broker_server_key
 
-# Save to .env file
-echo -e "FLOTILLA_BROKER_SERVER_KEY='$broker_server_key'" >> $flotilla_dir/.env
+if [ -f $flotilla_dir/.env ]; then
+    echo -e "WARNING: The file '$flotilla_dir/.env' already exists, it will be overwritten if the operation continues."
+    echo -e "Is this ok? (Y/n)"
 
-echo -e "Added broker server key to .env file"
-echo -e "Broker setup - Done!"
-echo -e "-----------------------------\n"
-#-----------------------------
+    read reply
+    if [ "$reply" = "n" ] || [ "$reply" = "N" ]; then
+        echo -e "\Broker setup - Aborted!\n"
+        broker_abort="true"
+    fi
+fi
+if [ "$broker_abort" != "true" ]; then
+    echo -e "MQTT TLS Server key needed for the broker to communicate using TLS"
+    echo -en "Input MQTT broker server key (copy-paste from KeyVault):\n" 
+    read -s broker_server_key
+
+    # Save to .env file
+    echo -e "FLOTILLA_BROKER_SERVER_KEY='$broker_server_key'" >> $flotilla_dir/.env
+
+    echo -e "Added broker server key to .env file"
+    echo -e "Broker setup - Done!"
+    echo -e "-----------------------------\n"
+    #-----------------------------
 
 
-echo -e "Flotilla setup - Done!"
-echo -e "-----------------------------"
+    echo -e "Flotilla setup - Done!"
+    echo -e "-----------------------------"
+fi
+
