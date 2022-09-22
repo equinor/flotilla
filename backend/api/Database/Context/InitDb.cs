@@ -83,7 +83,7 @@ public static class InitDb
             EchoMissionId = 95,
             IsarMissionId = "1",
             MissionStatus = MissionStatus.Pending,
-            StartTime = DateTimeOffset.UtcNow,
+            StartTime = DateTimeOffset.UtcNow.AddHours(3),
             PlannedTasks = new List<PlannedTask>(),
         };
 
@@ -116,6 +116,11 @@ public static class InitDb
 
     public static void PopulateDb(FlotillaDbContext context)
     {
+        // To make sure we are not trying to initialize database more than once during tests
+        if (context.Robots.Any())
+        {
+            return;
+        }
         foreach (var robot in Robots)
         {
             robot.VideoStreams.Add(VideoStream);
@@ -129,7 +134,7 @@ public static class InitDb
             mission.PlannedTasks.Add(plannedTask);
         }
         context.AddRange(Robots);
-        // context.AddRange(Missions);
+        context.AddRange(Missions);
         context.SaveChanges();
     }
 }

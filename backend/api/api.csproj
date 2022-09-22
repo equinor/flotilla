@@ -27,4 +27,8 @@
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.0.2.221" />
   </ItemGroup>
 
+  <ItemGroup>
+     <InternalsVisibleTo Include="api" />
+  </ItemGroup>
+
 </Project>

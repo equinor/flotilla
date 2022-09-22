@@ -64,14 +64,17 @@ builder.Services.AddAuthorization(
     }
 );
 
-// The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
-// See https://github.com/Azure/azure-sdk-for-net/issues/17052
-builder.Configuration.AddAzureKeyVault(
-    new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
-    new DefaultAzureCredential(
-        new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
-    )
-);
+if (!builder.Environment.EnvironmentName.Equals("Test", StringComparison.OrdinalIgnoreCase))
+{
+    // The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
+    // See https://github.com/Azure/azure-sdk-for-net/issues/17052
+    builder.Configuration.AddAzureKeyVault(
+        new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
+        new DefaultAzureCredential(
+            new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
+        )
+    );
+}
 
 var app = builder.Build();
 

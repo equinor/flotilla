@@ -199,7 +199,7 @@ To check the formatting, run the following command in the backend folder:
 
 ```
 cd backend
-dotnet format --severity info --verbosity diagnostic --verify-no-changes
+dotnet format --severity info --verbosity diagnostic --verify-no-changes --exclude ./api/migrations
 ```
 
 dotnet format is used to detect naming conventions and other code-related issues. They can be fixed by

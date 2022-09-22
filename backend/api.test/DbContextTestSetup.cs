@@ -1,7 +1,13 @@
 ﻿using System;
+using System.Security.Claims;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 using Api.Database.Context;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace Api.Test
@@ -14,12 +20,9 @@ namespace Api.Test
 
         private DbContextOptions<FlotillaDbContext> CreateOptions()
         {
-            //if (_connection is null)
-            //{
             string connectionString = new SqliteConnectionStringBuilder { DataSource = ":memory:", Cache = SqliteCacheMode.Shared }.ToString();
             _connection = new SqliteConnection(connectionString);
             _connection.Open();
-            //}
             var builder = new DbContextOptionsBuilder<FlotillaDbContext>();
             builder.EnableSensitiveDataLogging();
             builder.UseSqlite(_connection);
@@ -53,5 +56,34 @@ namespace Api.Test
         // This class has no code, and is never created. Its purpose is simply
         // to be the place to apply [CollectionDefinition] and all the
         // ICollectionFixture<> interfaces.
+    }
+
+    // Class for mocking authentication options
+    public class TestAuthHandlerOptions : AuthenticationSchemeOptions
+    {
+        public string DefaultUserId { get; set; } = null!;
+    }
+
+    // Class for mocking authentication handler
+    public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+    {
+        public const string AuthenticationScheme = "Test";
+        public TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
+            ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
+            : base(options, logger, encoder, clock)
+        {
+        }
+
+        protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            var claims = new[] { new Claim(ClaimTypes.Name, "Test.User"), new Claim(ClaimTypes.Role, "Test.User") };
+            var identity = new ClaimsIdentity(claims, AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(principal, AuthenticationScheme);
+
+            var result = AuthenticateResult.Success(ticket);
+
+            return Task.FromResult(result);
+        }
     }
 }
