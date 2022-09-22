@@ -12,19 +12,8 @@ See [Flotilla readme](../README.md#automatic-environment-setup)
 
 ### Manual environment setup
 
-The best way to pass this is to store it **base 64-encoded** in a `.env` file in the root of flotilla, and docker compose loads this by default on startup.  
+The best way to pass this is to store it in a `.env` file in the root of flotilla, and docker compose loads this by default on startup.  
 See [Using the “--env-file” option](https://docs.docker.com/compose/environment-variables/#using-the---env-file--option) for more information.
-
-The key **has to be base64-encoded in the .env file**.  
-The key should be in be in 'pure format' (No start and end lines) before being encoded.
-
-You can encode the key in any base64 encoder online or:  
-To encode the key in a bash terminal, you can run
-
-```
-key="ACTUAL_KEY_HERE"
-encoded_key=$(echo $key|base64)
-```
 
 ## Running the broker
 

@@ -73,11 +73,8 @@ echo -e "MQTT TLS Server key needed for the broker to communicate using TLS"
 echo -en "Input MQTT broker server key (copy-paste from KeyVault):\n" 
 read -s broker_server_key
 
-# base64 encode
-encoded_key=$(echo $broker_server_key|base64)
-
-# save to .env file
-echo -e "FLOTILLA_BROKER_SERVER_KEY='$encoded_key'" >> $flotilla_dir/.env
+# Save to .env file
+echo -e "FLOTILLA_BROKER_SERVER_KEY='$broker_server_key'" >> $flotilla_dir/.env
 
 echo -e "Added broker server key to .env file"
 echo -e "Broker setup - Done!"

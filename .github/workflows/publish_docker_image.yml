@@ -39,8 +39,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          #build-args: |
-          #  TLS_SERVER_KEY=${{ secrets.TLS_SERVER_KEY }}
 
   build-and-push-backend:
     runs-on: ubuntu-latest
