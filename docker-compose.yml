@@ -13,10 +13,10 @@ services:
   broker:
     build:
       context: broker
-      args:
-        - TLS_SERVER_KEY=${FLOTILLA_BROKER_SERVER_KEY}
     ports:
       - "1883:1883"
+    environment:
+      - TLS_SERVER_KEY=${FLOTILLA_BROKER_SERVER_KEY}
   backend:
     build: backend
     ports:
@@ -26,4 +26,3 @@ services:
       - Mqtt__Host=broker
       - ASPNETCORE_ENVIRONMENT=Development
       - AZURE_CLIENT_SECRET=${FLOTILLA_CLIENT_SECRET}
-      
