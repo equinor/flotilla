@@ -1,4 +1,5 @@
-﻿using Api.Controllers.Models;
+﻿using System.Text.Json;
+using Api.Controllers.Models;
 using static Api.Controllers.Models.IsarTaskDefinition;
 namespace Api.Utilities
 {
@@ -13,10 +14,27 @@ namespace Api.Utilities
             Justification = "Will be implemented, is here for documentation of intended behavior")]
         public static IsarPose GetPoseFromTag(EchoTag tag)
         {
-            const string Frame = "asset";
-            IsarPosition position = new(0, 0, 0, Frame);
-            IsarOrientation orientation = new(0, 0, 0, 1, Frame);
-            return new IsarPose(position, orientation, Frame);
+            using (var r = new StreamReader("./Utilities/PredefinedPoses.json"))
+            {
+                string json = r.ReadToEnd();
+                var predefinedPoses = JsonSerializer.Deserialize<List<PredefinedPose>>(json);
+
+                if (predefinedPoses != null)
+                {
+                    var predefinedPose = predefinedPoses.Find(x => x.Tag == tag.TagId);
+                    if (predefinedPose != null)
+                    {
+                        IsarPosition position = new(predefinedPose.Pose.Position.X, predefinedPose.Pose.Position.Y, predefinedPose.Pose.Position.Z, predefinedPose.Pose.Frame);
+                        IsarOrientation orientation = new(predefinedPose.Pose.Orientation.X, predefinedPose.Pose.Orientation.Y, predefinedPose.Pose.Orientation.Z, predefinedPose.Pose.Orientation.W, predefinedPose.Pose.Frame);
+
+                        return new IsarPose(position, orientation, predefinedPose.Pose.Frame);
+                    }
+                }
+            }
+            string dummyFrame = "asset";
+            IsarPosition dummyPosition = new(0, 0, 0, dummyFrame);
+            IsarOrientation dummyOrientation = new(0, 0, 0, 1, dummyFrame);
+            return new IsarPose(dummyPosition, dummyOrientation, dummyFrame);
         }
 
         /// <summary>
