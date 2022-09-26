@@ -56,7 +56,7 @@ namespace Api.Test.EventHandlers
                         {
                             new EchoInspection(IsarStep.InspectionTypeEnum.Image, null)
                         },
-                        TagId = "123",
+                        TagId = "dummy-tag",
                         URL = new Uri("http://localhost:3000")
                     }
                 }

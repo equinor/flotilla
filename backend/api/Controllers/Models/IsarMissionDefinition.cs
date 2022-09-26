@@ -91,6 +91,12 @@ namespace Api.Controllers.Models
                 Orientation = orientation;
                 FrameName = frameName;
             }
+            public IsarPose(PredefinedPose predefinedPose)
+            {
+                Position = new IsarPosition(predefinedPose.Pose.Position.X, predefinedPose.Pose.Position.Y, predefinedPose.Pose.Position.Z, predefinedPose.Pose.Frame);
+                Orientation = new IsarOrientation(predefinedPose.Pose.Orientation.X, predefinedPose.Pose.Orientation.Y, predefinedPose.Pose.Orientation.Z, predefinedPose.Pose.Orientation.W, predefinedPose.Pose.Frame);
+                FrameName = predefinedPose.Pose.Frame;
+            }
         }
 
         [JsonPropertyName("pose")]
