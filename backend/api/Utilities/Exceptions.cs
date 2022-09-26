@@ -9,4 +9,9 @@
     {
         public MissionNotFoundException(string message) : base(message) { }
     }
+
+    public class RobotPositionNotFoundException : Exception
+    {
+        public RobotPositionNotFoundException(string message) : base(message) { }
+    }
 }
