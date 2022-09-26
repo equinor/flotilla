@@ -257,6 +257,12 @@ public class RobotController : ControllerBase
             _logger.LogError(e, "{message}", message);
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
+        catch (RobotPositionNotFoundException e)
+        {
+            string message = "A suitable robot position could not be found";
+            _logger.LogError(e, "{message}", message);
+            return StatusCode(StatusCodes.Status500InternalServerError, message);
+        }
 
         robot.Status = RobotStatus.Busy;
         await _robotService.Update(robot);

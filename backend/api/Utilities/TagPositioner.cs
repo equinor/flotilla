@@ -14,27 +14,24 @@ namespace Api.Utilities
             Justification = "Will be implemented, is here for documentation of intended behavior")]
         public static IsarPose GetPoseFromTag(EchoTag tag)
         {
-            using (var r = new StreamReader("./Utilities/PredefinedPoses.json"))
-            {
-                string json = r.ReadToEnd();
-                var predefinedPoses = JsonSerializer.Deserialize<List<PredefinedPose>>(json);
+            using var r = new StreamReader("./Utilities/PredefinedPoses.json");
+            string json = r.ReadToEnd();
+            var predefinedPoses = JsonSerializer.Deserialize<List<PredefinedPose>>(json);
 
-                if (predefinedPoses != null)
-                {
-                    var predefinedPose = predefinedPoses.Find(x => x.Tag == tag.TagId);
-                    if (predefinedPose != null)
-                    {
-                        IsarPosition position = new(predefinedPose.Pose.Position.X, predefinedPose.Pose.Position.Y, predefinedPose.Pose.Position.Z, predefinedPose.Pose.Frame);
-                        IsarOrientation orientation = new(predefinedPose.Pose.Orientation.X, predefinedPose.Pose.Orientation.Y, predefinedPose.Pose.Orientation.Z, predefinedPose.Pose.Orientation.W, predefinedPose.Pose.Frame);
+            if (predefinedPoses == null)
+                throw new RobotPositionNotFoundException("Could not find any predefined poses in the workaround file");
 
-                        return new IsarPose(position, orientation, predefinedPose.Pose.Frame);
-                    }
-                }
-            }
-            string dummyFrame = "asset";
-            IsarPosition dummyPosition = new(0, 0, 0, dummyFrame);
-            IsarOrientation dummyOrientation = new(0, 0, 0, 1, dummyFrame);
-            return new IsarPose(dummyPosition, dummyOrientation, dummyFrame);
+
+            var predefinedPose = predefinedPoses.Find(x => x.Tag == tag.TagId);
+
+            if (predefinedPose == null)
+                throw new RobotPositionNotFoundException($"Could not find tag {tag.TagId} in the workaround file");
+
+            IsarPosition position = new(predefinedPose.Pose.Position.X, predefinedPose.Pose.Position.Y, predefinedPose.Pose.Position.Z, predefinedPose.Pose.Frame);
+            IsarOrientation orientation = new(predefinedPose.Pose.Orientation.X, predefinedPose.Pose.Orientation.Y, predefinedPose.Pose.Orientation.Z, predefinedPose.Pose.Orientation.W, predefinedPose.Pose.Frame);
+
+            return new IsarPose(position, orientation, predefinedPose.Pose.Frame);
+
         }
 
         /// <summary>
