@@ -65,7 +65,7 @@ namespace Api.EventHandlers
             {
                 var result = await RobotController.StartMission(
                     scheduledMission.Robot.Id,
-                    scheduledMission.EchoMissionId
+                    scheduledMission.Id
                 );
                 if (result.Result is not OkObjectResult)
                 {
@@ -80,8 +80,6 @@ namespace Api.EventHandlers
                 _logger.LogError(e, "Failed to start mission '{id}'", scheduledMission.Id);
                 return false;
             }
-            scheduledMission.MissionStatus = MissionStatus.Ongoing;
-            await MissionService.Update(scheduledMission);
             return true;
         }
     }

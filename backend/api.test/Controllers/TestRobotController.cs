@@ -30,7 +30,6 @@ namespace Api.Test.Controllers
             var missionService = new MissionService(context, missionServiceLogger.Object);
             var isarService = new IsarService(
                 isarLogger.Object,
-                missionService,
                 isarDownstreamApi.Object
             );
             var echoService = new EchoService(config, echoDownstreamApi.Object);
@@ -41,7 +40,8 @@ namespace Api.Test.Controllers
                 mockLoggerController.Object,
                 service,
                 isarService,
-                echoService
+                echoService,
+                missionService
             );
         }
 

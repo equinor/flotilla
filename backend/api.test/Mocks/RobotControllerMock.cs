@@ -26,7 +26,8 @@ namespace Api.Test.Mocks
                 mockLoggerController.Object,
                 RobotServiceMock.Object,
                 IsarServiceMock.Object,
-                EchoServiceMock.Object
+                EchoServiceMock.Object,
+                MissionServiceMock.Object
             )
             {
                 CallBase = true
