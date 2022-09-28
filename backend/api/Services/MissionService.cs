@@ -170,8 +170,7 @@ namespace Api.Services
             }
 
             mission.MissionStatus = missionStatus;
-
-            await _context.SaveChangesAsync();
+            await Update(mission);
 
             return true;
         }
