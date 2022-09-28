@@ -30,8 +30,8 @@ namespace Api.Services
         public async Task<IList<EchoMission>> GetMissions(string? installationCode)
         {
             string relativePath = string.IsNullOrEmpty(installationCode) ?
-            $"robots/robot-plan" :
-            $"robots/robot-plan?InstallationCode={installationCode}";
+            $"robots/robot-plan?Status=Ready" :
+            $"robots/robot-plan?InstallationCode={installationCode}&&Status=Ready";
 
             var response = await _echoApi.CallWebApiForAppAsync(
                 ServiceName,
