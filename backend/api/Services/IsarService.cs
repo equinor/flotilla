@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Api.Controllers.Models;
 using Api.Database.Models;
+using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.Identity.Web;
 
@@ -10,7 +11,7 @@ namespace Api.Services
 {
     public interface IIsarService
     {
-        public abstract Task<Mission> StartMission(
+        public abstract Task<IsarServiceStartMissionResponse> StartMission(
             Robot robot,
             int echoMissionId,
             IsarMissionDefinition missionDefinition
@@ -28,16 +29,13 @@ namespace Api.Services
         public const string ServiceName = "IsarApi";
         private readonly IDownstreamWebApi _isarApi;
         private readonly ILogger<IsarService> _logger;
-        private readonly IMissionService _missionService;
 
         public IsarService(
             ILogger<IsarService> logger,
-            IMissionService missionService,
             IDownstreamWebApi downstreamWebApi
         )
         {
             _logger = logger;
-            _missionService = missionService;
             _isarApi = downstreamWebApi;
         }
 
@@ -76,7 +74,7 @@ namespace Api.Services
             );
         }
 
-        public async Task<Mission> StartMission(
+        public async Task<IsarServiceStartMissionResponse> StartMission(
             Robot robot,
             int echoMissionId,
             IsarMissionDefinition missionDefinition
@@ -111,22 +109,18 @@ namespace Api.Services
 
             var tasks = ProcessIsarMissionResponse(isarMissionResponse);
 
-            var mission = new Mission
-            {
-                Robot = robot,
-                IsarMissionId = isarMissionResponse?.MissionId,
-                EchoMissionId = echoMissionId,
-                MissionStatus = MissionStatus.Pending,
-                StartTime = DateTimeOffset.UtcNow,
-                Tasks = tasks,
-            };
+            var isarServiceStartMissionResponse = new IsarServiceStartMissionResponse(
+                isarMissionId: isarMissionResponse.MissionId,
+                startTime: DateTimeOffset.UtcNow,
+                tasks: tasks
+            );
 
             _logger.LogInformation(
                 "ISAR Mission '{missionId}' started on robot '{robotId}'",
                 isarMissionResponse?.MissionId,
                 robot.Id
             );
-            return await _missionService.Create(mission);
+            return isarServiceStartMissionResponse;
         }
 
         public async Task<IsarStopMissionResponse> StopMission(Robot robot)

@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers;
-using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.EventHandlers;
@@ -43,35 +41,6 @@ namespace Api.Test.EventHandlers
                 Robot = Robot,
                 MissionStatus = MissionStatus.Pending,
                 StartTime = DateTimeOffset.Now
-            };
-        private static EchoMission EchoMission =>
-            new()
-            {
-                Tags = new List<EchoTag>()
-                {
-                    new EchoTag()
-                    {
-                        Id = 1,
-                        Inspections = new List<EchoInspection>()
-                        {
-                            new EchoInspection(IsarStep.InspectionTypeEnum.Image, null)
-                        },
-                        TagId = "dummy-tag",
-                        URL = new Uri("http://localhost:3000")
-                    }
-                }
-            };
-        private static Mission TestOngoingMission =>
-            new()
-            {
-                Id = "id",
-                Robot = Robot,
-                IsarMissionId = "isarId",
-                EchoMissionId = 0,
-                MissionStatus = MissionStatus.Ongoing,
-                StartTime = DateTimeOffset.Now,
-                EndTime = DateTimeOffset.Now.AddMinutes(3),
-                Tasks = new List<IsarTask>()
             };
 
         public TestMissionScheduler(DatabaseFixture fixture)
@@ -157,33 +126,6 @@ namespace Api.Test.EventHandlers
             var postMission = await _missionService.ReadById(ScheduledMission.Id);
             Assert.NotNull(postMission);
             Assert.True(postMission!.MissionStatus == postStatus);
-        }
-
-        [Fact]
-        public void ScheduledMissionSetToOngoing()
-        {
-            // Mock happy path of 'RobotController.StartMission'
-
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-            _robotControllerMock.RobotServiceMock
-                .Setup(r => r.ReadById(Robot.Id))
-                .Returns(async () => Robot);
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            _robotControllerMock.IsarServiceMock
-                .Setup(
-                    i =>
-                        i.StartMission(
-                            Robot,
-                            It.IsAny<int>(),
-                            It.IsAny<IsarMissionDefinition>()
-                        ).Result
-                )
-                .Returns(TestOngoingMission);
-            _robotControllerMock.EchoServiceMock
-                .Setup(i => i.GetMissionById(It.IsAny<int>()).Result)
-                .Returns(EchoMission);
-
-            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Ongoing);
         }
 
         [Fact]
