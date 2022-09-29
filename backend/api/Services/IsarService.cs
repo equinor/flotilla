@@ -22,6 +22,8 @@ namespace Api.Services
         public abstract Task<HttpResponseMessage> PauseMission(Robot robot);
 
         public abstract Task<HttpResponseMessage> ResumeMission(Robot robot);
+
+        public abstract Task<IsarMissionDefinition> GetIsarMissionDefinition(EchoMission echoMission);
     }
 
     public class IsarService : IIsarService
@@ -29,14 +31,17 @@ namespace Api.Services
         public const string ServiceName = "IsarApi";
         private readonly IDownstreamWebApi _isarApi;
         private readonly ILogger<IsarService> _logger;
+        private readonly ITagPositioner _tagPositioner;
 
         public IsarService(
             ILogger<IsarService> logger,
-            IDownstreamWebApi downstreamWebApi
+            IDownstreamWebApi downstreamWebApi,
+            ITagPositioner tagPositioner
         )
         {
             _logger = logger;
             _isarApi = downstreamWebApi;
+            _tagPositioner = tagPositioner;
         }
 
         /// <summary>
@@ -72,6 +77,27 @@ namespace Api.Services
                 },
                 content
             );
+        }
+
+
+        public async Task<IsarMissionDefinition> GetIsarMissionDefinition(EchoMission echoMission)
+        {
+            var tasks = echoMission.Tags.Select(tag => GetIsarTaskDefinition(tag));
+            var results = await Task.WhenAll(tasks);
+            return new IsarMissionDefinition(tasks: results.ToList());
+        }
+        public async Task<IsarTaskDefinition> GetIsarTaskDefinition(EchoTag echoTag)
+        {
+            string tag = echoTag.TagId;
+            var sensorTypes = echoTag.Inspections.Select(t => t.InspectionType.ToString()).ToList();
+            var pose = _tagPositioner.GetPoseFromTag(echoTag);
+            var inspectionTarget = await _tagPositioner.GetTagPositionFromTag(echoTag);
+            float? videoDuration = echoTag.Inspections
+                .Where(t => t.TimeInSeconds.HasValue)
+                .FirstOrDefault()
+                ?.TimeInSeconds;
+
+            return new IsarTaskDefinition(pose: pose, tag: tag, inspectionTarget: inspectionTarget, sensorTypes: sensorTypes, videoDuration: videoDuration);
         }
 
         public async Task<IsarServiceStartMissionResponse> StartMission(

@@ -2,6 +2,7 @@
 using Api.Controllers;
 using Api.Database.Models;
 using Api.Services;
+using Api.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -23,6 +24,7 @@ namespace Api.Test.Controllers
             var missionServiceLogger = new Mock<ILogger<MissionService>>();
             var echoDownstreamApi = new Mock<IDownstreamWebApi>();
             var isarDownstreamApi = new Mock<IDownstreamWebApi>();
+            var tagPositioner = new Mock<ITagPositioner>();
 
             var context = fixture.NewContext;
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -30,7 +32,8 @@ namespace Api.Test.Controllers
             var missionService = new MissionService(context, missionServiceLogger.Object);
             var isarService = new IsarService(
                 isarLogger.Object,
-                isarDownstreamApi.Object
+                isarDownstreamApi.Object,
+                tagPositioner.Object
             );
             var echoService = new EchoService(config, echoDownstreamApi.Object);
             var service = new RobotService(context);
