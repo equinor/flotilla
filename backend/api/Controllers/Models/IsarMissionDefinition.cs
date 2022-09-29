@@ -15,11 +15,6 @@ namespace Api.Controllers.Models
         {
             Tasks = tasks;
         }
-
-        public IsarMissionDefinition(EchoMission echoMission)
-        {
-            Tasks = echoMission.Tags.Select(tag => new IsarTaskDefinition(tag)).ToList();
-        }
     }
 
     public class IsarTaskDefinition
@@ -127,18 +122,6 @@ namespace Api.Controllers.Models
             InspectionTarget = inspectionTarget;
             InspectionTypes = sensorTypes;
             VideoDuration = videoDuration;
-        }
-
-        public IsarTaskDefinition(EchoTag echoTag)
-        {
-            Tag = echoTag.TagId;
-            InspectionTypes = echoTag.Inspections.Select(t => t.InspectionType.ToString()).ToList();
-            Pose = TagPositioner.GetPoseFromTag(echoTag);
-            InspectionTarget = TagPositioner.GetTagPositionFromTag(echoTag);
-            VideoDuration = echoTag.Inspections
-                .Where(t => t.TimeInSeconds.HasValue)
-                .FirstOrDefault()
-                ?.TimeInSeconds;
         }
     }
 }
