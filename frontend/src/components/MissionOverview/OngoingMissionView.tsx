@@ -1,4 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
+import { pause } from '@equinor/eds-icons'
 import { useApi } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useEffect, useState } from 'react'
