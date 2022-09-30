@@ -67,7 +67,7 @@ function MissionControlButtons({ mission }: MissionProps) {
                 break
             }
             case ControlButton.Stop: {
-                apiCaller.resumeMission(mission.robot.id)
+                apiCaller.stopMission(mission.robot.id)
                 setStatus(MissionStatus.Cancelled)
                 break
             }
