@@ -6,7 +6,7 @@ import { MissionProgressDisplay } from './MissionTagDisplay'
 import { MissionStatusDisplay } from './MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { pause_circle, stop, play_circle, pause } from '@equinor/eds-icons'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useApi } from 'api/ApiCaller'
 
 Icon.add({ pause_circle, play_circle, stop })
@@ -46,7 +46,7 @@ export function OngoingMissionCard({ mission }: MissionProps) {
 }
 
 function MissionControlButtons({ mission }: MissionProps) {
-    const [status, setStatus] = useState(MissionStatus.Ongoing)
+    const [status, setStatus] = useState(mission.missionStatus)
     const apiCaller = useApi()
     enum ControlButton {
         Pause,
