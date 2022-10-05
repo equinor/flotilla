@@ -1,7 +1,7 @@
 import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { UpcomingMissionCard } from './UpcomingMissionCard'
-import { useApi, useInterval } from 'api/ApiCaller'
+import { useApi } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { NoUpcomingMissionsPlaceholder } from './NoMissionPlaceholder'
@@ -71,11 +71,14 @@ export function UpcomingMissionView() {
         })
     }, [apiCaller])
 
-    useInterval(async () => {
-        apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
-            setUpcomingMissions(missions)
-        })
-    })
+    useEffect(() => {
+        const id = setInterval(() => {
+            apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
+                setUpcomingMissions(missions)
+            })
+        }, 1000)
+        return () => clearInterval(id)
+    }, [])
 
     var upcomingMissionDisplay = upcomingMissions.map(function (mission, index) {
         return <UpcomingMissionCard key={index} mission={mission} />

@@ -26,6 +26,15 @@ export function OngoingMissionView() {
         })
     }, [])
 
+    useEffect(() => {
+        const id = setInterval(() => {
+            apiCaller.getMissionsByStatus(MissionStatus.Ongoing).then((missions) => {
+                setOngoingMissions(missions)
+            })
+        }, 1000)
+        return () => clearInterval(id)
+    }, [])
+
     var missionDisplay = ongoingMissions.map(function (mission, index) {
         return <OngoingMissionCard key={index} mission={mission} />
     })
