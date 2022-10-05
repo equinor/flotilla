@@ -54,6 +54,7 @@ namespace Api.EventHandlers
                         upcomingMission.MissionStatus = newStatus;
                         await MissionService.Update(upcomingMission);
                     }
+                    break;
                 }
                 await Task.Delay(_timeDelay, stoppingToken);
             }
