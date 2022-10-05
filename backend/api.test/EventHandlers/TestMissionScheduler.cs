@@ -117,7 +117,7 @@ namespace Api.Test.EventHandlers
 
             // Start / Stop eventhandler
             await _scheduledMissionEventHandler.StartAsync(cts.Token);
-            await Task.Delay(100);
+            await Task.Delay(3000);
             await _scheduledMissionEventHandler.StopAsync(cts.Token);
 
             // ASSERT
