@@ -34,9 +34,14 @@ namespace Api.EventHandlers
             {
                 foreach (var upcomingMission in UpcomingMissions)
                 {
+                    var freshMission = MissionService.ReadById(upcomingMission.Id).Result;
+                    if (freshMission == null)
+                    {
+                        continue;
+                    }
                     if (
-                        upcomingMission.Robot.Status is not RobotStatus.Available
-                        || upcomingMission.StartTime > DateTimeOffset.UtcNow
+                        freshMission.Robot.Status is not RobotStatus.Available
+                        || freshMission.StartTime > DateTimeOffset.UtcNow
                     )
                     {
                         continue;
@@ -54,7 +59,6 @@ namespace Api.EventHandlers
                         upcomingMission.MissionStatus = newStatus;
                         await MissionService.Update(upcomingMission);
                     }
-                    break;
                 }
                 await Task.Delay(_timeDelay, stoppingToken);
             }
