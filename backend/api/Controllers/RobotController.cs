@@ -18,6 +18,7 @@ public class RobotController : ControllerBase
     private readonly IEchoService _echoService;
     private readonly IMissionService _missionService;
 
+
     public RobotController(
         ILogger<RobotController> logger,
         IRobotService robotService,
@@ -242,10 +243,11 @@ public class RobotController : ControllerBase
         IsarServiceStartMissionResponse isarServiceStartMissionResponse;
         try
         {
+            var isarMissionDefinition = await _isarService.GetIsarMissionDefinition(echoMission);
             isarServiceStartMissionResponse = await _isarService.StartMission(
                 robot,
                 mission.EchoMissionId,
-                new IsarMissionDefinition(echoMission)
+                isarMissionDefinition
             );
         }
         catch (HttpRequestException e)

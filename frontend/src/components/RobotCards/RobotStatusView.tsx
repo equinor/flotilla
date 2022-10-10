@@ -1,5 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
-import { useApi, useInterval } from 'api/ApiCaller'
+import { useApi } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -26,11 +26,15 @@ export function RobotStatusSection() {
         })
     }, [])
 
-    useInterval(async () => {
-        apiCaller.getRobots().then((result) => {
-            setRobots(result)
-        })
-    })
+    useEffect(() => {
+        const id = setInterval(() => {
+            apiCaller.getRobots().then((result) => {
+                setRobots(result)
+            })
+        }, 1000)
+        return () => clearInterval(id)
+    }, [])
+
     var robotDisplay = robots.map(function (robot) {
         return <RobotStatusCard key={robot.id} robot={robot} />
     })

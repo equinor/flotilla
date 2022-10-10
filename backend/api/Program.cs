@@ -4,6 +4,7 @@ using Api.Controllers;
 using Api.EventHandlers;
 using Api.Mqtt;
 using Api.Services;
+using Api.Utilities;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +20,8 @@ builder.Services.AddScoped<IRobotService, RobotService>();
 builder.Services.AddScoped<IMissionService, MissionService>();
 builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
+builder.Services.AddScoped<IStidService, StidService>();
+builder.Services.AddScoped<ITagPositioner, TagPositioner>();
 builder.Services.AddScoped<RobotController>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
@@ -45,6 +48,7 @@ builder.Services
     .EnableTokenAcquisitionToCallDownstreamApi()
     .AddInMemoryTokenCaches()
     .AddDownstreamWebApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
+    .AddDownstreamWebApi(StidService.ServiceName, builder.Configuration.GetSection("Stid"))
     .AddDownstreamWebApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
 builder.Services.AddAuthorization(
