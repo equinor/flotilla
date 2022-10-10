@@ -65,11 +65,14 @@ export function UpcomingMissionView() {
     }, [sessionStorage.getItem('assetString')])
 
     useEffect(() => {
-        apiCaller.getEchoMissions(assetString).then((missions) => {
-            const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
-            setEchoMissions(mappedEchoMissions)
-        })
-    }, [apiCaller])
+        const id = setInterval(() => {
+            apiCaller.getEchoMissions(assetString).then((missions) => {
+                const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
+                setEchoMissions(mappedEchoMissions)
+            })
+        }, 1000)
+        return () => clearInterval(id)
+    }, [])
 
     useEffect(() => {
         const id = setInterval(() => {
