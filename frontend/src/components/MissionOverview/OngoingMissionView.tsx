@@ -21,6 +21,9 @@ const OngoingMissionSection = styled.div`
 export function OngoingMissionView() {
     const apiCaller = useApi()
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
+    const [pausedMissions, setPausedMissions] = useState<Mission[]>([])
+    const [missionsToDisplay, setMissionsToDisplay] = useState<Mission[]>([])
+
     useEffect(() => {
         updateOngoingMissions()
     }, [])
@@ -29,6 +32,7 @@ export function OngoingMissionView() {
         const timeDelay = 1000
         const id = setInterval(() => {
             updateOngoingMissions()
+            updatePausedMissions()
         }, timeDelay)
         return () => clearInterval(id)
     }, [])
@@ -39,7 +43,18 @@ export function OngoingMissionView() {
         })
     }
 
-    var missionDisplay = ongoingMissions.map(function (mission, index) {
+    const updatePausedMissions = () => {
+        apiCaller.getMissionsByStatus(MissionStatus.Paused).then((missions) => {
+            setPausedMissions(missions)
+        })
+    }
+
+    useEffect(() => {
+        const missions: Mission[] = ongoingMissions.concat(pausedMissions)
+        setMissionsToDisplay(missions)
+    }, [ongoingMissions, pausedMissions])
+
+    var missionDisplay = missionsToDisplay.map(function (mission, index) {
         return <OngoingMissionCard key={index} mission={mission} />
     })
 
