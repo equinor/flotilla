@@ -64,12 +64,12 @@ export function UpcomingMissionView() {
         }
     }, [sessionStorage.getItem('assetString')])
 
-    useEffect(() => {
+    useInterval(async () => {
         apiCaller.getEchoMissions(assetString).then((missions) => {
             const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
             setEchoMissions(mappedEchoMissions)
         })
-    }, [apiCaller])
+    })
 
     useInterval(async () => {
         apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
