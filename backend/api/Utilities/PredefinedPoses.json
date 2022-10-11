@@ -19,6 +19,44 @@
         }
     },
     {
+        "Tag": "331-LD-525",
+        "Pose": {
+            "Position": {
+                "X": 20253.721,
+                "Y": 5312.485,
+                "Z": 14.336,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0,
+                "W": 1,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
+        "Tag": "344-LD-1024",
+        "Pose": {
+            "Position": {
+                "X": 20256.427,
+                "Y": 5310.491,
+                "Z": 14.336,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0,
+                "W": 1,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
         "Tag": "334-LD-0225",
         "Pose": {
             "Position": {
