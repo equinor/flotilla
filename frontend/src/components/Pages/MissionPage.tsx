@@ -23,16 +23,33 @@ export function MissionPage() {
     const apiCaller = useApi()
     const [videoStreams, setVideoStreams] = useState<VideoStream[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
+
     useEffect(() => {
         if (missionId) {
             apiCaller.getMissionById(missionId).then((mission) => {
                 setSelectedMission(mission)
-                apiCaller.getVideoStreamsByRobotId(mission.robot.id).then((streams) => {
-                    setVideoStreams(streams)
-                })
+                updateVideoStreams(mission)
             })
         }
     }, [])
+
+    useEffect(() => {
+        const timeDelay = 1000
+        const id = setInterval(() => {
+            if (missionId) {
+                apiCaller.getMissionById(missionId).then((mission) => {
+                    setSelectedMission(mission)
+                })
+            }
+        }, timeDelay)
+        return () => clearInterval(id)
+    }, [])
+
+    const updateVideoStreams = (mission: Mission) => {
+        apiCaller.getVideoStreamsByRobotId(mission.robot.id).then((streams) => {
+            setVideoStreams(streams)
+        })
+    }
 
     var videoDisplay = videoStreams.map(function (videoStream, index) {
         return <VideoStreamWindow key={index} videoStream={videoStream} />
