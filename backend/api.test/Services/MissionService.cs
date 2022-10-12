@@ -31,23 +31,6 @@ namespace Api.Test.Services
         }
 
         [Fact]
-        public async Task ReadAll()
-        {
-            var missions = await _missionService.ReadAll();
-            Assert.True(missions.Any());
-        }
-
-        [Fact]
-        public async Task Read()
-        {
-            var missions = await _missionService.ReadAll();
-            var firstReport = missions.First();
-            var missionById = await _missionService.ReadById(firstReport.Id);
-
-            Assert.Equal(firstReport, missionById);
-        }
-
-        [Fact]
         public async Task ReadIdDoesNotExist()
         {
             var mission = await _missionService.ReadById("some_id_that_does_not_exist");

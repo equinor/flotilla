@@ -55,25 +55,6 @@ namespace Api.Test.Controllers
         }
 
         [Fact]
-        public void GetMissionById_ShouldReturnOkObject()
-        {
-            var actionResultType = typeof(OkObjectResult);
-            var result = (OkObjectResult)_controller.GetMissions(null, null).Result.Result!;
-            var scheduledMissions = (IList<Mission>?)result.Value;
-            Assert.NotNull(scheduledMissions);
-
-            if (scheduledMissions is null)
-                return;
-
-            string missionId = scheduledMissions[0].Id;
-
-            IActionResult? actionResult = _controller.GetMissionById(missionId).Result.Result;
-
-            // Check if the result is, or inherits from, the expected result type
-            Assert.IsAssignableFrom(actionResultType, actionResult);
-        }
-
-        [Fact]
         public void DeleteMission_ShouldReturnNotFound()
         {
             var actionResultType = typeof(NotFoundObjectResult);
@@ -83,26 +64,6 @@ namespace Api.Test.Controllers
 
             // Check if the result is, or inherits from, the expected result type
             Assert.IsAssignableFrom(actionResultType, result);
-        }
-
-        [Fact]
-        public void DeleteMission_ShouldReturnOkObject()
-        {
-            var actionResultType = typeof(OkObjectResult);
-            var result = (OkObjectResult)_controller.GetMissions(null, null).Result.Result!;
-            var scheduledMissions = (IList<Mission>?)result.Value;
-            Assert.NotNull(scheduledMissions);
-
-            if (scheduledMissions is null)
-                return;
-
-            string scheduledMissionsId = scheduledMissions[0].Id;
-            IActionResult? actionResult = _controller
-                .DeleteMission(scheduledMissionsId)
-                .Result.Result;
-
-            // Check if the result is, or inherits from, the expected result type
-            Assert.IsAssignableFrom(actionResultType, actionResult);
         }
     }
 }
