@@ -129,7 +129,7 @@ public static class InitDb
             mission.PlannedTasks.Add(plannedTask);
         }
         context.AddRange(Robots);
-        context.AddRange(Missions);
+        // context.AddRange(Missions);
         context.SaveChanges();
     }
 }
