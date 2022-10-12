@@ -41,7 +41,12 @@ namespace Api.Services
             if (stidTagPositionResponse is null)
                 throw new JsonException("Failed to deserialize tag position from STID");
 
-            return new Position(x: stidTagPositionResponse.XCoordinate, y: stidTagPositionResponse.YCoordinate, z: stidTagPositionResponse.ZCoordinate);
+            // Convert from millimeter to meter
+            return new Position(
+                x: stidTagPositionResponse.XCoordinate / 1000,
+                y: stidTagPositionResponse.YCoordinate / 1000,
+                z: stidTagPositionResponse.ZCoordinate / 1000
+            );
         }
     }
 }
