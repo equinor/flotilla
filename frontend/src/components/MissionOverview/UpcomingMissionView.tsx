@@ -7,6 +7,7 @@ import { Mission, MissionStatus } from 'models/Mission'
 import { NoUpcomingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { EchoMission } from 'models/EchoMission'
+import { Robot } from 'models/Robot'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -32,12 +33,23 @@ const mapEchoMissionToString = (missions: EchoMission[]): Map<string, EchoMissio
     return missionMap
 }
 
+const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
+    var robotMap = new Map<string, Robot>()
+    robots.map((robot: Robot) => {
+        robotMap.set(robot.name + ' id: ' + robot.id, robot)
+    })
+    return robotMap
+}
+
 export function UpcomingMissionView() {
     const apiCaller = useApi()
     const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
-    const [selectedEchoMission, setSelectedEchoMissions] = useState<EchoMission[]>([])
+    const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMission[]>([])
+    const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [echoMissions, setEchoMissions] = useState<Map<string, EchoMission>>()
+    const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>()
     const [assetString, setAssetString] = useState<string>('')
+    const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
 
     const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
         var echoMissionsToSchedule: EchoMission[] = []
@@ -46,9 +58,18 @@ export function UpcomingMissionView() {
         })
         setSelectedEchoMissions(echoMissionsToSchedule)
     }
+    const onSelectedRobot = (selectedRobot: string) => {
+        if (robotOptions === undefined) return
+
+        setSelectedRobot(robotOptions.get(selectedRobot) as Robot)
+    }
+
     const onScheduleButtonPress = () => {
-        selectedEchoMission.map((mission: EchoMission) => {
-            apiCaller.postMission(mission.id, new Date())
+        if (selectedRobot === undefined) return
+
+        selectedEchoMissions.map((mission: EchoMission) => {
+            console.log(`Schedule Echo missions ${mission.id}: ${mission.name} to robot ${selectedRobot.name}`)
+            apiCaller.postMission(mission.id, selectedRobot.id, new Date())
         })
     }
     useEffect(() => {
@@ -76,12 +97,30 @@ export function UpcomingMissionView() {
 
     useEffect(() => {
         const id = setInterval(() => {
+            apiCaller.getRobots().then((robots) => {
+                const mappedRobots: Map<string, Robot> = mapRobotsToString(robots)
+                setRobotOptions(mappedRobots)
+            })
+        }, 1000)
+        return () => clearInterval(id)
+    }, [])
+
+    useEffect(() => {
+        const id = setInterval(() => {
             apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
                 setUpcomingMissions(missions)
             })
         }, 1000)
         return () => clearInterval(id)
     }, [])
+
+    useEffect(() => {
+        if (selectedRobot === undefined || selectedEchoMissions.length === 0) {
+            setScheduleButtonDisabled(true)
+        } else {
+            setScheduleButtonDisabled(false)
+        }
+    }, [selectedRobot, selectedEchoMissions])
 
     var upcomingMissionDisplay = upcomingMissions.map(function (mission, index) {
         return <UpcomingMissionCard key={index} mission={mission} />
@@ -96,12 +135,15 @@ export function UpcomingMissionView() {
                 {upcomingMissions.length === 0 && <NoUpcomingMissionsPlaceholder />}
             </MissionTable>
             <MissionButtonView>
-                {echoMissions && (
+                {echoMissions && robotOptions && (
                     <>
                         <ScheduleMissionDialog
-                            options={Array.from(echoMissions.keys())}
+                            robotOptions={Array.from(robotOptions.keys())}
+                            echoMissionsOptions={Array.from(echoMissions.keys())}
                             onSelectedMissions={onSelectedEchoMissions}
+                            onSelectedRobot={onSelectedRobot}
                             onScheduleButtonPress={onScheduleButtonPress}
+                            scheduleButtonDisabled={scheduleButtonDisabled}
                         ></ScheduleMissionDialog>
                         <Button>Make new mission in Echo</Button>
                     </>

@@ -4,9 +4,12 @@ import { useState } from 'react'
 import styled from 'styled-components'
 
 interface IProps {
-    options: Array<string>
+    robotOptions: Array<string>
+    echoMissionsOptions: Array<string>
     onSelectedMissions: (missions: string[]) => void
+    onSelectedRobot: (robot: string) => void
     onScheduleButtonPress: () => void
+    scheduleButtonDisabled: boolean
 }
 
 const StyledMissionDialog = styled.div`
@@ -26,8 +29,11 @@ const StyledMissionSection = styled.div`
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
-    const onChange = (changes: AutocompleteChanges<string>) => {
+    const onChangeEchoMissionSelections = (changes: AutocompleteChanges<string>) => {
         props.onSelectedMissions(changes.selectedItems)
+    }
+    const onChangeRobotSelection = (changes: AutocompleteChanges<string>) => {
+        props.onSelectedRobot(changes.selectedItems[0])
     }
     return (
         <>
@@ -43,10 +49,15 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     <StyledAutoComplete>
                         <Typography variant="h5">Schedule mission</Typography>
                         <Autocomplete
-                            options={props.options}
+                            options={props.echoMissionsOptions}
                             label={'Schedule Missions'}
-                            onOptionsChange={onChange}
+                            onOptionsChange={onChangeEchoMissionSelections}
                             multiple
+                        />
+                        <Autocomplete
+                            options={props.robotOptions}
+                            label={'Select robot'}
+                            onOptionsChange={onChangeRobotSelection}
                         />
                         <StyledMissionSection>
                             <Button
@@ -64,6 +75,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     props.onScheduleButtonPress()
                                     setIsOpen(false)
                                 }}
+                                disabled={props.scheduleButtonDisabled}
                             >
                                 {' '}
                                 Schedule mission
