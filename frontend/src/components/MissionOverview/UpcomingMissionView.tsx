@@ -50,6 +50,7 @@ export function UpcomingMissionView() {
     const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>()
     const [assetString, setAssetString] = useState<string>('')
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
+    const timeDelay = 1000
 
     const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
         var echoMissionsToSchedule: EchoMission[] = []
@@ -80,7 +81,7 @@ export function UpcomingMissionView() {
 
     useEffect(() => {
         const installationCode = sessionStorage.getItem('assetString')
-        if (installationCode != assetString) {
+        if (installationCode !== assetString) {
             setAssetString(installationCode as string)
         }
     }, [sessionStorage.getItem('assetString')])
@@ -91,7 +92,7 @@ export function UpcomingMissionView() {
                 const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
                 setEchoMissions(mappedEchoMissions)
             })
-        }, 1000)
+        }, timeDelay)
         return () => clearInterval(id)
     }, [])
 
@@ -101,7 +102,7 @@ export function UpcomingMissionView() {
                 const mappedRobots: Map<string, Robot> = mapRobotsToString(robots)
                 setRobotOptions(mappedRobots)
             })
-        }, 1000)
+        }, timeDelay)
         return () => clearInterval(id)
     }, [])
 
@@ -110,7 +111,7 @@ export function UpcomingMissionView() {
             apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
                 setUpcomingMissions(missions)
             })
-        }, 1000)
+        }, timeDelay)
         return () => clearInterval(id)
     }, [])
 

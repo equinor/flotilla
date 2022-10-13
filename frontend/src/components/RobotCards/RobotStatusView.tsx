@@ -21,19 +21,22 @@ export function RobotStatusSection() {
 
     const [robots, setRobots] = useState<Robot[]>([])
     useEffect(() => {
-        apiCaller.getRobots().then((result) => {
-            setRobots(result)
-        })
+        updateRobots()
     }, [])
 
     useEffect(() => {
+        const timeDelay = 1000
         const id = setInterval(() => {
-            apiCaller.getRobots().then((result) => {
-                setRobots(result)
-            })
-        }, 1000)
+            updateRobots()
+        }, timeDelay)
         return () => clearInterval(id)
     }, [])
+
+    const updateRobots = () => {
+        apiCaller.getRobots().then((result) => {
+            setRobots(result)
+        })
+    }
 
     var robotDisplay = robots.map(function (robot) {
         return <RobotStatusCard key={robot.id} robot={robot} />
