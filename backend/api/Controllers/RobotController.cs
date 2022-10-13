@@ -174,6 +174,53 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
+    /// Updates a robot's status in the database
+    /// </summary>
+    /// <remarks>
+    /// </remarks>
+    /// <returns> Updated robot </returns>
+    /// <response code="200"> The robot status was succesfully updated </response>
+    /// <response code="400"> The robot data is invalid </response>
+    /// <response code="404"> There was no robot with the given ID in the database </response>
+    [HttpPut]
+    [Route("{id}/status")]
+    [ProducesResponseType(typeof(Robot), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<Robot>> UpdateRobotStatus(
+        [FromRoute] string id,
+        [FromBody] RobotStatus robotStatus
+    )
+    {
+        _logger.LogInformation("Updating robot status with id={id}", id);
+
+        if (!ModelState.IsValid)
+            return BadRequest("Invalid data.");
+
+        var robot = await _robotService.ReadById(id);
+        if (robot == null)
+            return NotFound($"No robot with id: {id} could be found");
+
+        robot.Status = robotStatus;
+        try
+        {
+            var updatedRobot = await _robotService.Update(robot);
+
+            _logger.LogInformation("Successful PUT of robot to database");
+
+            return Ok(updatedRobot);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while updating status for robot with id={id}", id);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Start the echo mission with the corresponding 'missionId' for the robot with id 'robotId'
     /// </summary>
     /// <remarks>
