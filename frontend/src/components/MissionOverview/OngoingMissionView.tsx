@@ -21,19 +21,22 @@ export function OngoingMissionView() {
     const apiCaller = useApi()
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     useEffect(() => {
-        apiCaller.getMissionsByStatus(MissionStatus.Ongoing).then((missions) => {
-            setOngoingMissions(missions)
-        })
+        updateOngoingMissions()
     }, [])
 
     useEffect(() => {
+        const timeDelay = 1000
         const id = setInterval(() => {
-            apiCaller.getMissionsByStatus(MissionStatus.Ongoing).then((missions) => {
-                setOngoingMissions(missions)
-            })
-        }, 1000)
+            updateOngoingMissions()
+        }, timeDelay)
         return () => clearInterval(id)
     }, [])
+
+    const updateOngoingMissions = () => {
+        apiCaller.getMissionsByStatus(MissionStatus.Ongoing).then((missions) => {
+            setOngoingMissions(missions)
+        })
+    }
 
     var missionDisplay = ongoingMissions.map(function (mission, index) {
         return <OngoingMissionCard key={index} mission={mission} />
