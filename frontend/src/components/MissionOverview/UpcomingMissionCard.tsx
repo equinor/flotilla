@@ -29,7 +29,7 @@ Icon.add({ more_vertical })
 export function UpcomingMissionCard({ mission }: MissionProps) {
     let navigate = useNavigate()
     const routeChange = () => {
-        let path = '/mission/' + mission.id
+        let path = '/robotics-frontend/mission/' + mission.id
         navigate(path)
     }
     var numberOfTasks = 0

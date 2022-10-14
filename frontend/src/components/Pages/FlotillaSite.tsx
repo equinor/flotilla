@@ -33,8 +33,8 @@ export function FlotillaSite() {
                             <StyledPages>
                                 <BrowserRouter>
                                     <Routes>
-                                        <Route path="/" element={<FrontPage />} />
-                                        <Route path="/mission/:missionId" element={<MissionPage />} />
+                                        <Route path="/robotics-frontend/" element={<FrontPage />} />
+                                        <Route path="/robotics-frontend/mission/:missionId" element={<MissionPage />} />
                                     </Routes>
                                 </BrowserRouter>
                             </StyledPages>
