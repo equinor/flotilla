@@ -13,6 +13,7 @@ using Microsoft.Identity.Web;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddAzureEnvironmentVariables();
+builder.ConfigureLogger();
 
 builder.Services.ConfigureDatabase(builder.Configuration);
 
