@@ -9,10 +9,41 @@ export enum RobotStatus {
 }
 
 export enum RobotType {
-    Taurob = 'Taurob',
-    ExRobotics = 'ExRobotics',
-    TurtleBot = 'TurtleBot',
+    TaurobInspector = 'TaurobInspector',
+    TaurobOperator = 'TaurobOperator',
+    ExR2 = 'ExR2',
+    Turtlebot = 'Turtlebot',
+    AnymalX = 'AnymalX',
+    AnymalD = 'AnymalD',
     NoneType = 'NoneType',
+}
+
+export namespace RobotType {
+    export function toString(robotType: RobotType): string {
+        switch (robotType) {
+            case RobotType.TaurobInspector: {
+                return 'Taurob Inspector'
+            }
+            case RobotType.TaurobOperator: {
+                return 'Taurob Operator'
+            }
+            case RobotType.ExR2: {
+                return 'ExR2'
+            }
+            case RobotType.Turtlebot: {
+                return 'Turtlebot'
+            }
+            case RobotType.AnymalX: {
+                return 'ANYmal X'
+            }
+            case RobotType.AnymalD: {
+                return 'ANYmal D'
+            }
+            default: {
+                return 'Unknown'
+            }
+        }
+    }
 }
 
 export interface Robot {

@@ -32,7 +32,7 @@ public static class InitDb
         var robot1 = new Robot
         {
             Name = "R2-D2",
-            Model = "R2",
+            Model = RobotModel.TaurobInspector,
             SerialNumber = "D2",
             Status = RobotStatus.Available,
             Enabled = true,
@@ -46,7 +46,7 @@ public static class InitDb
         var robot2 = new Robot
         {
             Name = "Shockwave",
-            Model = "Decepticon",
+            Model = RobotModel.ExR2,
             SerialNumber = "SS79",
             Status = RobotStatus.Busy,
             Enabled = true,
@@ -60,7 +60,7 @@ public static class InitDb
         var robot3 = new Robot
         {
             Name = "Ultron",
-            Model = "AISATW",
+            Model = RobotModel.AnymalX,
             SerialNumber = "Earth616",
             Status = RobotStatus.Available,
             Enabled = false,

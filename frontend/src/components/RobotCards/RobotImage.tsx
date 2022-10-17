@@ -1,5 +1,7 @@
 import { RobotType } from 'models/Robot'
 import taurobInspector from 'mediaAssets/taurob_inspector.jpg'
+import anymalX from 'mediaAssets/anymal_x.png'
+import anymalD from 'mediaAssets/anymal_d.png'
 import exRobotics from 'mediaAssets/ExRobotics.webp'
 import turtleBot from 'mediaAssets/turtlebot.webp'
 import styled from 'styled-components'
@@ -29,16 +31,24 @@ const StyledIcon = styled(Icon)`
 export function RobotImage({ robotType }: TypeProps) {
     var robotImage
     switch (robotType) {
-        case RobotType.Taurob: {
+        case RobotType.TaurobInspector: {
             robotImage = taurobInspector
             break
         }
-        case RobotType.ExRobotics: {
+        case RobotType.ExR2: {
             robotImage = exRobotics
             break
         }
-        case RobotType.TurtleBot: {
+        case RobotType.Turtlebot: {
             robotImage = turtleBot
+            break
+        }
+        case RobotType.AnymalX: {
+            robotImage = anymalX
+            break
+        }
+        case RobotType.AnymalD: {
+            robotImage = anymalD
             break
         }
         case RobotType.NoneType: {

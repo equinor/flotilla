@@ -38,7 +38,7 @@ function cardContent({ robot }: RobotProps) {
         <div>
             <RobotImage robotType={robot.model} />
             <Typography variant="h5">{robot.name}</Typography>
-            <Typography variant="body_short">{robot.model}</Typography>
+            <Typography variant="body_short">{RobotType.toString(robot.model)}</Typography>
             <HorisontalContent>
                 <RobotStatusChip status={robot.status} />
                 <BatteryStatusView battery={robot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
