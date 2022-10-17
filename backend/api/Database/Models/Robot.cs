@@ -17,7 +17,7 @@ namespace Api.Database.Models
 
         [MaxLength(128)]
         [Required]
-        public string Model { get; set; }
+        public RobotModel Model { get; set; }
 
         [MaxLength(128)]
         [Required]
@@ -60,7 +60,7 @@ namespace Api.Database.Models
         public Robot()
         {
             Name = "defaultId";
-            Model = "defaultModel";
+            Model = RobotModel.Turtlebot;
             SerialNumber = "defaultSerialNumber";
             Status = RobotStatus.Offline;
             Enabled = false;

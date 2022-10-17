@@ -67,7 +67,7 @@ namespace Api.Test.Services
             var robotQuery = new CreateRobotQuery()
             {
                 Name = "",
-                Model = "",
+                Model = RobotModel.Turtlebot,
                 SerialNumber = "",
                 VideoStreams = new List<CreateVideoStreamQuery>() { videoStreamQuery },
                 Host = "",
