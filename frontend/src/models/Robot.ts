@@ -5,7 +5,7 @@ import { VideoStream } from './VideoStream'
 export enum RobotStatus {
     Available = 'Available',
     Offline = 'Offline',
-    MissionInProgress = 'Mission in progress',
+    Busy = 'Busy',
 }
 
 export enum RobotType {

@@ -53,7 +53,7 @@ export function RobotStatusCard({ robot }: RobotProps) {
         let path = `mission`
         navigate(path)
     }
-    if (robot.status == RobotStatus.MissionInProgress) {
+    if (robot.status == RobotStatus.Busy) {
         return (
             <HoverableStyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={goToMission}>
                 {cardContent({ robot })}
