@@ -9,7 +9,7 @@ interface StatusProps {
 enum StatusColors {
     Available = '#A1DAA0',
     Offline = '#F7F7F7',
-    MissionInProgress = '#FFC67A',
+    Busy = '#FFC67A',
 }
 
 export function RobotStatusChip({ status }: StatusProps) {
@@ -19,8 +19,8 @@ export function RobotStatusChip({ status }: StatusProps) {
             chipColor = StatusColors.Available
             break
         }
-        case RobotStatus.MissionInProgress: {
-            chipColor = StatusColors.MissionInProgress
+        case RobotStatus.Busy: {
+            chipColor = StatusColors.Busy
             break
         }
         default: {
