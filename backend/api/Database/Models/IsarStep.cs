@@ -101,8 +101,7 @@ namespace Api.Database.Models
                 "Audio" => InspectionTypeEnum.Audio,
                 "TakeImage" => InspectionTypeEnum.Image,
                 "TakeVideo" => InspectionTypeEnum.Video,
-                "TakeThermalImage" => InspectionTypeEnum.ThermalImage,
-                "TakeThermalVideo" => InspectionTypeEnum.ThermalVideo,
+                "ThermicVideo" => InspectionTypeEnum.ThermalVideo,
                 _ => InspectionTypeEnum.Image,
             };
         }
