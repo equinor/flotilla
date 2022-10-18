@@ -10,12 +10,12 @@ interface MissionProps {
 }
 
 const StyledMissionCard = styled(Card)`
-    width: 700px;
+    width: 900px;
     display: flex;
 `
 const HorizontalContent = styled.div`
     display: grid;
-    grid-template-columns: 50px auto auto auto auto 50px;
+    grid-template-columns: 50px 200px 100px auto auto auto 50px;
     align-items: center;
 `
 const StyledMissionStartTime = styled.div`
@@ -44,6 +44,7 @@ export function UpcomingMissionCard({ mission }: MissionProps) {
             <HorizontalContent>
                 <Checkbox />
                 <Typography variant="h6">{mission.name}</Typography>
+                <Typography>{mission.robot.name}</Typography>
                 <MissionStartTimeDisplay mission={mission} />
                 <Typography>Tasks: {numberOfTasks}</Typography>
                 <MissionDurationDisplay mission={mission} />
