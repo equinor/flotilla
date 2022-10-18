@@ -43,7 +43,7 @@ export function UpcomingMissionCard({ mission }: MissionProps) {
         >
             <HorizontalContent>
                 <Checkbox />
-                <Typography variant="h6">Mission name</Typography>
+                <Typography variant="h6">{mission.name}</Typography>
                 <MissionStartTimeDisplay mission={mission} />
                 <Typography>Tasks: {numberOfTasks}</Typography>
                 <MissionDurationDisplay mission={mission} />
