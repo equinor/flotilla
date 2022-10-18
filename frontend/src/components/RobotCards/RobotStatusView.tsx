@@ -33,14 +33,21 @@ export function RobotStatusSection() {
     }, [])
 
     const updateRobots = () => {
-        apiCaller.getRobots().then((result) => {
-            setRobots(result)
+        apiCaller.getRobots().then((result: Robot[]) => {
+            setRobots(sortRobotsByStatus(result))
         })
     }
 
     var robotDisplay = robots.map(function (robot) {
         return <RobotStatusCard key={robot.id} robot={robot} />
     })
+    const sortRobotsByStatus = (robots: Robot[]): Robot[] => {
+        const sortedRobots = robots.sort((robot, robotToCompareWith) =>
+            robot.status! > robotToCompareWith.status! ? 1 : -1
+        )
+
+        return sortedRobots
+    }
     return (
         <RobotView>
             <Typography color="resting" variant="h2">
