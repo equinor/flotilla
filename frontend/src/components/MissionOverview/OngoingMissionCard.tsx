@@ -29,6 +29,7 @@ export function OngoingMissionCard({ mission }: MissionProps) {
     return (
         <StyledMissionCard variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={routeChange}>
             <Typography variant="h6">{mission.name}</Typography>
+            <Typography>{mission.robot.name}</Typography>
             <HorisontalContent>
                 <MissionStatusDisplay status={mission.missionStatus} />
                 <MissionProgressDisplay />
