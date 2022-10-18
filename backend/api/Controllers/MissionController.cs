@@ -118,6 +118,7 @@ public class MissionController : ControllerBase
 
         var scheduledMission = new Mission
         {
+            Name = echoMission.Name,
             Robot = robot,
             EchoMissionId = scheduledMissionQuery.EchoMissionId,
             MissionStatus = MissionStatus.Pending,
