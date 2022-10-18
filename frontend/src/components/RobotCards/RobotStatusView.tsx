@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { useApi } from 'api/ApiCaller'
-import { Robot } from 'models/Robot'
+import { Robot, RobotStatus } from 'models/Robot'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
@@ -39,8 +39,9 @@ export function RobotStatusSection() {
     }
 
     var robotDisplay = robots.map(function (robot) {
-        return <RobotStatusCard key={robot.id} robot={robot} />
+        if (robot.status !== RobotStatus.Offline) return <RobotStatusCard key={robot.id} robot={robot} />
     })
+
     return (
         <RobotView>
             <Typography color="resting" variant="h2">
