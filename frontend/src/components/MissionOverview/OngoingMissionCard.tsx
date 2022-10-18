@@ -32,7 +32,7 @@ export function OngoingMissionCard({ mission }: MissionProps) {
             <Typography>{mission.robot.name}</Typography>
             <HorisontalContent>
                 <MissionStatusDisplay status={mission.missionStatus} />
-                <MissionProgressDisplay />
+                <MissionProgressDisplay tasks={mission.tasks} />
             </HorisontalContent>
         </StyledMissionCard>
     )
