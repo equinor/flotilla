@@ -28,7 +28,7 @@ Icon.add({ fullscreen })
 export function VideoSection({ videoStream, toggleFullScreenModeFunction }: VideoSectionProps) {
     return (
         <StyledVideoSection>
-            <img src={videoStream.url} width="100%" height="100%" alt={videoStream.name + ' video stream'} />
+            <video autoPlay src={videoStream.url} width="100%" height="100%" />
             <FullscreenButton color="secondary" onClick={toggleFullScreenModeFunction}>
                 <Icon name="fullscreen" size={32} />
             </FullscreenButton>
