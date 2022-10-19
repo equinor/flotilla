@@ -26,6 +26,7 @@ export function OngoingMissionView() {
 
     useEffect(() => {
         updateOngoingMissions()
+        updatePausedMissions()
     }, [])
 
     useEffect(() => {
@@ -64,8 +65,8 @@ export function OngoingMissionView() {
                 Ongoing missions
             </Typography>
             <OngoingMissionSection>
-                {ongoingMissions.length > 0 && missionDisplay}
-                {ongoingMissions.length === 0 && <NoOngoingMissionsPlaceholder />}
+                {missionsToDisplay.length > 0 && missionDisplay}
+                {missionsToDisplay.length === 0 && <NoOngoingMissionsPlaceholder />}
             </OngoingMissionSection>
         </StyledOngoingMissionView>
     )
