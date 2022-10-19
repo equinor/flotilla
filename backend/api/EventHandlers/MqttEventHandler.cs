@@ -126,7 +126,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (status == MissionStatus.Ongoing)
+            if (status == MissionStatus.Ongoing || status == MissionStatus.Paused)
             {
                 robot.Status = RobotStatus.Busy;
                 await RobotService.Update(robot);
