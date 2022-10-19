@@ -28,12 +28,12 @@ export function OngoingMissionCard({ mission }: MissionProps) {
         navigate(path)
     }
     return (
-        <StyledMissionCard variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={routeChange}>
-            <Typography variant="h6">{mission.name}</Typography>
-            <Typography>{mission.robot.name}</Typography>
+        <StyledMissionCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
+            <div onClick={routeChange}>
+                <Typography variant="h6">{mission.name}</Typography>
+                <Typography>{mission.robot.name}</Typography>
+            </div>
             <HorisontalContent>
-                <MissionStatusDisplay status={mission.missionStatus} />
-                <MissionProgressDisplay tasks={mission.tasks} />
                 <MissionStatusDisplay status={mission.missionStatus} />
                 <MissionProgressDisplay tasks={mission.tasks} />
                 <MissionControlButtons mission={mission} />
