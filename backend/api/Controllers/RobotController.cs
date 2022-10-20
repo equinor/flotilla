@@ -18,7 +18,6 @@ public class RobotController : ControllerBase
     private readonly IEchoService _echoService;
     private readonly IMissionService _missionService;
 
-
     public RobotController(
         ILogger<RobotController> logger,
         IRobotService robotService,
@@ -47,11 +46,9 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IList<Robot>>> GetRobots()
     {
-        _logger.LogInformation("Getting robots from database");
         try
         {
             var robots = await _robotService.ReadAll();
-            _logger.LogInformation("Successful GET of robots from database");
             return Ok(robots);
         }
         catch (Exception e)
@@ -343,7 +340,10 @@ public class RobotController : ControllerBase
         {
             if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
             {
-                _logger.LogWarning("Could not find echo mission with id={id}", mission.EchoMissionId);
+                _logger.LogWarning(
+                    "Could not find echo mission with id={id}",
+                    mission.EchoMissionId
+                );
                 return NotFound("Echo mission not found");
             }
 
@@ -390,7 +390,8 @@ public class RobotController : ControllerBase
         }
         catch (RobotPositionNotFoundException e)
         {
-            string message = "A suitable robot position could not be found for one or more of the desired tags";
+            string message =
+                "A suitable robot position could not be found for one or more of the desired tags";
             _logger.LogError(e, "{message}", message);
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
