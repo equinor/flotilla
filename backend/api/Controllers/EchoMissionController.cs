@@ -20,12 +20,10 @@ public class EchoMissionController : ControllerBase
     }
 
     /// <summary>
-    /// List all available missions on the asset
+    /// List all available Echo missions for the asset
     /// </summary>
     /// <remarks>
-    /// Overview
-    ///
-    /// List all available missions on the asset in the Echo mission planner
+    /// These missions are created in the Echo mission planner
     /// </remarks>
     [HttpGet]
     [ProducesResponseType(typeof(List<EchoMission>), StatusCodes.Status200OK)]
@@ -54,13 +52,10 @@ public class EchoMissionController : ControllerBase
     }
 
     /// <summary>
-    /// Lookup mission by specified missionId
+    /// Lookup Echo mission by Id
     /// </summary>
     /// <remarks>
-    /// Overview
-    ///
-    /// Lookup mission by specified missionId
-    /// <para>Returns a mission corresponding to the specified missionId</para>
+    /// This mission is created in the Echo mission planner
     /// </remarks>
     [HttpGet]
     [Route("{missionId}")]

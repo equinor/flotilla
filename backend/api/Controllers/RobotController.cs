@@ -38,7 +38,7 @@ public class RobotController : ControllerBase
     /// List all robots on the asset.
     /// </summary>
     /// <remarks>
-    /// <para> This query gets all robots (paginated) </para>
+    /// <para> This query gets all robots </para>
     /// </remarks>
     [HttpGet]
     [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status200OK)]
@@ -102,7 +102,6 @@ public class RobotController : ControllerBase
     /// <remarks>
     /// <para> This query creates a robot and adds it to the database </para>
     /// </remarks>
-    /// <returns> Robot </returns>
     [HttpPost]
     [ProducesResponseType(typeof(Robot), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -130,7 +129,6 @@ public class RobotController : ControllerBase
     /// </summary>
     /// <remarks>
     /// </remarks>
-    /// <returns> Updated robot </returns>
     /// <response code="200"> The robot was succesfully updated </response>
     /// <response code="400"> The robot data is invalid </response>
     /// <response code="404"> There was no robot with the given ID in the database </response>
@@ -178,7 +176,6 @@ public class RobotController : ControllerBase
     /// </summary>
     /// <remarks>
     /// </remarks>
-    /// <returns> Updated robot </returns>
     /// <response code="200"> The robot status was succesfully updated </response>
     /// <response code="400"> The robot data is invalid </response>
     /// <response code="404"> There was no robot with the given ID in the database </response>
@@ -221,10 +218,10 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
-    /// Start the echo mission with the corresponding 'missionId' for the robot with id 'robotId'
+    /// Start the mission in the database with the corresponding 'missionId' for the robot with id 'robotId'
     /// </summary>
     /// <remarks>
-    /// <para> This query starts a mission for a given robot and creates a mission </para>
+    /// <para> This query starts a mission for a given robot </para>
     /// </remarks>
     [HttpPost]
     [Route("{robotId}/start/{missionId}")]
@@ -339,10 +336,10 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
-    /// Stop robot
+    /// Stops the current mission on a robot
     /// </summary>
     /// <remarks>
-    /// <para> This query stops a robot based on id </para>
+    /// <para> This query stops the current mission for a given robot </para>
     /// </remarks>
     [HttpPost]
     [Route("{robotId}/stop/")]
@@ -383,7 +380,7 @@ public class RobotController : ControllerBase
         }
         catch (JsonException e)
         {
-            string message = "Error while processing of the response from ISAR";
+            string message = "Error while processing the response from ISAR";
             _logger.LogError(e, "{message}", message);
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
@@ -423,7 +420,6 @@ public class RobotController : ControllerBase
     /// <remarks>
     /// <para> Adds a provided video stream to the given robot </para>
     /// </remarks>
-    /// <returns> The updated robot </returns>
     [HttpPost]
     [Route("{robotId}/video-streams/")]
     [ProducesResponseType(typeof(Robot), StatusCodes.Status201Created)]
