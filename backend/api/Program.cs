@@ -17,6 +17,8 @@ builder.ConfigureLogger();
 
 builder.Services.ConfigureDatabase(builder.Configuration);
 
+builder.Services.AddApplicationInsightsTelemetry();
+
 builder.Services.AddScoped<IRobotService, RobotService>();
 builder.Services.AddScoped<IMissionService, MissionService>();
 builder.Services.AddScoped<IIsarService, IsarService>();
