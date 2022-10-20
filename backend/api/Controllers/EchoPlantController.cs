@@ -16,6 +16,9 @@ public class EchoPlantController : ControllerBase
         _echoService = echoService;
     }
 
+    /// <summary>
+    /// Get selected information on all the plants in Echo
+    /// </summary>
     [HttpGet]
     [Route("/all-plants-info")]
     [ProducesResponseType(typeof(List<EchoPlantInfo>), StatusCodes.Status200OK)]

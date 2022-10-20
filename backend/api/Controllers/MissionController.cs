@@ -29,10 +29,10 @@ public class MissionController : ControllerBase
     }
 
     /// <summary>
-    /// List all missions on the asset.
+    /// List all missions in the Flotilla database
     /// </summary>
     /// <remarks>
-    /// <para> This query gets all missions (paginated) </para>
+    /// <para> This query gets all missions </para>
     /// </remarks>
     [HttpGet]
     [ProducesResponseType(typeof(IList<Mission>), StatusCodes.Status200OK)]
@@ -135,9 +135,6 @@ public class MissionController : ControllerBase
     /// <summary>
     /// Deletes the mission with the specified id from the database.
     /// </summary>
-    /// <remarks>
-    /// <para> Deletes the mission with the specified id from the database </para>
-    /// </remarks>
     [HttpDelete]
     [Route("{id}")]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
