@@ -218,6 +218,79 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
+    /// Get video streams for a given robot
+    /// </summary>
+    /// <remarks>
+    /// <para> Retrieves the video streams available for the given robot </para>
+    /// </remarks>
+    [HttpGet]
+    [Route("{robotId}/video-streams/")]
+    [ProducesResponseType(typeof(IList<VideoStream>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IList<VideoStream>>> GetVideoStreams([FromRoute] string robotId)
+    {
+        var robot = await _robotService.ReadById(robotId);
+        if (robot == null)
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound();
+        }
+
+        return Ok(robot.VideoStreams);
+    }
+
+    /// <summary>
+    /// Add a video stream to a given robot
+    /// </summary>
+    /// <remarks>
+    /// <para> Adds a provided video stream to the given robot </para>
+    /// </remarks>
+    [HttpPost]
+    [Route("{robotId}/video-streams/")]
+    [ProducesResponseType(typeof(Robot), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<Robot>> CreateVideoStream(
+        [FromRoute] string robotId,
+        [FromBody] VideoStream videoStream
+    )
+    {
+        var robot = await _robotService.ReadById(robotId);
+        if (robot == null)
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound();
+        }
+
+        robot.VideoStreams ??= new List<VideoStream>();
+
+        robot.VideoStreams.Add(videoStream);
+
+        try
+        {
+            var updatedRobot = await _robotService.Update(robot);
+
+            return CreatedAtAction(
+                nameof(GetVideoStreams),
+                new { robotId = updatedRobot.Id },
+                updatedRobot
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding video stream to robot");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Start the mission in the database with the corresponding 'missionId' for the robot with id 'robotId'
     /// </summary>
     /// <remarks>
@@ -389,83 +462,10 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
-    /// Get video streams for a given robot
+    /// Pause the current mission on a robot
     /// </summary>
     /// <remarks>
-    /// <para> Retrieves the video streams available for the given robot </para>
-    /// </remarks>
-    [HttpGet]
-    [Route("{robotId}/video-streams/")]
-    [ProducesResponseType(typeof(IList<VideoStream>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IList<VideoStream>>> GetVideoStreams([FromRoute] string robotId)
-    {
-        var robot = await _robotService.ReadById(robotId);
-        if (robot == null)
-        {
-            _logger.LogWarning("Could not find robot with id={id}", robotId);
-            return NotFound();
-        }
-
-        return Ok(robot.VideoStreams);
-    }
-
-    /// <summary>
-    /// Add a video stream to a given robot
-    /// </summary>
-    /// <remarks>
-    /// <para> Adds a provided video stream to the given robot </para>
-    /// </remarks>
-    [HttpPost]
-    [Route("{robotId}/video-streams/")]
-    [ProducesResponseType(typeof(Robot), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Robot>> CreateVideoStream(
-        [FromRoute] string robotId,
-        [FromBody] VideoStream videoStream
-    )
-    {
-        var robot = await _robotService.ReadById(robotId);
-        if (robot == null)
-        {
-            _logger.LogWarning("Could not find robot with id={id}", robotId);
-            return NotFound();
-        }
-
-        robot.VideoStreams ??= new List<VideoStream>();
-
-        robot.VideoStreams.Add(videoStream);
-
-        try
-        {
-            var updatedRobot = await _robotService.Update(robot);
-
-            return CreatedAtAction(
-                nameof(GetVideoStreams),
-                new { robotId = updatedRobot.Id },
-                updatedRobot
-            );
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding video stream to robot");
-            throw;
-        }
-    }
-
-    /// <summary>
-    /// Pause current mission
-    /// </summary>
-    /// <remarks>
-    /// <para> This query pauses the currently executing mission for a robot </para>
+    /// <para> This query pauses the current mission for a robot </para>
     /// </remarks>
     [HttpPost]
     [Route("{robotId}/pause/")]
@@ -514,7 +514,7 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
-    /// Resume paused mission
+    /// Resume paused mission on a robot
     /// </summary>
     /// <remarks>
     /// <para> This query resumes the currently paused mission for a robot </para>
