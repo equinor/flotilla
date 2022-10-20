@@ -73,6 +73,11 @@ export function UpcomingMissionView() {
             apiCaller.postMission(mission.id, selectedRobot.id, new Date())
         })
     }
+
+    const onDeleteMission = (mission: Mission) => {
+        apiCaller.deleteMission(mission.id)
+    }
+
     useEffect(() => {
         apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
             setUpcomingMissions(missions)
@@ -124,7 +129,7 @@ export function UpcomingMissionView() {
     }, [selectedRobot, selectedEchoMissions])
 
     var upcomingMissionDisplay = upcomingMissions.map(function (mission, index) {
-        return <UpcomingMissionCard key={index} mission={mission} />
+        return <UpcomingMissionCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
     })
     return (
         <StyledMissionView>

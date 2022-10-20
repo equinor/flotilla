@@ -127,6 +127,13 @@ export class BackendAPICaller {
         return result.body
     }
 
+    async deleteMission(missionId: string) {
+        const path: string = 'missions/' + missionId
+        await this.DELETE(path, '').catch((e) => {
+            throw new Error(`Failed to DELETE /${path}: ` + e)
+        })
+    }
+
     async pauseMission(robotId: string) {
         const path: string = 'robots/' + robotId + '/pause'
         await this.POST(path, '').catch((e) => {
