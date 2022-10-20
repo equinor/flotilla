@@ -132,3 +132,10 @@ dotnet format is used to detect naming conventions and other code-related issues
 ```
 dotnet format --severity info
 ```
+
+## Monitoring
+We use [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core)
+to monitor the backend of our application.
+  
+We have one application insight instance for each environment.  
+The connection strings for the AI instances are stored in the keyvault.
