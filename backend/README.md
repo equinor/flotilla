@@ -49,7 +49,7 @@ See [Using the “--env-file” option](https://docs.docker.com/compose/environm
 To run the backend in docker, run the following command in the root folder of flotilla:
 
 ```
-docker compose up backend --build
+docker-compose up --build backend
 ```
 
 ## Test
