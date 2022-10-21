@@ -1,12 +1,12 @@
 # Flotilla backend
 
-The backend of flotilla is created using ASP.NET.  
+The backend of flotilla is created using ASP.NET.
 Useful documentation of concepts and features in the .NET frameworks can be found
 [here](https://docs.microsoft.com/en-us/dotnet/fundamentals/).
 
 ## Setup
 
-To set up the backend on **Windows/Mac**, install visual studio and include the "ASP.NET and web development" workload during install.  
+To set up the backend on **Windows/Mac**, install visual studio and include the "ASP.NET and web development" workload during install.
 If you already have visual studio installed, you can open the "Visual Studio Installer" and modify your install to add the workload.
 
 To set up the backend on **Linux**, install .NET for linux
@@ -35,7 +35,7 @@ dotnet run --project api
 ```
 
 To change the ports of the application and various other launch settings (such as the Environment), this can be modified in
-[launchSettings.json](api/Properties/launchSettings.json).  
+[launchSettings.json](api/Properties/launchSettings.json).
 Read more about the `launchSettings.json` file
 [here](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments?view=aspnetcore-6.0&preserve-view=true&viewFallbackFrom=aspnetcore-2.2#lsj)
 
@@ -66,14 +66,14 @@ dotnet test
 
 The MQTT client is implemented in [MqttService.cs](api/MQTT/MqttService.cs)
 and runs as an ASP.NET
-[BackgroundService](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-6.0&tabs=visual-studio#backgroundservice-base-class).  
-Each MQTT message has its own class representation, and is linked to its respective topic pattern in [MqttTopics.cs](api/MQTT/MqttTopics.cs).  
+[BackgroundService](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-6.0&tabs=visual-studio#backgroundservice-base-class).
+Each MQTT message has its own class representation, and is linked to its respective topic pattern in [MqttTopics.cs](api/MQTT/MqttTopics.cs).
 To match incoming topic messages against the topic patterns we use helper functions to convert from the
 [MQTT wildcards](https://docs.oasis-open.org/mqtt/mqtt/v5.0/os/mqtt-v5.0-os.html#_Toc3901242)
 to regEx wildcards for the dictionnary lookup.
 
 Each topic then has it's respective [event](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/events/)
-which is triggered whenever a new message arrives in that topic.  
+which is triggered whenever a new message arrives in that topic.
 The list of topics being subscribe to is defined as an array in
 [appsettings.Development.json](api/appsettings.Development.json).
 
@@ -83,13 +83,13 @@ An example of the subscriber pattern for an MQTT event is implemented in
 ## Configuration
 
 The project has two [appsettings](https://docs.microsoft.com/en-us/iis-administration/configuration/appsettings.json)
-files.  
+files.
 The base `appsettings.json` file is for common variables across all environments, while the
 `appsetings.Development.json` file is for variables specific to the Dev environments, such as the client ID's for the
 various app registrations used in development.
 
-The configuration will also read from a configured azure keyvault, which can then be accessed the same way as any other config variables.  
-For this to work you will need to have the client secret stored locally in the secret manager as described below.  
+The configuration will also read from a configured azure keyvault, which can then be accessed the same way as any other config variables.
+For this to work you will need to have the client secret stored locally in the secret manager as described below.
 The client secret (and mqtt password if not connected to keyvault) should be in the following format:
 
 ```
