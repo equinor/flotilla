@@ -35,6 +35,12 @@ This command runs the app in the development mode. Open [http://localhost:3001](
 
 The page will reload if you make edits. You will also be able to see any lint errors in the console.
 
+## Run in Docker
+To run the frontend in docker, run the following command in the root folder of flotilla:
+```
+docker-compose up --build frontend
+```
+
 ## Authentication
 
 Authentication is implemented for the frontend following the [official Microsoft tutorial on Oauth2 flow in React](https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-react).
