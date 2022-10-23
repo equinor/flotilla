@@ -8,7 +8,6 @@ using Api.Utilities;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,12 +66,12 @@ builder.Services.AddAuthorization(
 
 // The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
 // See https://github.com/Azure/azure-sdk-for-net/issues/17052
-//builder.Configuration.AddAzureKeyVault(
-//    new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
-//    new DefaultAzureCredential(
-//        new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
-//    )
-//);
+builder.Configuration.AddAzureKeyVault(
+    new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
+    new DefaultAzureCredential(
+        new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
+    )
+);
 
 var app = builder.Build();
 
