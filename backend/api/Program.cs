@@ -8,6 +8,7 @@ using Api.Utilities;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Routing.Patterns;
 using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,18 +67,20 @@ builder.Services.AddAuthorization(
 
 // The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
 // See https://github.com/Azure/azure-sdk-for-net/issues/17052
-builder.Configuration.AddAzureKeyVault(
-    new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
-    new DefaultAzureCredential(
-        new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
-    )
-);
+//builder.Configuration.AddAzureKeyVault(
+//    new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
+//    new DefaultAzureCredential(
+//        new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
+//    )
+//);
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
+    app.UseRouting();
+
     app.UseSwagger();
     app.UseSwaggerUI(
         c =>
@@ -91,6 +94,14 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
                 }
             );
             c.OAuthUsePkce();
+        }
+    );
+
+    app.UseEndpoints(
+        endpoints =>
+        {
+            endpoints.Map("/", context => Task.Run(() =>
+                context.Response.Redirect("/swagger/index.html")));
         }
     );
 }
