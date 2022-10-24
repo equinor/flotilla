@@ -78,6 +78,8 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
+    app.UseRouting();
+
     app.UseSwagger();
     app.UseSwaggerUI(
         c =>
@@ -91,6 +93,14 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
                 }
             );
             c.OAuthUsePkce();
+        }
+    );
+
+    app.UseEndpoints(
+        endpoints =>
+        {
+            endpoints.Map("/", context => Task.Run(() =>
+                context.Response.Redirect("/swagger/index.html")));
         }
     );
 }
