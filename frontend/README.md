@@ -31,7 +31,7 @@ To start the app, run the following command in the root folder:
 npm start
 ```
 
-This command runs the app in the development mode. Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
+This command runs the app in the development mode. Open [http://localhost:3001/robotics-frontend](http://localhost:3001/robotics-frontend) to view it in the browser.
 
 The page will reload if you make edits. You will also be able to see any lint errors in the console.
 
