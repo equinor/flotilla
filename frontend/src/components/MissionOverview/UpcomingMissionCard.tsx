@@ -6,6 +6,7 @@ import { format, differenceInHours } from 'date-fns'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+
 interface UpcomingMissionCardProps {
     mission: Mission
     onDeleteMission: (mission: Mission) => void
@@ -113,7 +114,13 @@ function MissionStartTimeDisplay({ mission }: MissionDisplayProps) {
     return (
         <StyledMissionStartTime>
             <Typography>Date: {format(new Date(mission.startTime), 'dd. MMM')}</Typography>
-            <Typography>Time: {format(new Date(mission.startTime), 'hh:mm')}</Typography>
+            <Typography>
+                Time:{' '}
+                {new Date(mission.startTime).toLocaleTimeString('no-NO', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                })}
+            </Typography>
         </StyledMissionStartTime>
     )
 }
