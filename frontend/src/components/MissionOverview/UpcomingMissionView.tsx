@@ -51,7 +51,8 @@ export function UpcomingMissionView() {
     const [assetString, setAssetString] = useState<string>('')
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
     const timeDelay = 1000
-
+    const echoURL = 'https://echo.equinor.com/mp?instCode='
+    const savedAsset = sessionStorage.getItem('assetString')
     const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
         var echoMissionsToSchedule: EchoMission[] = []
         selectedEchoMissions.map((selectedEchoMission: string) => {
@@ -151,7 +152,13 @@ export function UpcomingMissionView() {
                             onScheduleButtonPress={onScheduleButtonPress}
                             scheduleButtonDisabled={scheduleButtonDisabled}
                         ></ScheduleMissionDialog>
-                        <Button>Make new mission in Echo</Button>
+                        <Button
+                            onClick={() => {
+                                window.open(echoURL + savedAsset)
+                            }}
+                        >
+                            Create mission
+                        </Button>
                     </>
                 )}
             </MissionButtonView>
