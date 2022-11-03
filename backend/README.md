@@ -104,6 +104,81 @@ The client secret (and mqtt password if not connected to keyvault) should be in 
 Any local secrets used for configuration should be added in the
 [ASP.NET Secret Manager](https://docs.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-6.0&tabs=linux#secret-manager).
 
+## Database model and EF Core
+
+Our database model is defined in the folder
+[`/backend/api/Database/Models`](/backend/api/Database/Models) and we use
+[Entity Framework Core](https://docs.microsoft.com/en-us/ef/core/) as an
+object-relational mapper (O/RM). When making changes to the model, we also need
+to create a new
+[migration](https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/)
+and apply it to our databases.
+
+### Installing EF Core
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+### Creating a new migration
+
+**NB: Make sure you have have fetched the newest code from main and that no-one else
+is making migrations at the same time as you!**
+After making changes to the model, run the following command from `/backend/api`:
+
+```bash
+dotnet ef migrations add {migration-name}
+```
+
+`add` will make changes to existing files and add 2 new files in
+`backend/api/Migrations`, which all need to be checked in to git.
+
+Note that the {migration-name} is just a descriptive name of your choosing.
+Also note that `Database__ConnectionString` should be pointed at one of our
+databases when running `add`. The reason for this is that the migration will be
+created slightly different when based of the in-memory database. `add` will _not_
+update or alter the connected database in any way.
+
+If you for some reason are unhappy with your migration, you can delete it with
+
+```bash
+dotnet ef migrations remove
+```
+
+Once removed you can make new changes to the model
+and then create a new migration with `add`.
+
+### Applying the migrations to the dev- and test database
+
+For the migration to take effect, we need to apply it to our databases. To get
+an overview of the current migrations in a database, set the correct
+`Database__ConnectionString` for that database and run:
+
+```bash
+dotnet ef migrations list
+```
+
+This will list all migrations that are applied to the database and the local
+migrations that are yet to be applied. The latter are denoted with the text
+(pending).
+
+To apply the pending migrations to the database run:
+
+```bash
+dotnet ef database update
+```
+
+If everything runs smoothly the pending tag should be gone if you run `list`
+once more.
+
+### When to apply the migration to our databases
+
+You can apply migrations to the dev database at any time to test that it
+behaves as expected.
+
+The prod and qa databases doesn't need to be updated manually, as all migrations are
+applied to it automatically as part of the pipelines when pushed to qa and prod.
+
 ## Formatting
 
 ### CSharpier
@@ -134,8 +209,9 @@ dotnet format --severity info
 ```
 
 ## Monitoring
+
 We use [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core)
 to monitor the backend of our application.
-  
-We have one application insight instance for each environment.  
+
+We have one application insight instance for each environment.
 The connection strings for the AI instances are stored in the keyvault.
