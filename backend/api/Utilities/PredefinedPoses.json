@@ -95,25 +95,6 @@
         }
     },
     {
-        "Tag": "334-LD-0225",
-        "Pose": {
-            "Position": {
-                "X": 1.63,
-                "Y": 1.724,
-                "Z": 0,
-                "Frame": "robot"
-            },
-            "Orientation": {
-                "X": 0,
-                "Y": 0,
-                "Z": 0.5383686,
-                "W": 0.8427095,
-                "Frame": "robot"
-            },
-            "Frame": "robot"
-        }
-    },
-    {
         "Tag": "314-LD-1001",
         "Pose": {
             "Position": {
@@ -2071,7 +2052,7 @@
         }
     },
     {
-        "Tag": "331-LD-0225",
+        "Tag": "334-LD-0225",
         "Pose": {
             "Position": {
                 "X": 20199.615,
@@ -2131,7 +2112,7 @@
         "Tag": "334-LD-0001",
         "Pose": {
             "Position": {
-                "X": 20187.523,
+                "X": 20188.025,
                 "Y": 5230.625,
                 "Z": 20.031,
                 "Frame": "asset"
@@ -2172,6 +2153,44 @@
                 "X": 20182.533,
                 "Y": 5248.396,
                 "Z": 14.423,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0,
+                "W": 1,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
+        "Tag": "346-LD-1029",
+        "Pose": {
+            "Position": {
+                "X": 20279.035,
+                "Y": 5311.035,
+                "Z": 14.494,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0,
+                "W": 1,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
+        "Tag": "382-ZU-026",
+        "Pose": {
+            "Position": {
+                "X": 20318.053,
+                "Y": 5216.487,
+                "Z": 14.495,
                 "Frame": "asset"
             },
             "Orientation": {
