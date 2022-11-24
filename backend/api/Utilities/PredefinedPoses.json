@@ -2069,5 +2069,119 @@
             },
             "Frame": "asset"
         }
+    },
+    {
+        "Tag": "331-LD-0225",
+        "Pose": {
+            "Position": {
+                "X": 20199.615,
+                "Y": 5249.648,
+                "Z": 14.461,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0,
+                "W": 1,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
+        "Tag": "334-LD-0113",
+        "Pose": {
+            "Position": {
+                "X": 20193.351,
+                "Y": 5260.643,
+                "Z": 17.600,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0,
+                "W": 1,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
+        "Tag": "334-LD-0045",
+        "Pose": {
+            "Position": {
+                "X": 20187.703,
+                "Y": 5256.772,
+                "Z": 19.931,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": -0.7071,
+                "W": 0.7071,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
+        "Tag": "334-LD-0001",
+        "Pose": {
+            "Position": {
+                "X": 20187.523,
+                "Y": 5230.625,
+                "Z": 20.031,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": -0.7071,
+                "W": 0.7071,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
+        "Tag": "334-LN-0102",
+        "Pose": {
+            "Position": {
+                "X": 20188.195,
+                "Y": 5229.334,
+                "Z": 14.324,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0,
+                "W": 1,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
+        "Tag": "EAN-003-07-L1-03",
+        "Pose": {
+            "Position": {
+                "X": 20182.533,
+                "Y": 5248.396,
+                "Z": 14.423,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 0,
+                "W": 1,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
     }
 ]
