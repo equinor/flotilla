@@ -38,7 +38,7 @@ The page will reload if you make edits. You will also be able to see any lint er
 ## Run in Docker
 To run the frontend in docker, run the following command in the root folder of flotilla:
 ```
-docker-compose up --build frontend
+docker compose up --build frontend
 ```
 
 ## Authentication

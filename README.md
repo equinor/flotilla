@@ -34,19 +34,13 @@ This script will ask you for the `Client Secret` for the backend and the `MQTT b
 
 ## Run with docker
 
-Install docker using the [official documentation](https://docs.docker.com/engine/install/ubuntu/).
+Install [docker](https://docs.docker.com/engine/install/ubuntu/) and [docker compose](https://docs.docker.com/compose/install/).
 
-Install docker compose:
-
-```
-sudo apt update
-sudo apt install docker-compose
-```
 
 Build the docker container:
 
 ```
-docker-compose build
+docker compose build
 ```
 
 Setup a .env file in the backend directory with the following environment variables:
@@ -60,13 +54,13 @@ AZURE_CLIENT_SECRET
 Start Flotilla by running:
 
 ```
-docker-compose up
+docker compose up
 ```
 
 or
 
 ```
-docker-compose up --build
+docker compose up --build
 ```
 
 ## Contributing

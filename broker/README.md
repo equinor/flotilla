@@ -20,7 +20,7 @@ See [Using the “--env-file” option](https://docs.docker.com/compose/environm
 From the flotilla root directory, run the following command:
 
 ```
-docker-compose up --build broker
+docker compose up --build broker
 ```
 
 ## Authentication
