@@ -1,6 +1,7 @@
 import { Button } from '@equinor/eds-core-react'
 import { useApi } from 'api/ApiCaller'
 import { TaskTable } from 'components/TaskOverview/TaskTable'
+import { MapPositionView } from 'components/MapPosition/MapPositionView'
 import { VideoStreamWindow } from 'components/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
 import { VideoStream } from 'models/VideoStream'
@@ -58,6 +59,7 @@ export function MissionPage() {
     return (
         <StyledMissionPage>
             <VideoStreamSection>{videoStreams.length > 0 && videoDisplay}</VideoStreamSection>
+            <MapPositionView mission={selectedMission} />
             <TaskTable mission={selectedMission} />
             <Button href="..">FrontPage</Button>
         </StyledMissionPage>
