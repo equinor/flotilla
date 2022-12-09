@@ -42,7 +42,7 @@ if [ -f $flotilla_dir/.env ]; then
         backend_abort="true"
     fi
 fi
-if [ "$frontend_abort" != "true" ]; then
+if [ "$backend_abort" != "true" ]; then
     echo -e "Flotilla azure client secret needed for backend dockerization."
     echo -en "Input Flotilla Azure Client Secret (copy-paste from KeyVault):\n" 
 
