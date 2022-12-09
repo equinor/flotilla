@@ -1,4 +1,5 @@
-import { Typography } from '@equinor/eds-core-react'
+import { Card, Typography } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -12,7 +13,15 @@ const MapPositionSection = styled.div`
     flex-wrap: wrap;
     gap: 2rem;
 `
+const PositionCard = styled(Card)`
+    padding: 16px;
+`
 
+const HorizontalContent = styled.div`
+    display: grid;
+    grid-template-column: auto auto auto;
+    align-items: start;
+`
 const StyledPlaceholder = styled.div`
     display: flex;
     box-sizing: border-box;
@@ -41,25 +50,27 @@ function NoPositionPlaceholder() {
 }
 
 interface TextProps {
-    text: String
+    positionText: String
 }
 
-function PositionDisplay({ text }: TextProps) {
+function PositionDisplay({ positionText }: TextProps) {
     return (
-        <StyledPlaceholder>
-            <Typography variant="h4" color="resting">
-                Robot position: {text}
-            </Typography>
-        </StyledPlaceholder>
+        <PositionCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
+            <HorizontalContent>
+                <Typography variant="h4" color="resting">
+                    {positionText}
+                </Typography>
+            </HorizontalContent>
+        </PositionCard>
     )
 }
 
 export function MapPositionView({ mission }: MissionProps): JSX.Element {
-    const [text, setText] = useState<String>('')
+    const [positionText, setPositionText] = useState<String>('')
 
     useEffect(() => {
         if (mission && mission.robot.pose) {
-            setText(
+            setPositionText(
                 `${mission.robot.pose.position.x.toFixed(2)}
                 , ${mission.robot.pose.position.y.toFixed(2)}
                 , ${mission.robot.pose.position.z.toFixed(2)}`
@@ -69,8 +80,11 @@ export function MapPositionView({ mission }: MissionProps): JSX.Element {
 
     return (
         <MapPositionSection>
-            {text === '' && <NoPositionPlaceholder />}
-            {text !== '' && <PositionDisplay text={text} />}
+            <Typography color="resting" variant="h2">
+                Robot position
+            </Typography>
+            {positionText === '' && <NoPositionPlaceholder />}
+            {positionText !== '' && <PositionDisplay positionText={positionText} />}
         </MapPositionSection>
     )
 }
