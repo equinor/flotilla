@@ -16,7 +16,7 @@ const RobotView = styled.div`
     gap: 1rem;
 `
 
-export function RobotStatusSection() {
+export function RobotStatusView() {
     const apiCaller = useApi()
 
     const [robots, setRobots] = useState<Robot[]>([])
