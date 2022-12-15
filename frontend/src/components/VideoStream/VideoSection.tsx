@@ -3,6 +3,7 @@ import { fullscreen, videocam_off } from '@equinor/eds-icons'
 import styled from 'styled-components'
 
 import { VideoStream } from 'models/VideoStream'
+import VideoPlayer from './Video'
 
 Icon.add({ fullscreen, videocam_off })
 
@@ -37,10 +38,19 @@ const NoVideoPlaceholder = styled(Icon)`
 `
 
 export function VideoSection({ videoStream, toggleFullScreenModeFunction }: VideoSectionProps) {
+    const videoJsOptions = {
+        sources: [
+            {
+                src: videoStream.url,
+                type: 'application/x-mpegURL',
+            },
+        ],
+    }
+
     return (
         <StyledVideoSection>
             {ValidateVideoStream(videoStream) && (
-                    <img src={videoStream.url} width="100%" height="100%" alt={videoStream.name + ' video stream'} />
+                    <VideoPlayer options={videoJsOptions} />
                 ) && (
                     <FullscreenButton color="secondary" onClick={toggleFullScreenModeFunction}>
                         <Icon name="fullscreen" size={32} />
