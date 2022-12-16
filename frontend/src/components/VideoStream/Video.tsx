@@ -26,9 +26,7 @@ const VideoPlayer: FC<IVideoPlayerProps> = ({ options }) => {
         player.current = videojs('videoJSplayer', {
             ...initialOptions,
             ...options,
-        }).ready(function () {
-            // console.log('onPlayerReady', this);
-        })
+        }).ready(function () {})
         return () => {
             if (player.current) {
                 player.current.dispose()
