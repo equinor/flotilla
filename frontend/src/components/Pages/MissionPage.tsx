@@ -11,7 +11,7 @@ import styled from 'styled-components'
 
 const StyledMissionPage = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
     gap: 3rem;
 `
 const VideoStreamSection = styled.div`

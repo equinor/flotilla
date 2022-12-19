@@ -13,6 +13,8 @@ interface VideoStreamWindowProps {
 }
 const VideoCard = styled(Card)`
     padding: 16px;
+    height: 20rem;
+    width: 20rem;
 `
 
 const VideoFullScreen = styled(ReactModal)`
