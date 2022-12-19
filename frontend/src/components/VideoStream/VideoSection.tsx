@@ -1,8 +1,10 @@
 import { Button, Card, Icon } from '@equinor/eds-core-react'
-import { fullscreen } from '@equinor/eds-icons'
+import { fullscreen, videocam_off } from '@equinor/eds-icons'
 import styled from 'styled-components'
 
 import { VideoStream } from 'models/VideoStream'
+
+Icon.add({ fullscreen, videocam_off })
 
 interface VideoSectionProps {
     videoStream: VideoStream
@@ -23,15 +25,37 @@ const FullscreenButton = styled(Button)`
     opacity: 0.75;
 `
 
-Icon.add({ fullscreen })
+const NoVideoPlaceholder = styled(Icon)`
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    height: 50%;
+    opacity: 0.4;
+`
 
 export function VideoSection({ videoStream, toggleFullScreenModeFunction }: VideoSectionProps) {
     return (
         <StyledVideoSection>
-            <img src={videoStream.url} width="100%" height="100%" alt={videoStream.name + ' video stream'} />
-            <FullscreenButton color="secondary" onClick={toggleFullScreenModeFunction}>
-                <Icon name="fullscreen" size={32} />
-            </FullscreenButton>
+            {ValidateVideoStream(videoStream) && (
+                    <img src={videoStream.url} width="100%" height="100%" alt={videoStream.name + ' video stream'} />
+                ) && (
+                    <FullscreenButton color="secondary" onClick={toggleFullScreenModeFunction}>
+                        <Icon name="fullscreen" size={32} />
+                    </FullscreenButton>
+                )}
+            {!ValidateVideoStream(videoStream) && <NoVideoPlaceholder name="videocam_off" />}
         </StyledVideoSection>
     )
+}
+
+function ValidateVideoStream(videoStream: VideoStream) {
+    const stream = new Image()
+    stream.src = videoStream.url
+    if (stream.naturalHeight === 0) {
+        return false
+    }
+    return true
 }

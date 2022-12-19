@@ -36,7 +36,9 @@ This command runs the app in the development mode. Open [http://localhost:3001/r
 The page will reload if you make edits. You will also be able to see any lint errors in the console.
 
 ## Run in Docker
+
 To run the frontend in docker, run the following command in the root folder of flotilla:
+
 ```
 docker compose up --build frontend
 ```
