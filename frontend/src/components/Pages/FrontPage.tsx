@@ -2,7 +2,6 @@ import { UpcomingMissionView } from 'components/MissionOverview/UpcomingMissionV
 import { OngoingMissionView } from 'components/MissionOverview/OngoingMissionView'
 import { RobotStatusSection } from 'components/RobotCards/RobotStatusView'
 import styled from 'styled-components'
-import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledFrontPage = styled.div`
     display: grid;
@@ -11,7 +10,6 @@ const StyledFrontPage = styled.div`
 `
 
 export function FrontPage() {
-    const { asset, switchAsset } = useAssetContext()
     return (
         <StyledFrontPage>
             <OngoingMissionView />
