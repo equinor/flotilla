@@ -78,6 +78,7 @@ public static class InitDb
     {
         var mission1 = new Mission
         {
+            Name = "Placeholder Mission 1",
             Robot = Robots[0],
             AssetCode = "test",
             EchoMissionId = 95,
@@ -89,6 +90,7 @@ public static class InitDb
 
         var mission2 = new Mission
         {
+            Name = "Placeholder Mission 2",
             Robot = Robots[1],
             AssetCode = "test",
             EchoMissionId = 95,
@@ -101,6 +103,7 @@ public static class InitDb
 
         var mission3 = new Mission
         {
+            Name = "Placeholder Mission 3",
             Robot = Robots[2],
             AssetCode = "test",
             EchoMissionId = 1,
