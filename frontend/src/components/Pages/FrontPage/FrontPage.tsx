@@ -1,5 +1,5 @@
-import { UpcomingMissionView } from 'components/MissionOverview/UpcomingMissionView'
-import { OngoingMissionView } from 'components/MissionOverview/OngoingMissionView'
+import { UpcomingMissionView } from 'components/Pages/FrontPage/MissionOverview/UpcomingMissionView'
+import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/OngoingMissionView'
 import { RobotStatusSection } from 'components/RobotCards/RobotStatusView'
 import styled from 'styled-components'
 
