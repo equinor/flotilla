@@ -1,6 +1,6 @@
 import { UpcomingMissionView } from 'components/Pages/FrontPage/MissionOverview/UpcomingMissionView'
 import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/OngoingMissionView'
-import { RobotStatusSection } from 'components/RobotCards/RobotStatusView'
+import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusView'
 import styled from 'styled-components'
 
 const StyledFrontPage = styled.div`
