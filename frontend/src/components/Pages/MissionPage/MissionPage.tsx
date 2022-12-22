@@ -1,15 +1,16 @@
 import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { arrow_back } from '@equinor/eds-icons'
 import { useApi } from 'api/ApiCaller'
-import { TaskTable } from 'components/TaskOverview/TaskTable'
-import { MapPositionView } from 'components/MapPosition/MapPositionView'
-import { VideoStreamWindow } from 'components/VideoStream/VideoStreamWindow'
+import { TaskTable } from 'components/Pages/MissionPage/TaskOverview/TaskTable'
+import { MapPositionView } from 'components/Pages/MissionPage/MapPosition/MapPositionView'
+import { VideoStreamWindow } from 'components/Pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
 import { VideoStream } from 'models/VideoStream'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { MissionControlButtons } from 'components/Pages/FrontPage/MissionOverview/MissionControlButtons'
+import { MissionHeader } from './MissionHeader/MissionHeader'
 
 
 const TaskAndMapSection = styled.div`
@@ -21,12 +22,6 @@ const TaskAndMapSection = styled.div`
 `
 const VideoStreamSection = styled.div`
     display: grid;
-    gap: 1rem;
-`
-
-const InfoSection = styled.div`
-    display: flex;
-    align-content: start;
     gap: 1rem;
 `
 
@@ -77,10 +72,7 @@ export function MissionPage() {
                     <Button variant="ghost" href="..">
                         <Icon name="arrow_back" size={32} />Back
                     </Button>
-                    <InfoSection>
-                        <Typography variant="h1">{selectedMission?.name}</Typography>
-                        <MissionControlButtons mission={selectedMission} />
-                    </InfoSection>
+                    <MissionHeader mission={selectedMission}/>
                     <TaskAndMapSection>
                         <TaskTable mission={selectedMission} />
                         <MapPositionView mission={selectedMission} />
