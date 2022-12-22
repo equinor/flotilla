@@ -1,4 +1,5 @@
-import { Button } from '@equinor/eds-core-react'
+import { Button, Icon, Typography } from '@equinor/eds-core-react'
+import { arrow_back } from '@equinor/eds-icons'
 import { useApi } from 'api/ApiCaller'
 import { TaskTable } from 'components/TaskOverview/TaskTable'
 import { MapPositionView } from 'components/MapPosition/MapPositionView'
@@ -8,16 +9,28 @@ import { VideoStream } from 'models/VideoStream'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
+import { MissionControlButtons } from 'components/MissionOverview/MissionControlButtons'
 
-const StyledMissionPage = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+
+const TaskAndMapSection = styled.div`
+    display: flex;
+    flex-wrap: wrap;
     gap: 3rem;
+    padding-top: 16px;
+    padding-bottom: 16px;
 `
 const VideoStreamSection = styled.div`
     display: grid;
     gap: 1rem;
 `
+
+const InfoSection = styled.div`
+    display: flex;
+    align-content: start;
+    gap: 1rem;
+`
+
+Icon.add({ arrow_back })
 
 export function MissionPage() {
     const { missionId } = useParams()
@@ -57,11 +70,33 @@ export function MissionPage() {
     })
 
     return (
-        <StyledMissionPage>
-            <VideoStreamSection>{videoStreams.length > 0 && videoDisplay}</VideoStreamSection>
-            <MapPositionView mission={selectedMission} />
-            <TaskTable mission={selectedMission} />
-            <Button href="..">FrontPage</Button>
-        </StyledMissionPage>
+        <>
+            {
+                selectedMission !== undefined &&
+                <>
+                    <Button variant="ghost" href="..">
+                        <Icon name="arrow_back" size={32} />Back
+                    </Button>
+                    <InfoSection>
+                        <Typography variant="h1">{selectedMission?.name}</Typography>
+                        <MissionControlButtons mission={selectedMission} />
+                    </InfoSection>
+                    <TaskAndMapSection>
+                        <TaskTable mission={selectedMission} />
+                        <MapPositionView mission={selectedMission} />
+                    </TaskAndMapSection>
+                    <VideoStreamSection>
+                        {
+                            videoStreams.length > 0 &&
+                            <>
+                                <Typography variant='h2'>Camera</Typography>
+                                {videoDisplay}
+                            </>
+                        }
+                    </VideoStreamSection>
+                </>
+            }
+
+        </>
     )
 }
