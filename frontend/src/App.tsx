@@ -1,5 +1,5 @@
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
-import { SignInPage } from './components/SignInPage/SignInPage'
+import { SignInPage } from './components/Pages/SignInPage/SignInPage'
 import { FlotillaSite } from 'components/Pages/FlotillaSite'
 
 function App() {

@@ -9,7 +9,7 @@ import { VideoStream } from 'models/VideoStream'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { MissionControlButtons } from 'components/MissionOverview/MissionControlButtons'
+import { MissionControlButtons } from 'components/Pages/FrontPage/MissionOverview/MissionControlButtons'
 
 
 const TaskAndMapSection = styled.div`

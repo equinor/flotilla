@@ -4,8 +4,8 @@ import { Header } from 'components/Header/Header'
 import { createContext, useEffect, useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import styled from 'styled-components'
-import { FrontPage } from './FrontPage'
-import { MissionPage } from './MissionPage'
+import { FrontPage } from './FrontPage/FrontPage'
+import { MissionPage } from './MissionPage/MissionPage'
 import { AssetProvider } from 'components/Contexts/AssetContext'
 
 export const AccessTokenContext = createContext('')
