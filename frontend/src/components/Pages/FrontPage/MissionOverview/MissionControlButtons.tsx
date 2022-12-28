@@ -62,8 +62,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
                     />
                 </>
             )
-        }
-        else if (status === MissionStatus.Paused) {
+        } else if (status === MissionStatus.Paused) {
             return (
                 <>
                     <Icon
@@ -81,9 +80,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
                 </>
             )
         }
-        return (
-            <></>
-        )
+        return <></>
     }
 
     return <>{renderControlIcon(status)}</>
