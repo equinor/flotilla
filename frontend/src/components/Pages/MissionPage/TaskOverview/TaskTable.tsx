@@ -1,11 +1,13 @@
 import { Table, Typography } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
-import { IsarTask } from 'models/IsarTask'
+import { IsarTask, IsarTaskStatus } from 'models/IsarTask'
 import { EchoTag } from 'models/EchoMission'
+import { TaskStatusDisplay } from './TaskStatusDisplay'
 
 const StyledTable = styled(Table)`
     grid-column: 1/ -1;
+    font: equinor;
 `
 interface MissionProps {
     mission?: Mission
@@ -25,10 +27,9 @@ export function TaskTable({ mission }: MissionProps) {
                 <Table.Row>
                     <Table.Cell>#</Table.Cell>
                     <Table.Cell>Tag-ID</Table.Cell>
+                    <Table.Cell>Description</Table.Cell>
                     <Table.Cell>Inspection Type</Table.Cell>
                     <Table.Cell>Status</Table.Cell>
-                    <Table.Cell>Echo Link</Table.Cell>
-                    <Table.Cell>Data Link</Table.Cell>
                 </Table.Row>
             </Table.Head>
             <Table.Body>{rows}</Table.Body>
@@ -43,11 +44,23 @@ function renderOngoingTasks(tasks: IsarTask[]) {
         return (
             <Table.Row key={indexCounter}>
                 <Table.Cell>{indexCounter}</Table.Cell>
-                <Table.Cell>{task.tagId}</Table.Cell>
-                <Table.Cell>{task.steps[0].inspectionType}</Table.Cell>
-                <Table.Cell>{task.taskStatus}</Table.Cell>
-                <Table.Cell>{}</Table.Cell>
-                <Table.Cell>{}</Table.Cell>
+                <Table.Cell> {task.tagId}</Table.Cell>
+                <Table.Cell> - </Table.Cell>
+                {task.taskStatus === IsarTaskStatus.Successful && (
+                    <Table.Cell>
+                        <Typography link href={task.steps[0].fileLocation}>
+                            {task.steps[0].inspectionType}
+                        </Typography>
+                    </Table.Cell>
+                )}
+                {task.taskStatus !== IsarTaskStatus.Successful && (
+                    <Table.Cell>
+                        <Typography>{task.steps[0].inspectionType}</Typography>
+                    </Table.Cell>
+                )}
+                <Table.Cell>
+                    <TaskStatusDisplay status={task.taskStatus} />
+                </Table.Cell>
             </Table.Row>
         )
     })
@@ -62,11 +75,16 @@ function renderUpcomingTasks(tasks: EchoTag[]) {
             return (
                 <Table.Row key={indexCounter}>
                     <Table.Cell>{indexCounter}</Table.Cell>
-                    <Table.Cell>{task.tagId}</Table.Cell>
+                    <Table.Cell>
+                        <Typography link href={task.url}>
+                            {task.tagId}
+                        </Typography>
+                    </Table.Cell>
+                    <Table.Cell> - </Table.Cell>
                     <Table.Cell>{inspection.inspectionType}</Table.Cell>
-                    <Table.Cell>Planned</Table.Cell>
-                    <Table.Cell>{task.url}</Table.Cell>
-                    <Table.Cell>-</Table.Cell>
+                    <Table.Cell>
+                        <TaskStatusDisplay status={IsarTaskStatus.NotStarted} />
+                    </Table.Cell>
                 </Table.Row>
             )
         })

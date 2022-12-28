@@ -11,7 +11,13 @@ import styled from 'styled-components'
 import { MissionHeader } from './MissionHeader/MissionHeader'
 import { BackButton } from './MissionHeader/BackButton'
 
-
+const StyledMissionPage = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: start;
+    flex-direction: column;
+    gap: 1rem;
+`
 const TaskAndMapSection = styled.div`
     display: flex;
     flex-wrap: wrap;
@@ -62,28 +68,25 @@ export function MissionPage() {
     })
 
     return (
-        <>
-            {
-                selectedMission !== undefined &&
+        <StyledMissionPage>
+            <BackButton />
+            {selectedMission !== undefined && (
                 <>
-                    <BackButton/>
-                    <MissionHeader mission={selectedMission}/>
+                    <MissionHeader mission={selectedMission} />
+                    <VideoStreamSection>
+                        {videoStreams.length > 0 && (
+                            <>
+                                <Typography variant="h2">Camera</Typography>
+                                {videoDisplay}
+                            </>
+                        )}
+                    </VideoStreamSection>
                     <TaskAndMapSection>
                         <TaskTable mission={selectedMission} />
                         <MapPositionView mission={selectedMission} />
                     </TaskAndMapSection>
-                    <VideoStreamSection>
-                        {
-                            videoStreams.length > 0 &&
-                            <>
-                                <Typography variant='h2'>Camera</Typography>
-                                {videoDisplay}
-                            </>
-                        }
-                    </VideoStreamSection>
                 </>
-            }
-
-        </>
+            )}
+        </StyledMissionPage>
     )
 }
