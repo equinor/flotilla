@@ -9,6 +9,11 @@ import { msalConfig } from 'api/AuthConfig'
 
 const msalInstance = new PublicClientApplication(msalConfig)
 
+// Error handling for redirect login
+msalInstance.handleRedirectPromise().catch((error) => {
+    console.error(error)
+})
+
 ReactDom.render(
     <React.StrictMode>
         <MsalProvider instance={msalInstance}>
