@@ -11,7 +11,10 @@ const HeaderSection = styled.div`
     flex-direction: column;
     gap: 1.2rem;
 `
-
+const TitleSection = styled.div`
+    display: flex;
+    gap: 10px;
+`
 const InfoSection = styled.div`
     display: flex;
     align-content: start;
@@ -40,8 +43,10 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
 
     return (
         <HeaderSection>
-            <Typography variant="h1">{mission.name}</Typography>
-            <MissionControlButtons mission={mission} />
+            <TitleSection>
+                <Typography variant="h1">{mission.name}</Typography>
+                <MissionControlButtons mission={mission} />
+            </TitleSection>
             <InfoSection>
                 <MissionStatusDisplay status={mission.missionStatus} />
                 {HeaderText('Start time: ' + format(new Date(mission.startTime), 'HH:mm'))}
