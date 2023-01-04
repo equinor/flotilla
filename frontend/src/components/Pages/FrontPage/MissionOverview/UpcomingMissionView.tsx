@@ -46,6 +46,7 @@ export function UpcomingMissionView() {
     const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMission[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
+    const [selectedStartTime, setSelectedStartTime] = useState<Date>()
     const [echoMissions, setEchoMissions] = useState<Map<string, EchoMission>>()
     const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>()
     const [assetString, setAssetString] = useState<string>('')
@@ -65,13 +66,17 @@ export function UpcomingMissionView() {
 
         setSelectedRobot(robotOptions.get(selectedRobot) as Robot)
     }
+    const onSelectedStartTime = (selectedStartTime: string) => {
+        if (selectedStartTime.length === 0) setSelectedStartTime(undefined)  
+        else setSelectedStartTime(new Date(selectedStartTime))
+    }
 
     const onScheduleButtonPress = () => {
         if (selectedRobot === undefined) return
 
         selectedEchoMissions.map((mission: EchoMission) => {
-            console.log(`Schedule Echo missions ${mission.id}: ${mission.name} to robot ${selectedRobot.name}`)
-            apiCaller.postMission(mission.id, selectedRobot.id, new Date())
+            console.log(`Schedule Echo missions ${mission.id}: ${mission.name} to robot ${selectedRobot.name} with start time ${selectedStartTime}`)
+            apiCaller.postMission(mission.id, selectedRobot.id, selectedStartTime as Date)
         })
     }
 
@@ -122,12 +127,13 @@ export function UpcomingMissionView() {
     }, [])
 
     useEffect(() => {
-        if (selectedRobot === undefined || selectedEchoMissions.length === 0) {
+        if (selectedRobot === undefined || selectedEchoMissions.length === 0 
+            || selectedStartTime === undefined) {
             setScheduleButtonDisabled(true)
         } else {
             setScheduleButtonDisabled(false)
         }
-    }, [selectedRobot, selectedEchoMissions])
+    }, [selectedRobot, selectedEchoMissions, selectedStartTime])
 
     var upcomingMissionDisplay = upcomingMissions.map(function (mission, index) {
         return <UpcomingMissionCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
@@ -149,6 +155,7 @@ export function UpcomingMissionView() {
                             echoMissionsOptions={Array.from(echoMissions.keys())}
                             onSelectedMissions={onSelectedEchoMissions}
                             onSelectedRobot={onSelectedRobot}
+                            onSelectedStartTime={onSelectedStartTime}
                             onScheduleButtonPress={onScheduleButtonPress}
                             scheduleButtonDisabled={scheduleButtonDisabled}
                         ></ScheduleMissionDialog>

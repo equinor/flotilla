@@ -1,6 +1,6 @@
-import { Autocomplete, AutocompleteChanges, Button, Card, Checkbox, Dialog, Typography } from '@equinor/eds-core-react'
+import { Autocomplete, AutocompleteChanges, Button, Card, Checkbox, Dialog, Typography, TextField } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
-import { useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import styled from 'styled-components'
 
 interface IProps {
@@ -8,6 +8,7 @@ interface IProps {
     echoMissionsOptions: Array<string>
     onSelectedMissions: (missions: string[]) => void
     onSelectedRobot: (robot: string) => void
+    onSelectedStartTime: (time: string) => void
     onScheduleButtonPress: () => void
     scheduleButtonDisabled: boolean
 }
@@ -35,6 +36,9 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const onChangeRobotSelection = (changes: AutocompleteChanges<string>) => {
         props.onSelectedRobot(changes.selectedItems[0])
     }
+    const onChangeStartTime = (changes: ChangeEvent<HTMLInputElement>) => {
+        props.onSelectedStartTime(changes.target.value)
+    }
     return (
         <>
             <Button
@@ -58,6 +62,12 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             options={props.robotOptions}
                             label={'Select robot'}
                             onOptionsChange={onChangeRobotSelection}
+                        />
+                        <TextField
+                            id="datetime"
+                            label="Select start time"
+                            type="datetime-local"
+                            onChange={onChangeStartTime}
                         />
                         <StyledMissionSection>
                             <Button
