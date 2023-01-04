@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Utilities;
@@ -12,7 +13,8 @@ namespace Api.Mqtt
 {
     public class MqttService : BackgroundService
     {
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarConnectReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotStatusReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotInfoReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarMissionReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarStepReceived;
@@ -106,15 +108,18 @@ namespace Api.Mqtt
             }
 
             _logger.LogInformation(
-                "Topic: {topic} - Message recieved: \n{payload}",
+                "Topic: {topic} - Message received: \n{payload}",
                 topic,
                 content
             );
 
             switch (messageType)
             {
-                case Type type when type == typeof(IsarConnectMessage):
-                    OnIsarTopicReceived<IsarConnectMessage>(content);
+                case Type type when type == typeof(IsarRobotStatusMessage):
+                    OnIsarTopicReceived<IsarRobotStatusMessage>(content);
+                    break;
+                case Type type when type == typeof(IsarRobotInfoMessage):
+                    OnIsarTopicReceived<IsarRobotInfoMessage>(content);
                     break;
                 case Type type when type == typeof(IsarMissionMessage):
                     OnIsarTopicReceived<IsarMissionMessage>(content);
@@ -239,7 +244,11 @@ namespace Api.Mqtt
             T? message;
             try
             {
-                message = JsonSerializer.Deserialize<T>(content);
+                var options = new JsonSerializerOptions
+                {
+                    Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+                };
+                message = JsonSerializer.Deserialize<T>(content, options);
                 if (message is null)
                     throw new JsonException();
             }
@@ -258,7 +267,8 @@ namespace Api.Mqtt
             {
                 var raiseEvent = type switch
                 {
-                    _ when type == typeof(IsarConnectMessage) => MqttIsarConnectReceived,
+                    _ when type == typeof(IsarRobotStatusMessage) => MqttIsarRobotStatusReceived,
+                    _ when type == typeof(IsarRobotInfoMessage) => MqttIsarRobotInfoReceived,
                     _ when type == typeof(IsarMissionMessage) => MqttIsarMissionReceived,
                     _ when type == typeof(IsarTaskMessage) => MqttIsarTaskReceived,
                     _ when type == typeof(IsarStepMessage) => MqttIsarStepReceived,

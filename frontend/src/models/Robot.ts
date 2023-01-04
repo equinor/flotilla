@@ -13,6 +13,7 @@ export enum RobotType {
     TaurobOperator = 'TaurobOperator',
     ExR2 = 'ExR2',
     Turtlebot = 'Turtlebot',
+    Robot = 'Robot',
     AnymalX = 'AnymalX',
     AnymalD = 'AnymalD',
     NoneType = 'NoneType',
@@ -32,6 +33,9 @@ export namespace RobotType {
             }
             case RobotType.Turtlebot: {
                 return 'Turtlebot'
+            }
+            case RobotType.Robot: {
+                return 'Robot'
             }
             case RobotType.AnymalX: {
                 return 'ANYmal X'

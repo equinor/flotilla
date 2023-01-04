@@ -5,6 +5,7 @@
         TaurobInspector,
         TaurobOperator,
         ExR2,
+        Robot,
         Turtlebot,
         AnymalX,
         AnymalD,

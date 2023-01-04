@@ -4,6 +4,7 @@ import anymalX from 'mediaAssets/anymal_x.png'
 import anymalD from 'mediaAssets/anymal_d.png'
 import exRobotics from 'mediaAssets/ExRobotics.webp'
 import turtleBot from 'mediaAssets/turtlebot.webp'
+import robot from 'mediaAssets/robot.png'
 import styled from 'styled-components'
 import { Icon } from '@equinor/eds-core-react'
 import { cloud_off, image } from '@equinor/eds-icons'
@@ -41,6 +42,10 @@ export function RobotImage({ robotType }: TypeProps) {
         }
         case RobotType.Turtlebot: {
             robotImage = turtleBot
+            break
+        }
+        case RobotType.Robot: {
+            robotImage = robot
             break
         }
         case RobotType.AnymalX: {
