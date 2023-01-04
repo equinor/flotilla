@@ -29,6 +29,7 @@ builder.Services.AddScoped<RobotController>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MqttService>();
+builder.Services.AddHostedService<IsarConnectionEventHandler>();
 builder.Services.AddHostedService<MissionScheduler>();
 
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));

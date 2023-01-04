@@ -9,12 +9,13 @@ namespace Api.Mqtt
     public static class MqttTopics
     {
         /// <summary>
-        /// A dictionnary linking MQTT topics to their respective message models
+        /// A dictionary linking MQTT topics to their respective message models
         /// </summary>
         public static readonly Dictionary<string, Type> TopicsToMessages =
             new()
             {
-                { "isar/+/robot", typeof(IsarConnectMessage) },
+                { "isar/+/robot_status", typeof(IsarRobotStatusMessage) },
+                { "isar/+/robot_info", typeof(IsarRobotInfoMessage) },
                 { "isar/+/mission", typeof(IsarMissionMessage) },
                 { "isar/+/task", typeof(IsarTaskMessage) },
                 { "isar/+/step", typeof(IsarStepMessage) },
@@ -23,7 +24,7 @@ namespace Api.Mqtt
             };
 
         /// <summary>
-        /// Searches a dictionnary for a specific topic name and returns the corresponding value from the wildcarded dictionnary
+        /// Searches a dictionary for a specific topic name and returns the corresponding value from the wildcarded dictionary
         /// </summary>
         /// <remarks>
         /// Will throw <see cref="InvalidOperationException"></see> if there are more than one matches for the topic.
