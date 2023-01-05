@@ -67,7 +67,7 @@ export function UpcomingMissionView() {
         setSelectedRobot(robotOptions.get(selectedRobot) as Robot)
     }
     const onSelectedStartTime = (selectedStartTime: string) => {
-        if (selectedStartTime.length === 0) setSelectedStartTime(undefined)  
+        if (selectedStartTime.length === 0) setSelectedStartTime(undefined)
         else setSelectedStartTime(new Date(selectedStartTime))
     }
 
@@ -75,7 +75,9 @@ export function UpcomingMissionView() {
         if (selectedRobot === undefined) return
 
         selectedEchoMissions.map((mission: EchoMission) => {
-            console.log(`Schedule Echo missions ${mission.id}: ${mission.name} to robot ${selectedRobot.name} with start time ${selectedStartTime}`)
+            console.log(
+                `Schedule Echo missions ${mission.id}: ${mission.name} to robot ${selectedRobot.name} with start time ${selectedStartTime}`
+            )
             apiCaller.postMission(mission.id, selectedRobot.id, selectedStartTime as Date)
         })
     }
@@ -127,8 +129,7 @@ export function UpcomingMissionView() {
     }, [])
 
     useEffect(() => {
-        if (selectedRobot === undefined || selectedEchoMissions.length === 0 
-            || selectedStartTime === undefined) {
+        if (selectedRobot === undefined || selectedEchoMissions.length === 0 || selectedStartTime === undefined) {
             setScheduleButtonDisabled(true)
         } else {
             setScheduleButtonDisabled(false)
