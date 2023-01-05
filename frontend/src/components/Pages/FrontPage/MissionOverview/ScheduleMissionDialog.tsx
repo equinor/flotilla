@@ -1,4 +1,13 @@
-import { Autocomplete, AutocompleteChanges, Button, Card, Checkbox, Dialog, Typography, TextField } from '@equinor/eds-core-react'
+import {
+    Autocomplete,
+    AutocompleteChanges,
+    Button,
+    Card,
+    Checkbox,
+    Dialog,
+    Typography,
+    TextField,
+} from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import { ChangeEvent, useState } from 'react'
 import styled from 'styled-components'
@@ -30,6 +39,7 @@ const StyledMissionSection = styled.div`
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [isStartTimeValid, setIsStartTimeValid] = useState<boolean>(true)
     const onChangeEchoMissionSelections = (changes: AutocompleteChanges<string>) => {
         props.onSelectedMissions(changes.selectedItems)
     }
@@ -37,7 +47,14 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         props.onSelectedRobot(changes.selectedItems[0])
     }
     const onChangeStartTime = (changes: ChangeEvent<HTMLInputElement>) => {
-        props.onSelectedStartTime(changes.target.value)
+        const allowedPastStartTime = 60 * 1000
+        if (!(new Date(changes.target.value).getTime() < new Date().getTime() - allowedPastStartTime)) {
+            setIsStartTimeValid(true)
+            props.onSelectedStartTime(changes.target.value)
+        } else {
+            setIsStartTimeValid(false)
+            props.onSelectedStartTime('')
+        }
     }
     return (
         <>
@@ -67,6 +84,8 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             id="datetime"
                             label="Select start time"
                             type="datetime-local"
+                            variant={isStartTimeValid ? undefined : 'error'}
+                            helperText={isStartTimeValid ? undefined : 'Cannot schedule mission in the past'}
                             onChange={onChangeStartTime}
                         />
                         <StyledMissionSection>
