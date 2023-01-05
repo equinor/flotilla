@@ -80,6 +80,14 @@ export function UpcomingMissionView() {
             )
             apiCaller.postMission(mission.id, selectedRobot.id, selectedStartTime as Date)
         })
+
+        onScheduledMission()
+    }
+
+    const onScheduledMission = () => {
+        setSelectedEchoMissions([])
+        setSelectedRobot(undefined)
+        setSelectedStartTime(undefined)
     }
 
     const onDeleteMission = (mission: Mission) => {
