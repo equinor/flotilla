@@ -485,7 +485,7 @@ public class RobotController : ControllerBase
             return NotFound();
         }
 
-        HttpResponseMessage response;
+        IsarControlMissionResponse response;
         try
         {
             response = await _isarService.PauseMission(robot);
@@ -510,7 +510,6 @@ public class RobotController : ControllerBase
             _logger.LogError(e, "{message}", message);
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
-
         return Ok(response);
     }
 
@@ -537,7 +536,7 @@ public class RobotController : ControllerBase
             return NotFound();
         }
 
-        HttpResponseMessage response;
+        IsarControlMissionResponse response;
         try
         {
             response = await _isarService.ResumeMission(robot);
