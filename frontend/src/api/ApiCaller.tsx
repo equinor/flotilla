@@ -1,5 +1,6 @@
 import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
+import { ControlMissionResponse } from 'models/ControlMissionResponse'
 import { EchoMission, EchoPlantInfo } from 'models/EchoMission'
 import { Mission, MissionStatus } from 'models/Mission'
 import { Robot } from 'models/Robot'
@@ -43,6 +44,23 @@ export class BackendAPICaller {
             throw new Error(`Error getting json from response: ${e}`)
         })
         return { body: responseBody, headers: response.headers }
+    }
+
+    private constructRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: T): RequestInit {
+        const headers = {
+            'content-type': 'application/json',
+            Authorization: `Bearer ${this.accessToken}`,
+        }
+
+        const init: RequestInit = {
+            method,
+            headers,
+            mode: 'cors',
+        }
+        if (body !== undefined) {
+            init.body = JSON.stringify(body)
+        }
+        return init
     }
 
     private async GET<T>(path: string): Promise<{ body: T; headers: Headers }> {
@@ -134,18 +152,32 @@ export class BackendAPICaller {
         })
     }
 
-    async pauseMission(robotId: string) {
+    async pauseMission(robotId: string): Promise<ControlMissionResponse> {
         const path: string = 'robots/' + robotId + '/pause'
-        await this.POST(path, '').catch((e) => {
-            throw new Error(`Failed to POST /${path}: ` + e)
+        const url = `${config.BACKEND_URL}/${path}`
+        const body = { robotId: robotId }
+        const init: RequestInit = this.constructRequest('POST', body)
+
+        const response: Response = await fetch(url, init)
+        if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`)
+        const responseBody: ControlMissionResponse = await response.json().catch((e) => {
+            throw new Error(`Error getting json from response: ${e}`)
         })
+        return responseBody
     }
 
     async resumeMission(robotId: string) {
         const path: string = 'robots/' + robotId + '/resume'
-        await this.POST(path, '').catch((e) => {
-            throw new Error(`Failed to POST /${path}: ` + e)
+        const url = `${config.BACKEND_URL}/${path}`
+        const body = { robotId: robotId }
+        const init: RequestInit = this.constructRequest('POST', body)
+
+        const response: Response = await fetch(url, init)
+        if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`)
+        const responseBody: ControlMissionResponse = await response.json().catch((e) => {
+            throw new Error(`Error getting json from response: ${e}`)
         })
+        return responseBody
     }
 
     async stopMission(robotId: string) {
