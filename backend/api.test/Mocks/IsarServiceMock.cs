@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
@@ -33,16 +32,16 @@ namespace Api.Test.Mocks
             return new IsarStopMissionResponse();
         }
 
-        public async Task<HttpResponseMessage> PauseMission(Robot robot)
+        public async Task<IsarControlMissionResponse> PauseMission(Robot robot)
         {
             await Task.Run(() => Thread.Sleep(1));
-            return new HttpResponseMessage();
+            return new IsarControlMissionResponse();
         }
 
-        public async Task<HttpResponseMessage> ResumeMission(Robot robot)
+        public async Task<IsarControlMissionResponse> ResumeMission(Robot robot)
         {
             await Task.Run(() => Thread.Sleep(1));
-            return new HttpResponseMessage();
+            return new IsarControlMissionResponse();
         }
 
         public async Task<IsarMissionDefinition> GetIsarMissionDefinition(EchoMission echoMission)
