@@ -17,7 +17,7 @@ namespace Api.Services
             IsarMissionDefinition missionDefinition
         );
 
-        public abstract Task<IsarStopMissionResponse> StopMission(Robot robot);
+        public abstract Task<IsarControlMissionResponse> StopMission(Robot robot);
 
         public abstract Task<IsarControlMissionResponse> PauseMission(Robot robot);
 
@@ -149,7 +149,7 @@ namespace Api.Services
             return isarServiceStartMissionResponse;
         }
 
-        public async Task<IsarStopMissionResponse> StopMission(Robot robot)
+        public async Task<IsarControlMissionResponse> StopMission(Robot robot)
         {
             _logger.LogInformation(
                 "Stopping mission on robot '{id}' on ISAR at '{uri}'",
@@ -171,7 +171,7 @@ namespace Api.Services
             }
 
             var isarMissionResponse =
-                await response.Content.ReadFromJsonAsync<IsarStopMissionResponse>();
+                await response.Content.ReadFromJsonAsync<IsarControlMissionResponse>();
             if (isarMissionResponse is null)
             {
                 _logger.LogError("Failed to deserialize mission from ISAR");

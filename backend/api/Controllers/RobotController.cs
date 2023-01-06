@@ -417,13 +417,13 @@ public class RobotController : ControllerBase
     /// </remarks>
     [HttpPost]
     [Route("{robotId}/stop/")]
-    [ProducesResponseType(typeof(IsarStopMissionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IsarControlMissionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IsarStopMissionResponse>> StopMission([FromRoute] string robotId)
+    public async Task<ActionResult<IsarControlMissionResponse>> StopMission([FromRoute] string robotId)
     {
         var robot = await _robotService.ReadById(robotId);
         if (robot == null)
@@ -432,7 +432,7 @@ public class RobotController : ControllerBase
             return NotFound();
         }
 
-        IsarStopMissionResponse response;
+        IsarControlMissionResponse response;
         try
         {
             response = await _isarService.StopMission(robot);
@@ -470,7 +470,7 @@ public class RobotController : ControllerBase
     /// </remarks>
     [HttpPost]
     [Route("{robotId}/pause/")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IsarControlMissionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -521,7 +521,7 @@ public class RobotController : ControllerBase
     /// </remarks>
     [HttpPost]
     [Route("{robotId}/resume/")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IsarControlMissionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
