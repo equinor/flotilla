@@ -73,7 +73,7 @@ function AssetPicker() {
     const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
     return (
         <Autocomplete
-            options={Array.from(mappedOptions.keys())}
+            options={Array.from(mappedOptions.keys()).sort()}
             label=""
             initialSelectedOptions={[initialOption]}
             placeholder="Select asset"
