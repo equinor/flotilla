@@ -14,12 +14,6 @@ const defaultAsset = {
     switchAsset: (newAsset: string) => {},
 }
 
-export const assetOptions = new Map<string, string>([
-    ['Test', 'test'],
-    ['Kårstø', 'kaa'],
-    ['Johan Sverdrup', 'js'],
-])
-
 export const AssetContext = createContext<IAssetContext>(defaultAsset)
 
 export const AssetProvider: FC<Props> = ({ children }) => {
