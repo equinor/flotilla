@@ -1,6 +1,6 @@
 import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
-import { ControlMissionResponse } from 'models/ControlMissionResponse'
+import { ControlMissionResponse, IControlMissionResponse } from 'models/ControlMissionResponse'
 import { EchoMission, EchoPlantInfo } from 'models/EchoMission'
 import { Mission, MissionStatus } from 'models/Mission'
 import { Robot } from 'models/Robot'
@@ -17,36 +17,7 @@ export class BackendAPICaller {
         this.accessToken = accessToken
     }
 
-    private async query<T>(
-        method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-        path: string,
-        body?: T
-    ): Promise<{ body: T; headers: Headers }> {
-        const headers = {
-            'content-type': 'application/json',
-            Authorization: `Bearer ${this.accessToken}`,
-        }
-
-        const init: RequestInit = {
-            method,
-            headers,
-            mode: 'cors',
-        }
-        if (body !== undefined) {
-            init.body = JSON.stringify(body)
-        }
-
-        const url = `${config.BACKEND_URL}/${path}`
-
-        const response: Response = await fetch(url, init)
-        if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`)
-        const responseBody = await response.json().catch((e) => {
-            throw new Error(`Error getting json from response: ${e}`)
-        })
-        return { body: responseBody, headers: response.headers }
-    }
-
-    private constructRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: T): RequestInit {
+    private initializeRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: T): RequestInit {
         const headers = {
             'content-type': 'application/json',
             Authorization: `Bearer ${this.accessToken}`,
@@ -63,19 +34,41 @@ export class BackendAPICaller {
         return init
     }
 
-    private async GET<T>(path: string): Promise<{ body: T; headers: Headers }> {
+    private async query<TBody, TContent>(
+        method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+        path: string,
+        body?: TBody
+    ): Promise<{ content: TContent; headers: Headers }> {
+        const initializedRequest: RequestInit = this.initializeRequest(method, body)
+
+        const url = `${config.BACKEND_URL}/${path}`
+        const response: Response = await fetch(url, initializedRequest)
+        if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`)
+        const responseContent = await response.json().catch((e) => {
+            throw new Error(`Error getting json from response: ${e}`)
+        })
+        return { content: responseContent, headers: response.headers }
+    }
+
+    private async postControlMissionRequest(path: string, robotId: string): Promise<ControlMissionResponse> {
+        const body = { robotId: robotId }
+        const response = await this.query('POST', path, body)
+
+        const responseObject: ControlMissionResponse = new ControlMissionResponse(
+            response.content as IControlMissionResponse
+        )
+        return responseObject
+    }
+
+    private async GET<TContent>(path: string): Promise<{ content: TContent; headers: Headers }> {
         return this.query('GET', path)
     }
 
-    private async POST<T>(path: string, body: T): Promise<{ body: T; headers: Headers }> {
+    private async POST<TBody, TContent>(path: string, body: TBody): Promise<{ content: TContent; headers: Headers }> {
         return this.query('POST', path, body)
     }
 
-    private async PUT<T>(path: string, body: T): Promise<{ body: T; headers: Headers }> {
-        return this.query('PUT', path, body)
-    }
-
-    private async DELETE<T>(path: string, body: T): Promise<{ body: T; headers: Headers }> {
+    private async DELETE<TBody, TContent>(path: string, body: TBody): Promise<{ content: TContent; headers: Headers }> {
         return this.query('DELETE', path, body)
     }
 
@@ -84,7 +77,7 @@ export class BackendAPICaller {
         const result = await this.GET<Robot[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
-        return result.body
+        return result.content
     }
 
     async getAllEchoMissions(): Promise<EchoMission[]> {
@@ -92,7 +85,7 @@ export class BackendAPICaller {
         const result = await this.GET<EchoMission[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
-        return result.body
+        return result.content
     }
 
     async getMissionsByStatus(status: MissionStatus): Promise<Mission[]> {
@@ -100,7 +93,7 @@ export class BackendAPICaller {
         const result = await this.GET<Mission[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
-        return result.body
+        return result.content
     }
 
     async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
@@ -108,7 +101,7 @@ export class BackendAPICaller {
         const result = await this.GET<EchoMission[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
-        return result.body
+        return result.content
     }
 
     async getMissionById(missionId: string): Promise<Mission> {
@@ -116,7 +109,7 @@ export class BackendAPICaller {
         const result = await this.GET<Mission>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
-        return result.body
+        return result.content
     }
 
     async getVideoStreamsByRobotId(robotId: string): Promise<VideoStream[]> {
@@ -124,7 +117,7 @@ export class BackendAPICaller {
         const result = await this.GET<VideoStream[]>(path).catch((e) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
-        return result.body
+        return result.content
     }
 
     async getEchoPlantInfo(): Promise<EchoPlantInfo[]> {
@@ -132,17 +125,17 @@ export class BackendAPICaller {
         const result = await this.GET<EchoPlantInfo[]>(path).catch((e: Error) => {
             throw new Error(`Failed to GET /${path}: ` + e)
         })
-        return result.body
+        return result.content
     }
     async postMission(echoMissionId: number, robotId: string, startTime: Date) {
         const path: string = 'missions'
         const robots: Robot[] = await this.getRobots()
         const desiredRobot = filterRobots(robots, robotId)
         const body = { robotId: desiredRobot[0].id, echoMissionId: echoMissionId, startTime: startTime }
-        const result = await this.POST<unknown>(path, body).catch((e) => {
+        const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
             throw new Error(`Failed to POST /${path}: ` + e)
         })
-        return result.body
+        return result.content
     }
 
     async deleteMission(missionId: string) {
@@ -154,37 +147,17 @@ export class BackendAPICaller {
 
     async pauseMission(robotId: string): Promise<ControlMissionResponse> {
         const path: string = 'robots/' + robotId + '/pause'
-        const url = `${config.BACKEND_URL}/${path}`
-        const body = { robotId: robotId }
-        const init: RequestInit = this.constructRequest('POST', body)
-
-        const response: Response = await fetch(url, init)
-        if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`)
-        const responseBody: ControlMissionResponse = await response.json().catch((e) => {
-            throw new Error(`Error getting json from response: ${e}`)
-        })
-        return responseBody
+        return this.postControlMissionRequest(path, robotId)
     }
 
-    async resumeMission(robotId: string) {
+    async resumeMission(robotId: string): Promise<ControlMissionResponse> {
         const path: string = 'robots/' + robotId + '/resume'
-        const url = `${config.BACKEND_URL}/${path}`
-        const body = { robotId: robotId }
-        const init: RequestInit = this.constructRequest('POST', body)
-
-        const response: Response = await fetch(url, init)
-        if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`)
-        const responseBody: ControlMissionResponse = await response.json().catch((e) => {
-            throw new Error(`Error getting json from response: ${e}`)
-        })
-        return responseBody
+        return this.postControlMissionRequest(path, robotId)
     }
 
-    async stopMission(robotId: string) {
+    async stopMission(robotId: string): Promise<ControlMissionResponse> {
         const path: string = 'robots/' + robotId + '/stop'
-        await this.POST(path, '').catch((e) => {
-            throw new Error(`Failed to POST /${path}: ` + e)
-        })
+        return this.postControlMissionRequest(path, robotId)
     }
 }
 
