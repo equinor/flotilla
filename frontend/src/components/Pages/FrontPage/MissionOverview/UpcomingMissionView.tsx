@@ -47,10 +47,11 @@ export function UpcomingMissionView() {
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMission[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [selectedStartTime, setSelectedStartTime] = useState<Date>()
-    const [echoMissions, setEchoMissions] = useState<Map<string, EchoMission>>()
-    const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>()
+    const [echoMissions, setEchoMissions] = useState<Map<string, EchoMission>>(mapEchoMissionToString([]))
+    const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>(mapRobotsToString([]))
     const [assetString, setAssetString] = useState<string>('')
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
+    const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
     const timeDelay = 1000
     const echoURL = 'https://echo.equinor.com/mp?instCode='
     const savedAsset = sessionStorage.getItem('assetString')
@@ -136,6 +137,14 @@ export function UpcomingMissionView() {
         }
     }, [selectedRobot, selectedEchoMissions, selectedStartTime])
 
+    useEffect(() => {
+        if (Array.from(robotOptions.keys()).length === 0 || Array.from(echoMissions.keys()).length === 0) {
+            setFrontPageScheduleButtonDisabled(true)
+        } else {
+            setFrontPageScheduleButtonDisabled(false)
+        }
+    }, [robotOptions, echoMissions])
+
     var upcomingMissionDisplay = upcomingMissions.map(function (mission, index) {
         return <UpcomingMissionCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
     })
@@ -149,26 +158,23 @@ export function UpcomingMissionView() {
                 {upcomingMissions.length === 0 && <NoUpcomingMissionsPlaceholder />}
             </MissionTable>
             <MissionButtonView>
-                {echoMissions && robotOptions && (
-                    <>
-                        <ScheduleMissionDialog
-                            robotOptions={Array.from(robotOptions.keys())}
-                            echoMissionsOptions={Array.from(echoMissions.keys())}
-                            onSelectedMissions={onSelectedEchoMissions}
-                            onSelectedRobot={onSelectedRobot}
-                            onSelectedStartTime={onSelectedStartTime}
-                            onScheduleButtonPress={onScheduleButtonPress}
-                            scheduleButtonDisabled={scheduleButtonDisabled}
-                        ></ScheduleMissionDialog>
-                        <Button
-                            onClick={() => {
-                                window.open(echoURL + savedAsset)
-                            }}
-                        >
-                            Create mission
-                        </Button>
-                    </>
-                )}
+                <ScheduleMissionDialog
+                    robotOptions={Array.from(robotOptions.keys())}
+                    echoMissionsOptions={Array.from(echoMissions.keys())}
+                    onSelectedMissions={onSelectedEchoMissions}
+                    onSelectedRobot={onSelectedRobot}
+                    onSelectedStartTime={onSelectedStartTime}
+                    onScheduleButtonPress={onScheduleButtonPress}
+                    scheduleButtonDisabled={scheduleButtonDisabled}
+                    frontPageScheduleButtonDisabled={frontPageScheduleButtonDisabled}
+                ></ScheduleMissionDialog>
+                <Button
+                    onClick={() => {
+                        window.open(echoURL + savedAsset)
+                    }}
+                >
+                    Create mission
+                </Button>
             </MissionButtonView>
         </StyledMissionView>
     )
