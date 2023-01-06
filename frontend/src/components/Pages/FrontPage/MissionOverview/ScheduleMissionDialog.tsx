@@ -20,6 +20,7 @@ interface IProps {
     onSelectedStartTime: (time: string) => void
     onScheduleButtonPress: () => void
     scheduleButtonDisabled: boolean
+    frontPageScheduleButtonDisabled: boolean
 }
 
 const StyledMissionDialog = styled.div`
@@ -62,6 +63,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 onClick={() => {
                     setIsOpen(true)
                 }}
+                disabled={props.frontPageScheduleButtonDisabled}
             >
                 Schedule Mission
             </Button>
