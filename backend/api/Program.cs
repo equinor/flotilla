@@ -25,6 +25,7 @@ builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<IStidService, StidService>();
 builder.Services.AddScoped<ITagPositioner, TagPositioner>();
+builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<RobotController>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
