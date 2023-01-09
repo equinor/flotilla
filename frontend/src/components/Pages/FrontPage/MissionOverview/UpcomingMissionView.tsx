@@ -47,9 +47,8 @@ export function UpcomingMissionView() {
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMission[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [selectedStartTime, setSelectedStartTime] = useState<Date>()
-    const [echoMissions, setEchoMissions] = useState<Map<string, EchoMission>>(mapEchoMissionToString([]))
-    const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>(mapRobotsToString([]))
-    const [assetString, setAssetString] = useState<string>('')
+    const [echoMissions, setEchoMissions] = useState<Map<string, EchoMission>>(new Map<string, EchoMission>())
+    const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>(new Map<string, Robot>())
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
     const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
     const timeDelay = 1000
@@ -94,15 +93,10 @@ export function UpcomingMissionView() {
     }, [])
 
     useEffect(() => {
-        const installationCode = sessionStorage.getItem('assetString')
-        if (installationCode !== assetString) {
-            setAssetString(installationCode as string)
-        }
-    }, [sessionStorage.getItem('assetString')])
-
-    useEffect(() => {
         const id = setInterval(() => {
-            apiCaller.getEchoMissions(assetString).then((missions) => {
+            var installationCode = sessionStorage.getItem('assetString')
+            if (!installationCode) installationCode = ''
+            apiCaller.getEchoMissions(installationCode as string).then((missions) => {
                 const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
                 setEchoMissions(mappedEchoMissions)
             })
