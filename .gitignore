@@ -14,6 +14,7 @@ frontend/build/
 # Backend
 backend/*/bin
 backend/*/obj
+backend/api/Database/Maps/
 
 #Broker
 broker/mosquitto/config/certs/server-key.pem
