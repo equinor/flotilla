@@ -94,12 +94,15 @@ export function UpcomingMissionView() {
 
     useEffect(() => {
         const id = setInterval(() => {
-            var installationCode = sessionStorage.getItem('assetString')
-            if (!installationCode) installationCode = ''
-            apiCaller.getEchoMissions(installationCode as string).then((missions) => {
-                const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
-                setEchoMissions(mappedEchoMissions)
-            })
+            const installationCode = sessionStorage.getItem('assetString')
+            if (!installationCode || installationCode == '') {
+                setEchoMissions(new Map<string, EchoMission>())
+            } else {
+                apiCaller.getEchoMissions(installationCode as string).then((missions) => {
+                    const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
+                    setEchoMissions(mappedEchoMissions)
+                })
+            }
         }, timeDelay)
         return () => clearInterval(id)
     }, [])
