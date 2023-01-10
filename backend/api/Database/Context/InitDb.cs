@@ -105,7 +105,7 @@ public static class InitDb
         {
             Name = "Placeholder Mission 3",
             Robot = Robots[2],
-            AssetCode = "test",
+            AssetCode = "kaa",
             EchoMissionId = 1,
             IsarMissionId = "1",
             MissionStatus = MissionStatus.Pending,

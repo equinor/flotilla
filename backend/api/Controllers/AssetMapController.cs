@@ -1,9 +1,3 @@
-using System.Text.Json;
-using Api.Controllers.Models;
-using Api.Database.Models;
-using Api.Services;
-using Api.Services.Models;
-using Api.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -14,6 +8,7 @@ public class AssetMapController : ControllerBase
 {
     private readonly ILogger<AssetMapController> _logger;
     private readonly IMapService _mapService;
+
     public AssetMapController(ILogger<AssetMapController> logger, IMapService mapService)
     {
         _logger = logger;
@@ -21,23 +16,29 @@ public class AssetMapController : ControllerBase
     }
 
     [HttpGet]
+    [Route("{missionId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<String>> GetMap()
-    {
+    public async Task<ActionResult<Byte[]>> GetMap([FromRoute] string missionId)
+    { 
         try
         {
-            var map = await _mapService.GetMap();
-            return Ok(map);
+            string filePath = await _mapService.FetchMapImage(missionId);
+            var returnFile = PhysicalFile(filePath, "image/png");
+            return returnFile;
         }
-        catch (Azure.RequestFailedException e)
+        catch (Azure.RequestFailedException)
         {
-            _logger.LogError(e, "Error getting map for this area");
-            return new StatusCodeResult(StatusCodes.Status502BadGateway);
+            return NotFound("Could not find map for this area.");
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return NotFound("Could not find mission with this mission ID");
         }
     }
 }

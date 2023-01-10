@@ -1,3 +1,5 @@
+using Api.Database.Context;
+using Api.Database.Models;
 using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
@@ -6,62 +8,40 @@ using Microsoft.Extensions.Options;
 
 public interface IMapService
 {
-    public abstract Task<String> GetMap();
+    public abstract Task<String> FetchMapImage(string missionId);
 }
 public class MapService: IMapService
 {
     private readonly ILogger<MapService> _logger;
     private readonly IOptions<AzureAdOptions> _azureOptions;
     private readonly IOptions<MapBlobOptions> _blobOptions;
+    private readonly FlotillaDbContext _dbContext;
+    string localFilePath = Directory.GetCurrentDirectory() + "/Database/Maps/Map.png";
     public MapService(
         ILogger<MapService> logger,
         IOptions<AzureAdOptions> azureOptions,
-        IOptions<MapBlobOptions> blobOptions)
+        IOptions<MapBlobOptions> blobOptions,
+        FlotillaDbContext dbContext)
     {
         _logger = logger;
         _azureOptions = azureOptions;
         _blobOptions = blobOptions;
+        _dbContext = dbContext;
+
     }
-    public async Task<String> GetMap()
+    public async Task<String> FetchMapImage(string missionId)
     {
-        BlobContainerClient blobContainer = GetBlobContainerClient("kaa"); //, "20190413-2854_bew_02.jpg"
-        try
+        Mission? currentMission = _dbContext.Missions.Find(missionId);
+        if (currentMission == null)
         {
-            await ListBlobsFlatListing(blobContainer, 1);
-        }
-        catch(RequestFailedException e)
-        {
-            throw e;
-        }
-        return "success";
+            _logger.LogError($"Mission not found for mission ID {missionId}");
+            throw new DirectoryNotFoundException($"Mission not found");
+        };
+
+        String filePath = await DownloadMapImageFromBlobStorage(currentMission);
+        return filePath;
     }
 
-    private static async Task ListBlobsFlatListing(BlobContainerClient blobContainerClient, 
-                                                int? segmentSize)
-    {
-        try
-        {
-            // Call the listing operation and return pages of the specified size.
-            var resultSegment = blobContainerClient.GetBlobsAsync()
-                .AsPages(default, segmentSize);
-
-            // Enumerate the blobs returned for each page.
-            await foreach (Azure.Page<BlobItem> blobPage in resultSegment)
-            {
-                foreach (BlobItem blobItem in blobPage.Values)
-                {
-                    Console.WriteLine("Blob name: {0}", blobItem.Name);
-                }
-
-                Console.WriteLine();
-            }
-        }
-        catch (RequestFailedException e)
-        {
-            Console.WriteLine(e.Message);
-            throw e;
-        }
-    }
     private BlobContainerClient GetBlobContainerClient(string asset)
     {
         var serviceClient = new BlobServiceClient(
@@ -70,4 +50,21 @@ public class MapService: IMapService
         var containerClient = serviceClient.GetBlobContainerClient(asset);
         return containerClient;
     }
+
+    private async Task<String> DownloadMapImageFromBlobStorage(Mission currentMission)
+    {
+        BlobContainerClient blobContainer = GetBlobContainerClient(currentMission.AssetCode);
+        BlobClient blobClient = blobContainer.GetBlobClient("k-lab.png");
+        try
+        {
+            await blobClient.DownloadToAsync(localFilePath);
+           
+        }
+        catch(RequestFailedException e)
+        {
+            _logger.LogError($"Directory not found: {e.Message}");
+            throw e;
+        }
+        return localFilePath;
+    } 
 }
