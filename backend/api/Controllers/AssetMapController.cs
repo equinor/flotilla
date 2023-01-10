@@ -34,7 +34,7 @@ public class AssetMapController : ControllerBase
             var map = await _mapService.GetMap();
             return Ok(map);
         }
-        catch (HttpRequestException e)
+        catch (Azure.RequestFailedException e)
         {
             _logger.LogError(e, "Error getting map for this area");
             return new StatusCodeResult(StatusCodes.Status502BadGateway);
