@@ -7,9 +7,10 @@ import {
     Dialog,
     Typography,
     TextField,
+    Popover,
 } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 interface IProps {
@@ -39,8 +40,28 @@ const StyledMissionSection = styled.div`
 `
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
-    const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+    const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [isStartTimeValid, setIsStartTimeValid] = useState<boolean>(true)
+    const anchorRef = useRef<HTMLButtonElement>(null)
+    let timer: ReturnType<typeof setTimeout>
+    const openPopover = () => {
+        if (props.frontPageScheduleButtonDisabled) setIsPopoverOpen(true)
+    }
+
+    const closePopover = () => setIsPopoverOpen(false)
+
+    const handleHover = () => {
+        timer = setTimeout(() => {
+            openPopover()
+        }, 300)
+    }
+
+    const handleClose = () => {
+        clearTimeout(timer)
+        closePopover()
+    }
+
     const onChangeEchoMissionSelections = (changes: AutocompleteChanges<string>) => {
         props.onSelectedMissions(changes.selectedItems)
     }
@@ -59,16 +80,26 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     }
     return (
         <>
-            <Button
-                onClick={() => {
-                    setIsOpen(true)
-                }}
-                disabled={props.frontPageScheduleButtonDisabled}
-            >
-                Schedule Mission
-            </Button>
+            <div onPointerEnter={handleHover} onPointerLeave={handleClose} onFocus={openPopover} onBlur={handleClose}>
+                <Button
+                    onClick={() => {
+                        setIsDialogOpen(true)
+                    }}
+                    disabled={props.frontPageScheduleButtonDisabled}
+                    ref={anchorRef}
+                >
+                    Schedule Mission
+                </Button>
+            </div>
+
+            <Popover anchorEl={anchorRef.current} onClose={handleClose} open={isPopoverOpen} placement="top">
+                <Popover.Content>
+                    <Typography variant="body_short">Please select asset</Typography>
+                </Popover.Content>
+            </Popover>
+
             <StyledMissionDialog>
-                <Dialog open={isOpen} isDismissable>
+                <Dialog open={isDialogOpen} isDismissable>
                     <StyledAutoComplete>
                         <Typography variant="h5">Schedule mission</Typography>
                         <Autocomplete
@@ -93,7 +124,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                         <StyledMissionSection>
                             <Button
                                 onClick={() => {
-                                    setIsOpen(false)
+                                    setIsDialogOpen(false)
                                 }}
                                 variant="outlined"
                                 color="secondary"
@@ -104,7 +135,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             <Button
                                 onClick={() => {
                                     props.onScheduleButtonPress()
-                                    setIsOpen(false)
+                                    setIsDialogOpen(false)
                                 }}
                                 disabled={props.scheduleButtonDisabled}
                             >
