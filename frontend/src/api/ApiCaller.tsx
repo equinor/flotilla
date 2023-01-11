@@ -127,11 +127,16 @@ export class BackendAPICaller {
         })
         return result.content
     }
-    async postMission(echoMissionId: number, robotId: string, startTime: Date) {
+    async postMission(echoMissionId: number, robotId: string, startTime: Date, assetCode: string | null) {
         const path: string = 'missions'
         const robots: Robot[] = await this.getRobots()
         const desiredRobot = filterRobots(robots, robotId)
-        const body = { robotId: desiredRobot[0].id, echoMissionId: echoMissionId, startTime: startTime }
+        const body = {
+            robotId: desiredRobot[0].id,
+            echoMissionId: echoMissionId,
+            startTime: startTime,
+            assetCode: assetCode,
+        }
         const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
             throw new Error(`Failed to POST /${path}: ` + e)
         })

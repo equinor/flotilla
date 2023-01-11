@@ -74,11 +74,12 @@ export function UpcomingMissionView() {
     const onScheduleButtonPress = () => {
         if (selectedRobot === undefined) return
 
+        const assetCode = sessionStorage.getItem('assetString')
         selectedEchoMissions.map((mission: EchoMission) => {
             console.log(
                 `Schedule Echo missions ${mission.id}: ${mission.name} to robot ${selectedRobot.name} with start time ${selectedStartTime}`
             )
-            apiCaller.postMission(mission.id, selectedRobot.id, selectedStartTime as Date)
+            apiCaller.postMission(mission.id, selectedRobot.id, selectedStartTime as Date, assetCode)
         })
 
         setSelectedEchoMissions([])
