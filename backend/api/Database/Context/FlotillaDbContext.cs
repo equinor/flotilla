@@ -20,7 +20,7 @@ public class FlotillaDbContext : DbContext
             .Entity<Mission>()
             .OwnsMany(m => m.PlannedTasks)
             .OwnsMany(t => t.Inspections);
-
+        modelBuilder.Entity<Mission>().OwnsMany(m => m.PlannedTasks).OwnsOne(r => r.TagPosition);
         modelBuilder.Entity<Mission>().OwnsMany(m => m.Tasks).OwnsMany(t => t.Steps);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);

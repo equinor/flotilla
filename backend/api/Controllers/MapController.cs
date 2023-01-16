@@ -8,6 +8,7 @@ public class AssetMapController : ControllerBase
 {
     private readonly ILogger<AssetMapController> _logger;
     private readonly IMapService _mapService;
+    
 
     public AssetMapController(ILogger<AssetMapController> logger, IMapService mapService)
     {

@@ -20,6 +20,8 @@ namespace Api.Database.Models
         [MaxLength(64)]
         public Uri URL { get; set; }
 
+        public Position TagPosition { get; set; }
+
         public IList<PlannedInspection> Inspections { get; set; }
 
         public PlannedTask()
