@@ -1,20 +1,14 @@
 ﻿using Api.Database.Context;
 using Api.Database.Models;
+using Api.Controllers.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Api.Services
 {
     public interface IMissionService
     {
-        public abstract Task<Mission> Create(Mission mission);
-
-        public abstract Task<Mission> Create(
-            string isarMissionId,
-            int echoMissionId,
-            string log,
-            MissionStatus status,
-            Robot robot
-        );
+        public abstract Task<Mission> Create(ScheduledMissionQuery scheduledMissionQuery);
 
         public abstract Task<IList<Mission>> ReadAll(
             string? assetCode = null,
@@ -57,11 +51,20 @@ namespace Api.Services
     {
         private readonly FlotillaDbContext _context;
         private readonly ILogger<MissionService> _logger;
+        private readonly IMapService _mapService;
+        private readonly IRobotService _robotService;
+        private readonly IEchoService _echoService;
+        private readonly IStidService _stidService;
 
-        public MissionService(FlotillaDbContext context, ILogger<MissionService> logger)
+        public MissionService(FlotillaDbContext context, ILogger<MissionService> logger, IMapService mapService, IRobotService robotService, IEchoService echoService, IStidService stidService)
         {
             _context = context;
             _logger = logger;
+            _robotService = robotService;
+            _mapService = mapService;
+            _echoService = echoService;
+            _stidService = stidService;
+
         }
 
         private IQueryable<Mission> GetMissionsWithSubModels()
@@ -75,33 +78,56 @@ namespace Api.Services
                 .ThenInclude(task => task.Steps);
         }
 
-        public async Task<Mission> Create(Mission mission)
+        public async Task<Mission> Create(ScheduledMissionQuery scheduledMissionQuery)
         {
-            await _context.Missions.AddAsync(mission);
+            var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
+            if (robot is null)
+                throw new KeyNotFoundException($"Could not find robot with id {scheduledMissionQuery.RobotId}");
+
+            EchoMission? echoMission;
+            try
+            {
+                echoMission = await _echoService.GetMissionById(scheduledMissionQuery.EchoMissionId);
+            }
+            catch (HttpRequestException e)
+            {
+                if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
+                {
+                    _logger.LogWarning(
+                        "Could not find echo mission with id={id}",
+                        scheduledMissionQuery.EchoMissionId
+                    );
+                    throw new KeyNotFoundException("Echo mission not found");
+                }
+
+                _logger.LogError(e, "Error getting mission from Echo");
+                throw e;
+            }
+            catch (JsonException e)
+            {
+                string message = "Error deserializing mission from Echo";
+                _logger.LogError(e, "{message}", message);
+                throw e;
+            }
+
+            var plannedTasks = echoMission.Tags.Select(t => new PlannedTask(t)).ToList();
+
+            var scheduledMission = new Mission
+            {
+                Name = echoMission.Name,
+                Robot = robot,
+                EchoMissionId = scheduledMissionQuery.EchoMissionId,
+                MissionStatus = MissionStatus.Pending,
+                StartTime = scheduledMissionQuery.StartTime,
+                PlannedTasks = plannedTasks,
+                Tasks = new List<IsarTask>(),
+                AssetCode = scheduledMissionQuery.AssetCode
+            };
+
+            await _context.Missions.AddAsync(scheduledMission);
             await _context.SaveChangesAsync();
 
-            return mission;
-        }
-
-        public async Task<Mission> Create(
-            string isarMissionId,
-            int echoMissionId,
-            string log,
-            MissionStatus status,
-            Robot robot
-        )
-        {
-            var mission = new Mission
-            {
-                IsarMissionId = isarMissionId,
-                EchoMissionId = echoMissionId,
-                MissionStatus = status,
-                StartTime = DateTimeOffset.UtcNow,
-                Robot = robot
-            };
-            await Create(mission);
-
-            return mission;
+            return scheduledMission;
         }
 
         public async Task<IList<Mission>> ReadAll(
