@@ -11,20 +11,14 @@ namespace Api.Controllers;
 public class MissionController : ControllerBase
 {
     private readonly IMissionService _missionService;
-    private readonly IRobotService _robotService;
-    private readonly IEchoService _echoService;
     private readonly ILogger<MissionController> _logger;
 
     public MissionController(
         IMissionService missionService,
-        IRobotService robotService,
-        IEchoService echoService,
         ILogger<MissionController> logger
     )
     {
         _missionService = missionService;
-        _robotService = robotService;
-        _echoService = echoService;
         _logger = logger;
     }
 
@@ -84,52 +78,8 @@ public class MissionController : ControllerBase
         [FromBody] ScheduledMissionQuery scheduledMissionQuery
     )
     {
-        var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
-        if (robot is null)
-            return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
-
-        EchoMission? echoMission;
-        try
-        {
-            echoMission = await _echoService.GetMissionById(scheduledMissionQuery.EchoMissionId);
-        }
-        catch (HttpRequestException e)
-        {
-            if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
-            {
-                _logger.LogWarning(
-                    "Could not find echo mission with id={id}",
-                    scheduledMissionQuery.EchoMissionId
-                );
-                return NotFound("Echo mission not found");
-            }
-
-            _logger.LogError(e, "Error getting mission from Echo");
-            return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
-        }
-        catch (JsonException e)
-        {
-            string message = "Error deserializing mission from Echo";
-            _logger.LogError(e, "{message}", message);
-            return StatusCode(StatusCodes.Status500InternalServerError, message);
-        }
-
-        var plannedTasks = echoMission.Tags.Select(t => new PlannedTask(t)).ToList();
-
-        var scheduledMission = new Mission
-        {
-            Name = echoMission.Name,
-            Robot = robot,
-            EchoMissionId = scheduledMissionQuery.EchoMissionId,
-            MissionStatus = MissionStatus.Pending,
-            StartTime = scheduledMissionQuery.StartTime,
-            PlannedTasks = plannedTasks,
-            Tasks = new List<IsarTask>(),
-            AssetCode = scheduledMissionQuery.AssetCode
-        };
-
-        var newMission = await _missionService.Create(scheduledMission);
-
+        
+        Mission newMission = await _missionService.Create(scheduledMissionQuery);
         return CreatedAtAction(nameof(GetMissionById), new { id = newMission.Id }, newMission);
     }
 
