@@ -111,6 +111,17 @@ namespace Api.Services
             }
 
             var plannedTasks = echoMission.Tags.Select(t => new PlannedTask(t)).ToList();
+            foreach (PlannedTask task in plannedTasks)
+            {
+                try
+                {
+                    task.TagPosition = await _stidService.GetTagPosition(task.TagId);
+                }
+                catch (JsonException)
+                {
+                    continue;
+                }
+            }
 
             var scheduledMission = new Mission
             {
