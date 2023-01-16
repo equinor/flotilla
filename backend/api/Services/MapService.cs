@@ -29,6 +29,7 @@ public class MapService: IMapService
         _dbContext = dbContext;
 
     }
+
     public async Task<String> FetchMapImage(string missionId)
     {
         Mission? currentMission = _dbContext.Missions.Find(missionId);
