@@ -127,6 +127,7 @@ namespace Api.Services
             {
                 Name = echoMission.Name,
                 Robot = robot,
+                AssetCode = echoMission.AssetCode,
                 EchoMissionId = scheduledMissionQuery.EchoMissionId,
                 MissionStatus = MissionStatus.Pending,
                 StartTime = scheduledMissionQuery.StartTime,

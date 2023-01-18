@@ -171,6 +171,7 @@ namespace Api.Services
             {
                 Id = echoMission.Id,
                 Name = echoMission.Name,
+                AssetCode = echoMission.InstallationCode,
                 URL = new Uri($"https://echo.equinor.com/mp?editId={echoMission.Id}"),
                 Tags = ProcessPlanItems(echoMission.PlanItems)
             };
