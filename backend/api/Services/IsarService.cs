@@ -23,7 +23,7 @@ namespace Api.Services
 
         public abstract Task<IsarControlMissionResponse> ResumeMission(Robot robot);
 
-        public abstract Task<IsarMissionDefinition> GetIsarMissionDefinition(EchoMission echoMission);
+        public abstract IsarMissionDefinition GetIsarMissionDefinition(Mission mission);
     }
 
     public class IsarService : IIsarService
@@ -80,19 +80,18 @@ namespace Api.Services
         }
 
 
-        public async Task<IsarMissionDefinition> GetIsarMissionDefinition(EchoMission echoMission)
+        public IsarMissionDefinition GetIsarMissionDefinition(Mission mission)
         {
-            var tasks = echoMission.Tags.Select(tag => GetIsarTaskDefinition(tag));
-            var results = await Task.WhenAll(tasks);
-            return new IsarMissionDefinition(tasks: results.ToList());
+            var tasks = mission.PlannedTasks.Select(task => GetIsarTaskDefinition(task));
+            return new IsarMissionDefinition(tasks: tasks.ToList());
         }
-        public async Task<IsarTaskDefinition> GetIsarTaskDefinition(EchoTag echoTag)
+        public IsarTaskDefinition GetIsarTaskDefinition(PlannedTask plannedTask)
         {
-            string tag = echoTag.TagId;
-            var sensorTypes = echoTag.Inspections.Select(t => t.InspectionType.ToString()).ToList();
-            var pose = _tagPositioner.GetPoseFromTag(echoTag);
-            var inspectionTarget = await _tagPositioner.GetTagPositionFromTag(echoTag);
-            float? videoDuration = echoTag.Inspections
+            string tag = plannedTask.TagId;
+            var sensorTypes = plannedTask.Inspections.Select(t => t.InspectionType.ToString()).ToList();
+            var pose = _tagPositioner.GetPoseFromTag(plannedTask.TagId);
+            var inspectionTarget = plannedTask.TagPosition;
+            float? videoDuration = plannedTask.Inspections
                 .Where(t => t.TimeInSeconds.HasValue)
                 .FirstOrDefault()
                 ?.TimeInSeconds;
@@ -102,7 +101,7 @@ namespace Api.Services
 
         public async Task<IsarServiceStartMissionResponse> StartMission(
             Robot robot,
-            int echoMissionId,
+            int MissionId,
             IsarMissionDefinition missionDefinition
         )
         {

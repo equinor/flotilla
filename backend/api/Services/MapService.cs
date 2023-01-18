@@ -3,7 +3,6 @@ using Api.Database.Models;
 using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Options;
 
 public interface IMapService
@@ -21,7 +20,8 @@ public class MapService: IMapService
         ILogger<MapService> logger,
         IOptions<AzureAdOptions> azureOptions,
         IOptions<MapBlobOptions> blobOptions,
-        FlotillaDbContext dbContext)
+        FlotillaDbContext dbContext
+    )
     {
         _logger = logger;
         _azureOptions = azureOptions;
@@ -41,6 +41,11 @@ public class MapService: IMapService
 
         String filePath = await DownloadMapImageFromBlobStorage(currentMission);
         return filePath;
+    }
+
+    public async Task<String> AssignMapToMission(Mission mission)
+    {
+        return "hei";
     }
 
     private BlobContainerClient GetBlobContainerClient(string asset)
