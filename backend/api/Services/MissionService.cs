@@ -122,6 +122,7 @@ namespace Api.Services
                     continue;
                 }
             }
+            MissionMap map = await _mapService.AssignMapToMission(echoMission.AssetCode, plannedTasks);
 
             var scheduledMission = new Mission
             {
@@ -130,6 +131,7 @@ namespace Api.Services
                 AssetCode = echoMission.AssetCode,
                 EchoMissionId = scheduledMissionQuery.EchoMissionId,
                 MissionStatus = MissionStatus.Pending,
+                Map = map,
                 StartTime = scheduledMissionQuery.StartTime,
                 PlannedTasks = plannedTasks,
                 Tasks = new List<IsarTask>(),

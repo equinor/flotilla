@@ -29,6 +29,9 @@ namespace Api.Database.Models
         public MissionStatus MissionStatus { get; set; }
 
         [Required]
+        public MissionMap Map { get; set; }
+
+        [Required]
         public DateTimeOffset StartTime { get; set; }
 
         public DateTimeOffset EndTime { get; set; }
