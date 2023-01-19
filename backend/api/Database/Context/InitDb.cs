@@ -86,6 +86,7 @@ public static class InitDb
             MissionStatus = MissionStatus.Pending,
             StartTime = DateTimeOffset.UtcNow.AddHours(3),
             PlannedTasks = new List<PlannedTask>(),
+            Map = new MissionMap()
         };
 
         var mission2 = new Mission
@@ -99,6 +100,7 @@ public static class InitDb
             StartTime = DateTimeOffset.UtcNow.AddHours(7),
             EndTime = DateTimeOffset.UtcNow.AddHours(9),
             PlannedTasks = new List<PlannedTask>(),
+            Map = new MissionMap()
         };
 
         var mission3 = new Mission
@@ -112,6 +114,7 @@ public static class InitDb
             StartTime = DateTimeOffset.UtcNow.AddHours(8),
             EndTime = DateTimeOffset.UtcNow.AddHours(9),
             PlannedTasks = new List<PlannedTask>(),
+            Map = new MissionMap()
         };
 
         return new List<Mission>(new Mission[] { mission1, mission2, mission3 });
