@@ -43,6 +43,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [isStartTimeValid, setIsStartTimeValid] = useState<boolean>(true)
+    const [isAssetValid, setIsAssetValid] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
     let timer: ReturnType<typeof setTimeout>
     const openPopover = () => {
@@ -55,6 +56,9 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         timer = setTimeout(() => {
             openPopover()
         }, 300)
+
+        if (sessionStorage.getItem('assetString')) setIsAssetValid(true)
+        else setIsAssetValid(false)
     }
 
     const handleClose = () => {
@@ -92,9 +96,25 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 </Button>
             </div>
 
-            <Popover anchorEl={anchorRef.current} onClose={handleClose} open={isPopoverOpen} placement="top">
+            <Popover
+                anchorEl={anchorRef.current}
+                onClose={handleClose}
+                open={isPopoverOpen && !isAssetValid}
+                placement="top"
+            >
                 <Popover.Content>
                     <Typography variant="body_short">Please select asset</Typography>
+                </Popover.Content>
+            </Popover>
+
+            <Popover
+                anchorEl={anchorRef.current}
+                onClose={handleClose}
+                open={isPopoverOpen && isAssetValid}
+                placement="top"
+            >
+                <Popover.Content>
+                    <Typography variant="body_short">This asset has no missions - Please create mission</Typography>
                 </Popover.Content>
             </Popover>
 
