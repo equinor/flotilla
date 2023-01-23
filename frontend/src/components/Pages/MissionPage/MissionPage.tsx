@@ -73,6 +73,10 @@ export function MissionPage() {
             {selectedMission !== undefined && (
                 <>
                     <MissionHeader mission={selectedMission} />
+                    <TaskAndMapSection>
+                        <TaskTable mission={selectedMission} />
+                        <MapPositionView mission={selectedMission} />
+                    </TaskAndMapSection>
                     <VideoStreamSection>
                         {videoStreams.length > 0 && (
                             <>
@@ -81,10 +85,6 @@ export function MissionPage() {
                             </>
                         )}
                     </VideoStreamSection>
-                    <TaskAndMapSection>
-                        <TaskTable mission={selectedMission} />
-                        <MapPositionView mission={selectedMission} />
-                    </TaskAndMapSection>
                 </>
             )}
         </StyledMissionPage>
