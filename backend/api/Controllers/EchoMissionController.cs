@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Services;
+using Api.Services.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -87,6 +88,39 @@ public class EchoMissionController : ControllerBase
         catch (JsonException e)
         {
             _logger.LogError(e, "Error deserializing mission from Echo");
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+    [HttpPost]
+    [Route("position/{installationCode}")]
+    [ProducesResponseType(typeof(EchoPoseResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult<EchoPoseResponse>> GetPositionsForTag([FromRoute] string installationCode, [FromBody] string tag)
+    {
+        try
+        {
+            var positions = await _echoService.GetRobotPoseForTags(installationCode, new List<string>() { tag });
+            return Ok(positions);
+        }
+        catch (HttpRequestException e)
+        {
+            if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
+            {
+                _logger.LogWarning("Error in echopose");
+                return NotFound("Echo pose not found");
+            }
+
+            _logger.LogError(e, "Error getting position from Echo");
+            return new StatusCodeResult(StatusCodes.Status502BadGateway);
+        }
+        catch (JsonException e)
+        {
+            _logger.LogError(e, "Error deserializing position from Echo");
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }

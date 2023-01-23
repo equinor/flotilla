@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Api.Controllers.Models;
+using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.Identity.Web;
 using static Api.Database.Models.IsarStep;
@@ -13,6 +14,7 @@ namespace Api.Services
         public abstract Task<EchoMission> GetMissionById(int missionId);
 
         public abstract Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
+        public abstract Task<EchoPoseResponse> GetRobotPoseForTags(string installationCode, List<string> tags);
     }
 
     public class EchoService : IEchoService
@@ -20,11 +22,12 @@ namespace Api.Services
         public const string ServiceName = "EchoApi";
         private readonly IDownstreamWebApi _echoApi;
         private readonly string _installationCode;
-
-        public EchoService(IConfiguration config, IDownstreamWebApi downstreamWebApi)
+        private readonly ILogger<EchoService> _logger;
+        public EchoService(IConfiguration config, IDownstreamWebApi downstreamWebApi, ILogger<EchoService> logger)
         {
             _echoApi = downstreamWebApi;
             _installationCode = config.GetValue<string>("InstallationCode");
+            _logger = logger;
         }
 
         public async Task<IList<EchoMission>> GetMissions(string? installationCode)
@@ -47,7 +50,6 @@ namespace Api.Services
             var echoMissions = await response.Content.ReadFromJsonAsync<
                 List<EchoMissionResponse>
             >();
-
             if (echoMissions is null)
                 throw new JsonException("Failed to deserialize missions from Echo");
 
@@ -102,6 +104,44 @@ namespace Api.Services
             return installations;
         }
 
+        public async Task<EchoPoseResponse> GetRobotPoseForTags(string installationCode, List<string> tags)
+        {
+            if (tags is null)
+            {
+                throw new Exception("TAGS ARE NULL");
+            }
+            else
+            {
+                _logger.LogInformation("TAGS ARE NOT NULL");
+            }
+            _logger.LogInformation("INSIDE SERVICE");
+            string relativePath = "/robots/pose/get_batch";
+            EchoPoseBody body = new EchoPoseBody();
+            body.installationCode = installationCode;
+            body.tags = tags;
+            var content = body is null
+                ? null
+                : new StringContent(
+                      JsonSerializer.Serialize(body),
+                      null,
+                      "application/json"
+                  );
+            var response = await _echoApi.CallWebApiForAppAsync(
+                ServiceName,
+                options =>
+                {
+                    options.HttpMethod = HttpMethod.Get;
+                    options.RelativePath = relativePath;
+                },
+                content
+            );
+            var echoPoseResponse = await response.Content.ReadFromJsonAsync<EchoPoseResponse>();
+            if (echoPoseResponse is null)
+            {
+                throw new JsonException("Failed to deserialize tag position from echo in echoservice");
+            }
+            return echoPoseResponse;
+        }
         private static IList<EchoInspection> ProcessSensorTypes(List<SensorType> sensorTypes)
         {
             var inspections = new List<EchoInspection>();
