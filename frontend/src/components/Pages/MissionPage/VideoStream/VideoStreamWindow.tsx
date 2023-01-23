@@ -3,7 +3,7 @@ import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 
 import { VideoStream } from 'models/VideoStream'
-import VideoPlayer from './Video'
+import { VideoPlayer } from './Video'
 
 const VideoCard = styled(Card)`
     padding: 16px;
@@ -21,19 +21,10 @@ interface VideoStreamWindowProps {
 }
 
 export function VideoStreamWindow({ videoStream }: VideoStreamWindowProps) {
-    const videoJsOptions = {
-        sources: [
-            {
-                src: videoStream.url,
-                type: 'application/x-mpegURL',
-            },
-        ],
-    }
-
     return (
         <VideoCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <StyledVideoSection>
-                <VideoPlayer options={videoJsOptions} />
+                <VideoPlayer videoStream={videoStream} />
             </StyledVideoSection>
             <Typography variant="h5">{videoStream.name}</Typography>
         </VideoCard>

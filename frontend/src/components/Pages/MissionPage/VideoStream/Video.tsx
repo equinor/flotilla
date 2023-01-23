@@ -1,40 +1,27 @@
-import { useRef, useEffect, FC } from 'react'
-import videojs from 'video.js'
+import { useEffect } from 'react'
+
+import OvenPlayer from 'ovenplayer'
 
 // Styles
 import 'video.js/dist/video-js.css'
+import { VideoStream } from 'models/VideoStream'
 
 interface IVideoPlayerProps {
-    options: videojs.PlayerOptions
+    videoStream: VideoStream
 }
 
-const initialOptions: videojs.PlayerOptions = {
-    controls: true,
-    fluid: true,
-    muted: true,
-    controlBar: {
-        volumePanel: {
-            inline: false,
-        },
-    },
-}
-
-const VideoPlayer: FC<IVideoPlayerProps> = ({ options }) => {
-    const player = useRef<videojs.Player>()
-
+export function VideoPlayer({ videoStream }: IVideoPlayerProps) {
     useEffect(() => {
-        player.current = videojs('videoJSplayer', {
-            ...initialOptions,
-            ...options,
-        }).ready(function () {})
-        return () => {
-            if (player.current) {
-                player.current.dispose()
-            }
-        }
-    }, [options])
+        const player = OvenPlayer.create(videoStream.id, {
+            sources: [
+                {
+                    label: videoStream.name,
+                    type: 'webrtc',
+                    file: videoStream.url,
+                },
+            ],
+        })
+    }, [])
 
-    return <video id="videoJSplayer" className="video-js" />
+    return <div id={videoStream.id} />
 }
-
-export default VideoPlayer
