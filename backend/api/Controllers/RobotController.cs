@@ -54,6 +54,7 @@ public class RobotController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError(e, "Error during GET of robots  from database");
+            return Unauthorized(e);
             throw;
         }
     }

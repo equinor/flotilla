@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Api.Services.Models;
 
 #nullable disable
 namespace Api.Database.Models
@@ -62,7 +63,22 @@ namespace Api.Database.Models
 
         [MaxLength(64)]
         public string Frame { get; set; }
-
+        private float axisAngleToQuaternionElement(float coordinate, float angle)
+        {
+            var quaterionElement = coordinate * MathF.Sin(angle / 2);
+            return quaterionElement;
+        }
+        public Orientation axisAngleToQuaternion(EchoVector axis, float angle)
+        {
+            var quaternion = new Orientation()
+            {
+                X = axisAngleToQuaternionElement(axis.East, angle),
+                Y = axisAngleToQuaternionElement(axis.North, angle),
+                Z = axisAngleToQuaternionElement(axis.Up, angle),
+                W = MathF.Cos(angle / 2)
+            };
+            return quaternion;
+        }
         public Pose()
         {
             Position = new Position();
@@ -84,6 +100,16 @@ namespace Api.Database.Models
             Position = new Position(x_pos, y_pos, z_pos);
             Orientation = new Orientation(x_ori, y_ori, z_ori, w);
             Frame = frame;
+        }
+        public Pose(
+            EchoVector enuPosition,
+            EchoVector axisAngleAxis,
+            float axisAngleAngle
+        )
+        {
+            Position = new Position(enuPosition.East, enuPosition.North, enuPosition.Up);
+            Orientation = axisAngleToQuaternion(axisAngleAxis, axisAngleAngle);
+            Frame = "asset";
         }
     }
 }

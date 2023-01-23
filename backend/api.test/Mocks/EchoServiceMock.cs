@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
+using Api.Services.Models;
 using Api.Services;
 
 namespace Api.Test.Mocks
@@ -34,6 +35,11 @@ namespace Api.Test.Mocks
         {
             await Task.Run(() => Thread.Sleep(1));
             return new List<EchoPlantInfo>();
+        }
+        public async Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId)
+        {
+            await Task.Run(() => Thread.Sleep(1));
+            return new EchoPoseResponse();
         }
     }
 }
