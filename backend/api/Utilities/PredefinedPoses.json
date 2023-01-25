@@ -2185,6 +2185,63 @@
         }
     },
     {
+        "Tag": "331-FV-0177",
+        "Pose": {
+            "Position": {
+                "X": 20272.44,
+                "Y": 5266.556,
+                "Z": 16.131,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 1,
+                "W": 0,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
+        "Tag": "331-TW-0007",
+        "Pose": {
+            "Position": {
+                "X": 20265.924,
+                "Y": 5266.599,
+                "Z": 16.132,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 1,
+                "W": 0,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
+        "Tag": "348-TV-0001",
+        "Pose": {
+            "Position": {
+                "X": 20261.473,
+                "Y": 5263.587,
+                "Z": 16.133,
+                "Frame": "asset"
+            },
+            "Orientation": {
+                "X": 0,
+                "Y": 0,
+                "Z": 1,
+                "W": 0,
+                "Frame": "asset"
+            },
+            "Frame": "asset"
+        }
+    },
+    {
         "Tag": "382-ZU-026",
         "Pose": {
             "Position": {
