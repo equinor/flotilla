@@ -4,7 +4,6 @@ using Api.Database.Models;
 using Api.Services;
 using Api.Utilities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Web;
 using Moq;
@@ -22,21 +21,28 @@ namespace Api.Test.Controllers
             // Using Moq https://github.com/moq/moq4
             var isarLogger = new Mock<ILogger<IsarService>>();
             var missionServiceLogger = new Mock<ILogger<MissionService>>();
-            var echoDownstreamApi = new Mock<IDownstreamWebApi>();
             var isarDownstreamApi = new Mock<IDownstreamWebApi>();
             var tagPositioner = new Mock<ITagPositioner>();
 
             var context = fixture.NewContext;
-            var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-            var missionService = new MissionService(context, missionServiceLogger.Object);
+            var service = new RobotService(context);
+            var echoService = new Mock<IEchoService>().Object;
+            var mapService = new Mock<IMapService>().Object;
+            var stidService = new Mock<IStidService>().Object;
+            var missionService = new MissionService(
+                context,
+                missionServiceLogger.Object,
+                mapService,
+                service,
+                echoService,
+                stidService
+            );
             var isarService = new IsarService(
                 isarLogger.Object,
                 isarDownstreamApi.Object,
                 tagPositioner.Object
             );
-            var echoService = new EchoService(config, echoDownstreamApi.Object);
-            var service = new RobotService(context);
 
             var mockLoggerController = new Mock<ILogger<RobotController>>();
             _controller = new RobotController(

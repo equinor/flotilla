@@ -3,6 +3,7 @@ using Api.Configurations;
 using Api.Controllers;
 using Api.EventHandlers;
 using Api.Mqtt;
+using Api.Options;
 using Api.Services;
 using Api.Utilities;
 using Azure.Identity;

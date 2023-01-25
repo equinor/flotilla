@@ -1,213 +1,261 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Options;
+using Api.Utilities;
 using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Options;
 
-public interface IMapService
+namespace Api.Services
 {
-    public abstract Task<String> FetchMapImage(string missionId);
-    public abstract Task<MissionMap> AssignMapToMission(string assetCode, List<PlannedTask> tasks);
-}
-public class MapService: IMapService
-{
-    private readonly ILogger<MapService> _logger;
-    private readonly IOptions<AzureAdOptions> _azureOptions;
-    private readonly IOptions<MapBlobOptions> _blobOptions;
-    private readonly FlotillaDbContext _dbContext;
-    string localFilePath = Directory.GetCurrentDirectory() + "/Database/Maps/Map.png";
-    public MapService(
-        ILogger<MapService> logger,
-        IOptions<AzureAdOptions> azureOptions,
-        IOptions<MapBlobOptions> blobOptions,
-        FlotillaDbContext dbContext
-    )
+    public interface IMapService
     {
-        _logger = logger;
-        _azureOptions = azureOptions;
-        _blobOptions = blobOptions;
-        _dbContext = dbContext;
-
+        public abstract Task<string> FetchMapImage(string missionId);
+        public abstract Task<MissionMap> AssignMapToMission(
+            string assetCode,
+            List<PlannedTask> tasks
+        );
     }
 
-    public async Task<String> FetchMapImage(string missionId)
+    public class MapService : IMapService
     {
-        Mission? currentMission = _dbContext.Missions.Find(missionId);
-        if (currentMission == null)
+        private readonly ILogger<MapService> _logger;
+        private readonly IOptions<AzureAdOptions> _azureOptions;
+        private readonly IOptions<MapBlobOptions> _blobOptions;
+        private readonly FlotillaDbContext _dbContext;
+        private readonly string _localFilePath =
+            Directory.GetCurrentDirectory() + "/Database/Maps/map.png";
+
+        public MapService(
+            ILogger<MapService> logger,
+            IOptions<AzureAdOptions> azureOptions,
+            IOptions<MapBlobOptions> blobOptions,
+            FlotillaDbContext dbContext
+        )
         {
-            _logger.LogError($"Mission not found for mission ID {missionId}");
-            throw new DirectoryNotFoundException($"Mission not found");
-        };
+            _logger = logger;
+            _azureOptions = azureOptions;
+            _blobOptions = blobOptions;
+            _dbContext = dbContext;
+        }
 
-        String filePath = await DownloadMapImageFromBlobStorage(currentMission);
-        return filePath;
-    }
-
-    public async Task<MissionMap> AssignMapToMission(string assetCode, List<PlannedTask> tasks)
-    {
-        string mostSuitableMap;
-        Dictionary<string,Boundary> boundaries = new Dictionary<string,Boundary>();
-        Dictionary<string, int[]> imageSizes = new Dictionary<string, int[]>();
-        BlobContainerClient blobContainerClient = GetBlobContainerClient(assetCode.ToLower(CultureInfo.CurrentCulture));
-        try
+        public async Task<string> FetchMapImage(string missionId)
         {
-            var resultSegment = blobContainerClient.GetBlobsAsync(BlobTraits.Metadata).AsPages();
-
-            await foreach (Page<BlobItem> blobPage in resultSegment)
+            var currentMission = _dbContext.Missions.Find(missionId);
+            if (currentMission == null)
             {
-                foreach (BlobItem blobItem in blobPage.Values)
+                _logger.LogError("Mission not found for mission ID {missionId}", missionId);
+                throw new MissionNotFoundException("Mission not found");
+            }
+            ;
+
+            return await DownloadMapImageFromBlobStorage(currentMission);
+        }
+
+        public async Task<MissionMap> AssignMapToMission(string assetCode, List<PlannedTask> tasks)
+        {
+            string mostSuitableMap;
+            var boundaries = new Dictionary<string, Boundary>();
+            var imageSizes = new Dictionary<string, int[]>();
+            var blobContainerClient = GetBlobContainerClient(
+                assetCode.ToLower(CultureInfo.CurrentCulture)
+            );
+            try
+            {
+                var resultSegment = blobContainerClient
+                    .GetBlobsAsync(BlobTraits.Metadata)
+                    .AsPages();
+
+                await foreach (var blobPage in resultSegment)
                 {
-                    try
+                    foreach (var blobItem in blobPage.Values)
                     {
-                        boundaries.Add(blobItem.Name, ExtractMapMetadata(blobItem));
-                        imageSizes.Add(blobItem.Name, ExtractImageSize(blobItem));
+                        try
+                        {
+                            boundaries.Add(blobItem.Name, ExtractMapMetadata(blobItem));
+                            imageSizes.Add(blobItem.Name, ExtractImageSize(blobItem));
+                        }
+                        catch (FormatException)
+                        {
+                            continue;
+                        }
                     }
-                    catch(FormatException)
+                }
+            }
+            catch (RequestFailedException e)
+            {
+                _logger.LogError(
+                    "Unable to find any map files for asset code {AssetCode}: {error message}",
+                    assetCode,
+                    e.Message
+                );
+                return new MissionMap();
+            }
+            try
+            {
+                mostSuitableMap = FindMostSuitableMap(boundaries, tasks);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                _logger.LogWarning("Unable to find a map for the given tasks.");
+                return new MissionMap();
+            }
+            return new MissionMap
+            {
+                MapName = mostSuitableMap,
+                Boundary = boundaries[mostSuitableMap],
+                TransformationMatrices = new TransformationMatrices(
+                    boundaries[mostSuitableMap].AsMatrix()[0],
+                    boundaries[mostSuitableMap].AsMatrix()[1],
+                    imageSizes[mostSuitableMap][0],
+                    imageSizes[mostSuitableMap][1]
+                )
+            };
+        }
+
+        private BlobContainerClient GetBlobContainerClient(string asset)
+        {
+            var serviceClient = new BlobServiceClient(
+                new Uri($"https://{_blobOptions.Value.StorageAccount}.blob.core.windows.net"),
+                new ClientSecretCredential(
+                    _azureOptions.Value.TenantId,
+                    _azureOptions.Value.ClientId,
+                    _azureOptions.Value.ClientSecret
+                )
+            );
+            var containerClient = serviceClient.GetBlobContainerClient(asset);
+            return containerClient;
+        }
+
+        private async Task<string> DownloadMapImageFromBlobStorage(Mission currentMission)
+        {
+            var blobContainerClient = GetBlobContainerClient(
+                currentMission.AssetCode.ToLower(CultureInfo.CurrentCulture)
+            );
+            var blobClient = blobContainerClient.GetBlobClient(currentMission.Map.MapName);
+            try
+            {
+                await blobClient.DownloadToAsync(_localFilePath);
+            }
+            catch (RequestFailedException e)
+            {
+                _logger.LogError("Directory not found: {message}", e.Message);
+                throw e;
+            }
+            return _localFilePath;
+        }
+
+        private Boundary ExtractMapMetadata(BlobItem map)
+        {
+            try
+            {
+                double lowerLeftX =
+                    double.Parse(map.Metadata["lowerLeftX"], CultureInfo.CurrentCulture) / 1000;
+                double lowerLeftY =
+                    double.Parse(map.Metadata["lowerLeftY"], CultureInfo.CurrentCulture) / 1000;
+                double upperRightX =
+                    double.Parse(map.Metadata["upperRightX"], CultureInfo.CurrentCulture) / 1000;
+                double upperRightY =
+                    double.Parse(map.Metadata["upperRightY"], CultureInfo.CurrentCulture) / 1000;
+                return new Boundary(lowerLeftX, lowerLeftY, upperRightX, upperRightY);
+            }
+            catch (FormatException e)
+            {
+                _logger.LogWarning(
+                    "Unable to extract metadata from map {map.Name}: {e.Message}",
+                    map.Name,
+                    e.Message
+                );
+                throw e;
+            }
+        }
+
+        private int[] ExtractImageSize(BlobItem map)
+        {
+            try
+            {
+                int x = int.Parse(map.Metadata["imageWidth"], CultureInfo.CurrentCulture);
+                int y = int.Parse(map.Metadata["imageHeight"], CultureInfo.CurrentCulture);
+                return new int[] { x, y };
+            }
+            catch (FormatException e)
+            {
+                _logger.LogWarning(
+                    "Unable to extract image size from map {map.Name}: {e.Message}",
+                    map.Name,
+                    e.Message
+                );
+                throw e;
+            }
+        }
+
+        private static string FindMostSuitableMap(
+            Dictionary<string, Boundary> boundaries,
+            List<PlannedTask> tasks
+        )
+        {
+            string mostSuitableMap = "";
+            foreach (var boundary in boundaries)
+            {
+                if (!string.IsNullOrEmpty(mostSuitableMap))
+                {
+                    string referenceMap = mostSuitableMap;
+                    //If the current map is lower resolution than the best map, it's not worth checking.
+                    if (
+                        !CheckMapIsHigherResolution(
+                            boundary.Value.AsMatrix(),
+                            boundaries[referenceMap].AsMatrix()
+                        )
+                    )
                     {
                         continue;
                     }
                 }
-            }
-        }
-        catch (RequestFailedException e)
-        {
-            _logger.LogError($"Unable to extract all metadata from map: {e.Message}");
-            return new MissionMap{MapName = "error"};
-        }
-        try
-        {
-            mostSuitableMap = FindMostSuitableMap(boundaries, tasks);
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            return new MissionMap{MapName = "error"};
-        }
-        return new MissionMap{
-            MapName = mostSuitableMap,
-            Boundary = boundaries[mostSuitableMap],
-            TransformationMatrices = new TransformationMatrices(
-                boundaries[mostSuitableMap].getBoundary()[0],
-                boundaries[mostSuitableMap].getBoundary()[1],
-                imageSizes[mostSuitableMap][0],
-                imageSizes[mostSuitableMap][1]
-            )};
-    }
-
-    private BlobContainerClient GetBlobContainerClient(string asset)
-    {
-        var serviceClient = new BlobServiceClient(
-            new Uri($"https://{_blobOptions.Value.StorageAccount}.blob.core.windows.net"),
-            new ClientSecretCredential(_azureOptions.Value.TenantId, _azureOptions.Value.ClientId, _azureOptions.Value.ClientSecret));
-        var containerClient = serviceClient.GetBlobContainerClient(asset);
-        return containerClient;
-    }
-
-    private async Task<String> DownloadMapImageFromBlobStorage(Mission currentMission)
-    {
-        BlobContainerClient blobContainerClient = GetBlobContainerClient(currentMission.AssetCode.ToLower(CultureInfo.CurrentCulture));
-        BlobClient blobClient = blobContainerClient.GetBlobClient(currentMission.Map.MapName);
-        try
-        {
-            await blobClient.DownloadToAsync(localFilePath);
-           
-        }
-        catch(RequestFailedException e)
-        {
-            _logger.LogError($"Directory not found: {e.Message}");
-            throw e;
-        }
-        return localFilePath;
-    }
-
-    private Boundary ExtractMapMetadata(BlobItem map)
-    {
-        try
-        {
-            var lowerLeftX = double.Parse(map.Metadata["lowerLeftX"], CultureInfo.CurrentCulture)/1000;
-            var lowerLeftY = double.Parse(map.Metadata["lowerLeftY"], CultureInfo.CurrentCulture)/1000;
-            var upperRightX = double.Parse(map.Metadata["upperRightX"], CultureInfo.CurrentCulture)/1000;
-            var upperRightY = double.Parse(map.Metadata["upperRightY"], CultureInfo.CurrentCulture)/1000;
-            return new Boundary(lowerLeftX, lowerLeftY, upperRightX, upperRightY);
-        }
-        catch(FormatException e)
-        {
-            _logger.LogWarning($"Unable to extract metadata from map {map.Name}: {e.Message}");
-            throw e;
-        }
-    }
-
-    private int[] ExtractImageSize(BlobItem map)
-    {
-        try
-        {
-            var x = int.Parse(map.Metadata["imageWidth"], CultureInfo.CurrentCulture);
-            var y = int.Parse(map.Metadata["imageHeight"], CultureInfo.CurrentCulture); 
-            return new int[] {x, y};
-        }
-        catch(FormatException e)
-        {
-            _logger.LogWarning($"Unable to extract image size from map {map.Name}: {e.Message}");
-            throw e;
-        }
-    }
-
-    private string FindMostSuitableMap(Dictionary<string, Boundary> boundaries, List<PlannedTask> tasks)
-    {
-        string mostSuitableMap = "";
-        string referenceMap = "";
-        foreach(var boundary in boundaries)
-        {
-            if (!string.IsNullOrEmpty(mostSuitableMap))
-            {
-                referenceMap = mostSuitableMap;
-                //If the current map is lower resolution than the best map, it's not worth checking.
-                if(!CheckMapIsHigherResolution(boundary.Value.getBoundary(), boundaries[referenceMap].getBoundary()))
+                if (CheckTagsInBoundary(boundary.Value.AsMatrix(), tasks))
                 {
-                    continue;
+                    mostSuitableMap = boundary.Key;
                 }
             }
-            if (CheckTagsInBoundary(boundary.Value.getBoundary(), tasks))
+            if (string.IsNullOrEmpty(mostSuitableMap))
             {
-                mostSuitableMap = boundary.Key;
+                throw new ArgumentOutOfRangeException(nameof(tasks));
             }
+            return mostSuitableMap;
         }
-        if (string.IsNullOrEmpty(mostSuitableMap))
+
+        private static bool CheckTagsInBoundary(List<double[]> boundary, List<PlannedTask> tasks)
         {
-            _logger.LogWarning("Unable to find a map for the given tasks.");
-            throw new ArgumentOutOfRangeException(nameof(tasks));
-        }
-        return mostSuitableMap;
-    }
-    
-    private bool CheckTagsInBoundary(List<double[]> boundary, List<PlannedTask> tasks)
-    {
-        foreach(PlannedTask task in tasks)
+            foreach (var task in tasks)
             {
-                if(task.TagPosition.X < boundary[0][0] | task.TagPosition.X > boundary[1][0])
+                if (task.TagPosition.X < boundary[0][0] | task.TagPosition.X > boundary[1][0])
                 {
                     return false;
                 }
-                if(task.TagPosition.Y < boundary[0][1] | task.TagPosition.Y > boundary[1][1])
+                if (task.TagPosition.Y < boundary[0][1] | task.TagPosition.Y > boundary[1][1])
                 {
                     return false;
                 }
             }
-        return true;
-    }
+            return true;
+        }
 
-    private bool CheckMapIsHigherResolution(List<double[]> checkMap, List<double[]> referenceMap)
-    {
-        if(checkMap[0][0] < referenceMap[0][0] | checkMap[0][1] < referenceMap[0][1])
+        private static bool CheckMapIsHigherResolution(
+            List<double[]> checkMap,
+            List<double[]> referenceMap
+        )
         {
-            return false;
+            if (checkMap[0][0] < referenceMap[0][0] | checkMap[0][1] < referenceMap[0][1])
+            {
+                return false;
+            }
+            if (checkMap[1][0] > referenceMap[1][0] | checkMap[1][1] > referenceMap[1][1])
+            {
+                return false;
+            }
+            return true;
         }
-        if(checkMap[1][0] > referenceMap[1][0] | checkMap[1][1] > referenceMap[1][1])
-        {
-            return false;
-        }
-        return true;
     }
 }

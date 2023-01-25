@@ -1,6 +1,4 @@
-    
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 #nullable disable
@@ -13,29 +11,36 @@ namespace Api.Database.Models
         // perform the transformation:
         // P = CE + D
         [Required]
-        private double c1 { get; set; }
-        private double c2 { get; set; }
-        private double d1 { get; set; }
-        private double d2 { get; set; }
+        private double C1 { get; set; }
+
+        [Required]
+        private double C2 { get; set; }
+
+        [Required]
+        private double D1 { get; set; }
+
+        [Required]
+        private double D2 { get; set; }
 
         public TransformationMatrices()
         {
-            c1 = 0;
-            c2 = 0;
-            d1 = 0;
-            d2 = 0;
+            C1 = 0;
+            C2 = 0;
+            D1 = 0;
+            D2 = 0;
         }
+
         public TransformationMatrices(double[] p1, double[] p2, int imageWidth, int imageHeight)
         {
-            c1 = (imageWidth)/(p2[0]-p1[0]);
-            c2 = (imageHeight)/(p2[1]-p1[1]);
-            d1 = -(c1*p1[0]);
-            d2 = -(c2*p1[1]);
+            C1 = imageWidth / (p2[0] - p1[0]);
+            C2 = imageHeight / (p2[1] - p1[1]);
+            D1 = -(C1 * p1[0]);
+            D2 = -(C2 * p1[1]);
         }
-        public List<double[]> GetTransformationMatrices()
+
+        public List<double[]> AsMatrix()
         {
-            return new List<double[]> {new double[] {c1, c2}, new double[] {d1, d2}};
+            return new List<double[]> { new double[] { C1, C2 }, new double[] { D1, D2 } };
         }
     }
 }
-    

@@ -12,14 +12,13 @@ namespace Api.Migrations
                 name: "Name",
                 table: "Missions",
                 type: "nvarchar(max)",
-                nullable: true);
+                nullable: true
+            );
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Name",
-                table: "Missions");
+            migrationBuilder.DropColumn(name: "Name", table: "Missions");
         }
     }
 }

@@ -4,12 +4,14 @@ using Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
+
 [ApiController]
 [Route("echo-plants")]
 public class EchoPlantController : ControllerBase
 {
     private readonly ILogger<EchoPlantController> _logger;
     private readonly IEchoService _echoService;
+
     public EchoPlantController(ILogger<EchoPlantController> logger, IEchoService echoService)
     {
         _logger = logger;
@@ -45,5 +47,3 @@ public class EchoPlantController : ControllerBase
         }
     }
 }
-
-

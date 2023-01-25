@@ -19,15 +19,23 @@ namespace Api.Test.Controllers
             var missionLogger = new Mock<ILogger<MissionService>>().Object;
             var missionControllerLogger = new Mock<ILogger<MissionController>>().Object;
             var context = fixture.NewContext;
-            var missionService = new MissionService(context, missionLogger);
             var robotService = new RobotService(context);
             var echoService = new Mock<IEchoService>().Object;
+            var mapService = new Mock<IMapService>().Object;
+            var stidService = new Mock<IStidService>().Object;
+            var missionService = new MissionService(
+                context,
+                missionLogger,
+                mapService,
+                robotService,
+                echoService,
+                stidService
+            );
 
             _controller = new MissionController(
                 missionService,
-                robotService,
-                echoService,
-                missionControllerLogger
+                missionControllerLogger,
+                mapService
             );
         }
 
