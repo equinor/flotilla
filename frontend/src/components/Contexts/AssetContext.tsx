@@ -21,7 +21,6 @@ export const AssetProvider: FC<Props> = ({ children }) => {
 
     const switchAsset = (newAsset: string) => {
         sessionStorage.setItem('assetString', newAsset)
-        console.log('Saved asset: ', sessionStorage.getItem('assetString'))
     }
 
     return (
