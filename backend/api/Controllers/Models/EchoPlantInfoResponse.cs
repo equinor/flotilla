@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System.Text.Json.Serialization;
+
 namespace Api.Controllers.Models
 {
     public class EchoPlantInfoResponse
@@ -24,6 +25,7 @@ namespace Api.Controllers.Models
 
         [JsonPropertyName("sapId")]
         public int? SapId { get; set; }
+
         [JsonPropertyName("ayelixSiteId")]
         public int? AyelixSiteId { get; set; }
     }

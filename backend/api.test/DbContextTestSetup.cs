@@ -20,7 +20,11 @@ namespace Api.Test
 
         private DbContextOptions<FlotillaDbContext> CreateOptions()
         {
-            string connectionString = new SqliteConnectionStringBuilder { DataSource = ":memory:", Cache = SqliteCacheMode.Shared }.ToString();
+            string connectionString = new SqliteConnectionStringBuilder
+            {
+                DataSource = ":memory:",
+                Cache = SqliteCacheMode.Shared
+            }.ToString();
             _connection = new SqliteConnection(connectionString);
             _connection.Open();
             var builder = new DbContextOptionsBuilder<FlotillaDbContext>();
@@ -47,7 +51,6 @@ namespace Api.Test
             }
             GC.SuppressFinalize(this);
         }
-
     }
 
     [CollectionDefinition("Database collection")]
@@ -68,15 +71,21 @@ namespace Api.Test
     public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         public const string AuthenticationScheme = "Test";
-        public TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
-            ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
-            : base(options, logger, encoder, clock)
-        {
-        }
+
+        public TestAuthHandler(
+            IOptionsMonitor<AuthenticationSchemeOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder,
+            ISystemClock clock
+        ) : base(options, logger, encoder, clock) { }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var claims = new[] { new Claim(ClaimTypes.Name, "Test.User"), new Claim(ClaimTypes.Role, "Test.User") };
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, "Test.User"),
+                new Claim(ClaimTypes.Role, "Test.User")
+            };
             var identity = new ClaimsIdentity(claims, AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, AuthenticationScheme);

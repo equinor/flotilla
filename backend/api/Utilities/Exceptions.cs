@@ -14,6 +14,7 @@
     {
         public RobotPositionNotFoundException(string message) : base(message) { }
     }
+
     public class TagPositionNotFoundException : Exception
     {
         public TagPositionNotFoundException(string message) : base(message) { }

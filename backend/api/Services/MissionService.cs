@@ -1,8 +1,8 @@
-﻿using Api.Database.Context;
-using Api.Database.Models;
+﻿using System.Text.Json;
 using Api.Controllers.Models;
+using Api.Database.Context;
+using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace Api.Services
 {
@@ -56,7 +56,14 @@ namespace Api.Services
         private readonly IEchoService _echoService;
         private readonly IStidService _stidService;
 
-        public MissionService(FlotillaDbContext context, ILogger<MissionService> logger, IMapService mapService, IRobotService robotService, IEchoService echoService, IStidService stidService)
+        public MissionService(
+            FlotillaDbContext context,
+            ILogger<MissionService> logger,
+            IMapService mapService,
+            IRobotService robotService,
+            IEchoService echoService,
+            IStidService stidService
+        )
         {
             _context = context;
             _logger = logger;
@@ -64,7 +71,6 @@ namespace Api.Services
             _mapService = mapService;
             _echoService = echoService;
             _stidService = stidService;
-
         }
 
         private IQueryable<Mission> GetMissionsWithSubModels()
@@ -82,12 +88,20 @@ namespace Api.Services
         {
             var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
             if (robot is null)
-                throw new KeyNotFoundException($"Could not find robot with id {scheduledMissionQuery.RobotId}");
+            {
+                _logger.LogError(
+                    "Could not find robot with id {RobotId}",
+                    scheduledMissionQuery.RobotId
+                );
+                throw new KeyNotFoundException("Could not find the requested robot");
+            }
 
             EchoMission? echoMission;
             try
             {
-                echoMission = await _echoService.GetMissionById(scheduledMissionQuery.EchoMissionId);
+                echoMission = await _echoService.GetMissionById(
+                    scheduledMissionQuery.EchoMissionId
+                );
             }
             catch (HttpRequestException e)
             {
@@ -105,30 +119,19 @@ namespace Api.Services
             }
             catch (JsonException e)
             {
-                string message = "Error deserializing mission from Echo";
-                _logger.LogError(e, "{message}", message);
+                _logger.LogError(e, "Error deserializing mission from Echo");
                 throw e;
             }
-
             var plannedTasks = echoMission.Tags.Select(t => new PlannedTask(t)).ToList();
-            foreach (PlannedTask task in plannedTasks)
+            foreach (var task in plannedTasks)
             {
-                try
-                {
-                    task.TagPosition = await _stidService.GetTagPosition(task.TagId);
-                }
-                catch (JsonException)
-                {
-                    continue;
-                }
+                task.TagPosition = await _stidService.GetTagPosition(task.TagId);
             }
-            MissionMap map = await _mapService.AssignMapToMission(echoMission.AssetCode, plannedTasks);
-
+            var map = await _mapService.AssignMapToMission(echoMission.AssetCode, plannedTasks);
             var scheduledMission = new Mission
             {
                 Name = echoMission.Name,
                 Robot = robot,
-                AssetCode = echoMission.AssetCode,
                 EchoMissionId = scheduledMissionQuery.EchoMissionId,
                 MissionStatus = MissionStatus.Pending,
                 Map = map,

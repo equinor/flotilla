@@ -79,16 +79,18 @@ namespace Api.Services
             return response;
         }
 
-
         public IsarMissionDefinition GetIsarMissionDefinition(Mission mission)
         {
             var tasks = mission.PlannedTasks.Select(task => GetIsarTaskDefinition(task));
             return new IsarMissionDefinition(tasks: tasks.ToList());
         }
+
         public IsarTaskDefinition GetIsarTaskDefinition(PlannedTask plannedTask)
         {
             string tag = plannedTask.TagId;
-            var sensorTypes = plannedTask.Inspections.Select(t => t.InspectionType.ToString()).ToList();
+            var sensorTypes = plannedTask.Inspections
+                .Select(t => t.InspectionType.ToString())
+                .ToList();
             var pose = _tagPositioner.GetPoseFromTag(plannedTask.TagId);
             var inspectionTarget = plannedTask.TagPosition;
             float? videoDuration = plannedTask.Inspections
@@ -96,12 +98,18 @@ namespace Api.Services
                 .FirstOrDefault()
                 ?.TimeInSeconds;
 
-            return new IsarTaskDefinition(pose: pose, tag: tag, inspectionTarget: inspectionTarget, sensorTypes: sensorTypes, videoDuration: videoDuration);
+            return new IsarTaskDefinition(
+                pose: pose,
+                tag: tag,
+                inspectionTarget: inspectionTarget,
+                sensorTypes: sensorTypes,
+                videoDuration: videoDuration
+            );
         }
 
         public async Task<IsarServiceStartMissionResponse> StartMission(
             Robot robot,
-            int MissionId,
+            int missionId,
             IsarMissionDefinition missionDefinition
         )
         {

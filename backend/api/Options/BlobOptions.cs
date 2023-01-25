@@ -1,4 +1,7 @@
-public class MapBlobOptions
+﻿namespace Api.Options
 {
-    public string StorageAccount { get; set; } = "";
+    public class MapBlobOptions
+    {
+        public string StorageAccount { get; set; } = "";
+    }
 }

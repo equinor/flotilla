@@ -9,13 +9,15 @@ namespace Api.Test.Mocks
 {
     public class MockEchoService : IEchoService
     {
-        public EchoMission MockEchoMission = new()
-        {
-            Id = 1,
-            Name = "test",
-            URL = new Uri("https://www.I-am-echo-stid-tag-url.com"),
-            Tags = new List<EchoTag>()
-        };
+        public EchoMission MockEchoMission =
+            new()
+            {
+                Id = 1,
+                Name = "test",
+                URL = new Uri("https://www.I-am-echo-stid-tag-url.com"),
+                Tags = new List<EchoTag>()
+            };
+
         public async Task<IList<EchoMission>> GetMissions(string? installationCode)
         {
             await Task.Run(() => Thread.Sleep(1));

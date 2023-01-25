@@ -16,7 +16,8 @@ namespace Api.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(128)",
-                oldMaxLength: 128);
+                oldMaxLength: 128
+            );
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -29,7 +30,8 @@ namespace Api.Migrations
                 nullable: false,
                 oldClrType: typeof(int),
                 oldType: "int",
-                oldMaxLength: 128);
+                oldMaxLength: 128
+            );
         }
     }
 }

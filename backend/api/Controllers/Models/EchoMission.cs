@@ -6,7 +6,7 @@ namespace Api.Controllers.Models
         public int Id { get; set; }
 
         public string Name { get; set; }
-        
+
         public string AssetCode { get; set; }
 
         public Uri URL { get; set; }

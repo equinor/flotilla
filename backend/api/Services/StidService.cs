@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Api.Database.Models;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.Identity.Web;
@@ -23,10 +22,10 @@ namespace Api.Services
             _stidApi = downstreamWebApi;
             _installationCode = config.GetValue<string>("InstallationCode");
         }
+
         public async Task<IsarPosition> GetTagPosition(string tag)
         {
-            string relativePath =
-                $"{_installationCode}/tag?tagNo={tag}";
+            string relativePath = $"{_installationCode}/tag?tagNo={tag}";
 
             var response = await _stidApi.CallWebApiForAppAsync(
                 ServiceName,
@@ -38,7 +37,8 @@ namespace Api.Services
             );
             response.EnsureSuccessStatusCode();
 
-            var stidTagPositionResponse = await response.Content.ReadFromJsonAsync<StidTagPositionResponse>();
+            var stidTagPositionResponse =
+                await response.Content.ReadFromJsonAsync<StidTagPositionResponse>();
             if (stidTagPositionResponse is null)
                 throw new JsonException("Failed to deserialize tag position from STID");
 

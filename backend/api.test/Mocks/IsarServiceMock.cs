@@ -44,9 +44,8 @@ namespace Api.Test.Mocks
             return new IsarControlMissionResponse();
         }
 
-        public async Task<IsarMissionDefinition> GetIsarMissionDefinition(EchoMission echoMission)
+        public IsarMissionDefinition GetIsarMissionDefinition(Mission mission)
         {
-            await Task.Run(() => Thread.Sleep(1));
             return new IsarMissionDefinition(new List<IsarTaskDefinition>());
         }
     }

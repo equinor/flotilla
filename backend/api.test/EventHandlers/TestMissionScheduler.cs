@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.EventHandlers;
@@ -22,26 +24,8 @@ namespace Api.Test.EventHandlers
         private readonly IMissionService _missionService;
         private readonly RobotControllerMock _robotControllerMock;
         private readonly FlotillaDbContext _context;
-
-        private static Robot Robot =>
-            new()
-            {
-                Id = "IamTestRobot",
-                Status = RobotStatus.Available,
-                Host = "localhost",
-                Model = RobotModel.Turtlebot,
-                Name = "TestosteroneTesty",
-                SerialNumber = "12354"
-            };
-        private static Mission ScheduledMission =>
-            new()
-            {
-                Id = "testMission",
-                EchoMissionId = 2,
-                Robot = Robot,
-                MissionStatus = MissionStatus.Pending,
-                StartTime = DateTimeOffset.Now
-            };
+        private readonly Robot _robot;
+        private ScheduledMissionQuery _scheduledMission;
 
         public TestMissionScheduler(DatabaseFixture fixture)
         {
@@ -53,10 +37,36 @@ namespace Api.Test.EventHandlers
 
             // Mock ScheduledMissionService:
             _context = fixture.NewContext;
-            _missionService = new MissionService(_context, missionLogger);
+            var robotService = new RobotService(_context);
+            var echoService = new MockEchoService();
+            var mapService = new MockMapService();
+            var stidService = new Mock<IStidService>().Object;
+            _missionService = new MissionService(
+                _context,
+                missionLogger,
+                mapService,
+                robotService,
+                echoService,
+                stidService
+            );
             _robotControllerMock = new RobotControllerMock();
 
             var mockServiceProvider = new Mock<IServiceProvider>();
+            _robot = new()
+            {
+                Id = _context.Robots.First().Id,
+                Status = RobotStatus.Busy,
+                Host = "localhost",
+                Model = RobotModel.Turtlebot,
+                Name = "TestosteroneTesty",
+                SerialNumber = "12354"
+            };
+            _scheduledMission = new()
+            {
+                RobotId = _robot.Id,
+                EchoMissionId = 2,
+                StartTime = DateTimeOffset.Now
+            };
 
             // Mock injection of ScheduledMissionService:
             mockServiceProvider
@@ -106,10 +116,9 @@ namespace Api.Test.EventHandlers
             var cts = new CancellationTokenSource();
 
             // Add Scheduled mission
-            await _missionService.Create(ScheduledMission);
+            var preMission = await _missionService.Create(_scheduledMission);
 
             // Assert start conditions
-            var preMission = await _missionService.ReadById(ScheduledMission.Id);
             Assert.NotNull(preMission);
             Assert.True(preMission!.MissionStatus == preStatus);
 
@@ -123,7 +132,7 @@ namespace Api.Test.EventHandlers
             // ASSERT
 
             // Verify status change
-            var postMission = await _missionService.ReadById(ScheduledMission.Id);
+            var postMission = await _missionService.ReadById(preMission.Id);
             Assert.NotNull(postMission);
             Assert.True(postMission!.MissionStatus == postStatus);
         }
@@ -135,10 +144,11 @@ namespace Api.Test.EventHandlers
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
             _robotControllerMock.RobotServiceMock
-                .Setup(r => r.ReadById(Robot.Id))
+                .Setup(r => r.ReadById(_robot.Id))
                 .Returns(async () => null);
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
+            // Expect failed because robot is busy
             AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Failed);
         }
     }

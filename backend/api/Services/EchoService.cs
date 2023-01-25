@@ -29,9 +29,9 @@ namespace Api.Services
 
         public async Task<IList<EchoMission>> GetMissions(string? installationCode)
         {
-            string relativePath = string.IsNullOrEmpty(installationCode) ?
-            $"robots/robot-plan?Status=Ready" :
-            $"robots/robot-plan?InstallationCode={installationCode}&&Status=Ready";
+            string relativePath = string.IsNullOrEmpty(installationCode)
+              ? $"robots/robot-plan?Status=Ready"
+              : $"robots/robot-plan?InstallationCode={installationCode}&&Status=Ready";
 
             var response = await _echoApi.CallWebApiForAppAsync(
                 ServiceName,
@@ -58,8 +58,7 @@ namespace Api.Services
 
         public async Task<EchoMission> GetMissionById(int missionId)
         {
-            string relativePath =
-                $"robots/robot-plan/{missionId}";
+            string relativePath = $"robots/robot-plan/{missionId}";
 
             var response = await _echoApi.CallWebApiForAppAsync(
                 ServiceName,
@@ -94,12 +93,15 @@ namespace Api.Services
             );
 
             response.EnsureSuccessStatusCode();
-            var echoPlantInfoResponse = await response.Content.ReadFromJsonAsync<List<EchoPlantInfoResponse>>();
+            var echoPlantInfoResponse = await response.Content.ReadFromJsonAsync<
+                List<EchoPlantInfoResponse>
+            >();
             if (echoPlantInfoResponse is null)
                 throw new JsonException("Failed to deserialize plant information from Echo");
             var installations = ProcessEchoPlantInfos(echoPlantInfoResponse);
             return installations;
         }
+
         private static IList<EchoInspection> ProcessSensorTypes(List<SensorType> sensorTypes)
         {
             var inspections = new List<EchoInspection>();
@@ -179,7 +181,9 @@ namespace Api.Services
             return mission;
         }
 
-        private static List<EchoPlantInfo> ProcessEchoPlantInfos(List<EchoPlantInfoResponse> echoPlantInfoResponse)
+        private static List<EchoPlantInfo> ProcessEchoPlantInfos(
+            List<EchoPlantInfoResponse> echoPlantInfoResponse
+        )
         {
             var echoPlantInfos = new List<EchoPlantInfo>();
             foreach (var plant in echoPlantInfoResponse)

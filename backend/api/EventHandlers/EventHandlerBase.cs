@@ -2,9 +2,9 @@
 {
     /// <summary>
     /// A wrapper for Event handlers that properly unsubscribe to events when the background service is disposed
-    /// 
+    ///
     /// <para>ALL EVENT HANDLERS SHOULD INHERIT FROM THIS</para>
-    /// 
+    ///
     /// </summary>
     public abstract class EventHandlerBase : BackgroundService
     {

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Api.Database.Models;
+
 namespace Api.Services.Models
 {
     public class IsarServiceStartMissionResponse
@@ -12,7 +13,12 @@ namespace Api.Services.Models
 
         [Required]
         public IList<IsarTask> Tasks { get; set; }
-        public IsarServiceStartMissionResponse(string isarMissionId, DateTimeOffset startTime, IList<IsarTask> tasks)
+
+        public IsarServiceStartMissionResponse(
+            string isarMissionId,
+            DateTimeOffset startTime,
+            IList<IsarTask> tasks
+        )
         {
             IsarMissionId = isarMissionId;
             StartTime = startTime;

@@ -30,40 +30,63 @@ namespace Api.Test
         {
             string projectDir = Directory.GetCurrentDirectory();
             string configPath = Path.Combine(projectDir, "appsettings.Test.json");
-            var client = factory.WithWebHostBuilder(builder =>
-                {
-                    var configuration = new ConfigurationBuilder().AddJsonFile(configPath).Build();
-                    builder.UseEnvironment("Test");
-                    builder.ConfigureAppConfiguration((context, config) =>
+            var client = factory
+                .WithWebHostBuilder(
+                    builder =>
                     {
-                        config.AddJsonFile(configPath).AddEnvironmentVariables();
-                    });
-                    builder.ConfigureTestServices(services =>
-                    {
-                        services.AddScoped<IIsarService, MockIsarService>();
-                        services.AddScoped<IEchoService, MockEchoService>();
-                        services.AddAuthorization(options =>
-                        {
-                            options.FallbackPolicy = new AuthorizationPolicyBuilder(TestAuthHandler.AuthenticationScheme)
-                                .RequireAuthenticatedUser()
-                                .RequireRole(configuration.GetSection("Authorization")["Roles"])
-                                .Build();
-                        });
-                        services.AddAuthentication(options =>
-                        {
-                            options.DefaultAuthenticateScheme = TestAuthHandler.AuthenticationScheme;
-                            options.DefaultChallengeScheme = TestAuthHandler.AuthenticationScheme;
-                        }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-                            TestAuthHandler.AuthenticationScheme, options => { });
-                    });
-                })
-                .CreateClient(new WebApplicationFactoryClientOptions
-                {
-                    AllowAutoRedirect = false,
-                });
+                        var configuration = new ConfigurationBuilder()
+                            .AddJsonFile(configPath)
+                            .Build();
+                        builder.UseEnvironment("Test");
+                        builder.ConfigureAppConfiguration(
+                            (context, config) =>
+                            {
+                                config.AddJsonFile(configPath).AddEnvironmentVariables();
+                            }
+                        );
+                        builder.ConfigureTestServices(
+                            services =>
+                            {
+                                services.AddScoped<IIsarService, MockIsarService>();
+                                services.AddScoped<IEchoService, MockEchoService>();
+                                services.AddAuthorization(
+                                    options =>
+                                    {
+                                        options.FallbackPolicy = new AuthorizationPolicyBuilder(
+                                            TestAuthHandler.AuthenticationScheme
+                                        )
+                                            .RequireAuthenticatedUser()
+                                            .RequireRole(
+                                                configuration.GetSection("Authorization")["Roles"]
+                                            )
+                                            .Build();
+                                    }
+                                );
+                                services
+                                    .AddAuthentication(
+                                        options =>
+                                        {
+                                            options.DefaultAuthenticateScheme =
+                                                TestAuthHandler.AuthenticationScheme;
+                                            options.DefaultChallengeScheme =
+                                                TestAuthHandler.AuthenticationScheme;
+                                        }
+                                    )
+                                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+                                        TestAuthHandler.AuthenticationScheme,
+                                        options => { }
+                                    );
+                            }
+                        );
+                    }
+                )
+                .CreateClient(
+                    new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, }
+                );
             client.BaseAddress = new Uri("https://localhost:8000");
-            client.DefaultRequestHeaders.Authorization =
-                        new AuthenticationHeaderValue(TestAuthHandler.AuthenticationScheme);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                TestAuthHandler.AuthenticationScheme
+            );
             _client = client;
         }
 
@@ -79,10 +102,8 @@ namespace Api.Test
             string url = "/missions";
             var response = await _client.GetAsync(url);
             var missions = await response.Content.ReadFromJsonAsync<List<Mission>>(
-                new JsonSerializerOptions
-                {
-                    Converters = { new JsonStringEnumConverter() },
-                });
+                new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() }, }
+            );
             Assert.True(response.IsSuccessStatusCode);
             Assert.True(missions != null && missions.Count == 3);
         }
@@ -93,10 +114,8 @@ namespace Api.Test
             string url = "/robots";
             var response = await _client.GetAsync(url);
             var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(
-                new JsonSerializerOptions
-                {
-                    Converters = { new JsonStringEnumConverter() },
-                });
+                new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() }, }
+            );
             Assert.True(response.IsSuccessStatusCode);
             Assert.True(robots != null && robots.Count == 3);
         }
