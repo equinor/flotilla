@@ -7,7 +7,7 @@
         "@azure/msal-browser": "^2.27.0",
         "@azure/msal-react": "^1.4.3",
         "@equinor/eds-core-react": "^0.20.4",
-        "@equinor/eds-icons": "^0.12.0",
+        "@equinor/eds-icons": "^0.18.0",
         "@equinor/eds-tokens": "^0.7.1",
         "@testing-library/jest-dom": "^5.16.4",
         "@testing-library/react": "^13.3.0",
