@@ -2,12 +2,12 @@ import { Mission, MissionStatus } from 'models/Mission'
 import { Icon } from '@equinor/eds-core-react'
 import { useState } from 'react'
 import { useApi } from 'api/ApiCaller'
-import { pause_circle, stop, play_circle, do_not_disturb } from '@equinor/eds-icons'
+import { pause_circle, stop_circle, play_circle, do_not_disturb } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
 import { ControlMissionResponse } from 'models/ControlMissionResponse'
 import { IsarTask, IsarTaskStatus } from 'models/IsarTask'
 
-Icon.add({ pause_circle, play_circle, stop, do_not_disturb })
+Icon.add({ pause_circle, play_circle, stop_circle, do_not_disturb })
 
 interface MissionProps {
     mission: Mission
@@ -20,7 +20,7 @@ export enum ControlButton {
 }
 
 enum IconsEnum {
-    Stop = 'stop',
+    Stop = 'stop_circle',
     Pause = 'pause_circle',
     Play = 'play_circle',
     Wait = 'do_not_disturb',
