@@ -63,10 +63,6 @@ export function MissionPage() {
         })
     }
 
-    var videoDisplay = videoStreams.map(function (videoStream, index) {
-        return <VideoStreamWindow key={index} videoStream={videoStream} />
-    })
-
     return (
         <StyledMissionPage>
             <BackButton />
@@ -78,12 +74,7 @@ export function MissionPage() {
                         <MapPositionView mission={selectedMission} />
                     </TaskAndMapSection>
                     <VideoStreamSection>
-                        {videoStreams.length > 0 && (
-                            <>
-                                <Typography variant="h2">Camera</Typography>
-                                {videoDisplay}
-                            </>
-                        )}
+                        {videoStreams.length > 0 && <VideoStreamWindow videoStreams={videoStreams} />}
                     </VideoStreamSection>
                 </>
             )}

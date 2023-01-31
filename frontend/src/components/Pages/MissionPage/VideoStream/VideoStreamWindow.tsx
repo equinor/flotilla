@@ -17,10 +17,14 @@ const StyledVideoSection = styled(Card)`
 `
 
 interface VideoStreamWindowProps {
+    videoStreams: VideoStream[]
+}
+
+interface VideoStreamCardProps {
     videoStream: VideoStream
 }
 
-export function VideoStreamWindow({ videoStream }: VideoStreamWindowProps) {
+function VideoStreamCard({ videoStream }: VideoStreamCardProps) {
     return (
         <VideoCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <StyledVideoSection>
@@ -28,5 +32,18 @@ export function VideoStreamWindow({ videoStream }: VideoStreamWindowProps) {
             </StyledVideoSection>
             <Typography variant="h5">{videoStream.name}</Typography>
         </VideoCard>
+    )
+}
+
+export function VideoStreamWindow({ videoStreams }: VideoStreamWindowProps) {
+    var videoCards = videoStreams.map(function (videoStream, index) {
+        return <VideoStreamCard key={index} videoStream={videoStream} />
+    })
+
+    return (
+        <>
+            <Typography variant="h2">Camera</Typography>
+            {videoCards}
+        </>
     )
 }
