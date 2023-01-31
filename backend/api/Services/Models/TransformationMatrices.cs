@@ -11,16 +11,16 @@ namespace Api.Database.Models
         // perform the transformation:
         // P = CE + D
         [Required]
-        private double C1 { get; set; }
+        public double C1 { get; set; }
 
         [Required]
-        private double C2 { get; set; }
+        public double C2 { get; set; }
 
         [Required]
-        private double D1 { get; set; }
+        public double D1 { get; set; }
 
         [Required]
-        private double D2 { get; set; }
+        public double D2 { get; set; }
 
         public TransformationMatrices()
         {
