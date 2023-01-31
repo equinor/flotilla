@@ -15,6 +15,13 @@ const StyledVideoSection = styled(Card)`
     height: 95%;
     display: inline-flex;
 `
+const VideoStreamContent = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3rem;
+    padding-top: 16px;
+    padding-bottom: 16px;
+`
 
 interface VideoStreamWindowProps {
     videoStreams: VideoStream[]
@@ -43,7 +50,7 @@ export function VideoStreamWindow({ videoStreams }: VideoStreamWindowProps) {
     return (
         <>
             <Typography variant="h2">Camera</Typography>
-            {videoCards}
+            <VideoStreamContent>{videoCards}</VideoStreamContent>
         </>
     )
 }
