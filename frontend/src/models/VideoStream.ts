@@ -3,4 +3,5 @@ export interface VideoStream {
     name: string
     robotId?: string
     url: string
+    type: string
 }

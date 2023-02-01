@@ -41,7 +41,8 @@ namespace Api.Services
                 var videoStream = new VideoStream
                 {
                     Name = videoStreamQuery.Name,
-                    Url = videoStreamQuery.Url
+                    Url = videoStreamQuery.Url,
+                    Type = videoStreamQuery.Type
                 };
                 videoStreams.Add(videoStream);
             }

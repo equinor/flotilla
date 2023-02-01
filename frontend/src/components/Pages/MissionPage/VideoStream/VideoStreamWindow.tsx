@@ -3,7 +3,8 @@ import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 
 import { VideoStream } from 'models/VideoStream'
-import { VideoPlayer } from './Video'
+import { VideoPlayerOvenPlayer, IsValidOvenPlayerType } from './VideoPlayerOvenPlayer'
+import { VideoPlayerSimple } from './VideoPlayerSimple'
 
 const VideoCard = styled(Card)`
     padding: 16px;
@@ -32,11 +33,16 @@ interface VideoStreamCardProps {
 }
 
 function VideoStreamCard({ videoStream }: VideoStreamCardProps) {
+    var videoPlayer = null
+    if (IsValidOvenPlayerType({ videoStream })) {
+        videoPlayer = <VideoPlayerOvenPlayer videoStream={videoStream} />
+    } else {
+        videoPlayer = <VideoPlayerSimple videoStream={videoStream} />
+    }
+
     return (
         <VideoCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
-            <StyledVideoSection>
-                <VideoPlayer videoStream={videoStream} />
-            </StyledVideoSection>
+            <StyledVideoSection>{videoPlayer}</StyledVideoSection>
             <Typography variant="h5">{videoStream.name}</Typography>
         </VideoCard>
     )
