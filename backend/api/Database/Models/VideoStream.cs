@@ -19,5 +19,9 @@ namespace Api.Database.Models
         [MaxLength(128)]
         [Required]
         public string Url { get; set; }
+
+        [MaxLength(64)]
+        [Required]
+        public string Type { get; set; }
     }
 }

@@ -62,7 +62,8 @@ namespace Api.Test.Services
             var videoStreamQuery = new CreateVideoStreamQuery()
             {
                 Name = "Front Camera",
-                Url = "localhost:5000"
+                Url = "localhost:5000",
+                Type = "mjpeg"
             };
             var robotQuery = new CreateRobotQuery()
             {

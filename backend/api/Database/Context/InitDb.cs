@@ -11,7 +11,8 @@ public static class InitDb
         new()
         {
             Name = "Front camera",
-            Url = "http://localhost:5000/stream?topic=/camera/rgb/image_raw"
+            Url = "http://localhost:5000/stream?topic=/camera/rgb/image_raw",
+            Type = "mjpeg"
         };
 
     private static PlannedInspection PlannedInspection =>
