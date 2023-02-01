@@ -21,7 +21,7 @@ export function TaskTable({ mission }: MissionProps) {
     return (
         <StyledTable>
             <Table.Caption>
-                <Typography variant="h3">Tasks</Typography>
+                <Typography variant="h2">Tasks</Typography>
             </Table.Caption>
             <Table.Head>
                 <Table.Row>
