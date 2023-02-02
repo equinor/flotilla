@@ -16,7 +16,7 @@ const StyledStatusDisplay = styled.div`
     align-items: flex-end;
 `
 
-function displayIcon(status: MissionStatus) {
+export function displayIcon(status: MissionStatus) {
     switch (status) {
         case MissionStatus.Pending: {
             return <Icon name="time" style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
