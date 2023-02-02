@@ -61,7 +61,9 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
             <HorizontalContent>
                 <HorizontalNonButtonContent onClick={routeChange}>
                     <Checkbox />
-                    <Typography variant="h6">{mission.name}</Typography>
+                    <Button as={Typography} variant="ghost" fullWidth>
+                        {mission.name}
+                    </Button>
                     <Typography>{mission.robot.name}</Typography>
                     <MissionStartTimeDisplay mission={mission} />
                     <Typography>Tasks: {numberOfTasks}</Typography>
