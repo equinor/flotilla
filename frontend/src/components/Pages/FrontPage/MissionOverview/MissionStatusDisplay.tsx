@@ -16,24 +16,31 @@ const StyledStatusDisplay = styled.div`
     align-items: flex-end;
 `
 
+enum IconEnum {
+    Pending = 'time',
+    Ongoing = 'autorenew',
+    Failed = 'error_outlined',
+    Successful = 'check_circle_outlined',
+}
+
 export function displayIcon(status: MissionStatus) {
     switch (status) {
         case MissionStatus.Pending: {
-            return <Icon name="time" style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
+            return <Icon name={IconEnum.Pending} style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
         }
         case MissionStatus.Ongoing: {
-            return <Icon name="autorenew" style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
+            return <Icon name={IconEnum.Ongoing} style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
         }
         case MissionStatus.Failed: {
-            return <Icon name="error_outlined" style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
+            return <Icon name={IconEnum.Failed} style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
         }
         case MissionStatus.Successful: {
             return (
-                <Icon name="check_circle_outlined" style={{ color: tokens.colors.interactive.success__resting.rgba }} />
+                <Icon name={IconEnum.Successful} style={{ color: tokens.colors.interactive.success__resting.rgba }} />
             )
         }
     }
-    return <Icon name="error_outlined" style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
+    return <Icon name={IconEnum.Failed} style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
 }
 
 export function MissionStatusDisplay({ status }: StatusProps) {
