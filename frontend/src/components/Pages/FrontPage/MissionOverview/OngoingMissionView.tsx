@@ -4,6 +4,7 @@ import { useApi } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { RefreshProps } from '../FrontPage'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { OngoingMissionCard } from './OngoingMissionCard'
 
@@ -18,7 +19,7 @@ const OngoingMissionSection = styled.div`
     gap: 2rem;
 `
 
-export function OngoingMissionView() {
+export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     const apiCaller = useApi()
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [pausedMissions, setPausedMissions] = useState<Mission[]>([])
@@ -30,11 +31,10 @@ export function OngoingMissionView() {
     }, [])
 
     useEffect(() => {
-        const timeDelay = 1000
         const id = setInterval(() => {
             updateOngoingMissions()
             updatePausedMissions()
-        }, timeDelay)
+        }, refreshInterval)
         return () => clearInterval(id)
     }, [])
 

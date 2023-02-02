@@ -8,6 +8,7 @@ import { NoUpcomingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { EchoMission } from 'models/EchoMission'
 import { Robot } from 'models/Robot'
+import { RefreshProps } from '../FrontPage'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -41,7 +42,7 @@ const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
     return robotMap
 }
 
-export function UpcomingMissionView() {
+export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
     const apiCaller = useApi()
     const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMission[]>([])
@@ -51,7 +52,6 @@ export function UpcomingMissionView() {
     const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>(new Map<string, Robot>())
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
     const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
-    const timeDelay = 1000
     const echoURL = 'https://echo.equinor.com/mp?instCode='
     const savedAsset = sessionStorage.getItem('assetString')
     const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
@@ -108,7 +108,7 @@ export function UpcomingMissionView() {
                     setEchoMissions(mappedEchoMissions)
                 })
             }
-        }, timeDelay)
+        }, refreshInterval)
         return () => clearInterval(id)
     }, [])
 
@@ -118,7 +118,7 @@ export function UpcomingMissionView() {
                 const mappedRobots: Map<string, Robot> = mapRobotsToString(robots)
                 setRobotOptions(mappedRobots)
             })
-        }, timeDelay)
+        }, refreshInterval)
         return () => clearInterval(id)
     }, [])
 
@@ -127,7 +127,7 @@ export function UpcomingMissionView() {
             apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
                 setUpcomingMissions(missions)
             })
-        }, timeDelay)
+        }, refreshInterval)
         return () => clearInterval(id)
     }, [])
 
