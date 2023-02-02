@@ -1,20 +1,20 @@
 import { Typography } from '@equinor/eds-core-react'
 import { IsarTask, IsarTaskStatus } from 'models/IsarTask'
+import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 const StyledTagCount = styled.div`
     display: flex;
 `
-interface TaskProps {
-    tasks: IsarTask[]
+interface MissionProps {
+    mission: Mission
 }
 
-interface TaskProps {
-    tasks: IsarTask[]
-}
+export function MissionProgressDisplay({ mission }: MissionProps) {
+    const tasks = mission.tasks
+    const plannedTasks = mission.plannedTasks
 
-export function MissionProgressDisplay({ tasks }: TaskProps) {
     const [completedTasks, setCompletedTasks] = useState<number>(0)
     useEffect(() => {
         setCompletedTasks(countCompletedTasks(tasks))
@@ -29,7 +29,7 @@ export function MissionProgressDisplay({ tasks }: TaskProps) {
     return (
         <StyledTagCount>
             <Typography>
-                Task {completedTasks}/{tasks.length}
+                Task {completedTasks}/{plannedTasks.length}
             </Typography>
         </StyledTagCount>
     )

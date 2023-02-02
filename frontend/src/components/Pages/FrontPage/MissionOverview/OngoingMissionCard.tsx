@@ -2,7 +2,7 @@ import { Card, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
-import { MissionProgressDisplay } from './MissionTagDisplay'
+import { MissionProgressDisplay } from './MissionProgressDisplay'
 import { MissionStatusDisplay } from './MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { MissionControlButtons } from './MissionControlButtons'
@@ -35,7 +35,7 @@ export function OngoingMissionCard({ mission }: MissionProps) {
             </div>
             <HorisontalContent>
                 <MissionStatusDisplay status={mission.missionStatus} />
-                <MissionProgressDisplay tasks={mission.tasks} />
+                <MissionProgressDisplay mission={mission} />
                 <MissionControlButtons mission={mission} />
             </HorisontalContent>
         </StyledMissionCard>
