@@ -12,12 +12,12 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        [MaxLength(64)]
         [Required]
+        [MaxLength(200)]
         public string Name { get; set; }
 
-        [MaxLength(128)]
         [Required]
+        [MaxLength(200)]
         public string Url { get; set; }
 
         [MaxLength(64)]

@@ -13,12 +13,17 @@ namespace Api.Database.Models
         public string Id { get; set; }
 
         [Required]
+        [MaxLength(200)]
         public string IsarTaskId { get; set; }
 
         [Required]
         public virtual Mission Mission { get; set; }
 
+        [MaxLength(200)]
         public string TagId { get; set; }
+
+        [MaxLength(200)]
+        public string EchoLink { get; set; }
 
         [Required]
         public IsarTaskStatus TaskStatus { get; set; }

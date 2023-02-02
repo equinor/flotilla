@@ -13,11 +13,13 @@ namespace Api.Database.Models
         public string Id { get; set; }
 
         [Required]
+        [MaxLength(200)]
         public string IsarStepId { get; set; }
 
         [Required]
         public virtual IsarTask Task { get; set; }
 
+        [MaxLength(200)]
         public string TagId { get; set; }
 
         [Required]
@@ -31,7 +33,7 @@ namespace Api.Database.Models
         [Required]
         public DateTimeOffset Time { get; set; }
 
-        [MaxLength(128)]
+        [MaxLength(200)]
         public string FileLocation { get; set; }
 
         public enum IsarStepStatus

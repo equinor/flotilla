@@ -8,30 +8,28 @@ namespace Api.Database.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Required]
         public string Id { get; set; }
 
-        [MaxLength(128)]
         [Required]
+        [MaxLength(200)]
         public string Name { get; set; }
 
-        [MaxLength(128)]
         [Required]
         public RobotModel Model { get; set; }
 
-        [MaxLength(128)]
         [Required]
+        [MaxLength(200)]
         public string SerialNumber { get; set; }
 
+        [MaxLength(200)]
         public string Logs { get; set; }
 
         public float BatteryLevel { get; set; }
 
-        [Required]
         public IList<VideoStream> VideoStreams { get; set; }
 
-        [MaxLength(128)]
         [Required]
+        [MaxLength(200)]
         public string Host { get; set; }
 
         [Required]
@@ -80,6 +78,7 @@ namespace Api.Database.Models
     {
         Available,
         Busy,
-        Offline
+        Offline,
+        Deprecated,
     }
 }

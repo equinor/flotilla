@@ -61,7 +61,7 @@ namespace Api.Database.Models
         [Required]
         public Orientation Orientation { get; set; }
 
-        [MaxLength(64)]
+        [MaxLength(200)]
         public string Frame { get; set; }
         private static float AxisAngleToQuaternionElement(float rotationAxis, float angle)
         {
