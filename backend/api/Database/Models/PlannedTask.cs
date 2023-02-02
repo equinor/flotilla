@@ -14,10 +14,10 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        [MaxLength(64)]
+        [MaxLength(200)]
         public string TagId { get; set; }
 
-        [MaxLength(64)]
+        [MaxLength(200)]
         public Uri URL { get; set; }
 
         [Required]

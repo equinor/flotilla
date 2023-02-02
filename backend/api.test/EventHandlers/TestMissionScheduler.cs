@@ -32,6 +32,7 @@ namespace Api.Test.EventHandlers
             new()
             {
                 Id = "testMission",
+                Name = "testMission",
                 EchoMissionId = 2,
                 Robot = Robot,
                 MissionStatus = MissionStatus.Pending,

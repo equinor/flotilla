@@ -176,8 +176,8 @@ once more.
 You can apply migrations to the dev database at any time to test that it
 behaves as expected.
 
-The prod and qa databases doesn't need to be updated manually, as all migrations are
-applied to it automatically as part of the pipelines when pushed to qa and prod.
+The staging and prod databases doesn't need to be updated manually, as all migrations are
+applied to it automatically as part of the pipelines when pushed to staging and prod.
 
 ## Formatting
 

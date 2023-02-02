@@ -8,6 +8,7 @@ namespace Api.Database.Models
     public class MissionMap
     {
         [Required]
+        [MaxLength(200)]
         public string MapName { get; set; }
 
         [Required]

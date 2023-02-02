@@ -46,6 +46,7 @@ namespace Api.Test.Services
             Mission mission =
                 new()
                 {
+                    Name = "testMission",
                     Robot = robot,
                     EchoMissionId = 0,
                     Map = new MissionMap() { MapName = "testMap" },

@@ -17,7 +17,7 @@ namespace Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.7")
+                .HasAnnotation("ProductVersion", "6.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -29,24 +29,34 @@ namespace Api.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AssetCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("EchoMissionId")
-                        .HasMaxLength(128)
+                        .HasMaxLength(200)
                         .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("EndTime")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<TimeSpan>("EstimatedDuration")
+                        .HasColumnType("time");
+
                     b.Property<string>("IsarMissionId")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("MissionStatus")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("RobotId")
                         .IsRequired()
@@ -54,6 +64,10 @@ namespace Api.Migrations
 
                     b.Property<DateTimeOffset>("StartTime")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("StatusReason")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -76,28 +90,28 @@ namespace Api.Migrations
 
                     b.Property<string>("Host")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Logs")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Model")
-                        .HasMaxLength(128)
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Port")
                         .HasColumnType("int");
 
                     b.Property<string>("SerialNumber")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -121,16 +135,22 @@ namespace Api.Migrations
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("nvarchar(450)");
 
+                            b1.Property<string>("EchoLink")
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
                             b1.Property<string>("IsarTaskId")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.Property<string>("MissionId")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(450)");
 
                             b1.Property<string>("TagId")
-                                .HasColumnType("nvarchar(max)");
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.Property<int>("TaskStatus")
                                 .HasColumnType("int");
@@ -154,15 +174,16 @@ namespace Api.Migrations
                                         .HasColumnType("nvarchar(450)");
 
                                     b2.Property<string>("FileLocation")
-                                        .HasMaxLength(128)
-                                        .HasColumnType("nvarchar(128)");
+                                        .HasMaxLength(200)
+                                        .HasColumnType("nvarchar(200)");
 
                                     b2.Property<int>("InspectionType")
                                         .HasColumnType("int");
 
                                     b2.Property<string>("IsarStepId")
                                         .IsRequired()
-                                        .HasColumnType("nvarchar(max)");
+                                        .HasMaxLength(200)
+                                        .HasColumnType("nvarchar(200)");
 
                                     b2.Property<int>("StepStatus")
                                         .HasColumnType("int");
@@ -171,7 +192,8 @@ namespace Api.Migrations
                                         .HasColumnType("int");
 
                                     b2.Property<string>("TagId")
-                                        .HasColumnType("nvarchar(max)");
+                                        .HasMaxLength(200)
+                                        .HasColumnType("nvarchar(200)");
 
                                     b2.Property<string>("TaskId")
                                         .IsRequired()
@@ -197,6 +219,80 @@ namespace Api.Migrations
                             b1.Navigation("Steps");
                         });
 
+                    b.OwnsOne("Api.Database.Models.MissionMap", "Map", b1 =>
+                        {
+                            b1.Property<string>("MissionId")
+                                .HasColumnType("nvarchar(450)");
+
+                            b1.Property<string>("MapName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
+
+                            b1.HasKey("MissionId");
+
+                            b1.ToTable("Missions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MissionId");
+
+                            b1.OwnsOne("Api.Database.Models.Boundary", "Boundary", b2 =>
+                                {
+                                    b2.Property<string>("MissionMapMissionId")
+                                        .HasColumnType("nvarchar(450)");
+
+                                    b2.Property<double>("X1")
+                                        .HasColumnType("float");
+
+                                    b2.Property<double>("X2")
+                                        .HasColumnType("float");
+
+                                    b2.Property<double>("Y1")
+                                        .HasColumnType("float");
+
+                                    b2.Property<double>("Y2")
+                                        .HasColumnType("float");
+
+                                    b2.HasKey("MissionMapMissionId");
+
+                                    b2.ToTable("Missions");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MissionMapMissionId");
+                                });
+
+                            b1.OwnsOne("Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
+                                {
+                                    b2.Property<string>("MissionMapMissionId")
+                                        .HasColumnType("nvarchar(450)");
+
+                                    b2.Property<double>("C1")
+                                        .HasColumnType("float");
+
+                                    b2.Property<double>("C2")
+                                        .HasColumnType("float");
+
+                                    b2.Property<double>("D1")
+                                        .HasColumnType("float");
+
+                                    b2.Property<double>("D2")
+                                        .HasColumnType("float");
+
+                                    b2.HasKey("MissionMapMissionId");
+
+                                    b2.ToTable("Missions");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MissionMapMissionId");
+                                });
+
+                            b1.Navigation("Boundary")
+                                .IsRequired();
+
+                            b1.Navigation("TransformationMatrices")
+                                .IsRequired();
+                        });
+
                     b.OwnsMany("Api.Database.Models.PlannedTask", "PlannedTasks", b1 =>
                         {
                             b1.Property<string>("Id")
@@ -207,13 +303,16 @@ namespace Api.Migrations
                                 .IsRequired()
                                 .HasColumnType("nvarchar(450)");
 
+                            b1.Property<int>("PoseId")
+                                .HasColumnType("int");
+
                             b1.Property<string>("TagId")
-                                .HasMaxLength(64)
-                                .HasColumnType("nvarchar(64)");
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.Property<string>("URL")
-                                .HasMaxLength(64)
-                                .HasColumnType("nvarchar(64)");
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.HasKey("Id");
 
@@ -250,8 +349,109 @@ namespace Api.Migrations
                                         .HasForeignKey("PlannedTaskId");
                                 });
 
+                            b1.OwnsOne("Api.Database.Models.Pose", "Pose", b2 =>
+                                {
+                                    b2.Property<string>("PlannedTaskId")
+                                        .HasColumnType("nvarchar(450)");
+
+                                    b2.Property<string>("Frame")
+                                        .HasMaxLength(200)
+                                        .HasColumnType("nvarchar(200)");
+
+                                    b2.HasKey("PlannedTaskId");
+
+                                    b2.ToTable("PlannedTask");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlannedTaskId");
+
+                                    b2.OwnsOne("Api.Database.Models.Orientation", "Orientation", b3 =>
+                                        {
+                                            b3.Property<string>("PosePlannedTaskId")
+                                                .HasColumnType("nvarchar(450)");
+
+                                            b3.Property<float>("W")
+                                                .HasColumnType("real");
+
+                                            b3.Property<float>("X")
+                                                .HasColumnType("real");
+
+                                            b3.Property<float>("Y")
+                                                .HasColumnType("real");
+
+                                            b3.Property<float>("Z")
+                                                .HasColumnType("real");
+
+                                            b3.HasKey("PosePlannedTaskId");
+
+                                            b3.ToTable("PlannedTask");
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("PosePlannedTaskId");
+                                        });
+
+                                    b2.OwnsOne("Api.Database.Models.Position", "Position", b3 =>
+                                        {
+                                            b3.Property<string>("PosePlannedTaskId")
+                                                .HasColumnType("nvarchar(450)");
+
+                                            b3.Property<float>("X")
+                                                .HasColumnType("real");
+
+                                            b3.Property<float>("Y")
+                                                .HasColumnType("real");
+
+                                            b3.Property<float>("Z")
+                                                .HasColumnType("real");
+
+                                            b3.HasKey("PosePlannedTaskId");
+
+                                            b3.ToTable("PlannedTask");
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("PosePlannedTaskId");
+                                        });
+
+                                    b2.Navigation("Orientation")
+                                        .IsRequired();
+
+                                    b2.Navigation("Position")
+                                        .IsRequired();
+                                });
+
+                            b1.OwnsOne("Api.Database.Models.Position", "TagPosition", b2 =>
+                                {
+                                    b2.Property<string>("PlannedTaskId")
+                                        .HasColumnType("nvarchar(450)");
+
+                                    b2.Property<float>("X")
+                                        .HasColumnType("real");
+
+                                    b2.Property<float>("Y")
+                                        .HasColumnType("real");
+
+                                    b2.Property<float>("Z")
+                                        .HasColumnType("real");
+
+                                    b2.HasKey("PlannedTaskId");
+
+                                    b2.ToTable("PlannedTask");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlannedTaskId");
+                                });
+
                             b1.Navigation("Inspections");
+
+                            b1.Navigation("Pose")
+                                .IsRequired();
+
+                            b1.Navigation("TagPosition")
+                                .IsRequired();
                         });
+
+                    b.Navigation("Map")
+                        .IsRequired();
 
                     b.Navigation("PlannedTasks");
 
@@ -268,8 +468,8 @@ namespace Api.Migrations
                                 .HasColumnType("nvarchar(450)");
 
                             b1.Property<string>("Frame")
-                                .HasMaxLength(64)
-                                .HasColumnType("nvarchar(64)");
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.HasKey("RobotId");
 
@@ -340,17 +540,22 @@ namespace Api.Migrations
 
                             b1.Property<string>("Name")
                                 .IsRequired()
-                                .HasMaxLength(64)
-                                .HasColumnType("nvarchar(64)");
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.Property<string>("RobotId")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(450)");
 
+                            b1.Property<string>("Type")
+                                .IsRequired()
+                                .HasMaxLength(64)
+                                .HasColumnType("nvarchar(64)");
+
                             b1.Property<string>("Url")
                                 .IsRequired()
-                                .HasMaxLength(128)
-                                .HasColumnType("nvarchar(128)");
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)");
 
                             b1.HasKey("Id");
 

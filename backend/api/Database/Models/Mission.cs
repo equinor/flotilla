@@ -8,21 +8,29 @@ namespace Api.Database.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Required]
         public string Id { get; set; }
 
+        [Required]
+        [MaxLength(200)]
         public string Name { get; set; }
 
+        [MaxLength(450)]
+        public string Description { get; set; }
+
+        [MaxLength(450)]
+        public string StatusReason { get; set; }
+
+        [MaxLength(200)]
         public string AssetCode { get; set; }
 
         [Required]
         public virtual Robot Robot { get; set; }
 
-        [MaxLength(128)]
+        [MaxLength(200)]
         public string IsarMissionId { get; set; }
 
-        [MaxLength(128)]
         [Required]
+        [MaxLength(200)]
         public int EchoMissionId { get; set; }
 
         private MissionStatus _missionStatus;
@@ -46,6 +54,8 @@ namespace Api.Database.Models
         public DateTimeOffset StartTime { get; set; }
 
         public DateTimeOffset EndTime { get; set; }
+
+        public TimeSpan EstimatedDuration { get; set; }
 
         [Required]
         public IList<IsarTask> Tasks { get; set; }
