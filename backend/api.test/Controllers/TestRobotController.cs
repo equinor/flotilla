@@ -26,18 +26,9 @@ namespace Api.Test.Controllers
 
             var context = fixture.NewContext;
 
-            var service = new RobotService(context);
+            var robotService = new RobotService(context);
             var echoService = new Mock<IEchoService>().Object;
-            var mapService = new Mock<IMapService>().Object;
-            var stidService = new Mock<IStidService>().Object;
-            var missionService = new MissionService(
-                context,
-                missionServiceLogger.Object,
-                mapService,
-                service,
-                echoService,
-                stidService
-            );
+            var missionService = new MissionService(context, missionServiceLogger.Object);
             var isarService = new IsarService(
                 isarLogger.Object,
                 isarDownstreamApi.Object,
@@ -47,7 +38,7 @@ namespace Api.Test.Controllers
             var mockLoggerController = new Mock<ILogger<RobotController>>();
             _controller = new RobotController(
                 mockLoggerController.Object,
-                service,
+                robotService,
                 isarService,
                 echoService,
                 missionService
