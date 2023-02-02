@@ -3,6 +3,7 @@ import { useApi } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { RefreshProps } from '../FrontPage'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
 
 const RobotCardSection = styled.div`
@@ -16,7 +17,7 @@ const RobotView = styled.div`
     gap: 1rem;
 `
 
-export function RobotStatusSection() {
+export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     const apiCaller = useApi()
 
     const [robots, setRobots] = useState<Robot[]>([])
@@ -25,10 +26,9 @@ export function RobotStatusSection() {
     }, [])
 
     useEffect(() => {
-        const timeDelay = 1000
         const id = setInterval(() => {
             updateRobots()
-        }, timeDelay)
+        }, refreshInterval)
         return () => clearInterval(id)
     }, [])
 

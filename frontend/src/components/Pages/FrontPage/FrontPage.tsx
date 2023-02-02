@@ -9,12 +9,18 @@ const StyledFrontPage = styled.div`
     gap: 3rem;
 `
 
+export type RefreshProps = {
+    refreshInterval: number
+}
+
 export function FrontPage() {
+    const refreshInterval = 100
+
     return (
         <StyledFrontPage>
-            <OngoingMissionView />
-            <UpcomingMissionView />
-            <RobotStatusSection />
+            <OngoingMissionView refreshInterval={refreshInterval} />
+            <UpcomingMissionView refreshInterval={refreshInterval} />
+            <RobotStatusSection refreshInterval={refreshInterval} />
         </StyledFrontPage>
     )
 }
