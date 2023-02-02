@@ -24,8 +24,8 @@ function displayIcon(status: MissionStatus) {
         case MissionStatus.Ongoing: {
             return <Icon name="autorenew" style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
         }
-        case MissionStatus.Warning: {
-            return <Icon name="warning_outlined" style={{ color: tokens.colors.interactive.warning__resting.rgba }} />
+        case MissionStatus.Failed: {
+            return <Icon name="error_outlined" style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
         }
         case MissionStatus.Successful: {
             return (
