@@ -156,6 +156,9 @@ namespace Api.Mqtt
 
         private Task OnConnectingFailed(ConnectingFailedEventArgs obj)
         {
+            if (_reconnectAttempts == -1)
+                return Task.CompletedTask;
+
             string errorMsg =
                 "Failed to connect to MQTT broker. Exception: " + obj.Exception.Message;
 
@@ -169,6 +172,9 @@ namespace Api.Mqtt
                     StopAsync(_cancellationToken);
                     return Task.CompletedTask;
                 }
+
+                _reconnectAttempts = -1;
+                return Task.CompletedTask;
             }
 
             _reconnectAttempts++;
