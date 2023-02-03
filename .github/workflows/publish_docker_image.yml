@@ -5,11 +5,13 @@ on:
     types: [published]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  GitHub_REGISTRY: ghcr.io
+  GitHub_IMAGE_NAME: ${{ github.repository }}
+  AURORA_PROD_REGISTRY: auroraprodacr.azurecr.io
+  AURORA_PROD_IMAGE_NAME: /robotics/flotilla
 
 jobs:
-  build-and-push-broker:
+  build-and-push-broker-ghcr:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -19,10 +21,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Log in to the Container registry
+      - name: Log in to the Github Container registry
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ env.GitHub_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -30,7 +32,39 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-broker
+          images: ${{ env.GitHub_REGISTRY }}/${{ env.GitHub_IMAGE_NAME }}-broker
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./broker
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-and-push-broker-auroraprodacr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Aurora Prod Container registry
+        uses: docker/login-action@v2
+        with:
+          login-server: ${{ env.AURORA_PROD_REGISTRY }}
+          registry: ${{ env.AURORA_PROD_REGISTRY }}
+          username: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
+          password: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.AURORA_PROD_REGISTRY }}/${{ env.AURORA_PROD_IMAGE_NAME }}-broker
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
@@ -50,10 +84,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Log in to the Container registry
+      - name: Log in to the Github Container registry
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ env.GitHub_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -61,7 +95,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+          images: ${{ env.GitHub_REGISTRY }}/${{ env.GitHub_IMAGE_NAME }}-backend
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
@@ -70,6 +104,39 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  build-and-push-backend-auroraprodacr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Aurora Prod Container registry
+        uses: docker/login-action@v2
+        with:
+          login-server: ${{ env.AURORA_PROD_REGISTRY }}
+          registry: ${{ env.AURORA_PROD_REGISTRY }}
+          username: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
+          password: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.AURORA_PROD_REGISTRY }}/${{ env.AURORA_PROD_IMAGE_NAME }}-backend
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
   build-and-push-frontend:
     runs-on: ubuntu-latest
     permissions:
@@ -80,10 +147,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Log in to the Container registry
+      - name: Log in to the Github Container registry
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ env.GitHub_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -91,7 +158,39 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+          images: ${{ env.GitHub_REGISTRY }}/${{ env.GitHub_IMAGE_NAME }}-frontend
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-and-push-frontend-auroraprodacr:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Aurora Prod Container registry
+        uses: docker/login-action@v2
+        with:
+          login-server: ${{ env.AURORA_PROD_REGISTRY }}
+          registry: ${{ env.AURORA_PROD_REGISTRY }}
+          username: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
+          password: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.AURORA_PROD_REGISTRY }}/${{ env.AURORA_PROD_IMAGE_NAME }}-frontend
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
