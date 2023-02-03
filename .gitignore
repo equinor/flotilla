@@ -15,6 +15,7 @@ frontend/build/
 backend/*/bin
 backend/*/obj
 backend/api/Database/Maps/
+backend/backend.sln.DotSettings.user
 
 #Broker
 broker/mosquitto/config/certs/server-key.pem
