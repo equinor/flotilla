@@ -1,5 +1,7 @@
 import { EchoTag } from './EchoMission'
 import { IsarTask } from './IsarTask'
+import { MissionMap } from './MissionMap'
+import { PlannedTask } from './PlannedTask'
 import { Robot } from './Robot'
 
 export enum MissionStatus {
@@ -23,5 +25,6 @@ export interface Mission {
     startTime: Date
     endTime?: Date
     tasks: IsarTask[]
-    plannedTasks: EchoTag[]
+    map: MissionMap
+    plannedTasks: PlannedTask[]
 }

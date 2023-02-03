@@ -15,8 +15,8 @@ public class MissionController : ControllerBase
     private readonly IRobotService _robotService;
     private readonly IEchoService _echoService;
     private readonly ILogger<MissionController> _logger;
-    private readonly IMapService _mapService;
     private readonly IStidService _stidService;
+    private readonly IMapService _mapService;
 
     public MissionController(
         IMissionService missionService,
@@ -31,6 +31,7 @@ public class MissionController : ControllerBase
         _robotService = robotService;
         _echoService = echoService;
         _mapService = mapService;
+        _stidService = stidService;
         _logger = logger;
         _stidService = stidService;
     }
@@ -167,6 +168,8 @@ public class MissionController : ControllerBase
             )
             .ToList();
 
+        var map = await _mapService.AssignMapToMission(echoMission.AssetCode, plannedTasks);
+
         var scheduledMission = new Mission
         {
             Name = echoMission.Name,
@@ -177,7 +180,7 @@ public class MissionController : ControllerBase
             PlannedTasks = plannedTasks,
             Tasks = new List<IsarTask>(),
             AssetCode = scheduledMissionQuery.AssetCode,
-            Map = new MissionMap()
+            Map = map
         };
 
         var newMission = await _missionService.Create(scheduledMission);
