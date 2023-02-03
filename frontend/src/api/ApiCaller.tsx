@@ -88,6 +88,14 @@ export class BackendAPICaller {
         return result.content
     }
 
+    async getMissions(): Promise<Mission[]> {
+        const path: string = 'missions'
+        const result = await this.GET<Mission[]>(path).catch((e) => {
+            throw new Error(`Failed to GET /${path}: ` + e)
+        })
+        return result.content
+    }
+
     async getMissionsByStatus(status: MissionStatus): Promise<Mission[]> {
         const path: string = 'missions?status=' + status
         const result = await this.GET<Mission[]>(path).catch((e) => {
