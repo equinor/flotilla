@@ -8,7 +8,7 @@ env:
   GitHub_REGISTRY: ghcr.io
   GitHub_IMAGE_NAME: ${{ github.repository }}
   AURORA_PROD_REGISTRY: auroraprodacr.azurecr.io
-  AURORA_PROD_IMAGE_NAME: /robotics/flotilla
+  AURORA_PROD_IMAGE_NAME: robotics/flotilla
 
 jobs:
   build-and-push-broker-ghcr:
