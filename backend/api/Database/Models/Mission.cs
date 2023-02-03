@@ -25,8 +25,19 @@ namespace Api.Database.Models
         [Required]
         public int EchoMissionId { get; set; }
 
+        private MissionStatus _missionStatus;
+
         [Required]
-        public MissionStatus MissionStatus { get; set; }
+        public MissionStatus MissionStatus
+        {
+            get { return _missionStatus; }
+            set
+            {
+                _missionStatus = value;
+                if (IsCompleted)
+                    EndTime = DateTimeOffset.UtcNow;
+            }
+        }
 
         [Required]
         public MissionMap Map { get; set; }
@@ -41,6 +52,15 @@ namespace Api.Database.Models
 
         [Required]
         public IList<PlannedTask> PlannedTasks { get; set; }
+
+        public bool IsCompleted =>
+            new[]
+            {
+                MissionStatus.Aborted,
+                MissionStatus.Cancelled,
+                MissionStatus.Successful,
+                MissionStatus.Failed
+            }.Contains(_missionStatus);
 
 #nullable enable
         public IsarTask? ReadIsarTaskById(string isarTaskId)
