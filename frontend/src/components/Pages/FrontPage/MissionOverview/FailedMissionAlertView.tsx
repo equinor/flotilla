@@ -73,7 +73,7 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
             <Indent>
                 <Typography>
                     <strong>{missionsToDisplay.length}</strong> missions failed in the last{' '}
-                    <strong>{FailedMissionTimeInterval}</strong> minutes. See 'Recent Missions' for more information.
+                    <strong>{FailedMissionTimeInterval}</strong> minutes. See 'Past Missions' for more information.
                 </Typography>
             </Indent>
         </>

@@ -9,8 +9,8 @@ import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { OngoingMissionCard } from './OngoingMissionCard'
 
 const StyledOngoingMissionView = styled.div`
-    display: grid;
-    grid-column: 1/ -1;
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
 `
 const OngoingMissionSection = styled.div`
