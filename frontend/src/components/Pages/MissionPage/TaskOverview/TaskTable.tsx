@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { IsarTask, IsarTaskStatus } from 'models/IsarTask'
 import { EchoTag } from 'models/EchoMission'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
+import { PlannedTask } from 'models/PlannedTask'
 
 const StyledTable = styled(Table)`
     grid-column: 1/ -1;
@@ -67,7 +68,7 @@ function renderOngoingTasks(tasks: IsarTask[]) {
     return rows
 }
 
-function renderUpcomingTasks(tasks: EchoTag[]) {
+function renderUpcomingTasks(tasks: PlannedTask[]) {
     var indexCounter = 0
     var rows = tasks?.map(function (task) {
         var inspections = task.inspections?.map(function (inspection) {

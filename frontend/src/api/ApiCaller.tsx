@@ -172,6 +172,34 @@ export class BackendAPICaller {
         const path: string = 'robots/' + robotId + '/stop'
         return this.postControlMissionRequest(path, robotId)
     }
+
+    async getMap(missionId: string): Promise<Blob> {
+        const path: string = 'missions/' + missionId + '/map'
+        const url = `${config.BACKEND_URL}/${path}`
+
+        const headers = {
+            'content-type': 'image/png',
+            Authorization: `Bearer ${this.accessToken}`,
+        }
+
+        const options: RequestInit = {
+            method: 'GET',
+            headers,
+            mode: 'cors',
+        }
+
+        let response = await fetch(url, options)
+    
+        if (response.status === 200) {
+            
+            const imageBlob = await response.blob()
+            return imageBlob
+        }
+        else {
+            console.log("HTTP-Error: " + response.status)
+            throw Error
+        }    
+    }
 }
 
 export const useApi = () => {

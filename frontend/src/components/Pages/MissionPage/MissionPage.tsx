@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { MissionHeader } from './MissionHeader/MissionHeader'
 import { BackButton } from './MissionHeader/BackButton'
+import { MapView } from './MapPosition/MapView'
 
 const StyledMissionPage = styled.div`
     display: flex;
@@ -72,6 +73,7 @@ export function MissionPage() {
                     <TaskAndMapSection>
                         <TaskTable mission={selectedMission} />
                         <MapPositionView mission={selectedMission} />
+                        <MapView mission={selectedMission}/>
                     </TaskAndMapSection>
                     <VideoStreamSection>
                         {videoStreams.length > 0 && <VideoStreamWindow videoStreams={videoStreams} />}
