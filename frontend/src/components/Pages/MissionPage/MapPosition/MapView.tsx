@@ -4,7 +4,8 @@ import { useApi } from "api/ApiCaller"
 import { Mission } from 'models/Mission'
 import { useEffect, useRef, useState } from "react"
 import styled from "styled-components"
-import { place } from '@equinor/eds-icons'
+import { image, place } from '@equinor/eds-icons'
+import NoMap from 'mediaAssets/NoMap.png'
 
 Icon.add({ place,  })
 
@@ -28,23 +29,34 @@ const StyledMap = styled.canvas`
 
 export function MapView({mission}:MissionProps){
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement("canvas"))
+    const [mapAvailable, setMapAvailable] = useState<Boolean>(false)
     const apiCaller = useApi()
+    var imageObjectURL:string
+
     useEffect(() => {
         apiCaller.getMap(mission.id).then((imageBlob) => {
-            const imageObjectURL = URL.createObjectURL(imageBlob);
+            imageObjectURL = URL.createObjectURL(imageBlob);
+            setMapAvailable(true)  
+        }).catch(() => {
+            imageObjectURL = NoMap
+        })
+        .then(() => {
             getMeta(imageObjectURL).then(img => {
-                const mapCanvas = document.getElementById("MapCanvas") as HTMLCanvasElement;
-                var context = mapCanvas?.getContext("2d")
-                mapCanvas.width = img.width
-                mapCanvas.height = img.height
-                context?.drawImage(img, 0, 0)
-                setMapCanvas(mapCanvas)
-              })
-            })     
+            const mapCanvas = document.getElementById("MapCanvas") as HTMLCanvasElement;
+            var context = mapCanvas?.getContext("2d")
+            mapCanvas.width = img.width
+            mapCanvas.height = img.height
+            context?.drawImage(img, 0, 0)
+            setMapCanvas(mapCanvas)
+          })}
+        )
+
     }, [])
     
     useEffect(() => {
-        PlaceTagInMap(mission, mapCanvas)
+        if(mapAvailable){
+            PlaceTagsInMap(mission, mapCanvas)
+        }
     }, [mapCanvas])
 
     const getMeta = async (url:string) => {
@@ -62,7 +74,8 @@ export function MapView({mission}:MissionProps){
     )
 }
 
-function PlaceTagInMap(mission: Mission, map: HTMLCanvasElement){
+function PlaceTagsInMap(mission: Mission, map: HTMLCanvasElement){
+    if(mission.plannedTasks[0].tagPosition === null){return}
     var circleSize = 30;
     var tagNumber = 0;
 
