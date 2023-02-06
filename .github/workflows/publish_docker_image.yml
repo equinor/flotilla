@@ -55,7 +55,6 @@ jobs:
       - name: Log in to the Aurora Prod Container registry
         uses: docker/login-action@v2
         with:
-          login-server: ${{ env.AURORA_PROD_REGISTRY }}
           registry: ${{ env.AURORA_PROD_REGISTRY }}
           username: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
           password: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
@@ -118,7 +117,6 @@ jobs:
       - name: Log in to the Aurora Prod Container registry
         uses: docker/login-action@v2
         with:
-          login-server: ${{ env.AURORA_PROD_REGISTRY }}
           registry: ${{ env.AURORA_PROD_REGISTRY }}
           username: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
           password: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
@@ -181,7 +179,6 @@ jobs:
       - name: Log in to the Aurora Prod Container registry
         uses: docker/login-action@v2
         with:
-          login-server: ${{ env.AURORA_PROD_REGISTRY }}
           registry: ${{ env.AURORA_PROD_REGISTRY }}
           username: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
           password: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
