@@ -159,7 +159,8 @@ public class MissionController : ControllerBase
             StartTime = scheduledMissionQuery.StartTime,
             PlannedTasks = plannedTasks,
             Tasks = new List<IsarTask>(),
-            AssetCode = scheduledMissionQuery.AssetCode
+            AssetCode = scheduledMissionQuery.AssetCode,
+            Map = new MissionMap()
         };
 
         var newMission = await _missionService.Create(scheduledMission);
