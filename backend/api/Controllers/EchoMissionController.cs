@@ -92,7 +92,7 @@ public class EchoMissionController : ControllerBase
         }
     }
     [HttpPost]
-    [Route("position/{installationCode}")]
+    [Route("position/{poseId}")]
     [ProducesResponseType(typeof(EchoPoseResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -100,12 +100,12 @@ public class EchoMissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<EchoPoseResponse>> GetPositionsForTag([FromRoute] string installationCode, [FromBody] string tag)
+    public async Task<ActionResult<EchoPoseResponse>> GetPositionsFromPoseId([FromRoute] int poseId)
     {
         try
         {
-            var positions = await _echoService.GetRobotPoseForTags(installationCode, new List<string>() { tag });
-            return Ok(positions);
+            var poses = await _echoService.GetRobotPoseFromPoseId(poseId);
+            return Ok(poses);
         }
         catch (HttpRequestException e)
         {
