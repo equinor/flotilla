@@ -2,6 +2,7 @@
 using Api.Controllers.Models;
 using Api.Services.Models;
 using Api.Utilities;
+using Api.Database.Models;
 using Microsoft.Identity.Web;
 using static Api.Database.Models.IsarStep;
 
@@ -14,7 +15,7 @@ namespace Api.Services
         public abstract Task<EchoMission> GetMissionById(int missionId);
 
         public abstract Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
-        public abstract Task<EchoPoseResponse> GetRobotPoseForTags(string installationCode, List<string> tags);
+        public abstract Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId);
     }
 
     public class EchoService : IEchoService
@@ -103,38 +104,18 @@ namespace Api.Services
             var installations = ProcessEchoPlantInfos(echoPlantInfoResponse);
             return installations;
         }
-
-        public async Task<EchoPoseResponse> GetRobotPoseForTags(string installationCode, List<string> tags)
+        public async Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId)
         {
-            if (tags is null)
-            {
-                throw new Exception("TAGS ARE NULL");
-            }
-            else
-            {
-                _logger.LogInformation("TAGS ARE NOT NULL");
-            }
-            _logger.LogInformation("INSIDE SERVICE");
-            string relativePath = "/robots/pose/get_batch";
-            EchoPoseBody body = new EchoPoseBody();
-            body.installationCode = installationCode;
-            body.tags = tags;
-            var content = body is null
-                ? null
-                : new StringContent(
-                      JsonSerializer.Serialize(body),
-                      null,
-                      "application/json"
-                  );
+            string relativePath = $"/robots/pose/{poseId}";
             var response = await _echoApi.CallWebApiForAppAsync(
                 ServiceName,
                 options =>
                 {
                     options.HttpMethod = HttpMethod.Get;
                     options.RelativePath = relativePath;
-                },
-                content
+                }
             );
+            response.EnsureSuccessStatusCode();
             var echoPoseResponse = await response.Content.ReadFromJsonAsync<EchoPoseResponse>();
             if (echoPoseResponse is null)
             {
@@ -171,13 +152,16 @@ namespace Api.Services
 
             foreach (var planItem in planItems)
             {
+                EchoPoseResponse robotPose = GetRobotPoseFromPoseId(planItem.PoseId).Result;
                 var tag = new EchoTag()
                 {
                     Id = planItem.Id,
                     TagId = planItem.Tag,
+                    PoseId = planItem.PoseId,
+                    Pose = new Pose(enuPosition: robotPose.Position, axisAngleAxis: robotPose.LookDirectionNormalized, axisAngleAngle: robotPose.TiltDegreesClockwise),
                     URL = new Uri(
-                        $"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"
-                    ),
+                    $"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"
+                ),
                     Inspections = ProcessSensorTypes(planItem.SensorTypes)
                 };
 

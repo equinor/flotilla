@@ -5,7 +5,7 @@ namespace Api.Services.Models
 {
     public class EchoPoseResponse
     {
-        [JsonPropertyName("poseID")]
+        [JsonPropertyName("poseId")]
         public int PoseId { get; set; }
         [JsonPropertyName("installationCode")]
         public string InstallationCode { get; set; }
@@ -14,18 +14,27 @@ namespace Api.Services.Models
         [JsonPropertyName("name")]
         public string Name { get; set; }
         [JsonPropertyName("position")]
-        public Position Position { get; set; }
+        public EchoVector Position { get; set; }
         [JsonPropertyName("lookDirectionNormalized")]
-        public Position LookDirectionNormalized { get; set; }
+        public EchoVector LookDirectionNormalized { get; set; }
         [JsonPropertyName("tiltDegClockwise")]
-        public float TiltDegreesClockwize { get; set; }
+        public float TiltDegreesClockwise { get; set; }
         [JsonPropertyName("isDefault")]
-        public float isDefault { get; set; }
+        public bool IsDefault { get; set; }
     }
-    public class EchoPoseBody
+    public class EchoVector
     {
-        public string installationCode { get; set; }
-        public List<string> tags { get; set; }
+        [JsonPropertyName("e")]
+        public float East { get; set; }
+        [JsonPropertyName("n")]
+        public float North { get; set; }
+        [JsonPropertyName("u")]
+        public float Up { get; set; }
+    }
+    public class EchoPoseRequestBody
+    {
+        public string InstallationCode { get; set; }
+        public List<string> Tags { get; set; }
 
     }
 }
