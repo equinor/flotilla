@@ -76,9 +76,6 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
 
         const assetCode = sessionStorage.getItem('assetString')
         selectedEchoMissions.map((mission: EchoMission) => {
-            console.log(
-                `Schedule Echo missions ${mission.id}: ${mission.name} to robot ${selectedRobot.name} with start time ${selectedStartTime}`
-            )
             apiCaller.postMission(mission.id, selectedRobot.id, selectedStartTime as Date, assetCode)
         })
 
@@ -100,7 +97,7 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
     useEffect(() => {
         const id = setInterval(() => {
             const installationCode = sessionStorage.getItem('assetString')
-            if (!installationCode || installationCode == '') {
+            if (!installationCode || installationCode === '') {
                 setEchoMissions(new Map<string, EchoMission>())
             } else {
                 apiCaller.getEchoMissions(installationCode as string).then((missions) => {
