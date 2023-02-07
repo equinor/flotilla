@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
 using Api.Services.Models;
+using Microsoft.EntityFrameworkCore;
 
 #nullable disable
 namespace Api.Database.Models

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
-using Api.Services.Models;
 using Api.Services;
+using Api.Services.Models;
 
 namespace Api.Test.Mocks
 {
