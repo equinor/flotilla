@@ -141,5 +141,11 @@ namespace Api.Controllers.Models
             );
             FrameName = predefinedPose.Pose.Frame;
         }
+        public IsarPose(Pose pose)
+        {
+            Position = new IsarPosition(pose.Position.X, pose.Position.Y, pose.Position.Z, pose.Frame);
+            Orientation = new IsarOrientation(pose.Orientation.X, pose.Orientation.Y, pose.Orientation.Z, pose.Orientation.W, pose.Frame);
+            FrameName = pose.Frame;
+        }
     }
 }
