@@ -1,27 +1,37 @@
 import { Card, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
-
 import { VideoStream } from 'models/VideoStream'
 import { VideoPlayerOvenPlayer, IsValidOvenPlayerType } from './VideoPlayerOvenPlayer'
 import { VideoPlayerSimple } from './VideoPlayerSimple'
 
 const VideoCard = styled(Card)`
-    padding: 16px;
+    padding: 1rem;
     height: 15rem;
     width: 20rem;
 `
 
-const StyledVideoSection = styled(Card)`
-    height: 95%;
-    display: inline-flex;
+const StyledVideoSection = styled.div`
+    height: 10rem;
 `
+const Rotate = styled.div`
+    transform: rotate(270deg);
+    position: relative;
+    left: 4rem;
+    bottom: 4rem;
+`
+
+const StyledVideoSectionRotated = styled.div`
+    width: 10rem;
+    height: 10rem;
+`
+
 const VideoStreamContent = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 3rem;
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 `
 
 interface VideoStreamWindowProps {
@@ -35,14 +45,32 @@ interface VideoStreamCardProps {
 function VideoStreamCard({ videoStream }: VideoStreamCardProps) {
     var videoPlayer = null
     if (IsValidOvenPlayerType({ videoStream })) {
-        videoPlayer = <VideoPlayerOvenPlayer videoStream={videoStream} />
+        if (videoStream.shouldRotate) {
+            videoPlayer = (
+                <StyledVideoSectionRotated>
+                    <Rotate>
+                        <VideoPlayerOvenPlayer videoStream={videoStream} />
+                    </Rotate>
+                </StyledVideoSectionRotated>
+            )
+        } else {
+            videoPlayer = (
+                <StyledVideoSection>
+                    <VideoPlayerOvenPlayer videoStream={videoStream} />
+                </StyledVideoSection>
+            )
+        }
     } else {
-        videoPlayer = <VideoPlayerSimple videoStream={videoStream} />
+        videoPlayer = (
+            <StyledVideoSection>
+                <VideoPlayerSimple videoStream={videoStream} />
+            </StyledVideoSection>
+        )
     }
 
     return (
         <VideoCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
-            <StyledVideoSection>{videoPlayer}</StyledVideoSection>
+            {videoPlayer}
             <Typography variant="h5">{videoStream.name}</Typography>
         </VideoCard>
     )

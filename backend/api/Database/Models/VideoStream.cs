@@ -23,5 +23,8 @@ namespace Api.Database.Models
         [MaxLength(64)]
         [Required]
         public string Type { get; set; }
+
+        [MaxLength(64)]
+        public bool ShouldRotate { get; set; }
     }
 }

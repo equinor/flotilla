@@ -4,4 +4,5 @@ export interface VideoStream {
     robotId?: string
     url: string
     type: string
+    shouldRotate: boolean
 }
