@@ -12,6 +12,7 @@ interface IVideoPlayerProps {
 
 export function VideoPlayerOvenPlayer({ videoStream }: IVideoPlayerProps) {
     useEffect(() => {
+        const aspectRatio = videoStream.shouldRotate ? '9:16' : '16:9'
         switch (videoStream.type) {
             case 'webrtc':
             case 'hls':
@@ -20,6 +21,10 @@ export function VideoPlayerOvenPlayer({ videoStream }: IVideoPlayerProps) {
             case 'lldash':
             case 'mp4':
                 const player = OvenPlayer.create(videoStream.id, {
+                    aspectRatio: aspectRatio,
+                    controls: !videoStream.shouldRotate,
+                    mute: true,
+                    autoStart: true,
                     sources: [
                         {
                             label: videoStream.name,
