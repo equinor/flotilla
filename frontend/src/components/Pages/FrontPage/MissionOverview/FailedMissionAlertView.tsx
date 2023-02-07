@@ -8,7 +8,7 @@ import { MissionStatusDisplay } from './MissionStatusDisplay'
 import { RefreshProps } from '../FrontPage'
 import { useNavigate } from 'react-router-dom'
 import { clear } from '@equinor/eds-icons'
-import { differenceInMinutes } from 'date-fns'
+import { addMinutes, max } from 'date-fns'
 
 const StyledCard = styled(Card)`
     width: 100%;
@@ -54,72 +54,75 @@ function FailedMission({ mission }: MissionProps) {
 }
 
 export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
-    // The amount of minutes in the past for failed missions to generate an alert
-    const FailedMissionTimeInterval: number = 10
+    // The default amount of minutes in the past for failed missions to generate an alert
+    const DefaultTimeInterval: number = 10
+
+    // The maximum amount of minutes in the past for failed missions to generate an alert
+    const MaxTimeInterval: number = 60
+
+    const DismissalTimeSessionKeyName: string = 'lastDismissalTime'
 
     const apiCaller = useApi()
-    const [missionsToDisplay, setMissionsToDisplay] = useState<Mission[]>([])
-    const [dismissedMissions, setDismissedMissions] = useState<Mission[]>([])
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
 
-    const dismissCurrentMissions = () => {
-        // We don't want to store old dismissed missions
-        const relevantDismissed = dismissedMissions.filter(
-            (m) => differenceInMinutes(Date.now(), new Date(m.endTime!)) <= FailedMissionTimeInterval
-        )
-        const newDismissed = missionsToDisplay.concat(relevantDismissed)
-        setDismissedMissions(newDismissed)
+    const getLastDismissalTime = (): Date => {
+        const sessionValue = sessionStorage.getItem(DismissalTimeSessionKeyName)
+
+        var lastTime: Date
+        if (sessionValue === null || sessionValue === '') {
+            lastTime = addMinutes(Date.now(), -DefaultTimeInterval)
+        } else {
+            lastTime = JSON.parse(sessionValue)
+            const pastLimit: Date = addMinutes(Date.now(), -MaxTimeInterval)
+
+            // If last dismissal time was more than {MaxTimeInterval} minutes ago, use the limit value instead
+            lastTime = max([pastLimit, lastTime])
+        }
+
+        return lastTime
     }
 
-    const updateFailedMissions = () => {
+    const dismissCurrentMissions = () => {
+        sessionStorage.setItem(DismissalTimeSessionKeyName, JSON.stringify(Date.now()))
+        setRecentFailedMissions([])
+    }
+
+    const updateRecentFailedMissions = () => {
+        const lastDismissTime: Date = getLastDismissalTime()
         apiCaller.getMissionsByStatus(MissionStatus.Failed).then((missions) => {
-            const newRecentFailedMissions = missions.filter(
-                (m) => differenceInMinutes(Date.now(), new Date(m.endTime!)) <= FailedMissionTimeInterval
-            )
+            const newRecentFailedMissions = missions.filter((m) => new Date(m.endTime!) > lastDismissTime)
             setRecentFailedMissions(newRecentFailedMissions)
         })
     }
 
-    // Display failed missions except dismissed ones
-    const displayRelevantMissions = () => {
-        const relevantFailedMissions = recentFailedMissions.filter(
-            (m) => !dismissedMissions.map((m) => m.id).includes(m.id)
-        )
-        setMissionsToDisplay(relevantFailedMissions)
-    }
-
-    useEffect(() => {
-        displayRelevantMissions()
-    }, [dismissedMissions, recentFailedMissions])
-
     useEffect(() => {
         const id = setInterval(() => {
-            updateFailedMissions()
+            updateRecentFailedMissions()
         }, refreshInterval)
         return () => clearInterval(id)
     }, [])
 
-    var missionDisplay = <FailedMission mission={missionsToDisplay[0]} />
+    var missionDisplay = <FailedMission mission={recentFailedMissions[0]} />
 
     var severalMissions = (
         <SeveralMissionPad>
             <Typography>
-                <strong>{missionsToDisplay.length}</strong> missions failed in the last{' '}
-                <strong>{FailedMissionTimeInterval}</strong> minutes. See 'Past Missions' for more information.
+                <strong>{recentFailedMissions.length}</strong> missions failed recently. See 'Past Missions' for more
+                information.
             </Typography>
         </SeveralMissionPad>
     )
 
     return (
         <>
-            {missionsToDisplay.length > 0 && (
+            {recentFailedMissions.length > 0 && (
                 <StyledCard variant="danger" style={{ boxShadow: tokens.elevation.raised }}>
                     <Horizontal>
                         <Center>
                             <MissionStatusDisplay status={MissionStatus.Failed} />
                             <Indent>
-                                {missionsToDisplay.length === 1 && missionDisplay}
-                                {missionsToDisplay.length > 1 && severalMissions}
+                                {recentFailedMissions.length === 1 && missionDisplay}
+                                {recentFailedMissions.length > 1 && severalMissions}
                             </Indent>
                         </Center>
                         <Button variant="ghost_icon" onClick={dismissCurrentMissions}>
