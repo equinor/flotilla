@@ -331,32 +331,6 @@ public class RobotController : ControllerBase
             return NotFound("Mission not found");
         }
 
-        EchoMission? echoMission;
-        try
-        {
-            echoMission = await _echoService.GetMissionById(mission.EchoMissionId);
-        }
-        catch (HttpRequestException e)
-        {
-            if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
-            {
-                _logger.LogWarning(
-                    "Could not find echo mission with id={id}",
-                    mission.EchoMissionId
-                );
-                return NotFound("Echo mission not found");
-            }
-
-            _logger.LogError(e, "Error getting mission from Echo");
-            return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
-        }
-        catch (JsonException e)
-        {
-            string message = "Error deserializing mission from Echo";
-            _logger.LogError(e, "{message}", message);
-            return StatusCode(StatusCodes.Status500InternalServerError, message);
-        }
-
         IsarServiceStartMissionResponse isarServiceStartMissionResponse;
         try
         {
