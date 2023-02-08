@@ -1,14 +1,13 @@
 ﻿using System.Text.Json;
 using Api.Services.Models;
-using Api.Utilities;
 using Microsoft.Identity.Web;
-using static Api.Controllers.Models.IsarTaskDefinition;
+using Api.Database.Models;
 
 namespace Api.Services
 {
     public interface IStidService
     {
-        public abstract Task<IsarPosition> GetTagPosition(string tag);
+        public abstract Task<Position> GetTagPosition(string tag);
     }
 
     public class StidService : IStidService
@@ -23,7 +22,7 @@ namespace Api.Services
             _installationCode = config.GetValue<string>("InstallationCode");
         }
 
-        public async Task<IsarPosition> GetTagPosition(string tag)
+        public async Task<Position> GetTagPosition(string tag)
         {
             string relativePath = $"{_installationCode}/tag?tagNo={tag}";
 
@@ -43,11 +42,10 @@ namespace Api.Services
                 throw new JsonException("Failed to deserialize tag position from STID");
 
             // Convert from millimeter to meter
-            return new IsarPosition(
+            return new Position(
                 x: stidTagPositionResponse.XCoordinate / 1000,
                 y: stidTagPositionResponse.YCoordinate / 1000,
-                z: stidTagPositionResponse.ZCoordinate / 1000,
-                frameName: "asset"
+                z: stidTagPositionResponse.ZCoordinate / 1000
             );
         }
     }

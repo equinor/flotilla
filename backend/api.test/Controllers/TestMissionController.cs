@@ -22,6 +22,7 @@ namespace Api.Test.Controllers
             var robotService = new RobotService(context);
             var echoService = new Mock<IEchoService>().Object;
             var mapService = new Mock<IMapService>().Object;
+            var stidService = new Mock<IStidService>().Object;
             var missionService = new MissionService(context, missionLogger);
 
             _controller = new MissionController(
@@ -29,7 +30,8 @@ namespace Api.Test.Controllers
                 robotService,
                 echoService,
                 missionControllerLogger,
-                mapService
+                mapService,
+                stidService
             );
         }
 

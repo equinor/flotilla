@@ -20,7 +20,8 @@ namespace Api.Database.Models
         [MaxLength(64)]
         public Uri URL { get; set; }
 
-        public IsarPosition TagPosition { get; set; }
+        [Required]
+        public Position TagPosition { get; set; }
 
         public IList<PlannedInspection> Inspections { get; set; }
 
@@ -29,13 +30,14 @@ namespace Api.Database.Models
             Inspections = new List<PlannedInspection>();
         }
 
-        public PlannedTask(EchoTag echoTag)
+        public PlannedTask(EchoTag echoTag, Position tagPosition)
         {
             Inspections = echoTag.Inspections
                 .Select(inspection => new PlannedInspection(inspection))
                 .ToList();
             URL = echoTag.URL;
             TagId = echoTag.TagId;
+            TagPosition = tagPosition;
         }
     }
 }

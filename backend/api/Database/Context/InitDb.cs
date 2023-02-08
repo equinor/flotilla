@@ -25,7 +25,8 @@ public static class InitDb
         {
             Inspections = new List<PlannedInspection>(),
             TagId = "Tagid here",
-            URL = new Uri("https://www.I-am-echo-stid-tag-url.com")
+            URL = new Uri("https://www.I-am-echo-stid-tag-url.com"),
+            TagPosition = new Position()
         };
 
     private static List<Robot> GetRobots()

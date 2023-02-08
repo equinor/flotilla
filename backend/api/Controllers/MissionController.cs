@@ -16,13 +16,15 @@ public class MissionController : ControllerBase
     private readonly IEchoService _echoService;
     private readonly ILogger<MissionController> _logger;
     private readonly IMapService _mapService;
+    private readonly IStidService _stidService;
 
     public MissionController(
         IMissionService missionService,
         IRobotService robotService,
         IEchoService echoService,
         ILogger<MissionController> logger,
-        IMapService mapService
+        IMapService mapService,
+        IStidService stidService
     )
     {
         _missionService = missionService;
@@ -30,6 +32,7 @@ public class MissionController : ControllerBase
         _echoService = echoService;
         _mapService = mapService;
         _logger = logger;
+        _stidService = stidService;
     }
 
     /// <summary>
@@ -148,7 +151,15 @@ public class MissionController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 
-        var plannedTasks = echoMission.Tags.Select(t => new PlannedTask(t)).ToList();
+        var plannedTasks = echoMission.Tags
+            .Select(
+                t =>
+                {
+                    var tagPosition = _stidService.GetTagPosition(t.TagId).Result;
+                    return new PlannedTask(t, tagPosition);
+                }
+            )
+            .ToList();
 
         var scheduledMission = new Mission
         {
