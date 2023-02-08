@@ -13,7 +13,6 @@ namespace Api.Test.Mocks
     {
         public async Task<IsarServiceStartMissionResponse> StartMission(
             Robot robot,
-            int echoMissionId,
             IsarMissionDefinition missionDefinition
         )
         {
