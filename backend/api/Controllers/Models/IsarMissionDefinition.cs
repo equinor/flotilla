@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Utilities;
+using Api.Database.Models;
 
 namespace Api.Controllers.Models
 {
@@ -34,19 +35,24 @@ namespace Api.Controllers.Models
         [JsonPropertyName("video_duration")]
         public float? VideoDuration { get; set; }
 
-        public IsarTaskDefinition(
-            IsarPose pose,
-            string tag,
-            IsarPosition inspectionTarget,
-            List<string> sensorTypes,
-            float? videoDuration
-        )
+        public IsarTaskDefinition(PlannedTask plannedTask, ITagPositioner tagPositioner)
         {
-            Pose = pose;
-            Tag = tag;
-            InspectionTarget = inspectionTarget;
-            InspectionTypes = sensorTypes;
-            VideoDuration = videoDuration;
+            Tag = plannedTask.TagId;
+            InspectionTypes = plannedTask.Inspections
+                .Select(t => t.InspectionType.ToString())
+                .ToList();
+            InspectionTarget = new IsarPosition(
+                plannedTask.TagPosition.X,
+                plannedTask.TagPosition.Y,
+                plannedTask.TagPosition.Z,
+                "asset"
+            );
+
+            VideoDuration = plannedTask.Inspections
+                .FirstOrDefault(t => t.TimeInSeconds.HasValue)
+                ?.TimeInSeconds;
+
+            Pose = tagPositioner.GetPoseFromTag(plannedTask.TagId);
         }
     }
 
