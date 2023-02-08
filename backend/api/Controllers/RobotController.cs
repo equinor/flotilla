@@ -342,7 +342,7 @@ public class RobotController : ControllerBase
         }
         catch (HttpRequestException e)
         {
-            string message = "Error connecting to ISAR while starting mission";
+            string message = $"Could not reach ISAR at {robot.IsarUri}";
             _logger.LogError(e, "{message}", message);
             robot.Enabled = false;
             robot.Status = RobotStatus.Offline;
