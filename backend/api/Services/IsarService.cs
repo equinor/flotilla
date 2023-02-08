@@ -13,7 +13,6 @@ namespace Api.Services
     {
         public abstract Task<IsarServiceStartMissionResponse> StartMission(
             Robot robot,
-            int echoMissionId,
             IsarMissionDefinition missionDefinition
         );
 
@@ -109,7 +108,6 @@ namespace Api.Services
 
         public async Task<IsarServiceStartMissionResponse> StartMission(
             Robot robot,
-            int missionId,
             IsarMissionDefinition missionDefinition
         )
         {

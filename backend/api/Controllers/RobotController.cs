@@ -337,7 +337,6 @@ public class RobotController : ControllerBase
             var isarMissionDefinition = _isarService.GetIsarMissionDefinition(mission);
             isarServiceStartMissionResponse = await _isarService.StartMission(
                 robot,
-                mission.EchoMissionId,
                 isarMissionDefinition
             );
         }
