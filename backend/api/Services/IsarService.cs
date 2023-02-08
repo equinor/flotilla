@@ -80,30 +80,10 @@ namespace Api.Services
 
         public IsarMissionDefinition GetIsarMissionDefinition(Mission mission)
         {
-            var tasks = mission.PlannedTasks.Select(task => GetIsarTaskDefinition(task));
-            return new IsarMissionDefinition(tasks: tasks.ToList());
-        }
-
-        public IsarTaskDefinition GetIsarTaskDefinition(PlannedTask plannedTask)
-        {
-            string tag = plannedTask.TagId;
-            var sensorTypes = plannedTask.Inspections
-                .Select(t => t.InspectionType.ToString())
-                .ToList();
-            var pose = _tagPositioner.GetPoseFromTag(plannedTask.TagId);
-            var inspectionTarget = plannedTask.TagPosition;
-            float? videoDuration = plannedTask.Inspections
-                .Where(t => t.TimeInSeconds.HasValue)
-                .FirstOrDefault()
-                ?.TimeInSeconds;
-
-            return new IsarTaskDefinition(
-                pose: pose,
-                tag: tag,
-                inspectionTarget: inspectionTarget,
-                sensorTypes: sensorTypes,
-                videoDuration: videoDuration
+            var tasks = mission.PlannedTasks.Select(
+                task => new IsarTaskDefinition(task, _tagPositioner)
             );
+            return new IsarMissionDefinition(tasks: tasks.ToList());
         }
 
         public async Task<IsarServiceStartMissionResponse> StartMission(
