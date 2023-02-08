@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
+using Api.Database.Models;
 using Api.Services.Models;
 using Microsoft.Identity.Web;
-using Api.Database.Models;
 
 namespace Api.Services
 {

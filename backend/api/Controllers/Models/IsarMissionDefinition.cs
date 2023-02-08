@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
-using Api.Utilities;
 using Api.Database.Models;
+using Api.Utilities;
 
 namespace Api.Controllers.Models
 {
