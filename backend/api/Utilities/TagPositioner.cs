@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using static Api.Controllers.Models.IsarTaskDefinition;
+using Api.Controllers.Models;
 
 namespace Api.Utilities
 {
