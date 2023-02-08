@@ -51,9 +51,14 @@ namespace Api.Database.Models
             get
             {
                 string host = Host;
+                string method = "https";
                 if (host == "0.0.0.0")
                     host = "localhost";
-                return $"http://{host}:{Port}";
+
+                if (host == "localhost")
+                    method = "http";
+
+                return $"{method}://{host}:{Port}";
             }
         }
 
