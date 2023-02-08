@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Api.Controllers.Models;
 using Microsoft.EntityFrameworkCore;
-using static Api.Controllers.Models.IsarTaskDefinition;
 
 #nullable disable
 
