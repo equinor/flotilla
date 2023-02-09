@@ -22,9 +22,10 @@ export function VideoPlayerOvenPlayer({ videoStream }: IVideoPlayerProps) {
             case 'mp4':
                 const player = OvenPlayer.create(videoStream.id, {
                     aspectRatio: aspectRatio,
-                    controls: !videoStream.shouldRotate,
+                    controls: false,
                     mute: true,
                     autoStart: true,
+                    expandFullScreenUI: false,
                     sources: [
                         {
                             label: videoStream.name,
