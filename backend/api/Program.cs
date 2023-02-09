@@ -80,6 +80,7 @@ if (!builder.Environment.EnvironmentName.Equals("Test", StringComparison.Ordinal
         )
     );
 }
+Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentName}'\n");
 
 var app = builder.Build();
 
