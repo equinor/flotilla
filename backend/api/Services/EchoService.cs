@@ -119,7 +119,7 @@ namespace Api.Services
             var echoPoseResponse = await response.Content.ReadFromJsonAsync<EchoPoseResponse>();
             if (echoPoseResponse is null)
             {
-                throw new JsonException("Failed to deserialize tag position from echo in echoservice");
+                throw new JsonException("Failed to deserialize robot pose from Echo");
             }
             return echoPoseResponse;
         }
@@ -165,7 +165,7 @@ namespace Api.Services
                     Id = planItem.Id,
                     TagId = planItem.Tag,
                     PoseId = planItem.PoseId.Value,
-                    Pose = new Pose(enuPosition: robotPose.Position, axisAngleAxis: robotPose.LookDirectionNormalized, axisAngleAngle: robotPose.TiltDegreesClockwise),
+                    Pose = new Pose(robotPose.Position, robotPose.LookDirectionNormalized, robotPose.TiltDegreesClockwise),
                     URL = new Uri(
                     $"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"
                 ),

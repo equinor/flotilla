@@ -15,7 +15,7 @@ namespace Api.Test.Services
 
             var expected = new Orientation() { X = 0.7071F, Y = 0, Z = 0, W = 0.7071F };
 
-            Assert.Equal(expected.X, new Pose(enuPosition: mockAngleAxisParameters, axisAngleAxis: mockAngleAxisParameters, axisAngleAngle: mockAngle).Orientation.X, 3);
+            Assert.Equal(expected.X, new Pose(mockAngleAxisParameters, mockAngleAxisParameters, mockAngle).Orientation.X, 3.0);
         }
     }
 }
