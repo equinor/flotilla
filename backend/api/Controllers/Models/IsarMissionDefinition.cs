@@ -52,7 +52,7 @@ namespace Api.Controllers.Models
                 .FirstOrDefault(t => t.TimeInSeconds.HasValue)
                 ?.TimeInSeconds;
 
-            Pose = new IsarPose(pose: plannedTask.Pose);
+            Pose = new IsarPose(plannedTask.Pose);
         }
     }
 

@@ -92,7 +92,7 @@ public class EchoMissionController : ControllerBase
         }
     }
     [HttpPost]
-    [Route("position/{poseId}")]
+    [Route("robot-pose/{poseId}")]
     [ProducesResponseType(typeof(EchoPoseResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
