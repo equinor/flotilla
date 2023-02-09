@@ -53,7 +53,7 @@ namespace Api.Controllers.Models
         [JsonPropertyName("sensorTypes")]
         public List<SensorType> SensorTypes { get; set; }
         [JsonPropertyName("poseId")]
-        public int PoseId { get; set; }
+        public int? PoseId { get; set; }
     }
 
     public class SensorType

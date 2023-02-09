@@ -63,18 +63,18 @@ namespace Api.Database.Models
 
         [MaxLength(64)]
         public string Frame { get; set; }
-        private float axisAngleToQuaternionElement(float coordinate, float angle)
+        private static float AxisAngleToQuaternionElement(float coordinate, float angle)
         {
-            var quaterionElement = coordinate * MathF.Sin(angle / 2);
+            float quaterionElement = coordinate * MathF.Sin(angle / 2);
             return quaterionElement;
         }
-        public Orientation axisAngleToQuaternion(EchoVector axis, float angle)
+        public Orientation AxisAngleToQuaternion(EchoVector axis, float angle)
         {
             var quaternion = new Orientation()
             {
-                X = axisAngleToQuaternionElement(axis.East, angle),
-                Y = axisAngleToQuaternionElement(axis.North, angle),
-                Z = axisAngleToQuaternionElement(axis.Up, angle),
+                X = AxisAngleToQuaternionElement(axis.East, angle),
+                Y = AxisAngleToQuaternionElement(axis.North, angle),
+                Z = AxisAngleToQuaternionElement(axis.Up, angle),
                 W = MathF.Cos(angle / 2)
             };
             return quaternion;
@@ -108,7 +108,7 @@ namespace Api.Database.Models
         )
         {
             Position = new Position(enuPosition.East, enuPosition.North, enuPosition.Up);
-            Orientation = axisAngleToQuaternion(axisAngleAxis, axisAngleAngle);
+            Orientation = AxisAngleToQuaternion(axisAngleAxis, axisAngleAngle);
             Frame = "asset";
         }
     }

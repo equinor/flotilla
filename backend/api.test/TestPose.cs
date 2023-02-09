@@ -1,5 +1,4 @@
 ﻿using System;
-using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services.Models;
 using Xunit;

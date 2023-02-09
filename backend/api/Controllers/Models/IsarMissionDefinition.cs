@@ -35,7 +35,7 @@ namespace Api.Controllers.Models
         [JsonPropertyName("video_duration")]
         public float? VideoDuration { get; set; }
 
-        public IsarTaskDefinition(PlannedTask plannedTask, ITagPositioner tagPositioner)
+        public IsarTaskDefinition(PlannedTask plannedTask)
         {
             Tag = plannedTask.TagId;
             InspectionTypes = plannedTask.Inspections
@@ -52,7 +52,7 @@ namespace Api.Controllers.Models
                 .FirstOrDefault(t => t.TimeInSeconds.HasValue)
                 ?.TimeInSeconds;
 
-            Pose = tagPositioner.GetPoseFromTag(plannedTask.TagId);
+            Pose = new IsarPose(pose: plannedTask.Pose);
         }
     }
 

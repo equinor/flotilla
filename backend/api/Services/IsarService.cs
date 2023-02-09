@@ -30,17 +30,14 @@ namespace Api.Services
         public const string ServiceName = "IsarApi";
         private readonly IDownstreamWebApi _isarApi;
         private readonly ILogger<IsarService> _logger;
-        private readonly ITagPositioner _tagPositioner;
 
         public IsarService(
             ILogger<IsarService> logger,
-            IDownstreamWebApi downstreamWebApi,
-            ITagPositioner tagPositioner
+            IDownstreamWebApi downstreamWebApi
         )
         {
             _logger = logger;
             _isarApi = downstreamWebApi;
-            _tagPositioner = tagPositioner;
         }
 
         /// <summary>
@@ -81,7 +78,7 @@ namespace Api.Services
         public IsarMissionDefinition GetIsarMissionDefinition(Mission mission)
         {
             var tasks = mission.PlannedTasks.Select(
-                task => new IsarTaskDefinition(task, _tagPositioner)
+                task => new IsarTaskDefinition(task)
             );
             return new IsarMissionDefinition(tasks: tasks.ToList());
         }
