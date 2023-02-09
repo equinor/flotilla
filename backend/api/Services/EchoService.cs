@@ -152,12 +152,19 @@ namespace Api.Services
 
             foreach (var planItem in planItems)
             {
-                EchoPoseResponse robotPose = GetRobotPoseFromPoseId(planItem.PoseId).Result;
+                if (planItem.PoseId is null)
+                {
+                    string message = $"Invalid EchoMission: {planItem.Tag} has no associated pose id.";
+                    _logger.LogError(message);
+                    throw new InvalidDataException(message);
+
+                }
+                var robotPose = GetRobotPoseFromPoseId(planItem.PoseId.Value).Result;
                 var tag = new EchoTag()
                 {
                     Id = planItem.Id,
                     TagId = planItem.Tag,
-                    PoseId = planItem.PoseId,
+                    PoseId = planItem.PoseId.Value,
                     Pose = new Pose(enuPosition: robotPose.Position, axisAngleAxis: robotPose.LookDirectionNormalized, axisAngleAngle: robotPose.TiltDegreesClockwise),
                     URL = new Uri(
                     $"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"
@@ -192,17 +199,23 @@ namespace Api.Services
         {
             if (echoMission.PlanItems is null)
                 throw new MissionNotFoundException("Mission has no tags");
-
-            var mission = new EchoMission()
+            try
             {
-                Id = echoMission.Id,
-                Name = echoMission.Name,
-                AssetCode = echoMission.InstallationCode,
-                URL = new Uri($"https://echo.equinor.com/mp?editId={echoMission.Id}"),
-                Tags = ProcessPlanItems(echoMission.PlanItems)
-            };
+                var mission = new EchoMission()
+                {
+                    Id = echoMission.Id,
+                    Name = echoMission.Name,
+                    AssetCode = echoMission.InstallationCode,
+                    URL = new Uri($"https://echo.equinor.com/mp?editId={echoMission.Id}"),
+                    Tags = ProcessPlanItems(echoMission.PlanItems)
+                };
+                return mission;
+            }
+            catch (InvalidDataException)
+            {
+                return null;
+            }
 
-            return mission;
         }
 
         private static List<EchoPlantInfo> ProcessEchoPlantInfos(

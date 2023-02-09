@@ -21,6 +21,8 @@ public class FlotillaDbContext : DbContext
             .OwnsMany(m => m.PlannedTasks)
             .OwnsMany(t => t.Inspections);
         modelBuilder.Entity<Mission>().OwnsMany(m => m.PlannedTasks).OwnsOne(r => r.TagPosition);
+        modelBuilder.Entity<Mission>().OwnsMany(m => m.PlannedTasks).OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
+        modelBuilder.Entity<Mission>().OwnsMany(m => m.PlannedTasks).OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
         modelBuilder.Entity<Mission>().OwnsMany(m => m.Tasks).OwnsMany(t => t.Steps);
         modelBuilder.Entity<Mission>().OwnsOne(m => m.Map).OwnsOne(t => t.TransformationMatrices);
         modelBuilder.Entity<Mission>().OwnsOne(m => m.Map).OwnsOne(b => b.Boundary);

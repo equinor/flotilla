@@ -22,6 +22,9 @@ namespace Api.Database.Models
 
         [Required]
         public Position TagPosition { get; set; }
+        [Required]
+        public Pose Pose { get; set; }
+        public int PoseId { get; set; }
 
         public IList<PlannedInspection> Inspections { get; set; }
 
@@ -38,6 +41,8 @@ namespace Api.Database.Models
             URL = echoTag.URL;
             TagId = echoTag.TagId;
             TagPosition = tagPosition;
+            Pose = echoTag.Pose;
+            PoseId = echoTag.PoseId;
         }
     }
 }

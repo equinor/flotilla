@@ -1,6 +1,5 @@
 ﻿#nullable disable
 using System.Text.Json.Serialization;
-using Api.Database.Models;
 namespace Api.Services.Models
 {
     public class EchoPoseResponse
