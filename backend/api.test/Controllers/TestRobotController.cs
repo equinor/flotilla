@@ -31,7 +31,6 @@ namespace Api.Test.Controllers
                 isarLogger.Object,
                 isarDownstreamApi.Object
             );
-            _ = new RobotService(context);
 
             var mockLoggerController = new Mock<ILogger<RobotController>>();
             _controller = new RobotController(

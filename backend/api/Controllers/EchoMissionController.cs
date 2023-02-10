@@ -90,6 +90,12 @@ public class EchoMissionController : ControllerBase
             _logger.LogError(e, "Error deserializing mission from Echo");
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
+        catch (InvalidDataException e)
+        {
+            string message = "EchoMission invalid: One or more tags are missing associated robot poses.";
+            _logger.LogError(e, message);
+            return StatusCode(StatusCodes.Status502BadGateway, message);
+        }
     }
     [HttpPost]
     [Route("robot-pose/{poseId}")]

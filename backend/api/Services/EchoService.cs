@@ -80,6 +80,11 @@ namespace Api.Services
                 throw new JsonException("Failed to deserialize mission from Echo");
 
             var mission = ProcessEchoMission(echoMission);
+            if (mission == null)
+            {
+                throw new InvalidDataException($"EchoMission with id: {missionId} is invalid.");
+            }
+
             return mission;
         }
 
@@ -189,13 +194,13 @@ namespace Api.Services
                 if (mission is null)
                     continue;
 
-                missions.Add(ProcessEchoMission(echoMission));
+                missions.Add(mission);
             }
 
             return missions;
         }
 
-        private EchoMission ProcessEchoMission(EchoMissionResponse echoMission)
+        private EchoMission? ProcessEchoMission(EchoMissionResponse echoMission)
         {
             if (echoMission.PlanItems is null)
                 throw new MissionNotFoundException("Mission has no tags");

@@ -150,6 +150,12 @@ public class MissionController : ControllerBase
             _logger.LogError(e, "{message}", message);
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
+        catch (InvalidDataException e)
+        {
+            string message = "Can not schedule mission because EchoMission is invalid. One or more tasks does not contain a robot pose.";
+            _logger.LogError(e, message);
+            return StatusCode(StatusCodes.Status502BadGateway, message);
+        }
 
         var plannedTasks = echoMission.Tags
             .Select(
