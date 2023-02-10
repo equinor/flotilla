@@ -24,7 +24,6 @@ namespace Api.Database.Models
         [Required]
         public string Type { get; set; }
 
-        [MaxLength(64)]
-        public bool ShouldRotate { get; set; }
+        public bool ShouldRotate270Clockwise { get; set; }
     }
 }

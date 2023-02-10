@@ -1,9 +1,31 @@
 import { VideoPlayerOvenPlayer, IsValidOvenPlayerType } from './VideoPlayerOvenPlayer'
 import { VideoPlayerSimple } from './VideoPlayerSimple'
+import { fullscreen_exit } from '@equinor/eds-icons'
+
 import { VideoStream } from 'models/VideoStream'
 import styled from 'styled-components'
-import { Typography } from '@equinor/eds-core-react'
+import { Typography, Button, Icon } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
+
+Icon.add({ fullscreen_exit })
+
+const FullscreenExitButton = styled(Button)`
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 32px;
+    height: 32px;
+    opacity: 0.75;
+`
+
+const FullscreenExitButtonRotate = styled(Button)`
+    position: absolute;
+    bottom: 1px;
+    left: 1px;
+    width: 32px;
+    height: 32px;
+    opacity: 0.75;
+`
 
 const FullScreenCard = styled.div`
     padding: 1rem;
@@ -23,7 +45,12 @@ const PositionText = styled.div`
     flex-direction: row-reverse;
 `
 
-export function FullScreenVideoStreamCard(videoStream: VideoStream) {
+interface IFullScreenVideoStreamCardProps {
+    videoStream: VideoStream
+    toggleFullScreenMode: VoidFunction
+}
+
+export function FullScreenVideoStreamCard({ videoStream, toggleFullScreenMode }: IFullScreenVideoStreamCardProps) {
     const cardWidth = () => {
         const availableInnerHeight = window.innerHeight - 9 * 16
         const availableInnerWidth = window.innerWidth - 2 * 16
@@ -43,18 +70,32 @@ export function FullScreenVideoStreamCard(videoStream: VideoStream) {
         )
     }
 
-    if (IsValidOvenPlayerType({ videoStream })) {
-        if (videoStream.shouldRotate) {
+    const fullScreenExitButton = (shouldRotate270Clockwise: boolean) => {
+        if (shouldRotate270Clockwise) {
             return (
-                <FullScreenCardRotated
-                    style={{ boxShadow: tokens.elevation.raised, width: rotatedCardWidth() }}
-                >
+                <FullscreenExitButtonRotate color="secondary" onClick={toggleFullScreenMode}>
+                    <Icon name="fullscreen_exit" size={32} />
+                </FullscreenExitButtonRotate>
+            )
+        }
+        return (
+            <FullscreenExitButton color="secondary" onClick={toggleFullScreenMode}>
+                <Icon name="fullscreen_exit" size={32} />
+            </FullscreenExitButton>
+        )
+    }
+
+    if (IsValidOvenPlayerType({ videoStream })) {
+        if (videoStream.shouldRotate270Clockwise) {
+            return (
+                <FullScreenCardRotated style={{ boxShadow: tokens.elevation.raised, width: rotatedCardWidth() }}>
                     <PositionText>
                         <RotateText>
                             <Typography variant="h5">{videoStream.name}</Typography>
                         </RotateText>
                         <VideoPlayerOvenPlayer videoStream={videoStream} />
                     </PositionText>
+                    {fullScreenExitButton(true)}
                 </FullScreenCardRotated>
             )
         }
@@ -62,6 +103,7 @@ export function FullScreenVideoStreamCard(videoStream: VideoStream) {
             <FullScreenCard style={{ boxShadow: tokens.elevation.raised, width: cardWidth() }}>
                 <Typography variant="h5">{videoStream.name}</Typography>
                 <VideoPlayerOvenPlayer videoStream={videoStream} />
+                {fullScreenExitButton(false)}
             </FullScreenCard>
         )
     }
@@ -70,6 +112,7 @@ export function FullScreenVideoStreamCard(videoStream: VideoStream) {
         <FullScreenCard style={{ boxShadow: tokens.elevation.raised, width: cardWidth() }}>
             <Typography variant="h5">{videoStream.name}</Typography>
             <VideoPlayerSimple videoStream={videoStream} />
+            {fullScreenExitButton(false)}
         </FullScreenCard>
     )
 }
