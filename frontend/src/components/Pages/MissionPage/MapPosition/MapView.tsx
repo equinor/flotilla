@@ -20,6 +20,7 @@ interface ObjectPosition {
 }
 
 const MapCard = styled(Card)`
+    display: flex;
     height: 600px;
     width: 600px;
     padding: 16px;
@@ -29,6 +30,7 @@ const StyledMap = styled.canvas`
     object-fit: contain;
     max-height: 100%;
     max-width: 100%;
+    margin: auto;
 `
 
 export function MapView({ mission }: MissionProps) {

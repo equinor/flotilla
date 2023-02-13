@@ -21,8 +21,9 @@ const StyledMissionPage = styled.div`
 `
 const TaskAndMapSection = styled.div`
     display: flex;
+    align-items: flex-start;
     flex-wrap: wrap;
-    gap: 3rem;
+    gap: 8rem;
     padding-top: 16px;
     padding-bottom: 16px;
 `
@@ -72,7 +73,6 @@ export function MissionPage() {
                     <MissionHeader mission={selectedMission} />
                     <TaskAndMapSection>
                         <TaskTable mission={selectedMission} />
-                        <MapPositionView mission={selectedMission} />
                         <MapView mission={selectedMission} />
                     </TaskAndMapSection>
                     <VideoStreamSection>
