@@ -189,16 +189,14 @@ export class BackendAPICaller {
         }
 
         let response = await fetch(url, options)
-    
+
         if (response.status === 200) {
-            
             const imageBlob = await response.blob()
             return imageBlob
-        }
-        else {
-            console.log("HTTP-Error: " + response.status)
+        } else {
+            console.log('HTTP-Error: ' + response.status)
             throw Error
-        }    
+        }
     }
 }
 
