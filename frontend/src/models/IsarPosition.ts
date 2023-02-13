@@ -1,4 +1,4 @@
-export interface IsarPosition{
+export interface IsarPosition {
     x: number
     y: number
     z: number

@@ -1,7 +1,7 @@
-import { IsarPosition } from "./IsarPosition"
-import { PlannedInspection } from "./PlannedInspection"
+import { IsarPosition } from './IsarPosition'
+import { PlannedInspection } from './PlannedInspection'
 
-export interface PlannedTask{
+export interface PlannedTask {
     id: string
     tagId: string
     url: string

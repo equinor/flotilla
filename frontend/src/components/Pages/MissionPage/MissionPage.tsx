@@ -73,7 +73,7 @@ export function MissionPage() {
                     <TaskAndMapSection>
                         <TaskTable mission={selectedMission} />
                         <MapPositionView mission={selectedMission} />
-                        <MapView mission={selectedMission}/>
+                        <MapView mission={selectedMission} />
                     </TaskAndMapSection>
                     <VideoStreamSection>
                         {videoStreams.length > 0 && <VideoStreamWindow videoStreams={videoStreams} />}

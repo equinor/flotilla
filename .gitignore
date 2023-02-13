@@ -14,7 +14,7 @@ frontend/build/
 # Backend
 backend/*/bin
 backend/*/obj
-backend/api/Database/Maps/
+backend/api/Database/Maps/*
 backend/backend.sln.DotSettings.user
 
 #Broker
