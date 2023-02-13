@@ -104,7 +104,7 @@ function PlaceTagsInMap(mission: Mission, map: HTMLCanvasElement) {
     if (mission.plannedTasks[0].tagPosition === null) {
         return
     }
-    var tagNumber = 0
+    var tagNumber = 1
 
     mission.plannedTasks.map(function (task) {
         var pixelPosition = calculateObjectPixelPosition(mission.map, task.tagPosition)
