@@ -19,7 +19,7 @@ namespace Api.Services
 
         public abstract Task<Mission> Update(Mission mission);
 
-        public abstract Task<bool> UpdateMissionStatusByIsarMissionId(
+        public abstract Task<Mission?> UpdateMissionStatusByIsarMissionId(
             string isarMissionId,
             MissionStatus missionStatus
         );
@@ -145,7 +145,7 @@ namespace Api.Services
                 .FirstOrDefaultAsync(mission => mission.IsarMissionId.Equals(isarMissionId));
         }
 
-        public async Task<bool> UpdateMissionStatusByIsarMissionId(
+        public async Task<Mission?> UpdateMissionStatusByIsarMissionId(
             string isarMissionId,
             MissionStatus missionStatus
         )
@@ -157,14 +157,14 @@ namespace Api.Services
                     "Could not update mission status for ISAR mission with id: {id} as the mission was not found",
                     isarMissionId
                 );
-                return false;
+                return null;
             }
 
             mission.MissionStatus = missionStatus;
 
             await _context.SaveChangesAsync();
 
-            return true;
+            return mission;
         }
 
         public async Task<bool> UpdateTaskStatusByIsarTaskId(
