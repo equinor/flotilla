@@ -20,6 +20,9 @@ namespace Api.Database.Models
         [MaxLength(450)]
         public string StatusReason { get; set; }
 
+        [MaxLength(1000)]
+        public string Comment { get; set; }
+
         [MaxLength(200)]
         public string AssetCode { get; set; }
 

@@ -85,7 +85,7 @@ An example of the subscriber pattern for an MQTT event is implemented in
 The project has two [appsettings](https://docs.microsoft.com/en-us/iis-administration/configuration/appsettings.json)
 files.
 The base `appsettings.json` file is for common variables across all environments, while the
-`appsetings.Development.json` file is for variables specific to the Dev environments, such as the client ID's for the
+`appsettings.Development.json` file is for variables specific to the Dev environments, such as the client ID's for the
 various app registrations used in development.
 
 The configuration will also read from a configured azure keyvault, which can then be accessed the same way as any other config variables.
