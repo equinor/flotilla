@@ -183,7 +183,7 @@ namespace Api.EventHandlers
             {
                 _logger.LogError(
                     e,
-                    "Failed to parse mission status from MQTT message. Mission: '{id}' was not updated.",
+                    "Failed to parse mission status from MQTT message. Mission with ISARMissionId '{id}' was not updated.",
                     isarMission.MissionId
                 );
                 return;
@@ -195,20 +195,29 @@ namespace Api.EventHandlers
             );
 
             if (flotillaMission is null)
-                _logger.LogInformation(
-                    "{time} - Mission '{id}' status updated to '{status}' for robot '{robot}'",
-                    isarMission.Timestamp,
+            {
+                _logger.LogError(
+                    "No mission found with ISARMissionId '{id}'. Could not update status to '{status}'",
                     isarMission.MissionId,
-                    isarMission.Status,
-                    isarMission.RobotId
+                    status
                 );
+                return;
+            }
 
-            var robot = await RobotService.ReadByName(isarMission.RobotId);
+            _logger.LogInformation(
+                "Mission '{id}' (ISARMissionID='{isarId}') status updated to '{status}' for robot '{robot}'",
+                flotillaMission.Id,
+                isarMission.MissionId,
+                isarMission.Status,
+                isarMission.RobotName
+            );
+
+            var robot = await RobotService.ReadByName(isarMission.RobotName);
             if (robot is null)
             {
                 _logger.LogError(
-                    "Could not find robot with name {id}. The robot status is not updated.",
-                    isarMission.RobotId
+                    "Could not find robot with name '{name}'. The robot status is not updated.",
+                    isarMission.RobotName
                 );
                 return;
             }
@@ -217,9 +226,8 @@ namespace Api.EventHandlers
 
             await RobotService.Update(robot);
             _logger.LogInformation(
-                "Mission with ISAR mission id '{id}' is started by the robot '{name}'. Robot status set to '{status}'.",
-                isarMission.MissionId,
-                isarMission.RobotId,
+                "Robot '{name}' - status set to '{status}'.",
+                robot.Name,
                 robot.Status
             );
         }
