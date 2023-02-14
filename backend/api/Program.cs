@@ -12,7 +12,22 @@ using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentName}'\n");
+
 builder.AddAzureEnvironmentVariables();
+
+if (!builder.Environment.EnvironmentName.Equals("Test", StringComparison.OrdinalIgnoreCase))
+{
+    // The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
+    // See https://github.com/Azure/azure-sdk-for-net/issues/17052
+    builder.Configuration.AddAzureKeyVault(
+        new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
+        new DefaultAzureCredential(
+            new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
+        )
+    );
+}
+
 builder.ConfigureLogger();
 
 builder.Services.ConfigureDatabase(builder.Configuration);
@@ -68,18 +83,6 @@ builder.Services.AddAuthorization(
     }
 );
 
-if (!builder.Environment.EnvironmentName.Equals("Test", StringComparison.OrdinalIgnoreCase))
-{
-    // The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
-    // See https://github.com/Azure/azure-sdk-for-net/issues/17052
-    builder.Configuration.AddAzureKeyVault(
-        new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
-        new DefaultAzureCredential(
-            new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
-        )
-    );
-}
-Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentName}'\n");
 
 var app = builder.Build();
 
