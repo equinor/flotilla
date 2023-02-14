@@ -90,7 +90,7 @@ namespace Api.Database.Models
         {
             return status switch
             {
-                "completed" => MissionStatus.Successful,
+                "successful" => MissionStatus.Successful,
                 "not_started" => MissionStatus.Pending,
                 "in_progress" => MissionStatus.Ongoing,
                 "failed" => MissionStatus.Failed,
