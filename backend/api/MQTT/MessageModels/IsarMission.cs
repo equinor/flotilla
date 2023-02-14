@@ -6,7 +6,7 @@ namespace Api.Mqtt.MessageModels
     public class IsarMissionMessage : MqttMessage
     {
         [JsonPropertyName("robot_id")]
-        public string RobotId { get; set; }
+        public string RobotName { get; set; }
 
         [JsonPropertyName("mission_id")]
         public string MissionId { get; set; }
