@@ -173,68 +173,55 @@ namespace Api.EventHandlers
 
         private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var mission = (IsarMissionMessage)mqttArgs.Message;
+            var isarMission = (IsarMissionMessage)mqttArgs.Message;
             MissionStatus status;
             try
             {
-                status = Mission.MissionStatusFromString(mission.Status);
+                status = Mission.MissionStatusFromString(isarMission.Status);
             }
             catch (ArgumentException e)
             {
                 _logger.LogError(
                     e,
                     "Failed to parse mission status from MQTT message. Mission: '{id}' was not updated.",
-                    mission.MissionId
+                    isarMission.MissionId
                 );
                 return;
             }
 
-            bool success = await MissionService.UpdateMissionStatusByIsarMissionId(
-                mission.MissionId,
+            var flotillaMission = await MissionService.UpdateMissionStatusByIsarMissionId(
+                isarMission.MissionId,
                 status
             );
 
-            if (success)
+            if (flotillaMission is null)
                 _logger.LogInformation(
                     "{time} - Mission '{id}' status updated to '{status}' for robot '{robot}'",
-                    mission.Timestamp,
-                    mission.MissionId,
-                    mission.Status,
-                    mission.RobotId
+                    isarMission.Timestamp,
+                    isarMission.MissionId,
+                    isarMission.Status,
+                    isarMission.RobotId
                 );
 
-            var robot = await RobotService.ReadByName(mission.RobotId);
+            var robot = await RobotService.ReadByName(isarMission.RobotId);
             if (robot is null)
             {
                 _logger.LogError(
                     "Could not find robot with name {id}. The robot status is not updated.",
-                    mission.RobotId
+                    isarMission.RobotId
                 );
                 return;
             }
 
-            if (status == MissionStatus.Ongoing || status == MissionStatus.Paused)
-            {
-                robot.Status = RobotStatus.Busy;
-                await RobotService.Update(robot);
-                _logger.LogInformation(
-                    "Mission with ISAR mission id '{id}' is started by the robot '{name}'. Robot status set to '{status}'.",
-                    mission.MissionId,
-                    mission.RobotId,
-                    robot.Status
-                );
-            }
-            else
-            {
-                robot.Status = RobotStatus.Available;
-                await RobotService.Update(robot);
-                _logger.LogInformation(
-                    "Mission with ISAR mission id '{id}' is completed by the robot '{name}'. Robot status set to '{status}'.",
-                    mission.MissionId,
-                    mission.RobotId,
-                    robot.Status
-                );
-            }
+            robot.Status = flotillaMission.IsCompleted ? RobotStatus.Available : RobotStatus.Busy;
+
+            await RobotService.Update(robot);
+            _logger.LogInformation(
+                "Mission with ISAR mission id '{id}' is started by the robot '{name}'. Robot status set to '{status}'.",
+                isarMission.MissionId,
+                isarMission.RobotId,
+                robot.Status
+            );
         }
 
         private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
