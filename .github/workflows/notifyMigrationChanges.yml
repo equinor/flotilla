@@ -1,0 +1,29 @@
+name: NotifyMigrationChanges
+
+on:
+  pull_request:
+    branches: [main]
+    paths: [backend/api/Migrations/**]
+
+jobs:
+  Notify_Migration:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Add comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.number }}
+          body: |
+            :bell: Migrations changes detected :bell:
+            :mega: Remember to comment "/UpdateDatabase" after review approval for migrations to take effect!
+
+      - name: Add label
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: database-change
