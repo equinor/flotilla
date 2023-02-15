@@ -1,3 +1,4 @@
+import { config } from 'config'
 import { useMsal } from '@azure/msal-react'
 import { fetchAccessToken } from 'api/AuthConfig'
 import { Header } from 'components/Header/Header'
@@ -33,8 +34,11 @@ export function FlotillaSite() {
                             <StyledPages>
                                 <BrowserRouter>
                                     <Routes>
-                                        <Route path="/robotics-frontend/" element={<FrontPage />} />
-                                        <Route path="/robotics-frontend/mission/:missionId" element={<MissionPage />} />
+                                        <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<FrontPage />} />
+                                        <Route
+                                            path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`}
+                                            element={<MissionPage />}
+                                        />
                                     </Routes>
                                 </BrowserRouter>
                             </StyledPages>

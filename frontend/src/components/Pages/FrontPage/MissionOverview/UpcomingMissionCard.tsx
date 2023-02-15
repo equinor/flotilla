@@ -1,4 +1,5 @@
 import { Button, Card, Checkbox, Dialog, Icon, Typography } from '@equinor/eds-core-react'
+import { config } from 'config'
 import { delete_forever } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
@@ -6,6 +7,7 @@ import { format, differenceInHours } from 'date-fns'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+
 interface UpcomingMissionCardProps {
     mission: Mission
     onDeleteMission: (mission: Mission) => void
@@ -50,7 +52,7 @@ Icon.add({ delete_forever })
 export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissionCardProps) {
     let navigate = useNavigate()
     const routeChange = () => {
-        let path = '/robotics-frontend/mission/' + mission.id
+        let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
     }
     const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState<boolean>(false)
