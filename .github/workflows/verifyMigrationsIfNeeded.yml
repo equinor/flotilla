@@ -1,0 +1,17 @@
+name: VerifyMigrationsIfNeeded
+
+on:
+  workflow_call:
+    inputs:
+      IsVerified:
+        default: false
+        required: false
+        type: boolean
+
+jobs:
+  fail_if_not_verified:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.IsVerified == false }}
+      steps:
+        - name: Fail
+          run: exit 1

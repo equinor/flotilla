@@ -1,0 +1,15 @@
+name: NotifyMigrationChanges
+
+on:
+  pull_request_target:
+    branches: [main]
+    paths-ignore: [backend/api/Migrations/**]
+
+jobs:
+  Set_Migrations_Verified_To_Success:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Unverify Migrations
+        uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
+        with:
+          IsVerified: true
