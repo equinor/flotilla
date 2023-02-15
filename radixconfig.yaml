@@ -25,6 +25,7 @@ spec:
             REACT_APP_BACKEND_URL: "https://backend-flotilla-dev.playground.radix.equinor.com"
             REACT_APP_BACKEND_API_SCOPE: "api://ea4c7b92-47b3-45fb-bd25-a8070f0c495c/user_impersonation"
             REACT_APP_FRONTEND_URL: "https://frontend-flotilla-dev.playground.radix.equinor.com"
+            REACT_APP_FRONTEND_BASE_ROUTE: ""
             REACT_APP_AD_CLIENT_ID: "f5993820-b7e2-4791-886f-f9f5027dc7be"
             REACT_APP_AD_TENANT_ID: "3aa4a235-b6e2-48d5-9195-7fcf05b459b0"
 

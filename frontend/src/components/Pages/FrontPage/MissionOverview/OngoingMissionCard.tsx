@@ -1,4 +1,5 @@
 import { Card, Typography } from '@equinor/eds-core-react'
+import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
@@ -24,7 +25,7 @@ const HorisontalContent = styled.div`
 export function OngoingMissionCard({ mission }: MissionProps) {
     let navigate = useNavigate()
     const routeChange = () => {
-        let path = '/robotics-frontend/mission/' + mission.id
+        let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
     }
     return (
