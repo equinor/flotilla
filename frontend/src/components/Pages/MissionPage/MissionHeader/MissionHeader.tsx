@@ -41,11 +41,16 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
         remainingTime = 'Not available'
     }
 
+    var showControlButtons = false
+    if (mission.missionStatus === MissionStatus.Ongoing || mission.missionStatus === MissionStatus.Paused) {
+        showControlButtons = true
+    }
+
     return (
         <HeaderSection>
             <TitleSection>
                 <Typography variant="h1">{mission.name}</Typography>
-                <MissionControlButtons mission={mission} />
+                {showControlButtons && <MissionControlButtons mission={mission} />}
             </TitleSection>
             <InfoSection>
                 <MissionStatusDisplay status={mission.missionStatus} />
