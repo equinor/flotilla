@@ -10,6 +10,9 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("robot_name")]
         public string RobotName { get; set; }
 
+        [JsonPropertyName("isar_id")]
+        public string IsarId { get; set; }
+
         [JsonPropertyName("robot_model")]
         public RobotModel RobotModel { get; set; }
 
