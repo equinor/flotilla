@@ -20,6 +20,8 @@ namespace Api.Database.Models
         [MaxLength(450)]
         public string StatusReason { get; set; }
 
+        public bool IAmANewBoolean {get; set;}
+
         [MaxLength(1000)]
         public string Comment { get; set; }
 
