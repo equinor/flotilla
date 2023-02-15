@@ -120,64 +120,64 @@ and apply it to our databases.
 dotnet tool install --global dotnet-ef
 ```
 
-### Creating a new migration
+### Adding a new migration
 
 **NB: Make sure you have have fetched the newest code from main and that no-one else
 is making migrations at the same time as you!**
-After making changes to the model, run the following command from `/backend/api`:
 
-```bash
-dotnet ef migrations add {migration-name}
-```
+1. Set the environment variable `ASPNETCORE_ENVIRONMENT` to `Development`:
 
-`add` will make changes to existing files and add 2 new files in
-`backend/api/Migrations`, which all need to be checked in to git.
+   ```bash
+    export ASPNETCORE_ENVIRONMENT=Development
+   ```
 
-Note that the {migration-name} is just a descriptive name of your choosing.
-Also note that `Database__ConnectionString` should be pointed at one of our
-databases when running `add`. The reason for this is that the migration will be
-created slightly different when based of the in-memory database. `add` will _not_
-update or alter the connected database in any way.
+2. In `appsettings.Development.json`, make sure that `UseInMemoryDatabase` is set to `false`  
+   The reason for this is that the migration will be
+   created slightly different when based of the in-memory database.
 
-If you for some reason are unhappy with your migration, you can delete it with
+3. Run the following command from `/backend/api`:
+   ```bash
+     dotnet ef migrations add <migration-name>
+   ```
+   `add` will make changes to existing files and add 2 new files in
+   `backend/api/Migrations`, which all need to be checked in to git.
 
-```bash
-dotnet ef migrations remove
-```
+### Notes
+
+- The \<migration-name\> is just a descriptive name of your choosing.
+- `Database__ConnectionString` will be fetched from the keyvault when running the `add` command.
+- `add` will _not_ update or alter the connected database in any way.
+- If you for some reason are unhappy with your migration, you can delete it with:
+  ```bash
+  dotnet ef migrations remove
+  ```
 
 Once removed you can make new changes to the model
 and then create a new migration with `add`.
 
-### Applying the migrations to the dev- and test database
+### Applying the migrations to the dev database
 
-For the migration to take effect, we need to apply it to our databases. To get
-an overview of the current migrations in a database, set the correct
-`Database__ConnectionString` for that database and run:
+Updates to the database structure (applying migrations) are done in Github Actions.  
+  
+When a pull request contains changes in the `backend/api/Database/Migrations` folder,
+[a workflow](https://github.com/equinor/flotilla/blob/main/.github/workflows/notifyMigrationChanges.yml)
+is triggered to notify that the pull request has database changes.
 
-```bash
-dotnet ef migrations list
-```
+After the pull request is approved, a user can then trigger the database changes by commenting
+`/UpdateDatabase` on the pull request.
 
-This will list all migrations that are applied to the database and the local
-migrations that are yet to be applied. The latter are denoted with the text
-(pending).
+This will trigger 
+[another workflow](https://github.com/equinor/flotilla/blob/main/.github/workflows/updateDatabase.yml) 
+which updates the database by apploying the new migrations.
+  
+By doing migrations this way, we ensure that the commands themselves are scripted, and that the database
+changes become part of the review process of a pull request.
 
-To apply the pending migrations to the database run:
+### Applying migrations to staging and production databases
 
-```bash
-dotnet ef database update
-```
-
-If everything runs smoothly the pending tag should be gone if you run `list`
-once more.
-
-### When to apply the migration to our databases
-
-You can apply migrations to the dev database at any time to test that it
-behaves as expected.
-
-The staging and prod databases doesn't need to be updated manually, as all migrations are
-applied to it automatically as part of the pipelines when pushed to staging and prod.
+This is done automatically as part of the promotion workflows 
+([promoteToProduction](https://github.com/equinor/flotilla/blob/main/.github/workflows/promoteToProduction.yml) 
+and [promoteToStaging](https://github.com/equinor/flotilla/blob/main/.github/workflows/promoteToStaging.yml)).
 
 ## Formatting
 
