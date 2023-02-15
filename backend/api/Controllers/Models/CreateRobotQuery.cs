@@ -6,6 +6,8 @@ namespace Api.Controllers.Models
     {
         public string Name { get; set; }
 
+        public string IsarId { get; set; }
+
         public RobotModel Model { get; set; }
 
         public string SerialNumber { get; set; }

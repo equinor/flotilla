@@ -34,6 +34,7 @@ public static class InitDb
     {
         var robot1 = new Robot
         {
+            IsarId = "c68b679d-308b-460f-9fe0-87eaadbd8a6e",
             Name = "R2-D2",
             Model = RobotModel.TaurobInspector,
             SerialNumber = "D2",

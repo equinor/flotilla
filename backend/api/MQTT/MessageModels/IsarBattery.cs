@@ -8,8 +8,11 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("battery_level")]
         public float BatteryLevel { get; set; }
 
-        [JsonPropertyName("robot_id")]
-        public string RobotId { get; set; }
+        [JsonPropertyName("robot_name")]
+        public string RobotName { get; set; }
+
+        [JsonPropertyName("isar_id")]
+        public string IsarId { get; set; }
 
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }

@@ -100,6 +100,11 @@ namespace Api.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("IsarId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("Logs")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");

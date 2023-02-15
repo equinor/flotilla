@@ -11,6 +11,7 @@ namespace Api.Services
         public abstract Task<IEnumerable<Robot>> ReadAll();
         public abstract Task<Robot?> ReadById(string id);
         public abstract Task<Robot?> ReadByName(string name);
+        public abstract Task<Robot?> ReadByIsarId(string isarId);
         public abstract Task<Robot> Update(Robot robot);
     }
 
@@ -49,6 +50,7 @@ namespace Api.Services
 
             var robot = new Robot
             {
+                IsarId = newRobot.IsarId,
                 Name = newRobot.Name,
                 Model = newRobot.Model,
                 SerialNumber = newRobot.SerialNumber,
@@ -78,6 +80,12 @@ namespace Api.Services
         {
             return await GetRobotsWithSubModels()
                 .FirstOrDefaultAsync(robot => robot.Name.Equals(name));
+        }
+
+        public async Task<Robot?> ReadByIsarId(string isarId)
+        {
+            return await GetRobotsWithSubModels()
+                .FirstOrDefaultAsync(robot => robot.IsarId.Equals(isarId));
         }
 
         public async Task<Robot> Update(Robot robot)

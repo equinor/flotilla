@@ -5,7 +5,10 @@ namespace Api.Mqtt.MessageModels
 #nullable disable
     public class IsarMissionMessage : MqttMessage
     {
-        [JsonPropertyName("robot_id")]
+        [JsonPropertyName("isar_id")]
+        public string IsarId { get; set; }
+
+        [JsonPropertyName("robot_name")]
         public string RobotName { get; set; }
 
         [JsonPropertyName("mission_id")]

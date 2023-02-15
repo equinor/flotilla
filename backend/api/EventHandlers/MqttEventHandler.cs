@@ -61,12 +61,13 @@ namespace Api.EventHandlers
         private async void OnIsarRobotStatus(object? sender, MqttReceivedArgs mqttArgs)
         {
             var isarRobotStatus = (IsarRobotStatusMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByName(isarRobotStatus.RobotName);
+            var robot = await RobotService.ReadByIsarId(isarRobotStatus.IsarId);
 
             if (robot == null)
             {
                 _logger.LogInformation(
-                    "Received message from unknown ISAR instance with robot name {name}.",
+                    "Received message from unknown ISAR instance {id} with robot name {name}.",
+                    isarRobotStatus.IsarId,
                     isarRobotStatus.RobotName
                 );
                 return;
@@ -87,17 +88,19 @@ namespace Api.EventHandlers
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
         {
             var isarRobotInfo = (IsarRobotInfoMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByName(isarRobotInfo.RobotName);
+            var robot = await RobotService.ReadByIsarId(isarRobotInfo.IsarId);
 
             if (robot == null)
             {
                 _logger.LogInformation(
-                    "Received message from new ISAR instance with robot name {name}. Adding new robot to database.",
+                    "Received message from new ISAR instance {id} with robot name {name}. Adding new robot to database.",
+                    isarRobotInfo.IsarId,
                     isarRobotInfo.RobotName
                 );
 
                 var robotQuery = new CreateRobotQuery()
                 {
+                    IsarId = isarRobotInfo.IsarId,
                     Name = isarRobotInfo.RobotName,
                     Model = isarRobotInfo.RobotModel,
                     SerialNumber = isarRobotInfo.SerialNumber,
@@ -261,11 +264,12 @@ namespace Api.EventHandlers
 
             if (success)
                 _logger.LogInformation(
-                    "{time} - Task {id} updated to {status} for {robot}",
+                    "{time} - Task {id} updated to {status} for {robot} with isar id {id}",
                     task.Timestamp,
                     task.TaskId,
                     task.Status,
-                    task.RobotId
+                    task.RobotName,
+                    task.IsarId
                 );
         }
 
@@ -296,23 +300,24 @@ namespace Api.EventHandlers
 
             if (success)
                 _logger.LogInformation(
-                    "{time} - Step {id} updated to {status} for {robot}",
+                    "{time} - Step {id} updated to {status} for {robot} with isar id {id}",
                     step.Timestamp,
                     step.StepId,
                     step.Status,
-                    step.RobotId
+                    step.RobotName,
+                    step.IsarId
                 );
         }
 
         private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByName(batteryStatus.RobotId);
+            var robot = await RobotService.ReadByName(batteryStatus.RobotName);
             if (robot == null)
             {
                 _logger.LogWarning(
-                    "Could not find corresponding robot for battery update with ID {id} ",
-                    batteryStatus.RobotId
+                    "Could not find corresponding robot for battery update on robot {name} ",
+                    batteryStatus.RobotName
                 );
             }
             else
@@ -326,12 +331,12 @@ namespace Api.EventHandlers
         private async void OnPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var poseStatus = (IsarPoseMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByName(poseStatus.RobotId);
+            var robot = await RobotService.ReadByName(poseStatus.RobotName);
             if (robot == null)
             {
                 _logger.LogWarning(
-                    "Could not find corresponding robot for pose update with ID {id} ",
-                    poseStatus.RobotId
+                    "Could not find corresponding robot for pose update with robot {name} ",
+                    poseStatus.RobotName
                 );
             }
             else

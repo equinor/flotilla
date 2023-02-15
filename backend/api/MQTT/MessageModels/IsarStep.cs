@@ -5,8 +5,11 @@ namespace Api.Mqtt.MessageModels
 {
     public class IsarStepMessage : MqttMessage
     {
-        [JsonPropertyName("robot_id")]
-        public string RobotId { get; set; }
+        [JsonPropertyName("robot_name")]
+        public string RobotName { get; set; }
+
+        [JsonPropertyName("isar_id")]
+        public string IsarId { get; set; }
 
         [JsonPropertyName("mission_id")]
         public string MissionId { get; set; }

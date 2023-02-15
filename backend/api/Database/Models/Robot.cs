@@ -15,6 +15,10 @@ namespace Api.Database.Models
         public string Name { get; set; }
 
         [Required]
+        [MaxLength(200)]
+        public string IsarId { get; set; }
+
+        [Required]
         public RobotModel Model { get; set; }
 
         [Required]
@@ -59,6 +63,7 @@ namespace Api.Database.Models
 
         public Robot()
         {
+            IsarId = "defaultIsarId";
             Name = "defaultId";
             Model = RobotModel.Turtlebot;
             SerialNumber = "defaultSerialNumber";
