@@ -1,0 +1,30 @@
+name: NotifyPossibleMigrationChanges
+
+on:
+  pull_request:
+    branches: [main]
+    paths: [backend/api/Database/**]
+
+jobs:
+  Notify_Possible_Migration:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Add comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.number }}
+          body: |
+            :bell: Changes in database folder detected :bell:
+            Do these changes require new migrations? :thinking: In that case follow [these steps](https://github.com/equinor/flotilla/tree/main/backend#adding-a-new-migration).
+            If you are uncertain, ask a database admin on the team :smile:
+
+      - name: Add label
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          labels: database-change

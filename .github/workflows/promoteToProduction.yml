@@ -1,0 +1,15 @@
+name: PromoteToProduction
+
+jobs:
+  # TODO: Add Aurora pipeline for promotion here:
+  # promote_to_aurora:
+
+  run_migrations:
+    uses: ./.github/workflows/runMigrations.yml
+    with:
+      PullRequestCheckout: false
+      Environment: Production
+    secrets:
+      ClientId: ${{secrets.AZURE_CLIENT_ID}}
+      KeyVaultUrl: ${{secrets.KEYVAULT_URL}}
+      ClientSecret: ${{secrets.AZURE_CLIENT_SECRET}}
