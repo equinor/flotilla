@@ -4,6 +4,28 @@ The backend of flotilla is created using ASP.NET.
 Useful documentation of concepts and features in the .NET frameworks can be found
 [here](https://docs.microsoft.com/en-us/dotnet/fundamentals/).
 
+- [Flotilla backend](#flotilla-backend)
+  - [Setup](#setup)
+    - [Automatic environment setup](#automatic-environment-setup)
+    - [Manual environment setup](#manual-environment-setup)
+  - [Run](#run)
+    - [Run in Docker](#run-in-docker)
+  - [Test](#test)
+  - [Components](#components)
+    - [MQTT Client](#mqtt-client)
+  - [Configuration](#configuration)
+  - [Database model and EF Core](#database-model-and-ef-core)
+    - [Installing EF Core](#installing-ef-core)
+    - [Adding a new migration](#adding-a-new-migration)
+    - [Notes](#notes)
+    - [Applying the migrations to the dev database](#applying-the-migrations-to-the-dev-database)
+    - [Applying migrations to staging and production databases](#applying-migrations-to-staging-and-production-databases)
+  - [Formatting](#formatting)
+    - [CSharpier](#csharpier)
+    - [Dotnet format](#dotnet-format)
+  - [Monitoring](#monitoring)
+
+
 ## Setup
 
 To set up the backend on **Windows/Mac**, install visual studio and include the "ASP.NET and web development" workload during install.
