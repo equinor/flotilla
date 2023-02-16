@@ -1,4 +1,4 @@
-name: NotifyPossibleMigrationChanges
+name: Notify possible migration changes
 
 on:
   pull_request_target:
@@ -23,8 +23,3 @@ jobs:
             :bell: Changes in database folder detected :bell:
             Do these changes require new migrations? :thinking: In that case follow [these steps](https://github.com/equinor/flotilla/tree/main/backend#adding-a-new-migration).
             If you are uncertain, ask a database admin on the team :smile:
-
-      - name: Add label
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          labels: database-change

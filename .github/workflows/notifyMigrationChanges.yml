@@ -1,4 +1,4 @@
-name: NotifyMigrationChanges
+name: Notify migration changes
 
 on:
   pull_request_target:
@@ -27,3 +27,11 @@ jobs:
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: database-change
+
+  Set_Migrations_Verified_To_Fail:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Unverify Migrations
+        uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
+        with:
+          IsVerified: false

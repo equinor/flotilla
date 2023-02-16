@@ -1,4 +1,5 @@
 import { Button, Table, Typography } from '@equinor/eds-core-react'
+import { config } from 'config'
 import { Mission } from 'models/Mission'
 import { MissionStatusDisplay } from './MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
@@ -28,7 +29,7 @@ function MissionEndTimeDisplay({ mission }: MissionProps) {
 export function PastMissionCard({ index, mission }: IndexedMissionProps) {
     let navigate = useNavigate()
     const routeChange = () => {
-        let path = '/robotics-frontend/mission/' + mission.id
+        let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
     }
     return (

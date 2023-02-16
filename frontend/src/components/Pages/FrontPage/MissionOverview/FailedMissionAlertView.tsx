@@ -1,4 +1,5 @@
 import { Button, Card, Icon, Typography } from '@equinor/eds-core-react'
+import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
 import { useApi } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
@@ -42,7 +43,7 @@ interface MissionProps {
 function FailedMission({ mission }: MissionProps) {
     let navigate = useNavigate()
     const goToMission = () => {
-        let path = '/robotics-frontend/mission/' + mission.id
+        let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
     }
 

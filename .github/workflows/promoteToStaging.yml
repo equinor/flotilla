@@ -1,4 +1,6 @@
-name: PromoteToStaging
+name: Promote to staging
+
+on: workflow_call
 
 jobs:
   # TODO: Add Aurora pipeline for promotion here:

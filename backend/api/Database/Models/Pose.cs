@@ -28,6 +28,35 @@ namespace Api.Database.Models
             Z = z;
             W = w;
         }
+        public override bool Equals(object obj)
+        {
+            if (obj is not Orientation)
+                return false;
+            const float Tolerance = 1e-6F;
+            var orientation = (Orientation)obj;
+            if (MathF.Abs(orientation.X - X) > Tolerance)
+            {
+                return false;
+            }
+            if (MathF.Abs(orientation.Y - Y) > Tolerance)
+            {
+                return false;
+            }
+            if (MathF.Abs(orientation.Z - Z) > Tolerance)
+            {
+                return false;
+            }
+            if (MathF.Abs(orientation.W - W) > Tolerance)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [Owned]
@@ -110,6 +139,16 @@ namespace Api.Database.Models
             Position = new Position(enuPosition.East, enuPosition.North, enuPosition.Up);
             Orientation = AxisAngleToQuaternion(axis, angle);
             Frame = "asset";
+        }
+        public Pose(
+            Position position,
+            Orientation orientation,
+            string frame
+        )
+        {
+            Position = position;
+            Orientation = orientation;
+            Frame = frame;
         }
     }
 }
