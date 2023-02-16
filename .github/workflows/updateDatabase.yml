@@ -49,7 +49,7 @@ jobs:
 
   if_not_approved_then_stop:
     needs: get_review_state
-    if: ${{ needs.get_review_state.outputs.review_approved == false }}
+    if: ${{ needs.get_review_state.outputs.review_approved == 'false' }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -77,7 +77,7 @@ jobs:
 
   database_update_start:
     needs: get_review_state
-    if: ${{ needs.get_review_state.outputs.review_approved == true }}
+    if: ${{ needs.get_review_state.outputs.review_approved == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -128,10 +128,11 @@ jobs:
           body: |
             :sparkles: Successfully ran migration command! :sparkles:
 
-      - name: Verify Migrations
-        uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
-        with:
-          IsVerified: true
+  verify_migrations:
+    needs: database_success
+    uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
+    with:
+      IsVerified: true
 
   database_failure:
     needs: run_migrations
