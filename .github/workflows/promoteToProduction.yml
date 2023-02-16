@@ -5,7 +5,7 @@ jobs:
   # promote_to_aurora:
 
   run_migrations:
-    uses: ./.github/workflows/runMigrations.yml
+    uses: ./.github/workflows/migration_workflows/runMigrations.yml
     with:
       PullRequestCheckout: false
       Environment: Production
