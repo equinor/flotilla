@@ -32,21 +32,21 @@ namespace Api.Database.Models
         {
             if (obj is not Orientation)
                 return false;
-            const float tolerance = 1e-6F;
+            const float Tolerance = 1e-6F;
             var orientation = (Orientation)obj;
-            if (MathF.Abs(orientation.X - X) > tolerance)
+            if (MathF.Abs(orientation.X - X) > Tolerance)
             {
                 return false;
             }
-            if (MathF.Abs(orientation.Y - Y) > tolerance)
+            if (MathF.Abs(orientation.Y - Y) > Tolerance)
             {
                 return false;
             }
-            if (MathF.Abs(orientation.Z - Z) > tolerance)
+            if (MathF.Abs(orientation.Z - Z) > Tolerance)
             {
                 return false;
             }
-            if (MathF.Abs(orientation.W - W) > tolerance)
+            if (MathF.Abs(orientation.W - W) > Tolerance)
             {
                 return false;
             }

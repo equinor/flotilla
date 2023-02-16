@@ -23,20 +23,20 @@ namespace Api.Test.Services
             var pose = new Pose(new Position(25.041F, 23.682F, 0), new Orientation(0, 0, 0.8907533F, 0.4544871F), "robots");
             var predefinedPosition = pose.Position;
             var predefinedOrientation = pose.Orientation;
-            var echoPose = ConvertPredefinedPoseToEchoPose(predefinedPosition, predefinedOrientation, "robot");
+            var echoPose = ConvertPredefinedPoseToEchoPose(predefinedPosition, predefinedOrientation, pose.Frame);
 
             var flotillaPose = new Pose(echoPose.Position, echoPose.Orientation.Axis, echoPose.Orientation.Angle);
             Assert.Equal(predefinedOrientation, flotillaPose.Orientation);
         }
 
-        private EchoPose ConvertPredefinedPoseToEchoPose(Position position, Orientation orientation, string frame)
+        private static EchoPose ConvertPredefinedPoseToEchoPose(Position position, Orientation orientation, string frame)
         {
             var enuPosition = new EchoVector(position.X, position.Y, position.Z);
             var axisAngle = ConvertOrientation(orientation);
-            return new EchoPose(enuPosition, axisAngle, "robot");
+            return new EchoPose(enuPosition, axisAngle, frame);
         }
         private static AxisAngle ConvertOrientation(Orientation orientation)
-        // This is the method used to convert predefined poses to the Angle-Axis representation used by
+        // This is the method used to convert predefined poses to the Angle-Axis representation used by Echo
         {
             float qw = orientation.W;
             float angle = -2 * MathF.Acos(qw);
