@@ -33,24 +33,29 @@ namespace Api.Database.Models
             if (obj is not Orientation)
                 return false;
             const float tolerance = 1e-6F;
-            Orientation orientation = (Orientation)obj;
-            if (MathF.Abs(orientation.X - this.X) > tolerance)
+            var orientation = (Orientation)obj;
+            if (MathF.Abs(orientation.X - X) > tolerance)
             {
                 return false;
             }
-            if (MathF.Abs(orientation.Y - this.Y) > tolerance)
+            if (MathF.Abs(orientation.Y - Y) > tolerance)
             {
                 return false;
             }
-            if (MathF.Abs(orientation.Z - this.Z) > tolerance)
+            if (MathF.Abs(orientation.Z - Z) > tolerance)
             {
                 return false;
             }
-            if (MathF.Abs(orientation.W - this.W) > tolerance)
+            if (MathF.Abs(orientation.W - W) > tolerance)
             {
                 return false;
             }
             return true;
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
         }
     }
 
