@@ -19,6 +19,7 @@ function GetEnvVariable(name: string): string {
 
 export const config = {
     BACKEND_URL: GetEnvVariable('REACT_APP_BACKEND_URL'),
+    BACKEND_API_SCOPE: GetEnvVariable('REACT_APP_BACKEND_API_SCOPE'),
     FRONTEND_URL: GetEnvVariable('REACT_APP_FRONTEND_URL'),
     AD_CLIENT_ID: GetEnvVariable('REACT_APP_AD_CLIENT_ID'),
     AD_TENANT_ID: GetEnvVariable('REACT_APP_AD_TENANT_ID'),

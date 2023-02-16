@@ -14,7 +14,7 @@ export const msalConfig: Configuration = {
 }
 
 export const loginRequest = {
-    scopes: ['api://ea4c7b92-47b3-45fb-bd25-a8070f0c495c/user_impersonation'],
+    scopes: [config.BACKEND_API_SCOPE],
 }
 
 export async function fetchAccessToken(context: IMsalContext): Promise<string> {
