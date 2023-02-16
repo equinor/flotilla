@@ -10,6 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Unverify Migrations
-        uses: ./.github/workflows/migration_workflows/verifyMigrationsIfNeeded.yml
+        uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
         with:
           IsVerified: true
