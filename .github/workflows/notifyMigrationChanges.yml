@@ -29,9 +29,6 @@ jobs:
           labels: database-change
 
   Set_Migrations_Verified_To_Fail:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Unverify Migrations
-        uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
-        with:
-          IsVerified: false
+    uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
+    with:
+      IsVerified: false
