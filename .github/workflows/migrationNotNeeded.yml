@@ -1,4 +1,4 @@
-name: NotifyMigrationChanges
+name: Migrations are not needed
 
 on:
   pull_request_target:

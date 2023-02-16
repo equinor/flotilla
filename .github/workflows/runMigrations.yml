@@ -1,4 +1,4 @@
-name: RunMigrations
+name: Run migrations
 
 on:
   workflow_call:
