@@ -12,6 +12,6 @@ jobs:
   fail_if_not_verified:
     runs-on: ubuntu-latest
     if: ${{ inputs.IsVerified == false }}
-      steps:
-        - name: Fail
-          run: exit 1
+    steps:
+      - name: Fail
+        run: exit 1
