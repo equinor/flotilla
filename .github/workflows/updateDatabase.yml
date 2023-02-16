@@ -1,4 +1,4 @@
-name: UpdateDatabase
+name: Update database
 
 on:
   issue_comment:

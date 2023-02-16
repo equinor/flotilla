@@ -1,4 +1,4 @@
-name: VerifyMigrationsIfNeeded
+name: Verify migrations if needed
 
 on:
   workflow_call:

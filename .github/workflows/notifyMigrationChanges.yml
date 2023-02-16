@@ -1,4 +1,4 @@
-name: NotifyMigrationChanges
+name: Notify migration changes
 
 on:
   pull_request_target:

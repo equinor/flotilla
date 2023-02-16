@@ -1,4 +1,4 @@
-name: PromoteToProduction
+name: Promote to production
 
 on: workflow_call
 

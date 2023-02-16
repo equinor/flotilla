@@ -1,4 +1,4 @@
-name: PromoteToStaging
+name: Promote to staging
 
 on: workflow_call
 
