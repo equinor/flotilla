@@ -9,7 +9,10 @@ jobs:
   Set_Migrations_Verified_To_Success:
     runs-on: ubuntu-latest
     steps:
-      - name: Unverify Migrations
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Verify Migrations
         uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
         with:
           IsVerified: true
