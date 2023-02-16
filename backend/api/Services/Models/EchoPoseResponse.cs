@@ -29,6 +29,12 @@ namespace Api.Services.Models
         public float North { get; set; }
         [JsonPropertyName("u")]
         public float Up { get; set; }
+        public EchoVector(float east, float north, float up)
+        {
+            East = east;
+            North = north;
+            Up = up;
+        }
     }
     public class EchoPoseRequestBody
     {
