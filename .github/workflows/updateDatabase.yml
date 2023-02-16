@@ -128,10 +128,11 @@ jobs:
           body: |
             :sparkles: Successfully ran migration command! :sparkles:
 
-      - name: Verify Migrations
-        uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
-        with:
-          IsVerified: true
+  verify_migrations:
+    needs: database_success
+    uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
+    with:
+      IsVerified: true
 
   database_failure:
     needs: run_migrations
