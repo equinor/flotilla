@@ -182,14 +182,14 @@ and then create a new migration with `add`.
 Updates to the database structure (applying migrations) are done in Github Actions.  
   
 When a pull request contains changes in the `backend/api/Database/Migrations` folder,
-[a workflow](https://github.com/equinor/flotilla/blob/main/.github/workflows/notifyMigrationChanges.yml)
+[a workflow](https://github.com/equinor/flotilla/blob/main/.github/workflows/migration_workflows/notifyMigrationChanges.yml)
 is triggered to notify that the pull request has database changes.
 
 After the pull request is approved, a user can then trigger the database changes by commenting
 `/UpdateDatabase` on the pull request.
 
 This will trigger 
-[another workflow](https://github.com/equinor/flotilla/blob/main/.github/workflows/updateDatabase.yml) 
+[another workflow](https://github.com/equinor/flotilla/blob/main/.github/workflows/migration_workflows/updateDatabase.yml) 
 which updates the database by apploying the new migrations.
   
 By doing migrations this way, we ensure that the commands themselves are scripted, and that the database
@@ -198,8 +198,8 @@ changes become part of the review process of a pull request.
 ### Applying migrations to staging and production databases
 
 This is done automatically as part of the promotion workflows 
-([promoteToProduction](https://github.com/equinor/flotilla/blob/main/.github/workflows/promoteToProduction.yml) 
-and [promoteToStaging](https://github.com/equinor/flotilla/blob/main/.github/workflows/promoteToStaging.yml)).
+([promoteToProduction](https://github.com/equinor/flotilla/blob/main/.github/workflows/migration_workflows/promoteToProduction.yml) 
+and [promoteToStaging](https://github.com/equinor/flotilla/blob/main/.github/workflows/migration_workflows/promoteToStaging.yml)).
 
 ## Formatting
 
