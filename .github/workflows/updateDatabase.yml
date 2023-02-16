@@ -105,7 +105,7 @@ jobs:
 
   run_migrations:
     needs: database_update_start
-    uses: ./.github/workflows/migration_workflows/runMigrations.yml
+    uses: ./.github/workflows/runMigrations.yml
     with:
       PullRequestCheckout: true
       Environment: Development
@@ -129,7 +129,7 @@ jobs:
             :sparkles: Successfully ran migration command! :sparkles:
 
       - name: Verify Migrations
-        uses: ./.github/workflows/migration_workflows/verifyMigrationsIfNeeded.yml
+        uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
         with:
           IsVerified: true
 
