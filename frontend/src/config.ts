@@ -2,14 +2,14 @@ const globalVars = window as any
 
 function GetEnvVariable(name: string): string {
     const value = process.env[name]
-    if (value === '' || value === undefined) {
-        console.warn('Environment variable named "' + name + '" undefined or empty. Attempting to use global variable.')
+    if (value === undefined) {
+        console.warn('Environment variable named "' + name + '" undefined. Attempting to use global variable.')
         const globalValue = globalVars[name]
 
-        // If global value equals its placeholder value 'placeholderValue', it is considered empty/undefined
+        // If global value equals its placeholder value 'placeholderValue', it is considered undefined
         const placeholderValue: string = '${' + name + '}'
 
-        if (globalValue === '' || globalValue === placeholderValue || globalValue === undefined)
+        if (globalValue === placeholderValue || globalValue === undefined)
             throw new Error(
                 `Global variable "${name}" is not set. Verify that your .env file is up to date with .env.example`
             )
