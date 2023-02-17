@@ -5,6 +5,12 @@ on:
     branches: [main]
     paths: [backend/api/Database/**]
 
+  env:
+    message: |
+      :bell: Changes in database folder detected :bell:
+      Do these changes require new migrations? :thinking: In that case follow [these steps](https://github.com/equinor/flotilla/tree/main/backend#adding-a-new-migration).
+      If you are uncertain, ask a database admin on the team :smile:
+
 jobs:
   Notify_Possible_Migration:
     runs-on: ubuntu-latest
@@ -15,18 +21,24 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Get changed files in the migrations folder
-        id: changed-files-specific
+        id: changed_files
         uses: tj-actions/changed-files@v35
         with:
           files: backend/api/Migrations/**
+          sha: ${{ github.event.pull_request.base.sha }}
 
-      - name: Add comment if no migrations added
-        if: ${{ steps.changed-files-specific.outputs.any_changed == 'false' }}
+      - name: If no migrations, check for previous comment
+        if: ${{ steps.changed_files.outputs.any_changed == 'true' }}
+        id: notify_comment_search
+        uses: peter-evans/find-comment@v2
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body-includes: ${{ env.message }}
+
+      - name: Add comment if no comment exists
+        if: ${{ !steps.notify_comment_search.outputs.comment-body }}
         uses: peter-evans/create-or-update-comment@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.number }}
-          body: |
-            :bell: Changes in database folder detected :bell:
-            Do these changes require new migrations? :thinking: In that case follow [these steps](https://github.com/equinor/flotilla/tree/main/backend#adding-a-new-migration).
-            If you are uncertain, ask a database admin on the team :smile:
+          body: ${{ env.message }}

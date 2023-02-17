@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths: [backend/api/Migrations/**]
 
+  env:
+    message: |
+      :bell: Migrations changes detected :bell:
+      :mega: Remember to comment "/UpdateDatabase" after review approval for migrations to take effect!
+
 jobs:
   Notify_Migration:
     runs-on: ubuntu-latest
@@ -14,14 +19,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Check for previous comment
+        if: ${{ steps.changed_files.outputs.any_changed == 'true' }}
+        id: notify_comment_search
+        uses: peter-evans/find-comment@v2
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body-includes: ${{ env.message }}
+
       - name: Add comment
         uses: peter-evans/create-or-update-comment@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.number }}
-          body: |
-            :bell: Migrations changes detected :bell:
-            :mega: Remember to comment "/UpdateDatabase" after review approval for migrations to take effect!
+          body: ${{ env.message }}
 
       - name: Add label
         uses: actions-ecosystem/action-add-labels@v1
