@@ -20,14 +20,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Check for previous comment
-        if: ${{ steps.changed_files.outputs.any_changed == 'true' }}
         id: notify_comment_search
         uses: peter-evans/find-comment@v2
         with:
           issue-number: ${{ github.event.number }}
           body-includes: ${{ env.message }}
 
-      - name: Add comment
+      - name: Add comment if no comment exists
+        if: ${{ !steps.notify_comment_search.outputs.comment-body }}
         uses: peter-evans/create-or-update-comment@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
