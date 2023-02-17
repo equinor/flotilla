@@ -22,10 +22,7 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: backend/api/Migrations/**
-
-      - name: Success if no migrations added
-        if: ${{ steps.changed-files-specific.outputs.any_changed == 'false' }}
-        run: exit 0
+          sha: ${{ github.event.pull_request.base.sha }}
 
       - name: If files changed, check for database success
         if: ${{ steps.changed-files-specific.outputs.any_changed == 'true' }}
@@ -43,8 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'issue_comment' &&
-      github.event.issue.pull_request &&
-      github.event.comment.body == ${{ env.success_message }}
+      github.event.issue.pull_request
     steps:
       - name: Success - Database updated
+        if: ${{ github.event.comment.body == env.success_message }}
         run: exit 0
