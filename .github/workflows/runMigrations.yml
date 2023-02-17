@@ -49,6 +49,6 @@ jobs:
       - name: Update database
         run: dotnet ef database update --no-build --verbose
         env:
-          AzureAd__ClientId: ${{ secrets.ClientId }}
-          AzureAd__ClientSecret: ${{ secrets.ClientSecret }}
+          AZURE_CLIENT_ID: ${{ secrets.ClientId }}
+          AZURE_CLIENT_SECRET: ${{ secrets.ClientSecret }}
           ASPNETCORE_ENVIRONMENT: ${{ vars.AspNetEnvironment }}
