@@ -22,7 +22,7 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: backend/api/Migrations/**
-          sha: ${{ github.event.pull_request.base.sha }}
+          sha: ${{ github.event.pull_request.head.sha }}
 
       - name: If files changed, check for database success
         if: ${{ steps.changed-files-specific.outputs.any_changed == 'true' }}
