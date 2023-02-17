@@ -10,6 +10,8 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
+        public bool AmHavingFun = false;
+
         [Required]
         [MaxLength(200)]
         public string Name { get; set; }
