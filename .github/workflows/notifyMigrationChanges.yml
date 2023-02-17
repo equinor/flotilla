@@ -5,10 +5,10 @@ on:
     branches: [main]
     paths: [backend/api/Migrations/**]
 
-  env:
-    message: |
-      :bell: Migrations changes detected :bell:
-      :mega: Remember to comment "/UpdateDatabase" after review approval for migrations to take effect!
+env:
+  message: |
+    :bell: Migrations changes detected :bell:
+    :mega: Remember to comment "/UpdateDatabase" after review approval for migrations to take effect!
 
 jobs:
   Notify_Migration:
