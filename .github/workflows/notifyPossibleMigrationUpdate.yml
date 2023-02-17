@@ -14,7 +14,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Add comment
+      - name: Get changed files in the migrations folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v35
+        with:
+          files: backend/api/Migrations/**
+
+      - name: Add comment if no migrations added
+        if: ${{ steps.changed-files-specific.outputs.any_changed == 'false' }}
         uses: peter-evans/create-or-update-comment@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
