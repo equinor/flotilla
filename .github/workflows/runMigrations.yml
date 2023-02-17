@@ -10,8 +10,6 @@ on:
         required: true
         type: string
     secrets:
-      KeyVaultUrl:
-        required: true
       ClientId:
         required: true
       ClientSecret:
@@ -32,7 +30,7 @@ jobs:
       # Checks out to main branch by default, so we need to manually checkout to the PR the comment was made on
       # in order to do the update database on the new migrations.
       - name: Checkout Pull Request
-        if: ${{ inputs.PullRequestCheckout == 'true' }}
+        if: ${{ inputs.PullRequestCheckout }}
         run: hub pr checkout ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
