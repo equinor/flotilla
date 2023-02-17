@@ -32,8 +32,10 @@ jobs:
           issue-number: ${{ github.event.number }}
           body-includes: ${{ env.success_message }}
 
-      - name: Fail if no database success (comment not found)
-        if: ${{ !steps.database_comment_search.outputs.comment-body }}
+      - name: Fail if files changed & no database success (comment not found)
+        if: |
+          steps.changed-files-specific.outputs.any_changed == 'true' && 
+          !steps.database_comment_search.outputs.comment-body }}
         run: exit 1
 
   CheckDatabaseSuccess:

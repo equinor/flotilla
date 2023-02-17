@@ -28,15 +28,17 @@ jobs:
           sha: ${{ github.event.pull_request.head.sha }}
 
       - name: If no migrations, check for previous comment
-        if: ${{ steps.changed_files.outputs.any_changed == 'true' }}
+        if: ${{ steps.changed_files.outputs.any_changed != 'true' }}
         id: notify_comment_search
         uses: peter-evans/find-comment@v2
         with:
           issue-number: ${{ github.event.number }}
           body-includes: ${{ env.message }}
 
-      - name: Add comment if no comment exists
-        if: ${{ !steps.notify_comment_search.outputs.comment-body }}
+      - name: Add comment if no migrations and no comment exists
+        if: |
+          !steps.notify_comment_search.outputs.comment-body &&
+          steps.changed_files.outputs.any_changed != 'true'
         uses: peter-evans/create-or-update-comment@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
