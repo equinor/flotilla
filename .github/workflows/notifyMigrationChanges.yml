@@ -27,8 +27,3 @@ jobs:
         uses: actions-ecosystem/action-add-labels@v1
         with:
           labels: database-change
-
-  Set_Migrations_Verified_To_Fail:
-    uses: ./.github/workflows/verifyMigrationsIfNeeded.yml
-    with:
-      IsVerified: false

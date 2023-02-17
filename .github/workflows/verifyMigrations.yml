@@ -1,0 +1,50 @@
+name: Verify migrations
+
+on:
+  pull_request_target:
+    branches: [main]
+  issue_comment:
+    types: [created]
+
+env:
+  success_message: ":sparkles: Successfully ran migration command! :sparkles:"
+
+jobs:
+  VerifyMigrations:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request_target' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get changed files in the migrations folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v35
+        with:
+          files: backend/api/Migrations/**
+
+      - name: Success if no migrations added
+        if: ${{ steps.changed-files-specific.outputs.any_changed == 'false' }}
+        run: exit 0
+
+      - name: If files changed, check for database success
+        if: ${{ steps.changed-files-specific.outputs.any_changed == 'true' }}
+        id: database_comment_search
+        uses: peter-evans/find-comment@v2
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body-includes: ${{ success_message }}
+
+      - name: Fail if no database success (comment not found)
+        if: ${{ !steps.database_comment_search.outputs.comment-body }}
+        run: exit 1
+
+  CheckDatabaseSuccess:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      github.event.comment.body == ${{ success_message }}
+    steps:
+      - name: Success - Database updated
+        run: exit 0
