@@ -3,9 +3,6 @@ name: Verify migrations
 on:
   pull_request_target:
     branches: [main]
-  issue_comment:
-    types: [created]
-
 env:
   success_message: ":sparkles: Successfully ran migration command! :sparkles:"
 
@@ -31,19 +28,10 @@ jobs:
         with:
           issue-number: ${{ github.event.number }}
           body-includes: ${{ env.success_message }}
+          comment-author: github-actions
 
       - name: Fail if files changed & no database success (comment not found)
         if: |
           steps.changed-files-specific.outputs.any_changed == 'true' && 
           !steps.database_comment_search.outputs.comment-body
         run: exit 1
-
-  CheckDatabaseSuccess:
-    runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'issue_comment' &&
-      github.event.issue.pull_request
-    steps:
-      - name: Success - Database updated
-        if: ${{ github.event.comment.body == env.success_message }}
-        run: exit 0
