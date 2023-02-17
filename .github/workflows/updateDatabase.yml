@@ -110,8 +110,8 @@ jobs:
       PullRequestCheckout: true
       Environment: Development
     secrets:
-      ClientId: ${{secrets.CLIENTID}}
-      ClientSecret: ${{secrets.CLIENTSECRET}}
+      AZURE_CLIENT_ID: ${{secrets.CLIENTID}}
+      AZURE_CLIENT_SECRET: ${{secrets.CLIENTSECRET}}
 
   database_success:
     needs: run_migrations
