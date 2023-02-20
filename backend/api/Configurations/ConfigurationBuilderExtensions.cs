@@ -23,7 +23,7 @@
             string? tenantId = builder.Configuration
                 .GetSection("AzureAd")
                 .GetValue<string?>("TenantId");
-            if (clientId is not null)
+            if (tenantId is not null)
             {
                 Environment.SetEnvironmentVariable("AZURE_TENANT_ID", tenantId);
                 Console.WriteLine("'AZURE_TENANT_ID' set to " + tenantId);
