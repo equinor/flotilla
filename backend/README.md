@@ -152,28 +152,24 @@ is making migrations at the same time as you!**
     export ASPNETCORE_ENVIRONMENT=Development
    ```
 
-2. In `appsettings.Development.json`, make sure that `UseInMemoryDatabase` is set to `false`  
-   The reason for this is that the migration will be
-   created slightly different when based of the in-memory database.
-
-3. Run the following command from `/backend/api`:
+2. Run the following command from `/backend/api`:
    ```bash
-     dotnet ef migrations add <migration-name>
+     dotnet ef migrations add your-migration-name-here
    ```
    `add` will make changes to existing files and add 2 new files in
    `backend/api/Migrations`, which all need to be checked in to git.
 
 ### Notes
 
-- The \<migration-name\> is just a descriptive name of your choosing.
+- The `your-migration-name-here` is basically a database commit message.
 - `Database__ConnectionString` will be fetched from the keyvault when running the `add` command.
-- `add` will _not_ update or alter the connected database in any way.
+- `add` will _not_ update or alter the connected database in any way, but will add a 
+description of the changes that will be applied later
 - If you for some reason are unhappy with your migration, you can delete it with:
   ```bash
   dotnet ef migrations remove
   ```
-
-Once removed you can make new changes to the model
+  Once removed you can make new changes to the model
 and then create a new migration with `add`.
 
 ### Applying the migrations to the dev database
