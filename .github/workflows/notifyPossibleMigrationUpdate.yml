@@ -8,7 +8,7 @@ on:
 env:
   message: |
     :bell: Changes in database folder detected :bell:
-    Do these changes require new migrations? :thinking: In that case follow [these steps](https://github.com/equinor/flotilla/tree/main/backend#adding-a-new-migration).
+    Do these changes require **adding new migrations**? :thinking: In that case follow [these steps](https://github.com/equinor/flotilla/tree/main/backend#Database-model-and-EF-Core).
     If you are uncertain, ask a database admin on the team :smile:
 
 jobs:
