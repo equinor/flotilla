@@ -63,8 +63,15 @@ namespace Api.Database.Models
         [Required]
         public IList<IsarTask> Tasks { get; set; }
 
+        private IList<PlannedTask> _plannedTasks;
+
+        // The planned tasks are always returned ordered by their order field
         [Required]
-        public IList<PlannedTask> PlannedTasks { get; set; }
+        public IList<PlannedTask> PlannedTasks
+        {
+            get { return _plannedTasks.OrderBy(t => t.PlanOrder).ToList(); }
+            set { _plannedTasks = value; }
+        }
 
         public bool IsCompleted =>
             new[]
