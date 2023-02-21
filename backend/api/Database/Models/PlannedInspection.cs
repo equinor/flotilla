@@ -16,6 +16,9 @@ namespace Api.Database.Models
 
         public InspectionTypeEnum InspectionType { get; set; }
 
+        [MaxLength(250)]
+        public string AnalysisTypes { get; set; }
+
         public float? TimeInSeconds { get; set; }
 
         public PlannedInspection()
