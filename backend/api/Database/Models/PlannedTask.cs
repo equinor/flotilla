@@ -14,6 +14,9 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
+        [Required]
+        public int PlanOrder { get; set; }
+
         [MaxLength(200)]
         public string TagId { get; set; }
 
@@ -22,6 +25,7 @@ namespace Api.Database.Models
 
         [Required]
         public Position TagPosition { get; set; }
+
         [Required]
         public Pose Pose { get; set; }
         public int PoseId { get; set; }
@@ -43,6 +47,7 @@ namespace Api.Database.Models
             TagPosition = tagPosition;
             Pose = echoTag.Pose;
             PoseId = echoTag.PoseId;
+            PlanOrder = echoTag.PlanOrder;
         }
     }
 }

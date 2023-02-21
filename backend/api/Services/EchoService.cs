@@ -24,7 +24,12 @@ namespace Api.Services
         private readonly IDownstreamWebApi _echoApi;
         private readonly string _installationCode;
         private readonly ILogger<EchoService> _logger;
-        public EchoService(IConfiguration config, IDownstreamWebApi downstreamWebApi, ILogger<EchoService> logger)
+
+        public EchoService(
+            IConfiguration config,
+            IDownstreamWebApi downstreamWebApi,
+            ILogger<EchoService> logger
+        )
         {
             _echoApi = downstreamWebApi;
             _installationCode = config.GetValue<string>("InstallationCode");
@@ -109,6 +114,7 @@ namespace Api.Services
             var installations = ProcessEchoPlantInfos(echoPlantInfoResponse);
             return installations;
         }
+
         public async Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId)
         {
             string relativePath = $"/robots/pose/{poseId}";
@@ -128,6 +134,7 @@ namespace Api.Services
             }
             return echoPoseResponse;
         }
+
         private static IList<EchoInspection> ProcessSensorTypes(List<SensorType> sensorTypes)
         {
             var inspections = new List<EchoInspection>();
@@ -159,10 +166,10 @@ namespace Api.Services
             {
                 if (planItem.PoseId is null)
                 {
-                    string message = $"Invalid EchoMission: {planItem.Tag} has no associated pose id.";
+                    string message =
+                        $"Invalid EchoMission: {planItem.Tag} has no associated pose id.";
                     _logger.LogError(message);
                     throw new InvalidDataException(message);
-
                 }
                 var robotPose = GetRobotPoseFromPoseId(planItem.PoseId.Value).Result;
                 var tag = new EchoTag()
@@ -170,10 +177,15 @@ namespace Api.Services
                     Id = planItem.Id,
                     TagId = planItem.Tag,
                     PoseId = planItem.PoseId.Value,
-                    Pose = new Pose(robotPose.Position, robotPose.LookDirectionNormalized, robotPose.TiltDegreesClockwise),
+                    PlanOrder = planItem.SortingOrder,
+                    Pose = new Pose(
+                        robotPose.Position,
+                        robotPose.LookDirectionNormalized,
+                        robotPose.TiltDegreesClockwise
+                    ),
                     URL = new Uri(
-                    $"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"
-                ),
+                        $"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"
+                    ),
                     Inspections = ProcessSensorTypes(planItem.SensorTypes)
                 };
 
@@ -220,7 +232,6 @@ namespace Api.Services
             {
                 return null;
             }
-
         }
 
         private static List<EchoPlantInfo> ProcessEchoPlantInfos(
