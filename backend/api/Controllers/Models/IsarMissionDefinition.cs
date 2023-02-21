@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Database.Models;
 using Api.Utilities;
-
 namespace Api.Controllers.Models
 {
     /// <summary>
@@ -18,6 +17,47 @@ namespace Api.Controllers.Models
         }
     }
 
+    public struct IsarInspectionDefinition
+    {
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
+        [JsonPropertyName("inspection_target")]
+        public IsarPosition InspectionTarget { get; set; }
+
+        [JsonPropertyName("analysis_types")]
+        public string? AnalysisTypes { get; set; }
+
+        [JsonPropertyName("duration")]
+        public float? Duration { get; set; }
+
+        [JsonPropertyName("metadata")]
+        public Dictionary<string, string>? Metadata { get; set; }
+
+        public IsarInspectionDefinition(PlannedInspection plannedInspection, PlannedTask plannedTask, Mission mission)
+        {
+            Type = plannedInspection.InspectionType.ToString();
+            InspectionTarget = new IsarPosition(
+                plannedTask.TagPosition.X,
+                plannedTask.TagPosition.Y,
+                plannedTask.TagPosition.Z,
+                "asset"
+            );
+            AnalysisTypes = plannedInspection.AnalysisTypes;
+            Duration = plannedInspection.TimeInSeconds;
+            var metadata = new Dictionary<string, string>
+            {
+                { "map", mission.Map.MapName },
+                { "description", mission.Description },
+                { "estimated_duration", mission.EstimatedDuration.ToString() },
+                { "asset_code", mission.AssetCode },
+                { "mission_name", mission.Name },
+                { "status_reason", mission.StatusReason }
+            };
+            Metadata = metadata;
+        }
+    }
+
     public struct IsarTaskDefinition
     {
         [JsonPropertyName("pose")]
@@ -26,33 +66,19 @@ namespace Api.Controllers.Models
         [JsonPropertyName("tag")]
         public string Tag { get; set; }
 
-        [JsonPropertyName("inspection_target")]
-        public IsarPosition InspectionTarget { get; set; }
+        [JsonPropertyName("inspections")]
+        public List<IsarInspectionDefinition> Inspections { get; set; }
 
-        [JsonPropertyName("inspection_types")]
-        public List<string> InspectionTypes { get; set; }
-
-        [JsonPropertyName("video_duration")]
-        public float? VideoDuration { get; set; }
-
-        public IsarTaskDefinition(PlannedTask plannedTask)
+        public IsarTaskDefinition(PlannedTask plannedTask, Mission mission)
         {
-            Tag = plannedTask.TagId;
-            InspectionTypes = plannedTask.Inspections
-                .Select(t => t.InspectionType.ToString())
-                .ToList();
-            InspectionTarget = new IsarPosition(
-                plannedTask.TagPosition.X,
-                plannedTask.TagPosition.Y,
-                plannedTask.TagPosition.Z,
-                "asset"
-            );
-
-            VideoDuration = plannedTask.Inspections
-                .FirstOrDefault(t => t.TimeInSeconds.HasValue)
-                ?.TimeInSeconds;
-
             Pose = new IsarPose(plannedTask.Pose);
+            Tag = plannedTask.TagId;
+            var isarInspections = new List<IsarInspectionDefinition>();
+            foreach (var inspection in plannedTask.Inspections)
+            {
+                isarInspections.Add(new IsarInspectionDefinition(inspection, plannedTask, mission));
+            }
+            Inspections = isarInspections;
         }
     }
 

@@ -78,7 +78,7 @@ namespace Api.Services
         public IsarMissionDefinition GetIsarMissionDefinition(Mission mission)
         {
             var tasks = mission.PlannedTasks.Select(
-                task => new IsarTaskDefinition(task)
+                task => new IsarTaskDefinition(task, mission)
             );
             return new IsarMissionDefinition(tasks: tasks.ToList());
         }

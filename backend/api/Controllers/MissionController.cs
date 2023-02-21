@@ -33,7 +33,6 @@ public class MissionController : ControllerBase
         _mapService = mapService;
         _stidService = stidService;
         _logger = logger;
-        _stidService = stidService;
     }
 
     /// <summary>
