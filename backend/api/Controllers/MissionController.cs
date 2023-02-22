@@ -183,6 +183,8 @@ public class MissionController : ControllerBase
             Map = map
         };
 
+        scheduledMission.CalculateEstimatedDuration();
+
         var newMission = await _missionService.Create(scheduledMission);
 
         return CreatedAtAction(nameof(GetMissionById), new { id = newMission.Id }, newMission);

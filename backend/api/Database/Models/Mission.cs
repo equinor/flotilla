@@ -110,6 +110,27 @@ namespace Api.Database.Models
                   )
             };
         }
+
+        public void CalculateEstimatedDuration()
+        {
+            double robotVelocity = 1.5 * 1000 / 60; // km/t => m/min
+            double efficiencyFactor = 0.20;
+            double inspectionTime = 2; // min/tag
+            int assumedXYMetersFromFirst = 20;
+
+            double distance = 0;
+            int numberOfTags = 0;
+            var prevPosition = new Position(PlannedTasks.First().Pose.Position.X + assumedXYMetersFromFirst, PlannedTasks.First().Pose.Position.Y + assumedXYMetersFromFirst, PlannedTasks.First().Pose.Position.Z);
+            foreach (var plannedTask in PlannedTasks)
+            {
+                numberOfTags += plannedTask.Inspections.Count;
+                var currentPosition = plannedTask.Pose.Position;
+                distance += Math.Abs(currentPosition.X - prevPosition.X) + Math.Abs(currentPosition.Y - prevPosition.Y);
+                prevPosition = currentPosition;
+            }
+            int estimate = (int)((distance / (robotVelocity * efficiencyFactor)) + (numberOfTags * inspectionTime));
+            EstimatedDuration = TimeSpan.FromMinutes(estimate);
+        }
     }
 
     public enum MissionStatus
