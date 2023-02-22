@@ -4,7 +4,7 @@
 
 namespace Api.Migrations
 {
-    public partial class Addorderfieldtotasks : Migration
+    public partial class AddVideoStreamRotateAndPlannedTaskOrder : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
