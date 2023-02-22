@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    [Migration("20230221091332_Add order field to tasks")]
-    partial class Addorderfieldtotasks
+    [Migration("20230222134050_AddVideoStreamRotateAndPlannedTaskOrder")]
+    partial class AddVideoStreamRotateAndPlannedTaskOrder
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
