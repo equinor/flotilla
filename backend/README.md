@@ -154,7 +154,7 @@ is making migrations at the same time as you!**
 
 2. Run the following command from `/backend/api`:
    ```bash
-     dotnet ef migrations add your-migration-name-here
+     dotnet ef migrations add AddTableNamePropertyName
    ```
    `add` will make changes to existing files and add 2 new files in
    `backend/api/Migrations`, which all need to be checked in to git.
@@ -163,14 +163,14 @@ is making migrations at the same time as you!**
 
 - The `your-migration-name-here` is basically a database commit message.
 - `Database__ConnectionString` will be fetched from the keyvault when running the `add` command.
-- `add` will _not_ update or alter the connected database in any way, but will add a 
-description of the changes that will be applied later
+- `add` will _not_ update or alter the connected database in any way, but will add a
+  description of the changes that will be applied later
 - If you for some reason are unhappy with your migration, you can delete it with:
   ```bash
   dotnet ef migrations remove
   ```
   Once removed you can make new changes to the model
-and then create a new migration with `add`.
+  and then create a new migration with `add`.
 
 ### Applying the migrations to the dev database
 
