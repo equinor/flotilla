@@ -152,7 +152,8 @@ public class MissionController : ControllerBase
         }
         catch (InvalidDataException e)
         {
-            string message = "Can not schedule mission because EchoMission is invalid. One or more tasks does not contain a robot pose.";
+            string message =
+                "Can not schedule mission because EchoMission is invalid. One or more tasks does not contain a robot pose.";
             _logger.LogError(e, message);
             return StatusCode(StatusCodes.Status502BadGateway, message);
         }
@@ -182,7 +183,8 @@ public class MissionController : ControllerBase
             Map = map
         };
 
-        scheduledMission.CalculateEstimatedDuration();
+        if (plannedTasks.Any())
+            scheduledMission.CalculateEstimatedDuration();
 
         var newMission = await _missionService.Create(scheduledMission);
 
