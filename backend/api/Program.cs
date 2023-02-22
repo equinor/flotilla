@@ -16,7 +16,7 @@ Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentNam
 
 builder.AddAzureEnvironmentVariables();
 
-if (!builder.Environment.EnvironmentName.Equals("Test", StringComparison.OrdinalIgnoreCase))
+if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
 {
     // The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
     // See https://github.com/Azure/azure-sdk-for-net/issues/17052
@@ -82,7 +82,6 @@ builder.Services.AddAuthorization(
             .Build();
     }
 );
-
 
 var app = builder.Build();
 
