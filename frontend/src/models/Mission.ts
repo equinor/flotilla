@@ -27,4 +27,5 @@ export interface Mission {
     tasks: IsarTask[]
     map: MissionMap
     plannedTasks: PlannedTask[]
+    estimatedDuration: string
 }

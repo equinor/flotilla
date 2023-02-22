@@ -1,7 +1,7 @@
 import { Typography } from '@equinor/eds-core-react'
 import { MissionControlButtons } from 'components/Pages/FrontPage/MissionOverview/MissionControlButtons'
 import { MissionStatusDisplay } from 'components/Pages/FrontPage/MissionOverview/MissionStatusDisplay'
-import { format, differenceInMinutes, addMinutes } from 'date-fns'
+import { format, differenceInMinutes } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
@@ -27,20 +27,7 @@ interface MissionHeaderProps {
 }
 
 export function MissionHeader({ mission }: MissionHeaderProps) {
-    let usedTime = differenceInMinutes(Date.now(), new Date(mission.startTime))
-    usedTime = usedTime > 0 ? usedTime : 0
-
-    var remainingTime
-    if (mission.endTime && new Date(mission.endTime).getFullYear() !== 1) {
-        let missionDuration = differenceInMinutes(new Date(mission.endTime), new Date(mission.startTime))
-        let diffNowEndTime = differenceInMinutes(new Date(mission.endTime), Date.now())
-        remainingTime = missionDuration > diffNowEndTime ? diffNowEndTime : missionDuration
-        remainingTime = remainingTime > 0 ? remainingTime : 0
-        remainingTime = remainingTime + ' minutes'
-    } else {
-        remainingTime = 'Not available'
-    }
-
+    var { usedTime, remainingTime } = UsedAndRemainingTime(mission)
     var showControlButtons = false
     if (mission.missionStatus === MissionStatus.Ongoing || mission.missionStatus === MissionStatus.Paused) {
         showControlButtons = true
@@ -70,4 +57,34 @@ function HeaderText(text: string) {
             {text}
         </Typography>
     )
+}
+
+function UsedAndRemainingTime(mission: Mission) {
+    var remainingTime
+    let usedTime = 0
+
+    let dateTime = mission.estimatedDuration.split('.')
+    const days = dateTime.length === 1 ? 0 : dateTime[0].split(':')[0]
+    const time = dateTime.length === 1 ? dateTime[0].split(':') : dateTime[1].split(':')
+    const estimatedDuration = +time[1] + 60 * (+time[0] + +days * 24)
+
+    if (mission.missionStatus === MissionStatus.Ongoing || mission.missionStatus === MissionStatus.Paused) {
+        usedTime = differenceInMinutes(Date.now(), new Date(mission.startTime))
+        if (estimatedDuration) {
+            remainingTime = estimatedDuration > usedTime ? estimatedDuration - usedTime : 0
+            remainingTime = remainingTime + ' minutes'
+        } else {
+            remainingTime = 'N/A'
+        }
+    } else if (mission.missionStatus === MissionStatus.Pending) {
+        remainingTime = estimatedDuration + ' minutes'
+    } else {
+        if (mission.endTime && mission.startTime) {
+            usedTime = differenceInMinutes(new Date(mission.endTime), new Date(mission.startTime))
+        }
+        remainingTime = 'N/A'
+    }
+
+    usedTime = usedTime > 0 ? usedTime : 0
+    return { usedTime, remainingTime }
 }
