@@ -28,7 +28,7 @@ jobs:
         with:
           issue-number: ${{ github.event.number }}
           body-includes: ${{ env.success_message }}
-          comment-author: github-actions
+          comment-author: github-actions[bot]
 
       - name: Fail if files changed & no database success (comment not found)
         if: |
