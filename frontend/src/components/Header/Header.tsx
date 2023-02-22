@@ -23,7 +23,7 @@ const Icons = styled.div`
 
 const StyledTopBarContent = styled(TopBar.CustomContent)`
     display: grid;
-    grid-template-columns: minmax(50px, 200px) auto;
+    grid-template-columns: minmax(50px, 265px) auto;
     align-items: end;
     gap: 0px 3rem;
 `
@@ -32,11 +32,7 @@ export function Header() {
     return (
         <StyledTopBar>
             <TopBar.Header>Flotilla</TopBar.Header>
-            <StyledTopBarContent>
-                {AssetPicker()}
-
-                <Search aria-label="sitewide" id="search-normal" placeholder="Search" />
-            </StyledTopBarContent>
+            <StyledTopBarContent>{AssetPicker()}</StyledTopBarContent>
             <TopBar.Actions>
                 <Icons>
                     <Button variant="ghost_icon" onClick={() => console.log('Clicked account icon')}>
