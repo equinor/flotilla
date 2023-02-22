@@ -101,7 +101,6 @@ public static class InitDb
             IsarMissionId = "1",
             MissionStatus = MissionStatus.Pending,
             StartTime = DateTimeOffset.UtcNow.AddHours(7),
-            EndTime = DateTimeOffset.UtcNow.AddHours(9),
             PlannedTasks = new List<PlannedTask>(),
             Map = new MissionMap()
         };
@@ -115,7 +114,6 @@ public static class InitDb
             IsarMissionId = "1",
             MissionStatus = MissionStatus.Pending,
             StartTime = DateTimeOffset.UtcNow.AddHours(8),
-            EndTime = DateTimeOffset.UtcNow.AddHours(9),
             PlannedTasks = new List<PlannedTask>(),
             Map = new MissionMap()
         };
