@@ -3,7 +3,7 @@ import { config } from 'config'
 import { delete_forever } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
-import { format, differenceInHours } from 'date-fns'
+import { format } from 'date-fns'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -123,12 +123,17 @@ function MissionStartTimeDisplay({ mission }: MissionDisplayProps) {
 }
 
 function MissionDurationDisplay({ mission }: MissionDisplayProps) {
-    if (mission.endTime) {
+    if (mission.estimatedDuration) {
+        let estimat = mission.estimatedDuration.split('.')
+        const days = estimat.length === 1 ? 0 : estimat[0].split(':')[0]
+        const time = estimat.length === 1 ? estimat[0].split(':') : estimat[1].split(':')
+        const hours = +days * 24 + +time[0]
+        const minutes = +time[1]
         return (
             <Typography>
-                Estimated duration: {differenceInHours(new Date(mission.endTime), new Date(mission.startTime))} h
+                Estimated duration: {hours}h {minutes}min
             </Typography>
         )
     }
-    return <></>
+    return <Typography>Estimated duration: not available</Typography>
 }
