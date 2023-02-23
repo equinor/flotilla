@@ -48,15 +48,12 @@ namespace Api.Database.Models
         {
             get
             {
+                const string Method = "http";
                 string host = Host;
-                string method = "https";
                 if (host == "0.0.0.0")
                     host = "localhost";
 
-                if (host == "localhost")
-                    method = "http";
-
-                return $"{method}://{host}:{Port}";
+                return $"{Method}://{host}:{Port}";
             }
         }
 
