@@ -4,7 +4,7 @@
 ![Frontend](https://github.com/equinor/flotilla/actions/workflows/frontend_lint_and_test.yml/badge.svg)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/0b37a44f66044dbc81fff906344b476e)](https://www.codacy.com/gh/equinor/flotilla/dashboard?utm_source=github.com&utm_medium=referral&utm_content=equinor/flotilla&utm_campaign=Badge_Grade)
 
-Flotilla is the main point of access for operators to interact with multiple robots in a facility. The application
+Flotilla is the main point of access for operators to interact with multiple robots in multiple facilities. The application
 consists of a [frontend](frontend) in React, a [backend](backend) in ASP.NET and a Mosquitto MQTT [Broker](broker).
 
 ## Deployments
@@ -35,7 +35,6 @@ This script will ask you for the `Client Secret` for the backend and the `MQTT b
 ## Run with docker
 
 Install [docker](https://docs.docker.com/engine/install/ubuntu/) and [docker compose](https://docs.docker.com/compose/install/).
-
 
 Build the docker container:
 
