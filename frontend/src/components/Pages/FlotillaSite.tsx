@@ -10,6 +10,7 @@ import { MissionPage } from './MissionPage/MissionPage'
 import { AssetProvider } from 'components/Contexts/AssetContext'
 import { LanguageProvider } from 'components/Contexts/LanguageContext'
 import { HistoricMissionPage } from './HistoricMissionPage/HistoricMissionPage'
+import { useErrorHandler } from 'react-error-boundary'
 
 export const AccessTokenContext = createContext('')
 
@@ -18,12 +19,15 @@ const StyledPages = styled.div`
 `
 
 export function FlotillaSite() {
+    const handleError = useErrorHandler()
     const authContext = useMsal()
     const [accessToken, setAccessToken] = useState('')
     useEffect(() => {
-        fetchAccessToken(authContext).then((accessToken) => {
-            setAccessToken(accessToken)
-        })
+        fetchAccessToken(authContext)
+            .then((accessToken) => {
+                setAccessToken(accessToken)
+            })
+            .catch((e) => handleError(e))
     }, [])
     return (
         <>

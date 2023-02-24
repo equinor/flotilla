@@ -9,6 +9,7 @@ import styled from 'styled-components'
 import { MissionHeader } from './MissionHeader/MissionHeader'
 import { BackButton } from './MissionHeader/BackButton'
 import { MapView } from './MapPosition/MapView'
+import { useErrorHandler } from 'react-error-boundary'
 
 const StyledMissionPage = styled.div`
     display: flex;
@@ -33,15 +34,19 @@ const VideoStreamSection = styled.div`
 export function MissionPage() {
     const { missionId } = useParams()
     const apiCaller = useApi()
+    const handleError = useErrorHandler()
     const [videoStreams, setVideoStreams] = useState<VideoStream[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
 
     useEffect(() => {
         if (missionId) {
-            apiCaller.getMissionById(missionId).then((mission) => {
-                setSelectedMission(mission)
-                updateVideoStreams(mission)
-            })
+            apiCaller
+                .getMissionById(missionId)
+                .then((mission) => {
+                    setSelectedMission(mission)
+                    updateVideoStreams(mission)
+                })
+                .catch((e) => handleError(e))
         }
     }, [])
 
@@ -49,18 +54,24 @@ export function MissionPage() {
         const timeDelay = 1000
         const id = setInterval(() => {
             if (missionId) {
-                apiCaller.getMissionById(missionId).then((mission) => {
-                    setSelectedMission(mission)
-                })
+                apiCaller
+                    .getMissionById(missionId)
+                    .then((mission) => {
+                        setSelectedMission(mission)
+                    })
+                    .catch((e) => handleError(e))
             }
         }, timeDelay)
         return () => clearInterval(id)
     }, [])
 
     const updateVideoStreams = (mission: Mission) => {
-        apiCaller.getVideoStreamsByRobotId(mission.robot.id).then((streams) => {
-            setVideoStreams(streams)
-        })
+        apiCaller
+            .getVideoStreamsByRobotId(mission.robot.id)
+            .then((streams) => {
+                setVideoStreams(streams)
+            })
+            .catch((e) => handleError(e))
     }
 
     return (

@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom'
 import { addMinutes, max } from 'date-fns'
 import { Text } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
+import { useErrorHandler } from 'react-error-boundary'
 
 const StyledCard = styled(Card)`
     width: 100%;
@@ -75,6 +76,8 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
 }
 
 export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
+    const handleError = useErrorHandler()
+
     // The default amount of minutes in the past for failed missions to generate an alert
     const DefaultTimeInterval: number = 10
 
@@ -110,10 +113,13 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
 
     const updateRecentFailedMissions = () => {
         const lastDismissTime: Date = getLastDismissalTime()
-        apiCaller.getMissionsByStatus(MissionStatus.Failed).then((missions) => {
-            const newRecentFailedMissions = missions.filter((m) => new Date(m.endTime!) > lastDismissTime)
-            setRecentFailedMissions(newRecentFailedMissions)
-        })
+        apiCaller
+            .getMissionsByStatus(MissionStatus.Failed)
+            .then((missions) => {
+                const newRecentFailedMissions = missions.filter((m) => new Date(m.endTime!) > lastDismissTime)
+                setRecentFailedMissions(newRecentFailedMissions)
+            })
+            .catch((e) => handleError(e))
     }
 
     useEffect(() => {

@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
 import { MissionMap } from 'models/MissionMap'
+import { useErrorHandler } from 'react-error-boundary'
+
 interface MissionProps {
     mission: Mission
 }
@@ -30,6 +32,7 @@ const StyledMap = styled.canvas`
 `
 
 export function MapView({ mission }: MissionProps) {
+    const handleError = useErrorHandler()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapAvailable, setMapAvailable] = useState<Boolean>(false)
@@ -57,6 +60,7 @@ export function MapView({ mission }: MissionProps) {
                     setMapImage(img)
                 })
             })
+            .catch((e) => handleError(e))
     }, [])
 
     useEffect(() => {

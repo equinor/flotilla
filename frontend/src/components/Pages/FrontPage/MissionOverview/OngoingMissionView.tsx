@@ -10,6 +10,7 @@ import { Text } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
+import { useErrorHandler } from 'react-error-boundary'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -28,6 +29,7 @@ const ButtonStyle = styled.div`
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     const apiCaller = useApi()
+    const handleError = useErrorHandler()
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [pausedMissions, setPausedMissions] = useState<Mission[]>([])
     const [missionsToDisplay, setMissionsToDisplay] = useState<Mission[]>([])
@@ -46,15 +48,21 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     }, [])
 
     const updateOngoingMissions = () => {
-        apiCaller.getMissionsByStatus(MissionStatus.Ongoing).then((missions) => {
-            setOngoingMissions(missions)
-        })
+        apiCaller
+            .getMissionsByStatus(MissionStatus.Ongoing)
+            .then((missions) => {
+                setOngoingMissions(missions)
+            })
+            .catch((e) => handleError(e))
     }
 
     const updatePausedMissions = () => {
-        apiCaller.getMissionsByStatus(MissionStatus.Paused).then((missions) => {
-            setPausedMissions(missions)
-        })
+        apiCaller
+            .getMissionsByStatus(MissionStatus.Paused)
+            .then((missions) => {
+                setPausedMissions(missions)
+            })
+            .catch((e) => handleError(e))
     }
 
     useEffect(() => {

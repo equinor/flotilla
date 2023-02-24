@@ -2,6 +2,7 @@ import { Typography } from '@equinor/eds-core-react'
 import { useApi } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
+import { useErrorHandler } from 'react-error-boundary'
 import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
@@ -20,6 +21,7 @@ const RobotView = styled.div`
 
 export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     const apiCaller = useApi()
+    const handleError = useErrorHandler()
 
     const [robots, setRobots] = useState<Robot[]>([])
     useEffect(() => {
@@ -34,9 +36,12 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     }, [])
 
     const updateRobots = () => {
-        apiCaller.getRobots().then((result: Robot[]) => {
-            setRobots(sortRobotsByStatus(result))
-        })
+        apiCaller
+            .getRobots()
+            .then((result: Robot[]) => {
+                setRobots(sortRobotsByStatus(result))
+            })
+            .catch((e) => handleError(e))
     }
 
     var robotDisplay = robots.map(function (robot) {
