@@ -8,6 +8,7 @@ import styled from 'styled-components'
 import { FrontPage } from './FrontPage/FrontPage'
 import { MissionPage } from './MissionPage/MissionPage'
 import { AssetProvider } from 'components/Contexts/AssetContext'
+import { LanguageProvider } from 'components/Contexts/LanguageContext'
 
 export const AccessTokenContext = createContext('')
 
@@ -28,22 +29,24 @@ export function FlotillaSite() {
             {accessToken === '' && <>Loading...</>}
             {accessToken !== '' && (
                 <>
-                    <AssetProvider>
-                        <AccessTokenContext.Provider value={accessToken}>
-                            <Header />
-                            <StyledPages>
-                                <BrowserRouter>
-                                    <Routes>
-                                        <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<FrontPage />} />
-                                        <Route
-                                            path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`}
-                                            element={<MissionPage />}
-                                        />
-                                    </Routes>
-                                </BrowserRouter>
-                            </StyledPages>
-                        </AccessTokenContext.Provider>
-                    </AssetProvider>
+                    <LanguageProvider>
+                        <AssetProvider>
+                            <AccessTokenContext.Provider value={accessToken}>
+                                <Header />
+                                <StyledPages>
+                                    <BrowserRouter>
+                                        <Routes>
+                                            <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<FrontPage />} />
+                                            <Route
+                                                path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`}
+                                                element={<MissionPage />}
+                                            />
+                                        </Routes>
+                                    </BrowserRouter>
+                                </StyledPages>
+                            </AccessTokenContext.Provider>
+                        </AssetProvider>
+                    </LanguageProvider>
                 </>
             )}
         </>
