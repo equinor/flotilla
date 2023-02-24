@@ -168,7 +168,6 @@ namespace Api.Services
                 {
                     string message =
                         $"Invalid EchoMission: {planItem.Tag} has no associated pose id.";
-                    _logger.LogError(message);
                     throw new InvalidDataException(message);
                 }
                 var robotPose = GetRobotPoseFromPoseId(planItem.PoseId.Value).Result;
@@ -228,8 +227,13 @@ namespace Api.Services
                 };
                 return mission;
             }
-            catch (InvalidDataException)
+            catch (InvalidDataException e)
             {
+                _logger.LogWarning(
+                    "Echo mission with ID '{id}' is invalid: '{message}'",
+                    echoMission.Id,
+                    e.Message
+                );
                 return null;
             }
         }

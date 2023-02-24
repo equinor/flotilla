@@ -61,7 +61,7 @@ namespace Api.EventHandlers
             if (robot == null)
             {
                 _logger.LogInformation(
-                    "Received message from unknown ISAR instance with robot name {name}.",
+                    "Received message from unknown ISAR instance with robot name '{name}'.",
                     isarRobotStatus.RobotName
                 );
                 return;
@@ -69,8 +69,8 @@ namespace Api.EventHandlers
 
             if (_isarConnectionTimers.ContainsKey(isarRobotStatus.RobotName))
             {
-                _logger.LogInformation(
-                    "Reset connection timer for robot {name}",
+                _logger.LogDebug(
+                    "Reset connection timer for robot '{name}'",
                     isarRobotStatus.RobotName
                 );
                 _isarConnectionTimers[isarRobotStatus.RobotName].Reset();
@@ -82,7 +82,7 @@ namespace Api.EventHandlers
                 timer.Start();
                 _isarConnectionTimers.Add(isarRobotStatus.RobotName, timer);
                 _logger.LogInformation(
-                    "Added new timer for robot {name}",
+                    "Added new timer for robot '{name}'",
                     isarRobotStatus.RobotName
                 );
             }
@@ -94,14 +94,14 @@ namespace Api.EventHandlers
             if (robot is null)
             {
                 _logger.LogError(
-                    "An event was received for a robot timer timing out but the robot {robotName} could not be found in the database.",
+                    "An event was received for a robot timer timing out but the robot '{robotName}' could not be found in the database.",
                     robotName
                 );
                 return;
             }
 
             _logger.LogWarning(
-                "Connection to robot {name} timed out and it will be set to offline",
+                "Connection to robot '{name}' timed out and it will be set to offline",
                 robotName
             );
             robot.Status = RobotStatus.Offline;
