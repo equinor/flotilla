@@ -13,6 +13,5 @@ jobs:
       PullRequestCheckout: false
       Environment: Production
     secrets:
-      ClientId: ${{secrets.AZURE_CLIENT_ID}}
-      KeyVaultUrl: ${{secrets.KEYVAULT_URL}}
-      ClientSecret: ${{secrets.AZURE_CLIENT_SECRET}}
+      ClientId: ${{secrets.CLIENTID}}
+      ClientSecret: ${{secrets.CLIENTSECRET}}
