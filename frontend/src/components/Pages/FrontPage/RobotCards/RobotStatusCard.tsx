@@ -7,6 +7,7 @@ import styled from 'styled-components'
 import { RobotImage } from './RobotImage'
 import { useNavigate } from 'react-router-dom'
 import { BatteryStatus } from 'models/Battery'
+import { Text } from 'components/Contexts/LanguageContext'
 
 interface RobotProps {
     robot: Robot
@@ -73,7 +74,7 @@ export function RobotStatusCardPlaceholder() {
             <div>
                 <RobotImage robotType={RobotType.NoneType} />
                 <Typography variant="h5" color="disabled">
-                    No robot connected
+                    {Text('No robot connected')}
                 </Typography>
                 <Typography variant="body_short" color="disabled">
                     ----

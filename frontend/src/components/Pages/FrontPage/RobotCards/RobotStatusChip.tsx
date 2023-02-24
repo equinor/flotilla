@@ -1,6 +1,7 @@
 import { Chip } from '@equinor/eds-core-react'
 import { RobotStatus } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
+import { Text } from 'components/Contexts/LanguageContext'
 
 interface StatusProps {
     status?: RobotStatus
@@ -34,7 +35,7 @@ export function RobotStatusChip({ status }: StatusProps) {
             className="StatusChip"
             style={{ background: chipColor, color: tokens.colors.text.static_icons__default.hex }}
         >
-            {status}
+            {Text(status)}
         </Chip>
     )
 }

@@ -7,6 +7,7 @@ import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { OngoingMissionCard } from './OngoingMissionCard'
+import { Text } from 'components/Contexts/LanguageContext'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -62,7 +63,7 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     return (
         <StyledOngoingMissionView>
             <Typography variant="h2" color="resting">
-                Ongoing missions
+                {Text('Ongoing Missions')}
             </Typography>
             <OngoingMissionSection>
                 {missionsToDisplay.length > 0 && missionDisplay}

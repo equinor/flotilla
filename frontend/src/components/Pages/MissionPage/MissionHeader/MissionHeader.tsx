@@ -5,6 +5,7 @@ import { format, differenceInMinutes } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
+import { Text } from 'components/Contexts/LanguageContext'
 
 const HeaderSection = styled.div`
     display: flex;
@@ -41,11 +42,11 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
             </TitleSection>
             <InfoSection>
                 <MissionStatusDisplay status={mission.missionStatus} />
-                {HeaderText('Start time: ' + format(new Date(mission.startTime), 'HH:mm'))}
-                {HeaderText('Time used: ' + usedTime + ' minutes')}
-                {HeaderText('Estimated time remaining: ' + remainingTime)}
-                {HeaderText('Robot: ' + mission.robot.name)}
-                {HeaderText('Battery level: ' + mission.robot.batteryLevel + '%')}
+                {HeaderText(Text('Start time') + ': ' + format(new Date(mission.startTime), 'HH:mm'))}
+                {HeaderText(Text('Time used') + ': ' + usedTime + ' ' + Text('minutes'))}
+                {HeaderText(Text('Estimated time remaining') + ': ' + remainingTime)}
+                {HeaderText(Text('Robot') + ': ' + mission.robot.name)}
+                {HeaderText(Text('Battery level') + ': ' + mission.robot.batteryLevel + '%')}
             </InfoSection>
         </HeaderSection>
     )
@@ -72,12 +73,12 @@ function UsedAndRemainingTime(mission: Mission) {
         usedTime = differenceInMinutes(Date.now(), new Date(mission.startTime))
         if (estimatedDuration) {
             remainingTime = estimatedDuration > usedTime ? estimatedDuration - usedTime : 0
-            remainingTime = remainingTime + ' minutes'
+            remainingTime = remainingTime + ' ' + Text('minutes')
         } else {
             remainingTime = 'N/A'
         }
     } else if (mission.missionStatus === MissionStatus.Pending) {
-        remainingTime = estimatedDuration + ' minutes'
+        remainingTime = estimatedDuration + ' ' + Text('minutes')
     } else {
         if (mission.endTime && mission.startTime) {
             usedTime = differenceInMinutes(new Date(mission.endTime), new Date(mission.startTime))

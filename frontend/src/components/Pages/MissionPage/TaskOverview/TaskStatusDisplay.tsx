@@ -10,6 +10,7 @@ import {
 import { tokens } from '@equinor/eds-tokens'
 import { IsarTaskStatus } from 'models/IsarTask'
 import styled from 'styled-components'
+import { Text } from 'components/Contexts/LanguageContext'
 
 Icon.add({ check_circle_outlined, error_outlined, warning_outlined, time, autorenew, pause_circle_outlined })
 
@@ -52,7 +53,7 @@ export function TaskStatusDisplay({ status }: StatusProps) {
     return (
         <StyledStatusDisplay>
             {displayIcon(status)}
-            <Typography>{status}</Typography>
+            <Typography>{Text(status)}</Typography>
         </StyledStatusDisplay>
     )
 }

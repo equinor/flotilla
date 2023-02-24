@@ -12,6 +12,7 @@ import {
 import { Mission } from 'models/Mission'
 import { ChangeEvent, useRef, useState } from 'react'
 import styled from 'styled-components'
+import { Text } from 'components/Contexts/LanguageContext'
 
 interface IProps {
     robotOptions: Array<string>
@@ -92,7 +93,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     disabled={props.frontPageScheduleButtonDisabled}
                     ref={anchorRef}
                 >
-                    Schedule Mission
+                    {Text('Schedule mission')}
                 </Button>
             </div>
 
@@ -103,7 +104,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 placement="top"
             >
                 <Popover.Content>
-                    <Typography variant="body_short">Please select asset</Typography>
+                    <Typography variant="body_short">{Text('Please select asset')}</Typography>
                 </Popover.Content>
             </Popover>
 
@@ -114,31 +115,33 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 placement="top"
             >
                 <Popover.Content>
-                    <Typography variant="body_short">This asset has no missions - Please create mission</Typography>
+                    <Typography variant="body_short">
+                        {Text('This asset has no missions - Please create mission')}
+                    </Typography>
                 </Popover.Content>
             </Popover>
 
             <StyledMissionDialog>
                 <Dialog open={isDialogOpen} isDismissable>
                     <StyledAutoComplete>
-                        <Typography variant="h5">Schedule mission</Typography>
+                        <Typography variant="h5">{Text('Schedule mission')}</Typography>
                         <Autocomplete
                             options={props.echoMissionsOptions}
-                            label={'Schedule Missions'}
+                            label={Text('Select missions')}
                             onOptionsChange={onChangeEchoMissionSelections}
                             multiple
                         />
                         <Autocomplete
                             options={props.robotOptions}
-                            label={'Select robot'}
+                            label={Text('Select robot')}
                             onOptionsChange={onChangeRobotSelection}
                         />
                         <TextField
                             id="datetime"
-                            label="Select start time"
+                            label={Text('Select start time')}
                             type="datetime-local"
                             variant={isStartTimeValid ? undefined : 'error'}
-                            helperText={isStartTimeValid ? undefined : 'Cannot schedule mission in the past'}
+                            helperText={isStartTimeValid ? undefined : Text('Cannot schedule mission in the past')}
                             onChange={onChangeStartTime}
                         />
                         <StyledMissionSection>
@@ -150,7 +153,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 color="secondary"
                             >
                                 {' '}
-                                Cancel{' '}
+                                {Text('Cancel')}{' '}
                             </Button>
                             <Button
                                 onClick={() => {
@@ -160,7 +163,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 disabled={props.scheduleButtonDisabled}
                             >
                                 {' '}
-                                Schedule mission
+                                {Text('Schedule mission')}
                             </Button>
                         </StyledMissionSection>
                     </StyledAutoComplete>
