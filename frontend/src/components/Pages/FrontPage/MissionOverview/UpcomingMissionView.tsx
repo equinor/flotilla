@@ -9,6 +9,7 @@ import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { EchoMission } from 'models/EchoMission'
 import { Robot } from 'models/Robot'
 import { RefreshProps } from '../FrontPage'
+import { Text } from 'components/Contexts/LanguageContext'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -150,7 +151,7 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
     return (
         <StyledMissionView>
             <Typography variant="h2" color="resting">
-                Upcoming missions
+                {Text('Upcoming Missions')}
             </Typography>
             <MissionTable>
                 {upcomingMissions.length > 0 && upcomingMissionDisplay}
@@ -172,7 +173,7 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
                         window.open(echoURL + savedAsset)
                     }}
                 >
-                    Create mission
+                    {Text('Create mission')}
                 </Button>
             </MissionButtonView>
         </StyledMissionView>

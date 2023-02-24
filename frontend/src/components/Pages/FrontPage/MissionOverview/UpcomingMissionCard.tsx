@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { Text } from 'components/Contexts/LanguageContext'
 
 interface UpcomingMissionCardProps {
     mission: Mission
@@ -68,7 +69,9 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
                     </Button>
                     <Typography>{mission.robot.name}</Typography>
                     <MissionStartTimeDisplay mission={mission} />
-                    <Typography>Tasks: {numberOfTasks}</Typography>
+                    <Typography>
+                        {Text('Tasks')}: {numberOfTasks}
+                    </Typography>
                     <MissionDurationDisplay mission={mission} />
                 </HorizontalNonButtonContent>
                 <Button
@@ -82,7 +85,7 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
                 </Button>
                 <Dialog open={confirmDeleteDialogOpen} isDismissable>
                     <StyledConfirmDialog>
-                        <Typography variant="h5">Please confirm that you want to delete:</Typography>
+                        <Typography variant="h5">{Text('Please confirm that you want to delete:')}</Typography>
                         <Typography bold>{mission.name}</Typography>
                         <StyledButtonSection>
                             <Button
@@ -93,7 +96,7 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
                                 color="secondary"
                             >
                                 {' '}
-                                Cancel{' '}
+                                {Text('Cancel')}{' '}
                             </Button>
                             <Button
                                 color="danger"
@@ -103,7 +106,7 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
                                 }}
                             >
                                 {' '}
-                                Delete mission
+                                {Text('Delete mission')}
                             </Button>
                         </StyledButtonSection>
                     </StyledConfirmDialog>
@@ -116,8 +119,12 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
 function MissionStartTimeDisplay({ mission }: MissionDisplayProps) {
     return (
         <StyledMissionStartTime>
-            <Typography>Date: {format(new Date(mission.startTime), 'dd. MMM')}</Typography>
-            <Typography>Time: {format(new Date(mission.startTime), 'HH:mm')}</Typography>
+            <Typography>
+                {Text('Date')}: {format(new Date(mission.startTime), 'dd. MMM')}
+            </Typography>
+            <Typography>
+                {Text('Time')}: {format(new Date(mission.startTime), 'HH:mm')}
+            </Typography>
         </StyledMissionStartTime>
     )
 }
@@ -131,9 +138,11 @@ function MissionDurationDisplay({ mission }: MissionDisplayProps) {
         const minutes = +time[1]
         return (
             <Typography>
-                Estimated duration: {hours}h {minutes}min
+                {Text('Estimated duration')}: {hours}
+                {Text('h')} {minutes}
+                {Text('min')}
             </Typography>
         )
     }
-    return <Typography>Estimated duration: not available</Typography>
+    return <Typography>{Text('Estimated duration: not available')}</Typography>
 }

@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
+import { Text } from 'components/Contexts/LanguageContext'
 
 const RobotCardSection = styled.div`
     display: flex;
@@ -51,7 +52,7 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     return (
         <RobotView>
             <Typography color="resting" variant="h2">
-                Robot status
+                {Text('Robot status')}
             </Typography>
             <RobotCardSection>
                 {robots.length > 0 && robotDisplay}

@@ -3,6 +3,7 @@ import { IsarTask, IsarTaskStatus } from 'models/IsarTask'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { Text } from 'components/Contexts/LanguageContext'
 
 const StyledTagCount = styled.div`
     display: flex;
@@ -29,7 +30,7 @@ export function MissionProgressDisplay({ mission }: MissionProps) {
     return (
         <StyledTagCount>
             <Typography>
-                Task {completedTasks}/{plannedTasks.length}
+                {Text('Task')} {completedTasks}/{plannedTasks.length}
             </Typography>
         </StyledTagCount>
     )

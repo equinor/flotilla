@@ -5,6 +5,7 @@ import { IsarTask, IsarTaskStatus } from 'models/IsarTask'
 import { EchoTag } from 'models/EchoMission'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
 import { PlannedTask } from 'models/PlannedTask'
+import { Text } from 'components/Contexts/LanguageContext'
 
 const StyledTable = styled(Table)`
     grid-column: 1/ -1;
@@ -22,15 +23,15 @@ export function TaskTable({ mission }: MissionProps) {
     return (
         <StyledTable>
             <Table.Caption>
-                <Typography variant="h2">Tasks</Typography>
+                <Typography variant="h2">{Text('Tasks')}</Typography>
             </Table.Caption>
             <Table.Head>
                 <Table.Row>
                     <Table.Cell>#</Table.Cell>
-                    <Table.Cell>Tag-ID</Table.Cell>
-                    <Table.Cell>Description</Table.Cell>
-                    <Table.Cell>Inspection Type</Table.Cell>
-                    <Table.Cell>Status</Table.Cell>
+                    <Table.Cell>{Text('Tag-ID')}</Table.Cell>
+                    <Table.Cell>{Text('Description')}</Table.Cell>
+                    <Table.Cell>{Text('Inspection Type')}</Table.Cell>
+                    <Table.Cell>{Text('Status')}</Table.Cell>
                 </Table.Row>
             </Table.Head>
             <Table.Body>{rows}</Table.Body>
@@ -50,13 +51,13 @@ function renderOngoingTasks(tasks: IsarTask[]) {
                 {task.taskStatus === IsarTaskStatus.Successful && (
                     <Table.Cell>
                         <Typography link href={task.steps[0].fileLocation}>
-                            {task.steps[0].inspectionType}
+                            {Text(task.steps[0].inspectionType as string)}
                         </Typography>
                     </Table.Cell>
                 )}
                 {task.taskStatus !== IsarTaskStatus.Successful && (
                     <Table.Cell>
-                        <Typography>{task.steps[0].inspectionType}</Typography>
+                        <Typography>{Text(task.steps[0].inspectionType as string)}</Typography>
                     </Table.Cell>
                 )}
                 <Table.Cell>

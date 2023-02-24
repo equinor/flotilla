@@ -1,5 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
+import { Text } from 'components/Contexts/LanguageContext'
 
 const StyledPlaceholder = styled.div`
     display: flex;
@@ -23,7 +24,7 @@ export function NoOngoingMissionsPlaceholder() {
         <StyledPlaceholder>
             <Typography variant="h4" color="disabled">
                 {' '}
-                No ongoing missions{' '}
+                {Text('No ongoing missions')}{' '}
             </Typography>
         </StyledPlaceholder>
     )
@@ -34,7 +35,7 @@ export function NoUpcomingMissionsPlaceholder() {
         <StyledPlaceholder>
             <Typography variant="h4" color="disabled">
                 {' '}
-                No pending missions in queue{' '}
+                {Text('No pending missions in queue')}{' '}
             </Typography>
         </StyledPlaceholder>
     )

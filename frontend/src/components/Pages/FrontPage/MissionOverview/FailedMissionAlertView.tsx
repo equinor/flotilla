@@ -10,6 +10,7 @@ import { RefreshProps } from '../FrontPage'
 import { useNavigate } from 'react-router-dom'
 import { clear } from '@equinor/eds-icons'
 import { addMinutes, max } from 'date-fns'
+import { Text } from 'components/Contexts/LanguageContext'
 
 const StyledCard = styled(Card)`
     width: 100%;
@@ -49,7 +50,7 @@ function FailedMission({ mission }: MissionProps) {
 
     return (
         <Button as={Typography} onClick={goToMission} variant="ghost" color="secondary">
-            <strong>'{mission.name}'</strong> failed on robot <strong>'{mission.robot.name}'</strong>
+            <strong>'{mission.name}'</strong> {Text('failed on robot')} <strong>'{mission.robot.name}'</strong>
         </Button>
     )
 }
@@ -108,8 +109,8 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
     var severalMissions = (
         <SeveralMissionPad>
             <Typography>
-                <strong>{recentFailedMissions.length}</strong> missions failed recently. See 'Past Missions' for more
-                information.
+                <strong>{recentFailedMissions.length}</strong>
+                {' ' + Text("missions failed recently. See 'Past Missions' for more information.")}
             </Typography>
         </SeveralMissionPad>
     )

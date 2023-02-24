@@ -6,6 +6,7 @@ import { PastMissionCard } from './PastMissionCard'
 import { compareDesc } from 'date-fns'
 import { RefreshProps } from '../FrontPage'
 import styled from 'styled-components'
+import { Text } from 'components/Contexts/LanguageContext'
 
 const TableWithHeader = styled.div`
     width: 600px;
@@ -57,14 +58,14 @@ export function PastMissionView({ refreshInterval }: RefreshProps) {
 
     return (
         <TableWithHeader>
-            <Typography variant="h2">Past Missions</Typography>
+            <Typography variant="h2">{Text('Past Missions')}</Typography>
             <ScrollableTable>
                 <Table>
                     <Table.Head sticky>
                         <Table.Row>
-                            <Table.Cell>Status</Table.Cell>
-                            <Table.Cell>Name</Table.Cell>
-                            <Table.Cell>Completion Time</Table.Cell>
+                            <Table.Cell>{Text('Status')}</Table.Cell>
+                            <Table.Cell>{Text('Name')}</Table.Cell>
+                            <Table.Cell>{Text('Completion Time')}</Table.Cell>
                         </Table.Row>
                     </Table.Head>
                     <Table.Body>{missionsDisplay}</Table.Body>

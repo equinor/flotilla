@@ -3,6 +3,7 @@ import { check_circle_outlined, error_outlined, time, warning_outlined, autorene
 import { tokens } from '@equinor/eds-tokens'
 import { MissionStatus } from 'models/Mission'
 import styled from 'styled-components'
+import { Text } from 'components/Contexts/LanguageContext'
 
 Icon.add({ check_circle_outlined, error_outlined, warning_outlined, time, autorenew })
 
@@ -47,7 +48,7 @@ export function MissionStatusDisplay({ status }: StatusProps) {
     return (
         <StyledStatusDisplay>
             {displayIcon(status)}
-            <Typography>{status}</Typography>
+            <Typography>{Text(status)}</Typography>
         </StyledStatusDisplay>
     )
 }

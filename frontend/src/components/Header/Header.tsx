@@ -5,6 +5,7 @@ import { useAssetContext } from 'components/Contexts/AssetContext'
 import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { Text } from 'components/Contexts/LanguageContext'
 
 Icon.add({ account_circle, accessible, notifications })
 
@@ -72,7 +73,7 @@ function AssetPicker() {
             options={Array.from(mappedOptions.keys()).sort()}
             label=""
             initialSelectedOptions={[initialOption]}
-            placeholder="Select asset"
+            placeholder={Text('Select asset')}
             onOptionsChange={({ selectedItems }) => {
                 const mapKey = mappedOptions.get(selectedItems[0])
                 if (mapKey != undefined) switchAsset(mapKey)
