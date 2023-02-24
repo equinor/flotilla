@@ -12,6 +12,7 @@ import { RefreshProps } from '../FrontPage'
 import { Text } from 'components/Contexts/LanguageContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { Icons } from 'utils/icons'
+import { useErrorHandler } from 'react-error-boundary'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -47,6 +48,7 @@ const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
 
 export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const apiCaller = useApi()
+    const handleError = useErrorHandler()
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMission[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
@@ -65,6 +67,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
             setEchoMissions(echoMissionsMap)
             setIsFetchingEchoMissions(false)
         })
+        .catch((e) => handleError(e))
     }
 
     const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
@@ -84,7 +87,9 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         if (selectedRobot === undefined) return
 
         selectedEchoMissions.map((mission: EchoMission) => {
-            apiCaller.postMission(mission.id, selectedRobot.id, assetCode)
+            apiCaller
+                .postMission(mission.id, selectedRobot.id, assetCode)
+                .catch((e) => handleError(e))
         })
 
         setSelectedEchoMissions([])
@@ -92,30 +97,39 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }
 
     const onDeleteMission = (mission: Mission) => {
-        apiCaller.deleteMission(mission.id)
+        apiCaller.deleteMission(mission.id).catch((e) => handleError(e))
     }
 
     useEffect(() => {
-        apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
-            setMissionQueue(missions)
-        })
+        apiCaller
+            .getMissionsByStatus(MissionStatus.Pending)
+            .then((missions) => {
+                setMissionQueue(missions)
+            })
+            .catch((e) => handleError(e))
     }, [])
 
     useEffect(() => {
         const id = setInterval(() => {
-            apiCaller.getRobots().then((robots) => {
-                const mappedRobots: Map<string, Robot> = mapRobotsToString(robots)
-                setRobotOptions(mappedRobots)
+            apiCaller
+                .getRobots()
+                .then((robots) => {
+                    const mappedRobots: Map<string, Robot> = mapRobotsToString(robots)
+                    setRobotOptions(mappedRobots)
             })
+            .catch((e) => handleError(e))
         }, refreshInterval)
         return () => clearInterval(id)
     }, [])
 
     useEffect(() => {
         const id = setInterval(() => {
-            apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
-                setMissionQueue(missions)
-            })
+            apiCaller
+                .getMissionsByStatus(MissionStatus.Pending)
+                .then((missions) => {
+                    setMissionQueue(missions)
+                })
+                .catch((e) => handleError(e))
         }, refreshInterval)
         return () => clearInterval(id)
     }, [])

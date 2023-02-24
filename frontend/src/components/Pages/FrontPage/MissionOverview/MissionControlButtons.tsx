@@ -6,6 +6,7 @@ import { useApi } from 'api/ApiCaller'
 import { tokens } from '@equinor/eds-tokens'
 import { ControlMissionResponse } from 'models/ControlMissionResponse'
 import { IsarTask, IsarTaskStatus } from 'models/IsarTask'
+import { useErrorHandler } from 'react-error-boundary'
 
 interface MissionProps {
     mission: Mission
@@ -48,27 +49,37 @@ export function MissionControlButtons({ mission }: MissionProps) {
         mapMissionStatusToIsarStatus(mission.missionStatus) as IsarMissionResponse
     )
     const apiCaller = useApi()
+    const handleError = useErrorHandler()
     const handleClick = (button: ControlButton) => {
         switch (button) {
             case ControlButton.Pause: {
                 setIsarResponse(IsarMissionResponse.Unknown)
-                apiCaller.pauseMission(mission.robot.id).then((response: ControlMissionResponse) => {
-                    setIsarResponse(response.missionStatus)
-                })
+                apiCaller
+                    .pauseMission(mission.robot.id)
+                    .then((response: ControlMissionResponse) => {
+                        setIsarResponse(response.missionStatus)
+                    })
+                    .catch((e) => handleError(e))
                 break
             }
             case ControlButton.Resume: {
                 setIsarResponse(IsarMissionResponse.Unknown)
-                apiCaller.resumeMission(mission.robot.id).then((response: ControlMissionResponse) => {
-                    setIsarResponse(response.missionStatus)
-                })
+                apiCaller
+                    .resumeMission(mission.robot.id)
+                    .then((response: ControlMissionResponse) => {
+                        setIsarResponse(response.missionStatus)
+                    })
+                    .catch((e) => handleError(e))
                 break
             }
             case ControlButton.Stop: {
                 setIsarResponse(IsarMissionResponse.Unknown)
-                apiCaller.stopMission(mission.robot.id).then((response: ControlMissionResponse) => {
-                    setIsarResponse(response.missionStatus)
-                })
+                apiCaller
+                    .stopMission(mission.robot.id)
+                    .then((response: ControlMissionResponse) => {
+                        setIsarResponse(response.missionStatus)
+                    })
+                    .catch((e) => handleError(e))
                 break
             }
         }

@@ -4,6 +4,7 @@ import { useApi } from 'api/ApiCaller'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
+import { useErrorHandler } from 'react-error-boundary'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
 import { SelectLanguageDialog } from './SelectLanguageDialog'
@@ -68,13 +69,18 @@ export function Header() {
 
 function AssetPicker() {
     const apiCaller = useApi()
+    const handleError = useErrorHandler()
+
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
     const { assetCode, switchAsset } = useAssetContext()
     useEffect(() => {
-        apiCaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
-            const mapping = mapAssetCodeToName(response)
-            setAllPlantsMap(mapping)
-        })
+        apiCaller
+            .getEchoPlantInfo()
+            .then((response: EchoPlantInfo[]) => {
+                const mapping = mapAssetCodeToName(response)
+                setAllPlantsMap(mapping)
+            })
+            .catch((e) => handleError(e))
     }, [])
     const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
     return (

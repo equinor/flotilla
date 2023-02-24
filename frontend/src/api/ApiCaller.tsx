@@ -75,7 +75,8 @@ export class BackendAPICaller {
     async getRobots(): Promise<Robot[]> {
         const path: string = 'robots'
         const result = await this.GET<Robot[]>(path).catch((e) => {
-            throw new Error(`Failed to GET /${path}: ` + e)
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
         })
         return result.content
     }
@@ -83,7 +84,8 @@ export class BackendAPICaller {
     async getAllEchoMissions(): Promise<EchoMission[]> {
         const path: string = 'echo-missions'
         const result = await this.GET<EchoMission[]>(path).catch((e) => {
-            throw new Error(`Failed to GET /${path}: ` + e)
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
         })
         return result.content
     }
@@ -99,7 +101,8 @@ export class BackendAPICaller {
     async getMissionsByStatus(status: MissionStatus): Promise<Mission[]> {
         const path: string = 'missions?status=' + status
         const result = await this.GET<Mission[]>(path).catch((e) => {
-            throw new Error(`Failed to GET /${path}: ` + e)
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
         })
         return result.content
     }
@@ -107,7 +110,8 @@ export class BackendAPICaller {
     async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
         const path: string = 'echo-missions?installationCode=' + installationCode
         const result = await this.GET<EchoMission[]>(path).catch((e) => {
-            throw new Error(`Failed to GET /${path}: ` + e)
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
         })
         return result.content
     }
@@ -115,7 +119,8 @@ export class BackendAPICaller {
     async getMissionById(missionId: string): Promise<Mission> {
         const path: string = 'missions/' + missionId
         const result = await this.GET<Mission>(path).catch((e) => {
-            throw new Error(`Failed to GET /${path}: ` + e)
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
         })
         return result.content
     }
@@ -123,7 +128,8 @@ export class BackendAPICaller {
     async getVideoStreamsByRobotId(robotId: string): Promise<VideoStream[]> {
         const path: string = 'robots/' + robotId + '/video-streams'
         const result = await this.GET<VideoStream[]>(path).catch((e) => {
-            throw new Error(`Failed to GET /${path}: ` + e)
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
         })
         return result.content
     }
@@ -131,7 +137,8 @@ export class BackendAPICaller {
     async getEchoPlantInfo(): Promise<EchoPlantInfo[]> {
         const path: string = 'echo-plants'
         const result = await this.GET<EchoPlantInfo[]>(path).catch((e: Error) => {
-            throw new Error(`Failed to GET /${path}: ` + e)
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
         })
         return result.content
     }
@@ -146,7 +153,8 @@ export class BackendAPICaller {
             assetCode: assetCode,
         }
         const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
-            throw new Error(`Failed to POST /${path}: ` + e)
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
         })
         return result.content
     }
@@ -154,7 +162,8 @@ export class BackendAPICaller {
     async deleteMission(missionId: string) {
         const path: string = 'missions/' + missionId
         await this.DELETE(path, '').catch((e) => {
-            throw new Error(`Failed to DELETE /${path}: ` + e)
+            console.error(`Failed to DELETE /${path}: ` + e)
+            throw e
         })
     }
 
