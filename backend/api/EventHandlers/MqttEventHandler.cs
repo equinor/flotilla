@@ -72,6 +72,9 @@ namespace Api.EventHandlers
                 return;
             }
 
+            if (robot.Status == isarRobotStatus.RobotStatus)
+                return;
+
             robot.Status = isarRobotStatus.RobotStatus;
             robot = await RobotService.Update(robot);
             _logger.LogInformation(
