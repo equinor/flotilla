@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Drawing;
+using System.Globalization;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Options;
@@ -13,7 +14,7 @@ namespace Api.Services
 {
     public interface IMapService
     {
-        public abstract Task<string> FetchMapImage(string missionId);
+        public abstract Task<Image> FetchMapImage(string missionId);
         public abstract Task<MissionMap> AssignMapToMission(
             string assetCode,
             List<PlannedTask> tasks
@@ -26,8 +27,6 @@ namespace Api.Services
         private readonly IOptions<AzureAdOptions> _azureOptions;
         private readonly IOptions<MapBlobOptions> _blobOptions;
         private readonly FlotillaDbContext _dbContext;
-        private readonly string _localFilePath =
-            Directory.GetCurrentDirectory() + "/Database/Maps/map.png";
 
         public MapService(
             ILogger<MapService> logger,
@@ -42,7 +41,7 @@ namespace Api.Services
             _dbContext = dbContext;
         }
 
-        public async Task<string> FetchMapImage(string missionId)
+        public async Task<Image> FetchMapImage(string missionId)
         {
             var currentMission = _dbContext.Missions.Find(missionId);
             if (currentMission == null)
@@ -130,22 +129,15 @@ namespace Api.Services
             return containerClient;
         }
 
-        private async Task<string> DownloadMapImageFromBlobStorage(Mission currentMission)
+        private async Task<Image> DownloadMapImageFromBlobStorage(Mission currentMission)
         {
             var blobContainerClient = GetBlobContainerClient(
                 currentMission.AssetCode.ToLower(CultureInfo.CurrentCulture)
             );
             var blobClient = blobContainerClient.GetBlobClient(currentMission.Map.MapName);
-            try
-            {
-                await blobClient.DownloadToAsync(_localFilePath);
-            }
-            catch (RequestFailedException e)
-            {
-                _logger.LogError("Directory not found: {message}", e.Message);
-                throw e;
-            }
-            return _localFilePath;
+
+            using var stream = await blobClient.OpenReadAsync();
+            return Image.FromStream(stream);
         }
 
         private Boundary ExtractMapMetadata(BlobItem map)

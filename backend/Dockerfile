@@ -12,9 +12,7 @@ RUN dotnet publish -c release -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=build /app ./
-
-# Create folder for temporary storing of maps
-RUN mkdir -p /app/Database/Maps/
+RUN apt-get update && apt-get install -y apt-utils libgdiplus libc6-dev
 
 EXPOSE 8000
 
