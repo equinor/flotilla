@@ -91,9 +91,11 @@ public class MissionController : ControllerBase
     {
         try
         {
-            string filePath = await _mapService.FetchMapImage(id);
-            var returnFile = PhysicalFile(filePath, "image/png");
-            return returnFile;
+            var mapImage = await _mapService.FetchMapImage(id);
+
+            using var memoryStream = new MemoryStream();
+            mapImage.Save(memoryStream, mapImage.RawFormat);
+            return File(memoryStream.ToArray(), "image/png");
         }
         catch (Azure.RequestFailedException)
         {
