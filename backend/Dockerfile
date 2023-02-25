@@ -13,6 +13,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=build /app ./
 
+# Create folder for temporary storing of maps
+RUN mkdir -p /app/Database/Maps/
+
 EXPOSE 8000
 
 # Runtime user change to non-root for added security
