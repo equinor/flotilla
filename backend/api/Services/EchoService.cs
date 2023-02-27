@@ -22,17 +22,14 @@ namespace Api.Services
     {
         public const string ServiceName = "EchoApi";
         private readonly IDownstreamWebApi _echoApi;
-        private readonly string _installationCode;
         private readonly ILogger<EchoService> _logger;
 
         public EchoService(
-            IConfiguration config,
             IDownstreamWebApi downstreamWebApi,
             ILogger<EchoService> logger
         )
         {
             _echoApi = downstreamWebApi;
-            _installationCode = config.GetValue<string>("InstallationCode");
             _logger = logger;
         }
 
@@ -158,7 +155,7 @@ namespace Api.Services
             return inspections;
         }
 
-        private List<EchoTag> ProcessPlanItems(List<PlanItem> planItems)
+        private List<EchoTag> ProcessPlanItems(List<PlanItem> planItems, string installationCode)
         {
             var tags = new List<EchoTag>();
 
@@ -183,7 +180,7 @@ namespace Api.Services
                         robotPose.TiltDegreesClockwise
                     ),
                     URL = new Uri(
-                        $"https://stid.equinor.com/{_installationCode}/tag?tagNo={planItem.Tag}"
+                        $"https://stid.equinor.com/{installationCode}/tag?tagNo={planItem.Tag}"
                     ),
                     Inspections = ProcessSensorTypes(planItem.SensorTypes)
                 };
@@ -223,7 +220,7 @@ namespace Api.Services
                     Name = echoMission.Name,
                     AssetCode = echoMission.InstallationCode,
                     URL = new Uri($"https://echo.equinor.com/mp?editId={echoMission.Id}"),
-                    Tags = ProcessPlanItems(echoMission.PlanItems)
+                    Tags = ProcessPlanItems(echoMission.PlanItems, echoMission.InstallationCode)
                 };
                 return mission;
             }

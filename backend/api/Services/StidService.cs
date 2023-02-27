@@ -7,24 +7,22 @@ namespace Api.Services
 {
     public interface IStidService
     {
-        public abstract Task<Position> GetTagPosition(string tag);
+        public abstract Task<Position> GetTagPosition(string tag, string installationCode);
     }
 
     public class StidService : IStidService
     {
         public const string ServiceName = "StidApi";
         private readonly IDownstreamWebApi _stidApi;
-        private readonly string _installationCode;
 
-        public StidService(IConfiguration config, IDownstreamWebApi downstreamWebApi)
+        public StidService(IDownstreamWebApi downstreamWebApi)
         {
             _stidApi = downstreamWebApi;
-            _installationCode = config.GetValue<string>("InstallationCode");
         }
 
-        public async Task<Position> GetTagPosition(string tag)
+        public async Task<Position> GetTagPosition(string tag, string installationCode)
         {
-            string relativePath = $"{_installationCode}/tag?tagNo={tag}";
+            string relativePath = $"{installationCode}/tag?tagNo={tag}";
 
             var response = await _stidApi.CallWebApiForAppAsync(
                 ServiceName,
