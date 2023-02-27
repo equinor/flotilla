@@ -8,6 +8,7 @@ export enum MissionStatus {
     Pending = 'Pending',
     Ongoing = 'Ongoing',
     Successful = 'Successful',
+    PartiallySuccessful = 'PartiallySuccessful',
     Aborted = 'Aborted',
     Failed = 'Failed',
     Paused = 'Paused',

@@ -23,6 +23,7 @@ export function PastMissionView({ refreshInterval }: RefreshProps) {
         MissionStatus.Aborted,
         MissionStatus.Cancelled,
         MissionStatus.Successful,
+        MissionStatus.PartiallySuccessful,
         MissionStatus.Failed,
     ]
     const apiCaller = useApi()
