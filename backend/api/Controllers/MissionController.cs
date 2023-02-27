@@ -164,7 +164,7 @@ public class MissionController : ControllerBase
             .Select(
                 t =>
                 {
-                    var tagPosition = _stidService.GetTagPosition(t.TagId).Result;
+                    var tagPosition = _stidService.GetTagPosition(t.TagId, scheduledMissionQuery.AssetCode).Result;
                     return new PlannedTask(t, tagPosition);
                 }
             )
