@@ -1,10 +1,10 @@
-import { Card, Icon, Typography } from '@equinor/eds-core-react'
+import { Card, Icon } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { useApi } from 'api/ApiCaller'
 import { Mission } from 'models/Mission'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { image, place } from '@equinor/eds-icons'
+import { place } from '@equinor/eds-icons'
 import NoMap from 'mediaAssets/NoMap.png'
 import { MissionMap } from 'models/MissionMap'
 

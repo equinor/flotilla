@@ -3,13 +3,11 @@ import {
     AutocompleteChanges,
     Button,
     Card,
-    Checkbox,
     Dialog,
     Typography,
     TextField,
     Popover,
 } from '@equinor/eds-core-react'
-import { Mission } from 'models/Mission'
 import { ChangeEvent, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
