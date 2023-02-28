@@ -6,6 +6,7 @@ import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
+import { SelectLanguageDialog } from './SelectLanguageDialog'
 
 Icon.add({ account_circle, accessible, notifications })
 
@@ -18,7 +19,7 @@ const Icons = styled.div`
     align-items: center;
     flex-direction: row-reverse;
     > * {
-        margin-left: 40px;
+        margin-left: 1rem;
     }
 `
 
@@ -46,6 +47,7 @@ export function Header() {
                         <Icon name="notifications" size={16} />
                     </Button>
                 </Icons>
+                {SelectLanguageDialog()}
             </TopBar.Actions>
         </StyledTopBar>
     )

@@ -1,5 +1,5 @@
 import { createContext, FC, useContext, useState } from 'react'
-import { dictionaryList } from '../../language'
+import { defaultLanguage, allLanguageDictionaries, languageOptions } from '../../language'
 
 interface ILanguageContext {
     language: string
@@ -11,20 +11,21 @@ interface Props {
     children: React.ReactNode
 }
 
-const defaultLanguage = {
-    language: 'en',
-    textDictionary: dictionaryList.en,
+const defaultLanguageInterface = {
+    language: defaultLanguage,
+    textDictionary: allLanguageDictionaries[defaultLanguage],
     switchLanguage: (newLanguage: string) => {},
 }
 
-export const LanguageContext = createContext<ILanguageContext>(defaultLanguage)
+export const LanguageContext = createContext<ILanguageContext>(defaultLanguageInterface)
 
 export const LanguageProvider: FC<Props> = ({ children }) => {
-    const prevLanguage = window.localStorage.getItem('rcml-lang')
-    const [language, setLanguage] = useState(prevLanguage || defaultLanguage.language)
+    const prevLanguage = window.localStorage.getItem('flotilla-language')
+    const [language, setLanguage] = useState(prevLanguage || defaultLanguage)
 
-    const textDictionary =
-        language === 'en' || language === 'no' ? dictionaryList[language] : defaultLanguage.textDictionary
+    if (!Object.keys(languageOptions).includes(language)) setLanguage(defaultLanguage)
+
+    const textDictionary = allLanguageDictionaries[language]
     const switchLanguage = (newLanguage: string) => {
         setLanguage(newLanguage)
         window.localStorage.setItem('flotilla-language', newLanguage)
