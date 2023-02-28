@@ -1,4 +1,3 @@
-import { EchoTag } from './EchoMission'
 import { IsarTask } from './IsarTask'
 import { MissionMap } from './MissionMap'
 import { PlannedTask } from './PlannedTask'

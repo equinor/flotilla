@@ -5,7 +5,7 @@ import { EchoMission, EchoPlantInfo } from 'models/EchoMission'
 import { Mission, MissionStatus } from 'models/Mission'
 import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
-import { useContext, useEffect, useRef } from 'react'
+import { useContext } from 'react'
 import { filterRobots } from 'utils/scheduleMission'
 
 export class BackendAPICaller {

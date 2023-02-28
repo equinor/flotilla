@@ -1,4 +1,4 @@
-import { Button, Icon, Search, TopBar, Autocomplete } from '@equinor/eds-core-react'
+import { Button, Icon, TopBar, Autocomplete } from '@equinor/eds-core-react'
 import { accessible, account_circle, notifications } from '@equinor/eds-icons'
 import { useApi } from 'api/ApiCaller'
 import { useAssetContext } from 'components/Contexts/AssetContext'

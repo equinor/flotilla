@@ -1,7 +1,5 @@
-import { Typography } from '@equinor/eds-core-react'
 import { useApi } from 'api/ApiCaller'
 import { TaskTable } from 'components/Pages/MissionPage/TaskOverview/TaskTable'
-import { MapPositionView } from 'components/Pages/MissionPage/MapPosition/MapPositionView'
 import { VideoStreamWindow } from 'components/Pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
 import { VideoStream } from 'models/VideoStream'
