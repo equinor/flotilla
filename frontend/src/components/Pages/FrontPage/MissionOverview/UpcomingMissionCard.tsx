@@ -1,6 +1,6 @@
 import { Button, Card, Checkbox, Dialog, Icon, Typography } from '@equinor/eds-core-react'
 import { config } from 'config'
-import { delete_forever } from '@equinor/eds-icons'
+import { remove_outlined } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import { format } from 'date-fns'
@@ -48,7 +48,7 @@ const StyledButtonSection = styled.div`
     grid-template-columns: auto auto;
 `
 
-Icon.add({ delete_forever })
+Icon.add({ remove_outlined })
 
 export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissionCardProps) {
     let navigate = useNavigate()
@@ -76,12 +76,11 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
                 </HorizontalNonButtonContent>
                 <Button
                     variant="ghost_icon"
-                    color="danger"
                     onClick={() => {
                         setConfirmDeleteDialogOpen(true)
                     }}
                 >
-                    <Icon name="delete_forever" size={24} title="more action" />
+                    <Icon name="remove_outlined" size={24} title="more action" />
                 </Button>
                 <Dialog open={confirmDeleteDialogOpen} isDismissable>
                     <StyledConfirmDialog>
