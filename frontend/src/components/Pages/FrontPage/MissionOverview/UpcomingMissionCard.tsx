@@ -84,7 +84,9 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
                 </Button>
                 <Dialog open={confirmDeleteDialogOpen} isDismissable>
                     <StyledConfirmDialog>
-                        <Typography variant="h5">{Text('Please confirm that you want to delete:')}</Typography>
+                        <Typography variant="h5">
+                            {Text('Please confirm that you want to remove the mission from the queue:')}
+                        </Typography>
                         <Typography bold>{mission.name}</Typography>
                         <StyledButtonSection>
                             <Button

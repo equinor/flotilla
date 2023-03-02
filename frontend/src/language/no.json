@@ -19,7 +19,7 @@
     "Select start time": "Velg starttidspunkt",
     "Cannot schedule mission in the past": "Kan ikke planlegge oppdrag i fortid",
     "Tasks": "Oppgaver",
-    "Please confirm that you want to delete:": "Vennligst bekreft at du ønsker å slette:",
+    "Please confirm that you want to remove the mission from the queue:": "Vennligst bekreft at du ønsker å fjerne oppdraget fra køen:",
     "Delete mission": "Slett oppdrag",
     "Time": "Tid",
     "Date": "Dato",
