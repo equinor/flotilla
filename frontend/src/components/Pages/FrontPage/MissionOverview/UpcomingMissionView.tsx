@@ -144,8 +144,8 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
     })
     return (
         <StyledMissionView>
-            <Typography variant="h2" color="resting">
-                {Text('Upcoming Missions')}
+            <Typography variant="h1" color="resting">
+                {Text('Mission Queue')}
             </Typography>
             <MissionTable>
                 {upcomingMissions.length > 0 && upcomingMissionDisplay}

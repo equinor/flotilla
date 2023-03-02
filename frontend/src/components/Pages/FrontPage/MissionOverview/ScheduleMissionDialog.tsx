@@ -7,10 +7,14 @@ import {
     Typography,
     TextField,
     Popover,
+    Icon,
 } from '@equinor/eds-core-react'
 import { ChangeEvent, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
+import { add } from '@equinor/eds-icons'
+
+Icon.add({ add })
 
 interface IProps {
     robotOptions: Array<string>
@@ -79,7 +83,8 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     disabled={props.frontPageScheduleButtonDisabled}
                     ref={anchorRef}
                 >
-                    {Text('Schedule mission')}
+                    <Icon name="add" size={16} />
+                    {Text('Add mission')}
                 </Button>
             </div>
 
@@ -110,7 +115,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             <StyledMissionDialog>
                 <Dialog open={isDialogOpen} isDismissable>
                     <StyledAutoComplete>
-                        <Typography variant="h5">{Text('Schedule mission')}</Typography>
+                        <Typography variant="h5">{Text('Add mission')}</Typography>
                         <Autocomplete
                             options={props.echoMissionsOptions}
                             label={Text('Select missions')}
@@ -141,7 +146,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 disabled={props.scheduleButtonDisabled}
                             >
                                 {' '}
-                                {Text('Schedule mission')}
+                                {Text('Add mission')}
                             </Button>
                         </StyledMissionSection>
                     </StyledAutoComplete>

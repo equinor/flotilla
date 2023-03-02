@@ -35,7 +35,7 @@ export function NoUpcomingMissionsPlaceholder() {
         <StyledPlaceholder>
             <Typography variant="h4" color="disabled">
                 {' '}
-                {Text('No pending missions in queue')}{' '}
+                {Text('No missions in queue')}{' '}
             </Typography>
         </StyledPlaceholder>
     )

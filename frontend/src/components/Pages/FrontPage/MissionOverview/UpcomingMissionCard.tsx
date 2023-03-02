@@ -3,7 +3,6 @@ import { config } from 'config'
 import { remove_outlined } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
-import { format } from 'date-fns'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -29,7 +28,7 @@ const HorizontalContent = styled.div`
 `
 const HorizontalNonButtonContent = styled.div`
     display: grid;
-    grid-template-columns: 50px 200px 100px auto auto auto;
+    grid-template-columns: 50px 400px auto 90px 180px;
     align-items: center;
 `
 
@@ -58,11 +57,13 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
             <HorizontalContent>
                 <HorizontalNonButtonContent onClick={routeChange}>
                     <Checkbox />
-                    <Button as={Typography} variant="ghost" fullWidth>
-                        {mission.name}
+                    <Button variant="ghost" fullWidth>
+                        <Typography variant="body_short_bold">{mission.name}</Typography>
                     </Button>
-                    <Typography>{mission.robot.name}</Typography>
-                    <Typography>
+                    <Typography variant="caption" color="#6F6F6F">
+                        {Text('Robot')}: {mission.robot.name}
+                    </Typography>
+                    <Typography variant="caption" color="#6F6F6F">
                         {Text('Tasks')}: {numberOfTasks}
                     </Typography>
                     <MissionDurationDisplay mission={mission} />
@@ -118,12 +119,16 @@ function MissionDurationDisplay({ mission }: MissionDisplayProps) {
         const hours = +days * 24 + +time[0]
         const minutes = +time[1]
         return (
-            <Typography>
+            <Typography variant="caption" color="#6F6F6F">
                 {Text('Estimated duration')}: {hours}
                 {Text('h')} {minutes}
                 {Text('min')}
             </Typography>
         )
     }
-    return <Typography>{Text('Estimated duration: not available')}</Typography>
+    return (
+        <Typography variant="caption" color="#6F6F6F">
+            {Text('Estimated duration: not available')}
+        </Typography>
+    )
 }
