@@ -3,7 +3,6 @@ import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/O
 import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusView'
 import { FailedMissionAlertView } from './MissionOverview/FailedMissionAlertView'
 import styled from 'styled-components'
-import { PastMissionView } from './MissionOverview/PastMissionsView'
 
 const StyledFrontPage = styled.div`
     display: grid;
@@ -40,7 +39,6 @@ export function FrontPage() {
                     <OngoingMissionView refreshInterval={refreshInterval} />
                     <MissionQueueView refreshInterval={refreshInterval} />
                 </MissionsContent>
-                <PastMissionView refreshInterval={refreshInterval} />
             </HorizontalContent>
             <RobotStatusSection refreshInterval={refreshInterval} />
         </StyledFrontPage>

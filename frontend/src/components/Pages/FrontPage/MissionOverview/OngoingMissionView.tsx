@@ -1,4 +1,5 @@
-import { Typography } from '@equinor/eds-core-react'
+import { Button, Typography, Icon } from '@equinor/eds-core-react'
+import { history } from '@equinor/eds-icons'
 import { useApi } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useEffect, useState } from 'react'
@@ -7,6 +8,10 @@ import { RefreshProps } from '../FrontPage'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { OngoingMissionCard } from './OngoingMissionCard'
 import { Text } from 'components/Contexts/LanguageContext'
+import { useNavigate } from 'react-router-dom'
+import { config } from 'config'
+
+Icon.add({ history })
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -17,6 +22,10 @@ const OngoingMissionSection = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 2rem;
+`
+
+const ButtonStyle = styled.div`
+    display: block;
 `
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
@@ -59,6 +68,12 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
         return <OngoingMissionCard key={index} mission={mission} />
     })
 
+    let navigate = useNavigate()
+    const routeChange = () => {
+        let path = `${config.FRONTEND_BASE_ROUTE}/historic`
+        navigate(path)
+    }
+
     return (
         <StyledOngoingMissionView>
             <Typography variant="h1" color="resting">
@@ -68,6 +83,12 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
                 {missionsToDisplay.length > 0 && missionDisplay}
                 {missionsToDisplay.length === 0 && <NoOngoingMissionsPlaceholder />}
             </OngoingMissionSection>
+            <ButtonStyle>
+                <Button variant="outlined" onClick={routeChange}>
+                    <Icon name="history" />
+                    {Text('History')}
+                </Button>
+            </ButtonStyle>
         </StyledOngoingMissionView>
     )
 }
