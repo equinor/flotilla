@@ -41,6 +41,10 @@ interface MissionProps {
     mission: Mission
 }
 
+interface MissionsProps {
+    missions: Mission[]
+}
+
 function FailedMission({ mission }: MissionProps) {
     let navigate = useNavigate()
     const goToMission = () => {
@@ -51,6 +55,21 @@ function FailedMission({ mission }: MissionProps) {
     return (
         <Button as={Typography} onClick={goToMission} variant="ghost" color="secondary">
             <strong>'{mission.name}'</strong> {Text('failed on robot')} <strong>'{mission.robot.name}'</strong>
+        </Button>
+    )
+}
+
+function SeveralFailedMissions({ missions }: MissionsProps) {
+    let navigate = useNavigate()
+    const goToHistoric = () => {
+        let path = `${config.FRONTEND_BASE_ROUTE}/historic`
+        navigate(path)
+    }
+
+    return (
+        <Button as={Typography} onClick={goToHistoric} variant="ghost" color="secondary">
+            <strong>{missions.length}</strong>{' '}
+            {' ' + Text("missions failed recently. See 'Historic Missions' for more information.")}
         </Button>
     )
 }
@@ -105,15 +124,7 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
     }, [])
 
     var missionDisplay = <FailedMission mission={recentFailedMissions[0]} />
-
-    var severalMissions = (
-        <SeveralMissionPad>
-            <Typography>
-                <strong>{recentFailedMissions.length}</strong>
-                {' ' + Text("missions failed recently. See 'Historic Missions' for more information.")}
-            </Typography>
-        </SeveralMissionPad>
-    )
+    var severalMissions = <SeveralFailedMissions missions={recentFailedMissions} />
 
     return (
         <>
