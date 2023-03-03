@@ -77,7 +77,7 @@ namespace Api.Services
                             boundaries.Add(blobItem.Name, ExtractMapMetadata(blobItem));
                             imageSizes.Add(blobItem.Name, ExtractImageSize(blobItem));
                         }
-                        catch (FormatException)
+                        catch (Exception e) when (e is FormatException || e is KeyNotFoundException)
                         {
                             continue;
                         }
@@ -154,14 +154,14 @@ namespace Api.Services
                     double.Parse(map.Metadata["upperRightY"], CultureInfo.CurrentCulture) / 1000;
                 return new Boundary(lowerLeftX, lowerLeftY, upperRightX, upperRightY);
             }
-            catch (FormatException e)
+            catch (Exception e) when (e is FormatException || e is KeyNotFoundException)
             {
                 _logger.LogWarning(
                     "Unable to extract metadata from map {map.Name}: {e.Message}",
                     map.Name,
                     e.Message
                 );
-                throw e;
+                throw;
             }
         }
 
@@ -173,14 +173,14 @@ namespace Api.Services
                 int y = int.Parse(map.Metadata["imageHeight"], CultureInfo.CurrentCulture);
                 return new int[] { x, y };
             }
-            catch (FormatException e)
+            catch (Exception e) when (e is FormatException || e is KeyNotFoundException)
             {
                 _logger.LogWarning(
                     "Unable to extract image size from map {map.Name}: {e.Message}",
                     map.Name,
                     e.Message
                 );
-                throw e;
+                throw;
             }
         }
 
