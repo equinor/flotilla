@@ -87,7 +87,7 @@ public static class InitDb
             EchoMissionId = 95,
             IsarMissionId = "1",
             MissionStatus = MissionStatus.Pending,
-            DesiredStartTime = DateTimeOffset.UtcNow.AddHours(3),
+            DesiredStartTime = DateTimeOffset.UtcNow,
             PlannedTasks = new List<PlannedTask>(),
             Map = new MissionMap()
         };
@@ -100,7 +100,7 @@ public static class InitDb
             EchoMissionId = 95,
             IsarMissionId = "1",
             MissionStatus = MissionStatus.Pending,
-            DesiredStartTime = DateTimeOffset.UtcNow.AddHours(7),
+            DesiredStartTime = DateTimeOffset.UtcNow,
             PlannedTasks = new List<PlannedTask>(),
             Map = new MissionMap()
         };
@@ -113,7 +113,7 @@ public static class InitDb
             EchoMissionId = 1,
             IsarMissionId = "1",
             MissionStatus = MissionStatus.Pending,
-            DesiredStartTime = DateTimeOffset.UtcNow.AddHours(8),
+            DesiredStartTime = DateTimeOffset.UtcNow,
             PlannedTasks = new List<PlannedTask>(),
             Map = new MissionMap()
         };
