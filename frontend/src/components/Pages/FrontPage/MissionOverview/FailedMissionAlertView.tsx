@@ -110,7 +110,7 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
         <SeveralMissionPad>
             <Typography>
                 <strong>{recentFailedMissions.length}</strong>
-                {' ' + Text("missions failed recently. See 'Past Missions' for more information.")}
+                {' ' + Text("missions failed recently. See 'Historic Missions' for more information.")}
             </Typography>
         </SeveralMissionPad>
     )

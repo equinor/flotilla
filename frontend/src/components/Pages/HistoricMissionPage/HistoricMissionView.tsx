@@ -2,9 +2,9 @@ import { Table, Typography } from '@equinor/eds-core-react'
 import { useApi } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useEffect, useState } from 'react'
-import { PastMissionCard } from './HistoricMissionCard'
+import { HistoricMissionCard } from './HistoricMissionCard'
 import { compareDesc } from 'date-fns'
-import { RefreshProps } from './HistoricPage'
+import { RefreshProps } from './HistoricMissionPage'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
 
@@ -19,7 +19,7 @@ const ScrollableTable = styled.div`
     overflow: auto;
 `
 
-export function PastMissionView({ refreshInterval }: RefreshProps) {
+export function HistoricMissionView({ refreshInterval }: RefreshProps) {
     const completedStatuses = [
         MissionStatus.Aborted,
         MissionStatus.Cancelled,
@@ -53,12 +53,12 @@ export function PastMissionView({ refreshInterval }: RefreshProps) {
     }
 
     var missionsDisplay = completedMissions.map(function (mission, index) {
-        return <PastMissionCard key={index} index={index} mission={mission} />
+        return <HistoricMissionCard key={index} index={index} mission={mission} />
     })
 
     return (
         <TableWithHeader>
-            <Typography variant="h1">{Text('Past Missions')}</Typography>
+            <Typography variant="h1">{Text('Historic Missions')}</Typography>
             <ScrollableTable>
                 <Table>
                     <Table.Head sticky>

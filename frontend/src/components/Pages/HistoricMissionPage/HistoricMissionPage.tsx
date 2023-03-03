@@ -1,4 +1,4 @@
-import { PastMissionView } from './HistoricMissionView'
+import { HistoricMissionView } from './HistoricMissionView'
 import { BackButton } from '../MissionPage/MissionHeader/BackButton'
 import styled from 'styled-components'
 
@@ -14,13 +14,13 @@ export type RefreshProps = {
     refreshInterval: number
 }
 
-export function HistoricPage() {
+export function HistoricMissionPage() {
     const refreshInterval = 1000
 
     return (
         <StyledMissionPage>
             <BackButton />
-            <PastMissionView refreshInterval={refreshInterval} />
+            <HistoricMissionView refreshInterval={refreshInterval} />
         </StyledMissionPage>
     )
 }
