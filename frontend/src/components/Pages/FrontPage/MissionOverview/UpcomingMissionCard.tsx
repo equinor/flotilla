@@ -33,12 +33,6 @@ const HorizontalNonButtonContent = styled.div`
     align-items: center;
 `
 
-const StyledMissionStartTime = styled.div`
-    display: grid;
-    grid-template-columns: auto auto auto;
-    align-items: center;
-`
-
 const StyledConfirmDialog = styled.div`
     padding: 8px;
 `
@@ -68,7 +62,6 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
                         {mission.name}
                     </Button>
                     <Typography>{mission.robot.name}</Typography>
-                    <MissionStartTimeDisplay mission={mission} />
                     <Typography>
                         {Text('Tasks')}: {numberOfTasks}
                     </Typography>
@@ -114,19 +107,6 @@ export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissio
                 </Dialog>
             </HorizontalContent>
         </StyledMissionCard>
-    )
-}
-
-function MissionStartTimeDisplay({ mission }: MissionDisplayProps) {
-    return (
-        <StyledMissionStartTime>
-            <Typography>
-                {Text('Date')}: {format(new Date(mission.desiredStartTime), 'dd. MMM')}
-            </Typography>
-            <Typography>
-                {Text('Time')}: {format(new Date(mission.desiredStartTime), 'HH:mm')}
-            </Typography>
-        </StyledMissionStartTime>
     )
 }
 

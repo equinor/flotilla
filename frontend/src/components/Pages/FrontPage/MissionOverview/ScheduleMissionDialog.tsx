@@ -17,7 +17,6 @@ interface IProps {
     echoMissionsOptions: Array<string>
     onSelectedMissions: (missions: string[]) => void
     onSelectedRobot: (robot: string) => void
-    onSelectedStartTime: (time: string) => void
     onScheduleButtonPress: () => void
     scheduleButtonDisabled: boolean
     frontPageScheduleButtonDisabled: boolean
@@ -41,7 +40,6 @@ const StyledMissionSection = styled.div`
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
-    const [isStartTimeValid, setIsStartTimeValid] = useState<boolean>(true)
     const [isAssetValid, setIsAssetValid] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
     let timer: ReturnType<typeof setTimeout>
@@ -70,16 +68,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     }
     const onChangeRobotSelection = (changes: AutocompleteChanges<string>) => {
         props.onSelectedRobot(changes.selectedItems[0])
-    }
-    const onChangeStartTime = (changes: ChangeEvent<HTMLInputElement>) => {
-        const allowedPastStartTime = 60 * 1000
-        if (!(new Date(changes.target.value).getTime() < new Date().getTime() - allowedPastStartTime)) {
-            setIsStartTimeValid(true)
-            props.onSelectedStartTime(changes.target.value)
-        } else {
-            setIsStartTimeValid(false)
-            props.onSelectedStartTime('')
-        }
     }
     return (
         <>
@@ -133,14 +121,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             options={props.robotOptions}
                             label={Text('Select robot')}
                             onOptionsChange={onChangeRobotSelection}
-                        />
-                        <TextField
-                            id="datetime"
-                            label={Text('Select start time')}
-                            type="datetime-local"
-                            variant={isStartTimeValid ? undefined : 'error'}
-                            helperText={isStartTimeValid ? undefined : Text('Cannot schedule mission in the past')}
-                            onChange={onChangeStartTime}
                         />
                         <StyledMissionSection>
                             <Button

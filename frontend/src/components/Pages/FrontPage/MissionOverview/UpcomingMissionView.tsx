@@ -48,7 +48,6 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
     const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMission[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
-    const [selectedStartTime, setSelectedStartTime] = useState<Date>()
     const [echoMissions, setEchoMissions] = useState<Map<string, EchoMission>>(new Map<string, EchoMission>())
     const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>(new Map<string, Robot>())
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
@@ -67,22 +66,17 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
 
         setSelectedRobot(robotOptions.get(selectedRobot) as Robot)
     }
-    const onSelectedStartTime = (selectedStartTime: string) => {
-        if (selectedStartTime.length === 0) setSelectedStartTime(undefined)
-        else setSelectedStartTime(new Date(selectedStartTime))
-    }
 
     const onScheduleButtonPress = () => {
         if (selectedRobot === undefined) return
 
         const assetCode = sessionStorage.getItem('assetString')
         selectedEchoMissions.map((mission: EchoMission) => {
-            apiCaller.postMission(mission.id, selectedRobot.id, selectedStartTime as Date, assetCode)
+            apiCaller.postMission(mission.id, selectedRobot.id, assetCode)
         })
 
         setSelectedEchoMissions([])
         setSelectedRobot(undefined)
-        setSelectedStartTime(undefined)
     }
 
     const onDeleteMission = (mission: Mission) => {
@@ -130,12 +124,12 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
     }, [])
 
     useEffect(() => {
-        if (selectedRobot === undefined || selectedEchoMissions.length === 0 || selectedStartTime === undefined) {
+        if (selectedRobot === undefined || selectedEchoMissions.length === 0) {
             setScheduleButtonDisabled(true)
         } else {
             setScheduleButtonDisabled(false)
         }
-    }, [selectedRobot, selectedEchoMissions, selectedStartTime])
+    }, [selectedRobot, selectedEchoMissions])
 
     useEffect(() => {
         if (Array.from(robotOptions.keys()).length === 0 || Array.from(echoMissions.keys()).length === 0) {
@@ -163,7 +157,6 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
                     echoMissionsOptions={Array.from(echoMissions.keys())}
                     onSelectedMissions={onSelectedEchoMissions}
                     onSelectedRobot={onSelectedRobot}
-                    onSelectedStartTime={onSelectedStartTime}
                     onScheduleButtonPress={onScheduleButtonPress}
                     scheduleButtonDisabled={scheduleButtonDisabled}
                     frontPageScheduleButtonDisabled={frontPageScheduleButtonDisabled}
