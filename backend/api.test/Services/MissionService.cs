@@ -50,7 +50,7 @@ namespace Api.Test.Services
                     Robot = robot,
                     EchoMissionId = 0,
                     Map = new MissionMap() { MapName = "testMap" },
-                    StartTime = DateTime.Now
+                    DesiredStartTime = DateTime.Now
                 };
 
             await _missionService.Create(mission);

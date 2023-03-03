@@ -36,7 +36,7 @@ namespace Api.Test.EventHandlers
                 EchoMissionId = 2,
                 Robot = Robot,
                 MissionStatus = MissionStatus.Pending,
-                StartTime = DateTimeOffset.Now,
+                DesiredStartTime = DateTimeOffset.Now,
                 Map = new MissionMap()
                 {
                     MapName = "TestMap",

@@ -142,7 +142,7 @@ export class BackendAPICaller {
         const body = {
             robotId: desiredRobot[0].id,
             echoMissionId: echoMissionId,
-            startTime: startTime,
+            desiredStartTime: startTime,
             assetCode: assetCode,
         }
         const result = await this.POST<unknown, unknown>(path, body).catch((e) => {

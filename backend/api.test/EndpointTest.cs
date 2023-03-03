@@ -148,7 +148,7 @@ namespace Api.Test
                 RobotId = robotId,
                 AssetCode = "test",
                 EchoMissionId = 95,
-                StartTime = DateTimeOffset.UtcNow
+                DesiredStartTime = DateTimeOffset.UtcNow
             };
             var content = new StringContent(
                       JsonSerializer.Serialize(query),

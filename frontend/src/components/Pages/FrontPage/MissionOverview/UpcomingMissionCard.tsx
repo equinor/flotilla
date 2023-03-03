@@ -121,10 +121,10 @@ function MissionStartTimeDisplay({ mission }: MissionDisplayProps) {
     return (
         <StyledMissionStartTime>
             <Typography>
-                {Text('Date')}: {format(new Date(mission.startTime), 'dd. MMM')}
+                {Text('Date')}: {format(new Date(mission.desiredStartTime), 'dd. MMM')}
             </Typography>
             <Typography>
-                {Text('Time')}: {format(new Date(mission.startTime), 'HH:mm')}
+                {Text('Time')}: {format(new Date(mission.desiredStartTime), 'HH:mm')}
             </Typography>
         </StyledMissionStartTime>
     )

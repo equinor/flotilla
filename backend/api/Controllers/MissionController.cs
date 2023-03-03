@@ -178,7 +178,7 @@ public class MissionController : ControllerBase
             Robot = robot,
             EchoMissionId = scheduledMissionQuery.EchoMissionId,
             MissionStatus = MissionStatus.Pending,
-            StartTime = scheduledMissionQuery.StartTime,
+            DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
             PlannedTasks = plannedTasks,
             Tasks = new List<IsarTask>(),
             AssetCode = scheduledMissionQuery.AssetCode,
