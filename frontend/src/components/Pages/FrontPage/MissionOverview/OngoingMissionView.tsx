@@ -61,7 +61,7 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
 
     return (
         <StyledOngoingMissionView>
-            <Typography variant="h2" color="resting">
+            <Typography variant="h1" color="resting">
                 {Text('Ongoing Missions')}
             </Typography>
             <OngoingMissionSection>
