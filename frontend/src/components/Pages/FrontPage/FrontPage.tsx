@@ -1,4 +1,4 @@
-import { UpcomingMissionView } from 'components/Pages/FrontPage/MissionOverview/UpcomingMissionView'
+import { MissionQueueView } from 'components/Pages/FrontPage/MissionOverview/MissionQueueView'
 import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/OngoingMissionView'
 import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusView'
 import { FailedMissionAlertView } from './MissionOverview/FailedMissionAlertView'
@@ -38,7 +38,7 @@ export function FrontPage() {
             <HorizontalContent>
                 <MissionsContent>
                     <OngoingMissionView refreshInterval={refreshInterval} />
-                    <UpcomingMissionView refreshInterval={refreshInterval} />
+                    <MissionQueueView refreshInterval={refreshInterval} />
                 </MissionsContent>
                 <PastMissionView refreshInterval={refreshInterval} />
             </HorizontalContent>

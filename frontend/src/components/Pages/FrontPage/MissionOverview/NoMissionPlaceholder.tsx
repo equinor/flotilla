@@ -30,7 +30,7 @@ export function NoOngoingMissionsPlaceholder() {
     )
 }
 
-export function NoUpcomingMissionsPlaceholder() {
+export function EmptyMissionQueuePlaceholder() {
     return (
         <StyledPlaceholder>
             <Typography variant="h4" color="disabled">

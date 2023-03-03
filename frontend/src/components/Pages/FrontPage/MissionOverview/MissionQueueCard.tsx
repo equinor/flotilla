@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Text } from 'components/Contexts/LanguageContext'
 
-interface UpcomingMissionCardProps {
+interface MissionQueueCardProps {
     mission: Mission
     onDeleteMission: (mission: Mission) => void
 }
@@ -43,7 +43,7 @@ const StyledButtonSection = styled.div`
 
 Icon.add({ remove_outlined })
 
-export function UpcomingMissionCard({ mission, onDeleteMission }: UpcomingMissionCardProps) {
+export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardProps) {
     let navigate = useNavigate()
     const routeChange = () => {
         let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
