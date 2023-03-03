@@ -86,7 +86,7 @@ public static class InitDb
             AssetCode = "test",
             EchoMissionId = 95,
             IsarMissionId = "1",
-            MissionStatus = MissionStatus.Pending,
+            MissionStatus = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
             PlannedTasks = new List<PlannedTask>(),
             Map = new MissionMap()
@@ -99,7 +99,7 @@ public static class InitDb
             AssetCode = "test",
             EchoMissionId = 95,
             IsarMissionId = "1",
-            MissionStatus = MissionStatus.Pending,
+            MissionStatus = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
             PlannedTasks = new List<PlannedTask>(),
             Map = new MissionMap()
@@ -112,7 +112,7 @@ public static class InitDb
             AssetCode = "kaa",
             EchoMissionId = 1,
             IsarMissionId = "1",
-            MissionStatus = MissionStatus.Pending,
+            MissionStatus = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
             PlannedTasks = new List<PlannedTask>(),
             Map = new MissionMap()
