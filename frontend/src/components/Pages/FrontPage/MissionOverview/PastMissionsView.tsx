@@ -58,7 +58,7 @@ export function PastMissionView({ refreshInterval }: RefreshProps) {
 
     return (
         <TableWithHeader>
-            <Typography variant="h2">{Text('Past Missions')}</Typography>
+            <Typography variant="h1">{Text('Past Missions')}</Typography>
             <ScrollableTable>
                 <Table>
                     <Table.Head sticky>
