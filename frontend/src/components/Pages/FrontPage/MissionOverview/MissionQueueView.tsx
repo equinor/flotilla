@@ -1,10 +1,10 @@
 import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { UpcomingMissionCard } from './UpcomingMissionCard'
+import { MissionQueueCard } from './MissionQueueCard'
 import { useApi } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
-import { NoUpcomingMissionsPlaceholder } from './NoMissionPlaceholder'
+import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { EchoMission } from 'models/EchoMission'
 import { Robot } from 'models/Robot'
@@ -43,9 +43,9 @@ const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
     return robotMap
 }
 
-export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
+export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const apiCaller = useApi()
-    const [upcomingMissions, setUpcomingMissions] = useState<Mission[]>([])
+    const [missionQueue, setMissionQueue] = useState<Mission[]>([])
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMission[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [echoMissions, setEchoMissions] = useState<Map<string, EchoMission>>(new Map<string, EchoMission>())
@@ -85,7 +85,7 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
 
     useEffect(() => {
         apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
-            setUpcomingMissions(missions)
+            setMissionQueue(missions)
         })
     }, [])
 
@@ -117,7 +117,7 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
     useEffect(() => {
         const id = setInterval(() => {
             apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
-                setUpcomingMissions(missions)
+                setMissionQueue(missions)
             })
         }, refreshInterval)
         return () => clearInterval(id)
@@ -139,8 +139,8 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
         }
     }, [robotOptions, echoMissions])
 
-    var upcomingMissionDisplay = upcomingMissions.map(function (mission, index) {
-        return <UpcomingMissionCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
+    var missionQueueDisplay = missionQueue.map(function (mission, index) {
+        return <MissionQueueCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
     })
     return (
         <StyledMissionView>
@@ -148,8 +148,8 @@ export function UpcomingMissionView({ refreshInterval }: RefreshProps) {
                 {Text('Mission Queue')}
             </Typography>
             <MissionTable>
-                {upcomingMissions.length > 0 && upcomingMissionDisplay}
-                {upcomingMissions.length === 0 && <NoUpcomingMissionsPlaceholder />}
+                {missionQueue.length > 0 && missionQueueDisplay}
+                {missionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
             </MissionTable>
             <MissionButtonView>
                 <ScheduleMissionDialog

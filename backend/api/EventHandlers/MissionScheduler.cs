@@ -12,7 +12,7 @@ namespace Api.EventHandlers
         private readonly int _timeDelay;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        private IList<Mission> UpcomingMissions =>
+        private IList<Mission> MissionQueue =>
             MissionService.ReadAll(null, MissionStatus.Pending).Result;
 
         private IMissionService MissionService =>
@@ -32,9 +32,9 @@ namespace Api.EventHandlers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                foreach (var upcomingMission in UpcomingMissions)
+                foreach (var queuedMission in MissionQueue)
                 {
-                    var freshMission = MissionService.ReadById(upcomingMission.Id).Result;
+                    var freshMission = MissionService.ReadById(queuedMission.Id).Result;
                     if (freshMission == null)
                     {
                         continue;
@@ -47,17 +47,17 @@ namespace Api.EventHandlers
                         continue;
                     }
 
-                    bool startedSuccessfull = await StartMission(upcomingMission);
+                    bool startedSuccessfull = await StartMission(queuedMission);
                     if (!startedSuccessfull)
                     {
                         var newStatus = MissionStatus.Failed;
                         _logger.LogWarning(
                             "Mission {id} was not started successfully. Status updated to '{status}'",
-                            upcomingMission.Id,
+                            queuedMission.Id,
                             newStatus
                         );
-                        upcomingMission.MissionStatus = newStatus;
-                        await MissionService.Update(upcomingMission);
+                        queuedMission.MissionStatus = newStatus;
+                        await MissionService.Update(queuedMission);
                     }
                 }
                 await Task.Delay(_timeDelay, stoppingToken);
