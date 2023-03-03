@@ -87,7 +87,7 @@ namespace Api.Services
                 IsarMissionId = isarMissionId,
                 EchoMissionId = echoMissionId,
                 MissionStatus = status,
-                StartTime = DateTimeOffset.UtcNow,
+                DesiredStartTime = DateTimeOffset.UtcNow,
                 Robot = robot
             };
             await Create(mission);

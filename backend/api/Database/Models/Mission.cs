@@ -54,9 +54,11 @@ namespace Api.Database.Models
         public MissionMap Map { get; set; }
 
         [Required]
-        public DateTimeOffset StartTime { get; set; }
+        public DateTimeOffset DesiredStartTime { get; set; }
 
-        public DateTimeOffset EndTime { get; set; }
+        public DateTimeOffset? StartTime { get; set; }
+
+        public DateTimeOffset? EndTime { get; set; }
 
         public TimeSpan EstimatedDuration { get; set; }
 

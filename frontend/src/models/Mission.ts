@@ -22,7 +22,8 @@ export interface Mission {
     isarMissionId?: string
     echoMissionId: number
     missionStatus: MissionStatus
-    startTime: Date
+    desiredStartTime: Date
+    startTime?: Date
     endTime?: Date
     tasks: IsarTask[]
     map: MissionMap
