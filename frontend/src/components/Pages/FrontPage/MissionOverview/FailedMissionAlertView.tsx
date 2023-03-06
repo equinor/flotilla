@@ -8,9 +8,9 @@ import styled from 'styled-components'
 import { MissionStatusDisplay } from './MissionStatusDisplay'
 import { RefreshProps } from '../FrontPage'
 import { useNavigate } from 'react-router-dom'
-import { clear } from '@equinor/eds-icons'
 import { addMinutes, max } from 'date-fns'
 import { Text } from 'components/Contexts/LanguageContext'
+import { Icons } from 'utils/icons'
 
 const StyledCard = styled(Card)`
     width: 100%;
@@ -139,7 +139,7 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
                             </Indent>
                         </Center>
                         <Button variant="ghost_icon" onClick={dismissCurrentMissions}>
-                            <Icon data={clear}></Icon>
+                            <Icon name={Icons.Clear}></Icon>
                         </Button>
                     </Horizontal>
                 </StyledCard>

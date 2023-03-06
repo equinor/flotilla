@@ -7,9 +7,7 @@ import turtleBot from 'mediaAssets/turtlebot.webp'
 import robot from 'mediaAssets/robot.png'
 import styled from 'styled-components'
 import { Icon } from '@equinor/eds-core-react'
-import { cloud_off, image } from '@equinor/eds-icons'
-
-Icon.add({ cloud_off, image })
+import { Icons } from 'utils/icons'
 interface TypeProps {
     robotType?: RobotType
 }
@@ -57,10 +55,10 @@ export function RobotImage({ robotType }: TypeProps) {
             break
         }
         case RobotType.NoneType: {
-            return <StyledIcon name="cloud_off" title={robotType} />
+            return <StyledIcon name={Icons.CloudOff} title={robotType} />
         }
         default: {
-            return <StyledIcon name="image" title={robotType} />
+            return <StyledIcon name={Icons.Image} title={robotType} />
         }
     }
     return <StyledImage alt={robotType} src={robotImage} />

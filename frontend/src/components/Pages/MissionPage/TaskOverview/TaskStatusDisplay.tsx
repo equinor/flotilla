@@ -1,18 +1,9 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
-import {
-    check_circle_outlined,
-    error_outlined,
-    time,
-    warning_outlined,
-    autorenew,
-    pause_circle_outlined,
-} from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
 import { IsarTaskStatus } from 'models/IsarTask'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
-
-Icon.add({ check_circle_outlined, error_outlined, warning_outlined, time, autorenew, pause_circle_outlined })
+import { Icons } from 'utils/icons'
 
 interface StatusProps {
     status: IsarTaskStatus
@@ -27,26 +18,22 @@ const StyledStatusDisplay = styled.div`
 function displayIcon(status: IsarTaskStatus) {
     switch (status) {
         case IsarTaskStatus.NotStarted: {
-            return <Icon name="time" style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
+            return <Icon name={Icons.Pending} style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
         }
         case IsarTaskStatus.InProgress: {
-            return <Icon name="autorenew" style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
+            return <Icon name={Icons.Ongoing} style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
         }
         case IsarTaskStatus.PartiallySuccessful: {
-            return <Icon name="warning_outlined" style={{ color: tokens.colors.interactive.warning__resting.rgba }} />
+            return <Icon name={Icons.Warning} style={{ color: tokens.colors.interactive.warning__resting.rgba }} />
         }
         case IsarTaskStatus.Paused: {
-            return (
-                <Icon name="pause_circle_outlined" style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
-            )
+            return <Icon name={Icons.Pause} style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
         }
         case IsarTaskStatus.Successful: {
-            return (
-                <Icon name="check_circle_outlined" style={{ color: tokens.colors.interactive.success__resting.rgba }} />
-            )
+            return <Icon name={Icons.Successful} style={{ color: tokens.colors.interactive.success__resting.rgba }} />
         }
     }
-    return <Icon name="error_outlined" style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
+    return <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
 }
 
 export function TaskStatusDisplay({ status }: StatusProps) {

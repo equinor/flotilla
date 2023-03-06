@@ -1,13 +1,10 @@
 import { VideoPlayerOvenPlayer, IsValidOvenPlayerType } from './VideoPlayerOvenPlayer'
 import { VideoPlayerSimple } from './VideoPlayerSimple'
-import { fullscreen_exit } from '@equinor/eds-icons'
-
 import { VideoStream } from 'models/VideoStream'
 import styled from 'styled-components'
 import { Typography, Button, Icon } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-
-Icon.add({ fullscreen_exit })
+import { Icons } from 'utils/icons'
 
 const FullscreenExitButton = styled(Button)`
     position: absolute;
@@ -74,13 +71,13 @@ export function FullScreenVideoStreamCard({ videoStream, toggleFullScreenMode }:
         if (shouldRotate270Clockwise) {
             return (
                 <FullscreenExitButtonRotate color="secondary" onClick={toggleFullScreenMode}>
-                    <Icon name="fullscreen_exit" size={32} />
+                    <Icon name={Icons.FullscreenExit} size={32} />
                 </FullscreenExitButtonRotate>
             )
         }
         return (
             <FullscreenExitButton color="secondary" onClick={toggleFullScreenMode}>
-                <Icon name="fullscreen_exit" size={32} />
+                <Icon name={Icons.FullscreenExit} size={32} />
             </FullscreenExitButton>
         )
     }

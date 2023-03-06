@@ -1,5 +1,4 @@
 import { Button, Icon, TopBar, Autocomplete } from '@equinor/eds-core-react'
-import { accessible, account_circle, notifications } from '@equinor/eds-icons'
 import { useApi } from 'api/ApiCaller'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { EchoPlantInfo } from 'models/EchoMission'
@@ -7,14 +6,13 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
 import { SelectLanguageDialog } from './SelectLanguageDialog'
-
-Icon.add({ account_circle, accessible, notifications })
+import { Icons } from 'utils/icons'
 
 const StyledTopBar = styled(TopBar)`
     margin-bottom: 2rem;
 `
 
-const Icons = styled.div`
+const IconStyle = styled.div`
     display: flex;
     align-items: center;
     flex-direction: row-reverse;
@@ -36,17 +34,17 @@ export function Header() {
             <TopBar.Header>Flotilla</TopBar.Header>
             <StyledTopBarContent>{AssetPicker()}</StyledTopBarContent>
             <TopBar.Actions>
-                <Icons>
+                <IconStyle>
                     <Button variant="ghost_icon" onClick={() => console.log('Clicked account icon')}>
-                        <Icon name="account_circle" size={16} title="user" />
+                        <Icon name={Icons.Account} size={16} title="user" />
                     </Button>
                     <Button variant="ghost_icon" onClick={() => console.log('Clicked accessibility icon')}>
-                        <Icon name="accessible" size={16} />
+                        <Icon name={Icons.Accessible} size={16} />
                     </Button>
                     <Button variant="ghost_icon" onClick={() => console.log('Clicked notification icon')}>
-                        <Icon name="notifications" size={16} />
+                        <Icon name={Icons.Notifications} size={16} />
                     </Button>
-                </Icons>
+                </IconStyle>
                 {SelectLanguageDialog()}
             </TopBar.Actions>
         </StyledTopBar>

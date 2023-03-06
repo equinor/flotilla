@@ -1,12 +1,10 @@
 import { LanguageShort, languageOptions } from 'language'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Button, Icon, Autocomplete, Dialog, Card } from '@equinor/eds-core-react'
-import { chevron_down } from '@equinor/eds-icons'
 import { useState } from 'react'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
-
-Icon.add({ chevron_down })
+import { Icons } from 'utils/icons'
 
 const StyledLanguageDialog = styled.div`
     display: flex;
@@ -33,7 +31,7 @@ export function SelectLanguageDialog() {
         <>
             <Button variant="ghost" onClick={() => setIsDialogOpen(true)}>
                 {languageOptions[language]}
-                <Icon name="chevron_down" size={16} title="user" />
+                <Icon name={Icons.DropDown} size={16} title="user" />
             </Button>
             <StyledLanguageDialog>
                 <Dialog open={isDialogOpen} isDismissable>

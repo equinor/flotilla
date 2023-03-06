@@ -1,11 +1,8 @@
 import { BatteryStatus } from 'models/Battery'
-import { battery, battery_charging, battery_alert, battery_unknown } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
-
 import { Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-
-Icon.add({ battery, battery_charging, battery_unknown, battery_alert })
+import { Icons } from 'utils/icons'
 
 const BatteryStatusTile = styled.div`
     display: flex;
@@ -25,22 +22,22 @@ const BatteryStatusView = ({ battery, batteryStatus }: BatteryStatusViewProps): 
 
     if (!battery) {
         battery_value = '---%'
-        battery_icon = 'battery_unknown'
+        battery_icon = Icons.BatteryUnknown
     } else {
         battery_value = `${battery}%`
         switch (batteryStatus) {
             case BatteryStatus.Normal:
-                battery_icon = 'battery'
+                battery_icon = Icons.Battery
                 break
             case BatteryStatus.Charging:
-                battery_icon = 'battery_charging'
+                battery_icon = Icons.BatteryCharging
                 break
             case BatteryStatus.Critical:
-                battery_icon = 'battery_alert'
+                battery_icon = Icons.BatteryAlert
                 icon_color = tokens.colors.interactive.danger__resting.hex
                 break
             default:
-                battery_icon = 'battery_unknown'
+                battery_icon = Icons.BatteryUnknown
                 battery_value = '---%'
                 break
         }

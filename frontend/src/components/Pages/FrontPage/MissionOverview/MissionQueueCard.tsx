@@ -1,12 +1,12 @@
 import { Button, Card, Checkbox, Dialog, Icon, Typography } from '@equinor/eds-core-react'
 import { config } from 'config'
-import { remove_outlined } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { Text } from 'components/Contexts/LanguageContext'
+import { Icons } from 'utils/icons'
 
 interface MissionQueueCardProps {
     mission: Mission
@@ -41,8 +41,6 @@ const StyledButtonSection = styled.div`
     grid-template-columns: auto auto;
 `
 
-Icon.add({ remove_outlined })
-
 export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardProps) {
     let navigate = useNavigate()
     const routeChange = () => {
@@ -74,7 +72,7 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
                         setConfirmDeleteDialogOpen(true)
                     }}
                 >
-                    <Icon name="remove_outlined" size={24} title="more action" />
+                    <Icon name={Icons.Remove} size={24} title="more action" />
                 </Button>
                 <Dialog open={confirmDeleteDialogOpen} isDismissable>
                     <StyledConfirmDialog>
