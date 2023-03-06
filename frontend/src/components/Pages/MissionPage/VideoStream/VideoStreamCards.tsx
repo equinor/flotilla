@@ -1,12 +1,10 @@
 import { Card, Typography, Icon, Button } from '@equinor/eds-core-react'
-import { fullscreen } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
 import { VideoPlayerOvenPlayer, IsValidOvenPlayerType } from './VideoPlayerOvenPlayer'
 import { VideoPlayerSimple } from './VideoPlayerSimple'
 import { VideoStream } from 'models/VideoStream'
 import styled from 'styled-components'
-
-Icon.add({ fullscreen })
+import { Icons } from 'utils/icons'
 
 const FullscreenButton = styled(Button)`
     position: absolute;
@@ -55,7 +53,7 @@ export function VideoStreamCard({ videoStream, toggleFullScreenMode, setFullScre
 
     const fullScreenButton = (
         <FullscreenButton color="secondary" onClick={turnOnFullScreen}>
-            <Icon name="fullscreen" size={32} />
+            <Icon name={Icons.Fullscreen} size={32} />
         </FullscreenButton>
     )
 

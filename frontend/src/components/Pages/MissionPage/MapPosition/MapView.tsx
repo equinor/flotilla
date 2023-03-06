@@ -4,12 +4,8 @@ import { useApi } from 'api/ApiCaller'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { place } from '@equinor/eds-icons'
 import NoMap from 'mediaAssets/NoMap.png'
 import { MissionMap } from 'models/MissionMap'
-
-Icon.add({ place })
-
 interface MissionProps {
     mission: Mission
 }

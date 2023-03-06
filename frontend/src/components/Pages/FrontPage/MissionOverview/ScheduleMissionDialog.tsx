@@ -5,16 +5,13 @@ import {
     Card,
     Dialog,
     Typography,
-    TextField,
     Popover,
     Icon,
 } from '@equinor/eds-core-react'
-import { ChangeEvent, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
-import { add } from '@equinor/eds-icons'
-
-Icon.add({ add })
+import { Icons } from 'utils/icons'
 
 interface IProps {
     robotOptions: Array<string>
@@ -83,7 +80,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     disabled={props.frontPageScheduleButtonDisabled}
                     ref={anchorRef}
                 >
-                    <Icon name="add" size={16} />
+                    <Icon name={Icons.Add} size={16} />
                     {Text('Add mission')}
                 </Button>
             </div>

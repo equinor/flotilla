@@ -1,5 +1,4 @@
 import { Button, Typography, Icon } from '@equinor/eds-core-react'
-import { history } from '@equinor/eds-icons'
 import { useApi } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useEffect, useState } from 'react'
@@ -10,8 +9,7 @@ import { OngoingMissionCard } from './OngoingMissionCard'
 import { Text } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
-
-Icon.add({ history })
+import { Icons } from 'utils/icons'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -85,7 +83,7 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
             </OngoingMissionSection>
             <ButtonStyle>
                 <Button variant="outlined" onClick={routeChange}>
-                    <Icon name="history" />
+                    <Icon name={Icons.Historic} />
                     {Text('History')}
                 </Button>
             </ButtonStyle>

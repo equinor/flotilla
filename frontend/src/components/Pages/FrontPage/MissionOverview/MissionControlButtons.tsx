@@ -1,13 +1,11 @@
 import { Mission, MissionStatus } from 'models/Mission'
 import { Icon } from '@equinor/eds-core-react'
+import { Icons } from 'utils/icons'
 import { useState } from 'react'
 import { useApi } from 'api/ApiCaller'
-import { pause_circle, stop_circle, play_circle, do_not_disturb } from '@equinor/eds-icons'
 import { tokens } from '@equinor/eds-tokens'
 import { ControlMissionResponse } from 'models/ControlMissionResponse'
 import { IsarTask, IsarTaskStatus } from 'models/IsarTask'
-
-Icon.add({ pause_circle, play_circle, stop_circle, do_not_disturb })
 
 interface MissionProps {
     mission: Mission
@@ -17,13 +15,6 @@ export enum ControlButton {
     Pause,
     Stop,
     Resume,
-}
-
-enum IconsEnum {
-    Stop = 'stop_circle',
-    Pause = 'pause_circle',
-    Play = 'play_circle',
-    Wait = 'do_not_disturb',
 }
 
 enum IsarMissionResponse {
@@ -88,13 +79,13 @@ export function MissionControlButtons({ mission }: MissionProps) {
             return (
                 <>
                     <Icon
-                        name={IconsEnum.Stop}
+                        name={Icons.StopButton}
                         style={{ color: tokens.colors.interactive.primary__resting.rgba }}
                         size={32}
                         onClick={() => handleClick(ControlButton.Stop)}
                     />
                     <Icon
-                        name={IconsEnum.Pause}
+                        name={Icons.PauseButton}
                         style={{ color: tokens.colors.interactive.primary__resting.rgba }}
                         size={32}
                         onClick={() => handleClick(ControlButton.Pause)}
@@ -105,13 +96,13 @@ export function MissionControlButtons({ mission }: MissionProps) {
             return (
                 <>
                     <Icon
-                        name={IconsEnum.Stop}
+                        name={Icons.StopButton}
                         style={{ color: tokens.colors.interactive.primary__resting.rgba }}
                         size={32}
                         onClick={() => handleClick(ControlButton.Stop)}
                     />
                     <Icon
-                        name={IconsEnum.Play}
+                        name={Icons.PlayButton}
                         style={{ color: tokens.colors.interactive.primary__resting.rgba }}
                         size={32}
                         onClick={() => handleClick(ControlButton.Resume)}
@@ -119,7 +110,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
                 </>
             )
         } else if (missionStatus === IsarMissionResponse.Unknown) {
-            return <Icon name={IconsEnum.Wait} size={32} />
+            return <Icon name={Icons.Wait} size={32} />
         }
         return <></>
     }
