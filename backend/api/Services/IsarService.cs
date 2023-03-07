@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Api.Controllers.Models;
 using Api.Database.Models;
@@ -31,10 +30,7 @@ namespace Api.Services
         private readonly IDownstreamWebApi _isarApi;
         private readonly ILogger<IsarService> _logger;
 
-        public IsarService(
-            ILogger<IsarService> logger,
-            IDownstreamWebApi downstreamWebApi
-        )
+        public IsarService(ILogger<IsarService> logger, IDownstreamWebApi downstreamWebApi)
         {
             _logger = logger;
             _isarApi = downstreamWebApi;
@@ -77,9 +73,7 @@ namespace Api.Services
 
         public IsarMissionDefinition GetIsarMissionDefinition(Mission mission)
         {
-            var tasks = mission.PlannedTasks.Select(
-                task => new IsarTaskDefinition(task, mission)
-            );
+            var tasks = mission.PlannedTasks.Select(task => new IsarTaskDefinition(task, mission));
             return new IsarMissionDefinition(tasks: tasks.ToList());
         }
 
@@ -97,8 +91,9 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                string? message = GetLogMessageForFailedIsarRequest(response.StatusCode);
-                _logger.LogError("{message}", message);
+                string message = GetErrorDescriptionFoFailedIsarRequest(response);
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                _logger.LogError("{message}: {error_response}", message, errorResponse);
                 throw new MissionException(message);
             }
             if (response.Content is null)
@@ -142,8 +137,9 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                string? message = GetLogMessageForFailedIsarRequest(response.StatusCode);
-                _logger.LogError("{message}", message);
+                string message = GetErrorDescriptionFoFailedIsarRequest(response);
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                _logger.LogError("{message}: {error_response}", message, errorResponse);
                 throw new MissionException(message);
             }
             if (response.Content is null)
@@ -174,8 +170,9 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                string message = GetLogMessageForFailedIsarRequest(response.StatusCode);
-                _logger.LogError("{message}", message);
+                string message = GetErrorDescriptionFoFailedIsarRequest(response);
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                _logger.LogError("{message}: {error_response}", message, errorResponse);
                 throw new MissionException(message);
             }
             if (response.Content is null)
@@ -205,8 +202,9 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                string message = GetLogMessageForFailedIsarRequest(response.StatusCode);
-                _logger.LogError("{message}", message);
+                string message = GetErrorDescriptionFoFailedIsarRequest(response);
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                _logger.LogError("{message}: {error_response}", message, errorResponse);
                 throw new MissionException(message);
             }
             if (response.Content is null)
@@ -286,18 +284,22 @@ namespace Api.Services
             return steps;
         }
 
-        private static string GetLogMessageForFailedIsarRequest(HttpStatusCode statusCode)
+        private static string GetErrorDescriptionFoFailedIsarRequest(HttpResponseMessage response)
         {
-            return (int)statusCode switch
+            var statusCode = response.StatusCode;
+            string description = (int)statusCode switch
             {
                 StatusCodes.Status408RequestTimeout
-                  => "A timeout ocurred when communicating with the ISAR state machine",
+                  => "A timeout occurred when communicating with the ISAR state machine",
                 StatusCodes.Status409Conflict
-                  => "A conflict ocurred when interacting with the ISAR state machine. This could imply the state machine is in a state that does not allow the current action you attempted.",
+                  => "A conflict occurred when interacting with the ISAR state machine. This could imply the state machine is in a state that does not allow the current action you attempted.",
                 StatusCodes.Status500InternalServerError
-                  => "An internal server error ocurred in ISAR",
-                _ => $"An unexpected status code: {statusCode} was received from ISAR"
+                  => "An internal server error occurred in ISAR",
+                StatusCodes.Status401Unauthorized => "Flotilla failed to authorize towards ISAR",
+                _ => $"An unexpected status code '{statusCode}' was received from ISAR"
             };
+
+            return description;
         }
     }
 
