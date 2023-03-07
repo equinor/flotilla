@@ -87,9 +87,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         if (selectedRobot === undefined) return
 
         selectedEchoMissions.map((mission: EchoMission) => {
-            apiCaller
-                .postMission(mission.id, selectedRobot.id, assetCode)
-                .catch((e) => handleError(e))
+            apiCaller.postMission(mission.id, selectedRobot.id, assetCode).catch((e) => handleError(e))
         })
 
         setSelectedEchoMissions([])
