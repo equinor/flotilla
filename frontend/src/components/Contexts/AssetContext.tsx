@@ -10,16 +10,18 @@ interface Props {
 }
 
 const defaultAsset = {
-    asset: 'test',
+    asset: '',
     switchAsset: (newAsset: string) => {},
 }
 
 export const AssetContext = createContext<IAssetContext>(defaultAsset)
 
 export const AssetProvider: FC<Props> = ({ children }) => {
-    const [asset, setAsset] = useState(defaultAsset.asset)
+    const prevAsset = sessionStorage.getItem('assetString')
+    const [asset, setAsset] = useState(prevAsset || defaultAsset.asset)
 
     const switchAsset = (newAsset: string) => {
+        setAsset(newAsset)
         sessionStorage.setItem('assetString', newAsset)
     }
 
