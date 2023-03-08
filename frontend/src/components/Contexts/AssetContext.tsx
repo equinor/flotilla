@@ -1,8 +1,8 @@
 import { createContext, FC, useContext, useState } from 'react'
 
 interface IAssetContext {
-    asset: string
-    switchAsset: (newAsset: string) => void
+    assetCode: string
+    switchAsset: (selectedAsset: string) => void
 }
 
 interface Props {
@@ -10,23 +10,25 @@ interface Props {
 }
 
 const defaultAsset = {
-    asset: 'test',
-    switchAsset: (newAsset: string) => {},
+    assetCode: '',
+    switchAsset: (selectedAsset: string) => {},
 }
 
 export const AssetContext = createContext<IAssetContext>(defaultAsset)
 
 export const AssetProvider: FC<Props> = ({ children }) => {
-    const [asset, setAsset] = useState(defaultAsset.asset)
+    const previousAsset = window.localStorage.getItem('assetString')
+    const [assetCode, setAsset] = useState(previousAsset || defaultAsset.assetCode)
 
-    const switchAsset = (newAsset: string) => {
-        sessionStorage.setItem('assetString', newAsset)
+    const switchAsset = (selectedAsset: string) => {
+        setAsset(selectedAsset)
+        window.localStorage.setItem('assetString', selectedAsset)
     }
 
     return (
         <AssetContext.Provider
             value={{
-                asset,
+                assetCode,
                 switchAsset,
             }}
         >

@@ -54,25 +54,19 @@ export function Header() {
 function AssetPicker() {
     const apiCaller = useApi()
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
-    const { asset, switchAsset } = useAssetContext()
+    const { assetCode, switchAsset } = useAssetContext()
     useEffect(() => {
         apiCaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
             const mapping = mapAssetCodeToName(response)
             setAllPlantsMap(mapping)
         })
     }, [])
-    let savedAsset = sessionStorage.getItem('assetString')
-    let initialOption = ''
-    if (savedAsset != null) {
-        initialOption = savedAsset
-        switchAsset(savedAsset)
-    }
     const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
     return (
         <Autocomplete
             options={Array.from(mappedOptions.keys()).sort()}
             label=""
-            initialSelectedOptions={[initialOption]}
+            initialSelectedOptions={[assetCode]}
             placeholder={Text('Select asset')}
             onOptionsChange={({ selectedItems }) => {
                 const mapKey = mappedOptions.get(selectedItems[0])
