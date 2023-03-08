@@ -27,6 +27,7 @@ import {
     arrow_back,
     add,
     history,
+    external_link,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -57,6 +58,7 @@ Icon.add({
     arrow_back,
     add,
     history,
+    external_link,
 })
 
 export enum Icons {
@@ -87,4 +89,5 @@ export enum Icons {
     ArrowBack = 'arrow_back',
     Add = 'add',
     Historic = 'history',
+    ExternalLink = 'external_link',
 }

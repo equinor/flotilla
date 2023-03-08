@@ -1,4 +1,4 @@
-import { Button, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { MissionQueueCard } from './MissionQueueCard'
 import { useApi } from 'api/ApiCaller'
@@ -10,6 +10,8 @@ import { EchoMission } from 'models/EchoMission'
 import { Robot } from 'models/Robot'
 import { RefreshProps } from '../FrontPage'
 import { Text } from 'components/Contexts/LanguageContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
+import { Icons } from 'utils/icons'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -25,7 +27,7 @@ const MissionTable = styled.div`
 
 const MissionButtonView = styled.div`
     display: flex;
-    gap: 2rem;
+    gap: 1rem;
 `
 const mapEchoMissionToString = (missions: EchoMission[]): Map<string, EchoMission> => {
     var missionMap = new Map<string, EchoMission>()
@@ -52,8 +54,19 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>(new Map<string, Robot>())
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
     const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
+    const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
+    const { assetCode } = useAssetContext()
     const echoURL = 'https://echo.equinor.com/mp?instCode='
-    const savedAsset = sessionStorage.getItem('assetString')
+
+    const fetchEchoMissions = () => {
+        setIsFetchingEchoMissions(true)
+        apiCaller.getEchoMissions(assetCode as string).then((missions) => {
+            const echoMissionsMap: Map<string, EchoMission> = mapEchoMissionToString(missions)
+            setEchoMissions(echoMissionsMap)
+            setIsFetchingEchoMissions(false)
+        })
+    }
+
     const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
         var echoMissionsToSchedule: EchoMission[] = []
         selectedEchoMissions.map((selectedEchoMission: string) => {
@@ -70,7 +83,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const onScheduleButtonPress = () => {
         if (selectedRobot === undefined) return
 
-        const assetCode = sessionStorage.getItem('assetString')
         selectedEchoMissions.map((mission: EchoMission) => {
             apiCaller.postMission(mission.id, selectedRobot.id, assetCode)
         })
@@ -87,21 +99,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
             setMissionQueue(missions)
         })
-    }, [])
-
-    useEffect(() => {
-        const id = setInterval(() => {
-            const installationCode = sessionStorage.getItem('assetString')
-            if (!installationCode || installationCode === '') {
-                setEchoMissions(new Map<string, EchoMission>())
-            } else {
-                apiCaller.getEchoMissions(installationCode as string).then((missions) => {
-                    const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
-                    setEchoMissions(mappedEchoMissions)
-                })
-            }
-        }, refreshInterval)
-        return () => clearInterval(id)
     }, [])
 
     useEffect(() => {
@@ -132,16 +129,28 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }, [selectedRobot, selectedEchoMissions])
 
     useEffect(() => {
-        if (Array.from(robotOptions.keys()).length === 0 || Array.from(echoMissions.keys()).length === 0) {
+        if (Array.from(robotOptions.keys()).length === 0 || assetCode === '') {
             setFrontPageScheduleButtonDisabled(true)
         } else {
             setFrontPageScheduleButtonDisabled(false)
         }
-    }, [robotOptions, echoMissions])
+    }, [robotOptions, assetCode])
 
     var missionQueueDisplay = missionQueue.map(function (mission, index) {
         return <MissionQueueCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
     })
+
+    const createMissionButton = (
+        <Button
+            onClick={() => {
+                window.open(echoURL + assetCode)
+            }}
+        >
+            <Icon name={Icons.ExternalLink} size={16}></Icon>
+            {Text('Create mission')}
+        </Button>
+    )
+
     return (
         <StyledMissionView>
             <Typography variant="h1" color="resting">
@@ -158,16 +167,13 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                     onSelectedMissions={onSelectedEchoMissions}
                     onSelectedRobot={onSelectedRobot}
                     onScheduleButtonPress={onScheduleButtonPress}
+                    fetchEchoMissions={fetchEchoMissions}
                     scheduleButtonDisabled={scheduleButtonDisabled}
                     frontPageScheduleButtonDisabled={frontPageScheduleButtonDisabled}
+                    isFetchingEchoMissions={isFetchingEchoMissions}
+                    createMissionButton={createMissionButton}
                 ></ScheduleMissionDialog>
-                <Button
-                    onClick={() => {
-                        window.open(echoURL + savedAsset)
-                    }}
-                >
-                    {Text('Create mission')}
-                </Button>
+                {createMissionButton}
             </MissionButtonView>
         </StyledMissionView>
     )
