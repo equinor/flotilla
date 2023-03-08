@@ -11,18 +11,18 @@ interface Props {
 
 const defaultAsset = {
     asset: '',
-    switchAsset: (newAsset: string) => {},
+    switchAsset: (newAsset: string) => { },
 }
 
 export const AssetContext = createContext<IAssetContext>(defaultAsset)
 
 export const AssetProvider: FC<Props> = ({ children }) => {
-    const prevAsset = sessionStorage.getItem('assetString')
+    const prevAsset = window.localStorage.getItem('assetString')
     const [asset, setAsset] = useState(prevAsset || defaultAsset.asset)
 
     const switchAsset = (newAsset: string) => {
         setAsset(newAsset)
-        sessionStorage.setItem('assetString', newAsset)
+        window.localStorage.setItem('assetString', newAsset)
     }
 
     return (
