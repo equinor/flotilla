@@ -8,10 +8,11 @@ import {
     Popover,
     Icon,
 } from '@equinor/eds-core-react'
-import { useRef, useState } from 'react'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
+import { useRef, useState, useEffect } from 'react'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 interface IProps {
     robotOptions: Array<string>
@@ -19,8 +20,11 @@ interface IProps {
     onSelectedMissions: (missions: string[]) => void
     onSelectedRobot: (robot: string) => void
     onScheduleButtonPress: () => void
+    onFrontPageScheduleButtonPress: () => void
     scheduleButtonDisabled: boolean
     frontPageScheduleButtonDisabled: boolean
+    createMissionButton: JSX.Element
+    isLoadingEchoMissions: boolean
 }
 
 const StyledMissionDialog = styled.div`
@@ -40,9 +44,20 @@ const StyledMissionSection = styled.div`
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+    const [isNoEchoMissionsDialogOpen, setIsNoEchoMissionsDialogOpen] = useState<boolean>(false)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
-    const [isAssetValid, setIsAssetValid] = useState<boolean>(false)
+    const [isScheduleMissionsPressed, setIsScheduleMissionsPressed] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
+    const { asset } = useAssetContext()
+
+    useEffect(() => {
+        if (!props.isLoadingEchoMissions && isScheduleMissionsPressed) {
+            if (props.echoMissionsOptions.length === 0) setIsNoEchoMissionsDialogOpen(true)
+            else setIsDialogOpen(true)
+            setIsScheduleMissionsPressed(false)
+        }
+    }, [props.isLoadingEchoMissions])
+
     let timer: ReturnType<typeof setTimeout>
     const openPopover = () => {
         if (props.frontPageScheduleButtonDisabled) setIsPopoverOpen(true)
@@ -54,14 +69,16 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         timer = setTimeout(() => {
             openPopover()
         }, 300)
-
-        if (sessionStorage.getItem('assetString')) setIsAssetValid(true)
-        else setIsAssetValid(false)
     }
 
     const handleClose = () => {
         clearTimeout(timer)
         closePopover()
+    }
+
+    const onClickScheduleMission = () => {
+        setIsScheduleMissionsPressed(true)
+        props.onFrontPageScheduleButtonPress()
     }
 
     const onChangeEchoMissionSelections = (changes: AutocompleteChanges<string>) => {
@@ -70,25 +87,36 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const onChangeRobotSelection = (changes: AutocompleteChanges<string>) => {
         props.onSelectedRobot(changes.selectedItems[0])
     }
+
     return (
         <>
             <div onPointerEnter={handleHover} onPointerLeave={handleClose} onFocus={openPopover} onBlur={handleClose}>
                 <Button
                     onClick={() => {
-                        setIsDialogOpen(true)
+                        onClickScheduleMission()
                     }}
                     disabled={props.frontPageScheduleButtonDisabled}
                     ref={anchorRef}
                 >
-                    <Icon name={Icons.Add} size={16} />
-                    {Text('Add mission')}
+                    {!props.isLoadingEchoMissions && (
+                        <>
+                            <Icon name={Icons.Add} size={16} />
+                            {Text('Add mission')}
+                        </>
+                    )}
+                    {props.isLoadingEchoMissions && (
+                        <>
+                            <Icon name={Icons.Wait} size={16} />
+                            {Text('Loading')}..
+                        </>
+                    )}
                 </Button>
             </div>
 
             <Popover
                 anchorEl={anchorRef.current}
                 onClose={handleClose}
-                open={isPopoverOpen && !isAssetValid}
+                open={isPopoverOpen && asset === ''}
                 placement="top"
             >
                 <Popover.Content>
@@ -96,18 +124,28 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 </Popover.Content>
             </Popover>
 
-            <Popover
-                anchorEl={anchorRef.current}
-                onClose={handleClose}
-                open={isPopoverOpen && isAssetValid}
-                placement="top"
-            >
-                <Popover.Content>
-                    <Typography variant="body_short">
-                        {Text('This asset has no missions - Please create mission')}
-                    </Typography>
-                </Popover.Content>
-            </Popover>
+            <StyledMissionDialog>
+                <Dialog open={isNoEchoMissionsDialogOpen} isDismissable>
+                    <StyledAutoComplete>
+                        <Typography variant="h5">
+                            {Text('This asset has no missions - Please create mission')}
+                        </Typography>
+                        <StyledMissionSection>
+                            {props.createMissionButton}
+                            <Button
+                                onClick={() => {
+                                    setIsNoEchoMissionsDialogOpen(false)
+                                }}
+                                variant="outlined"
+                                color="secondary"
+                            >
+                                {' '}
+                                {Text('Cancel')}{' '}
+                            </Button>
+                        </StyledMissionSection>
+                    </StyledAutoComplete>
+                </Dialog>
+            </StyledMissionDialog>
 
             <StyledMissionDialog>
                 <Dialog open={isDialogOpen} isDismissable>

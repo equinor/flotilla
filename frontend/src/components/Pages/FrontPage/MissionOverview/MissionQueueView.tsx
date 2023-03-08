@@ -10,6 +10,7 @@ import { EchoMission } from 'models/EchoMission'
 import { Robot } from 'models/Robot'
 import { RefreshProps } from '../FrontPage'
 import { Text } from 'components/Contexts/LanguageContext'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -52,8 +53,19 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>(new Map<string, Robot>())
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
     const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
+    const [isLoadingEchoMissions, setIsLoadingEchoMissions] = useState<boolean>(false)
+    const { asset } = useAssetContext()
     const echoURL = 'https://echo.equinor.com/mp?instCode='
-    const savedAsset = sessionStorage.getItem('assetString')
+
+    const onFrontPageScheduleButtonPress = () => {
+        setIsLoadingEchoMissions(true)
+        apiCaller.getEchoMissions(asset as string).then((missions) => {
+            const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
+            setEchoMissions(mappedEchoMissions)
+            setIsLoadingEchoMissions(false)
+        })
+    }
+
     const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
         var echoMissionsToSchedule: EchoMission[] = []
         selectedEchoMissions.map((selectedEchoMission: string) => {
@@ -70,9 +82,8 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const onScheduleButtonPress = () => {
         if (selectedRobot === undefined) return
 
-        const assetCode = sessionStorage.getItem('assetString')
         selectedEchoMissions.map((mission: EchoMission) => {
-            apiCaller.postMission(mission.id, selectedRobot.id, assetCode)
+            apiCaller.postMission(mission.id, selectedRobot.id, asset)
         })
 
         setSelectedEchoMissions([])
@@ -87,21 +98,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
             setMissionQueue(missions)
         })
-    }, [])
-
-    useEffect(() => {
-        const id = setInterval(() => {
-            const installationCode = sessionStorage.getItem('assetString')
-            if (!installationCode || installationCode === '') {
-                setEchoMissions(new Map<string, EchoMission>())
-            } else {
-                apiCaller.getEchoMissions(installationCode as string).then((missions) => {
-                    const mappedEchoMissions: Map<string, EchoMission> = mapEchoMissionToString(missions)
-                    setEchoMissions(mappedEchoMissions)
-                })
-            }
-        }, refreshInterval)
-        return () => clearInterval(id)
     }, [])
 
     useEffect(() => {
@@ -132,16 +128,27 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }, [selectedRobot, selectedEchoMissions])
 
     useEffect(() => {
-        if (Array.from(robotOptions.keys()).length === 0 || Array.from(echoMissions.keys()).length === 0) {
+        if (Array.from(robotOptions.keys()).length === 0 || asset === '') {
             setFrontPageScheduleButtonDisabled(true)
         } else {
             setFrontPageScheduleButtonDisabled(false)
         }
-    }, [robotOptions, echoMissions])
+    }, [robotOptions, asset])
 
     var missionQueueDisplay = missionQueue.map(function (mission, index) {
         return <MissionQueueCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
     })
+
+    const createMissionButton = (
+        <Button
+            onClick={() => {
+                window.open(echoURL + asset)
+            }}
+        >
+            {Text('Create mission')}
+        </Button>
+    )
+
     return (
         <StyledMissionView>
             <Typography variant="h1" color="resting">
@@ -158,16 +165,13 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                     onSelectedMissions={onSelectedEchoMissions}
                     onSelectedRobot={onSelectedRobot}
                     onScheduleButtonPress={onScheduleButtonPress}
+                    onFrontPageScheduleButtonPress={onFrontPageScheduleButtonPress}
                     scheduleButtonDisabled={scheduleButtonDisabled}
                     frontPageScheduleButtonDisabled={frontPageScheduleButtonDisabled}
+                    isLoadingEchoMissions={isLoadingEchoMissions}
+                    createMissionButton={createMissionButton}
                 ></ScheduleMissionDialog>
-                <Button
-                    onClick={() => {
-                        window.open(echoURL + savedAsset)
-                    }}
-                >
-                    {Text('Create mission')}
-                </Button>
+                {createMissionButton}
             </MissionButtonView>
         </StyledMissionView>
     )
