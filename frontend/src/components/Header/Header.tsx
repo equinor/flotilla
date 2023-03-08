@@ -1,4 +1,5 @@
-import { Button, Icon, TopBar, Autocomplete } from '@equinor/eds-core-react'
+import { config } from 'config'
+import { Button, Icon, TopBar, Autocomplete, Typography } from '@equinor/eds-core-react'
 import { useApi } from 'api/ApiCaller'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { EchoPlantInfo } from 'models/EchoMission'
@@ -21,6 +22,10 @@ const IconStyle = styled.div`
     }
 `
 
+const HandPointer = styled.div`
+    cursor: pointer;
+`
+
 const StyledTopBarContent = styled(TopBar.CustomContent)`
     display: grid;
     grid-template-columns: minmax(50px, 265px) auto;
@@ -31,7 +36,17 @@ const StyledTopBarContent = styled(TopBar.CustomContent)`
 export function Header() {
     return (
         <StyledTopBar>
-            <TopBar.Header>Flotilla</TopBar.Header>
+            <HandPointer>
+                <TopBar.Header
+                    onClick={() => {
+                        window.location.href = `${config.FRONTEND_URL}/`
+                    }}
+                >
+                    <Typography variant="body_long_bold" color="primary">
+                        Flotilla
+                    </Typography>
+                </TopBar.Header>
+            </HandPointer>
             <StyledTopBarContent>{AssetPicker()}</StyledTopBarContent>
             <TopBar.Actions>
                 <IconStyle>
