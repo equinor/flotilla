@@ -62,12 +62,14 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
 
     const fetchEchoMissions = () => {
         setIsFetchingEchoMissions(true)
-        apiCaller.getEchoMissions(assetCode as string).then((missions) => {
-            const echoMissionsMap: Map<string, EchoMission> = mapEchoMissionToString(missions)
-            setEchoMissions(echoMissionsMap)
-            setIsFetchingEchoMissions(false)
-        })
-        .catch((e) => handleError(e))
+        apiCaller
+            .getEchoMissions(assetCode as string)
+            .then((missions) => {
+                const echoMissionsMap: Map<string, EchoMission> = mapEchoMissionToString(missions)
+                setEchoMissions(echoMissionsMap)
+                setIsFetchingEchoMissions(false)
+            })
+            .catch((e) => handleError(e))
     }
 
     const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
@@ -114,8 +116,8 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                 .then((robots) => {
                     const mappedRobots: Map<string, Robot> = mapRobotsToString(robots)
                     setRobotOptions(mappedRobots)
-            })
-            .catch((e) => handleError(e))
+                })
+                .catch((e) => handleError(e))
         }, refreshInterval)
         return () => clearInterval(id)
     }, [])
