@@ -46,8 +46,10 @@ const StyledMissionSection = styled.div`
 
 const StyledLoading = styled.div`
     display: flex;
-    justify-content: center;
-    padding-top: 2rem;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 3rem;
+    gap: 1rem;
 `
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
@@ -129,6 +131,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     <StyledAutoComplete>
                         <StyledLoading>
                             <CircularProgress />
+                            <Typography>{Text('Fetching missions from Echo') + '...'}</Typography>
                         </StyledLoading>
                         <StyledMissionSection>
                             <Button
