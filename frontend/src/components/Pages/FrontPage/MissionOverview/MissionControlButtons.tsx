@@ -1,7 +1,7 @@
 import { Mission, MissionStatus } from 'models/Mission'
 import { Icon } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useApi } from 'api/ApiCaller'
 import { tokens } from '@equinor/eds-tokens'
 import { ControlMissionResponse } from 'models/ControlMissionResponse'
@@ -48,6 +48,11 @@ export function MissionControlButtons({ mission }: MissionProps) {
     const [isarResponse, setIsarResponse] = useState<MissionResponse>(
         mapMissionStatusToIsarStatus(mission.missionStatus) as IsarMissionResponse
     )
+
+    useEffect(() => {
+        setIsarResponse(mapMissionStatusToIsarStatus(mission.missionStatus) as IsarMissionResponse)
+    }, [mission.missionStatus])
+
     const apiCaller = useApi()
     const handleError = useErrorHandler()
     const handleClick = (button: ControlButton) => {
