@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Api.Services.Models;
 
 #nullable disable
 namespace Api.Database.Models
@@ -9,6 +10,13 @@ namespace Api.Database.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
+
+        [Required]
+        [MaxLength(200)]
+        public int EchoMissionId { get; set; }
+
+        [MaxLength(200)]
+        public string IsarMissionId { get; set; }
 
         [Required]
         [MaxLength(200)]
@@ -29,26 +37,30 @@ namespace Api.Database.Models
         [Required]
         public virtual Robot Robot { get; set; }
 
-        [MaxLength(200)]
-        public string IsarMissionId { get; set; }
+        private MissionStatus _status;
 
         [Required]
-        [MaxLength(200)]
-        public int EchoMissionId { get; set; }
-
-        private MissionStatus _missionStatus;
-
-        [Required]
-        public MissionStatus MissionStatus
+        public MissionStatus Status
         {
-            get { return _missionStatus; }
+            get { return _status; }
             set
             {
-                _missionStatus = value;
-                if (IsCompleted)
+                _status = value;
+                if (IsCompleted && EndTime is null)
                     EndTime = DateTimeOffset.UtcNow;
+
+                if (_status is MissionStatus.Ongoing && StartTime is null)
+                    StartTime = DateTimeOffset.UtcNow;
             }
         }
+
+        public bool IsCompleted =>
+            _status
+                is MissionStatus.Aborted
+                    or MissionStatus.Cancelled
+                    or MissionStatus.Successful
+                    or MissionStatus.PartiallySuccessful
+                    or MissionStatus.Failed;
 
         [Required]
         public MissionMap Map { get; set; }
@@ -56,37 +68,34 @@ namespace Api.Database.Models
         [Required]
         public DateTimeOffset DesiredStartTime { get; set; }
 
-        public DateTimeOffset? StartTime { get; set; }
+        public DateTimeOffset? StartTime { get; private set; }
 
-        public DateTimeOffset? EndTime { get; set; }
+        public DateTimeOffset? EndTime { get; private set; }
 
         public TimeSpan EstimatedDuration { get; set; }
 
-        [Required]
-        public IList<IsarTask> Tasks { get; set; }
+        private IList<MissionTask> _tasks;
 
-        private IList<PlannedTask> _plannedTasks;
-
-        // The planned tasks are always returned ordered by their order field
+        // The tasks are always returned ordered by their order field
         [Required]
-        public IList<PlannedTask> PlannedTasks
+        public IList<MissionTask> Tasks
         {
-            get { return _plannedTasks.OrderBy(t => t.PlanOrder).ToList(); }
-            set { _plannedTasks = value; }
+            get { return _tasks.OrderBy(t => t.TaskOrder).ToList(); }
+            set { _tasks = value; }
         }
 
-        public bool IsCompleted =>
-            new[]
+        public void UpdateWithIsarInfo(IsarMission isarMission)
+        {
+            IsarMissionId = isarMission.IsarMissionId;
+            foreach (var isarTask in isarMission.Tasks)
             {
-                MissionStatus.Aborted,
-                MissionStatus.Cancelled,
-                MissionStatus.Successful,
-                MissionStatus.PartiallySuccessful,
-                MissionStatus.Failed
-            }.Contains(_missionStatus);
+                var task = GetTaskByIsarId(isarTask.IsarTaskId);
+                task.UpdateWithIsarInfo(isarTask);
+            }
+        }
 
 #nullable enable
-        public IsarTask? ReadIsarTaskById(string isarTaskId)
+        public MissionTask? GetTaskByIsarId(string isarTaskId)
         {
             return Tasks.FirstOrDefault(
                 task => task.IsarTaskId.Equals(isarTaskId, StringComparison.Ordinal)
@@ -123,14 +132,14 @@ namespace Api.Database.Models
             double distance = 0;
             int numberOfTags = 0;
             var prevPosition = new Position(
-                PlannedTasks.First().Pose.Position.X + AssumedXyMetersFromFirst,
-                PlannedTasks.First().Pose.Position.Y + AssumedXyMetersFromFirst,
-                PlannedTasks.First().Pose.Position.Z
+                Tasks.First().RobotPose.Position.X + AssumedXyMetersFromFirst,
+                Tasks.First().RobotPose.Position.Y + AssumedXyMetersFromFirst,
+                Tasks.First().RobotPose.Position.Z
             );
-            foreach (var plannedTask in PlannedTasks)
+            foreach (var task in Tasks)
             {
-                numberOfTags += plannedTask.Inspections.Count;
-                var currentPosition = plannedTask.Pose.Position;
+                numberOfTags += task.Inspections.Count;
+                var currentPosition = task.RobotPose.Position;
                 distance +=
                     Math.Abs(currentPosition.X - prevPosition.X)
                     + Math.Abs(currentPosition.Y - prevPosition.Y);

@@ -1,5 +1,6 @@
 ﻿using Api.Database.Context;
 using Api.Database.Models;
+using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
@@ -14,8 +15,6 @@ namespace Api.Services
         );
 
         public abstract Task<Mission?> ReadById(string id);
-
-        public abstract Task<Mission?> ReadByIsarMissionId(string isarMissionId);
 
         public abstract Task<Mission> Update(Mission mission);
 
@@ -34,7 +33,7 @@ namespace Api.Services
             string isarMissionId,
             string isarTaskId,
             string isarStepId,
-            IsarStep.IsarStepStatus stepStatus
+            IsarStepStatus stepStatus
         );
 
         public abstract Task<Mission?> Delete(string id);
@@ -61,36 +60,16 @@ namespace Api.Services
             return _context.Missions
                 .Include(mission => mission.Robot)
                 .ThenInclude(robot => robot.VideoStreams)
-                .Include(mission => mission.PlannedTasks)
+                .Include(mission => mission.Tasks)
                 .ThenInclude(planTask => planTask.Inspections)
                 .Include(mission => mission.Tasks)
-                .ThenInclude(task => task.Steps);
+                .ThenInclude(task => task.Inspections);
         }
 
         public async Task<Mission> Create(Mission mission)
         {
             await _context.Missions.AddAsync(mission);
             await _context.SaveChangesAsync();
-
-            return mission;
-        }
-
-        public async Task<Mission> Create(
-            string isarMissionId,
-            int echoMissionId,
-            MissionStatus status,
-            Robot robot
-        )
-        {
-            var mission = new Mission
-            {
-                IsarMissionId = isarMissionId,
-                EchoMissionId = echoMissionId,
-                MissionStatus = status,
-                DesiredStartTime = DateTimeOffset.UtcNow,
-                Robot = robot
-            };
-            await Create(mission);
 
             return mission;
         }
@@ -106,7 +85,7 @@ namespace Api.Services
                 query = query.Where(mission => mission.AssetCode.Equals(assetCode));
 
             if (status is not null)
-                query = query.Where(mission => mission.MissionStatus.Equals(status));
+                query = query.Where(mission => mission.Status.Equals(status));
 
             return await query.ToListAsync();
         }
@@ -139,7 +118,7 @@ namespace Api.Services
         }
 
         #region ISAR Specific methods
-        public async Task<Mission?> ReadByIsarMissionId(string isarMissionId)
+        private async Task<Mission?> ReadByIsarMissionId(string isarMissionId)
         {
             return await GetMissionsWithSubModels()
                 .FirstOrDefaultAsync(mission => mission.IsarMissionId.Equals(isarMissionId));
@@ -160,7 +139,7 @@ namespace Api.Services
                 return null;
             }
 
-            mission.MissionStatus = missionStatus;
+            mission.Status = missionStatus;
 
             await _context.SaveChangesAsync();
 
@@ -184,7 +163,7 @@ namespace Api.Services
                 return false;
             }
 
-            var task = mission.ReadIsarTaskById(isarTaskId);
+            var task = mission.GetTaskByIsarId(isarTaskId);
             if (task is null)
             {
                 _logger.LogWarning(
@@ -194,7 +173,7 @@ namespace Api.Services
                 return false;
             }
 
-            task.TaskStatus = taskStatus;
+            task.UpdateStatus(taskStatus);
 
             await _context.SaveChangesAsync();
 
@@ -205,42 +184,42 @@ namespace Api.Services
             string isarMissionId,
             string isarTaskId,
             string isarStepId,
-            IsarStep.IsarStepStatus stepStatus
+            IsarStepStatus stepStatus
         )
         {
             var mission = await ReadByIsarMissionId(isarMissionId);
             if (mission is null)
             {
                 _logger.LogWarning(
-                    "Could not update step status for ISAR step with id: {id} in mission with id: {missionId} as the mission was not found",
+                    "Could not update step status for ISAR inspection with id: {id} in mission with id: {missionId} as the mission was not found",
                     isarStepId,
                     isarMissionId
                 );
                 return false;
             }
 
-            var task = mission.ReadIsarTaskById(isarTaskId);
+            var task = mission.GetTaskByIsarId(isarTaskId);
             if (task is null)
             {
                 _logger.LogWarning(
-                    "Could not update step status for ISAR step with id: {id} as the task with id: {taskId} was not found",
+                    "Could not update step status for ISAR inspection with id: {id} as the task with id: {taskId} was not found",
                     isarStepId,
                     isarTaskId
                 );
                 return false;
             }
 
-            var step = task.ReadIsarStepById(isarStepId);
-            if (step is null)
+            var inspection = task.GetInspectionByIsarStepId(isarStepId);
+            if (inspection is null)
             {
                 _logger.LogWarning(
-                    "Could not update step status for ISAR step with id: {id} as the step was not found",
+                    "Could not update step status for ISAR inspection with id: {id} as the step was not found",
                     isarStepId
                 );
                 return false;
             }
 
-            step.StepStatus = stepStatus;
+            inspection.UpdateStatus(stepStatus);
 
             await _context.SaveChangesAsync();
 

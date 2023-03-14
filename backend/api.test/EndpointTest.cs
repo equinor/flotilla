@@ -164,7 +164,7 @@ namespace Api.Test
             );
             Assert.True(mission != null);
             Assert.True(mission.Id != null);
-            Assert.True(mission.MissionStatus == MissionStatus.Pending);
+            Assert.True(mission.Status == MissionStatus.Pending);
         }
     }
 }

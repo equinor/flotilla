@@ -5,6 +5,7 @@ using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
+using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.IdentityModel.Tokens;
 
@@ -240,13 +241,13 @@ namespace Api.EventHandlers
             IsarTaskStatus status;
             try
             {
-                status = IsarTaskStatusMethods.FromString(task.Status);
+                status = IsarTask.StatusFromString(task.Status);
             }
             catch (ArgumentException e)
             {
                 _logger.LogError(
                     e,
-                    "Failed to parse mission status from MQTT message. Report: {id} was not updated.",
+                    "Failed to parse mission status from MQTT message. Mission '{id}' was not updated.",
                     task.MissionId
                 );
                 return;
@@ -272,7 +273,13 @@ namespace Api.EventHandlers
         private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var step = (IsarStepMessage)mqttArgs.Message;
-            IsarStep.IsarStepStatus status;
+
+            // Flotilla does not care about DriveTo steps
+            var stepType = IsarStep.StepTypeFromString(step.StepType);
+            if (stepType is IsarStepType.DriveToPose)
+                return;
+
+            IsarStepStatus status;
             try
             {
                 status = IsarStep.StatusFromString(step.Status);
@@ -281,7 +288,7 @@ namespace Api.EventHandlers
             {
                 _logger.LogError(
                     e,
-                    "Failed to parse mission status from MQTT message. Report: {id} was not updated.",
+                    "Failed to parse mission status from MQTT message. Mission '{id}' was not updated.",
                     step.MissionId
                 );
                 return;
@@ -296,7 +303,7 @@ namespace Api.EventHandlers
 
             if (success)
                 _logger.LogInformation(
-                    "{time} - Step {id} updated to {status} for {robot} with isar id {id}",
+                    "{time} - Inspection '{id}' updated to '{status}' for '{robotName}' with isar id '{id}'",
                     step.Timestamp,
                     step.StepId,
                     step.Status,

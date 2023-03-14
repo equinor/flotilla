@@ -98,7 +98,7 @@ public class MissionController : ControllerBase
 
         try
         {
-            byte[] mapStream = await _mapService.FetchMapImage(id);
+            byte[] mapStream = await _mapService.FetchMapImage(mission);
             return File(mapStream, "image/png");
         }
         catch (Azure.RequestFailedException)
@@ -164,14 +164,14 @@ public class MissionController : ControllerBase
             return StatusCode(StatusCodes.Status502BadGateway, message);
         }
 
-        var plannedTasks = echoMission.Tags
+        var missionTasks = echoMission.Tags
             .Select(
                 t =>
                 {
                     var tagPosition = _stidService
                         .GetTagPosition(t.TagId, scheduledMissionQuery.AssetCode)
                         .Result;
-                    return new PlannedTask(t, tagPosition);
+                    return new MissionTask(t, tagPosition);
                 }
             )
             .ToList();
@@ -181,17 +181,16 @@ public class MissionController : ControllerBase
             Name = echoMission.Name,
             Robot = robot,
             EchoMissionId = scheduledMissionQuery.EchoMissionId,
-            MissionStatus = MissionStatus.Pending,
+            Status = MissionStatus.Pending,
             DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
-            PlannedTasks = plannedTasks,
-            Tasks = new List<IsarTask>(),
+            Tasks = missionTasks,
             AssetCode = scheduledMissionQuery.AssetCode,
             Map = new MissionMap()
         };
 
         await _mapService.AssignMapToMission(scheduledMission);
 
-        if (plannedTasks.Any())
+        if (scheduledMission.Tasks.Any())
             scheduledMission.CalculateEstimatedDuration();
 
         var newMission = await _missionService.Create(scheduledMission);

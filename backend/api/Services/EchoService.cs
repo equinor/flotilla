@@ -4,7 +4,7 @@ using Api.Database.Models;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.Identity.Web;
-using static Api.Database.Models.IsarStep;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Services
 {
@@ -15,6 +15,7 @@ namespace Api.Services
         public abstract Task<EchoMission> GetMissionById(int missionId);
 
         public abstract Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
+
         public abstract Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId);
     }
 
@@ -24,10 +25,7 @@ namespace Api.Services
         private readonly IDownstreamWebApi _echoApi;
         private readonly ILogger<EchoService> _logger;
 
-        public EchoService(
-            IDownstreamWebApi downstreamWebApi,
-            ILogger<EchoService> logger
-        )
+        public EchoService(IDownstreamWebApi downstreamWebApi, ILogger<EchoService> logger)
         {
             _echoApi = downstreamWebApi;
             _logger = logger;
@@ -132,29 +130,6 @@ namespace Api.Services
             return echoPoseResponse;
         }
 
-        private static IList<EchoInspection> ProcessSensorTypes(List<SensorType> sensorTypes)
-        {
-            var inspections = new List<EchoInspection>();
-
-            bool isEmpty = !sensorTypes.Any();
-            if (isEmpty)
-            {
-                inspections.Add(new EchoInspection(InspectionTypeEnum.Image, null));
-            }
-            else
-            {
-                foreach (var sensorType in sensorTypes)
-                {
-                    var inspectionType = InspectionTypeFromString(sensorType.Key);
-                    inspections.Add(
-                        new EchoInspection(inspectionType, (float?)sensorType.TimeInSeconds)
-                    );
-                }
-            }
-
-            return inspections;
-        }
-
         private List<EchoTag> ProcessPlanItems(List<PlanItem> planItems, string installationCode)
         {
             var tags = new List<EchoTag>();
@@ -182,8 +157,13 @@ namespace Api.Services
                     URL = new Uri(
                         $"https://stid.equinor.com/{installationCode}/tag?tagNo={planItem.Tag}"
                     ),
-                    Inspections = ProcessSensorTypes(planItem.SensorTypes)
+                    Inspections = planItem.SensorTypes
+                        .Select(sensor => new EchoInspection(sensor))
+                        .ToList()
                 };
+
+                if (tag.Inspections.IsNullOrEmpty())
+                    tag.Inspections.Add(new EchoInspection());
 
                 tags.Add(tag);
             }

@@ -15,19 +15,17 @@ public static class InitDb
             Type = "mjpeg"
         };
 
-    private static PlannedInspection PlannedInspection =>
-        new() { InspectionType = IsarStep.InspectionTypeEnum.Image, TimeInSeconds = 0.5f };
-    private static PlannedInspection PlannedInspection2 =>
-        new() { InspectionType = IsarStep.InspectionTypeEnum.ThermalImage, TimeInSeconds = 0.5f };
+    private static Inspection Inspection => new() { InspectionType = InspectionType.Image };
+    private static Inspection Inspection2 => new() { InspectionType = InspectionType.ThermalImage };
 
-    private static PlannedTask PlannedTask =>
+    private static MissionTask ExampleTask =>
         new()
         {
-            Inspections = new List<PlannedInspection>(),
+            Inspections = new List<Inspection>(),
             TagId = "Tagid here",
-            URL = new Uri("https://www.I-am-echo-stid-tag-url.com"),
-            TagPosition = new Position(),
-            Pose = new Pose()
+            EchoTagLink = new Uri("https://www.I-am-echo-stid-tag-url.com"),
+            InspectionTarget = new Position(),
+            RobotPose = new Pose()
         };
 
     private static List<Robot> GetRobots()
@@ -88,10 +86,9 @@ public static class InitDb
             Robot = Robots[0],
             AssetCode = "test",
             EchoMissionId = 95,
-            IsarMissionId = "1",
-            MissionStatus = MissionStatus.Successful,
+            Status = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
-            PlannedTasks = new List<PlannedTask>(),
+            Tasks = new List<MissionTask>(),
             Map = new MissionMap()
         };
 
@@ -101,10 +98,9 @@ public static class InitDb
             Robot = Robots[1],
             AssetCode = "test",
             EchoMissionId = 95,
-            IsarMissionId = "1",
-            MissionStatus = MissionStatus.Successful,
+            Status = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
-            PlannedTasks = new List<PlannedTask>(),
+            Tasks = new List<MissionTask>(),
             Map = new MissionMap()
         };
 
@@ -113,15 +109,13 @@ public static class InitDb
             Name = "Placeholder Mission 3",
             Robot = Robots[2],
             AssetCode = "kaa",
-            EchoMissionId = 1,
-            IsarMissionId = "1",
-            MissionStatus = MissionStatus.Successful,
+            Status = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
-            PlannedTasks = new List<PlannedTask>(),
+            Tasks = new List<MissionTask>(),
             Map = new MissionMap()
         };
 
-        return new List<Mission>(new Mission[] { mission1, mission2, mission3 });
+        return new List<Mission>(new[] { mission1, mission2, mission3 });
     }
 
     public static void PopulateDb(FlotillaDbContext context)
@@ -138,10 +132,11 @@ public static class InitDb
 
         foreach (var mission in Missions)
         {
-            var plannedTask = PlannedTask;
-            plannedTask.Inspections.Add(PlannedInspection);
-            plannedTask.Inspections.Add(PlannedInspection2);
-            mission.PlannedTasks.Add(plannedTask);
+            var task = ExampleTask;
+            task.Inspections.Add(Inspection);
+            task.Inspections.Add(Inspection2);
+            var tasks = new List<MissionTask> { task };
+            mission.Tasks = tasks;
         }
         context.AddRange(Robots);
         context.AddRange(Missions);

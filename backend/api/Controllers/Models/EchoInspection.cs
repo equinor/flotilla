@@ -1,17 +1,36 @@
-﻿using static Api.Database.Models.IsarStep;
+﻿using Api.Database.Models;
 
 namespace Api.Controllers.Models
 {
     public class EchoInspection
     {
-        public InspectionTypeEnum InspectionType { get; set; }
+        public InspectionType InspectionType { get; set; }
 
         public float? TimeInSeconds { get; set; }
 
-        public EchoInspection(InspectionTypeEnum inspectionType, float? timeInSeconds)
+        public EchoInspection()
         {
-            InspectionType = inspectionType;
-            TimeInSeconds = timeInSeconds;
+            InspectionType = InspectionType.Image;
+        }
+
+        public EchoInspection(SensorType echoSensorType)
+        {
+            InspectionType = InspectionTypeFromEchoSensorType(echoSensorType.Key);
+            TimeInSeconds = (float?)echoSensorType.TimeInSeconds;
+        }
+
+        private static InspectionType InspectionTypeFromEchoSensorType(string sensorType)
+        {
+            return sensorType switch
+            {
+                "Picture" => InspectionType.Image,
+                "ThermicPicture" => InspectionType.ThermalImage,
+                "Audio" => InspectionType.Audio,
+                "TakeImage" => InspectionType.Image,
+                "TakeVideo" => InspectionType.Video,
+                "ThermicVideo" => InspectionType.ThermalVideo,
+                _ => InspectionType.Image,
+            };
         }
     }
 }
