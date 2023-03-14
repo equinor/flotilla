@@ -19,7 +19,7 @@ namespace Api.Database.Models
 
         public MissionMap()
         {
-            MapName = "Unavailable";
+            MapName = "DefaultMapName";
             Boundary = new Boundary();
             TransformationMatrices = new TransformationMatrices();
         }

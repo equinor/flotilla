@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Database.Models;
@@ -9,13 +8,12 @@ namespace Api.Test.Mocks
 {
     public class MockMapService : IMapService
     {
-        public async Task<MissionMap> AssignMapToMission(string assetCode, List<PlannedTask> tasks)
+        public async Task AssignMapToMission(Mission mission)
         {
             await Task.Run(() => Thread.Sleep(1));
-            return new MissionMap();
         }
 
-        public async Task<byte[]> FetchMapImage(string missionId)
+        public async Task<byte[]> FetchMapImage(Mission mission)
         {
             await Task.Run(() => Thread.Sleep(1));
             string filePath = Directory.GetCurrentDirectory() + "Images/MockMapImage.png";
