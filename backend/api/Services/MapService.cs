@@ -2,7 +2,6 @@
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Options;
-using Api.Utilities;
 using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
@@ -13,11 +12,8 @@ namespace Api.Services
 {
     public interface IMapService
     {
-        public abstract Task<byte[]> FetchMapImage(string missionId);
-        public abstract Task<MissionMap> AssignMapToMission(
-            string assetCode,
-            List<PlannedTask> tasks
-        );
+        public abstract Task<byte[]> FetchMapImage(Mission mission);
+        public abstract Task AssignMapToMission(Mission mission);
     }
 
     public class MapService : IMapService
@@ -25,41 +21,30 @@ namespace Api.Services
         private readonly ILogger<MapService> _logger;
         private readonly IOptions<AzureAdOptions> _azureOptions;
         private readonly IOptions<MapBlobOptions> _blobOptions;
-        private readonly FlotillaDbContext _dbContext;
 
         public MapService(
             ILogger<MapService> logger,
             IOptions<AzureAdOptions> azureOptions,
-            IOptions<MapBlobOptions> blobOptions,
-            FlotillaDbContext dbContext
+            IOptions<MapBlobOptions> blobOptions
         )
         {
             _logger = logger;
             _azureOptions = azureOptions;
             _blobOptions = blobOptions;
-            _dbContext = dbContext;
         }
 
-        public async Task<byte[]> FetchMapImage(string missionId)
+        public async Task<byte[]> FetchMapImage(Mission mission)
         {
-            var currentMission = _dbContext.Missions.Find(missionId);
-            if (currentMission == null)
-            {
-                _logger.LogError("Mission not found for mission ID {missionId}", missionId);
-                throw new MissionNotFoundException("Mission not found");
-            }
-            ;
-
-            return await DownloadMapImageFromBlobStorage(currentMission);
+            return await DownloadMapImageFromBlobStorage(mission);
         }
 
-        public async Task<MissionMap> AssignMapToMission(string assetCode, List<PlannedTask> tasks)
+        public async Task AssignMapToMission(Mission mission)
         {
             string mostSuitableMap;
             var boundaries = new Dictionary<string, Boundary>();
             var imageSizes = new Dictionary<string, int[]>();
             var blobContainerClient = GetBlobContainerClient(
-                assetCode.ToLower(CultureInfo.CurrentCulture)
+                mission.AssetCode.ToLower(CultureInfo.CurrentCulture)
             );
             try
             {
@@ -89,23 +74,23 @@ namespace Api.Services
             }
             catch (RequestFailedException e)
             {
-                _logger.LogError(
+                _logger.LogWarning(
                     "Unable to find any map files for asset code {AssetCode}: {error message}",
-                    assetCode,
+                    mission.AssetCode,
                     e.Message
                 );
-                return new MissionMap();
+                return;
             }
             try
             {
-                mostSuitableMap = FindMostSuitableMap(boundaries, tasks);
+                mostSuitableMap = FindMostSuitableMap(boundaries, mission.Tasks);
             }
             catch (ArgumentOutOfRangeException)
             {
-                _logger.LogWarning("Unable to find a map for the given tasks.");
-                return new MissionMap();
+                _logger.LogWarning("Unable to find a map for mission '{missionId}'", mission.Id);
+                return;
             }
-            return new MissionMap
+            var map = new MissionMap
             {
                 MapName = mostSuitableMap,
                 Boundary = boundaries[mostSuitableMap],
@@ -116,6 +101,7 @@ namespace Api.Services
                     imageSizes[mostSuitableMap][1]
                 )
             };
+            mission.Map = map;
         }
 
         private BlobContainerClient GetBlobContainerClient(string asset)
@@ -139,7 +125,7 @@ namespace Api.Services
             );
             var blobClient = blobContainerClient.GetBlobClient(currentMission.Map.MapName);
 
-            using var stream = await blobClient.OpenReadAsync();
+            await using var stream = await blobClient.OpenReadAsync();
 
             byte[] result = new byte[stream.Length];
             await stream.ReadAsync(result);
@@ -206,7 +192,7 @@ namespace Api.Services
 
         private static string FindMostSuitableMap(
             Dictionary<string, Boundary> boundaries,
-            List<PlannedTask> tasks
+            IList<PlannedTask> tasks
         )
         {
             string mostSuitableMap = "";

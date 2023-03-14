@@ -89,6 +89,13 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<ActionResult<byte[]>> GetMap([FromRoute] string id)
     {
+        var mission = await _missionService.ReadById(id);
+        if (mission is null)
+        {
+            _logger.LogError("Mission not found for mission ID {missionId}", id);
+            throw new MissionNotFoundException("Mission not found");
+        }
+
         try
         {
             byte[] mapStream = await _mapService.FetchMapImage(id);
@@ -169,8 +176,6 @@ public class MissionController : ControllerBase
             )
             .ToList();
 
-        var map = await _mapService.AssignMapToMission(echoMission.AssetCode, plannedTasks);
-
         var scheduledMission = new Mission
         {
             Name = echoMission.Name,
@@ -181,8 +186,10 @@ public class MissionController : ControllerBase
             PlannedTasks = plannedTasks,
             Tasks = new List<IsarTask>(),
             AssetCode = scheduledMissionQuery.AssetCode,
-            Map = map
+            Map = new MissionMap()
         };
+
+        await _mapService.AssignMapToMission(scheduledMission);
 
         if (plannedTasks.Any())
             scheduledMission.CalculateEstimatedDuration();
