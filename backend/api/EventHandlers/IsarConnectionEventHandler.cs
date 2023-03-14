@@ -108,8 +108,11 @@ namespace Api.EventHandlers
 
             _ = await RobotService.Update(robot);
 
-            _isarConnectionTimers[robotName].Close();
-            _isarConnectionTimers.Remove(robotName);
+            if (_isarConnectionTimers.TryGetValue(robotName, out var timer))
+            {
+                timer.Close();
+                _isarConnectionTimers.Remove(robotName);
+            }
         }
     }
 }
