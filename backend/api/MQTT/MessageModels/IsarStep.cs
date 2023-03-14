@@ -20,6 +20,9 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("step_id")]
         public string StepId { get; set; }
 
+        [JsonPropertyName("step_type")]
+        public string StepType { get; set; }
+
         [JsonPropertyName("status")]
         public string Status { get; set; }
 
