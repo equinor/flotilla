@@ -1,10 +1,12 @@
-﻿using Api.Controllers.Models;
+﻿using System.Text.Json;
+using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
 using Api.Utilities;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Api.EventHandlers
 {
@@ -87,13 +89,14 @@ namespace Api.EventHandlers
 
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
         {
+            var robotService = RobotService;
             var isarRobotInfo = (IsarRobotInfoMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByIsarId(isarRobotInfo.IsarId);
+            var robot = await robotService.ReadByIsarId(isarRobotInfo.IsarId);
 
             if (robot == null)
             {
                 _logger.LogInformation(
-                    "Received message from new ISAR instance {id} with robot name {name}. Adding new robot to database.",
+                    "Received message from new ISAR instance '{id}' with robot name '{name}'. Adding new robot to database.",
                     isarRobotInfo.IsarId,
                     isarRobotInfo.RobotName
                 );
@@ -112,69 +115,60 @@ namespace Api.EventHandlers
                 };
 
                 robot = await RobotService.Create(robotQuery);
-                _logger.LogInformation("Added robot {name} to database", robot.Name);
+                _logger.LogInformation("Added robot '{name}' to database", robot.Name);
+
+                return;
             }
-            else if (RobotHasSignificantChange(robot, isarRobotInfo))
-            {
-                _logger.LogInformation(
-                    "A change was discovered on robot {name} and the database will be updated",
-                    robot.Name
-                );
 
-                var existingVideoStreams = new List<string>();
-                foreach (var existingVideoStream in robot.VideoStreams)
-                    existingVideoStreams.Add(existingVideoStream.Name);
-
-                foreach (var videoStreamQuery in isarRobotInfo.VideoStreamQueries)
-                {
-                    if (!existingVideoStreams.Contains(videoStreamQuery.Name))
-                    {
-                        var videoStream = new VideoStream
+            var updatedStreams = isarRobotInfo.VideoStreamQueries
+                .Select(
+                    stream =>
+                        new VideoStream
                         {
-                            Name = videoStreamQuery.Name,
-                            Url = videoStreamQuery.Url,
-                            Type = videoStreamQuery.Type
-                        };
-                        robot.VideoStreams.Add(videoStream);
-                    }
-                }
+                            Name = stream.Name,
+                            Url = stream.Url,
+                            Type = stream.Type
+                        }
+                )
+                .ToList();
 
-                robot.Host = isarRobotInfo.Host;
-                robot.Port = isarRobotInfo.Port;
-
-                robot = await RobotService.Update(robot);
-                _logger.LogInformation("Updated robot {name} in database", robot.Name);
-            }
-        }
-
-        private static bool RobotHasSignificantChange(
-            Robot robot,
-            IsarRobotInfoMessage isarRobotInfo
-        )
-        {
-            if (robot.Host != isarRobotInfo.Host || robot.Port != isarRobotInfo.Port)
-                return true;
-
-            var existingVideoStreams = new List<string>();
-            foreach (var existingVideoStream in robot.VideoStreams)
-                existingVideoStreams.Add(existingVideoStream.Name);
-
-            foreach (var videoStreamQuery in isarRobotInfo.VideoStreamQueries)
+            List<string> updatedFields = new();
+            if (
+                !(
+                    updatedStreams.Count == robot.VideoStreams.Count
+                    && updatedStreams.TrueForAll(stream => robot.VideoStreams.Contains(stream))
+                )
+            )
             {
-                if (!existingVideoStreams.Contains(videoStreamQuery.Name))
-                    return true;
-
-                foreach (var existingVideoStream in robot.VideoStreams)
-                {
-                    if (
-                        videoStreamQuery.Name == existingVideoStream.Name
-                        && videoStreamQuery.Url != existingVideoStream.Url
-                    )
-                        return true;
-                }
+                updatedFields.Add(
+                    $"\nVideoStreams ({JsonSerializer.Serialize(robot.VideoStreams, new JsonSerializerOptions() { WriteIndented = true })} "
+                        + "\n-> "
+                        + $"\n{JsonSerializer.Serialize(updatedStreams, new JsonSerializerOptions() { WriteIndented = true })})\n"
+                );
+                robot.VideoStreams = updatedStreams;
             }
 
-            return false;
+            if (!isarRobotInfo.Host.Equals(robot.Host, StringComparison.Ordinal))
+            {
+                updatedFields.Add($"\nHost ({robot.Host} -> {isarRobotInfo.Host})\n");
+                robot.Host = isarRobotInfo.Host;
+            }
+
+            if (!isarRobotInfo.Port.Equals(robot.Port))
+            {
+                updatedFields.Add($"\nPort ({robot.Port} -> {isarRobotInfo.Port})\n");
+                robot.Port = isarRobotInfo.Port;
+            }
+
+            if (!updatedFields.IsNullOrEmpty())
+            {
+                robot = await robotService.Update(robot);
+                _logger.LogInformation(
+                    "Updated robot '{name}' in database: {updates}",
+                    robot.Name,
+                    updatedFields
+                );
+            }
         }
 
         private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
