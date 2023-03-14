@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Services.Models;
@@ -11,18 +9,17 @@ namespace Api.Test.Mocks
 {
     public class MockIsarService : IIsarService
     {
-        public async Task<IsarServiceStartMissionResponse> StartMission(
-            Robot robot,
-            IsarMissionDefinition missionDefinition
-        )
+        public async Task<IsarMission> StartMission(Robot robot, Mission mission)
         {
             await Task.Run(() => Thread.Sleep(1));
-            var isarServiceStartMissionResponse = new IsarServiceStartMissionResponse(
-                isarMissionId: "test",
-                startTime: DateTimeOffset.UtcNow,
-                tasks: new List<IsarTask>()
+            var isarServiceMissionResponse = new IsarMission(
+                new IsarStartMissionResponse
+                {
+                    MissionId = "test",
+                    Tasks = new List<IsarTaskResponse>()
+                }
             );
-            return isarServiceStartMissionResponse;
+            return isarServiceMissionResponse;
         }
 
         public async Task<IsarControlMissionResponse> StopMission(Robot robot)
@@ -41,11 +38,6 @@ namespace Api.Test.Mocks
         {
             await Task.Run(() => Thread.Sleep(1));
             return new IsarControlMissionResponse();
-        }
-
-        public IsarMissionDefinition GetIsarMissionDefinition(Mission mission)
-        {
-            return new IsarMissionDefinition(new List<IsarTaskDefinition>());
         }
     }
 }

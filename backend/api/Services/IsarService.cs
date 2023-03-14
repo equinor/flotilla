@@ -1,6 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services.Models;
 using Api.Utilities;
@@ -10,18 +8,13 @@ namespace Api.Services
 {
     public interface IIsarService
     {
-        public abstract Task<IsarServiceStartMissionResponse> StartMission(
-            Robot robot,
-            IsarMissionDefinition missionDefinition
-        );
+        public abstract Task<IsarMission> StartMission(Robot robot, Mission mission);
 
         public abstract Task<IsarControlMissionResponse> StopMission(Robot robot);
 
         public abstract Task<IsarControlMissionResponse> PauseMission(Robot robot);
 
         public abstract Task<IsarControlMissionResponse> ResumeMission(Robot robot);
-
-        public abstract IsarMissionDefinition GetIsarMissionDefinition(Mission mission);
     }
 
     public class IsarService : IIsarService
@@ -71,22 +64,14 @@ namespace Api.Services
             return response;
         }
 
-        public IsarMissionDefinition GetIsarMissionDefinition(Mission mission)
+        public async Task<IsarMission> StartMission(Robot robot, Mission mission)
         {
-            var tasks = mission.PlannedTasks.Select(task => new IsarTaskDefinition(task, mission));
-            return new IsarMissionDefinition(tasks: tasks.ToList());
-        }
-
-        public async Task<IsarServiceStartMissionResponse> StartMission(
-            Robot robot,
-            IsarMissionDefinition missionDefinition
-        )
-        {
+            var missionDefinitionObject = new IsarMissionDefinition(mission);
             var response = await CallApi(
                 HttpMethod.Post,
                 robot.IsarUri,
                 "schedule/start-mission",
-                new { mission_definition = missionDefinition }
+                new { mission_definition = missionDefinitionObject }
             );
 
             if (!response.IsSuccessStatusCode)

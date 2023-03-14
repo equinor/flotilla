@@ -334,11 +334,7 @@ public class RobotController : ControllerBase
         IsarServiceStartMissionResponse isarServiceStartMissionResponse;
         try
         {
-            var isarMissionDefinition = _isarService.GetIsarMissionDefinition(mission);
-            isarServiceStartMissionResponse = await _isarService.StartMission(
-                robot,
-                isarMissionDefinition
-            );
+            isarServiceStartMissionResponse = await _isarService.StartMission(robot, mission);
         }
         catch (HttpRequestException e)
         {
