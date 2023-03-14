@@ -1,7 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Database.Models;
 using Api.Utilities;
-namespace Api.Controllers.Models
+
+namespace Api.Services.Models
 {
     /// <summary>
     /// The input ISAR expects as a mission description in the /schedule/start-mission endpoint
@@ -14,6 +15,35 @@ namespace Api.Controllers.Models
         public IsarMissionDefinition(List<IsarTaskDefinition> tasks)
         {
             Tasks = tasks;
+        }
+
+        public IsarMissionDefinition(Mission mission)
+        {
+            Tasks = mission.Tasks.Select(task => new IsarTaskDefinition(task, mission)).ToList();
+        }
+    }
+
+    public struct IsarTaskDefinition
+    {
+        [JsonPropertyName("pose")]
+        public IsarPose Pose { get; set; }
+
+        [JsonPropertyName("tag")]
+        public string Tag { get; set; }
+
+        [JsonPropertyName("inspections")]
+        public List<IsarInspectionDefinition> Inspections { get; set; }
+
+        public IsarTaskDefinition(MissionTask missionTask, Mission mission)
+        {
+            Pose = new IsarPose(missionTask.RobotPose);
+            Tag = missionTask.TagId;
+            var isarInspections = new List<IsarInspectionDefinition>();
+            foreach (var inspection in missionTask.Inspections)
+            {
+                isarInspections.Add(new IsarInspectionDefinition(inspection, missionTask, mission));
+            }
+            Inspections = isarInspections;
         }
     }
 
@@ -34,17 +64,17 @@ namespace Api.Controllers.Models
         [JsonPropertyName("metadata")]
         public Dictionary<string, string>? Metadata { get; set; }
 
-        public IsarInspectionDefinition(PlannedInspection plannedInspection, PlannedTask plannedTask, Mission mission)
+        public IsarInspectionDefinition(Inspection inspection, MissionTask task, Mission mission)
         {
-            Type = plannedInspection.InspectionType.ToString();
+            Type = inspection.InspectionType.ToString();
             InspectionTarget = new IsarPosition(
-                plannedTask.TagPosition.X,
-                plannedTask.TagPosition.Y,
-                plannedTask.TagPosition.Z,
+                task.InspectionTarget.X,
+                task.InspectionTarget.Y,
+                task.InspectionTarget.Z,
                 "asset"
             );
-            AnalysisTypes = plannedInspection.AnalysisTypes;
-            Duration = plannedInspection.TimeInSeconds;
+            AnalysisTypes = inspection.AnalysisTypes;
+            Duration = inspection.VideoDuration;
             var metadata = new Dictionary<string, string>
             {
                 { "map", mission.Map.MapName },
@@ -55,30 +85,6 @@ namespace Api.Controllers.Models
                 { "status_reason", mission.StatusReason }
             };
             Metadata = metadata;
-        }
-    }
-
-    public struct IsarTaskDefinition
-    {
-        [JsonPropertyName("pose")]
-        public IsarPose Pose { get; set; }
-
-        [JsonPropertyName("tag")]
-        public string Tag { get; set; }
-
-        [JsonPropertyName("inspections")]
-        public List<IsarInspectionDefinition> Inspections { get; set; }
-
-        public IsarTaskDefinition(PlannedTask plannedTask, Mission mission)
-        {
-            Pose = new IsarPose(plannedTask.Pose);
-            Tag = plannedTask.TagId;
-            var isarInspections = new List<IsarInspectionDefinition>();
-            foreach (var inspection in plannedTask.Inspections)
-            {
-                isarInspections.Add(new IsarInspectionDefinition(inspection, plannedTask, mission));
-            }
-            Inspections = isarInspections;
         }
     }
 
@@ -167,10 +173,22 @@ namespace Api.Controllers.Models
             );
             FrameName = predefinedPose.Pose.Frame;
         }
+
         public IsarPose(Pose pose)
         {
-            Position = new IsarPosition(pose.Position.X, pose.Position.Y, pose.Position.Z, pose.Frame);
-            Orientation = new IsarOrientation(pose.Orientation.X, pose.Orientation.Y, pose.Orientation.Z, pose.Orientation.W, pose.Frame);
+            Position = new IsarPosition(
+                pose.Position.X,
+                pose.Position.Y,
+                pose.Position.Z,
+                pose.Frame
+            );
+            Orientation = new IsarOrientation(
+                pose.Orientation.X,
+                pose.Orientation.Y,
+                pose.Orientation.Z,
+                pose.Orientation.W,
+                pose.Frame
+            );
             FrameName = pose.Frame;
         }
     }

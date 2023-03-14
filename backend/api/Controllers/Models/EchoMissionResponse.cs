@@ -52,6 +52,7 @@ namespace Api.Controllers.Models
 
         [JsonPropertyName("sensorTypes")]
         public List<SensorType> SensorTypes { get; set; }
+
         [JsonPropertyName("poseId")]
         public int? PoseId { get; set; }
     }
