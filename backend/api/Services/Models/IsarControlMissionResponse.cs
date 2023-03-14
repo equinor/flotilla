@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-# nullable disable
+#nullable disable
 
-namespace Api.Controllers.Models
+namespace Api.Services.Models
 {
     public class IsarControlMissionResponse
     {
