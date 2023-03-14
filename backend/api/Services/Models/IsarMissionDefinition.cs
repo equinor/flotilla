@@ -9,22 +9,30 @@ namespace Api.Services.Models
     /// </summary>
     public struct IsarMissionDefinition
     {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
         [JsonPropertyName("tasks")]
         public List<IsarTaskDefinition> Tasks { get; set; }
 
         public IsarMissionDefinition(List<IsarTaskDefinition> tasks)
         {
+            Id = null;
             Tasks = tasks;
         }
 
         public IsarMissionDefinition(Mission mission)
         {
+            Id = mission.IsarMissionId;
             Tasks = mission.Tasks.Select(task => new IsarTaskDefinition(task, mission)).ToList();
         }
     }
 
     public struct IsarTaskDefinition
     {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
         [JsonPropertyName("pose")]
         public IsarPose Pose { get; set; }
 
@@ -36,6 +44,7 @@ namespace Api.Services.Models
 
         public IsarTaskDefinition(MissionTask missionTask, Mission mission)
         {
+            Id = missionTask.IsarTaskId;
             Pose = new IsarPose(missionTask.RobotPose);
             Tag = missionTask.TagId;
             var isarInspections = new List<IsarInspectionDefinition>();
@@ -49,6 +58,9 @@ namespace Api.Services.Models
 
     public struct IsarInspectionDefinition
     {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
         [JsonPropertyName("type")]
         public string Type { get; set; }
 
@@ -66,6 +78,7 @@ namespace Api.Services.Models
 
         public IsarInspectionDefinition(Inspection inspection, MissionTask task, Mission mission)
         {
+            Id = inspection.IsarStepId;
             Type = inspection.InspectionType.ToString();
             InspectionTarget = new IsarPosition(
                 task.InspectionTarget.X,
