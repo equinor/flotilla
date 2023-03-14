@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using Api.Database.Context;
 using Api.Database.Models;
 using Api.Options;
 using Azure;
@@ -149,7 +148,14 @@ namespace Api.Services
                     double.Parse(map.Metadata["minElevation"], CultureInfo.CurrentCulture) / 1000;
                 double maxElevation =
                     double.Parse(map.Metadata["maxElevation"], CultureInfo.CurrentCulture) / 1000;
-                return new Boundary(lowerLeftX, lowerLeftY, upperRightX, upperRightY, minElevation, maxElevation);
+                return new Boundary(
+                    lowerLeftX,
+                    lowerLeftY,
+                    upperRightX,
+                    upperRightY,
+                    minElevation,
+                    maxElevation
+                );
             }
             catch (FormatException e)
             {
@@ -192,7 +198,7 @@ namespace Api.Services
 
         private static string FindMostSuitableMap(
             Dictionary<string, Boundary> boundaries,
-            IList<PlannedTask> tasks
+            IList<MissionTask> tasks
         )
         {
             string mostSuitableMap = "";
@@ -224,21 +230,30 @@ namespace Api.Services
             return mostSuitableMap;
         }
 
-        private static bool CheckTagsInBoundary(Boundary boundary, List<PlannedTask> tasks)
+        private static bool CheckTagsInBoundary(Boundary boundary, IList<MissionTask> tasks)
         {
             foreach (var task in tasks)
             {
                 try
                 {
-                    if (task.TagPosition.X < boundary.X1 | task.TagPosition.X > boundary.X2)
+                    if (
+                        task.InspectionTarget.X < boundary.X1
+                        || task.InspectionTarget.X > boundary.X2
+                    )
                     {
                         return false;
                     }
-                    if (task.TagPosition.Y < boundary.Y1 | task.TagPosition.Y > boundary.Y2)
+                    if (
+                        task.InspectionTarget.Y < boundary.Y1
+                        || task.InspectionTarget.Y > boundary.Y2
+                    )
                     {
                         return false;
                     }
-                    if (task.TagPosition.Z < boundary.Z1 | task.TagPosition.Z > boundary.Z2)
+                    if (
+                        task.InspectionTarget.Z < boundary.Z1
+                        || task.InspectionTarget.Z > boundary.Z2
+                    )
                     {
                         return false;
                     }
@@ -256,8 +271,11 @@ namespace Api.Services
             List<double[]> referenceMap
         )
         {
-            double checkMapArea = (checkMap[1][0] - checkMap[0][0]) * (checkMap[1][1] - checkMap[0][1]);
-            double referenceMapArea = (referenceMap[1][0] - referenceMap[0][0]) * (referenceMap[1][1] - referenceMap[0][1]);
+            double checkMapArea =
+                (checkMap[1][0] - checkMap[0][0]) * (checkMap[1][1] - checkMap[0][1]);
+            double referenceMapArea =
+                (referenceMap[1][0] - referenceMap[0][0])
+                * (referenceMap[1][1] - referenceMap[0][1]);
             if (checkMapArea > referenceMapArea)
             {
                 return false;

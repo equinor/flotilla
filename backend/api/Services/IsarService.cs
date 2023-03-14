@@ -66,12 +66,11 @@ namespace Api.Services
 
         public async Task<IsarMission> StartMission(Robot robot, Mission mission)
         {
-            var missionDefinitionObject = new IsarMissionDefinition(mission);
             var response = await CallApi(
                 HttpMethod.Post,
                 robot.IsarUri,
                 "schedule/start-mission",
-                new { mission_definition = missionDefinitionObject }
+                new { mission_definition = new IsarMissionDefinition(mission) }
             );
 
             if (!response.IsSuccessStatusCode)
@@ -95,20 +94,14 @@ namespace Api.Services
                 throw new JsonException("Failed to deserialize mission from ISAR");
             }
 
-            var tasks = ProcessIsarMissionResponse(isarMissionResponse);
-
-            var isarServiceStartMissionResponse = new IsarServiceStartMissionResponse(
-                isarMissionId: isarMissionResponse.MissionId,
-                startTime: DateTimeOffset.UtcNow,
-                tasks: tasks
-            );
+            var isarMission = new IsarMission(isarMissionResponse);
 
             _logger.LogInformation(
                 "ISAR Mission '{missionId}' started on robot '{robotId}'",
-                isarMissionResponse?.MissionId,
+                isarMission.IsarMissionId,
                 robot.Id
             );
-            return isarServiceStartMissionResponse;
+            return isarMission;
         }
 
         public async Task<IsarControlMissionResponse> StopMission(Robot robot)
@@ -209,66 +202,6 @@ namespace Api.Services
             return isarMissionResponse;
         }
 
-        private static IList<IsarTask> ProcessIsarMissionResponse(
-            IsarStartMissionResponse isarMissionResponse
-        )
-        {
-            var tasks = new List<IsarTask>();
-            foreach (var taskResponse in isarMissionResponse.Tasks)
-            {
-                var steps = ProcessIsarTask(taskResponse);
-
-                var task = new IsarTask()
-                {
-                    IsarTaskId = taskResponse.IsarTaskId,
-                    TagId = taskResponse.TagId,
-                    TaskStatus = IsarTaskStatus.NotStarted,
-                    Time = DateTimeOffset.UtcNow,
-                    Steps = steps,
-                };
-
-                tasks.Add(task);
-            }
-
-            return tasks;
-        }
-
-        private static IList<IsarStep> ProcessIsarTask(IsarTaskResponse taskResponse)
-        {
-            var steps = new List<IsarStep>();
-
-            foreach (var stepResponse in taskResponse.Steps)
-            {
-                bool success = Enum.TryParse<IsarStep.StepTypeEnum>(
-                    stepResponse.Type,
-                    out var stepType
-                );
-                if (!success)
-                    throw new JsonException(
-                        $"Failed to parse step type. {stepResponse.Type} is not valid"
-                    );
-
-                if (stepType != IsarStep.StepTypeEnum.DriveToPose)
-                {
-                    _ = IsarStep.StepTypeFromString(stepResponse.Type);
-                }
-
-                var step = new IsarStep()
-                {
-                    IsarStepId = stepResponse.IsarStepId,
-                    TagId = taskResponse.TagId,
-                    StepStatus = IsarStep.IsarStepStatus.NotStarted,
-                    StepType = stepType,
-                    Time = DateTimeOffset.UtcNow,
-                    FileLocation = "",
-                };
-
-                steps.Add(step);
-            }
-
-            return steps;
-        }
-
         private static string GetErrorDescriptionFoFailedIsarRequest(HttpResponseMessage response)
         {
             var statusCode = response.StatusCode;
@@ -286,14 +219,5 @@ namespace Api.Services
 
             return description;
         }
-    }
-
-    public class IsarStopMissionResponse
-    {
-        [JsonPropertyName("message")]
-        public string? Message { get; set; }
-
-        [JsonPropertyName("stopped")]
-        public bool Stopped { get; set; }
     }
 }

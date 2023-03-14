@@ -331,10 +331,10 @@ public class RobotController : ControllerBase
             return NotFound("Mission not found");
         }
 
-        IsarServiceStartMissionResponse isarServiceStartMissionResponse;
+        IsarMission isarMission;
         try
         {
-            isarServiceStartMissionResponse = await _isarService.StartMission(robot, mission);
+            isarMission = await _isarService.StartMission(robot, mission);
         }
         catch (HttpRequestException e)
         {
@@ -365,10 +365,8 @@ public class RobotController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 
-        mission.IsarMissionId = isarServiceStartMissionResponse.IsarMissionId;
-        mission.StartTime = isarServiceStartMissionResponse.StartTime;
-        mission.Tasks = isarServiceStartMissionResponse.Tasks;
-        mission.MissionStatus = MissionStatus.Ongoing;
+        mission.UpdateWithIsarInfo(isarMission);
+        mission.Status = MissionStatus.Ongoing;
 
         await _missionService.Update(mission);
 

@@ -56,7 +56,7 @@ namespace Api.EventHandlers
                             queuedMission.Id,
                             newStatus
                         );
-                        queuedMission.MissionStatus = newStatus;
+                        queuedMission.Status = newStatus;
                         await MissionService.Update(queuedMission);
                     }
                 }

@@ -35,7 +35,7 @@ namespace Api.Test.EventHandlers
                 Name = "testMission",
                 EchoMissionId = 2,
                 Robot = Robot,
-                MissionStatus = MissionStatus.Pending,
+                Status = MissionStatus.Pending,
                 DesiredStartTime = DateTimeOffset.Now,
                 Map = new MissionMap()
                 {
@@ -122,7 +122,7 @@ namespace Api.Test.EventHandlers
             // Assert start conditions
             var preMission = await _missionService.ReadById(ScheduledMission.Id);
             Assert.NotNull(preMission);
-            Assert.True(preMission!.MissionStatus == preStatus);
+            Assert.True(preMission!.Status == preStatus);
 
             // ACT
 
@@ -136,7 +136,7 @@ namespace Api.Test.EventHandlers
             // Verify status change
             var postMission = await _missionService.ReadById(ScheduledMission.Id);
             Assert.NotNull(postMission);
-            Assert.True(postMission!.MissionStatus == postStatus);
+            Assert.True(postMission!.Status == postStatus);
         }
 
         [Fact]
