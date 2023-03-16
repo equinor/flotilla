@@ -20,7 +20,6 @@ export const GoToAccessITButton = () => {
     )
 }
 
-
 export const UnauthorizedPage = () => {
     var errorMessage = "You don't have access to this site. Apply for access in AccessIT"
     return (
