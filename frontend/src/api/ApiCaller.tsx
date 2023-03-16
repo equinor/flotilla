@@ -53,7 +53,7 @@ export class BackendAPICaller {
     private async postControlMissionRequest(path: string, robotId: string): Promise<ControlMissionResponse> {
         const body = { robotId: robotId }
         const response = await this.query('POST', path, body).catch((e) => {
-            console.error(`Failed to POST /${path}: ` + e) 
+            console.error(`Failed to POST /${path}: ` + e)
             throw e
         })
 
