@@ -2,8 +2,9 @@ name: Promote to staging
 
 on:
   workflow_dispatch:
-  release:
-    types: [published]
+  # Add this when we are ready to promote to staging on release:
+  # release:
+  #   types: [published]
 
 jobs:
   # TODO: Add Aurora pipeline for promotion here:
