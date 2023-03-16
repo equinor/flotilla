@@ -1,8 +1,9 @@
 import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { GoToAccessITButton } from './GoToAccessITButton'
+import { Button } from '@equinor/eds-core-react'
+import { Text } from 'components/Contexts/LanguageContext'
 
-const StyledUnauthorizedPage = styled.div`
+export const StyledCenteredPage = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
@@ -11,12 +12,21 @@ const StyledUnauthorizedPage = styled.div`
     gap: 3rem;
 `
 
+export const GoToAccessITButton = () => {
+    return (
+        <Button href="https://accessit.equinor.com" variant="contained">
+            {Text('Go to AccessIT')}
+        </Button>
+    )
+}
+
+
 export const UnauthorizedPage = () => {
     var errorMessage = "You don't have access to this site. Apply for access in AccessIT"
     return (
-        <StyledUnauthorizedPage>
-            <Typography variant="h1">{errorMessage}</Typography>
+        <StyledCenteredPage>
+            <Typography variant="h1">{Text(errorMessage)}</Typography>
             <GoToAccessITButton />
-        </StyledUnauthorizedPage>
+        </StyledCenteredPage>
     )
 }
