@@ -9,10 +9,10 @@ export interface EchoTag {
     id: number
     tagId: string
     url: string
-    inspections: Inspection[]
+    inspections: EchoInspection[]
 }
 
-export interface Inspection {
+export interface EchoInspection {
     inspectionType: string
     timeInSeconds: number
 }
