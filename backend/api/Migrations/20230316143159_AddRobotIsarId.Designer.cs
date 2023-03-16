@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    [Migration("20230314082540_AddRobotIsarId")]
+    [Migration("20230316143159_AddRobotIsarId")]
     partial class AddRobotIsarId
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
