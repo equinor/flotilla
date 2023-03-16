@@ -65,5 +65,8 @@
     "Save": "Save",
     "Select language": "Select language",
     "History": "History",
-    "Fetching missions from Echo": "Fetching missions from Echo"
+    "Fetching missions from Echo": "Fetching missions from Echo",
+    "Go to AccessIT": "Go to AccessIT",
+    "You don't have access to this site. Apply for access in AccessIT": "You don't have access to this site. Apply for access in AccessIT",
+    "An unknown error has occurred": "An unknown error has occurred"
 }
