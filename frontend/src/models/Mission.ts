@@ -16,17 +16,21 @@ export enum MissionStatus {
 
 export interface Mission {
     id: string
+    echoMissionId: number
+    isarMissionId?: string
     name: string
+    description?: string
+    statusReason?: string
+    comment?: string
     assetCode?: string
     robot: Robot
-    isarMissionId?: string
-    echoMissionId: number
-    missionStatus: MissionStatus
+    status: MissionStatus
+    isCompleted: boolean
     desiredStartTime: Date
     startTime?: Date
     endTime?: Date
+    estimatedDuration?: string
     tasks: IsarTask[]
     map: MissionMap
     plannedTasks: PlannedTask[]
-    estimatedDuration: string
 }
