@@ -50,6 +50,7 @@ public static class InitDb
         var robot2 = new Robot
         {
             Name = "Shockwave",
+            IsarId = "c68b679d-308b-460f-9fe0-87eaadbd1234",
             Model = RobotModel.ExR2,
             SerialNumber = "SS79",
             Status = RobotStatus.Busy,
@@ -64,6 +65,7 @@ public static class InitDb
         var robot3 = new Robot
         {
             Name = "Ultron",
+            IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
             Model = RobotModel.AnymalX,
             SerialNumber = "Earth616",
             Status = RobotStatus.Available,
