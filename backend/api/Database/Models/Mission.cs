@@ -62,7 +62,6 @@ namespace Api.Database.Models
                     or MissionStatus.PartiallySuccessful
                     or MissionStatus.Failed;
 
-        [Required]
         public MissionMap Map { get; set; }
 
         [Required]
