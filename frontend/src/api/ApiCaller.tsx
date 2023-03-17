@@ -44,9 +44,13 @@ export class BackendAPICaller {
         const url = `${config.BACKEND_URL}/${path}`
         const response: Response = await fetch(url, initializedRequest)
         if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`)
-        const responseContent = await response.json().catch((e) => {
-            throw new Error(`Error getting json from response: ${e}`)
-        })
+        var responseContent
+        // Status code 204 means no content
+        if (response.status !== 204) {
+            responseContent = await response.json().catch((e) => {
+                throw new Error(`Error getting json from response: ${e}`)
+            })
+        } else responseContent = ''
         return { content: responseContent, headers: response.headers }
     }
 
