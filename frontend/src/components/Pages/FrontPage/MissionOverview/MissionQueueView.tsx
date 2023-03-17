@@ -13,6 +13,7 @@ import { Text } from 'components/Contexts/LanguageContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { Icons } from 'utils/icons'
 import { useErrorHandler } from 'react-error-boundary'
+import { compareByDate } from 'utils/filtersAndSorts'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -98,13 +99,9 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         apiCaller.deleteMission(mission.id) //.catch((e) => handleError(e))
     }
 
-    const sortOnDesiredStart = (a: Mission, b: Mission): number => {
-        return Math.sign(a.desiredStartTime.getTime() - b.desiredStartTime.getTime())
-    }
-
     useEffect(() => {
         apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
-            setMissionQueue(missions.sort(sortOnDesiredStart))
+            setMissionQueue(missions.sort((a, b) => compareByDate(a.desiredStartTime, b.desiredStartTime)))
         })
         //.catch((e) => handleError(e))
     }, [])

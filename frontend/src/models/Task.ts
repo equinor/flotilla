@@ -1,4 +1,3 @@
-import { Url } from 'url'
 import { Inspection } from './Inspection'
 import { Pose } from './Pose'
 import { Position } from './Position'

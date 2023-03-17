@@ -8,6 +8,7 @@ import { RefreshProps } from './HistoricMissionPage'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
 import { useErrorHandler } from 'react-error-boundary'
+import { compareByDate } from 'utils/filtersAndSorts'
 
 const TableWithHeader = styled.div`
     width: 600px;
@@ -45,12 +46,7 @@ export function HistoricMissionView({ refreshInterval }: RefreshProps) {
             setCompletedMissions(
                 missions
                     .filter((m) => completedStatuses.includes(m.status))
-                    .sort((a, b) =>
-                        compareDesc(
-                            a.endTime === undefined ? new Date(0) : new Date(a.endTime),
-                            b.endTime === undefined ? new Date(0) : new Date(b.endTime)
-                        )
-                    )
+                    .sort((a, b) => compareByDate(a.endTime, b.endTime))
             )
         })
         //.catch((e) => handleError(e))
