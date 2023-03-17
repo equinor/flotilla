@@ -25,11 +25,15 @@ namespace Api.Controllers.Models
             {
                 "Picture" => InspectionType.Image,
                 "ThermicPicture" => InspectionType.ThermalImage,
+                "ThermalPicture" => InspectionType.ThermalImage,
                 "Audio" => InspectionType.Audio,
-                "TakeImage" => InspectionType.Image,
-                "TakeVideo" => InspectionType.Video,
+                "Video" => InspectionType.Video,
                 "ThermicVideo" => InspectionType.ThermalVideo,
-                _ => InspectionType.Image,
+                "ThermalVideo" => InspectionType.ThermalVideo,
+                _
+                  => throw new InvalidDataException(
+                      $"Echo sensor type '{sensorType}' not supported"
+                  )
             };
         }
     }
