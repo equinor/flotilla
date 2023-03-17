@@ -384,15 +384,13 @@ public class RobotController : ControllerBase
     /// </remarks>
     [HttpPost]
     [Route("{robotId}/stop/")]
-    [ProducesResponseType(typeof(IsarControlMissionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IsarControlMissionResponse>> StopMission(
-        [FromRoute] string robotId
-    )
+    public async Task<ActionResult> StopMission([FromRoute] string robotId)
     {
         var robot = await _robotService.ReadById(robotId);
         if (robot == null)
@@ -401,10 +399,9 @@ public class RobotController : ControllerBase
             return NotFound();
         }
 
-        IsarControlMissionResponse response;
         try
         {
-            response = await _isarService.StopMission(robot);
+            await _isarService.StopMission(robot);
         }
         catch (HttpRequestException e)
         {
@@ -428,7 +425,7 @@ public class RobotController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 
-        return Ok(response);
+        return NoContent();
     }
 
     /// <summary>
@@ -439,13 +436,13 @@ public class RobotController : ControllerBase
     /// </remarks>
     [HttpPost]
     [Route("{robotId}/pause/")]
-    [ProducesResponseType(typeof(IsarControlMissionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<string>> PauseMission([FromRoute] string robotId)
+    public async Task<ActionResult> PauseMission([FromRoute] string robotId)
     {
         var robot = await _robotService.ReadById(robotId);
         if (robot == null)
@@ -454,10 +451,9 @@ public class RobotController : ControllerBase
             return NotFound();
         }
 
-        IsarControlMissionResponse response;
         try
         {
-            response = await _isarService.PauseMission(robot);
+            await _isarService.PauseMission(robot);
         }
         catch (HttpRequestException e)
         {
@@ -479,7 +475,8 @@ public class RobotController : ControllerBase
             _logger.LogError(e, "{message}", message);
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
-        return Ok(response);
+
+        return NoContent();
     }
 
     /// <summary>
@@ -490,13 +487,13 @@ public class RobotController : ControllerBase
     /// </remarks>
     [HttpPost]
     [Route("{robotId}/resume/")]
-    [ProducesResponseType(typeof(IsarControlMissionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<string>> ResumeMission([FromRoute] string robotId)
+    public async Task<ActionResult> ResumeMission([FromRoute] string robotId)
     {
         var robot = await _robotService.ReadById(robotId);
         if (robot == null)
@@ -505,10 +502,9 @@ public class RobotController : ControllerBase
             return NotFound();
         }
 
-        IsarControlMissionResponse response;
         try
         {
-            response = await _isarService.ResumeMission(robot);
+            await _isarService.ResumeMission(robot);
         }
         catch (HttpRequestException e)
         {
@@ -531,6 +527,6 @@ public class RobotController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 
-        return Ok(response);
+        return NoContent();
     }
 }
