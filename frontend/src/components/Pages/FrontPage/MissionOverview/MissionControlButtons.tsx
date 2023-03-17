@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react'
 import { useApi } from 'api/ApiCaller'
 import { tokens } from '@equinor/eds-tokens'
 import { ControlMissionResponse } from 'models/ControlMissionResponse'
-import { IsarTask, IsarTaskStatus } from 'models/IsarTask'
 import { useErrorHandler } from 'react-error-boundary'
+import { Task, TaskStatus } from 'models/Task'
 
 interface MissionProps {
     mission: Mission
@@ -34,10 +34,10 @@ const mapMissionStatusToIsarStatus = (status: MissionStatus): IsarMissionRespons
     return IsarMissionResponse.Unknown
 }
 
-const checkIfTasksStarted = (tasks: IsarTask[]): boolean => {
+const checkIfTasksStarted = (tasks: Task[]): boolean => {
     var isStarted = false
-    tasks.map((task: IsarTask) => {
-        if (task.taskStatus !== IsarTaskStatus.NotStarted) {
+    tasks.map((task: Task) => {
+        if (task.status !== TaskStatus.NotStarted) {
             isStarted = true
         }
     })
@@ -46,7 +46,7 @@ const checkIfTasksStarted = (tasks: IsarTask[]): boolean => {
 
 export function MissionControlButtons({ mission }: MissionProps) {
     const [isarResponse, setIsarResponse] = useState<MissionResponse>(
-        mapMissionStatusToIsarStatus(mission.missionStatus) as IsarMissionResponse
+        mapMissionStatusToIsarStatus(mission.status) as IsarMissionResponse
     )
 
     useEffect(() => {

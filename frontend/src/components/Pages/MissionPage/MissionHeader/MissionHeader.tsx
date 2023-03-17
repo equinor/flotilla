@@ -30,7 +30,7 @@ interface MissionHeaderProps {
 export function MissionHeader({ mission }: MissionHeaderProps) {
     var { startTime, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
     var showControlButtons = false
-    if (mission.missionStatus === MissionStatus.Ongoing || mission.missionStatus === MissionStatus.Paused) {
+    if (mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused) {
         showControlButtons = true
     }
 
@@ -41,7 +41,7 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
                 {showControlButtons && <MissionControlButtons mission={mission} />}
             </TitleSection>
             <InfoSection>
-                <MissionStatusDisplay status={mission.missionStatus} />
+                <MissionStatusDisplay status={mission.status} />
                 {HeaderText(Text('Start time') + ': ' + startTime)}
                 {HeaderText(Text('Time used') + ': ' + usedTime)}
                 {HeaderText(Text('Estimated time remaining') + ': ' + remainingTime)}

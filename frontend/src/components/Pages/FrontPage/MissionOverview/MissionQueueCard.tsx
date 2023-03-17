@@ -49,7 +49,7 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
     }
     const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState<boolean>(false)
     var numberOfTasks = 0
-    mission.plannedTasks.forEach((task) => (numberOfTasks += task.inspections.length))
+    mission.tasks.forEach((task) => (numberOfTasks += task.inspections.length))
     return (
         <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <HorizontalContent>
@@ -111,9 +111,9 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
 
 function MissionDurationDisplay({ mission }: MissionDisplayProps) {
     if (mission.estimatedDuration) {
-        let estimat = mission.estimatedDuration.split('.')
-        const days = estimat.length === 1 ? 0 : estimat[0].split(':')[0]
-        const time = estimat.length === 1 ? estimat[0].split(':') : estimat[1].split(':')
+        let estimate = mission.estimatedDuration.split('.')
+        const days = estimate.length === 1 ? 0 : estimate[0].split(':')[0]
+        const time = estimate.length === 1 ? estimate[0].split(':') : estimate[1].split(':')
         const hours = +days * 24 + +time[0]
         const minutes = +time[1]
         return (

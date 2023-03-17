@@ -35,7 +35,7 @@ export function HistoricMissionCard({ index, mission }: IndexedMissionProps) {
     return (
         <Table.Row key={index}>
             <Table.Cell>
-                <MissionStatusDisplay status={mission.missionStatus} />
+                <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
             <Table.Cell>
                 <Button as={Typography} variant="ghost" onClick={routeChange}>
