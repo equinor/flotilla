@@ -1,6 +1,5 @@
 import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
-import { ControlMissionResponse, IControlMissionResponse } from 'models/ControlMissionResponse'
 import { EchoMission, EchoPlantInfo } from 'models/EchoMission'
 import { Mission, MissionStatus } from 'models/Mission'
 import { Robot } from 'models/Robot'
@@ -54,19 +53,6 @@ export class BackendAPICaller {
         return { content: responseContent, headers: response.headers }
     }
 
-    private async postControlMissionRequest(path: string, robotId: string): Promise<ControlMissionResponse> {
-        const body = { robotId: robotId }
-        const response = await this.query('POST', path, body).catch((e) => {
-            console.error(`Failed to POST /${path}: ` + e)
-            throw e
-        })
-
-        const responseObject: ControlMissionResponse = new ControlMissionResponse(
-            response.content as IControlMissionResponse
-        )
-        return responseObject
-    }
-
     private async GET<TContent>(path: string): Promise<{ content: TContent; headers: Headers }> {
         return this.query('GET', path)
     }
@@ -77,6 +63,14 @@ export class BackendAPICaller {
 
     private async DELETE<TBody, TContent>(path: string, body: TBody): Promise<{ content: TContent; headers: Headers }> {
         return this.query('DELETE', path, body)
+    }
+
+    private async postControlMissionRequest(path: string, robotId: string): Promise<void> {
+        const body = { robotId: robotId }
+        await this.POST(path, body).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
     }
 
     async getRobots(): Promise<Robot[]> {
@@ -174,17 +168,17 @@ export class BackendAPICaller {
         })
     }
 
-    async pauseMission(robotId: string): Promise<ControlMissionResponse> {
+    async pauseMission(robotId: string): Promise<void> {
         const path: string = 'robots/' + robotId + '/pause'
         return this.postControlMissionRequest(path, robotId)
     }
 
-    async resumeMission(robotId: string): Promise<ControlMissionResponse> {
+    async resumeMission(robotId: string): Promise<void> {
         const path: string = 'robots/' + robotId + '/resume'
         return this.postControlMissionRequest(path, robotId)
     }
 
-    async stopMission(robotId: string): Promise<ControlMissionResponse> {
+    async stopMission(robotId: string): Promise<void> {
         const path: string = 'robots/' + robotId + '/stop'
         return this.postControlMissionRequest(path, robotId)
     }

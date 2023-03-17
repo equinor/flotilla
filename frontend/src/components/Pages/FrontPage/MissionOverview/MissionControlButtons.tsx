@@ -4,7 +4,6 @@ import { Icons } from 'utils/icons'
 import { useEffect, useState } from 'react'
 import { useApi } from 'api/ApiCaller'
 import { tokens } from '@equinor/eds-tokens'
-import { ControlMissionResponse } from 'models/ControlMissionResponse'
 import { useErrorHandler } from 'react-error-boundary'
 import { Task, TaskStatus } from 'models/Task'
 
@@ -18,74 +17,41 @@ export enum ControlButton {
     Resume,
 }
 
-enum IsarMissionResponse {
-    Paused = 'paused',
-    Stopped = 'cancelled',
-    Ongoing = 'in_progress',
-    Unknown = 'unknown',
-}
-
-export type MissionResponse = IsarMissionResponse | MissionStatus
-
-const mapMissionStatusToIsarStatus = (status: MissionStatus): IsarMissionResponse => {
-    if (status === MissionStatus.Ongoing) return IsarMissionResponse.Ongoing
-    if (status === MissionStatus.Paused) return IsarMissionResponse.Paused
-    if (status === MissionStatus.Aborted) return IsarMissionResponse.Stopped
-    return IsarMissionResponse.Unknown
-}
-
 const checkIfTasksStarted = (tasks: Task[]): boolean => {
-    var isStarted = false
-    tasks.map((task: Task) => {
-        if (task.status !== TaskStatus.NotStarted) {
-            isStarted = true
-        }
-    })
-    return isStarted
+    return tasks.some((task) => task.status !== TaskStatus.NotStarted)
 }
 
 export function MissionControlButtons({ mission }: MissionProps) {
-    const [isarResponse, setIsarResponse] = useState<MissionResponse>(
-        mapMissionStatusToIsarStatus(mission.status) as IsarMissionResponse
-    )
-
-    useEffect(() => {
-        setIsarResponse(mapMissionStatusToIsarStatus(mission.missionStatus) as IsarMissionResponse)
-    }, [mission.missionStatus])
-
+    const [isWaitingForResponse, setIsWaitingForResponse] = useState<boolean>(false)
     const apiCaller = useApi()
     const handleError = useErrorHandler()
     const handleClick = (button: ControlButton) => {
         switch (button) {
             case ControlButton.Pause: {
-                setIsarResponse(IsarMissionResponse.Unknown)
-                apiCaller.pauseMission(mission.robot.id).then((response: ControlMissionResponse) => {
-                    setIsarResponse(response.missionStatus)
-                })
+                setIsWaitingForResponse(true)
+                apiCaller.pauseMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
                 //.catch((e) => handleError(e))
                 break
             }
             case ControlButton.Resume: {
-                setIsarResponse(IsarMissionResponse.Unknown)
-                apiCaller.resumeMission(mission.robot.id).then((response: ControlMissionResponse) => {
-                    setIsarResponse(response.missionStatus)
-                })
+                setIsWaitingForResponse(true)
+                apiCaller.resumeMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
                 //.catch((e) => handleError(e))
                 break
             }
             case ControlButton.Stop: {
-                setIsarResponse(IsarMissionResponse.Unknown)
-                apiCaller.stopMission(mission.robot.id).then((response: ControlMissionResponse) => {
-                    setIsarResponse(response.missionStatus)
-                })
+                setIsWaitingForResponse(true)
+                apiCaller.stopMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
                 //.catch((e) => handleError(e))
                 break
             }
         }
     }
 
-    const renderControlIcon = (missionStatus: MissionResponse) => {
-        if (missionStatus === IsarMissionResponse.Ongoing) {
+    const renderControlIcon = (missionStatus: MissionStatus) => {
+        if (isWaitingForResponse) {
+            return <Icon name={Icons.Wait} size={32} />
+        } else if (missionStatus === MissionStatus.Ongoing) {
             return (
                 <>
                     <Icon
@@ -102,7 +68,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
                     />
                 </>
             )
-        } else if (missionStatus === IsarMissionResponse.Paused) {
+        } else if (missionStatus === MissionStatus.Paused) {
             return (
                 <>
                     <Icon
@@ -119,10 +85,8 @@ export function MissionControlButtons({ mission }: MissionProps) {
                     />
                 </>
             )
-        } else if (missionStatus === IsarMissionResponse.Unknown) {
-            return <Icon name={Icons.Wait} size={32} />
         }
         return <></>
     }
-    return checkIfTasksStarted(mission.tasks) ? <>{renderControlIcon(isarResponse)}</> : <></>
+    return checkIfTasksStarted(mission.tasks) ? <>{renderControlIcon(mission.status)}</> : <></>
 }
