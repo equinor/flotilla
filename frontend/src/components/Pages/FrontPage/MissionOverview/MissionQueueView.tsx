@@ -98,9 +98,13 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         apiCaller.deleteMission(mission.id) //.catch((e) => handleError(e))
     }
 
+    const sortOnDesiredStart = (a: Mission, b: Mission): number => {
+        return Math.sign(a.desiredStartTime.getTime() - b.desiredStartTime.getTime())
+    }
+
     useEffect(() => {
         apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
-            setMissionQueue(missions)
+            setMissionQueue(missions.sort(sortOnDesiredStart))
         })
         //.catch((e) => handleError(e))
     }, [])
