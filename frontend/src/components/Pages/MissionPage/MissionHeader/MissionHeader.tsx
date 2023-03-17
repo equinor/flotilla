@@ -62,31 +62,39 @@ function HeaderText(text: string) {
     )
 }
 
-function StartUsedAndRemainingTime(mission: Mission) {
-    var startTime
-    var remainingTime
-    var usedTime
+function StartUsedAndRemainingTime(mission: Mission): { startTime: string; usedTime: string; remainingTime: string } {
+    var startTime: string
+    var remainingTime: string
+    var usedTimeInMinutes: number
+    var estimatedDuration: number | undefined
 
-    let dateTime = mission.estimatedDuration.split('.')
-    const days = dateTime.length === 1 ? 0 : dateTime[0].split(':')[0]
-    const time = dateTime.length === 1 ? dateTime[0].split(':') : dateTime[1].split(':')
-    const estimatedDuration = +time[1] + 60 * (+time[0] + +days * 24)
+    if (mission.estimatedDuration) {
+        let dateTime = mission.estimatedDuration.split('.')
+        const days = dateTime.length === 1 ? 0 : dateTime[0].split(':')[0]
+        const time = dateTime.length === 1 ? dateTime[0].split(':') : dateTime[1].split(':')
+        estimatedDuration = +time[1] + 60 * (+time[0] + +days * 24)
+    }
 
     if (mission.endTime) {
         startTime = mission.startTime
             ? format(new Date(mission.startTime), 'HH:mm')
             : format(new Date(mission.endTime), 'HH:mm')
-        usedTime = mission.startTime ? differenceInMinutes(new Date(mission.endTime), new Date(mission.startTime)) : 0
+        usedTimeInMinutes = mission.startTime
+            ? differenceInMinutes(new Date(mission.endTime), new Date(mission.startTime))
+            : 0
         remainingTime = 'N/A'
     } else if (mission.startTime) {
         startTime = format(new Date(mission.startTime), 'HH:mm')
-        usedTime = differenceInMinutes(Date.now(), new Date(mission.startTime))
-        remainingTime = Math.max(estimatedDuration - usedTime, 0) + ' ' + Text('minutes')
+        usedTimeInMinutes = differenceInMinutes(Date.now(), new Date(mission.startTime))
+        if (estimatedDuration)
+            remainingTime = Math.max(estimatedDuration - usedTimeInMinutes, 0) + ' ' + Text('minutes')
+        else remainingTime = 'N/A'
     } else {
         startTime = 'N/A'
-        usedTime = 0
-        remainingTime = estimatedDuration + ' ' + Text('minutes')
+        usedTimeInMinutes = 0
+        if (estimatedDuration) remainingTime = estimatedDuration + ' ' + Text('minutes')
+        else remainingTime = 'N/A'
     }
-    usedTime = usedTime + ' ' + Text('minutes')
+    const usedTime: string = usedTimeInMinutes + ' ' + Text('minutes')
     return { startTime, usedTime, remainingTime }
 }
