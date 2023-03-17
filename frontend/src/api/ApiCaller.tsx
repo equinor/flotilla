@@ -6,7 +6,7 @@ import { Mission, MissionStatus } from 'models/Mission'
 import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
 import { useContext } from 'react'
-import { filterRobots } from 'utils/scheduleMission'
+import { filterRobots } from 'utils/filtersAndSorts'
 
 export class BackendAPICaller {
     /* Implements the request sent to the backend api.
