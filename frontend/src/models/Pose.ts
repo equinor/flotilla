@@ -1,19 +1,10 @@
-export interface Position {
-    x: number
-    y: number
-    z: number
-}
-
-export interface Orientation {
-    x: number
-    y: number
-    z: number
-    w: number
-}
+import { Orientation } from './Orientation'
+import { Position } from './Position'
 
 export interface Pose {
     position: Position
     orientation: Orientation
+    frame?: string
 }
 
 export const defaultPosition: Position = {
