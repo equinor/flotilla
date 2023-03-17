@@ -1,10 +1,9 @@
 import { Table, Typography } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
-import { IsarTask, IsarTaskStatus } from 'models/IsarTask'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
-import { PlannedTask } from 'models/PlannedTask'
 import { Text } from 'components/Contexts/LanguageContext'
+import { Task } from 'models/Task'
 
 const StyledTable = styled(Table)`
     grid-column: 1/ -1;
@@ -16,8 +15,7 @@ interface MissionProps {
 
 export function TaskTable({ mission }: MissionProps) {
     var rows
-    if (mission && mission.tasks.length > 0) rows = renderOngoingTasks(mission.tasks)
-    else if (mission && mission.plannedTasks.length > 0) rows = renderUpcomingTasks(mission.plannedTasks)
+    if (mission && mission.tasks.length > 0) rows = renderTasks(mission.tasks)
 
     return (
         <StyledTable>
@@ -28,8 +26,7 @@ export function TaskTable({ mission }: MissionProps) {
                 <Table.Row>
                     <Table.Cell>#</Table.Cell>
                     <Table.Cell>{Text('Tag-ID')}</Table.Cell>
-                    <Table.Cell>{Text('Description')}</Table.Cell>
-                    <Table.Cell>{Text('Inspection Type')}</Table.Cell>
+                    <Table.Cell>{Text('Inspection Types')}</Table.Cell>
                     <Table.Cell>{Text('Status')}</Table.Cell>
                 </Table.Row>
             </Table.Head>
@@ -38,29 +35,17 @@ export function TaskTable({ mission }: MissionProps) {
     )
 }
 
-function renderOngoingTasks(tasks: IsarTask[]) {
-    var indexCounter = 0
+function renderTasks(tasks: Task[]) {
     var rows = tasks?.map(function (task) {
-        indexCounter++
+        // Workaround for current bug in echo
+        var order: number = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
         return (
-            <Table.Row key={indexCounter}>
-                <Table.Cell>{indexCounter}</Table.Cell>
-                <Table.Cell> {task.tagId}</Table.Cell>
-                <Table.Cell> - </Table.Cell>
-                {task.taskStatus === IsarTaskStatus.Successful && (
-                    <Table.Cell>
-                        <Typography link href={task.steps[0].fileLocation}>
-                            {Text(task.steps[0].inspectionType as string)}
-                        </Typography>
-                    </Table.Cell>
-                )}
-                {task.taskStatus !== IsarTaskStatus.Successful && (
-                    <Table.Cell>
-                        <Typography>{Text(task.steps[0].inspectionType as string)}</Typography>
-                    </Table.Cell>
-                )}
+            <Table.Row key={order}>
+                <Table.Cell>{order}</Table.Cell>
+                <Table.Cell> {renderTagId(task)}</Table.Cell>
+                <Table.Cell> {renderInspectionTypes(task)} </Table.Cell>
                 <Table.Cell>
-                    <TaskStatusDisplay status={task.taskStatus} />
+                    <TaskStatusDisplay status={task.status} />
                 </Table.Cell>
             </Table.Row>
         )
@@ -68,28 +53,26 @@ function renderOngoingTasks(tasks: IsarTask[]) {
     return rows
 }
 
-function renderUpcomingTasks(tasks: PlannedTask[]) {
-    var indexCounter = 0
-    var rows = tasks?.map(function (task) {
-        var inspections = task.inspections?.map(function (inspection) {
-            indexCounter++
+function renderTagId(task: Task) {
+    if (!task.tagId) return <Typography>{'N/A'}</Typography>
+
+    if (task.echoTagLink)
+        return (
+            <Typography link href={task.echoTagLink}>
+                {task.tagId!}
+            </Typography>
+        )
+    else return <Typography>{task.tagId!}</Typography>
+}
+
+function renderInspectionTypes(task: Task) {
+    return task.inspections?.map(function (inspection) {
+        if (inspection.inspectionUrl)
             return (
-                <Table.Row key={indexCounter}>
-                    <Table.Cell>{indexCounter}</Table.Cell>
-                    <Table.Cell>
-                        <Typography link href={task.url}>
-                            {task.tagId}
-                        </Typography>
-                    </Table.Cell>
-                    <Table.Cell> - </Table.Cell>
-                    <Table.Cell>{inspection.inspectionType}</Table.Cell>
-                    <Table.Cell>
-                        <TaskStatusDisplay status={IsarTaskStatus.NotStarted} />
-                    </Table.Cell>
-                </Table.Row>
+                <Typography link href={inspection.inspectionUrl}>
+                    {Text(inspection.inspectionType as string)}
+                </Typography>
             )
-        })
-        return inspections
+        else return <Typography>{Text(inspection.inspectionType as string)}</Typography>
     })
-    return rows
 }

@@ -35,7 +35,7 @@ export function OngoingMissionCard({ mission }: MissionProps) {
                 <Typography>{mission.robot.name}</Typography>
             </div>
             <HorisontalContent>
-                <MissionStatusDisplay status={mission.missionStatus} />
+                <MissionStatusDisplay status={mission.status} />
                 <MissionProgressDisplay mission={mission} />
                 <MissionControlButtons mission={mission} />
             </HorisontalContent>

@@ -1,4 +1,4 @@
-import { Card, Icon } from '@equinor/eds-core-react'
+import { Card } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { useApi } from 'api/ApiCaller'
 import { Mission } from 'models/Mission'
@@ -40,6 +40,10 @@ export function MapView({ mission }: MissionProps) {
     var imageObjectURL: string
 
     useEffect(() => {
+        if (!mission.map) {
+            setMapAvailable(false)
+            return
+        }
         apiCaller
             .getMap(mission.id)
             .then((imageBlob) => {
@@ -101,15 +105,14 @@ function updateMap(mission: Mission, mapCanvas: HTMLCanvasElement, mapImage: HTM
 }
 
 function PlaceTagsInMap(mission: Mission, map: HTMLCanvasElement) {
-    if (mission.plannedTasks[0].tagPosition === null) {
-        return
-    }
     var tagNumber = 1
 
-    mission.plannedTasks.map(function (task) {
-        var pixelPosition = calculateObjectPixelPosition(mission.map, task.tagPosition)
-        drawTagMarker(pixelPosition[0], pixelPosition[1], map, tagNumber)
-        tagNumber += 1
+    mission.tasks.map(function (task) {
+        if (task.inspectionTarget) {
+            var pixelPosition = calculateObjectPixelPosition(mission.map!, task.inspectionTarget)
+            drawTagMarker(pixelPosition[0], pixelPosition[1], map, tagNumber)
+            tagNumber += 1
+        }
     })
 }
 
@@ -117,7 +120,7 @@ function PlaceRobotInMap(mission: Mission, map: HTMLCanvasElement) {
     if (mission.robot.pose === undefined) {
         return
     }
-    var pixelPosition = calculateObjectPixelPosition(mission.map, mission.robot.pose.position)
+    var pixelPosition = calculateObjectPixelPosition(mission.map!, mission.robot.pose.position)
     drawRobotMarker(pixelPosition[0], pixelPosition[1], map)
 }
 

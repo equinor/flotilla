@@ -44,7 +44,7 @@ export function HistoricMissionView({ refreshInterval }: RefreshProps) {
         apiCaller.getMissions().then((missions) => {
             setCompletedMissions(
                 missions
-                    .filter((m) => completedStatuses.includes(m.missionStatus))
+                    .filter((m) => completedStatuses.includes(m.status))
                     .sort((a, b) =>
                         compareDesc(
                             a.endTime === undefined ? new Date(0) : new Date(a.endTime),

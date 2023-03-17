@@ -1,7 +1,6 @@
-import { IsarTask } from './IsarTask'
 import { MissionMap } from './MissionMap'
-import { PlannedTask } from './PlannedTask'
 import { Robot } from './Robot'
+import { Task } from './Task'
 
 export enum MissionStatus {
     Pending = 'Pending',
@@ -30,7 +29,6 @@ export interface Mission {
     startTime?: Date
     endTime?: Date
     estimatedDuration?: string
-    tasks: IsarTask[]
-    map: MissionMap
-    plannedTasks: PlannedTask[]
+    tasks: Task[]
+    map?: MissionMap
 }
