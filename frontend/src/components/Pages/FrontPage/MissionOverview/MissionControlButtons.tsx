@@ -1,5 +1,5 @@
 import { Mission, MissionStatus } from 'models/Mission'
-import { Icon } from '@equinor/eds-core-react'
+import { CircularProgress, Icon } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { useEffect, useState } from 'react'
 import { useApi } from 'api/ApiCaller'
@@ -50,7 +50,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
 
     const renderControlIcon = (missionStatus: MissionStatus) => {
         if (isWaitingForResponse) {
-            return <Icon name={Icons.Wait} size={32} />
+            return <CircularProgress size={32} />
         } else if (missionStatus === MissionStatus.Ongoing) {
             return (
                 <>
