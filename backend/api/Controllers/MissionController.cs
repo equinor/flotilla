@@ -91,11 +91,8 @@ public class MissionController : ControllerBase
     {
         try
         {
-            var mapImage = await _mapService.FetchMapImage(id);
-
-            using var memoryStream = new MemoryStream();
-            mapImage.Save(memoryStream, mapImage.RawFormat);
-            return File(memoryStream.ToArray(), "image/png");
+            byte[] mapStream = await _mapService.FetchMapImage(id);
+            return File(mapStream, "image/png");
         }
         catch (Azure.RequestFailedException)
         {
@@ -164,7 +161,9 @@ public class MissionController : ControllerBase
             .Select(
                 t =>
                 {
-                    var tagPosition = _stidService.GetTagPosition(t.TagId, scheduledMissionQuery.AssetCode).Result;
+                    var tagPosition = _stidService
+                        .GetTagPosition(t.TagId, scheduledMissionQuery.AssetCode)
+                        .Result;
                     return new PlannedTask(t, tagPosition);
                 }
             )
