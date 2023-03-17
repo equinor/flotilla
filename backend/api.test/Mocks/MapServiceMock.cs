@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,11 +15,11 @@ namespace Api.Test.Mocks
             return new MissionMap();
         }
 
-        public async Task<Image> FetchMapImage(string missionId)
+        public async Task<byte[]> FetchMapImage(string missionId)
         {
             await Task.Run(() => Thread.Sleep(1));
             string filePath = Directory.GetCurrentDirectory() + "Images/MockMapImage.png";
-            return Image.FromFile(filePath); ;
+            return File.ReadAllBytes(filePath);
         }
     }
 }

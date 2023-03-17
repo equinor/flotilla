@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Globalization;
+﻿using System.Globalization;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Options;
@@ -14,7 +13,7 @@ namespace Api.Services
 {
     public interface IMapService
     {
-        public abstract Task<Image> FetchMapImage(string missionId);
+        public abstract Task<byte[]> FetchMapImage(string missionId);
         public abstract Task<MissionMap> AssignMapToMission(
             string assetCode,
             List<PlannedTask> tasks
@@ -41,7 +40,7 @@ namespace Api.Services
             _dbContext = dbContext;
         }
 
-        public async Task<Image> FetchMapImage(string missionId)
+        public async Task<byte[]> FetchMapImage(string missionId)
         {
             var currentMission = _dbContext.Missions.Find(missionId);
             if (currentMission == null)
@@ -129,7 +128,7 @@ namespace Api.Services
             return containerClient;
         }
 
-        private async Task<Image> DownloadMapImageFromBlobStorage(Mission currentMission)
+        private async Task<byte[]> DownloadMapImageFromBlobStorage(Mission currentMission)
         {
             var blobContainerClient = GetBlobContainerClient(
                 currentMission.AssetCode.ToLower(CultureInfo.CurrentCulture)
@@ -137,7 +136,11 @@ namespace Api.Services
             var blobClient = blobContainerClient.GetBlobClient(currentMission.Map.MapName);
 
             using var stream = await blobClient.OpenReadAsync();
-            return Image.FromStream(stream);
+
+            byte[] result = new byte[stream.Length];
+            await stream.ReadAsync(result);
+
+            return result;
         }
 
         private Boundary ExtractMapMetadata(BlobItem map)
