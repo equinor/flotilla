@@ -270,11 +270,9 @@ namespace Api.Services
             List<double[]> referenceMap
         )
         {
-            if (checkMap[0][0] < referenceMap[0][0] | checkMap[0][1] < referenceMap[0][1])
-            {
-                return false;
-            }
-            if (checkMap[1][0] > referenceMap[1][0] | checkMap[1][1] > referenceMap[1][1])
+            double checkMapArea = (checkMap[1][0] - checkMap[0][0]) * (checkMap[1][1] - checkMap[0][1]);
+            double referenceMapArea = (referenceMap[1][0] - referenceMap[0][0]) * (referenceMap[1][1] - referenceMap[0][1]);
+            if (checkMapArea > referenceMapArea)
             {
                 return false;
             }
