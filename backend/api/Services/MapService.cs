@@ -80,6 +80,10 @@ namespace Api.Services
                         {
                             continue;
                         }
+                        catch (KeyNotFoundException)
+                        {
+                            continue;
+                        }
                     }
                 }
             }
@@ -106,8 +110,8 @@ namespace Api.Services
                 MapName = mostSuitableMap,
                 Boundary = boundaries[mostSuitableMap],
                 TransformationMatrices = new TransformationMatrices(
-                    boundaries[mostSuitableMap].AsMatrix()[0],
-                    boundaries[mostSuitableMap].AsMatrix()[1],
+                    boundaries[mostSuitableMap].As2DMatrix()[0],
+                    boundaries[mostSuitableMap].As2DMatrix()[1],
                     imageSizes[mostSuitableMap][0],
                     imageSizes[mostSuitableMap][1]
                 )
@@ -155,12 +159,25 @@ namespace Api.Services
                     double.Parse(map.Metadata["upperRightX"], CultureInfo.CurrentCulture) / 1000;
                 double upperRightY =
                     double.Parse(map.Metadata["upperRightY"], CultureInfo.CurrentCulture) / 1000;
-                return new Boundary(lowerLeftX, lowerLeftY, upperRightX, upperRightY);
+                double minElevation =
+                    double.Parse(map.Metadata["minElevation"], CultureInfo.CurrentCulture) / 1000;
+                double maxElevation =
+                    double.Parse(map.Metadata["maxElevation"], CultureInfo.CurrentCulture) / 1000;
+                return new Boundary(lowerLeftX, lowerLeftY, upperRightX, upperRightY, minElevation, maxElevation);
             }
             catch (FormatException e)
             {
                 _logger.LogWarning(
                     "Unable to extract metadata from map {map.Name}: {e.Message}",
+                    map.Name,
+                    e.Message
+                );
+                throw e;
+            }
+            catch (KeyNotFoundException e)
+            {
+                _logger.LogWarning(
+                    "Map {map.Name} is missing required metadata: {e.message}",
                     map.Name,
                     e.Message
                 );
@@ -201,15 +218,15 @@ namespace Api.Services
                     //If the current map is lower resolution than the best map, it's not worth checking.
                     if (
                         !CheckMapIsHigherResolution(
-                            boundary.Value.AsMatrix(),
-                            boundaries[referenceMap].AsMatrix()
+                            boundary.Value.As2DMatrix(),
+                            boundaries[referenceMap].As2DMatrix()
                         )
                     )
                     {
                         continue;
                     }
                 }
-                if (CheckTagsInBoundary(boundary.Value.AsMatrix(), tasks))
+                if (CheckTagsInBoundary(boundary.Value, tasks))
                 {
                     mostSuitableMap = boundary.Key;
                 }
@@ -221,15 +238,26 @@ namespace Api.Services
             return mostSuitableMap;
         }
 
-        private static bool CheckTagsInBoundary(List<double[]> boundary, List<PlannedTask> tasks)
+        private static bool CheckTagsInBoundary(Boundary boundary, List<PlannedTask> tasks)
         {
             foreach (var task in tasks)
             {
-                if (task.TagPosition.X < boundary[0][0] | task.TagPosition.X > boundary[1][0])
+                try
                 {
-                    return false;
+                    if (task.TagPosition.X < boundary.X1 | task.TagPosition.X > boundary.X2)
+                    {
+                        return false;
+                    }
+                    if (task.TagPosition.Y < boundary.Y1 | task.TagPosition.Y > boundary.Y2)
+                    {
+                        return false;
+                    }
+                    if (task.TagPosition.Z < boundary.Z1 | task.TagPosition.Z > boundary.Z2)
+                    {
+                        return false;
+                    }
                 }
-                if (task.TagPosition.Y < boundary[0][1] | task.TagPosition.Y > boundary[1][1])
+                catch
                 {
                     return false;
                 }
