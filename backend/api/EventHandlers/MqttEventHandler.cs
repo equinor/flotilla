@@ -335,7 +335,16 @@ namespace Api.EventHandlers
             }
             else
             {
-                poseStatus.Pose.CopyIsarPoseToRobotPose(robot.Pose);
+                try
+                {
+                    poseStatus.Pose.CopyIsarPoseToRobotPose(robot.Pose);
+                }
+                catch (NullReferenceException e)
+                {
+                    _logger.LogWarning("Received a NullReferenceException: {message}", e.Message);
+                }
+
+
                 await RobotService.Update(robot);
                 _logger.LogDebug("Updated pose on robot {name} ", robot.Name);
             }
