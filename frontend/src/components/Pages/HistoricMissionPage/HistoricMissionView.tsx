@@ -41,21 +41,19 @@ export function HistoricMissionView({ refreshInterval }: RefreshProps) {
     }, [])
 
     const updateCompletedMissions = () => {
-        apiCaller
-            .getMissions()
-            .then((missions) => {
-                setCompletedMissions(
-                    missions
-                        .filter((m) => completedStatuses.includes(m.missionStatus))
-                        .sort((a, b) =>
-                            compareDesc(
-                                a.endTime === undefined ? new Date(0) : new Date(a.endTime),
-                                b.endTime === undefined ? new Date(0) : new Date(b.endTime)
-                            )
+        apiCaller.getMissions().then((missions) => {
+            setCompletedMissions(
+                missions
+                    .filter((m) => completedStatuses.includes(m.missionStatus))
+                    .sort((a, b) =>
+                        compareDesc(
+                            a.endTime === undefined ? new Date(0) : new Date(a.endTime),
+                            b.endTime === undefined ? new Date(0) : new Date(b.endTime)
                         )
-                )
-            })
-            .catch((e) => handleError(e))
+                    )
+            )
+        })
+        //.catch((e) => handleError(e))
     }
 
     var missionsDisplay = completedMissions.map(function (mission, index) {

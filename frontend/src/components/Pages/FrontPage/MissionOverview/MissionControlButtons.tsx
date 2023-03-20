@@ -59,32 +59,26 @@ export function MissionControlButtons({ mission }: MissionProps) {
         switch (button) {
             case ControlButton.Pause: {
                 setIsarResponse(IsarMissionResponse.Unknown)
-                apiCaller
-                    .pauseMission(mission.robot.id)
-                    .then((response: ControlMissionResponse) => {
-                        setIsarResponse(response.missionStatus)
-                    })
-                    .catch((e) => handleError(e))
+                apiCaller.pauseMission(mission.robot.id).then((response: ControlMissionResponse) => {
+                    setIsarResponse(response.missionStatus)
+                })
+                //.catch((e) => handleError(e))
                 break
             }
             case ControlButton.Resume: {
                 setIsarResponse(IsarMissionResponse.Unknown)
-                apiCaller
-                    .resumeMission(mission.robot.id)
-                    .then((response: ControlMissionResponse) => {
-                        setIsarResponse(response.missionStatus)
-                    })
-                    .catch((e) => handleError(e))
+                apiCaller.resumeMission(mission.robot.id).then((response: ControlMissionResponse) => {
+                    setIsarResponse(response.missionStatus)
+                })
+                //.catch((e) => handleError(e))
                 break
             }
             case ControlButton.Stop: {
                 setIsarResponse(IsarMissionResponse.Unknown)
-                apiCaller
-                    .stopMission(mission.robot.id)
-                    .then((response: ControlMissionResponse) => {
-                        setIsarResponse(response.missionStatus)
-                    })
-                    .catch((e) => handleError(e))
+                apiCaller.stopMission(mission.robot.id).then((response: ControlMissionResponse) => {
+                    setIsarResponse(response.missionStatus)
+                })
+                //.catch((e) => handleError(e))
                 break
             }
         }

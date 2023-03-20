@@ -36,12 +36,10 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     }, [])
 
     const updateRobots = () => {
-        apiCaller
-            .getRobots()
-            .then((result: Robot[]) => {
-                setRobots(sortRobotsByStatus(result))
-            })
-            .catch((e) => handleError(e))
+        apiCaller.getRobots().then((result: Robot[]) => {
+            setRobots(sortRobotsByStatus(result))
+        })
+        //.catch((e) => handleError(e))
     }
 
     var robotDisplay = robots.map(function (robot) {

@@ -23,11 +23,10 @@ export function FlotillaSite() {
     const authContext = useMsal()
     const [accessToken, setAccessToken] = useState('')
     useEffect(() => {
-        fetchAccessToken(authContext)
-            .then((accessToken) => {
-                setAccessToken(accessToken)
-            })
-            .catch((e) => handleError(e))
+        fetchAccessToken(authContext).then((accessToken) => {
+            setAccessToken(accessToken)
+        })
+        //.catch((e) => handleError(e))
     }, [])
     return (
         <>

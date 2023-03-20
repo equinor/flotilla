@@ -113,13 +113,11 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
 
     const updateRecentFailedMissions = () => {
         const lastDismissTime: Date = getLastDismissalTime()
-        apiCaller
-            .getMissionsByStatus(MissionStatus.Failed)
-            .then((missions) => {
-                const newRecentFailedMissions = missions.filter((m) => new Date(m.endTime!) > lastDismissTime)
-                setRecentFailedMissions(newRecentFailedMissions)
-            })
-            .catch((e) => handleError(e))
+        apiCaller.getMissionsByStatus(MissionStatus.Failed).then((missions) => {
+            const newRecentFailedMissions = missions.filter((m) => new Date(m.endTime!) > lastDismissTime)
+            setRecentFailedMissions(newRecentFailedMissions)
+        })
+        //.catch((e) => handleError(e))
     }
 
     useEffect(() => {

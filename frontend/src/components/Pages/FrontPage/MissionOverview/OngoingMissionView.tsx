@@ -48,21 +48,17 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     }, [])
 
     const updateOngoingMissions = () => {
-        apiCaller
-            .getMissionsByStatus(MissionStatus.Ongoing)
-            .then((missions) => {
-                setOngoingMissions(missions)
-            })
-            .catch((e) => handleError(e))
+        apiCaller.getMissionsByStatus(MissionStatus.Ongoing).then((missions) => {
+            setOngoingMissions(missions)
+        })
+        //.catch((e) => handleError(e))
     }
 
     const updatePausedMissions = () => {
-        apiCaller
-            .getMissionsByStatus(MissionStatus.Paused)
-            .then((missions) => {
-                setPausedMissions(missions)
-            })
-            .catch((e) => handleError(e))
+        apiCaller.getMissionsByStatus(MissionStatus.Paused).then((missions) => {
+            setPausedMissions(missions)
+        })
+        //.catch((e) => handleError(e))
     }
 
     useEffect(() => {
