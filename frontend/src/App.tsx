@@ -6,7 +6,8 @@ import { ErrorFallback } from 'components/Pages/ErrorFallback'
 
 function App() {
     return (
-        <ErrorBoundary fallbackRender={({ error, resetErrorBoundary }) => ErrorFallback(error)}>
+        // <ErrorBoundary fallbackRender={({ error, resetErrorBoundary }) => ErrorFallback(error)}>
+        <>
             <UnauthenticatedTemplate>
                 <div className="sign-in-page">
                     <SignInPage></SignInPage>
@@ -15,7 +16,8 @@ function App() {
             <AuthenticatedTemplate>
                 <FlotillaSite />
             </AuthenticatedTemplate>
-        </ErrorBoundary>
+        </>
+        // </ErrorBoundary>
     )
 }
 
