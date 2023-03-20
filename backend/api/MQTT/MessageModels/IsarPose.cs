@@ -20,66 +20,66 @@ namespace Api.Mqtt.MessageModels
         public DateTime Timestamp { get; set; }
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Naming",
-        "IDE1006: Naming rule violation",
-        Justification = "Need to keep lower letter variable names for MQTT to be able to cast message to class"
-    )]
     public class IsarPose
     {
-        public IsarPosition position { get; set; }
-        public IsarOrientation orientation { get; set; }
-        public IsarFrame frame { get; set; }
+        [JsonPropertyName("position")]
+        public IsarPosition Position { get; set; }
+
+        [JsonPropertyName("orientation")]
+        public IsarOrientation Orientation { get; set; }
+
+        [JsonPropertyName("frame")]
+        public IsarFrame Frame { get; set; }
 
         public void CopyIsarPoseToRobotPose(Pose robotPose)
         {
-            robotPose.Frame = frame.name;
+            robotPose.Position.X = Position.X;
+            robotPose.Position.Y = Position.Y;
+            robotPose.Position.Z = Position.Z;
 
-            robotPose.Position.X = position.x;
-            robotPose.Position.Y = position.y;
-            robotPose.Position.Z = position.z;
-
-            robotPose.Orientation.X = orientation.x;
-            robotPose.Orientation.Y = orientation.y;
-            robotPose.Orientation.Z = orientation.z;
-            robotPose.Orientation.W = orientation.w;
+            robotPose.Orientation.X = Orientation.X;
+            robotPose.Orientation.Y = Orientation.Y;
+            robotPose.Orientation.Z = Orientation.Z;
+            robotPose.Orientation.W = Orientation.W;
         }
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Naming",
-        "IDE1006: Naming rule violation",
-        Justification = "Need to keep lower letter variable names for MQTT to be able to cast message to class"
-    )]
     public class IsarPosition
     {
-        public float x { get; set; }
-        public float y { get; set; }
-        public float z { get; set; }
-        public IsarFrame frame { get; set; }
+        [JsonPropertyName("x")]
+        public float X { get; set; }
+
+        [JsonPropertyName("y")]
+        public float Y { get; set; }
+
+        [JsonPropertyName("z")]
+        public float Z { get; set; }
+
+        [JsonPropertyName("frame")]
+        public IsarFrame Frame { get; set; }
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Naming",
-        "IDE1006: Naming rule violation",
-        Justification = "Need to keep lower letter variable names for MQTT to be able to cast message to class"
-    )]
     public class IsarOrientation
     {
-        public float x { get; set; }
-        public float y { get; set; }
-        public float z { get; set; }
-        public float w { get; set; }
-        public IsarFrame frame { get; set; }
+        [JsonPropertyName("x")]
+        public float X { get; set; }
+
+        [JsonPropertyName("y")]
+        public float Y { get; set; }
+
+        [JsonPropertyName("z")]
+        public float Z { get; set; }
+
+        [JsonPropertyName("w")]
+        public float W { get; set; }
+
+        [JsonPropertyName("frame")]
+        public IsarFrame Frame { get; set; }
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Naming",
-        "IDE1006: Naming rule violation",
-        Justification = "Need to keep lower letter variable names for MQTT to be able to cast message to class"
-    )]
     public class IsarFrame
     {
-        public string name { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
     }
 }
