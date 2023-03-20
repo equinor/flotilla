@@ -341,7 +341,18 @@ namespace Api.EventHandlers
                 }
                 catch (NullReferenceException e)
                 {
-                    _logger.LogWarning("Received a NullReferenceException: {message}", e.Message);
+                    _logger.LogWarning("Received a NullReferenceException on {robot.Name}: {message}", robot.Name, e.Message);
+                    _logger.LogInformation("Id: {robot.Id}", robot.Id);
+                    _logger.LogInformation("IsarId: {robot.IsarId}", robot.IsarId);
+                    _logger.LogInformation("robot.Pose: {robot.Pose}", robot.Pose);
+                    _logger.LogInformation("robot.Pose.Position: {robot.Pose.Position}", robot.Pose.Position);
+                    _logger.LogInformation("robot.Pose.Orientation: {robot.Pose.Orientation}", robot.Pose.Orientation);
+                    _logger.LogInformation("robot.Pose.Frame: {robot.Pose.Frame}", robot.Pose.Frame);
+                    _logger.LogInformation("poseStatus.Pose.position: {poseStatus.Pose.position}", poseStatus.Pose.position);
+                    _logger.LogInformation("poseStatus.Pose.orientation: {poseStatus.Pose.orientation}", poseStatus.Pose.orientation);
+                    _logger.LogInformation("poseStatus.Pose.frame: {poseStatus.Pose.frame}", poseStatus.Pose.frame);
+
+
                 }
 
 
