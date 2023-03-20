@@ -28,6 +28,7 @@ namespace Api.Database.Models
             Z = z;
             W = w;
         }
+
         public override bool Equals(object obj)
         {
             if (obj is not Orientation)
@@ -90,13 +91,12 @@ namespace Api.Database.Models
         [Required]
         public Orientation Orientation { get; set; }
 
-        [MaxLength(200)]
-        public string Frame { get; set; }
         private static float AxisAngleToQuaternionElement(float rotationAxis, float angle)
         {
             float quaterionElement = rotationAxis * MathF.Sin(angle / 2);
             return quaterionElement;
         }
+
         public Orientation AxisAngleToQuaternion(EchoVector axis, float angle)
         {
             var quaternion = new Orientation()
@@ -108,11 +108,11 @@ namespace Api.Database.Models
             };
             return quaternion;
         }
+
         public Pose()
         {
             Position = new Position();
             Orientation = new Orientation();
-            Frame = "defaultFrame";
         }
 
         public Pose(
@@ -122,33 +122,23 @@ namespace Api.Database.Models
             float x_ori,
             float y_ori,
             float z_ori,
-            float w,
-            string frame
+            float w
         )
         {
             Position = new Position(x_pos, y_pos, z_pos);
             Orientation = new Orientation(x_ori, y_ori, z_ori, w);
-            Frame = frame;
         }
-        public Pose(
-            EchoVector enuPosition,
-            EchoVector axis,
-            float angle
-        )
+
+        public Pose(EchoVector enuPosition, EchoVector axis, float angle)
         {
             Position = new Position(enuPosition.East, enuPosition.North, enuPosition.Up);
             Orientation = AxisAngleToQuaternion(axis, angle);
-            Frame = "asset";
         }
-        public Pose(
-            Position position,
-            Orientation orientation,
-            string frame
-        )
+
+        public Pose(Position position, Orientation orientation)
         {
             Position = position;
             Orientation = orientation;
-            Frame = frame;
         }
     }
 }

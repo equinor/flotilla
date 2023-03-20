@@ -175,34 +175,29 @@ namespace Api.Services.Models
                 predefinedPose.Pose.Position.X,
                 predefinedPose.Pose.Position.Y,
                 predefinedPose.Pose.Position.Z,
-                predefinedPose.Pose.Frame
+                "asset"
             );
             Orientation = new IsarOrientation(
                 predefinedPose.Pose.Orientation.X,
                 predefinedPose.Pose.Orientation.Y,
                 predefinedPose.Pose.Orientation.Z,
                 predefinedPose.Pose.Orientation.W,
-                predefinedPose.Pose.Frame
+                "asset"
             );
-            FrameName = predefinedPose.Pose.Frame;
+            FrameName = "asset";
         }
 
         public IsarPose(Pose pose)
         {
-            Position = new IsarPosition(
-                pose.Position.X,
-                pose.Position.Y,
-                pose.Position.Z,
-                pose.Frame
-            );
+            Position = new IsarPosition(pose.Position.X, pose.Position.Y, pose.Position.Z, "asset");
             Orientation = new IsarOrientation(
                 pose.Orientation.X,
                 pose.Orientation.Y,
                 pose.Orientation.Z,
                 pose.Orientation.W,
-                pose.Frame
+                "asset"
             );
-            FrameName = pose.Frame;
+            FrameName = "asset";
         }
     }
 }

@@ -4,7 +4,6 @@ import { Position } from './Position'
 export interface Pose {
     position: Position
     orientation: Orientation
-    frame?: string
 }
 
 export const defaultPosition: Position = {
