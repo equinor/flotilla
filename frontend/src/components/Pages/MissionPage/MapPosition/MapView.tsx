@@ -60,7 +60,7 @@ export function MapView({ mission }: MissionProps) {
                     setMapImage(img)
                 })
             })
-            .catch((e) => handleError(e))
+        //.catch((e) => handleError(e))
     }, [])
 
     useEffect(() => {

@@ -40,13 +40,11 @@ export function MissionPage() {
 
     useEffect(() => {
         if (missionId) {
-            apiCaller
-                .getMissionById(missionId)
-                .then((mission) => {
-                    setSelectedMission(mission)
-                    updateVideoStreams(mission)
-                })
-                .catch((e) => handleError(e))
+            apiCaller.getMissionById(missionId).then((mission) => {
+                setSelectedMission(mission)
+                updateVideoStreams(mission)
+            })
+            //.catch((e) => handleError(e))
         }
     }, [])
 
@@ -54,24 +52,20 @@ export function MissionPage() {
         const timeDelay = 1000
         const id = setInterval(() => {
             if (missionId) {
-                apiCaller
-                    .getMissionById(missionId)
-                    .then((mission) => {
-                        setSelectedMission(mission)
-                    })
-                    .catch((e) => handleError(e))
+                apiCaller.getMissionById(missionId).then((mission) => {
+                    setSelectedMission(mission)
+                })
+                //.catch((e) => handleError(e))
             }
         }, timeDelay)
         return () => clearInterval(id)
     }, [])
 
     const updateVideoStreams = (mission: Mission) => {
-        apiCaller
-            .getVideoStreamsByRobotId(mission.robot.id)
-            .then((streams) => {
-                setVideoStreams(streams)
-            })
-            .catch((e) => handleError(e))
+        apiCaller.getVideoStreamsByRobotId(mission.robot.id).then((streams) => {
+            setVideoStreams(streams)
+        })
+        //.catch((e) => handleError(e))
     }
 
     return (

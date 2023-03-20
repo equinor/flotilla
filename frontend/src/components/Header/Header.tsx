@@ -74,13 +74,11 @@ function AssetPicker() {
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
     const { assetCode, switchAsset } = useAssetContext()
     useEffect(() => {
-        apiCaller
-            .getEchoPlantInfo()
-            .then((response: EchoPlantInfo[]) => {
-                const mapping = mapAssetCodeToName(response)
-                setAllPlantsMap(mapping)
-            })
-            .catch((e) => handleError(e))
+        apiCaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
+            const mapping = mapAssetCodeToName(response)
+            setAllPlantsMap(mapping)
+        })
+        //.catch((e) => handleError(e))
     }, [])
     const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
     return (
