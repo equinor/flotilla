@@ -47,16 +47,21 @@ namespace Api.EventHandlers
                         continue;
                     }
 
-                    bool startedSuccessfull = await StartMission(queuedMission);
-                    if (!startedSuccessfull)
+                    try
                     {
-                        var newStatus = MissionStatus.Failed;
+                        await StartMission(queuedMission);
+                    }
+                    catch (MissionException e)
+                    {
+                        const MissionStatus NewStatus = MissionStatus.Failed;
                         _logger.LogWarning(
-                            "Mission {id} was not started successfully. Status updated to '{status}'",
+                            "Mission {id} was not started successfully. Status updated to '{status}'.\nReason: {failReason}",
                             queuedMission.Id,
-                            newStatus
+                            NewStatus,
+                            e.Message
                         );
-                        queuedMission.Status = newStatus;
+                        queuedMission.Status = NewStatus;
+                        queuedMission.StatusReason = $"Failed to start: '{e.Message}'";
                         await MissionService.Update(queuedMission);
                     }
                 }
@@ -64,28 +69,20 @@ namespace Api.EventHandlers
             }
         }
 
-        private async Task<bool> StartMission(Mission scheduledMission)
+        private async Task StartMission(Mission queuedMission)
         {
-            try
+            var result = await RobotController.StartMission(
+                queuedMission.Robot.Id,
+                queuedMission.Id
+            );
+            if (result.Result is not OkObjectResult)
             {
-                var result = await RobotController.StartMission(
-                    scheduledMission.Robot.Id,
-                    scheduledMission.Id
-                );
-                if (result.Result is not OkObjectResult)
-                {
-                    throw new MissionException(
-                        result?.Result?.ToString() ?? "Unknown error from robot controller"
-                    );
-                }
-                _logger.LogInformation("Started mission '{id}'", scheduledMission.Id);
+                string errorMessage = "Unknown error from robot controller";
+                if (result.Result is ObjectResult returnObject)
+                    errorMessage = returnObject.Value?.ToString() ?? errorMessage;
+                throw new MissionException(errorMessage);
             }
-            catch (MissionException e)
-            {
-                _logger.LogError(e, "Failed to start mission '{id}'", scheduledMission.Id);
-                return false;
-            }
-            return true;
+            _logger.LogInformation("Started mission '{id}'", queuedMission.Id);
         }
     }
 }
