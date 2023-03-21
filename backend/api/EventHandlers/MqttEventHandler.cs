@@ -41,6 +41,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarTaskReceived += OnTaskUpdate;
             MqttService.MqttIsarStepReceived += OnStepUpdate;
             MqttService.MqttIsarBatteryReceived += OnBatteryUpdate;
+            MqttService.MqttIsarPressureReceived += OnPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnPoseUpdate;
         }
 
@@ -52,6 +53,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarTaskReceived -= OnTaskUpdate;
             MqttService.MqttIsarStepReceived -= OnStepUpdate;
             MqttService.MqttIsarBatteryReceived -= OnBatteryUpdate;
+            MqttService.MqttIsarPressureReceived -= OnPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnPoseUpdate;
         }
 
@@ -319,6 +321,25 @@ namespace Api.EventHandlers
                 robot.BatteryLevel = batteryStatus.BatteryLevel;
                 await RobotService.Update(robot);
                 _logger.LogDebug("Updated battery on robot {name} ", robot.Name);
+            }
+        }
+
+        private async void OnPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
+            var robot = await RobotService.ReadByName(pressureStatus.RobotName);
+            if (robot == null)
+            {
+                _logger.LogWarning(
+                    "Could not find corresponding robot for pressure update on robot {name} ",
+                    pressureStatus.RobotName
+                );
+            }
+            else
+            {
+                robot.PressureLevel = pressureStatus.PressureLevel;
+                await RobotService.Update(robot);
+                _logger.LogDebug("Updated pressure on robot {name} ", robot.Name);
             }
         }
 
