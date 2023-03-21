@@ -19,6 +19,7 @@ namespace Api.Mqtt
         public static event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarStepReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarBatteryReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarPressureReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
 
         private readonly ILogger<MqttService> _logger;
@@ -128,6 +129,9 @@ namespace Api.Mqtt
                     break;
                 case Type type when type == typeof(IsarBatteryMessage):
                     OnIsarTopicReceived<IsarBatteryMessage>(content);
+                    break;
+                case Type type when type == typeof(IsarPressureMessage):
+                    OnIsarTopicReceived<IsarPressureMessage>(content);
                     break;
                 case Type type when type == typeof(IsarPoseMessage):
                     OnIsarTopicReceived<IsarPoseMessage>(content);
@@ -269,6 +273,7 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarTaskMessage) => MqttIsarTaskReceived,
                     _ when type == typeof(IsarStepMessage) => MqttIsarStepReceived,
                     _ when type == typeof(IsarBatteryMessage) => MqttIsarBatteryReceived,
+                    _ when type == typeof(IsarPressureMessage) => MqttIsarPressureReceived,
                     _ when type == typeof(IsarPoseMessage) => MqttIsarPoseReceived,
                     _
                       => throw new NotImplementedException(
