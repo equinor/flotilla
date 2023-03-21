@@ -6,6 +6,7 @@ import { Mission, MissionStatus } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
+import { StatusReason } from '../StatusReason'
 
 const HeaderSection = styled.div`
     display: flex;
@@ -41,6 +42,7 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
                 <Typography variant="h1">{mission.name}</Typography>
                 {showControlButtons && <MissionControlButtons mission={mission} />}
             </TitleSection>
+            <StatusReason mission={mission}></StatusReason>
             <InfoSection>
                 <MissionStatusDisplay status={mission.status} />
                 {HeaderText(Text('Start time') + ': ' + startTime)}
