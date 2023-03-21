@@ -32,4 +32,8 @@
      <InternalsVisibleTo Include="api" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
