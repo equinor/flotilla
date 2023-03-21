@@ -30,6 +30,7 @@ interface MissionHeaderProps {
 
 export function MissionHeader({ mission }: MissionHeaderProps) {
     const barToMillibar = 1000
+    const isMissionCompleted = mission.endTime ? true : false
     var { startTime, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
     var showControlButtons = false
     if (mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused) {
@@ -47,10 +48,11 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
                 <MissionStatusDisplay status={mission.status} />
                 {HeaderText(Text('Start time') + ': ' + startTime)}
                 {HeaderText(Text('Time used') + ': ' + usedTime)}
-                {HeaderText(Text('Estimated time remaining') + ': ' + remainingTime)}
+                {!isMissionCompleted && HeaderText(Text('Estimated time remaining') + ': ' + remainingTime)}
                 {HeaderText(Text('Robot') + ': ' + mission.robot.name)}
-                {HeaderText(Text('Battery level') + ': ' + mission.robot.batteryLevel + '%')}
-                {mission.robot.pressureLevel &&
+                {!isMissionCompleted && HeaderText(Text('Battery level') + ': ' + mission.robot.batteryLevel + '%')}
+                {!isMissionCompleted &&
+                    mission.robot.pressureLevel &&
                     HeaderText(
                         Text('Pressure level') + ': ' + Math.round(mission.robot.pressureLevel * barToMillibar) + 'mBar'
                     )}
