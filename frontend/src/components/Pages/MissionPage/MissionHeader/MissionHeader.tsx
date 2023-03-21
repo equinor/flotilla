@@ -47,6 +47,8 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
                 {HeaderText(Text('Estimated time remaining') + ': ' + remainingTime)}
                 {HeaderText(Text('Robot') + ': ' + mission.robot.name)}
                 {HeaderText(Text('Battery level') + ': ' + mission.robot.batteryLevel + '%')}
+                {mission.robot.pressureLevel &&
+                    HeaderText(Text('Pressure level') + ': ' + mission.robot.pressureLevel + 'mBar')}
             </InfoSection>
         </HeaderSection>
     )
