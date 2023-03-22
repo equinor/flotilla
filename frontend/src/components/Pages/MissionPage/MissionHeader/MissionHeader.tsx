@@ -28,6 +28,7 @@ interface MissionHeaderProps {
 }
 
 export function MissionHeader({ mission }: MissionHeaderProps) {
+    const barToMillibar = 1000
     var { startTime, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
     var showControlButtons = false
     if (mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused) {
@@ -48,7 +49,9 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
                 {HeaderText(Text('Robot') + ': ' + mission.robot.name)}
                 {HeaderText(Text('Battery level') + ': ' + mission.robot.batteryLevel + '%')}
                 {mission.robot.pressureLevel &&
-                    HeaderText(Text('Pressure level') + ': ' + mission.robot.pressureLevel + 'mBar')}
+                    HeaderText(
+                        Text('Pressure level') + ': ' + Math.round(mission.robot.pressureLevel * barToMillibar) + 'mBar'
+                    )}
             </InfoSection>
         </HeaderSection>
     )
