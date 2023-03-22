@@ -8,19 +8,20 @@ import { RobotImage } from './RobotImage'
 import { useNavigate } from 'react-router-dom'
 import { BatteryStatus } from 'models/Battery'
 import { Text } from 'components/Contexts/LanguageContext'
+import PressureStatusView from './PressureStatusView'
 
 interface RobotProps {
     robot: Robot
 }
 
-export const card_width = 200
+export const card_width = 220
 
 const StyledCard = styled(Card)`
-    width: 200px;
+    width: 220px;
     padding: 8px;
 `
 const HoverableStyledCard = styled(Card)`
-    width: 200px;
+    width: 220px;
     padding: 8px;
     :hover {
         background-color: #deedee;
@@ -34,15 +35,26 @@ const HorisontalContent = styled.div`
     padding-top: 2px;
 `
 
+const VerticalContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+`
+
 function cardContent({ robot }: RobotProps) {
     return (
         <div>
             <RobotImage robotType={robot.model} />
-            <Typography variant="h5">{robot.name}</Typography>
-            <Typography variant="body_short">{RobotType.toString(robot.model)}</Typography>
             <HorisontalContent>
-                <RobotStatusChip status={robot.status} />
-                <BatteryStatusView battery={robot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
+                <VerticalContent>
+                    <Typography variant="h5">{robot.name}</Typography>
+                    <Typography variant="caption">{RobotType.toString(robot.model)}</Typography>
+                    <RobotStatusChip status={robot.status} />
+                </VerticalContent>
+                <VerticalContent>
+                    <PressureStatusView pressure={robot.pressureLevel} />
+                    <BatteryStatusView battery={robot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
+                </VerticalContent>
             </HorisontalContent>
         </div>
     )
@@ -54,7 +66,7 @@ export function RobotStatusCard({ robot }: RobotProps) {
         let path = `mission`
         navigate(path)
     }
-    if (robot.status == RobotStatus.Busy) {
+    if (robot.status === RobotStatus.Busy) {
         return (
             <HoverableStyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={goToMission}>
                 {cardContent({ robot })}

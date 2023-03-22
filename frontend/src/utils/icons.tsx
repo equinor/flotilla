@@ -28,6 +28,7 @@ import {
     add,
     history,
     external_link,
+    pressure,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -59,6 +60,7 @@ Icon.add({
     add,
     history,
     external_link,
+    pressure,
 })
 
 export enum Icons {
@@ -90,4 +92,5 @@ export enum Icons {
     Add = 'add',
     Historic = 'history',
     ExternalLink = 'external_link',
+    Pressure = 'pressure',
 }
