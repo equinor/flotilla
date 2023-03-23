@@ -262,7 +262,7 @@ namespace Api.EventHandlers
             if (success)
                 _logger.LogInformation(
                     "{time} - Task {id} updated to {status} for {robot} with isar id {id}",
-                    task.Timestamp,
+                    task.Timestamp.ToLocalTime(),
                     task.TaskId,
                     task.Status,
                     task.RobotName,
@@ -304,7 +304,7 @@ namespace Api.EventHandlers
             if (success)
                 _logger.LogInformation(
                     "{time} - Inspection '{id}' updated to '{status}' for '{robotName}' with isar id '{id}'",
-                    step.Timestamp,
+                    step.Timestamp.ToLocalTime(),
                     step.StepId,
                     step.Status,
                     step.RobotName,
