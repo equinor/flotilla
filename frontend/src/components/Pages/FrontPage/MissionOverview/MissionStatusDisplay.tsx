@@ -29,6 +29,9 @@ export function displayIcon(status: MissionStatus) {
         case MissionStatus.Successful: {
             return <Icon name={Icons.Successful} style={{ color: tokens.colors.interactive.success__resting.rgba }} />
         }
+        case MissionStatus.PartiallySuccessful: {
+            return <Icon name={Icons.Warning} style={{ color: tokens.colors.interactive.success__resting.rgba }} />
+        }
     }
     return <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
 }
