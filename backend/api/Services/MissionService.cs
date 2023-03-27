@@ -86,6 +86,8 @@ namespace Api.Services
 
             query = query.Where(filter);
 
+            SearchByName(ref query, parameters.NameSearch);
+
             return await PagedList<Mission>.ToPagedListAsync(
                 query.OrderBy(mission => mission.Name),
                 parameters.PageNumber,
@@ -229,6 +231,17 @@ namespace Api.Services
             return true;
         }
         #endregion ISAR Specific methods
+
+        private static void SearchByName(ref IQueryable<Mission> missions, string? name)
+        {
+            if (!missions.Any() || string.IsNullOrWhiteSpace(name))
+                return;
+
+            missions = missions.Where(
+                mission =>
+                    mission.Name != null && mission.Name.ToLower().Contains(name.Trim().ToLower())
+            );
+        }
 
         /// <summary>
         /// Filters by <see cref="MissionQueryStringParameters.AssetCode"/> and <see cref="MissionQueryStringParameters.Status"/>
