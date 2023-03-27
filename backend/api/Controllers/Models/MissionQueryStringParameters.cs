@@ -5,18 +5,68 @@ namespace Api.Controllers.Models
     public class MissionQueryStringParameters : QueryStringParameters
     {
         /// <summary>
-        /// The current status of the mission
+        /// Filter for the current status of the mission
         /// </summary>
         public MissionStatus? Status { get; set; }
 
         /// <summary>
-        /// The asset code of the mission
+        /// Filter for the asset code of the mission
         /// </summary>
         public string? AssetCode { get; set; }
+
+        /// <summary>
+        /// Filter for the robot id of the robot assigned to the mission
+        /// </summary>
+        public string? RobotId { get; set; }
 
         /// <summary>
         /// The search parameter for the mission name
         /// </summary>
         public string? NameSearch { get; set; }
+
+        /// <summary>
+        /// The search parameter for the name of the robot assigned to the mission
+        /// </summary>
+        public string? RobotNameSearch { get; set; }
+
+        /// <summary>
+        /// The search parameter for a tag in the mission
+        /// </summary>
+        public string? TagSearch { get; set; }
+
+        #region Time Filters
+
+        /// <summary>
+        /// Filter for Start Time in epoch time format
+        /// </summary>
+        public long MinStartTime { get; set; }
+
+        /// /// <summary>
+        /// Filter for Start Time in epoch time format
+        /// </summary>
+        public long MaxStartTime { get; set; } = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
+
+        /// <summary>
+        /// Filter for Start Time in epoch time format
+        /// </summary>
+        public long MinEndTime { get; set; }
+
+        /// /// <summary>
+        /// Filter for Start Time in epoch time format
+        /// </summary>
+        public long MaxEndTime { get; set; } = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
+
+        /// <summary>
+        /// Filter for Start Time in epoch time format
+        /// </summary>
+        public long MinDesiredStartTime { get; set; }
+
+        /// /// <summary>
+        /// Filter for Start Time in epoch time format
+        /// </summary>
+        public long MaxDesiredStartTime { get; set; } = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
+
+        #endregion Time Filters
+
     }
 }

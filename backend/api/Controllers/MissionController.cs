@@ -50,6 +50,19 @@ public class MissionController : ControllerBase
         [FromQuery] MissionQueryStringParameters parameters
     )
     {
+        if (parameters.MaxDesiredStartTime < parameters.MinDesiredStartTime)
+        {
+            return BadRequest("Max DesiredStartTime cannot be less than min DesiredStartTime");
+        }
+        if (parameters.MaxStartTime < parameters.MinStartTime)
+        {
+            return BadRequest("Max StartTime cannot be less than min StartTime");
+        }
+        if (parameters.MaxEndTime < parameters.MinEndTime)
+        {
+            return BadRequest("Max EndTime cannot be less than min EndTime");
+        }
+
         var missions = await _missionService.ReadAll(parameters);
 
         var metadata = new
