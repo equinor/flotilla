@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Configurations;
 using Api.Controllers;
+using Api.Controllers.Models;
 using Api.EventHandlers;
 using Api.Mqtt;
 using Api.Options;
@@ -110,6 +111,7 @@ app.UseCors(
         corsBuilder
             .WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>())
             .SetIsOriginAllowedToAllowWildcardSubdomains()
+            .WithExposedHeaders(QueryStringParameters.PaginationHeader)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()

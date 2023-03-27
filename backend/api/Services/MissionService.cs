@@ -1,6 +1,9 @@
-﻿using Api.Database.Context;
+﻿using System.Linq.Expressions;
+using Api.Controllers.Models;
+using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services.Models;
+using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
@@ -9,10 +12,7 @@ namespace Api.Services
     {
         public abstract Task<Mission> Create(Mission mission);
 
-        public abstract Task<IList<Mission>> ReadAll(
-            string? assetCode = null,
-            MissionStatus? status = null
-        );
+        public abstract Task<PagedList<Mission>> ReadAll(MissionQueryStringParameters parameters);
 
         public abstract Task<Mission?> ReadById(string id);
 
@@ -44,6 +44,11 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Globalization",
+        "CA1304:Specify CultureInfo",
+        Justification = "Entity framework does not support translating culture info to SQL calls"
+    )]
     public class MissionService : IMissionService
     {
         private readonly FlotillaDbContext _context;
@@ -74,20 +79,18 @@ namespace Api.Services
             return mission;
         }
 
-        public async Task<IList<Mission>> ReadAll(
-            string? assetCode = null,
-            MissionStatus? status = null
-        )
+        public async Task<PagedList<Mission>> ReadAll(MissionQueryStringParameters parameters)
         {
             var query = GetMissionsWithSubModels();
+            var filter = ConstructFilter(parameters);
 
-            if (assetCode is not null)
-                query = query.Where(mission => mission.AssetCode.Equals(assetCode));
+            query = query.Where(filter);
 
-            if (status is not null)
-                query = query.Where(mission => mission.Status.Equals(status));
-
-            return await query.ToListAsync();
+            return await PagedList<Mission>.ToPagedListAsync(
+                query.OrderBy(mission => mission.Name),
+                parameters.PageNumber,
+                parameters.PageSize
+            );
         }
 
         public async Task<Mission?> ReadById(string id)
@@ -226,5 +229,37 @@ namespace Api.Services
             return true;
         }
         #endregion ISAR Specific methods
+
+        /// <summary>
+        /// Filters by <see cref="MissionQueryStringParameters.AssetCode"/> and <see cref="MissionQueryStringParameters.Status"/>
+        ///
+        /// <para>Uses LINQ Expression trees (see <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees"/>)</para>
+        /// </summary>
+        /// <param name="parameters"> The variable containing the filter params </param>
+        private static Expression<Func<Mission, bool>> ConstructFilter(
+            MissionQueryStringParameters parameters
+        )
+        {
+            Expression<Func<Mission, bool>> assetFilter = parameters.AssetCode is null
+                ? mission => true
+                : mission =>
+                      mission.AssetCode.ToLower().Equals(parameters.AssetCode.Trim().ToLower());
+
+            Expression<Func<Mission, bool>> statusFilter = parameters.Status is null
+                ? mission => true
+                : mission => mission.Status.Equals(parameters.Status);
+
+            // The parameter of the filter expression
+            var mission = Expression.Parameter(typeof(Mission));
+
+            // Combining the body of the two filters to create the combined filter, using invoke to force parameter substitution
+            Expression body = Expression.AndAlso(
+                Expression.Invoke(assetFilter, mission),
+                Expression.Invoke(statusFilter, mission)
+            );
+
+            // Constructing the resulting lambda expression by combining parameter and body
+            return Expression.Lambda<Func<Mission, bool>>(body, mission);
+        }
     }
 }

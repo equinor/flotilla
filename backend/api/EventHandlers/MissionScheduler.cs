@@ -1,4 +1,5 @@
 ﻿using Api.Controllers;
+using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Utilities;
@@ -13,7 +14,9 @@ namespace Api.EventHandlers
         private readonly IServiceScopeFactory _scopeFactory;
 
         private IList<Mission> MissionQueue =>
-            MissionService.ReadAll(null, MissionStatus.Pending).Result;
+            MissionService
+                .ReadAll(new MissionQueryStringParameters() { Status = MissionStatus.Pending })
+                .Result;
 
         private IMissionService MissionService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionService>();
