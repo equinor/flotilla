@@ -49,6 +49,11 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Globalization",
+        "CA1307:Specify CultureInfo",
+        Justification = "Entity framework does not support translating culture info to SQL calls"
+    )]
     public class MissionService : IMissionService
     {
         private readonly FlotillaDbContext _context;
@@ -87,6 +92,8 @@ namespace Api.Services
             query = query.Where(filter);
 
             SearchByName(ref query, parameters.NameSearch);
+            SearchByRobotName(ref query, parameters.RobotNameSearch);
+            SearchByTag(ref query, parameters.TagSearch);
 
             return await PagedList<Mission>.ToPagedListAsync(
                 query.OrderBy(mission => mission.Name),
@@ -243,6 +250,27 @@ namespace Api.Services
             );
         }
 
+        private static void SearchByRobotName(ref IQueryable<Mission> missions, string? robotName)
+        {
+            if (!missions.Any() || string.IsNullOrWhiteSpace(robotName))
+                return;
+
+            missions = missions.Where(
+                mission => mission.Robot.Name.ToLower().Contains(robotName.Trim().ToLower())
+            );
+        }
+
+        private static void SearchByTag(ref IQueryable<Mission> missions, string? tag)
+        {
+            if (!missions.Any() || string.IsNullOrWhiteSpace(tag))
+                return;
+
+            missions = missions.Where(
+                mission =>
+                    mission.Tasks.Any(task => task.TagId.ToLower().Contains(tag.Trim().ToLower()))
+            );
+        }
+
         /// <summary>
         /// Filters by <see cref="MissionQueryStringParameters.AssetCode"/> and <see cref="MissionQueryStringParameters.Status"/>
         ///
@@ -262,13 +290,57 @@ namespace Api.Services
                 ? mission => true
                 : mission => mission.Status.Equals(parameters.Status);
 
+            Expression<Func<Mission, bool>> robotIdFilter = parameters.RobotId is null
+                ? mission => true
+                : mission => mission.Robot.Id.Equals(parameters.RobotId);
+
+            var minStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinStartTime);
+            var maxStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxStartTime);
+            Expression<Func<Mission, bool>> startTimeFilter = mission =>
+                mission.StartTime == null
+                || (
+                    DateTimeOffset.Compare(mission.StartTime.Value, minStartTime) >= 0
+                    && DateTimeOffset.Compare(mission.StartTime.Value, maxStartTime) <= 0
+                );
+
+            var minEndTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinEndTime);
+            var maxEndTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxEndTime);
+            Expression<Func<Mission, bool>> endTimeFilter = mission =>
+                mission.EndTime == null
+                || (
+                    DateTimeOffset.Compare(mission.EndTime.Value, minEndTime) >= 0
+                    && DateTimeOffset.Compare(mission.EndTime.Value, maxEndTime) <= 0
+                );
+
+            var minDesiredStartTime = DateTimeOffset.FromUnixTimeSeconds(
+                parameters.MinDesiredStartTime
+            );
+            var maxDesiredStartTime = DateTimeOffset.FromUnixTimeSeconds(
+                parameters.MaxDesiredStartTime
+            );
+            Expression<Func<Mission, bool>> desiredStartTimeFilter = mission =>
+                DateTimeOffset.Compare(mission.DesiredStartTime, minDesiredStartTime) >= 0
+                && DateTimeOffset.Compare(mission.DesiredStartTime, maxDesiredStartTime) <= 0;
+
             // The parameter of the filter expression
             var mission = Expression.Parameter(typeof(Mission));
 
-            // Combining the body of the two filters to create the combined filter, using invoke to force parameter substitution
+            // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
             Expression body = Expression.AndAlso(
                 Expression.Invoke(assetFilter, mission),
-                Expression.Invoke(statusFilter, mission)
+                Expression.AndAlso(
+                    Expression.Invoke(statusFilter, mission),
+                    Expression.AndAlso(
+                        Expression.Invoke(robotIdFilter, mission),
+                        Expression.AndAlso(
+                            Expression.Invoke(desiredStartTimeFilter, mission),
+                            Expression.AndAlso(
+                                Expression.Invoke(startTimeFilter, mission),
+                                Expression.Invoke(endTimeFilter, mission)
+                            )
+                        )
+                    )
+                )
             );
 
             // Constructing the resulting lambda expression by combining parameter and body
