@@ -13,5 +13,10 @@ namespace Api.Controllers.Models
         /// The asset code of the mission
         /// </summary>
         public string? AssetCode { get; set; }
+
+        /// <summary>
+        /// The search parameter for the mission name
+        /// </summary>
+        public string? NameSearch { get; set; }
     }
 }
