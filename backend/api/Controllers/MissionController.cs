@@ -47,12 +47,25 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IList<Mission>>> GetMissions(
-        [FromQuery] string? assetCode,
-        [FromQuery] MissionStatus? status
+        [FromQuery] MissionQueryStringParameters parameters
     )
     {
-        IList<Mission> missions;
-        missions = await _missionService.ReadAll(assetCode, status);
+        var missions = await _missionService.ReadAll(parameters);
+
+        var metadata = new
+        {
+            missions.TotalCount,
+            missions.PageSize,
+            missions.CurrentPage,
+            missions.TotalPages,
+            missions.HasNext,
+            missions.HasPrevious
+        };
+
+        Response.Headers.Add(
+            QueryStringParameters.PaginationHeader,
+            JsonSerializer.Serialize(metadata)
+        );
 
         return Ok(missions);
     }
