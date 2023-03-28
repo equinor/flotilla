@@ -7,6 +7,7 @@ import { VideoStream } from 'models/VideoStream'
 import { useContext } from 'react'
 import { filterRobots } from 'utils/filtersAndSorts'
 import { MissionQueryParameters } from 'models/MissionQueryParameters'
+import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'models/PaginatedResponse'
 
 export class BackendAPICaller {
     /* Implements the request sent to the backend api.
@@ -92,7 +93,7 @@ export class BackendAPICaller {
         return result.content
     }
 
-    async getMissions(parameters: MissionQueryParameters): Promise<Mission[]> {
+    async getMissions(parameters: MissionQueryParameters): Promise<PaginatedResponse<Mission>> {
         let path: string = 'missions?'
         if (parameters.status) path = path + 'status=' + parameters.status + '&'
         if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
@@ -101,7 +102,11 @@ export class BackendAPICaller {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
-        return result.content
+        if (!result.headers.has(PaginationHeaderName)) {
+            console.error('No Pagination header received ("' + PaginationHeaderName + '")')
+        }
+        const pagination: PaginationHeader = JSON.parse(result.headers.get(PaginationHeaderName)!)
+        return { pagination: pagination, content: result.content }
     }
 
     async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {

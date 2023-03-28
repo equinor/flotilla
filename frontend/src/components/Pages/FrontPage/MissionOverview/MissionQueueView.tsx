@@ -48,6 +48,7 @@ const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
 }
 
 export function MissionQueueView({ refreshInterval }: RefreshProps) {
+    const missionPageSize = 100
     const apiCaller = useApi()
     const handleError = useErrorHandler()
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
@@ -100,8 +101,8 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }
 
     useEffect(() => {
-        apiCaller.getMissions({ status: MissionStatus.Pending }).then((missions) => {
-            setMissionQueue(missions.sort((a, b) => compareByDate(a.desiredStartTime, b.desiredStartTime)))
+        apiCaller.getMissions({ status: MissionStatus.Pending, pageSize: missionPageSize }).then((missions) => {
+            setMissionQueue(missions.content.sort((a, b) => compareByDate(a.desiredStartTime, b.desiredStartTime)))
         })
         //.catch((e) => handleError(e))
     }, [])
@@ -120,7 +121,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     useEffect(() => {
         const id = setInterval(() => {
             apiCaller.getMissions({ status: MissionStatus.Pending }).then((missions) => {
-                setMissionQueue(missions)
+                setMissionQueue(missions.content)
             })
             //.catch((e) => handleError(e))
         }, refreshInterval)
