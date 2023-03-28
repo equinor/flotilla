@@ -28,6 +28,7 @@ const ButtonStyle = styled.div`
 `
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
+    const missionPageSize = 100
     const apiCaller = useApi()
     const handleError = useErrorHandler()
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
@@ -48,15 +49,15 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     }, [])
 
     const updateOngoingMissions = () => {
-        apiCaller.getMissions({ status: MissionStatus.Ongoing }).then((missions) => {
-            setOngoingMissions(missions)
+        apiCaller.getMissions({ status: MissionStatus.Ongoing, pageSize: missionPageSize }).then((missions) => {
+            setOngoingMissions(missions.content)
         })
         //.catch((e) => handleError(e))
     }
 
     const updatePausedMissions = () => {
         apiCaller.getMissions({ status: MissionStatus.Paused }).then((missions) => {
-            setPausedMissions(missions)
+            setPausedMissions(missions.content)
         })
         //.catch((e) => handleError(e))
     }
