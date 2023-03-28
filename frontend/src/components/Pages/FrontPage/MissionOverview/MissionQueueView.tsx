@@ -100,7 +100,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }
 
     useEffect(() => {
-        apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
+        apiCaller.getMissions({ status: MissionStatus.Pending }).then((missions) => {
             setMissionQueue(missions.sort((a, b) => compareByDate(a.desiredStartTime, b.desiredStartTime)))
         })
         //.catch((e) => handleError(e))
@@ -119,7 +119,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
 
     useEffect(() => {
         const id = setInterval(() => {
-            apiCaller.getMissionsByStatus(MissionStatus.Pending).then((missions) => {
+            apiCaller.getMissions({ status: MissionStatus.Pending }).then((missions) => {
                 setMissionQueue(missions)
             })
             //.catch((e) => handleError(e))

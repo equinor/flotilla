@@ -6,6 +6,7 @@ import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
 import { useContext } from 'react'
 import { filterRobots } from 'utils/filtersAndSorts'
+import { MissionQueryParameters } from 'models/MissionQueryParameters'
 
 export class BackendAPICaller {
     /* Implements the request sent to the backend api.
@@ -91,16 +92,11 @@ export class BackendAPICaller {
         return result.content
     }
 
-    async getMissions(): Promise<Mission[]> {
-        const path: string = 'missions'
-        const result = await this.GET<Mission[]>(path).catch((e) => {
-            throw new Error(`Failed to GET /${path}: ` + e)
-        })
-        return result.content
-    }
-
-    async getMissionsByStatus(status: MissionStatus): Promise<Mission[]> {
-        const path: string = 'missions?status=' + status
+    async getMissions(parameters: MissionQueryParameters): Promise<Mission[]> {
+        let path: string = 'missions?'
+        if (parameters.status) path = path + 'status=' + parameters.status + '&'
+        if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
+        if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
         const result = await this.GET<Mission[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
