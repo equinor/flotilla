@@ -7,7 +7,6 @@ using Api.Database.Models;
 using Api.EventHandlers;
 using Api.Services;
 using Api.Test.Mocks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -54,16 +53,11 @@ namespace Api.Test.EventHandlers
         {
             // Using Moq https://github.com/moq/moq4
 
-            var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
             var schedulerLogger = new Mock<ILogger<MissionScheduler>>().Object;
             var missionLogger = new Mock<ILogger<MissionService>>().Object;
 
             // Mock ScheduledMissionService:
             _context = fixture.NewContext;
-            var robotService = new RobotService(_context);
-            var echoService = new MockEchoService();
-            var mapService = new MockMapService();
-            var stidService = new Mock<IStidService>().Object;
             _missionService = new MissionService(_context, missionLogger);
             _robotControllerMock = new RobotControllerMock();
 
@@ -122,7 +116,7 @@ namespace Api.Test.EventHandlers
             // Assert start conditions
             var preMission = await _missionService.ReadById(ScheduledMission.Id);
             Assert.NotNull(preMission);
-            Assert.True(preMission!.Status == preStatus);
+            Assert.Equal(preStatus, preMission!.Status);
 
             // ACT
 
@@ -136,7 +130,7 @@ namespace Api.Test.EventHandlers
             // Verify status change
             var postMission = await _missionService.ReadById(ScheduledMission.Id);
             Assert.NotNull(postMission);
-            Assert.True(postMission!.Status == postStatus);
+            Assert.Equal(postStatus, postMission!.Status);
         }
 
         [Fact]
