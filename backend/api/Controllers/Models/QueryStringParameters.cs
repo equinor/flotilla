@@ -21,5 +21,12 @@
             get { return _pageSize; }
             set { _pageSize = (value > MaxPageSize) ? MaxPageSize : value; }
         }
+
+        /// <summary>
+        /// Can be ordered by several parameters.
+        /// <para>Use 'desc' after a parameter name to order it Descending (default is Ascending)</para>
+        /// <para>Format: "OrderBy=Id, Name desc, StartTime"</para>
+        /// </summary>
+        public string OrderBy { get; set; } = "";
     }
 }

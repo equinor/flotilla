@@ -43,6 +43,7 @@ public class MissionController : ControllerBase
     /// </remarks>
     [HttpGet]
     [ProducesResponseType(typeof(IList<Mission>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -63,7 +64,16 @@ public class MissionController : ControllerBase
             return BadRequest("Max EndTime cannot be less than min EndTime");
         }
 
-        var missions = await _missionService.ReadAll(parameters);
+        PagedList<Mission> missions;
+        try
+        {
+            missions = await _missionService.ReadAll(parameters);
+        }
+        catch (InvalidDataException e)
+        {
+            _logger.LogError(e.Message);
+            return BadRequest(e.Message);
+        }
 
         var metadata = new
         {

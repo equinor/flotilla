@@ -4,6 +4,12 @@ namespace Api.Controllers.Models
 {
     public class MissionQueryStringParameters : QueryStringParameters
     {
+        public MissionQueryStringParameters()
+        {
+            // Default order is desired start time
+            OrderBy = "DesiredStartTime desc";
+        }
+
         /// <summary>
         /// Filter for the current status of the mission
         /// </summary>
