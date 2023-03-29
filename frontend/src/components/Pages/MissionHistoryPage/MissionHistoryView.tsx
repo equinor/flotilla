@@ -4,7 +4,7 @@ import { Mission, MissionStatus } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
 import { compareDesc } from 'date-fns'
-import { RefreshProps } from './HistoricMissionPage'
+import { RefreshProps } from './MissionHistoryPage'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
 import { useErrorHandler } from 'react-error-boundary'
@@ -23,7 +23,7 @@ const StyledLoading = styled.div`
     gap: 1rem;
 `
 
-export function HistoricMissionView({ refreshInterval }: RefreshProps) {
+export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     const handleError = useErrorHandler()
     const pageSize: number = 20
 
@@ -75,7 +75,7 @@ export function HistoricMissionView({ refreshInterval }: RefreshProps) {
     return (
         <>
             <TableWithHeader>
-                <Typography variant="h1">{Text('Historic Missions')}</Typography>
+                <Typography variant="h1">{Text('Mission History')}</Typography>
                 {isLoading && (
                     <StyledLoading>
                         <CircularProgress />

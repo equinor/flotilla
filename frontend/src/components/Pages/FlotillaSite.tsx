@@ -9,7 +9,7 @@ import { FrontPage } from './FrontPage/FrontPage'
 import { MissionPage } from './MissionPage/MissionPage'
 import { AssetProvider } from 'components/Contexts/AssetContext'
 import { LanguageProvider } from 'components/Contexts/LanguageContext'
-import { HistoricMissionPage } from './HistoricMissionPage/HistoricMissionPage'
+import { MissionHistoryPage } from './MissionHistoryPage/MissionHistoryPage'
 import { useErrorHandler } from 'react-error-boundary'
 
 export const AccessTokenContext = createContext('')
@@ -46,8 +46,8 @@ export function FlotillaSite() {
                                                 element={<MissionPage />}
                                             />
                                             <Route
-                                                path={`${config.FRONTEND_BASE_ROUTE}/historic`}
-                                                element={<HistoricMissionPage />}
+                                                path={`${config.FRONTEND_BASE_ROUTE}/history`}
+                                                element={<MissionHistoryPage />}
                                             />
                                         </Routes>
                                     </BrowserRouter>
