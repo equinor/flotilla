@@ -63,15 +63,15 @@ function FailedMission({ mission }: MissionProps) {
 
 function SeveralFailedMissions({ missions }: MissionsProps) {
     let navigate = useNavigate()
-    const goToHistoric = () => {
-        let path = `${config.FRONTEND_BASE_ROUTE}/historic`
+    const goToHistory = () => {
+        let path = `${config.FRONTEND_BASE_ROUTE}/history`
         navigate(path)
     }
 
     return (
-        <Button as={Typography} onClick={goToHistoric} variant="ghost" color="secondary">
+        <Button as={Typography} onClick={goToHistory} variant="ghost" color="secondary">
             <strong>{missions.length}</strong>{' '}
-            {' ' + Text("missions failed recently. See 'Historic Missions' for more information.")}
+            {' ' + Text("missions failed recently. See 'Mission History' for more information.")}
         </Button>
     )
 }

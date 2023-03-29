@@ -73,7 +73,7 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
 
     let navigate = useNavigate()
     const routeChange = () => {
-        let path = `${config.FRONTEND_BASE_ROUTE}/historic`
+        let path = `${config.FRONTEND_BASE_ROUTE}/history`
         navigate(path)
     }
 

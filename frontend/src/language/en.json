@@ -1,9 +1,9 @@
 {
     "Ongoing Missions": "Ongoing Missions",
     "Mission Queue": "Mission Queue",
-    "Historic Missions": "Historic Missions",
+    "Mission History": "Mission History",
     "failed on robot": "failed on robot",
-    "missions failed recently. See 'Historic Missions' for more information.": "missions failed recently. See 'Historic Missions' for more information.",
+    "missions failed recently. See 'Mission History' for more information.": "missions failed recently. See 'Mission History' for more information.",
     "Task": "Task",
     "No ongoing missions": "No ongoing missions",
     "No missions in queue": "No missions in queue",

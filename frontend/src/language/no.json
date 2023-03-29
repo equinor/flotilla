@@ -1,9 +1,9 @@
 {
     "Ongoing Missions": "Pågående oppdrag",
     "Mission Queue": "Oppdragskø",
-    "Historic Missions": "Historiske oppdrag",
+    "Mission History": "Oppdragshistorie",
     "failed on robot": "feilet på robot",
-    "missions failed recently. See 'Historic Missions' for more information.": "oppdrag feilet nylig. Se 'Historiske oppdrag' for mer informasjon.",
+    "missions failed recently. See 'Mission History' for more information.": "oppdrag feilet nylig. Se 'Oppdragshistorie' for mer informasjon.",
     "Task": "Oppgave",
     "No ongoing missions": "Ingen pågående oppdrag",
     "No missions in queue": "Ingen oppdrag i kø",
