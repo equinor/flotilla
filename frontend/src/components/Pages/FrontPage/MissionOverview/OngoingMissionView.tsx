@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { useErrorHandler } from 'react-error-boundary'
+import { PaginatedResponse } from 'models/PaginatedResponse'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -48,15 +49,19 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
         return () => clearInterval(id)
     }, [])
 
+    const getCurrentMissions = (status: MissionStatus): Promise<PaginatedResponse<Mission>> => {
+        return apiCaller.getMissions({ status: status, pageSize: missionPageSize, orderBy: 'StartTime desc' })
+    }
+
     const updateOngoingMissions = () => {
-        apiCaller.getMissions({ status: MissionStatus.Ongoing, pageSize: missionPageSize }).then((missions) => {
+        getCurrentMissions(MissionStatus.Ongoing).then((missions) => {
             setOngoingMissions(missions.content)
         })
         //.catch((e) => handleError(e))
     }
 
     const updatePausedMissions = () => {
-        apiCaller.getMissions({ status: MissionStatus.Paused }).then((missions) => {
+        getCurrentMissions(MissionStatus.Paused).then((missions) => {
             setPausedMissions(missions.content)
         })
         //.catch((e) => handleError(e))

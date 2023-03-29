@@ -98,6 +98,7 @@ export class BackendAPICaller {
         if (parameters.status) path = path + 'status=' + parameters.status + '&'
         if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
         if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
+        if (parameters.orderBy) path = path + 'OrderBy=' + parameters.orderBy + '&'
         const result = await this.GET<Mission[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
