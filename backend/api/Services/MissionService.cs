@@ -1,4 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -95,8 +98,10 @@ namespace Api.Services
             SearchByRobotName(ref query, parameters.RobotNameSearch);
             SearchByTag(ref query, parameters.TagSearch);
 
+            ApplySort(ref query, parameters.OrderBy);
+
             return await PagedList<Mission>.ToPagedListAsync(
-                query.OrderBy(mission => mission.Name),
+                query,
                 parameters.PageNumber,
                 parameters.PageSize
             );
@@ -123,6 +128,7 @@ namespace Api.Services
             {
                 return null;
             }
+
             _context.Missions.Remove(mission);
             await _context.SaveChangesAsync();
 
@@ -130,6 +136,7 @@ namespace Api.Services
         }
 
         #region ISAR Specific methods
+
         private async Task<Mission?> ReadByIsarMissionId(string isarMissionId)
         {
             return await GetMissionsWithSubModels()
@@ -237,6 +244,7 @@ namespace Api.Services
 
             return true;
         }
+
         #endregion ISAR Specific methods
 
         private static void SearchByName(ref IQueryable<Mission> missions, string? name)
@@ -345,6 +353,62 @@ namespace Api.Services
 
             // Constructing the resulting lambda expression by combining parameter and body
             return Expression.Lambda<Func<Mission, bool>>(body, mission);
+        }
+
+        private static void ApplySort(ref IQueryable<Mission> missions, string orderByQueryString)
+        {
+            if (!missions.Any())
+                return;
+
+            if (string.IsNullOrWhiteSpace(orderByQueryString))
+            {
+                missions = missions.OrderBy(x => x.Name);
+                return;
+            }
+
+            string[] orderParams = orderByQueryString
+                .Trim()
+                .Split(',')
+                .Select(parameterString => parameterString.Trim())
+                .ToArray();
+
+            var propertyInfos = typeof(Mission).GetProperties(
+                BindingFlags.Public | BindingFlags.Instance
+            );
+            var orderQueryBuilder = new StringBuilder();
+
+            foreach (string param in orderParams)
+            {
+                if (string.IsNullOrWhiteSpace(param))
+                    continue;
+
+                string propertyFromQueryName = param.Split(" ")[0];
+                var objectProperty = propertyInfos.FirstOrDefault(
+                    pi =>
+                        pi.Name.Equals(
+                            propertyFromQueryName,
+                            StringComparison.InvariantCultureIgnoreCase
+                        )
+                );
+
+                if (objectProperty == null)
+                    throw new InvalidDataException(
+                        $"Mission has no property '{propertyFromQueryName}' for ordering"
+                    );
+
+                string sortingOrder = param.EndsWith(" desc", StringComparison.OrdinalIgnoreCase)
+                  ? "descending"
+                  : "ascending";
+
+                string sortParameter = $"{objectProperty.Name} {sortingOrder}, ";
+                orderQueryBuilder.Append(sortParameter);
+            }
+
+            string orderQuery = orderQueryBuilder.ToString().TrimEnd(',', ' ');
+
+            missions = string.IsNullOrWhiteSpace(orderQuery)
+              ? missions.OrderBy(mission => mission.Name)
+              : missions.OrderBy(orderQuery);
         }
     }
 }
