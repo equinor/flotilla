@@ -13,7 +13,6 @@ import { Text } from 'components/Contexts/LanguageContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { Icons } from 'utils/icons'
 import { useErrorHandler } from 'react-error-boundary'
-import { compareByDate } from 'utils/filtersAndSorts'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -101,13 +100,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }
 
     useEffect(() => {
-        apiCaller.getMissions({ status: MissionStatus.Pending, pageSize: missionPageSize }).then((missions) => {
-            setMissionQueue(missions.content.sort((a, b) => compareByDate(a.desiredStartTime, b.desiredStartTime)))
-        })
-        //.catch((e) => handleError(e))
-    }, [])
-
-    useEffect(() => {
         const id = setInterval(() => {
             apiCaller.getRobots().then((robots) => {
                 const mappedRobots: Map<string, Robot> = mapRobotsToString(robots)
@@ -120,9 +112,15 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
 
     useEffect(() => {
         const id = setInterval(() => {
-            apiCaller.getMissions({ status: MissionStatus.Pending }).then((missions) => {
-                setMissionQueue(missions.content)
-            })
+            apiCaller
+                .getMissions({
+                    status: MissionStatus.Pending,
+                    pageSize: missionPageSize,
+                    orderBy: 'DesiredStartTime desc',
+                })
+                .then((missions) => {
+                    setMissionQueue(missions.content)
+                })
             //.catch((e) => handleError(e))
         }, refreshInterval)
         return () => clearInterval(id)

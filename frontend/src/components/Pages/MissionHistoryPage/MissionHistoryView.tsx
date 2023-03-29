@@ -8,7 +8,6 @@ import { RefreshProps } from './MissionHistoryPage'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
 import { useErrorHandler } from 'react-error-boundary'
-import { compareByDate } from 'utils/filtersAndSorts'
 import { PaginationHeader } from 'models/PaginatedResponse'
 
 const TableWithHeader = styled.div`
@@ -50,15 +49,13 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     const updateCompletedMissions = () => {
         const page = currentPage ?? 1
         console.log('Page is ' + page)
-        apiCaller.getMissions({ pageSize: pageSize, pageNumber: page }).then((paginatedMissions) => {
-            setPaginationDetails(paginatedMissions.pagination)
-            setCompletedMissions(
-                paginatedMissions.content
-                    .filter((m) => completedStatuses.includes(m.status))
-                    .sort((a, b) => compareByDate(a.endTime, b.endTime))
-            )
-            setIsLoading(false)
-        })
+        apiCaller
+            .getMissions({ pageSize: pageSize, pageNumber: page, orderBy: 'EndTime desc, Name' })
+            .then((paginatedMissions) => {
+                setPaginationDetails(paginatedMissions.pagination)
+                setCompletedMissions(paginatedMissions.content.filter((m) => completedStatuses.includes(m.status)))
+                setIsLoading(false)
+            })
         //.catch((e) => handleError(e))
     }
 

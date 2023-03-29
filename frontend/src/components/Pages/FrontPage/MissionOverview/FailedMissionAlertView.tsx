@@ -79,6 +79,7 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
 export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
     const handleError = useErrorHandler()
 
+    const PageSize: number = 100
     // The default amount of minutes in the past for failed missions to generate an alert
     const DefaultTimeInterval: number = 10
 
@@ -114,7 +115,7 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
 
     const updateRecentFailedMissions = () => {
         const lastDismissTime: Date = getLastDismissalTime()
-        apiCaller.getMissions({ status: MissionStatus.Failed }).then((missions) => {
+        apiCaller.getMissions({ status: MissionStatus.Failed, pageSize: 100 }).then((missions) => {
             const newRecentFailedMissions = missions.content.filter((m) => new Date(m.endTime!) > lastDismissTime)
             setRecentFailedMissions(newRecentFailedMissions)
         })

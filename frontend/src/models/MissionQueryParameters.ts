@@ -15,4 +15,5 @@ export interface MissionQueryParameters {
     maxDesiredStartTime?: number
     pageNumber?: number
     pageSize?: number
+    orderBy?: string
 }
