@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
@@ -41,7 +42,9 @@ namespace Api.Test.Services
         public async Task Create()
         {
             var robot = _context.Robots.First();
-            int nReportsBefore = _missionService.ReadAll().Result.Count;
+            int nReportsBefore = _missionService
+                .ReadAll(new MissionQueryStringParameters())
+                .Result.Count;
 
             Mission mission =
                 new()
@@ -54,7 +57,9 @@ namespace Api.Test.Services
                 };
 
             await _missionService.Create(mission);
-            int nReportsAfter = _missionService.ReadAll().Result.Count;
+            int nReportsAfter = _missionService
+                .ReadAll(new MissionQueryStringParameters())
+                .Result.Count;
 
             Assert.Equal(nReportsBefore + 1, nReportsAfter);
         }
