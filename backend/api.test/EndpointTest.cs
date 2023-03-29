@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -26,11 +27,12 @@ namespace Api.Test
     public class EndpointTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
     {
         private readonly HttpClient _client;
-        private readonly JsonSerializerOptions _serializerOptions = new()
-        {
-            Converters = { new JsonStringEnumConverter() },
-            PropertyNameCaseInsensitive = true
-        };
+        private readonly JsonSerializerOptions _serializerOptions =
+            new()
+            {
+                Converters = { new JsonStringEnumConverter() },
+                PropertyNameCaseInsensitive = true
+            };
 
         public EndpointTests(WebApplicationFactory<Program> factory)
         {
@@ -103,6 +105,7 @@ namespace Api.Test
             GC.SuppressFinalize(this);
         }
 
+        #region MissionsController
         [Fact]
         public async Task MissionsTest()
         {
@@ -116,16 +119,62 @@ namespace Api.Test
         }
 
         [Fact]
+        public async Task GetMissionById_ShouldReturnNotFound()
+        {
+            string missionId = "RandomString";
+            string url = "/missions/" + missionId;
+            var response = await _client.GetAsync(url);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task DeleteMission_ShouldReturnNotFound()
+        {
+            string missionId = "RandomString";
+            string url = "/missions/" + missionId;
+            var response = await _client.DeleteAsync(url);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        #endregion MissionsController
+
+        #region RobotController
+        [Fact]
         public async Task RobotsTest()
         {
             string url = "/robots";
             var response = await _client.GetAsync(url);
-            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(
-                _serializerOptions
-            );
+            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
             Assert.True(response.IsSuccessStatusCode);
             Assert.True(robots != null && robots.Count == 3);
         }
+
+        [Fact]
+        public async Task GetRobotById_ShouldReturnNotFound()
+        {
+            string robotId = "RandomString";
+            string url = "/robots/" + robotId;
+            var response = await _client.GetAsync(url);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetRobotById_ShouldReturnRobot()
+        {
+            string url = "/robots";
+            var response = await _client.GetAsync(url);
+            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
+            Assert.NotNull(robots);
+
+            string robotId = robots[0].Id;
+
+            var robotResponse = await _client.GetAsync("/robots/" + robotId);
+            var robot = await robotResponse.Content.ReadFromJsonAsync<Robot>(_serializerOptions);
+            Assert.Equal(HttpStatusCode.OK, robotResponse.StatusCode);
+            Assert.NotNull(robot);
+            Assert.Equal(robot.Id, robotId);
+        }
+        #endregion RobotController
 
         [Fact]
         public async Task StartMissionTest()
@@ -134,9 +183,7 @@ namespace Api.Test
             string url = "/robots";
             var response = await _client.GetAsync(url);
             Assert.True(response.IsSuccessStatusCode);
-            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(
-                _serializerOptions
-            );
+            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
             Assert.True(robots != null);
             var robot = robots[0];
             string robotId = robot.Id;
@@ -151,17 +198,15 @@ namespace Api.Test
                 DesiredStartTime = DateTimeOffset.UtcNow
             };
             var content = new StringContent(
-                      JsonSerializer.Serialize(query),
-                      null,
-                      "application/json"
-                  );
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
             response = await _client.PostAsync(url, content);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var mission = await response.Content.ReadFromJsonAsync<Mission>(
-                _serializerOptions
-            );
+            var mission = await response.Content.ReadFromJsonAsync<Mission>(_serializerOptions);
             Assert.True(mission != null);
             Assert.True(mission.Id != null);
             Assert.True(mission.Status == MissionStatus.Pending);
