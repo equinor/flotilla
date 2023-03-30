@@ -28,7 +28,7 @@ namespace Api.Mqtt
 
         private readonly ManagedMqttClientOptions _options;
 
-        private readonly bool _notProduction;
+        //private readonly bool _notProduction;
 
         private readonly string _serverHost;
         private readonly int _serverPort;
@@ -47,9 +47,9 @@ namespace Api.Mqtt
             var mqttFactory = new MqttFactory();
             _mqttClient = mqttFactory.CreateManagedMqttClient();
 
-            _notProduction = !(
+            /*_notProduction = !(
                 config.GetValue<string?>("ASPNETCORE_ENVIRONMENT") ?? "Production"
-            ).Equals("Production", StringComparison.OrdinalIgnoreCase);
+            ).Equals("Production", StringComparison.OrdinalIgnoreCase);*/
 
             var mqttConfig = config.GetSection("Mqtt");
             string password = mqttConfig.GetValue<string>("Password");
@@ -65,8 +65,9 @@ namespace Api.Mqtt
                     o =>
                     {
                         o.UseTls = true;
-                        if (_notProduction)
-                            o.IgnoreCertificateChainErrors = true;
+                        /* Currently disabled to use self-signed certificate in the internal broker communication */
+                        //if (_notProduction)
+                        o.IgnoreCertificateChainErrors = true;
                     }
                 )
                 .WithCredentials(username, password);
