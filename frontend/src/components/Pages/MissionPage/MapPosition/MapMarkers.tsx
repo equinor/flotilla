@@ -133,7 +133,6 @@ const drawAura = (x: number, y: number, map: HTMLCanvasElement, circleSize: numb
     // reset timer every pulseDurationMilliseconds
     timer = timer % pulseDurationMilliseconds
 
-    console.log(1 - timer)
     context.fillStyle = tokens.colors.interactive.primary__resting.hex
     context.beginPath()
     context.arc(

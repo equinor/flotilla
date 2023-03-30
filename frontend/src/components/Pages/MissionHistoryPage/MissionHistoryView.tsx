@@ -48,7 +48,6 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
 
     const updateCompletedMissions = () => {
         const page = currentPage ?? 1
-        console.log('Page is ' + page)
         apiCaller
             .getMissions({ pageSize: pageSize, pageNumber: page, orderBy: 'EndTime desc, Name' })
             .then((paginatedMissions) => {
@@ -64,7 +63,6 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     })
 
     const onPageChange = (page: number) => {
-        console.log('Changing page to ' + page)
         setIsLoading(true)
         setCurrentPage(page)
     }
