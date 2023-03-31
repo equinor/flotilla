@@ -1,9 +1,11 @@
-﻿using Api.Database.Models;
+﻿using Api.Controllers.Models;
+using Api.Database.Models;
 using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
 using Api.Utilities;
+using TaskStatus = Api.Database.Models.TaskStatus;
 
 namespace Api.EventHandlers
 {
@@ -17,6 +19,9 @@ namespace Api.EventHandlers
 
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+
+        private IMissionService MissionService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionService>();
 
         private readonly Dictionary<string, System.Timers.Timer> _isarConnectionTimers = new();
 
@@ -105,12 +110,48 @@ namespace Api.EventHandlers
             else
             {
                 _logger.LogWarning(
-                    "Connection to ISAR instance '{id}' timed out - It will be set to offline",
+                    "Connection to ISAR instance '{id}' timed out - It will be disabled and active missions aborted",
                     robotStatusMessage.IsarId
                 );
+                robot.Enabled = false;
                 robot.Status = RobotStatus.Offline;
-
                 await RobotService.Update(robot);
+
+                var missionsOnRobot = await MissionService.ReadAll(
+                    new MissionQueryStringParameters
+                    {
+                        RobotId = robot.Id,
+                        OrderBy = "StartTime desc",
+                    }
+                );
+
+                var runningMission = missionsOnRobot.FirstOrDefault(
+                    mission => mission.Status is MissionStatus.Ongoing or MissionStatus.Paused
+                );
+
+                if (runningMission is not null)
+                {
+                    _logger.LogError(
+                        "Mission '{missionId}' ('{missionName}') failed due to ISAR timeout",
+                        runningMission.Id,
+                        runningMission.Name
+                    );
+                    runningMission.Status = MissionStatus.Failed;
+                    runningMission.StatusReason = "ISAR connection timed out during mission";
+                    foreach (var task in runningMission.Tasks.Where(task => !task.IsCompleted))
+                    {
+                        task.Status = TaskStatus.Failed;
+                        foreach (
+                            var inspection in task.Inspections.Where(
+                                inspection => !inspection.IsCompleted
+                            )
+                        )
+                        {
+                            inspection.Status = InspectionStatus.Failed;
+                        }
+                    }
+                    await MissionService.Update(runningMission);
+                }
             }
 
             if (_isarConnectionTimers.TryGetValue(robotStatusMessage.IsarId, out var timer))
