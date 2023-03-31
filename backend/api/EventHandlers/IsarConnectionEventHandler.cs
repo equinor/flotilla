@@ -73,26 +73,30 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (_isarConnectionTimers.ContainsKey(isarRobotStatus.IsarId))
-            {
-                _logger.LogDebug(
-                    "Reset connection timer for ISAR '{isarId}' ('{robotName}')",
-                    isarRobotStatus.IsarId,
-                    isarRobotStatus.RobotName
-                );
-                _isarConnectionTimers[isarRobotStatus.IsarId].Reset();
-            }
-            else
+            if (!_isarConnectionTimers.ContainsKey(robot.IsarId))
             {
                 var timer = new System.Timers.Timer(_isarConnectionTimeout * 1000);
                 timer.Elapsed += (_, _) => OnTimeoutEvent(isarRobotStatus);
                 timer.Start();
-                _isarConnectionTimers.Add(isarRobotStatus.IsarId, timer);
+                _isarConnectionTimers.Add(robot.IsarId, timer);
                 _logger.LogInformation(
                     "Added new timer for ISAR '{isarId}' ('{robotName}')",
-                    isarRobotStatus.IsarId,
-                    isarRobotStatus.RobotName
+                    robot.IsarId,
+                    robot.Name
                 );
+            }
+
+            _logger.LogDebug(
+                "Reset connection timer for ISAR '{isarId}' ('{robotName}')",
+                robot.IsarId,
+                robot.Name
+            );
+            _isarConnectionTimers[robot.IsarId].Reset();
+
+            if (!robot.Enabled)
+            {
+                robot.Enabled = true;
+                await RobotService.Update(robot);
             }
         }
 
