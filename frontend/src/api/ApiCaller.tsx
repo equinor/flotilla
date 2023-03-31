@@ -75,13 +75,13 @@ export class BackendAPICaller {
         })
     }
 
-    async getRobots(): Promise<Robot[]> {
+    async getEnabledRobots(): Promise<Robot[]> {
         const path: string = 'robots'
         const result = await this.GET<Robot[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
-        return result.content
+        return result.content.filter((robot) => robot.enabled)
     }
 
     async getAllEchoMissions(): Promise<EchoMission[]> {
@@ -147,7 +147,7 @@ export class BackendAPICaller {
     }
     async postMission(echoMissionId: number, robotId: string, assetCode: string | null) {
         const path: string = 'missions'
-        const robots: Robot[] = await this.getRobots()
+        const robots: Robot[] = await this.getEnabledRobots()
         const desiredRobot = filterRobots(robots, robotId)
         const body = {
             robotId: desiredRobot[0].id,
