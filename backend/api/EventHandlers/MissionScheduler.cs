@@ -15,7 +15,14 @@ namespace Api.EventHandlers
 
         private IList<Mission> MissionQueue =>
             MissionService
-                .ReadAll(new MissionQueryStringParameters() { Status = MissionStatus.Pending })
+                .ReadAll(
+                    new MissionQueryStringParameters
+                    {
+                        Status = MissionStatus.Pending,
+                        OrderBy = "DesiredStartTime desc",
+                        PageSize = 100
+                    }
+                )
                 .Result;
 
         private IMissionService MissionService =>
