@@ -44,7 +44,7 @@ export function FlotillaSite() {
                                             element={<MissionPage />}
                                         />
                                         <Route
-                                            path={`${config.FRONTEND_BASE_ROUTE}/historic`}
+                                            path={`${config.FRONTEND_BASE_ROUTE}/history`}
                                             element={<MissionHistoryPage />}
                                         />
                                     </Routes>
