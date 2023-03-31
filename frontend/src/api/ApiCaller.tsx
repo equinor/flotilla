@@ -1,7 +1,7 @@
 import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
 import { EchoMission, EchoPlantInfo } from 'models/EchoMission'
-import { Mission, MissionStatus } from 'models/Mission'
+import { Mission } from 'models/Mission'
 import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
 import { useContext } from 'react'
@@ -13,6 +13,7 @@ export class BackendAPICaller {
     /* Implements the request sent to the backend api.
      */
     accessToken: string
+    getAssetCode = (): string | null => window.localStorage.getItem('assetString')
 
     constructor(accessToken: string) {
         this.accessToken = accessToken
@@ -95,10 +96,26 @@ export class BackendAPICaller {
 
     async getMissions(parameters: MissionQueryParameters): Promise<PaginatedResponse<Mission>> {
         let path: string = 'missions?'
+
+        // Always filter by currently selected asset
+        const assetCode: string | null = this.getAssetCode()
+        if (assetCode) path = path + 'AssetCode=' + assetCode + '&'
+
         if (parameters.status) path = path + 'status=' + parameters.status + '&'
         if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
         if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
         if (parameters.orderBy) path = path + 'OrderBy=' + parameters.orderBy + '&'
+        if (parameters.robotId) path = path + 'RobotId=' + parameters.robotId + '&'
+        if (parameters.nameSearch) path = path + 'NameSearch=' + parameters.nameSearch + '&'
+        if (parameters.robotNameSearch) path = path + 'RobotNameSearch=' + parameters.robotNameSearch + '&'
+        if (parameters.tagSearch) path = path + 'TagSearch=' + parameters.tagSearch + '&'
+        if (parameters.minStartTime) path = path + 'MinStartTime=' + parameters.minStartTime + '&'
+        if (parameters.maxStartTime) path = path + 'MaxStartTime=' + parameters.maxStartTime + '&'
+        if (parameters.minEndTime) path = path + 'MinEndTime=' + parameters.minEndTime + '&'
+        if (parameters.maxEndTime) path = path + 'MaxEndTime=' + parameters.maxEndTime + '&'
+        if (parameters.minDesiredStartTime) path = path + 'MinDesiredStartTime=' + parameters.minDesiredStartTime + '&'
+        if (parameters.maxDesiredStartTime) path = path + 'MaxDesiredStartTime=' + parameters.maxDesiredStartTime + '&'
+
         const result = await this.GET<Mission[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
