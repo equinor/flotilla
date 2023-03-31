@@ -56,62 +56,67 @@ namespace Api.EventHandlers
         private async void OnIsarRobotStatus(object? sender, MqttReceivedArgs mqttArgs)
         {
             var isarRobotStatus = (IsarRobotStatusMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByName(isarRobotStatus.RobotName);
+            var robot = await RobotService.ReadByIsarId(isarRobotStatus.IsarId);
 
             if (robot == null)
             {
                 _logger.LogInformation(
-                    "Received message from unknown ISAR instance with robot name '{name}'.",
+                    "Received message from unknown ISAR '{isarId}' ('{robotName}')",
+                    isarRobotStatus.IsarId,
                     isarRobotStatus.RobotName
                 );
                 return;
             }
 
-            if (_isarConnectionTimers.ContainsKey(isarRobotStatus.RobotName))
+            if (_isarConnectionTimers.ContainsKey(isarRobotStatus.IsarId))
             {
                 _logger.LogDebug(
-                    "Reset connection timer for robot '{name}'",
+                    "Reset connection timer for ISAR '{isarId}' ('{robotName}')",
+                    isarRobotStatus.IsarId,
                     isarRobotStatus.RobotName
                 );
-                _isarConnectionTimers[isarRobotStatus.RobotName].Reset();
+                _isarConnectionTimers[isarRobotStatus.IsarId].Reset();
             }
             else
             {
                 var timer = new System.Timers.Timer(_isarConnectionTimeout * 1000);
-                timer.Elapsed += (_, _) => OnTimeoutEvent(isarRobotStatus.RobotName);
+                timer.Elapsed += (_, _) => OnTimeoutEvent(isarRobotStatus);
                 timer.Start();
-                _isarConnectionTimers.Add(isarRobotStatus.RobotName, timer);
+                _isarConnectionTimers.Add(isarRobotStatus.IsarId, timer);
                 _logger.LogInformation(
-                    "Added new timer for robot '{name}'",
+                    "Added new timer for ISAR '{isarId}' ('{robotName}')",
+                    isarRobotStatus.IsarId,
                     isarRobotStatus.RobotName
                 );
             }
         }
 
-        private async void OnTimeoutEvent(string robotName)
+        private async void OnTimeoutEvent(IsarRobotStatusMessage robotStatusMessage)
         {
-            var robot = await RobotService.ReadByName(robotName);
+            var robot = await RobotService.ReadByIsarId(robotStatusMessage.IsarId);
             if (robot is null)
             {
                 _logger.LogError(
-                    "An event was received for a robot timer timing out but the robot '{robotName}' could not be found in the database.",
-                    robotName
+                    "Connection to ISAR instance '{id}' ('{robotName}') timed out but the corresponding robot could not be found in the database.",
+                    robotStatusMessage.IsarId,
+                    robotStatusMessage.IsarId
                 );
-                return;
+            }
+            else
+            {
+                _logger.LogWarning(
+                    "Connection to ISAR instance '{id}' timed out - It will be set to offline",
+                    robotStatusMessage.IsarId
+                );
+                robot.Status = RobotStatus.Offline;
+
+                await RobotService.Update(robot);
             }
 
-            _logger.LogWarning(
-                "Connection to robot '{name}' timed out and it will be set to offline",
-                robotName
-            );
-            robot.Status = RobotStatus.Offline;
-
-            _ = await RobotService.Update(robot);
-
-            if (_isarConnectionTimers.TryGetValue(robotName, out var timer))
+            if (_isarConnectionTimers.TryGetValue(robotStatusMessage.IsarId, out var timer))
             {
                 timer.Close();
-                _isarConnectionTimers.Remove(robotName);
+                _isarConnectionTimers.Remove(robotStatusMessage.IsarId);
             }
         }
     }
