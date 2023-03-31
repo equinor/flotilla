@@ -2,13 +2,12 @@ import { MissionStatus } from './Mission'
 
 export interface MissionQueryParameters {
     status?: MissionStatus
-    assetCode?: string
     robotId?: string
     nameSearch?: string
     robotNameSearch?: string
     tagSearch?: string
     minStartTime?: number
-    MaxStartTime?: number
+    maxStartTime?: number
     minEndTime?: number
     maxEndTime?: number
     minDesiredStartTime?: number
