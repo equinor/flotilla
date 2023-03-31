@@ -25,7 +25,8 @@ namespace Api.Test.EventHandlers
                 Host = "localhost",
                 Model = RobotModel.Turtlebot,
                 Name = "TestosteroneTesty",
-                SerialNumber = "12354"
+                SerialNumber = "12354",
+                Enabled = true
             };
         private static Mission ScheduledMission =>
             new()
@@ -137,7 +138,6 @@ namespace Api.Test.EventHandlers
         public void ScheduledMissionSetTFailed()
         {
             // Mock bad path of 'RobotController.StartMission'
-
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
             _robotControllerMock.RobotServiceMock
                 .Setup(r => r.ReadById(Robot.Id))
