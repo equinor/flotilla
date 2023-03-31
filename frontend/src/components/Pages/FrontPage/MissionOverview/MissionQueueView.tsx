@@ -101,7 +101,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
 
     useEffect(() => {
         const id = setInterval(() => {
-            apiCaller.getRobots().then((robots) => {
+            apiCaller.getEnabledRobots().then((robots) => {
                 const mappedRobots: Map<string, Robot> = mapRobotsToString(robots)
                 setRobotOptions(mappedRobots)
             })
