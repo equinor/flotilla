@@ -87,6 +87,7 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
                             <Table.Row>
                                 <Table.Cell>{Text('Status')}</Table.Cell>
                                 <Table.Cell>{Text('Name')}</Table.Cell>
+                                <Table.Cell>{Text('Robot')}</Table.Cell>
                                 <Table.Cell>{Text('Completion Time')}</Table.Cell>
                             </Table.Row>
                         </Table.Head>
