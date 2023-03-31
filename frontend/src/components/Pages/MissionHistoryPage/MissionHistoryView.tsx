@@ -3,7 +3,6 @@ import { useApi } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
-import { compareDesc } from 'date-fns'
 import { RefreshProps } from './MissionHistoryPage'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
@@ -11,20 +10,20 @@ import { useErrorHandler } from 'react-error-boundary'
 import { PaginationHeader } from 'models/PaginatedResponse'
 
 const TableWithHeader = styled.div`
-    width: 600px;
     gap: 2rem;
 `
 const StyledLoading = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 3rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
     gap: 1rem;
 `
 
 export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     const handleError = useErrorHandler()
-    const pageSize: number = 20
+    const pageSize: number = 10
 
     const completedStatuses = [
         MissionStatus.Aborted,
@@ -62,6 +61,17 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
         return <HistoricMissionCard key={index} index={index} mission={mission} />
     })
 
+    const PaginationComponent = () => {
+        return (
+            <Pagination
+                totalItems={paginationDetails!.TotalCount}
+                itemsPerPage={paginationDetails!.PageSize}
+                withItemIndicator
+                onChange={(_, page) => onPageChange(page)}
+            ></Pagination>
+        )
+    }
+
     const onPageChange = (page: number) => {
         setIsLoading(true)
         setCurrentPage(page)
@@ -71,12 +81,7 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
         <>
             <TableWithHeader>
                 <Typography variant="h1">{Text('Mission History')}</Typography>
-                {isLoading && (
-                    <StyledLoading>
-                        <CircularProgress />
-                    </StyledLoading>
-                )}
-                {!isLoading && (
+                <Table>
                     <Table>
                         <Table.Head sticky>
                             <Table.Row>
@@ -85,17 +90,19 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
                                 <Table.Cell>{Text('Completion Time')}</Table.Cell>
                             </Table.Row>
                         </Table.Head>
-                        <Table.Body>{missionsDisplay}</Table.Body>
+                        {isLoading && (
+                            <Table.Caption captionSide={'bottom'}>
+                                <StyledLoading>
+                                    <CircularProgress />
+                                </StyledLoading>
+                            </Table.Caption>
+                        )}
+                        {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
                     </Table>
-                )}
-                {paginationDetails && paginationDetails.TotalPages > 1 && (
-                    <Pagination
-                        totalItems={paginationDetails!.TotalCount}
-                        itemsPerPage={paginationDetails!.PageSize}
-                        withItemIndicator
-                        onChange={(_, page) => onPageChange(page)}
-                    />
-                )}
+                    <Table.Caption captionSide={'bottom'}>
+                        {paginationDetails && paginationDetails.TotalPages > 1 && PaginationComponent()}
+                    </Table.Caption>
+                </Table>
             </TableWithHeader>
         </>
     )
