@@ -51,6 +51,7 @@ namespace Api.EventHandlers
                     }
                     if (
                         freshMission.Robot.Status is not RobotStatus.Available
+                        || !freshMission.Robot.Enabled
                         || freshMission.DesiredStartTime > DateTimeOffset.UtcNow
                     )
                     {
