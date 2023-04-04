@@ -36,9 +36,9 @@ export function TaskTable({ mission }: MissionProps) {
 }
 
 function renderTasks(tasks: Task[]) {
+    var order: number = 0
     var rows = tasks?.map(function (task) {
-        // Workaround for current bug in echo
-        var order: number = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
+        order++
         return (
             <Table.Row key={order}>
                 <Table.Cell>{order}</Table.Cell>
