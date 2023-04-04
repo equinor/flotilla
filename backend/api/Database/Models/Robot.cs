@@ -32,6 +32,10 @@ namespace Api.Database.Models
 
         public float? PressureLevel { get; set; }
 
+        public float? PressureLevelThreshold { get; set; }
+
+        public float? BatteryLevelThreshold { get; set; }
+
         public IList<VideoStream> VideoStreams { get; set; }
 
         [Required]
