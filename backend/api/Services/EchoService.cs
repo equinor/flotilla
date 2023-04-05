@@ -152,7 +152,7 @@ namespace Api.Services
                     Pose = new Pose(
                         robotPose.Position,
                         robotPose.LookDirectionNormalized,
-                        robotPose.TiltDegreesClockwise
+                        robotPose.TiltDegreesClockwise * MathF.PI / 180
                     ),
                     URL = new Uri(
                         $"https://stid.equinor.com/{installationCode}/tag?tagNo={planItem.Tag}"
