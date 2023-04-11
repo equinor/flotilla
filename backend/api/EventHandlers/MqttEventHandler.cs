@@ -118,7 +118,11 @@ namespace Api.EventHandlers
                 };
 
                 robot = await RobotService.Create(robotQuery);
-                _logger.LogInformation("Added robot '{name}' to database", robot.Name);
+                _logger.LogInformation(
+                    "Added robot '{robotName}' with ISAR id '{isarId}' to database",
+                    robot.Name,
+                    robot.IsarId
+                );
 
                 return;
             }
@@ -167,7 +171,8 @@ namespace Api.EventHandlers
             {
                 robot = await robotService.Update(robot);
                 _logger.LogInformation(
-                    "Updated robot '{name}' in database: {updates}",
+                    "Updated robot '{id}' ('{robotName}') in database: {updates}",
+                    robot.Id,
                     robot.Name,
                     updatedFields
                 );
@@ -186,7 +191,7 @@ namespace Api.EventHandlers
             {
                 _logger.LogError(
                     e,
-                    "Failed to parse mission status from MQTT message. Mission with ISARMissionId '{id}' was not updated.",
+                    "Failed to parse mission status from MQTT message. Mission with ISARMissionId '{isarMissionId}' was not updated.",
                     isarMission.MissionId
                 );
                 return;
@@ -200,7 +205,7 @@ namespace Api.EventHandlers
             if (flotillaMission is null)
             {
                 _logger.LogError(
-                    "No mission found with ISARMissionId '{id}'. Could not update status to '{status}'",
+                    "No mission found with ISARMissionId '{isarMissionId}'. Could not update status to '{status}'",
                     isarMission.MissionId,
                     status
                 );
@@ -208,19 +213,21 @@ namespace Api.EventHandlers
             }
 
             _logger.LogInformation(
-                "Mission '{id}' (ISARMissionID='{isarId}') status updated to '{status}' for robot '{robot}'",
+                "Mission '{id}' (ISARMissionID='{isarId}') status updated to '{status}' for robot '{robotName}' with ISAR id '{isarId}'",
                 flotillaMission.Id,
                 isarMission.MissionId,
                 isarMission.Status,
-                isarMission.RobotName
+                isarMission.RobotName,
+                isarMission.IsarId
             );
 
             var robot = await RobotService.ReadByIsarId(isarMission.IsarId);
             if (robot is null)
             {
                 _logger.LogError(
-                    "Could not find robot with name '{name}'. The robot status is not updated.",
-                    isarMission.RobotName
+                    "Could not find robot '{robotName}' with ISAR id '{isarId}'. The robot status is not updated.",
+                    isarMission.RobotName,
+                    isarMission.IsarId
                 );
                 return;
             }
@@ -231,7 +238,8 @@ namespace Api.EventHandlers
 
             await RobotService.Update(robot);
             _logger.LogInformation(
-                "Robot '{name}' - status set to '{status}'.",
+                "Robot '{id}' ('{name}') - status set to '{status}'.",
+                robot.IsarId,
                 robot.Name,
                 robot.Status
             );
@@ -263,8 +271,7 @@ namespace Api.EventHandlers
 
             if (success)
                 _logger.LogInformation(
-                    "{time} - Task {id} updated to {status} for {robot} with isar id {id}",
-                    task.Timestamp,
+                    "Task '{id}' updated to '{status}' for robot '{robotName}' with ISAR id '{isarId}'",
                     task.TaskId,
                     task.Status,
                     task.RobotName,
@@ -305,8 +312,7 @@ namespace Api.EventHandlers
 
             if (success)
                 _logger.LogInformation(
-                    "{time} - Inspection '{id}' updated to '{status}' for '{robotName}' with isar id '{id}'",
-                    step.Timestamp,
+                    "Inspection '{id}' updated to '{status}' for robot '{robotName}' with ISAR id '{isarId}'",
                     step.StepId,
                     step.Status,
                     step.RobotName,
@@ -321,15 +327,20 @@ namespace Api.EventHandlers
             if (robot == null)
             {
                 _logger.LogWarning(
-                    "Could not find corresponding robot for battery update on robot {name} ",
-                    batteryStatus.RobotName
+                    "Could not find corresponding robot for battery update on robot '{robotName}' with ISAR id '{isarId}'",
+                    batteryStatus.RobotName,
+                    batteryStatus.IsarId
                 );
             }
             else
             {
                 robot.BatteryLevel = batteryStatus.BatteryLevel;
                 await RobotService.Update(robot);
-                _logger.LogDebug("Updated battery on robot {name} ", robot.Name);
+                _logger.LogDebug(
+                    "Updated battery on robot '{robotName}' with ISAR id '{isarId}'",
+                    robot.Name,
+                    robot.IsarId
+                );
             }
         }
 
@@ -340,15 +351,20 @@ namespace Api.EventHandlers
             if (robot == null)
             {
                 _logger.LogWarning(
-                    "Could not find corresponding robot for pressure update on robot {name} ",
-                    pressureStatus.RobotName
+                    "Could not find corresponding robot for pressure update on robot '{robotName}' with ISAR id '{isarId}'",
+                    pressureStatus.RobotName,
+                    pressureStatus.IsarId
                 );
             }
             else
             {
                 robot.PressureLevel = pressureStatus.PressureLevel;
                 await RobotService.Update(robot);
-                _logger.LogDebug("Updated pressure on robot {name} ", robot.Name);
+                _logger.LogDebug(
+                    "Updated pressure on '{robotName}' with ISAR id '{isarId}'",
+                    robot.Name,
+                    robot.IsarId
+                );
             }
         }
 
@@ -359,8 +375,9 @@ namespace Api.EventHandlers
             if (robot == null)
             {
                 _logger.LogWarning(
-                    "Could not find corresponding robot for pose update with robot {name} ",
-                    poseStatus.RobotName
+                    "Could not find corresponding robot for pose update on robot '{robotName}' with ISAR id '{isarId}'",
+                    poseStatus.RobotName,
+                    poseStatus.IsarId
                 );
             }
             else
@@ -372,14 +389,19 @@ namespace Api.EventHandlers
                 catch (NullReferenceException e)
                 {
                     _logger.LogWarning(
-                        "NullReferenceException while updating pose on '{robot.Name}': {message}",
+                        "NullReferenceException while updating pose on robot '{robotName}' with ISAR id '{isarId}': {message}",
                         robot.Name,
+                        robot.IsarId,
                         e.Message
                     );
                 }
 
                 await RobotService.Update(robot);
-                _logger.LogDebug("Updated pose on robot {name} ", robot.Name);
+                _logger.LogDebug(
+                    "Updated pose on robot '{robotName}' with ISAR id '{isarId}'",
+                    robot.Name,
+                    robot.IsarId
+                );
             }
         }
     }
