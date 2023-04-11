@@ -8,6 +8,7 @@ using Api.Database.Models;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
+using TaskStatus = Api.Database.Models.TaskStatus;
 
 namespace Api.Services
 {
@@ -196,6 +197,23 @@ namespace Api.Services
             }
 
             task.UpdateStatus(taskStatus);
+            if (taskStatus == IsarTaskStatus.InProgress && mission.Status != MissionStatus.Ongoing)
+            {
+                // If mission was set to failed and then ISAR recovered connection, we need to reset the coming tasks
+                mission.Status = MissionStatus.Ongoing;
+                foreach (
+                    var taskItem in mission.Tasks.Where(
+                        taskItem => taskItem.TaskOrder > task.TaskOrder
+                    )
+                )
+                {
+                    taskItem.Status = TaskStatus.NotStarted;
+                    foreach (var inspection in taskItem.Inspections)
+                    {
+                        inspection.Status = InspectionStatus.NotStarted;
+                    }
+                }
+            }
 
             await _context.SaveChangesAsync();
 
