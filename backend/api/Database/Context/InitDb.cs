@@ -40,7 +40,6 @@ public static class InitDb
             Status = RobotStatus.Available,
             Enabled = true,
             Host = "localhost",
-            Logs = "",
             Port = 3000,
             VideoStreams = new List<VideoStream>(),
             Pose = new Pose()
@@ -55,7 +54,6 @@ public static class InitDb
             Status = RobotStatus.Busy,
             Enabled = true,
             Host = "localhost",
-            Logs = "logs",
             Port = 3000,
             VideoStreams = new List<VideoStream>(),
             Pose = new Pose()
@@ -70,7 +68,6 @@ public static class InitDb
             Status = RobotStatus.Available,
             Enabled = false,
             Host = "localhost",
-            Logs = "logs",
             Port = 3000,
             VideoStreams = new List<VideoStream>(),
             Pose = new Pose()

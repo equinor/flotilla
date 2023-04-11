@@ -25,9 +25,6 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public string SerialNumber { get; set; }
 
-        [MaxLength(200)]
-        public string Logs { get; set; }
-
         public float BatteryLevel { get; set; }
 
         public float? PressureLevel { get; set; }
@@ -79,7 +76,6 @@ namespace Api.Database.Models
             Status = RobotStatus.Offline;
             Enabled = false;
             Host = "localhost";
-            Logs = "logs";
             Port = 3000;
             Pose = new Pose();
         }
