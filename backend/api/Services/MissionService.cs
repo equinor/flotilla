@@ -140,7 +140,10 @@ namespace Api.Services
         private async Task<Mission?> ReadByIsarMissionId(string isarMissionId)
         {
             return await GetMissionsWithSubModels()
-                .FirstOrDefaultAsync(mission => mission.IsarMissionId.Equals(isarMissionId));
+                .FirstOrDefaultAsync(
+                    mission =>
+                        mission.IsarMissionId != null && mission.IsarMissionId.Equals(isarMissionId)
+                );
         }
 
         public async Task<Mission?> UpdateMissionStatusByIsarMissionId(
@@ -275,7 +278,11 @@ namespace Api.Services
 
             missions = missions.Where(
                 mission =>
-                    mission.Tasks.Any(task => task.TagId.ToLower().Contains(tag.Trim().ToLower()))
+                    mission.Tasks.Any(
+                        task =>
+                            task.TagId != null
+                            && task.TagId.ToLower().Contains(tag.Trim().ToLower())
+                    )
             );
         }
 

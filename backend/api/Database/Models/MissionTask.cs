@@ -4,8 +4,7 @@ using Api.Controllers.Models;
 using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
 
-#nullable disable
-
+#pragma warning disable CS8618
 namespace Api.Database.Models
 {
     [Owned]
@@ -17,16 +16,16 @@ namespace Api.Database.Models
 
         [MaxLength(200)]
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-        public string IsarTaskId { get; private set; } = Guid.NewGuid().ToString();
+        public string? IsarTaskId { get; private set; } = Guid.NewGuid().ToString();
 
         [Required]
         public int TaskOrder { get; set; }
 
         [MaxLength(200)]
-        public string TagId { get; set; }
+        public string? TagId { get; set; }
 
         [MaxLength(200)]
-        public Uri EchoTagLink { get; set; }
+        public Uri? EchoTagLink { get; set; }
 
         [Required]
         public Position InspectionTarget { get; set; }
@@ -34,7 +33,7 @@ namespace Api.Database.Models
         [Required]
         public Pose RobotPose { get; set; }
 
-        public int EchoPoseId { get; set; }
+        public int? EchoPoseId { get; set; }
 
         private TaskStatus _status;
 
@@ -66,8 +65,10 @@ namespace Api.Database.Models
 
         public IList<Inspection> Inspections { get; set; }
 
+        // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
         public MissionTask() { }
 
+        // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
         public MissionTask(EchoTag echoTag, Position tagPosition)
         {
             Inspections = echoTag.Inspections
@@ -113,7 +114,9 @@ namespace Api.Database.Models
         public Inspection? GetInspectionByIsarStepId(string isarStepId)
         {
             return Inspections.FirstOrDefault(
-                inspection => inspection.IsarStepId.Equals(isarStepId, StringComparison.Ordinal)
+                inspection =>
+                    inspection.IsarStepId != null
+                    && inspection.IsarStepId.Equals(isarStepId, StringComparison.Ordinal)
             );
         }
 

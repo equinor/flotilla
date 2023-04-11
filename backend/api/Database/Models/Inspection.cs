@@ -4,7 +4,7 @@ using Api.Controllers.Models;
 using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
 
-#nullable disable
+#pragma warning disable CS8618
 namespace Api.Database.Models
 {
     [Owned]
@@ -16,7 +16,7 @@ namespace Api.Database.Models
 
         [MaxLength(200)]
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-        public string IsarStepId { get; private set; } = Guid.NewGuid().ToString();
+        public string? IsarStepId { get; private set; } = Guid.NewGuid().ToString();
 
         private InspectionStatus _status;
 
@@ -47,10 +47,10 @@ namespace Api.Database.Models
         public float? VideoDuration { get; set; }
 
         [MaxLength(250)]
-        public string AnalysisTypes { get; set; }
+        public string? AnalysisTypes { get; set; }
 
         [MaxLength(250)]
-        public string InspectionUrl { get; set; }
+        public string? InspectionUrl { get; set; }
 
         public DateTimeOffset? StartTime { get; private set; }
 
