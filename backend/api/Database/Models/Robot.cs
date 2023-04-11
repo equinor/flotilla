@@ -50,6 +50,8 @@ namespace Api.Database.Models
         [Required]
         public Pose Pose { get; set; }
 
+        public string? CurrentMissionId { get; set; }
+
         public string IsarUri
         {
             get
