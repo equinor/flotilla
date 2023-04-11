@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-#nullable disable
+#pragma warning disable CS8618
 namespace Api.Database.Models
 {
     [Owned]
@@ -26,7 +26,7 @@ namespace Api.Database.Models
 
         public bool ShouldRotate270Clockwise { get; set; }
 
-        public bool Equals(VideoStream other)
+        public bool Equals(VideoStream? other)
         {
             if (other is null)
             {
@@ -41,7 +41,7 @@ namespace Api.Database.Models
             return Name == other.Name && Url == other.Url && Type == other.Type;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is null)
             {
@@ -63,7 +63,9 @@ namespace Api.Database.Models
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Name, Url, Type);
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
+            // Reason: Id is for all intents an purposes read only
+            return HashCode.Combine(Id);
         }
     }
 }
