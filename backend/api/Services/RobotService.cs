@@ -10,7 +10,6 @@ namespace Api.Services
         public abstract Task<Robot> Create(CreateRobotQuery newRobot);
         public abstract Task<IEnumerable<Robot>> ReadAll();
         public abstract Task<Robot?> ReadById(string id);
-        public abstract Task<Robot?> ReadByName(string name);
         public abstract Task<Robot?> ReadByIsarId(string isarId);
         public abstract Task<Robot> Update(Robot robot);
     }
@@ -74,12 +73,6 @@ namespace Api.Services
         public async Task<Robot?> ReadById(string id)
         {
             return await GetRobotsWithSubModels().FirstOrDefaultAsync(robot => robot.Id.Equals(id));
-        }
-
-        public async Task<Robot?> ReadByName(string name)
-        {
-            return await GetRobotsWithSubModels()
-                .FirstOrDefaultAsync(robot => robot.Name.Equals(name));
         }
 
         public async Task<Robot?> ReadByIsarId(string isarId)
