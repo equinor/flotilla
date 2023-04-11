@@ -15,21 +15,18 @@ public class RobotController : ControllerBase
     private readonly ILogger<RobotController> _logger;
     private readonly IRobotService _robotService;
     private readonly IIsarService _isarService;
-    private readonly IEchoService _echoService;
     private readonly IMissionService _missionService;
 
     public RobotController(
         ILogger<RobotController> logger,
         IRobotService robotService,
         IIsarService isarService,
-        IEchoService echoService,
         IMissionService missionService
     )
     {
         _logger = logger;
         _robotService = robotService;
         _isarService = isarService;
-        _echoService = echoService;
         _missionService = missionService;
     }
 
@@ -266,8 +263,6 @@ public class RobotController : ControllerBase
             return NotFound();
         }
 
-        robot.VideoStreams ??= new List<VideoStream>();
-
         robot.VideoStreams.Add(videoStream);
 
         try
@@ -340,10 +335,7 @@ public class RobotController : ControllerBase
         {
             string message = $"Could not reach ISAR at {robot.IsarUri}";
             _logger.LogError(e, "{message}", message);
-            robot.Enabled = false;
-            robot.Status = RobotStatus.Offline;
-            await _robotService.Update(robot);
-
+            OnIsarUnavailable(robot);
             return StatusCode(StatusCodes.Status502BadGateway, message);
         }
         catch (MissionException e)
@@ -370,7 +362,18 @@ public class RobotController : ControllerBase
 
         await _missionService.Update(mission);
 
+        if (robot.CurrentMissionId != null)
+        {
+            var orphanedMission = await _missionService.ReadById(robot.CurrentMissionId);
+            if (orphanedMission != null)
+            {
+                orphanedMission.SetToFailed();
+                await _missionService.Update(orphanedMission);
+            }
+        }
+
         robot.Status = RobotStatus.Busy;
+        robot.CurrentMissionId = mission.Id;
         await _robotService.Update(robot);
 
         return Ok(mission);
@@ -402,15 +405,14 @@ public class RobotController : ControllerBase
         try
         {
             await _isarService.StopMission(robot);
+            robot.CurrentMissionId = null;
+            await _robotService.Update(robot);
         }
         catch (HttpRequestException e)
         {
             string message = "Error connecting to ISAR while stopping mission";
             _logger.LogError(e, "{message}", message);
-            robot.Enabled = false;
-            robot.Status = RobotStatus.Offline;
-            await _robotService.Update(robot);
-
+            OnIsarUnavailable(robot);
             return StatusCode(StatusCodes.Status502BadGateway, message);
         }
         catch (MissionException e)
@@ -459,9 +461,7 @@ public class RobotController : ControllerBase
         {
             string message = "Error connecting to ISAR while pausing mission";
             _logger.LogError(e, "{message}", message);
-            robot.Enabled = false;
-            robot.Status = RobotStatus.Offline;
-            await _robotService.Update(robot);
+            OnIsarUnavailable(robot);
             return StatusCode(StatusCodes.Status502BadGateway, message);
         }
         catch (MissionException e)
@@ -510,9 +510,7 @@ public class RobotController : ControllerBase
         {
             string message = "Error connecting to ISAR while resuming mission";
             _logger.LogError(e, "{message}", message);
-            robot.Enabled = false;
-            robot.Status = RobotStatus.Offline;
-            await _robotService.Update(robot);
+            OnIsarUnavailable(robot);
             return StatusCode(StatusCodes.Status502BadGateway, message);
         }
         catch (MissionException e)
@@ -528,5 +526,26 @@ public class RobotController : ControllerBase
         }
 
         return NoContent();
+    }
+
+    private async void OnIsarUnavailable(Robot robot)
+    {
+        robot.Enabled = false;
+        robot.Status = RobotStatus.Offline;
+        if (robot.CurrentMissionId != null)
+        {
+            var mission = await _missionService.ReadById(robot.CurrentMissionId);
+            if (mission != null)
+            {
+                mission.SetToFailed();
+                await _missionService.Update(mission);
+                _logger.LogWarning(
+                    "Mission '{id}' failed because ISAR could not be reached",
+                    mission.Id
+                );
+            }
+        }
+        robot.CurrentMissionId = null;
+        await _robotService.Update(robot);
     }
 }
