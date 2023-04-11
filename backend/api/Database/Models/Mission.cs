@@ -31,8 +31,9 @@ namespace Api.Database.Models
         [MaxLength(1000)]
         public string? Comment { get; set; }
 
+        [Required]
         [MaxLength(200)]
-        public string? AssetCode { get; set; }
+        public string AssetCode { get; set; }
 
         [Required]
         public virtual Robot Robot { get; set; }
