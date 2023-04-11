@@ -215,7 +215,7 @@ namespace Api.EventHandlers
                 isarMission.RobotName
             );
 
-            var robot = await RobotService.ReadByName(isarMission.RobotName);
+            var robot = await RobotService.ReadByIsarId(isarMission.IsarId);
             if (robot is null)
             {
                 _logger.LogError(
@@ -317,7 +317,7 @@ namespace Api.EventHandlers
         private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByName(batteryStatus.RobotName);
+            var robot = await RobotService.ReadByIsarId(batteryStatus.IsarId);
             if (robot == null)
             {
                 _logger.LogWarning(
@@ -336,7 +336,7 @@ namespace Api.EventHandlers
         private async void OnPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByName(pressureStatus.RobotName);
+            var robot = await RobotService.ReadByIsarId(pressureStatus.IsarId);
             if (robot == null)
             {
                 _logger.LogWarning(
@@ -355,7 +355,7 @@ namespace Api.EventHandlers
         private async void OnPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var poseStatus = (IsarPoseMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByName(poseStatus.RobotName);
+            var robot = await RobotService.ReadByIsarId(poseStatus.IsarId);
             if (robot == null)
             {
                 _logger.LogWarning(
