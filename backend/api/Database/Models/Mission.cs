@@ -151,6 +151,22 @@ namespace Api.Database.Models
             );
             EstimatedDuration = TimeSpan.FromMinutes(estimate);
         }
+
+        public void SetToFailed()
+        {
+            Status = MissionStatus.Failed;
+            StatusReason = "Lost connection to ISAR during mission";
+            foreach (var task in Tasks.Where(task => !task.IsCompleted))
+            {
+                task.Status = TaskStatus.Failed;
+                foreach (
+                    var inspection in task.Inspections.Where(inspection => !inspection.IsCompleted)
+                )
+                {
+                    inspection.Status = InspectionStatus.Failed;
+                }
+            }
+        }
     }
 
     public enum MissionStatus

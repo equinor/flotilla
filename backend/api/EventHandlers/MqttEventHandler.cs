@@ -226,6 +226,8 @@ namespace Api.EventHandlers
             }
 
             robot.Status = flotillaMission.IsCompleted ? RobotStatus.Available : RobotStatus.Busy;
+            if (flotillaMission.IsCompleted)
+                robot.CurrentMissionId = null;
 
             await RobotService.Update(robot);
             _logger.LogInformation(
