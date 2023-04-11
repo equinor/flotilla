@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-#nullable disable
+#pragma warning disable CS8618
 namespace Api.Database.Models
 {
     public class Robot
@@ -65,6 +65,7 @@ namespace Api.Database.Models
 
         public Robot()
         {
+            VideoStreams = new List<VideoStream>();
             IsarId = "defaultIsarId";
             Name = "defaultId";
             Model = RobotModel.Turtlebot;

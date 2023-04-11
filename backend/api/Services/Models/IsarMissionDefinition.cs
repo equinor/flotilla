@@ -46,7 +46,12 @@ namespace Api.Services.Models
         {
             Id = missionTask.IsarTaskId;
             Pose = new IsarPose(missionTask.RobotPose);
-            Tag = missionTask.TagId;
+            Tag =
+                missionTask.TagId
+                ?? throw new ArgumentNullException(
+                    nameof(missionTask.TagId),
+                    "Cannot create IsarTask without a TagId"
+                );
             var isarInspections = new List<IsarInspectionDefinition>();
             foreach (var inspection in missionTask.Inspections)
             {
@@ -74,7 +79,7 @@ namespace Api.Services.Models
         public float? Duration { get; set; }
 
         [JsonPropertyName("metadata")]
-        public Dictionary<string, string>? Metadata { get; set; }
+        public Dictionary<string, string?>? Metadata { get; set; }
 
         public IsarInspectionDefinition(Inspection inspection, MissionTask task, Mission mission)
         {
@@ -88,9 +93,9 @@ namespace Api.Services.Models
             );
             AnalysisTypes = inspection.AnalysisTypes;
             Duration = inspection.VideoDuration;
-            var metadata = new Dictionary<string, string>
+            var metadata = new Dictionary<string, string?>
             {
-                { "map", mission.Map.MapName },
+                { "map", mission.Map?.MapName },
                 { "description", mission.Description },
                 { "estimated_duration", mission.EstimatedDuration.ToString() },
                 { "asset_code", mission.AssetCode },

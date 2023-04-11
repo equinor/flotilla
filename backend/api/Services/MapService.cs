@@ -119,6 +119,12 @@ namespace Api.Services
 
         private async Task<byte[]> DownloadMapImageFromBlobStorage(Mission currentMission)
         {
+            if (currentMission.Map is null)
+                throw new ArgumentNullException(
+                    nameof(currentMission.Map),
+                    "Cannot fetch map image from blob when map is null"
+                );
+
             var blobContainerClient = GetBlobContainerClient(
                 currentMission.AssetCode.ToLower(CultureInfo.CurrentCulture)
             );
@@ -127,6 +133,7 @@ namespace Api.Services
             await using var stream = await blobClient.OpenReadAsync();
 
             byte[] result = new byte[stream.Length];
+            // ReSharper disable once MustUseReturnValue
             await stream.ReadAsync(result);
 
             return result;

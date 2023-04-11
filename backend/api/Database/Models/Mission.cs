@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Api.Services.Models;
 
-#nullable disable
+#pragma warning disable CS8618
 namespace Api.Database.Models
 {
     public class Mission
@@ -16,23 +16,23 @@ namespace Api.Database.Models
         public int EchoMissionId { get; set; }
 
         [MaxLength(200)]
-        public string IsarMissionId { get; set; }
+        public string? IsarMissionId { get; set; }
 
         [Required]
         [MaxLength(200)]
         public string Name { get; set; }
 
         [MaxLength(450)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [MaxLength(450)]
-        public string StatusReason { get; set; }
+        public string? StatusReason { get; set; }
 
         [MaxLength(1000)]
-        public string Comment { get; set; }
+        public string? Comment { get; set; }
 
         [MaxLength(200)]
-        public string AssetCode { get; set; }
+        public string? AssetCode { get; set; }
 
         [Required]
         public virtual Robot Robot { get; set; }
@@ -62,7 +62,7 @@ namespace Api.Database.Models
                     or MissionStatus.PartiallySuccessful
                     or MissionStatus.Failed;
 
-        public MissionMap Map { get; set; }
+        public MissionMap? Map { get; set; }
 
         [Required]
         public DateTimeOffset DesiredStartTime { get; set; }
@@ -71,7 +71,7 @@ namespace Api.Database.Models
 
         public DateTimeOffset? EndTime { get; private set; }
 
-        public TimeSpan EstimatedDuration { get; set; }
+        public TimeSpan? EstimatedDuration { get; set; }
 
         private IList<MissionTask> _tasks;
 
@@ -89,7 +89,7 @@ namespace Api.Database.Models
             foreach (var isarTask in isarMission.Tasks)
             {
                 var task = GetTaskByIsarId(isarTask.IsarTaskId);
-                task.UpdateWithIsarInfo(isarTask);
+                task?.UpdateWithIsarInfo(isarTask);
             }
         }
 
@@ -97,7 +97,9 @@ namespace Api.Database.Models
         public MissionTask? GetTaskByIsarId(string isarTaskId)
         {
             return Tasks.FirstOrDefault(
-                task => task.IsarTaskId.Equals(isarTaskId, StringComparison.Ordinal)
+                task =>
+                    task.IsarTaskId != null
+                    && task.IsarTaskId.Equals(isarTaskId, StringComparison.Ordinal)
             );
         }
 
