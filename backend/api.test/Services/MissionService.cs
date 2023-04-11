@@ -53,6 +53,7 @@ namespace Api.Test.Services
                     Robot = robot,
                     EchoMissionId = 0,
                     Map = new MissionMap() { MapName = "testMap" },
+                    AssetCode = "testAsset",
                     DesiredStartTime = DateTime.Now
                 };
 
