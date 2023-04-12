@@ -69,5 +69,8 @@
     "Fetching missions from Echo": "Henter oppdrag fra Echo",
     "Go to AccessIT": "Gå til AccessIT",
     "You don't have access to this site. Apply for access in AccessIT": "Du har ikke tilgang til denne siden. Søk om tilgang i AccessIT",
-    "An unknown error has occurred": "En ukjent feil oppstod"
+    "An unknown error has occurred": "En ukjent feil oppstod",
+    "Select deck": "Velg dekk",
+    "Localize": "Lokaliser",
+    "Localization": "Lokalisering"
 }
