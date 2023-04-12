@@ -9,6 +9,7 @@ public class FlotillaDbContext : DbContext
 {
     public DbSet<Robot> Robots => Set<Robot>();
     public DbSet<Mission> Missions => Set<Mission>();
+    public DbSet<AssetDeck> AssetDecks => Set<AssetDeck>();
 
     public FlotillaDbContext(DbContextOptions options) : base(options) { }
 
@@ -56,6 +57,7 @@ public class FlotillaDbContext : DbContext
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
         modelBuilder.Entity<Robot>().OwnsMany(r => r.VideoStreams);
+        modelBuilder.Entity<AssetDeck>().OwnsOne(a => a.DefaultLocalizationPose);
     }
 
     // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations
