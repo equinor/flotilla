@@ -8,6 +8,8 @@ import { useContext } from 'react'
 import { filterRobots } from 'utils/filtersAndSorts'
 import { MissionQueryParameters } from 'models/MissionQueryParameters'
 import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'models/PaginatedResponse'
+import { Pose } from 'models/Pose'
+import { AssetDeck } from 'models/AssetDeck'
 
 export class BackendAPICaller {
     /* Implements the request sent to the backend api.
@@ -188,6 +190,19 @@ export class BackendAPICaller {
         return result.content
     }
 
+    async postLocalizationMission(localizationPose: Pose, robotId: string) {
+        const path: string = 'robots/' + robotId + '/start-localization'
+        const body = {
+            position: localizationPose.position,
+            orientation: localizationPose.orientation,
+        }
+        const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
     async deleteMission(missionId: string) {
         const path: string = 'missions/' + missionId
         await this.DELETE(path, '').catch((e) => {
@@ -235,6 +250,15 @@ export class BackendAPICaller {
             console.log('HTTP-Error: ' + response.status)
             throw Error
         }
+    }
+
+    async getAssetDecks(): Promise<AssetDeck[]> {
+        const path: string = 'asset-decks'
+        const result = await this.GET<AssetDeck[]>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
     }
 }
 
