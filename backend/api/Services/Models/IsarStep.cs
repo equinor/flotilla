@@ -41,6 +41,7 @@
                 "TakeVideo" => IsarStepType.TakeVideo,
                 "TakeThermalImage" => IsarStepType.TakeThermalImage,
                 "TakeThermalVideo" => IsarStepType.TakeThermalVideo,
+                "Localize" => IsarStepType.Localize,
                 _
                   => throw new ArgumentException(
                       $"Failed to parse step type '{isarClassName}' - not supported"
@@ -61,6 +62,7 @@
     public enum IsarStepType
     {
         DriveToPose,
+        Localize,
         TakeImage,
         TakeVideo,
         TakeThermalImage,
