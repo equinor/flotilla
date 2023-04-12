@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import { BatteryStatus } from 'models/Battery'
 import { Text } from 'components/Contexts/LanguageContext'
 import PressureStatusView from './PressureStatusView'
+import { config } from 'config'
 
 interface RobotProps {
     robot: Robot
@@ -62,21 +63,14 @@ function cardContent({ robot }: RobotProps) {
 
 export function RobotStatusCard({ robot }: RobotProps) {
     let navigate = useNavigate()
-    const goToMission = () => {
-        let path = `mission`
+    const goToRobot = () => {
+        let path = `${config.FRONTEND_BASE_ROUTE}/robot/${robot.id}`
         navigate(path)
     }
-    if (robot.status === RobotStatus.Busy) {
-        return (
-            <HoverableStyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={goToMission}>
-                {cardContent({ robot })}
-            </HoverableStyledCard>
-        )
-    }
     return (
-        <StyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
+        <HoverableStyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
             {cardContent({ robot })}
-        </StyledCard>
+        </HoverableStyledCard>
     )
 }
 

@@ -85,6 +85,15 @@ export class BackendAPICaller {
         return result.content.filter((robot) => robot.enabled)
     }
 
+    async getRobotById(robotId: string): Promise<Robot> {
+        const path: string = 'robots/' + robotId
+        const result = await this.GET<Robot>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
     async getAllEchoMissions(): Promise<EchoMission[]> {
         const path: string = 'echo-missions'
         const result = await this.GET<EchoMission[]>(path).catch((e) => {
