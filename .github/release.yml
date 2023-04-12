@@ -12,6 +12,9 @@ changelog:
     - title: Bug Fixes
       labels:
         - bug
+    - title: Database Changes 💾
+      labels:
+        - database-change
     - title: Other Changes
       labels:
         - "*"
