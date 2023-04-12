@@ -39,5 +39,18 @@ namespace Api.Test.Mocks
             await Task.Run(() => Thread.Sleep(1));
             return new IsarControlMissionResponse();
         }
+
+        public async Task<IsarMission> StartLocalizationMission(Robot robot, Pose localizationPose)
+        {
+            await Task.Run(() => Thread.Sleep(1));
+            var isarServiceMissionResponse = new IsarMission(
+                new IsarStartMissionResponse
+                {
+                    MissionId = "testLocalization",
+                    Tasks = new List<IsarTaskResponse>()
+                }
+            );
+            return isarServiceMissionResponse;
+        }
     }
 }

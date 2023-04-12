@@ -528,6 +528,89 @@ public class RobotController : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Start a localization mission with localization in the pose 'localizationPose' for the robot with id 'robotId'
+    /// </summary>
+    /// <remarks>
+    /// <para> This query starts a localization for a given robot </para>
+    /// </remarks>
+    [HttpPost]
+    [Route("{robotId}/start-localization")]
+    [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<Mission>> StartLocalizationMission(
+        [FromRoute] string robotId,
+        [FromBody] Pose localizationPose
+    )
+    {
+        var robot = await _robotService.ReadById(robotId);
+        if (robot == null)
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound("Robot not found");
+        }
+
+        if (robot.Status is not RobotStatus.Available)
+        {
+            _logger.LogWarning(
+                "Robot '{id}' is not available ({status})",
+                robotId,
+                robot.Status.ToString()
+            );
+            return Conflict($"The Robot is not available ({robot.Status})");
+        }
+
+        var mission = new Mission
+        {
+            Name = "Localization Mission",
+            Robot = robot,
+            AssetCode = "NA",
+            EchoMissionId = 0,
+            Status = MissionStatus.Pending,
+            DesiredStartTime = DateTimeOffset.UtcNow,
+            Tasks = new List<MissionTask>(),
+            Map = new MissionMap()
+        };
+
+        IsarMission isarMission;
+        try
+        {
+            isarMission = await _isarService.StartLocalizationMission(robot, localizationPose);
+        }
+        catch (HttpRequestException e)
+        {
+            string message = $"Could not reach ISAR at {robot.IsarUri}";
+            _logger.LogError(e, "{message}", message);
+            OnIsarUnavailable(robot);
+            return StatusCode(StatusCodes.Status502BadGateway, message);
+        }
+        catch (MissionException e)
+        {
+            _logger.LogError(e, "Error while starting ISAR localization mission");
+            return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+        }
+        catch (JsonException e)
+        {
+            string message = "Error while processing of the response from ISAR";
+            _logger.LogError(e, "{message}", message);
+            return StatusCode(StatusCodes.Status500InternalServerError, message);
+        }
+
+        mission.UpdateWithIsarInfo(isarMission);
+        mission.Status = MissionStatus.Ongoing;
+
+        await _missionService.Create(mission);
+
+        robot.Status = RobotStatus.Busy;
+        robot.CurrentMissionId = mission.Id;
+        await _robotService.Update(robot);
+        return Ok(mission);
+    }
+
     private async void OnIsarUnavailable(Robot robot)
     {
         robot.Enabled = false;
