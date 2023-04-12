@@ -15,6 +15,8 @@ namespace Api.Services
         public abstract Task<IsarControlMissionResponse> PauseMission(Robot robot);
 
         public abstract Task<IsarControlMissionResponse> ResumeMission(Robot robot);
+
+        public abstract Task<IsarMission> StartLocalizationMission(Robot robot, Pose localizationMission);
     }
 
     public class IsarService : IIsarService
@@ -200,6 +202,46 @@ namespace Api.Services
             }
 
             return isarMissionResponse;
+        }
+
+        public async Task<IsarMission> StartLocalizationMission(Robot robot, Pose localizationPose)
+        {
+            var response = await CallApi(
+                HttpMethod.Post,
+                robot.IsarUri,
+                "schedule/start-localization-mission",
+                new { localization_pose = new IsarPose(localizationPose) }
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string message = GetErrorDescriptionFoFailedIsarRequest(response);
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                _logger.LogError("{message}: {error_response}", message, errorResponse);
+                throw new MissionException(message);
+            }
+            if (response.Content is null)
+            {
+                _logger.LogError("Could not read content from localization mission");
+                throw new MissionException("Could not read content from localization mission");
+            }
+
+            var isarMissionResponse =
+                await response.Content.ReadFromJsonAsync<IsarStartMissionResponse>();
+            if (isarMissionResponse is null)
+            {
+                _logger.LogError("Failed to deserialize localization mission from ISAR");
+                throw new JsonException("Failed to deserialize localization mission from ISAR");
+            }
+
+            var isarMission = new IsarMission(isarMissionResponse);
+
+            _logger.LogInformation(
+                "ISAR Localization Mission '{missionId}' started on robot '{robotId}'",
+                isarMission.IsarMissionId,
+                robot.Id
+            );
+            return isarMission;
         }
 
         private static string GetErrorDescriptionFoFailedIsarRequest(HttpResponseMessage response)
