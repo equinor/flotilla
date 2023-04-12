@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { BackButton } from '../MissionPage/MissionHeader/BackButton'
+import { LocalizationSection } from './LocalizationSection'
 
 const StyledRobotPage = styled.div`
     display: flex;
@@ -31,7 +32,8 @@ export function RobotPage() {
     return (
         <StyledRobotPage>
             <BackButton />
-            <Typography variant="h1"> {selectedRobot?.name + ' (' + selectedRobot?.model + ')'} </Typography>
+            <Typography variant="h1">{selectedRobot?.name + ' (' + selectedRobot?.model + ')'}</Typography>
+            {selectedRobot !== undefined && <LocalizationSection robot={selectedRobot} />}
         </StyledRobotPage>
     )
 }
