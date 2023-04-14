@@ -1,6 +1,6 @@
 import { config } from 'config'
 import { Button, Icon, TopBar, Autocomplete, Typography } from '@equinor/eds-core-react'
-import { useApi } from 'api/ApiCaller'
+import { BackendAPICaller } from 'api/ApiCaller'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
@@ -68,13 +68,12 @@ export function Header() {
 }
 
 function AssetPicker() {
-    const apiCaller = useApi()
     const handleError = useErrorHandler()
 
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
     const { assetCode, switchAsset } = useAssetContext()
     useEffect(() => {
-        apiCaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
+        BackendAPICaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
             const mapping = mapAssetCodeToName(response)
             setAllPlantsMap(mapping)
         })

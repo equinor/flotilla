@@ -1,5 +1,4 @@
 import { Button, Typography, Icon } from '@equinor/eds-core-react'
-import { useApi } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -12,6 +11,7 @@ import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { useErrorHandler } from 'react-error-boundary'
 import { PaginatedResponse } from 'models/PaginatedResponse'
+import { BackendAPICaller } from 'api/ApiCaller'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -30,7 +30,6 @@ const ButtonStyle = styled.div`
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     const missionPageSize = 100
-    const apiCaller = useApi()
     const handleError = useErrorHandler()
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [pausedMissions, setPausedMissions] = useState<Mission[]>([])
@@ -50,7 +49,7 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     }, [])
 
     const getCurrentMissions = (status: MissionStatus): Promise<PaginatedResponse<Mission>> => {
-        return apiCaller.getMissions({ status: status, pageSize: missionPageSize, orderBy: 'StartTime desc' })
+        return BackendAPICaller.getMissions({ status: status, pageSize: missionPageSize, orderBy: 'StartTime desc' })
     }
 
     const updateOngoingMissions = () => {

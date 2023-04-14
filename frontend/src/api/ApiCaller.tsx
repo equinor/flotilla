@@ -1,30 +1,31 @@
-import { AccessTokenContext } from 'components/Pages/FlotillaSite'
 import { config } from 'config'
 import { EchoMission, EchoPlantInfo } from 'models/EchoMission'
 import { Mission } from 'models/Mission'
 import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
-import { useContext } from 'react'
 import { filterRobots } from 'utils/filtersAndSorts'
 import { MissionQueryParameters } from 'models/MissionQueryParameters'
 import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'models/PaginatedResponse'
 import { Pose } from 'models/Pose'
 import { AssetDeck } from 'models/AssetDeck'
+import { timeout } from 'utils/timeout'
 
+/** Implements the request sent to the backend api. */
 export class BackendAPICaller {
-    /* Implements the request sent to the backend api.
-     */
-    accessToken: string
-    getAssetCode = (): string | null => window.localStorage.getItem('assetString')
+    static accessToken: string
+    static assetCode: string
 
-    constructor(accessToken: string) {
-        this.accessToken = accessToken
+    /**  API is not ready until access token has been set for the first time */
+    private static async ApiReady() {
+        while (this.accessToken === null || this.accessToken === '') {
+            await timeout(500)
+        }
     }
 
-    private initializeRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: T): RequestInit {
+    private static initializeRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: T): RequestInit {
         const headers = {
             'content-type': 'application/json',
-            Authorization: `Bearer ${this.accessToken}`,
+            Authorization: `Bearer ${BackendAPICaller.accessToken}`,
         }
 
         const init: RequestInit = {
@@ -38,12 +39,14 @@ export class BackendAPICaller {
         return init
     }
 
-    private async query<TBody, TContent>(
+    private static async query<TBody, TContent>(
         method: 'GET' | 'POST' | 'PUT' | 'DELETE',
         path: string,
         body?: TBody
     ): Promise<{ content: TContent; headers: Headers }> {
-        const initializedRequest: RequestInit = this.initializeRequest(method, body)
+        await BackendAPICaller.ApiReady()
+
+        const initializedRequest: RequestInit = BackendAPICaller.initializeRequest(method, body)
 
         const url = `${config.BACKEND_URL}/${path}`
         const response: Response = await fetch(url, initializedRequest)
@@ -58,36 +61,42 @@ export class BackendAPICaller {
         return { content: responseContent, headers: response.headers }
     }
 
-    private async GET<TContent>(path: string): Promise<{ content: TContent; headers: Headers }> {
-        return this.query('GET', path)
+    private static async GET<TContent>(path: string): Promise<{ content: TContent; headers: Headers }> {
+        return BackendAPICaller.query('GET', path)
     }
 
-    private async POST<TBody, TContent>(path: string, body: TBody): Promise<{ content: TContent; headers: Headers }> {
-        return this.query('POST', path, body)
+    private static async POST<TBody, TContent>(
+        path: string,
+        body: TBody
+    ): Promise<{ content: TContent; headers: Headers }> {
+        return BackendAPICaller.query('POST', path, body)
     }
 
-    private async DELETE<TBody, TContent>(path: string, body: TBody): Promise<{ content: TContent; headers: Headers }> {
-        return this.query('DELETE', path, body)
+    private static async DELETE<TBody, TContent>(
+        path: string,
+        body: TBody
+    ): Promise<{ content: TContent; headers: Headers }> {
+        return BackendAPICaller.query('DELETE', path, body)
     }
 
-    private async postControlMissionRequest(path: string, robotId: string): Promise<void> {
+    private static async postControlMissionRequest(path: string, robotId: string): Promise<void> {
         const body = { robotId: robotId }
-        await this.POST(path, body).catch((e) => {
+        await BackendAPICaller.POST(path, body).catch((e) => {
             console.error(`Failed to POST /${path}: ` + e)
             throw e
         })
     }
 
-    async getEnabledRobots(): Promise<Robot[]> {
+    static async getEnabledRobots(): Promise<Robot[]> {
         const path: string = 'robots'
-        const result = await this.GET<Robot[]>(path).catch((e) => {
+        const result = await BackendAPICaller.GET<Robot[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
         return result.content.filter((robot) => robot.enabled)
     }
 
-    async getRobotById(robotId: string): Promise<Robot> {
+    static async getRobotById(robotId: string): Promise<Robot> {
         const path: string = 'robots/' + robotId
         const result = await this.GET<Robot>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
@@ -96,20 +105,20 @@ export class BackendAPICaller {
         return result.content
     }
 
-    async getAllEchoMissions(): Promise<EchoMission[]> {
+    static async getAllEchoMissions(): Promise<EchoMission[]> {
         const path: string = 'echo-missions'
-        const result = await this.GET<EchoMission[]>(path).catch((e) => {
+        const result = await BackendAPICaller.GET<EchoMission[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
         return result.content
     }
 
-    async getMissions(parameters: MissionQueryParameters): Promise<PaginatedResponse<Mission>> {
+    static async getMissions(parameters: MissionQueryParameters): Promise<PaginatedResponse<Mission>> {
         let path: string = 'missions?'
 
         // Always filter by currently selected asset
-        const assetCode: string | null = this.getAssetCode()
+        const assetCode: string | null = BackendAPICaller.assetCode
         if (assetCode) path = path + 'AssetCode=' + assetCode + '&'
 
         if (parameters.status) path = path + 'status=' + parameters.status + '&'
@@ -127,7 +136,7 @@ export class BackendAPICaller {
         if (parameters.minDesiredStartTime) path = path + 'MinDesiredStartTime=' + parameters.minDesiredStartTime + '&'
         if (parameters.maxDesiredStartTime) path = path + 'MaxDesiredStartTime=' + parameters.maxDesiredStartTime + '&'
 
-        const result = await this.GET<Mission[]>(path).catch((e) => {
+        const result = await BackendAPICaller.GET<Mission[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
@@ -138,44 +147,44 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
+    static async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
         const path: string = 'echo-missions?installationCode=' + installationCode
-        const result = await this.GET<EchoMission[]>(path).catch((e) => {
+        const result = await BackendAPICaller.GET<EchoMission[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
         return result.content
     }
 
-    async getMissionById(missionId: string): Promise<Mission> {
+    static async getMissionById(missionId: string): Promise<Mission> {
         const path: string = 'missions/' + missionId
-        const result = await this.GET<Mission>(path).catch((e) => {
+        const result = await BackendAPICaller.GET<Mission>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
         return result.content
     }
 
-    async getVideoStreamsByRobotId(robotId: string): Promise<VideoStream[]> {
+    static async getVideoStreamsByRobotId(robotId: string): Promise<VideoStream[]> {
         const path: string = 'robots/' + robotId + '/video-streams'
-        const result = await this.GET<VideoStream[]>(path).catch((e) => {
+        const result = await BackendAPICaller.GET<VideoStream[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
         return result.content
     }
 
-    async getEchoPlantInfo(): Promise<EchoPlantInfo[]> {
+    static async getEchoPlantInfo(): Promise<EchoPlantInfo[]> {
         const path: string = 'echo-plants'
-        const result = await this.GET<EchoPlantInfo[]>(path).catch((e: Error) => {
+        const result = await BackendAPICaller.GET<EchoPlantInfo[]>(path).catch((e: Error) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
         return result.content
     }
-    async postMission(echoMissionId: number, robotId: string, assetCode: string | null) {
+    static async postMission(echoMissionId: number, robotId: string, assetCode: string | null) {
         const path: string = 'missions'
-        const robots: Robot[] = await this.getEnabledRobots()
+        const robots: Robot[] = await BackendAPICaller.getEnabledRobots()
         const desiredRobot = filterRobots(robots, robotId)
         const body = {
             robotId: desiredRobot[0].id,
@@ -183,14 +192,14 @@ export class BackendAPICaller {
             desiredStartTime: new Date(),
             assetCode: assetCode,
         }
-        const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
+        const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch((e) => {
             console.error(`Failed to POST /${path}: ` + e)
             throw e
         })
         return result.content
     }
 
-    async postLocalizationMission(localizationPose: Pose, robotId: string) {
+    static async postLocalizationMission(localizationPose: Pose, robotId: string) {
         const path: string = 'robots/' + robotId + '/start-localization'
         const body = {
             position: localizationPose.position,
@@ -203,36 +212,36 @@ export class BackendAPICaller {
         return result.content
     }
 
-    async deleteMission(missionId: string) {
+    static async deleteMission(missionId: string) {
         const path: string = 'missions/' + missionId
-        await this.DELETE(path, '').catch((e) => {
+        await BackendAPICaller.DELETE(path, '').catch((e) => {
             console.error(`Failed to DELETE /${path}: ` + e)
             throw e
         })
     }
 
-    async pauseMission(robotId: string): Promise<void> {
+    static async pauseMission(robotId: string): Promise<void> {
         const path: string = 'robots/' + robotId + '/pause'
-        return this.postControlMissionRequest(path, robotId)
+        return BackendAPICaller.postControlMissionRequest(path, robotId)
     }
 
-    async resumeMission(robotId: string): Promise<void> {
+    static async resumeMission(robotId: string): Promise<void> {
         const path: string = 'robots/' + robotId + '/resume'
-        return this.postControlMissionRequest(path, robotId)
+        return BackendAPICaller.postControlMissionRequest(path, robotId)
     }
 
-    async stopMission(robotId: string): Promise<void> {
+    static async stopMission(robotId: string): Promise<void> {
         const path: string = 'robots/' + robotId + '/stop'
-        return this.postControlMissionRequest(path, robotId)
+        return BackendAPICaller.postControlMissionRequest(path, robotId)
     }
 
-    async getMap(missionId: string): Promise<Blob> {
+    static async getMap(missionId: string): Promise<Blob> {
         const path: string = 'missions/' + missionId + '/map'
         const url = `${config.BACKEND_URL}/${path}`
 
         const headers = {
             'content-type': 'image/png',
-            Authorization: `Bearer ${this.accessToken}`,
+            Authorization: `Bearer ${BackendAPICaller.accessToken}`,
         }
 
         const options: RequestInit = {
@@ -247,12 +256,12 @@ export class BackendAPICaller {
             const imageBlob = await response.blob()
             return imageBlob
         } else {
-            console.log('HTTP-Error: ' + response.status)
+            console.error('HTTP-Error: ' + response.status)
             throw Error
         }
     }
 
-    async getAssetDecks(): Promise<AssetDeck[]> {
+    static async getAssetDecks(): Promise<AssetDeck[]> {
         const path: string = 'asset-decks'
         const result = await this.GET<AssetDeck[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
@@ -260,9 +269,4 @@ export class BackendAPICaller {
         })
         return result.content
     }
-}
-
-export const useApi = () => {
-    const accessToken = useContext(AccessTokenContext)
-    return new BackendAPICaller(accessToken)
 }

@@ -3,21 +3,18 @@ import { Text } from 'components/Contexts/LanguageContext'
 import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
 import { AssetDeck } from 'models/AssetDeck'
-import { useApi } from 'api/ApiCaller'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { BackendAPICaller } from 'api/ApiCaller'
 
 interface RobotProps {
     robot: Robot
 }
 
 export function LocalizationSection({ robot }: RobotProps) {
-    const { assetCode } = useAssetContext()
     const [selectedAssetDeck, setSelectedAssetDeck] = useState<AssetDeck>()
     const [assetDecks, setAssetDecks] = useState<AssetDeck[]>()
-    const apiCaller = useApi()
 
     useEffect(() => {
-        apiCaller.getAssetDecks().then((response: AssetDeck[]) => {
+        BackendAPICaller.getAssetDecks().then((response: AssetDeck[]) => {
             setAssetDecks(response)
         })
     }, [])
@@ -39,7 +36,7 @@ export function LocalizationSection({ robot }: RobotProps) {
 
     const onClickLocalize = () => {
         if (selectedAssetDeck) {
-            apiCaller.postLocalizationMission(selectedAssetDeck?.defaultLocalizationPose, robot.id)
+            BackendAPICaller.postLocalizationMission(selectedAssetDeck?.defaultLocalizationPose, robot.id)
         }
     }
     return (
