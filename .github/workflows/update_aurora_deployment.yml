@@ -1,0 +1,69 @@
+name: Update deployment in aurora
+
+on:
+  workflow_call:
+    inputs:
+      Environment:
+        required: true
+        type: string
+      Tag:
+        required: true
+        type: string
+      Registry:
+        required: true
+        type: string
+      ImageName:
+        required: true
+        type: string
+      AuthorEmail:
+        required: true
+        type: string
+      AuthorName:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Update deployment
+    runs-on: ubuntu-latest
+    env:
+      EMAIL: ${{ inputs.AuthorEmail }}
+      NAME: ${{ inputs.AuthorName }}
+    steps:
+      - name: Checkout infrastructure
+        uses: actions/checkout@v2
+        with:
+          ref: main
+          repository: equinor/robotics-infrastructure
+          ssh-key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }} # NEED TO ADD THIS FOR US
+
+      - name: Update frontend in file
+        run: |
+          COMPONENT=frontend
+          SHA_LONG=${{ github.sha }}
+          TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
+          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: $SHA_LONG/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
+
+      - name: Update backend in file
+        run: |
+          COMPONENT=backend
+          SHA_LONG=${{ github.sha }}
+          TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
+          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: $SHA_LONG/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
+
+      - name: Update broker in file
+        run: |
+          COMPONENT=broker
+          SHA_LONG=${{ github.sha }}
+          TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
+          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: $SHA_LONG/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
+
+      - name: Update infrastructure in GitHub
+        run: |
+          SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-8)
+          SHA_LONG=${{ github.sha }}
+          git config --global user.email "${EMAIL}"
+          git config --global user.name  "GitHub Actions (${NAME})"
+          git add k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
+          git commit --message "GHA: Update Flotilla in ${{ inputs.Environment }} (${SHA_SHORT})" || true
+          git push
