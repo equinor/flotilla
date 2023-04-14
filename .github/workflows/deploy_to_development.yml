@@ -1,0 +1,48 @@
+name: Update deployment in Aurora Dev
+
+on:
+  push:
+    branches:
+      - "main"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  TAG: ${{ github.sha }}
+
+jobs:
+  build-and-push-broker:
+    uses: ./.github/workflows/publish_component.yml
+    with:
+      ComponentName: broker
+      Registry: ${{ env.REGISTRY }}
+      Tag: ${{ env.TAG }}
+      ImageName: ${{ env.IMAGE_NAME }}
+
+  build-and-push-backend:
+    uses: ./.github/workflows/publish_component.yml
+    with:
+      ComponentName: backend
+      Registry: ${{ env.REGISTRY }}
+      Tag: ${{ env.TAG }}
+      ImageName: ${{ env.IMAGE_NAME }}
+
+  build-and-push-frontend:
+    uses: ./.github/workflows/publish_component.yml
+    with:
+      ComponentName: frontend
+      Registry: ${{ env.REGISTRY }}
+      Tag: ${{ env.TAG }}
+      ImageName: ${{ env.IMAGE_NAME }}
+
+  deploy:
+    needs:
+      [build-and-push-broker, build-and-push-backend, build-and-push-frontend]
+    uses: Update deployment in Development
+    with:
+      Environment: development
+      Registry: ${{ env.REGISTRY }}
+      Tag: ${{ env.TAG }}
+      ImageName: ${{ env.IMAGE_NAME }}
+      AuthorEmail: ${{ github.event.head_commit.author.email }}
+      AuthorName: ${{ github.event.head_commit.author.name }}

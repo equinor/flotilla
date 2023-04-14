@@ -1,0 +1,56 @@
+name: Update deployment in Aurora Dev
+
+on:
+  release:
+    types: [published]
+
+env:
+  REGISTRY: auroraprodacr.azurecr.io
+  IMAGE_NAME: robotics/flotilla
+  TAG: ${{ github.event.release.tag_name }}
+
+jobs:
+  run_migrations:
+    uses: ./.github/workflows/runMigrations.yml
+    with:
+      PullRequestCheckout: false
+      Environment: Staging
+    secrets:
+      ClientId: ${{secrets.CLIENTID}}
+      ClientSecret: ${{secrets.CLIENTSECRET}}
+
+  build-and-push-broker:
+    uses: ./.github/workflows/publish_component.yml
+    with:
+      ComponentName: broker
+      Registry: ${{ env.REGISTRY }}
+      Tag: ${{ env.TAG }}
+      ImageName: ${{ env.IMAGE_NAME }}
+
+  build-and-push-backend:
+    uses: ./.github/workflows/publish_component.yml
+    with:
+      ComponentName: backend
+      Registry: ${{ env.REGISTRY }}
+      Tag: ${{ env.TAG }}
+      ImageName: ${{ env.IMAGE_NAME }}
+
+  build-and-push-frontend:
+    uses: ./.github/workflows/publish_component.yml
+    with:
+      ComponentName: frontend
+      Registry: ${{ env.REGISTRY }}
+      Tag: ${{ env.TAG }}
+      ImageName: ${{ env.IMAGE_NAME }}
+
+  deploy:
+    needs:
+      [build-and-push-broker, build-and-push-backend, build-and-push-frontend]
+    uses: Update deployment in Staging
+    with:
+      Environment: staging
+      Registry: ${{ env.REGISTRY }}
+      Tag: ${{ env.TAG }}
+      ImageName: ${{ env.IMAGE_NAME }}
+      AuthorEmail: ${{ github.event.release.author.email }}
+      AuthorName: ${{ github.event.release.author.name }}

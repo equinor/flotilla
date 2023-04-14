@@ -1,12 +1,13 @@
-name: Promote to production
+name: Promote release in Staging to Production
 
 on:
   workflow_dispatch:
 
-jobs:
-  # TODO: Add Aurora pipeline for promotion here:
-  # promote_to_aurora:
+env:
+  REGISTRY: auroraprodacr.azurecr.io
+  IMAGE_NAME: robotics/flotilla
 
+jobs:
   run_migrations:
     uses: ./.github/workflows/runMigrations.yml
     with:
@@ -15,3 +16,34 @@ jobs:
     secrets:
       ClientId: ${{secrets.CLIENTID}}
       ClientSecret: ${{secrets.CLIENTSECRET}}
+
+  get_staging_version:
+    outputs:
+      versionTag: ${{ steps.get_version_tag.outputs.tag }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout infrastructure
+        uses: actions/checkout@v2
+        with:
+          ref: main
+          repository: equinor/robotics-infrastructure
+          ssh-key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }} # NEED TO ADD THIS FOR US
+
+      - name: Get Flotilla version in staging
+        id: get_version_tag
+        run: |
+          COMPONENT=frontend
+          TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/staging/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
+          VERSION_TAG=$(sed -n "${TAG_LINE_NUMBER}p" k8s_kustomize/overlays/staging/kustomization.yaml  |  cut --delimiter=":" --fields=2)
+          echo "tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: get_staging_version
+    uses: Update deployment in Production
+    with:
+      Environment: production
+      Registry: ${{ env.REGISTRY }}
+      Tag: ${{ needs.get_staging_version.outputs.versionTag }}
+      ImageName: ${{ env.IMAGE_NAME }}
+      AuthorEmail: ${{ github.event.sender.email }}
+      AuthorName: ${{ github.event.sender.name }}
