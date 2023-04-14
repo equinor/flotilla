@@ -8,6 +8,7 @@ import { AssetProvider } from 'components/Contexts/AssetContext'
 import { MissionHistoryPage } from './MissionHistoryPage/MissionHistoryPage'
 import { RobotPage } from './RobotPage/RobotPage'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
+import { APIUpdater } from 'components/Contexts/APIUpdater'
 
 const StyledPages = styled.div`
     margin: 2rem;
@@ -18,23 +19,28 @@ export function FlotillaSite() {
         <>
             <AssetProvider>
                 <AuthProvider>
-                    <Header />
-                    <StyledPages>
-                        <BrowserRouter>
-                            <Routes>
-                                <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<FrontPage />} />
-                                <Route
-                                    path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`}
-                                    element={<MissionPage />}
-                                />
-                                <Route
-                                    path={`${config.FRONTEND_BASE_ROUTE}/history`}
-                                    element={<MissionHistoryPage />}
-                                />
-                                <Route path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`} element={<RobotPage />} />
-                            </Routes>
-                        </BrowserRouter>
-                    </StyledPages>
+                    <APIUpdater>
+                        <Header />
+                        <StyledPages>
+                            <BrowserRouter>
+                                <Routes>
+                                    <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<FrontPage />} />
+                                    <Route
+                                        path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`}
+                                        element={<MissionPage />}
+                                    />
+                                    <Route
+                                        path={`${config.FRONTEND_BASE_ROUTE}/history`}
+                                        element={<MissionHistoryPage />}
+                                    />
+                                    <Route
+                                        path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`}
+                                        element={<RobotPage />}
+                                    />
+                                </Routes>
+                            </BrowserRouter>
+                        </StyledPages>
+                    </APIUpdater>
                 </AuthProvider>
             </AssetProvider>
         </>
