@@ -1,6 +1,5 @@
 import { Card } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { useApi } from 'api/ApiCaller'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -8,6 +7,7 @@ import NoMap from 'mediaAssets/NoMap.png'
 import { useErrorHandler } from 'react-error-boundary'
 import { defaultPose, Pose } from 'models/Pose'
 import { PlaceRobotInMap, PlaceTagsInMap } from './MapMarkers'
+import { BackendAPICaller } from 'api/ApiCaller'
 
 interface MissionProps {
     mission: Mission
@@ -34,7 +34,6 @@ export function MapView({ mission }: MissionProps) {
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
     const [previousRobotPose, setPreviousRobotPose] = useState<Pose>(defaultPose)
     const [currentRobotPose, setCurrentRobotPose] = useState<Pose>(defaultPose)
-    const apiCaller = useApi()
     let imageObjectURL: string
 
     const updateMap = () => {
@@ -56,8 +55,7 @@ export function MapView({ mission }: MissionProps) {
     }
 
     useEffect(() => {
-        apiCaller
-            .getMap(mission.id)
+        BackendAPICaller.getMap(mission.id)
             .then((imageBlob) => {
                 imageObjectURL = URL.createObjectURL(imageBlob)
             })
