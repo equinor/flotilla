@@ -1,5 +1,4 @@
 import { CircularProgress, Pagination, Table, Typography } from '@equinor/eds-core-react'
-import { useApi } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
@@ -8,6 +7,7 @@ import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
 import { useErrorHandler } from 'react-error-boundary'
 import { PaginationHeader } from 'models/PaginatedResponse'
+import { BackendAPICaller } from 'api/ApiCaller'
 
 const TableWithHeader = styled.div`
     gap: 2rem;
@@ -32,7 +32,6 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
         MissionStatus.PartiallySuccessful,
         MissionStatus.Failed,
     ]
-    const apiCaller = useApi()
     const [completedMissions, setCompletedMissions] = useState<Mission[]>([])
     const [paginationDetails, setPaginationDetails] = useState<PaginationHeader>()
     const [currentPage, setCurrentPage] = useState<number>()
@@ -47,13 +46,13 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
 
     const updateCompletedMissions = () => {
         const page = currentPage ?? 1
-        apiCaller
-            .getMissions({ pageSize: pageSize, pageNumber: page, orderBy: 'EndTime desc, Name' })
-            .then((paginatedMissions) => {
+        BackendAPICaller.getMissions({ pageSize: pageSize, pageNumber: page, orderBy: 'EndTime desc, Name' }).then(
+            (paginatedMissions) => {
                 setPaginationDetails(paginatedMissions.pagination)
                 setCompletedMissions(paginatedMissions.content.filter((m) => completedStatuses.includes(m.status)))
                 setIsLoading(false)
-            })
+            }
+        )
         //.catch((e) => handleError(e))
     }
 

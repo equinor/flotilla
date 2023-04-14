@@ -1,4 +1,3 @@
-import { useApi } from 'api/ApiCaller'
 import { TaskTable } from 'components/Pages/MissionPage/TaskOverview/TaskTable'
 import { VideoStreamWindow } from 'components/Pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
@@ -10,6 +9,7 @@ import { MissionHeader } from './MissionHeader/MissionHeader'
 import { BackButton } from './MissionHeader/BackButton'
 import { MapView } from './MapPosition/MapView'
 import { useErrorHandler } from 'react-error-boundary'
+import { BackendAPICaller } from 'api/ApiCaller'
 
 const StyledMissionPage = styled.div`
     display: flex;
@@ -33,14 +33,13 @@ const VideoStreamSection = styled.div`
 
 export function MissionPage() {
     const { missionId } = useParams()
-    const apiCaller = useApi()
     const handleError = useErrorHandler()
     const [videoStreams, setVideoStreams] = useState<VideoStream[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
 
     useEffect(() => {
         if (missionId) {
-            apiCaller.getMissionById(missionId).then((mission) => {
+            BackendAPICaller.getMissionById(missionId).then((mission) => {
                 setSelectedMission(mission)
                 updateVideoStreams(mission)
             })
@@ -52,7 +51,7 @@ export function MissionPage() {
         const timeDelay = 1000
         const id = setInterval(() => {
             if (missionId) {
-                apiCaller.getMissionById(missionId).then((mission) => {
+                BackendAPICaller.getMissionById(missionId).then((mission) => {
                     setSelectedMission(mission)
                 })
                 //.catch((e) => handleError(e))
@@ -62,7 +61,7 @@ export function MissionPage() {
     }, [])
 
     const updateVideoStreams = (mission: Mission) => {
-        apiCaller.getVideoStreamsByRobotId(mission.robot.id).then((streams) => {
+        BackendAPICaller.getVideoStreamsByRobotId(mission.robot.id).then((streams) => {
             setVideoStreams(streams)
         })
         //.catch((e) => handleError(e))

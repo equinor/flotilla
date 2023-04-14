@@ -1,9 +1,9 @@
 import { Button, Card, Icon, Typography } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
-import { useApi } from 'api/ApiCaller'
+import { BackendAPICaller } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import styled from 'styled-components'
 import { MissionStatusDisplay } from './MissionStatusDisplay'
 import { RefreshProps } from '../FrontPage'
@@ -87,8 +87,6 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
     const MaxTimeInterval: number = 60
 
     const DismissalTimeSessionKeyName: string = 'lastDismissalTime'
-
-    const apiCaller = useApi()
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
 
     const getLastDismissalTime = (): Date => {
@@ -115,7 +113,7 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
 
     const updateRecentFailedMissions = () => {
         const lastDismissTime: Date = getLastDismissalTime()
-        apiCaller.getMissions({ status: MissionStatus.Failed, pageSize: 100 }).then((missions) => {
+        BackendAPICaller.getMissions({ status: MissionStatus.Failed, pageSize: PageSize }).then((missions) => {
             const newRecentFailedMissions = missions.content.filter((m) => new Date(m.endTime!) > lastDismissTime)
             setRecentFailedMissions(newRecentFailedMissions)
         })

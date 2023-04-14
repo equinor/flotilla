@@ -1,11 +1,11 @@
 import { Mission, MissionStatus } from 'models/Mission'
 import { CircularProgress, Icon } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
-import { useEffect, useState } from 'react'
-import { useApi } from 'api/ApiCaller'
+import { useState } from 'react'
 import { tokens } from '@equinor/eds-tokens'
 import { useErrorHandler } from 'react-error-boundary'
 import { Task, TaskStatus } from 'models/Task'
+import { BackendAPICaller } from 'api/ApiCaller'
 
 interface MissionProps {
     mission: Mission
@@ -23,25 +23,24 @@ const checkIfTasksStarted = (tasks: Task[]): boolean => {
 
 export function MissionControlButtons({ mission }: MissionProps) {
     const [isWaitingForResponse, setIsWaitingForResponse] = useState<boolean>(false)
-    const apiCaller = useApi()
     const handleError = useErrorHandler()
     const handleClick = (button: ControlButton) => {
         switch (button) {
             case ControlButton.Pause: {
                 setIsWaitingForResponse(true)
-                apiCaller.pauseMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
+                BackendAPICaller.pauseMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
                 //.catch((e) => handleError(e))
                 break
             }
             case ControlButton.Resume: {
                 setIsWaitingForResponse(true)
-                apiCaller.resumeMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
+                BackendAPICaller.resumeMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
                 //.catch((e) => handleError(e))
                 break
             }
             case ControlButton.Stop: {
                 setIsWaitingForResponse(true)
-                apiCaller.stopMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
+                BackendAPICaller.stopMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
                 //.catch((e) => handleError(e))
                 break
             }

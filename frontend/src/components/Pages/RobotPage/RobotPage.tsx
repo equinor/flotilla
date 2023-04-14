@@ -1,5 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
-import { useApi } from 'api/ApiCaller'
+import { BackendAPICaller } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -17,12 +17,11 @@ const StyledRobotPage = styled.div`
 
 export function RobotPage() {
     const { robotId } = useParams()
-    const apiCaller = useApi()
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
 
     useEffect(() => {
         if (robotId) {
-            apiCaller.getRobotById(robotId).then((robot) => {
+            BackendAPICaller.getRobotById(robotId).then((robot) => {
                 setSelectedRobot(robot)
             })
             //.catch((e) => handleError(e))
