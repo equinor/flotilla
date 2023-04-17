@@ -28,3 +28,5 @@ jobs:
       Tag: ${{ github.sha }}
       AuthorEmail: ${{ github.event.head_commit.author.email }}
       AuthorName: ${{ github.event.head_commit.author.name }}
+    secrets:
+      DeployKey: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
