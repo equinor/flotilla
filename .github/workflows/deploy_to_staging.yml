@@ -44,9 +44,10 @@ jobs:
       ImageName: ${{ env.IMAGE_NAME }}
 
   deploy:
+    name: Update deployment in Staging
     needs:
       [build-and-push-broker, build-and-push-backend, build-and-push-frontend]
-    uses: Update deployment in Staging
+    uses: ./.github/workflows/update_aurora_deployment.yml
     with:
       Environment: staging
       Registry: ${{ env.REGISTRY }}
