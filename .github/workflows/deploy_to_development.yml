@@ -16,6 +16,9 @@ jobs:
       Registry: ghcr.io
       ImageName: ${{ github.repository }}
       Tag: ${{ github.sha }}
+      RegistryUsername: ${{ github.actor }}
+    secrets:
+      RegistryPassword: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     name: Update deployment in Development
