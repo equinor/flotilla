@@ -4,11 +4,6 @@ on:
   release:
     types: [published]
 
-env:
-  REGISTRY: auroraprodacr.azurecr.io
-  IMAGE_NAME: robotics/flotilla
-  TAG: ${{ github.event.release.tag_name }}
-
 jobs:
   run_migrations:
     uses: ./.github/workflows/runMigrations.yml
@@ -19,39 +14,25 @@ jobs:
       ClientId: ${{secrets.CLIENTID}}
       ClientSecret: ${{secrets.CLIENTSECRET}}
 
-  build-and-push-broker:
+  build-and-push-components:
+    strategy:
+      matrix:
+        component: [broker, backend, frontend]
     uses: ./.github/workflows/publish_component.yml
     with:
-      ComponentName: broker
-      Registry: ${{ env.REGISTRY }}
-      Tag: ${{ env.TAG }}
-      ImageName: ${{ env.IMAGE_NAME }}
-
-  build-and-push-backend:
-    uses: ./.github/workflows/publish_component.yml
-    with:
-      ComponentName: backend
-      Registry: ${{ env.REGISTRY }}
-      Tag: ${{ env.TAG }}
-      ImageName: ${{ env.IMAGE_NAME }}
-
-  build-and-push-frontend:
-    uses: ./.github/workflows/publish_component.yml
-    with:
-      ComponentName: frontend
-      Registry: ${{ env.REGISTRY }}
-      Tag: ${{ env.TAG }}
-      ImageName: ${{ env.IMAGE_NAME }}
+      ComponentName: ${{ matrix.component }}
+      Registry: auroraprodacr.azurecr.io
+      ImageName: robotics/flotilla
+      Tag: ${{ github.event.release.tag_name }}
 
   deploy:
     name: Update deployment in Staging
-    needs:
-      [build-and-push-broker, build-and-push-backend, build-and-push-frontend]
+    needs: [build-and-push-components]
     uses: ./.github/workflows/update_aurora_deployment.yml
     with:
       Environment: staging
-      Registry: ${{ env.REGISTRY }}
-      Tag: ${{ env.TAG }}
-      ImageName: ${{ env.IMAGE_NAME }}
+      Registry: auroraprodacr.azurecr.io
+      ImageName: robotics/flotilla
+      Tag: ${{ github.event.release.tag_name }}
       AuthorEmail: ${{ github.event.release.author.email }}
       AuthorName: ${{ github.event.release.author.name }}
