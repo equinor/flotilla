@@ -6,7 +6,18 @@ on:
       - "main"
 
 jobs:
+  get-short-sha:
+    outputs:
+      tag: ${{ steps.get-tag.outputs.tag }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: get-tag
+        run: |
+          SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-8)
+          echo "tag=$SHA_SHORT" >> "$GITHUB_OUTPUT"
+
   build-and-push-components:
+    needs: get-short-sha
     strategy:
       matrix:
         component: [broker, backend, frontend]
@@ -15,20 +26,20 @@ jobs:
       ComponentName: ${{ matrix.component }}
       Registry: ghcr.io
       ImageName: ${{ github.repository }}
-      Tag: ${{ github.sha }}
+      Tag: ${{ needs.get-short-sha.outputs.tag }}
     secrets:
       RegistryUsername: ${{ github.actor }}
       RegistryPassword: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     name: Update deployment in Development
-    needs: [build-and-push-components]
+    needs: [build-and-push-components, get-short-sha]
     uses: ./.github/workflows/update_aurora_deployment.yml
     with:
       Environment: development
       Registry: ghcr.io
       ImageName: ${{ github.repository }}
-      Tag: ${{ github.sha }}
+      Tag: ${{ needs.get-short-sha.outputs.tag }}
       AuthorEmail: ${{ github.event.head_commit.author.email }}
       AuthorName: ${{ github.event.head_commit.author.name }}
     secrets:
