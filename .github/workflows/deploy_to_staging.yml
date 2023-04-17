@@ -24,8 +24,8 @@ jobs:
       Registry: auroraprodacr.azurecr.io
       ImageName: robotics/flotilla
       Tag: ${{ github.event.release.tag_name }}
-      RegistryUsername: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
     secrets:
+      RegistryUsername: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
       RegistryPassword: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
 
   deploy:
