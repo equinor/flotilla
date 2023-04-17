@@ -5,45 +5,26 @@ on:
     branches:
       - "main"
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-  TAG: ${{ github.sha }}
-
 jobs:
-  build-and-push-broker:
+  build-and-push-components:
+    strategy:
+      matrix:
+        component: [broker, backend, frontend]
     uses: ./.github/workflows/publish_component.yml
     with:
-      ComponentName: broker
-      Registry: ${{ env.REGISTRY }}
-      Tag: ${{ env.TAG }}
-      ImageName: ${{ env.IMAGE_NAME }}
-
-  build-and-push-backend:
-    uses: ./.github/workflows/publish_component.yml
-    with:
-      ComponentName: backend
-      Registry: ${{ env.REGISTRY }}
-      Tag: ${{ env.TAG }}
-      ImageName: ${{ env.IMAGE_NAME }}
-
-  build-and-push-frontend:
-    uses: ./.github/workflows/publish_component.yml
-    with:
-      ComponentName: frontend
-      Registry: ${{ env.REGISTRY }}
-      Tag: ${{ env.TAG }}
-      ImageName: ${{ env.IMAGE_NAME }}
+      ComponentName: ${{ matrix.component }}
+      Registry: ghcr.io
+      ImageName: ${{ github.repository }}
+      Tag: ${{ github.sha }}
 
   deploy:
     name: Update deployment in Development
-    needs:
-      [build-and-push-broker, build-and-push-backend, build-and-push-frontend]
+    needs: [build-and-push-components]
     uses: ./.github/workflows/update_aurora_deployment.yml
     with:
       Environment: development
-      Registry: ${{ env.REGISTRY }}
-      Tag: ${{ env.TAG }}
-      ImageName: ${{ env.IMAGE_NAME }}
+      Registry: ghcr.io
+      ImageName: ${{ github.repository }}
+      Tag: ${{ github.sha }}
       AuthorEmail: ${{ github.event.head_commit.author.email }}
       AuthorName: ${{ github.event.head_commit.author.name }}

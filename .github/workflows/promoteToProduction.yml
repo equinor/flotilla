@@ -3,10 +3,6 @@ name: Promote release in Staging to Production
 on:
   workflow_dispatch:
 
-env:
-  REGISTRY: auroraprodacr.azurecr.io
-  IMAGE_NAME: robotics/flotilla
-
 jobs:
   get_staging_version:
     outputs:
@@ -45,8 +41,8 @@ jobs:
     uses: ./.github/workflows/update_aurora_deployment.yml
     with:
       Environment: production
-      Registry: ${{ env.REGISTRY }}
       Tag: ${{ needs.get_staging_version.outputs.versionTag }}
-      ImageName: ${{ env.IMAGE_NAME }}
+      Registry: auroraprodacr.azurecr.io
+      ImageName: robotics/flotilla
       AuthorEmail: ${{ github.event.sender.email }}
       AuthorName: ${{ github.event.sender.name }}
