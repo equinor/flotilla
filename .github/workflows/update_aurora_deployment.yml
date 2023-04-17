@@ -16,7 +16,7 @@ on:
         required: true
         type: string
       AuthorEmail:
-        required: true
+        required: false
         type: string
       AuthorName:
         required: true

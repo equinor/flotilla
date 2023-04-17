@@ -43,7 +43,6 @@ jobs:
       Tag: ${{ needs.get_staging_version.outputs.versionTag }}
       Registry: auroraprodacr.azurecr.io
       ImageName: robotics/flotilla
-      AuthorEmail: ${{ github.event.sender.email }}
-      AuthorName: ${{ github.event.sender.name }}
+      AuthorName: ${{ github.actor }}
     secrets:
       DeployKey: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
