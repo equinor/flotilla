@@ -43,30 +43,25 @@ jobs:
       - name: Update frontend in file
         run: |
           COMPONENT=frontend
-          SHA_LONG=${{ github.sha }}
           TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
-          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: $SHA_LONG/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
+          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: ${{ inputs.Tag }}/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
 
       - name: Update backend in file
         run: |
           COMPONENT=backend
-          SHA_LONG=${{ github.sha }}
           TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
-          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: $SHA_LONG/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
+          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: ${{ inputs.Tag }}/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
 
       - name: Update broker in file
         run: |
           COMPONENT=broker
-          SHA_LONG=${{ github.sha }}
           TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
-          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: $SHA_LONG/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
+          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: ${{ inputs.Tag }}/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
 
       - name: Update infrastructure in GitHub
         run: |
-          SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-8)
-          SHA_LONG=${{ github.sha }}
           git config --global user.email "${EMAIL}"
           git config --global user.name  "GitHub Actions (${NAME})"
           git add k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
-          git commit --message "GHA: Update Flotilla in ${{ inputs.Environment }} (${SHA_SHORT})" || true
+          git commit --message "GHA: Update Flotilla in ${{ inputs.Environment }} (${{ inputs.Tag }})" || true
           git push
