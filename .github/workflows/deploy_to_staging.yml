@@ -14,6 +14,20 @@ jobs:
       ClientId: ${{secrets.CLIENTID}}
       ClientSecret: ${{secrets.CLIENTSECRET}}
 
+  build-and-push-release-to-dev:
+    strategy:
+      matrix:
+        component: [broker, backend, frontend]
+    uses: ./.github/workflows/publish_component.yml
+    with:
+      ComponentName: ${{ matrix.component }}
+      Registry: ghcr.io
+      ImageName: ${{ github.repository }}
+      Tag: ${{ github.event.release.tag_name }}
+    secrets:
+      RegistryUsername: ${{ github.actor }}
+      RegistryPassword: ${{ secrets.GITHUB_TOKEN }}
+
   build-and-push-components:
     strategy:
       matrix:
