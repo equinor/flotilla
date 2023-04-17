@@ -40,8 +40,9 @@ jobs:
       ClientSecret: ${{secrets.CLIENTSECRET}}
 
   deploy:
+    name: Update deployment in Production
     needs: get_staging_version
-    uses: Update deployment in Production
+    uses: ./.github/workflows/update_aurora_deployment.yml
     with:
       Environment: production
       Registry: ${{ env.REGISTRY }}
