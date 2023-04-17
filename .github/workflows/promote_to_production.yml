@@ -1,4 +1,4 @@
-name: Promote release in Staging to Production
+name: Promote to Production
 
 on:
   workflow_dispatch:
@@ -19,8 +19,7 @@ jobs:
       - name: Get Flotilla version in staging
         id: get_version_tag
         run: |
-          COMPONENT=frontend
-          TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/staging/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
+          TAG_LINE_NUMBER=$(($(grep -n "auroraprodacr.azurecr.io/robotics/flotilla-frontend" k8s_kustomize/overlays/staging/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
           VERSION_TAG=$(sed -n "${TAG_LINE_NUMBER}p" k8s_kustomize/overlays/staging/kustomization.yaml  |  cut --delimiter=":" --fields=2)
           echo "tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
 
