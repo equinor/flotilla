@@ -8,26 +8,17 @@ env:
   IMAGE_NAME: robotics/flotilla
 
 jobs:
-  run_migrations:
-    uses: ./.github/workflows/runMigrations.yml
-    with:
-      PullRequestCheckout: false
-      Environment: Production
-    secrets:
-      ClientId: ${{secrets.CLIENTID}}
-      ClientSecret: ${{secrets.CLIENTSECRET}}
-
   get_staging_version:
     outputs:
       versionTag: ${{ steps.get_version_tag.outputs.tag }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout infrastructure
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: main
           repository: equinor/robotics-infrastructure
-          ssh-key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }} # NEED TO ADD THIS FOR US
+          ssh-key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
 
       - name: Get Flotilla version in staging
         id: get_version_tag
@@ -36,6 +27,17 @@ jobs:
           TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/staging/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
           VERSION_TAG=$(sed -n "${TAG_LINE_NUMBER}p" k8s_kustomize/overlays/staging/kustomization.yaml  |  cut --delimiter=":" --fields=2)
           echo "tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+
+  run_migrations:
+    needs: get_staging_version
+    uses: ./.github/workflows/runMigrations.yml
+    with:
+      PullRequestCheckout: false
+      Environment: Production
+      CheckoutRef: ${{ needs.get_staging_version.outputs.versionTag }}
+    secrets:
+      ClientId: ${{secrets.CLIENTID}}
+      ClientSecret: ${{secrets.CLIENTSECRET}}
 
   deploy:
     needs: get_staging_version
