@@ -21,6 +21,9 @@ on:
       AuthorName:
         required: true
         type: string
+    secrets:
+      DeployKey:
+        required: true
 
 jobs:
   deploy:
@@ -35,7 +38,7 @@ jobs:
         with:
           ref: main
           repository: equinor/robotics-infrastructure
-          ssh-key: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
+          ssh-key: ${{ secrets.DeployKey }}
 
       - name: Update frontend in file
         run: |
