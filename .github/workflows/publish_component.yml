@@ -15,10 +15,9 @@ on:
       ImageName:
         required: true
         type: string
+    secrets:
       RegistryUsername:
         required: true
-        type: string
-    secrets:
       RegistryPassword:
         required: true
 
@@ -37,7 +36,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ${{ inputs.Registry }}
-          username: ${{ inputs.RegistryUsername }}
+          username: ${{ secrets.RegistryUsername }}
           password: ${{ secrets.RegistryPassword }}
 
       - name: Extract metadata (tags, labels) for Docker
