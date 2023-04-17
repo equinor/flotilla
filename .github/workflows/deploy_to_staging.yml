@@ -51,7 +51,6 @@ jobs:
       Registry: auroraprodacr.azurecr.io
       ImageName: robotics/flotilla
       Tag: ${{ github.event.release.tag_name }}
-      AuthorEmail: ${{ github.event.release.author.email }}
       AuthorName: ${{ github.event.release.author.login }}
     secrets:
       DeployKey: ${{ secrets.ROBOTICS_INFRASTRUCTURE_DEPLOY_KEY }}
