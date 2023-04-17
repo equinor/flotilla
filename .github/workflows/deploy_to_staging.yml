@@ -1,4 +1,4 @@
-name: Update deployment in Aurora Dev
+name: Update deployment in Aurora Staging
 
 on:
   release:
@@ -24,6 +24,9 @@ jobs:
       Registry: auroraprodacr.azurecr.io
       ImageName: robotics/flotilla
       Tag: ${{ github.event.release.tag_name }}
+      RegistryUsername: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_APPLICATION_ID }}
+    secrets:
+      RegistryPassword: ${{ secrets.ROBOTICS_ACRPUSH_DOCKER_SECRET }}
 
   deploy:
     name: Update deployment in Staging
