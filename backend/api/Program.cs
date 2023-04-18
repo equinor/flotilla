@@ -87,25 +87,21 @@ builder.Services.AddAuthorization(
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(
-        c =>
-        {
-            c.OAuthClientId(builder.Configuration["AzureAd:ClientId"]);
-            // The following parameter represents the "audience" of the access token.
-            c.OAuthAdditionalQueryStringParams(
-                new Dictionary<string, string>
-                {
-                    { "Resource", builder.Configuration["AzureAd:ClientId"] }
-                }
-            );
-            c.OAuthUsePkce();
-        }
-    );
-}
+app.UseSwagger();
+app.UseSwaggerUI(
+    c =>
+    {
+        c.OAuthClientId(builder.Configuration["AzureAd:ClientId"]);
+        // The following parameter represents the "audience" of the access token.
+        c.OAuthAdditionalQueryStringParams(
+            new Dictionary<string, string>
+            {
+                { "Resource", builder.Configuration["AzureAd:ClientId"] }
+            }
+        );
+        c.OAuthUsePkce();
+    }
+);
 
 app.UseCors(
     corsBuilder =>
