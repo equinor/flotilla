@@ -94,7 +94,10 @@ app.UseSwagger(c =>
 {
     c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
     {
-        swaggerDoc.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}{basePath}" } };
+        swaggerDoc.Servers = new List<OpenApiServer> {
+            new OpenApiServer { Url = $"https://{httpReq.Host.Value}{basePath}" },
+            new OpenApiServer { Url = $"http://{httpReq.Host.Value}{basePath}" }
+        };
     });
 });
 app.UseSwaggerUI(
