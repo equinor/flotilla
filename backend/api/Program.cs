@@ -10,6 +10,7 @@ using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,7 +88,15 @@ builder.Services.AddAuthorization(
 
 var app = builder.Build();
 
-app.UseSwagger();
+
+string basePath = builder.Configuration["BackendBaseRoute"];
+app.UseSwagger(c =>
+{
+    c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+    {
+        swaggerDoc.Servers = new List<OpenApiServer> { new OpenApiServer { Url = $"{httpReq.Scheme}://{httpReq.Host.Value}{basePath}" } };
+    });
+});
 app.UseSwaggerUI(
     c =>
     {
