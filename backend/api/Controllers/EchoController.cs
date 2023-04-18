@@ -7,14 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-[Route("echo-missions")]
-public class EchoMissionController : ControllerBase
+[Route("echo")]
+public class EchoController : ControllerBase
 {
-    private readonly ILogger<EchoMissionController> _logger;
+    private readonly ILogger<EchoController> _logger;
 
     private readonly IEchoService _echoService;
 
-    public EchoMissionController(ILogger<EchoMissionController> logger, IEchoService echoService)
+    public EchoController(ILogger<EchoController> logger, IEchoService echoService)
     {
         _logger = logger;
         _echoService = echoService;
@@ -27,6 +27,7 @@ public class EchoMissionController : ControllerBase
     /// These missions are created in the Echo mission planner
     /// </remarks>
     [HttpGet]
+    [Route("missions")]
     [ProducesResponseType(typeof(List<EchoMission>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -59,7 +60,7 @@ public class EchoMissionController : ControllerBase
     /// This mission is created in the Echo mission planner
     /// </remarks>
     [HttpGet]
-    [Route("{missionId}")]
+    [Route("missions/{missionId}")]
     [ProducesResponseType(typeof(EchoMission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -92,13 +93,15 @@ public class EchoMissionController : ControllerBase
         }
         catch (InvalidDataException e)
         {
-            string message = "EchoMission invalid: One or more tags are missing associated robot poses.";
+            string message =
+                "EchoMission invalid: One or more tags are missing associated robot poses.";
             _logger.LogError(e, message);
             return StatusCode(StatusCodes.Status502BadGateway, message);
         }
     }
+
     [HttpPost]
-    [Route("robot-pose/{poseId}")]
+    [Route("robot-poses/{poseId}")]
     [ProducesResponseType(typeof(EchoPoseResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -127,6 +130,36 @@ public class EchoMissionController : ControllerBase
         catch (JsonException e)
         {
             _logger.LogError(e, "Error deserializing position from Echo");
+            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    /// <summary>
+    /// Get selected information on all the plants in Echo
+    /// </summary>
+    [HttpGet]
+    [Route("plants")]
+    [ProducesResponseType(typeof(List<EchoPlantInfo>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult<EchoPlantInfo>> GetEchoPlantInfos()
+    {
+        try
+        {
+            var echoPlantInfos = await _echoService.GetEchoPlantInfos();
+            return Ok(echoPlantInfos);
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError(e, "Error getting plant info from Echo");
+            return new StatusCodeResult(StatusCodes.Status502BadGateway);
+        }
+        catch (JsonException e)
+        {
+            _logger.LogError(e, "Error deserializing plant info response from Echo");
             return new StatusCodeResult(StatusCodes.Status500InternalServerError);
         }
     }

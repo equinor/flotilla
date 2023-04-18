@@ -116,7 +116,7 @@ export class BackendAPICaller {
     }
 
     static async getAllEchoMissions(): Promise<EchoMission[]> {
-        const path: string = 'echo-missions'
+        const path: string = 'echo/missions'
         const result = await BackendAPICaller.GET<EchoMission[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
@@ -158,7 +158,7 @@ export class BackendAPICaller {
     }
 
     static async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
-        const path: string = 'echo-missions?installationCode=' + installationCode
+        const path: string = 'echo/missions?installationCode=' + installationCode
         const result = await BackendAPICaller.GET<EchoMission[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
@@ -185,7 +185,7 @@ export class BackendAPICaller {
     }
 
     static async getEchoPlantInfo(): Promise<EchoPlantInfo[]> {
-        const path: string = 'echo-plants'
+        const path: string = 'echo/plants'
         const result = await BackendAPICaller.GET<EchoPlantInfo[]>(path).catch((e: Error) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
