@@ -1,10 +1,24 @@
 name: Promote to Production
 
+# Only one workflow in a concurrency group may run at a time
+concurrency:
+  group: production-concurrency
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
 
 jobs:
+  trigger-github-deployment:
+    name: Trigger GitHub Deployment
+    environment: Production
+    steps:
+      - name: Empty Step
+        run: echo "Hello World"
+
   get_staging_version:
+    name: Get version from staging
+    needs: trigger-github-deployment
     outputs:
       versionTag: ${{ steps.get_version_tag.outputs.tag }}
     runs-on: ubuntu-latest
@@ -24,7 +38,8 @@ jobs:
           echo "tag=$VERSION_TAG" >> "$GITHUB_OUTPUT"
 
   run_migrations:
-    needs: get_staging_version
+    name: Update database in Production
+    needs: [get_staging_version, trigger-github-deployment]
     uses: ./.github/workflows/runMigrations.yml
     with:
       PullRequestCheckout: false
@@ -36,7 +51,7 @@ jobs:
 
   deploy:
     name: Update deployment in Production
-    needs: get_staging_version
+    needs: [get_staging_version, trigger-github-deployment]
     uses: ./.github/workflows/update_aurora_deployment.yml
     with:
       Environment: production

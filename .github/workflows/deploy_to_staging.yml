@@ -1,11 +1,25 @@
-name: Update deployment in Aurora Staging
+name: Deploy to Staging
+
+# Only one workflow in a concurrency group may run at a time
+concurrency:
+  group: staging-concurrency
+  cancel-in-progress: true
 
 on:
   release:
     types: [published]
 
 jobs:
+  trigger-github-deployment:
+    name: Trigger GitHub Deployment
+    environment: Staging
+    steps:
+      - name: Empty Step
+        run: echo "Hello World"
+
   run_migrations:
+    name: Update database in Staging
+    needs: trigger-github-deployment
     uses: ./.github/workflows/runMigrations.yml
     with:
       PullRequestCheckout: false
@@ -15,6 +29,8 @@ jobs:
       ClientSecret: ${{secrets.CLIENTSECRET}}
 
   build-and-push-release-to-dev:
+    name: Update containers in dev with version tag
+    needs: trigger-github-deployment
     strategy:
       matrix:
         component: [broker, backend, frontend]
@@ -29,6 +45,8 @@ jobs:
       RegistryPassword: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-push-components:
+    name: Build and push containers to auroraprodcr for Staging/Production
+    needs: [trigger-github-deployment, build-and-push-components]
     strategy:
       matrix:
         component: [broker, backend, frontend]
@@ -44,7 +62,7 @@ jobs:
 
   deploy:
     name: Update deployment in Staging
-    needs: [build-and-push-components]
+    needs: [trigger-github-deployment, build-and-push-components]
     uses: ./.github/workflows/update_aurora_deployment.yml
     with:
       Environment: staging
