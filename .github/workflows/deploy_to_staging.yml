@@ -13,6 +13,7 @@ jobs:
   trigger-github-deployment:
     name: Trigger GitHub Deployment
     environment: Staging
+    runs-on: ubuntu-latest
     steps:
       - name: Empty Step
         run: echo "Hello World"
