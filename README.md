@@ -1,20 +1,21 @@
 # Flotilla
 
-![Backend](https://github.com/equinor/flotilla/actions/workflows/backend_lint_and_test.yml/badge.svg)
-![Frontend](https://github.com/equinor/flotilla/actions/workflows/frontend_lint_and_test.yml/badge.svg)
+[![Backend](https://github.com/equinor/flotilla/actions/workflows/backend_lint_and_test.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/backend_lint_and_test.yml)
+[![Frontend](https://github.com/equinor/flotilla/actions/workflows/frontend_lint_and_test.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/frontend_lint_and_test.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/0b37a44f66044dbc81fff906344b476e)](https://www.codacy.com/gh/equinor/flotilla/dashboard?utm_source=github.com&utm_medium=referral&utm_content=equinor/flotilla&utm_campaign=Badge_Grade)
 
-Flotilla is the main point of access for operators to interact with multiple robots in multiple facilities. The application
-consists of a [frontend](frontend) in React, a [backend](backend) in ASP.NET and a Mosquitto MQTT [Broker](broker).
+Flotilla is the main point of access for operators to interact with multiple robots in multiple facilities.  
+The application consists of a [frontend](frontend) in React, a [backend](backend) in ASP.NET and a Mosquitto MQTT [Broker](broker).
 
 ## Deployments
 
-We currently have 1 environment (Dev) deployed to Radix for demo purposes.
+We currently have 3 environment (Development, Staging and Production) deployed to Aurora.
 
-| Environment | Deployment                                                                                                                                              | Status                                                                                                     |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Dev         | [Frontend](https://frontend-flotilla-dev.playground.radix.equinor.com/)<br>[Backend](https://backend-flotilla-dev.playground.radix.equinor.com/swagger) | ![Dev](https://api.playground.radix.equinor.com/api/v1/applications/flotilla/environments/dev/buildstatus) |
-|             |
+| Environment | Deployment                                                                                                                                                | Status                                                                                                                                                                                      |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Development | [Frontend](https://shared.dev.aurora.equinor.com/robotics-frontend/)<br>[Backend](https://shared.dev.aurora.equinor.com/robotics-backend/swagger)         | [![Dev](https://github.com/equinor/flotilla/actions/workflows/deploy_to_development.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/deploy_to_development.yml)        |
+| Staging     | [Frontend](https://shared.aurora.equinor.com/robotics-staging-frontend/)<br>[Backend](https://shared.aurora.equinor.com/robotics-staging-backend/swagger) | [![Staging](https://github.com/equinor/flotilla/actions/workflows/deploy_to_staging.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/deploy_to_staging.yml)            |
+| Production  | [Frontend](https://shared.aurora.equinor.com/robotics-prod-frontend/)<br>[Backend](https://shared.aurora.equinor.com/robotics-prod-backend/swagger)       | [![Production](https://github.com/equinor/flotilla/actions/workflows/promote_to_production.yml/badge.svg)](https://github.com/equinor/flotilla/actions/workflows/promote_to_production.yml) |
 
 ## Setup
 
