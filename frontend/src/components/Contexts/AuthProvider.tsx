@@ -9,23 +9,26 @@ type Props = {
 
 export const AuthContext = createContext('')
 
+// Check for new token every second (Will refresh token if needed)
+export const tokenReverificationInterval: number = 1000
+
 export const AuthProvider = (props: Props) => {
-    // Check for new token every 5 seconds
-    const tokenRefreshInterval = 5000
     const handleError = useErrorHandler()
     const msalContext = useMsal()
     const [accessToken, setAccessToken] = useState('')
-    const UpdateToken = () => {
+    const VerifyToken = () => {
         fetchAccessToken(msalContext).then((accessToken) => {
             setAccessToken(accessToken)
         })
     }
-    UpdateToken()
     useEffect(() => {
         const id = setInterval(() => {
-            UpdateToken()
-        }, tokenRefreshInterval)
+            VerifyToken()
+        }, tokenReverificationInterval)
         return () => clearInterval(id)
     }, [])
+
+    VerifyToken()
+
     return <AuthContext.Provider value={accessToken}>{props.children}</AuthContext.Provider>
 }
