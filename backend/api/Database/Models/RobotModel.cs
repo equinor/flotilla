@@ -1,13 +1,21 @@
 ﻿namespace Api.Database.Models
 {
-    public enum RobotModel
+    public class RobotModel
+
     {
-        TaurobInspector,
-        TaurobOperator,
-        ExR2,
-        Robot,
-        Turtlebot,
-        AnymalX,
-        AnymalD,
+        public enum RobotType
+        {
+            TaurobInspector,
+            TaurobOperator,
+            ExR2,
+            Robot,
+            Turtlebot,
+            AnymalX,
+            AnymalD,
+        }
+
+        float battery_warning_threshold;
+        float pressure_warning_threshold;
     }
+
 }

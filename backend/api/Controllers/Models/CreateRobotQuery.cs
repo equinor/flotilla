@@ -8,7 +8,7 @@ namespace Api.Controllers.Models
 
         public string IsarId { get; set; }
 
-        public RobotModel Model { get; set; }
+        public RobotModel.RobotType Model { get; set; }
 
         public string SerialNumber { get; set; }
 

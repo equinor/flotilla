@@ -69,7 +69,7 @@ namespace Api.Test.Services
             {
                 Name = "",
                 IsarId = "",
-                Model = RobotModel.Turtlebot,
+                Model = RobotModel.RobotType.Turtlebot,
                 SerialNumber = "",
                 VideoStreams = new List<CreateVideoStreamQuery>() { videoStreamQuery },
                 Host = "",

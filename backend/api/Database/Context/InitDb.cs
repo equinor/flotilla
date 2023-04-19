@@ -35,7 +35,7 @@ public static class InitDb
 
             IsarId = "c68b679d-308b-460f-9fe0-87eaadbd8a6e",
             Name = "R2-D2",
-            Model = RobotModel.TaurobInspector,
+            Model = RobotModel.RobotType.TaurobInspector,
             SerialNumber = "D2",
             Status = RobotStatus.Available,
             Enabled = true,
@@ -49,7 +49,7 @@ public static class InitDb
         {
             Name = "Shockwave",
             IsarId = "c68b679d-308b-460f-9fe0-87eaadbd1234",
-            Model = RobotModel.ExR2,
+            Model = RobotModel.RobotType.ExR2,
             SerialNumber = "SS79",
             Status = RobotStatus.Busy,
             Enabled = true,
@@ -63,7 +63,7 @@ public static class InitDb
         {
             Name = "Ultron",
             IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
-            Model = RobotModel.AnymalX,
+            Model = RobotModel.RobotType.AnymalX,
             SerialNumber = "Earth616",
             Status = RobotStatus.Available,
             Enabled = false,

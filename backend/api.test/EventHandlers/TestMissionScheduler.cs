@@ -23,7 +23,7 @@ namespace Api.Test.EventHandlers
                 Id = "IamTestRobot",
                 Status = RobotStatus.Available,
                 Host = "localhost",
-                Model = RobotModel.Turtlebot,
+                Model = RobotModel.RobotType.Turtlebot,
                 Name = "TestosteroneTesty",
                 SerialNumber = "12354",
                 Enabled = true
