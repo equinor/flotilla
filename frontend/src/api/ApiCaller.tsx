@@ -9,6 +9,7 @@ import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'model
 import { Pose } from 'models/Pose'
 import { AssetDeck } from 'models/AssetDeck'
 import { timeout } from 'utils/timeout'
+import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
@@ -49,7 +50,16 @@ export class BackendAPICaller {
         const initializedRequest: RequestInit = BackendAPICaller.initializeRequest(method, body)
 
         const url = `${config.BACKEND_URL}/${path}`
-        const response: Response = await fetch(url, initializedRequest)
+
+        let response: Response
+        response = await fetch(url, initializedRequest)
+
+        // If Unauthenticated, token may have expired, wait max token refresh time and try again
+        if (response.status === 401) {
+            await timeout(tokenReverificationInterval)
+            response = await fetch(url, initializedRequest)
+        }
+
         if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`)
         var responseContent
         // Status code 204 means no content
