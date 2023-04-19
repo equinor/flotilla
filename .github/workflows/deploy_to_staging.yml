@@ -47,7 +47,7 @@ jobs:
 
   build-and-push-components:
     name: Build and push containers to auroraprodcr for Staging/Production
-    needs: [trigger-github-deployment, build-and-push-components]
+    needs: [trigger-github-deployment]
     strategy:
       matrix:
         component: [broker, backend, frontend]
