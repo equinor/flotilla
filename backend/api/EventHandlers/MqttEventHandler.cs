@@ -23,6 +23,8 @@ namespace Api.EventHandlers
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionService>();
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+        private IRobotModelService RobotModelService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotModelService>();
 
         public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory scopeFactory)
         {
@@ -108,7 +110,7 @@ namespace Api.EventHandlers
                 {
                     IsarId = isarRobotInfo.IsarId,
                     Name = isarRobotInfo.RobotName,
-                    Model = isarRobotInfo.RobotModel,
+                    RobotType = isarRobotInfo.RobotType,
                     SerialNumber = isarRobotInfo.SerialNumber,
                     VideoStreams = isarRobotInfo.VideoStreamQueries,
                     Host = isarRobotInfo.Host,
@@ -117,11 +119,23 @@ namespace Api.EventHandlers
                     Enabled = true
                 };
 
-                robot = await RobotService.Create(robotQuery);
+                var robotModel = await RobotModelService.ReadByRobotType(robotQuery.RobotType);
+                if (robotModel == null)
+                {
+                    _logger.LogError(
+                        "Could not create new robot for ISAR instance '{id}' because the provided robot type '{robotType}' does not exist",
+                        isarRobotInfo.IsarId,
+                        isarRobotInfo.RobotType
+                    );
+                    return;
+                }
+
+                var newRobot = new Robot(robotQuery) { Model = robotModel };
+                newRobot = await RobotService.Create(newRobot);
                 _logger.LogInformation(
                     "Added robot '{robotName}' with ISAR id '{isarId}' to database",
-                    robot.Name,
-                    robot.IsarId
+                    newRobot.Name,
+                    newRobot.IsarId
                 );
 
                 return;

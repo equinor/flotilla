@@ -71,13 +71,18 @@ namespace Api.Test.Services
                 IsarId = "",
                 SerialNumber = "",
                 VideoStreams = new List<CreateVideoStreamQuery>() { videoStreamQuery },
+                RobotType = RobotType.Robot,
                 Host = "",
                 Port = 1,
                 Enabled = true,
                 Status = RobotStatus.Available
             };
 
-            await robotService.Create(robotQuery);
+            var robot = new Robot(robotQuery);
+            var robotModel = _context.RobotModels.First();
+            robot.Model = robotModel;
+
+            await robotService.Create(robot);
             int nRobotsAfter = robotService.ReadAll().Result.Count();
 
             Assert.Equal(nRobotsBefore + 1, nRobotsAfter);
