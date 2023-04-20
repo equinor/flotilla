@@ -18,8 +18,7 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public string IsarId { get; set; }
 
-        [Required]
-        public RobotModel Model { get; set; }
+        public virtual RobotModel Model { get; set; }
 
         [Required]
         [MaxLength(200)]
@@ -67,7 +66,6 @@ namespace Api.Database.Models
             VideoStreams = new List<VideoStream>();
             IsarId = "defaultIsarId";
             Name = "defaultId";
-            Model = RobotModel.Turtlebot;
             SerialNumber = "defaultSerialNumber";
             Status = RobotStatus.Offline;
             Enabled = false;
