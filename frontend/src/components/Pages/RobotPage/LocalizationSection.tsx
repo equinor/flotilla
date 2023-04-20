@@ -26,7 +26,7 @@ export function LocalizationSection({ robot }: RobotProps) {
         })
         return assetDeckNameMap
     }
-    const assetDeckNames = assetDecks !== undefined ? Array.from(getAssetDeckNames(assetDecks).keys()) : []
+    const assetDeckNames = assetDecks !== undefined ? Array.from(getAssetDeckNames(assetDecks).keys()).sort() : []
 
     const onSelectedDeck = (changes: AutocompleteChanges<string>) => {
         const selectedDeckName = changes.selectedItems[0]
