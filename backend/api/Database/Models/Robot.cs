@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Api.Controllers.Models;
 
 #pragma warning disable CS8618
 namespace Api.Database.Models
@@ -71,6 +72,31 @@ namespace Api.Database.Models
             Enabled = false;
             Host = "localhost";
             Port = 3000;
+            Pose = new Pose();
+        }
+
+        public Robot(CreateRobotQuery createQuery)
+        {
+            var videoStreams = new List<VideoStream>();
+            foreach (var videoStreamQuery in createQuery.VideoStreams)
+            {
+                var videoStream = new VideoStream
+                {
+                    Name = videoStreamQuery.Name,
+                    Url = videoStreamQuery.Url,
+                    Type = videoStreamQuery.Type
+                };
+                videoStreams.Add(videoStream);
+            }
+
+            IsarId = createQuery.IsarId;
+            Name = createQuery.Name;
+            SerialNumber = createQuery.SerialNumber;
+            VideoStreams = videoStreams;
+            Host = createQuery.Host;
+            Port = createQuery.Port;
+            Enabled = createQuery.Enabled;
+            Status = createQuery.Status;
             Pose = new Pose();
         }
     }

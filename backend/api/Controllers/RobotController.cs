@@ -16,18 +16,21 @@ public class RobotController : ControllerBase
     private readonly IRobotService _robotService;
     private readonly IIsarService _isarService;
     private readonly IMissionService _missionService;
+    private readonly IRobotModelService _robotModelService;
 
     public RobotController(
         ILogger<RobotController> logger,
         IRobotService robotService,
         IIsarService isarService,
-        IMissionService missionService
+        IMissionService missionService,
+        IRobotModelService robotModelService
     )
     {
         _logger = logger;
         _robotService = robotService;
         _isarService = isarService;
         _missionService = missionService;
+        _robotModelService = robotModelService;
     }
 
     /// <summary>
@@ -102,11 +105,19 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Robot>> CreateRobot([FromBody] CreateRobotQuery robot)
+    public async Task<ActionResult<Robot>> CreateRobot([FromBody] CreateRobotQuery robotQuery)
     {
         _logger.LogInformation("Creating new robot");
         try
         {
+            var robotModel = await _robotModelService.ReadByRobotType(robotQuery.RobotType);
+            if (robotModel == null)
+                return BadRequest(
+                    $"No robot model exists with robot type '{robotQuery.RobotType}'"
+                );
+
+            var robot = new Robot(robotQuery) { Model = robotModel };
+
             var newRobot = await _robotService.Create(robot);
             _logger.LogInformation("Succesfully created new robot");
             return CreatedAtAction(nameof(GetRobotById), new { id = newRobot.Id }, newRobot);

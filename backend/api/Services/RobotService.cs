@@ -6,7 +6,7 @@ namespace Api.Services
 {
     public interface IRobotService
     {
-        public abstract Task<Robot> Create(CreateRobotQuery newRobot);
+        public abstract Task<Robot> Create(Robot newRobot);
         public abstract Task<IEnumerable<Robot>> ReadAll();
         public abstract Task<Robot?> ReadById(string id);
         public abstract Task<Robot?> ReadByIsarId(string isarId);
@@ -33,36 +33,11 @@ namespace Api.Services
             return _context.Robots.Include(r => r.VideoStreams).Include(r => r.Model);
         }
 
-        public async Task<Robot> Create(CreateRobotQuery newRobot)
+        public async Task<Robot> Create(Robot newRobot)
         {
-            var videoStreams = new List<VideoStream>();
-            foreach (var videoStreamQuery in newRobot.VideoStreams)
-            {
-                var videoStream = new VideoStream
-                {
-                    Name = videoStreamQuery.Name,
-                    Url = videoStreamQuery.Url,
-                    Type = videoStreamQuery.Type
-                };
-                videoStreams.Add(videoStream);
-            }
-
-            var robot = new Robot
-            {
-                IsarId = newRobot.IsarId,
-                Name = newRobot.Name,
-                Model = newRobot.Model,
-                SerialNumber = newRobot.SerialNumber,
-                VideoStreams = videoStreams,
-                Host = newRobot.Host,
-                Port = newRobot.Port,
-                Enabled = newRobot.Enabled,
-                Status = newRobot.Status
-            };
-
-            await _context.Robots.AddAsync(robot);
+            await _context.Robots.AddAsync(newRobot);
             await _context.SaveChangesAsync();
-            return robot;
+            return newRobot;
         }
 
         public async Task<IEnumerable<Robot>> ReadAll()
