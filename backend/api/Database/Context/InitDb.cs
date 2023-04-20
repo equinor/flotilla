@@ -4,8 +4,8 @@ namespace Api.Database.Context;
 
 public static class InitDb
 {
-    public static readonly List<Robot> Robots = GetRobots();
-    public static readonly List<Mission> Missions = GetMissions();
+    private static readonly List<Robot> robots = GetRobots();
+    private static readonly List<Mission> missions = GetMissions();
 
     private static VideoStream VideoStream =>
         new()
@@ -34,7 +34,6 @@ public static class InitDb
         {
             IsarId = "c68b679d-308b-460f-9fe0-87eaadbd8a6e",
             Name = "R2-D2",
-            Model = RobotModel.TaurobInspector,
             SerialNumber = "D2",
             Status = RobotStatus.Available,
             Enabled = true,
@@ -48,7 +47,6 @@ public static class InitDb
         {
             Name = "Shockwave",
             IsarId = "c68b679d-308b-460f-9fe0-87eaadbd1234",
-            Model = RobotModel.ExR2,
             SerialNumber = "SS79",
             Status = RobotStatus.Busy,
             Enabled = true,
@@ -62,7 +60,6 @@ public static class InitDb
         {
             Name = "Ultron",
             IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
-            Model = RobotModel.AnymalX,
             SerialNumber = "Earth616",
             Status = RobotStatus.Available,
             Enabled = false,
@@ -80,7 +77,7 @@ public static class InitDb
         var mission1 = new Mission
         {
             Name = "Placeholder Mission 1",
-            Robot = Robots[0],
+            Robot = robots[0],
             AssetCode = "test",
             EchoMissionId = 95,
             Status = MissionStatus.Successful,
@@ -92,7 +89,7 @@ public static class InitDb
         var mission2 = new Mission
         {
             Name = "Placeholder Mission 2",
-            Robot = Robots[1],
+            Robot = robots[1],
             AssetCode = "test",
             EchoMissionId = 95,
             Status = MissionStatus.Successful,
@@ -104,7 +101,7 @@ public static class InitDb
         var mission3 = new Mission
         {
             Name = "Placeholder Mission 3",
-            Robot = Robots[2],
+            Robot = robots[2],
             AssetCode = "kaa",
             Status = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
@@ -122,12 +119,33 @@ public static class InitDb
         {
             return;
         }
-        foreach (var robot in Robots)
+
+        // Create robot models for the test database
+        foreach (var type in Enum.GetValues<RobotType>())
+        {
+            RobotModel model =
+                new()
+                {
+                    Type = type,
+                    BatteryWarningThreshold = 20f,
+                    LowerPressureWarningThreshold = 40f,
+                    UpperPressureWarningThreshold = 80f
+                };
+            context.Add(model);
+        }
+        context.SaveChanges();
+
+        foreach (var robot in robots)
         {
             robot.VideoStreams.Add(VideoStream);
         }
 
-        foreach (var mission in Missions)
+        var models = context.RobotModels.AsEnumerable().ToList();
+        robots[0].Model = models.Find(model => model.Type == RobotType.TaurobInspector)!;
+        robots[1].Model = models.Find(model => model.Type == RobotType.ExR2)!;
+        robots[2].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
+
+        foreach (var mission in missions)
         {
             var task = ExampleTask;
             task.Inspections.Add(Inspection);
@@ -135,8 +153,8 @@ public static class InitDb
             var tasks = new List<MissionTask> { task };
             mission.Tasks = tasks;
         }
-        context.AddRange(Robots);
-        context.AddRange(Missions);
+        context.AddRange(robots);
+        context.AddRange(missions);
         context.SaveChanges();
     }
 }

@@ -31,7 +31,7 @@ export function RobotPage() {
     return (
         <StyledRobotPage>
             <BackButton />
-            <Typography variant="h1">{selectedRobot?.name + ' (' + selectedRobot?.model + ')'}</Typography>
+            <Typography variant="h1">{selectedRobot?.name + ' (' + selectedRobot?.model.type + ')'}</Typography>
             {selectedRobot !== undefined && <LocalizationSection robot={selectedRobot} />}
         </StyledRobotPage>
     )

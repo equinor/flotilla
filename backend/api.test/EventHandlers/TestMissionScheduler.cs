@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers;
@@ -17,13 +18,22 @@ namespace Api.Test.EventHandlers
     [Collection("Database collection")]
     public class TestMissionScheduler : IDisposable
     {
+        private static RobotModel TurtlebotModel =>
+            new()
+            {
+                Id = "TestModel",
+                Type = RobotType.Turtlebot,
+                BatteryWarningThreshold = 20f,
+                LowerPressureWarningThreshold = 20f,
+                UpperPressureWarningThreshold = 80f
+            };
         private static Robot Robot =>
             new()
             {
                 Id = "IamTestRobot",
                 Status = RobotStatus.Available,
                 Host = "localhost",
-                Model = RobotModel.Turtlebot,
+                Model = TurtlebotModel,
                 Name = "TestosteroneTesty",
                 SerialNumber = "12354",
                 Enabled = true
@@ -48,6 +58,7 @@ namespace Api.Test.EventHandlers
 
         private readonly MissionScheduler _scheduledMissionEventHandler;
         private readonly IMissionService _missionService;
+        private readonly IRobotService _robotService;
         private readonly RobotControllerMock _robotControllerMock;
         private readonly FlotillaDbContext _context;
 
@@ -61,14 +72,19 @@ namespace Api.Test.EventHandlers
             // Mock ScheduledMissionService:
             _context = fixture.NewContext;
             _missionService = new MissionService(_context, missionLogger);
+            _robotService = new RobotService(_context);
             _robotControllerMock = new RobotControllerMock();
 
             var mockServiceProvider = new Mock<IServiceProvider>();
 
-            // Mock injection of ScheduledMissionService:
+            // Mock injection of MissionService:
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IMissionService)))
                 .Returns(_missionService);
+            // Mock injection of MissionService:
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(IRobotService)))
+                .Returns(_robotService);
             // Mock injection of Robot Controller
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(RobotController)))
@@ -103,9 +119,11 @@ namespace Api.Test.EventHandlers
         /// </summary>
         /// <param name="preStatus"></param>
         /// <param name="postStatus"></param>
+        /// <param name="mission"></param>
         private async void AssertExpectedStatusChange(
             MissionStatus preStatus,
-            MissionStatus postStatus
+            MissionStatus postStatus,
+            Mission mission
         )
         {
             // ARRANGE
@@ -113,10 +131,10 @@ namespace Api.Test.EventHandlers
             var cts = new CancellationTokenSource();
 
             // Add Scheduled mission
-            await _missionService.Create(ScheduledMission);
+            await _missionService.Create(mission);
 
             // Assert start conditions
-            var preMission = await _missionService.ReadById(ScheduledMission.Id);
+            var preMission = await _missionService.ReadById(mission.Id);
             Assert.NotNull(preMission);
             Assert.Equal(preStatus, preMission!.Status);
 
@@ -130,23 +148,31 @@ namespace Api.Test.EventHandlers
             // ASSERT
 
             // Verify status change
-            var postMission = await _missionService.ReadById(ScheduledMission.Id);
+            var postMission = await _missionService.ReadById(mission.Id);
             Assert.NotNull(postMission);
             Assert.Equal(postStatus, postMission!.Status);
         }
 
         [Fact]
-        public void ScheduledMissionSetTFailed()
+        public async void ScheduledMissionSetTFailed()
         {
+            var mission = ScheduledMission;
+
+            // Get real robot to avoid error on robot model
+            var robot = (await _robotService.ReadAll()).First(
+                r => r.Status == RobotStatus.Available
+            );
+            mission.Robot = robot;
+
             // Mock bad path of 'RobotController.StartMission'
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
             _robotControllerMock.RobotServiceMock
-                .Setup(r => r.ReadById(Robot.Id))
+                .Setup(r => r.ReadById(robot.Id))
                 .Returns(async () => null);
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
-            // Expect failed because robot is busy
-            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Failed);
+            // Expect failed because robot is null
+            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Failed, mission);
         }
     }
 }

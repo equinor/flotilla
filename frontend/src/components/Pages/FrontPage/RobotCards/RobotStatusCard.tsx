@@ -1,5 +1,5 @@
 import { Card, Typography } from '@equinor/eds-core-react'
-import { Robot, RobotStatus, RobotType } from 'models/Robot'
+import { Robot } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from './RobotStatusChip'
 import BatteryStatusView from './BatteryStatusView'
@@ -10,6 +10,7 @@ import { BatteryStatus } from 'models/Battery'
 import { Text } from 'components/Contexts/LanguageContext'
 import PressureStatusView from './PressureStatusView'
 import { config } from 'config'
+import { RobotType } from 'models/RobotModel'
 
 interface RobotProps {
     robot: Robot
@@ -45,11 +46,11 @@ const VerticalContent = styled.div`
 function cardContent({ robot }: RobotProps) {
     return (
         <div>
-            <RobotImage robotType={robot.model} />
+            <RobotImage robotType={robot.model.type} />
             <HorisontalContent>
                 <VerticalContent>
                     <Typography variant="h5">{robot.name}</Typography>
-                    <Typography variant="caption">{RobotType.toString(robot.model)}</Typography>
+                    <Typography variant="caption">{robot.model.type}</Typography>
                     <RobotStatusChip status={robot.status} />
                 </VerticalContent>
                 <VerticalContent>

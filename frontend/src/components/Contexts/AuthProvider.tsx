@@ -28,7 +28,5 @@ export const AuthProvider = (props: Props) => {
         return () => clearInterval(id)
     }, [])
 
-    VerifyToken()
-
     return <AuthContext.Provider value={accessToken}>{props.children}</AuthContext.Provider>
 }
