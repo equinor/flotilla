@@ -1,5 +1,4 @@
-﻿using Api.Controllers.Models;
-using Api.Database.Context;
+﻿using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 

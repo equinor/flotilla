@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Api.Controllers.Models;
 
 #pragma warning disable CS8618
 namespace Api.Database.Models
@@ -50,5 +51,22 @@ namespace Api.Database.Models
         /// Lower pressure warning threshold in mBar
         /// </summary>
         public float? LowerPressureWarningThreshold { get; set; }
+
+        public RobotModel() { }
+
+        public RobotModel(CreateRobotModelQuery query)
+        {
+            Type = query.RobotType;
+            BatteryWarningThreshold = query.BatteryWarningThreshold;
+            UpperPressureWarningThreshold = query.UpperPressureWarningThreshold;
+            LowerPressureWarningThreshold = query.LowerPressureWarningThreshold;
+        }
+
+        public void Update(UpdateRobotModelQuery updateQuery)
+        {
+            BatteryWarningThreshold = updateQuery.BatteryWarningThreshold;
+            UpperPressureWarningThreshold = updateQuery.UpperPressureWarningThreshold;
+            LowerPressureWarningThreshold = updateQuery.LowerPressureWarningThreshold;
+        }
     }
 }

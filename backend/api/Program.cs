@@ -43,6 +43,7 @@ builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<IStidService, StidService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IAssetDeckService, AssetDeckService>();
+builder.Services.AddScoped<IRobotModelService, RobotModelService>();
 builder.Services.AddScoped<RobotController>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
@@ -88,18 +89,22 @@ builder.Services.AddAuthorization(
 
 var app = builder.Build();
 
-
 string basePath = builder.Configuration["BackendBaseRoute"];
-app.UseSwagger(c =>
-{
-    c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+app.UseSwagger(
+    c =>
     {
-        swaggerDoc.Servers = new List<OpenApiServer> {
-            new OpenApiServer { Url = $"https://{httpReq.Host.Value}{basePath}" },
-            new OpenApiServer { Url = $"http://{httpReq.Host.Value}{basePath}" }
-        };
-    });
-});
+        c.PreSerializeFilters.Add(
+            (swaggerDoc, httpReq) =>
+            {
+                swaggerDoc.Servers = new List<OpenApiServer>
+                {
+                    new OpenApiServer { Url = $"https://{httpReq.Host.Value}{basePath}" },
+                    new OpenApiServer { Url = $"http://{httpReq.Host.Value}{basePath}" }
+                };
+            }
+        );
+    }
+);
 app.UseSwaggerUI(
     c =>
     {
