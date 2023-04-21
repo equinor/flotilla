@@ -83,6 +83,18 @@ namespace Api.Database.Models
             Status = TaskStatus.NotStarted;
         }
 
+        // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
+        public MissionTask(CustomTaskQuery taskQuery)
+        {
+            Inspections = taskQuery.Inspections
+                .Select(inspection => new Inspection(inspection))
+                .ToList();
+            InspectionTarget = taskQuery.InspectionTarget;
+            RobotPose = taskQuery.RobotPose;
+            TaskOrder = taskQuery.TaskOrder;
+            Status = TaskStatus.NotStarted;
+        }
+
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
             UpdateStatus(isarTask.TaskStatus);
