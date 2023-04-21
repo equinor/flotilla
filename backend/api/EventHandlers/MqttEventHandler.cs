@@ -19,12 +19,8 @@ namespace Api.EventHandlers
         private readonly ILogger<MqttEventHandler> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        private IMissionService MissionService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionService>();
-        private IRobotService RobotService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
-        private IRobotModelService RobotModelService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotModelService>();
+        private IServiceProvider GetServiceProvider() =>
+            _scopeFactory.CreateScope().ServiceProvider;
 
         public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory scopeFactory)
         {
@@ -67,8 +63,10 @@ namespace Api.EventHandlers
 
         private async void OnIsarRobotStatus(object? sender, MqttReceivedArgs mqttArgs)
         {
+            var provider = GetServiceProvider();
+            var robotService = provider.GetRequiredService<IRobotService>();
             var isarRobotStatus = (IsarRobotStatusMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByIsarId(isarRobotStatus.IsarId);
+            var robot = await robotService.ReadByIsarId(isarRobotStatus.IsarId);
 
             if (robot == null)
             {
@@ -84,7 +82,7 @@ namespace Api.EventHandlers
                 return;
 
             robot.Status = isarRobotStatus.RobotStatus;
-            robot = await RobotService.Update(robot);
+            robot = await robotService.Update(robot);
             _logger.LogInformation(
                 "Updated status for robot {name} to {status}",
                 robot.Name,
@@ -94,7 +92,10 @@ namespace Api.EventHandlers
 
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var robotService = RobotService;
+            var provider = GetServiceProvider();
+            var robotService = provider.GetRequiredService<IRobotService>();
+            var robotModelService = provider.GetRequiredService<IRobotModelService>();
+
             var isarRobotInfo = (IsarRobotInfoMessage)mqttArgs.Message;
             var robot = await robotService.ReadByIsarId(isarRobotInfo.IsarId);
 
@@ -119,7 +120,7 @@ namespace Api.EventHandlers
                     Enabled = true
                 };
 
-                var robotModel = await RobotModelService.ReadByRobotType(robotQuery.RobotType);
+                var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType);
                 if (robotModel == null)
                 {
                     _logger.LogError(
@@ -131,7 +132,7 @@ namespace Api.EventHandlers
                 }
 
                 var newRobot = new Robot(robotQuery) { Model = robotModel };
-                newRobot = await RobotService.Create(newRobot);
+                newRobot = await robotService.Create(newRobot);
                 _logger.LogInformation(
                     "Added robot '{robotName}' with ISAR id '{isarId}' to database",
                     newRobot.Name,
@@ -195,6 +196,10 @@ namespace Api.EventHandlers
 
         private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
+            var provider = GetServiceProvider();
+            var missionService = provider.GetRequiredService<IMissionService>();
+            var robotService = provider.GetRequiredService<IRobotService>();
+
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
             MissionStatus status;
             try
@@ -211,7 +216,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var flotillaMission = await MissionService.UpdateMissionStatusByIsarMissionId(
+            var flotillaMission = await missionService.UpdateMissionStatusByIsarMissionId(
                 isarMission.MissionId,
                 status
             );
@@ -235,7 +240,7 @@ namespace Api.EventHandlers
                 isarMission.IsarId
             );
 
-            var robot = await RobotService.ReadByIsarId(isarMission.IsarId);
+            var robot = await robotService.ReadByIsarId(isarMission.IsarId);
             if (robot is null)
             {
                 _logger.LogError(
@@ -250,7 +255,7 @@ namespace Api.EventHandlers
             if (flotillaMission.IsCompleted)
                 robot.CurrentMissionId = null;
 
-            await RobotService.Update(robot);
+            await robotService.Update(robot);
             _logger.LogInformation(
                 "Robot '{id}' ('{name}') - status set to '{status}'.",
                 robot.IsarId,
@@ -261,6 +266,8 @@ namespace Api.EventHandlers
 
         private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
+            var provider = GetServiceProvider();
+            var missionService = provider.GetRequiredService<IMissionService>();
             var task = (IsarTaskMessage)mqttArgs.Message;
             IsarTaskStatus status;
             try
@@ -277,7 +284,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            bool success = await MissionService.UpdateTaskStatusByIsarTaskId(
+            bool success = await missionService.UpdateTaskStatusByIsarTaskId(
                 task.MissionId,
                 task.TaskId,
                 status
@@ -295,6 +302,9 @@ namespace Api.EventHandlers
 
         private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
+            var provider = GetServiceProvider();
+            var missionService = provider.GetRequiredService<IMissionService>();
+
             var step = (IsarStepMessage)mqttArgs.Message;
 
             // Flotilla does not care about DriveTo or localization steps
@@ -317,7 +327,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            bool success = await MissionService.UpdateStepStatusByIsarStepId(
+            bool success = await missionService.UpdateStepStatusByIsarStepId(
                 step.MissionId,
                 step.TaskId,
                 step.StepId,
@@ -336,8 +346,11 @@ namespace Api.EventHandlers
 
         private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
+            var provider = GetServiceProvider();
+            var robotService = provider.GetRequiredService<IRobotService>();
+
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByIsarId(batteryStatus.IsarId);
+            var robot = await robotService.ReadByIsarId(batteryStatus.IsarId);
             if (robot == null)
             {
                 _logger.LogWarning(
@@ -349,7 +362,7 @@ namespace Api.EventHandlers
             else
             {
                 robot.BatteryLevel = batteryStatus.BatteryLevel;
-                await RobotService.Update(robot);
+                await robotService.Update(robot);
                 _logger.LogDebug(
                     "Updated battery on robot '{robotName}' with ISAR id '{isarId}'",
                     robot.Name,
@@ -360,8 +373,11 @@ namespace Api.EventHandlers
 
         private async void OnPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
+            var provider = GetServiceProvider();
+            var robotService = provider.GetRequiredService<IRobotService>();
+
             var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByIsarId(pressureStatus.IsarId);
+            var robot = await robotService.ReadByIsarId(pressureStatus.IsarId);
             if (robot == null)
             {
                 _logger.LogWarning(
@@ -373,7 +389,7 @@ namespace Api.EventHandlers
             else
             {
                 robot.PressureLevel = pressureStatus.PressureLevel;
-                await RobotService.Update(robot);
+                await robotService.Update(robot);
                 _logger.LogDebug(
                     "Updated pressure on '{robotName}' with ISAR id '{isarId}'",
                     robot.Name,
@@ -384,8 +400,11 @@ namespace Api.EventHandlers
 
         private async void OnPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
+            var provider = GetServiceProvider();
+            var robotService = provider.GetRequiredService<IRobotService>();
+
             var poseStatus = (IsarPoseMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByIsarId(poseStatus.IsarId);
+            var robot = await robotService.ReadByIsarId(poseStatus.IsarId);
             if (robot == null)
             {
                 _logger.LogWarning(
@@ -410,7 +429,7 @@ namespace Api.EventHandlers
                     );
                 }
 
-                await RobotService.Update(robot);
+                await robotService.Update(robot);
                 _logger.LogDebug(
                     "Updated pose on robot '{robotName}' with ISAR id '{isarId}'",
                     robot.Name,
