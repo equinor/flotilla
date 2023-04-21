@@ -20,7 +20,7 @@
     "Cannot schedule mission in the past": "Kan ikke planlegge oppdrag i fortid",
     "Tasks": "Oppgaver",
     "Please confirm that you want to remove the mission from the queue:": "Vennligst bekreft at du ønsker å fjerne oppdraget fra køen:",
-    "Delete mission": "Slett oppdrag",
+    "Remove mission": "Fjern oppdrag",
     "Time": "Tid",
     "Date": "Dato",
     "Estimated duration": "Estimert varighet",
