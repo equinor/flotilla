@@ -158,6 +158,7 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Mission>> Create(
         [FromBody] ScheduledMissionQuery scheduledMissionQuery
@@ -221,6 +222,52 @@ public class MissionController : ControllerBase
             DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
             Tasks = missionTasks,
             AssetCode = scheduledMissionQuery.AssetCode,
+            Map = new MissionMap()
+        };
+
+        await _mapService.AssignMapToMission(scheduledMission);
+
+        if (scheduledMission.Tasks.Any())
+            scheduledMission.CalculateEstimatedDuration();
+
+        var newMission = await _missionService.Create(scheduledMission);
+
+        return CreatedAtAction(nameof(GetMissionById), new { id = newMission.Id }, newMission);
+    }
+
+    /// <summary>
+    /// Schedule a custom mission
+    /// </summary>
+    /// <remarks>
+    /// <para> This query schedules a custom mission defined in the incoming json </para>
+    /// </remarks>
+    [HttpPost]
+    [Route("custom")]
+    [ProducesResponseType(typeof(Mission), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<Mission>> Create(
+        [FromBody] CustomMissionQuery customMissionQuery
+    )
+    {
+        var robot = await _robotService.ReadById(customMissionQuery.RobotId);
+        if (robot is null)
+            return NotFound($"Could not find robot with id {customMissionQuery.RobotId}");
+
+        var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
+
+        var scheduledMission = new Mission
+        {
+            Name = customMissionQuery.Name,
+            Robot = robot,
+            EchoMissionId = 0,
+            Status = MissionStatus.Pending,
+            DesiredStartTime = customMissionQuery.DesiredStartTime,
+            Tasks = missionTasks,
+            AssetCode = customMissionQuery.AssetCode,
             Map = new MissionMap()
         };
 

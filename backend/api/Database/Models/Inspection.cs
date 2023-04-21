@@ -69,6 +69,14 @@ namespace Api.Database.Models
             Status = InspectionStatus.NotStarted;
         }
 
+        public Inspection(CustomInspectionQuery inspectionQuery)
+        {
+            InspectionType = inspectionQuery.InspectionType;
+            VideoDuration = inspectionQuery.VideoDuration;
+            AnalysisTypes = inspectionQuery.AnalysisTypes;
+            Status = InspectionStatus.NotStarted;
+        }
+
         public void UpdateWithIsarInfo(IsarStep isarStep)
         {
             UpdateStatus(isarStep.StepStatus);
