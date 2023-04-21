@@ -99,7 +99,7 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
                                 }}
                             >
                                 {' '}
-                                {Text('Delete mission')}
+                                {Text('Remove mission')}
                             </Button>
                         </StyledButtonSection>
                     </StyledConfirmDialog>
