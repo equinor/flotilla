@@ -1,4 +1,4 @@
-import { Button, Icon, Typography } from '@equinor/eds-core-react'
+import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { MissionQueueCard } from './MissionQueueCard'
 import { BackendAPICaller } from 'api/ApiCaller'
@@ -11,8 +11,8 @@ import { Robot } from 'models/Robot'
 import { RefreshProps } from '../FrontPage'
 import { Text } from 'components/Contexts/LanguageContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
-import { Icons } from 'utils/icons'
 import { useErrorHandler } from 'react-error-boundary'
+import { CreateMissionButton } from './CreateMissionButton'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -58,7 +58,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
     const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
     const { assetCode } = useAssetContext()
-    const echoURL = 'https://echo.equinor.com/mp?instCode='
 
     const fetchEchoMissions = () => {
         setIsFetchingEchoMissions(true)
@@ -143,17 +142,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         return <MissionQueueCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
     })
 
-    const createMissionButton = (
-        <Button
-            onClick={() => {
-                window.open(echoURL + assetCode)
-            }}
-        >
-            <Icon name={Icons.ExternalLink} size={16}></Icon>
-            {Text('Create mission')}
-        </Button>
-    )
-
     return (
         <StyledMissionView>
             <Typography variant="h1" color="resting">
@@ -174,9 +162,8 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                     scheduleButtonDisabled={scheduleButtonDisabled}
                     frontPageScheduleButtonDisabled={frontPageScheduleButtonDisabled}
                     isFetchingEchoMissions={isFetchingEchoMissions}
-                    createMissionButton={createMissionButton}
                 ></ScheduleMissionDialog>
-                {createMissionButton}
+                {CreateMissionButton()}
             </MissionButtonView>
         </StyledMissionView>
     )

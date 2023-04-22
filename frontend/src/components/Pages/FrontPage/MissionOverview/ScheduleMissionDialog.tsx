@@ -14,6 +14,7 @@ import { Text } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState, useEffect } from 'react'
 import { useAssetContext } from 'components/Contexts/AssetContext'
+import { CreateMissionButton } from './CreateMissionButton'
 
 interface IProps {
     robotOptions: Array<string>
@@ -24,7 +25,6 @@ interface IProps {
     fetchEchoMissions: () => void
     scheduleButtonDisabled: boolean
     frontPageScheduleButtonDisabled: boolean
-    createMissionButton: JSX.Element
     isFetchingEchoMissions: boolean
 }
 
@@ -156,7 +156,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             {Text('This asset has no missions - Please create mission')}
                         </Typography>
                         <StyledMissionSection>
-                            {props.createMissionButton}
+                            {CreateMissionButton()}
                             <Button
                                 onClick={() => {
                                     setIsEmptyEchoMissionsDialogOpen(false)
