@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,44 +8,25 @@ using Api.Database.Context;
 using Api.Database.Models;
 using Api.EventHandlers;
 using Api.Services;
+using Api.Services.Models;
 using Api.Test.Mocks;
+using Api.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
+#pragma warning disable CS1998
 namespace Api.Test.EventHandlers
 {
     [Collection("Database collection")]
     public class TestMissionScheduler : IDisposable
     {
-        private static RobotModel TurtlebotModel =>
-            new()
-            {
-                Id = "TestModel",
-                Type = RobotType.Turtlebot,
-                BatteryWarningThreshold = 20f,
-                LowerPressureWarningThreshold = 20f,
-                UpperPressureWarningThreshold = 80f
-            };
-        private static Robot Robot =>
-            new()
-            {
-                Id = "IamTestRobot",
-                Status = RobotStatus.Available,
-                Host = "localhost",
-                Model = TurtlebotModel,
-                Name = "TestosteroneTesty",
-                SerialNumber = "12354",
-                Enabled = true
-            };
         private static Mission ScheduledMission =>
             new()
             {
-                Id = "testMission",
                 Name = "testMission",
                 EchoMissionId = 2,
-                Robot = Robot,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTimeOffset.Now,
                 AssetCode = "TestAsset",
@@ -81,7 +63,7 @@ namespace Api.Test.EventHandlers
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IMissionService)))
                 .Returns(_missionService);
-            // Mock injection of MissionService:
+            // Mock injection of RobotService:
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IRobotService)))
                 .Returns(_robotService);
@@ -133,6 +115,14 @@ namespace Api.Test.EventHandlers
             // Add Scheduled mission
             await _missionService.Create(mission);
 
+            _robotControllerMock.RobotServiceMock
+                .Setup(service => service.ReadById(mission.Robot.Id))
+                .Returns(async () => mission.Robot);
+
+            _robotControllerMock.MissionServiceMock
+                .Setup(service => service.ReadById(mission.Id))
+                .Returns(async () => mission);
+
             // Assert start conditions
             var preMission = await _missionService.ReadById(mission.Id);
             Assert.NotNull(preMission);
@@ -154,24 +144,70 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void ScheduledMissionSetTFailed()
+        // Test that if robot is busy, mission awaits available robot
+        public async void ScheduledMissionPendingIfRobotBusy()
         {
             var mission = ScheduledMission;
 
             // Get real robot to avoid error on robot model
             var robot = (await _robotService.ReadAll()).First(
-                r => r.Status == RobotStatus.Available
+                r => r is { Status: RobotStatus.Busy, Enabled: true }
             );
             mission.Robot = robot;
 
-            // Mock bad path of 'RobotController.StartMission'
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-            _robotControllerMock.RobotServiceMock
-                .Setup(r => r.ReadById(robot.Id))
-                .Returns(async () => null);
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+            // Expect failed because robot does not exist
+            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Pending, mission);
+        }
 
-            // Expect failed because robot is null
+        [Fact]
+        // Test that if robot is available, mission is started
+        public async void ScheduledMissionStartedIfRobotAvailable()
+        {
+            var mission = ScheduledMission;
+
+            // Get real robot to avoid error on robot model
+            var robot = (await _robotService.ReadAll()).First(
+                r => r is { Status: RobotStatus.Available, Enabled: true }
+            );
+            mission.Robot = robot;
+
+            // Mock successful Start Mission:
+            _robotControllerMock.IsarServiceMock
+                .Setup(isar => isar.StartMission(robot, mission))
+                .Returns(
+                    async () =>
+                        new IsarMission(
+                            new IsarStartMissionResponse
+                            {
+                                MissionId = "test",
+                                Tasks = new List<IsarTaskResponse>()
+                            }
+                        )
+                );
+
+            // Expect failed because robot does not exist
+            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Ongoing, mission);
+        }
+
+        [Fact]
+        // Test that if ISAR fails, mission is set to failed
+        public async void ScheduledMissionFailedIfIsarUnavailable()
+        {
+            var mission = ScheduledMission;
+
+            // Get real robot to avoid error on robot model
+            var robot = (await _robotService.ReadAll()).First();
+            robot.Enabled = true;
+            robot.Status = RobotStatus.Available;
+            await _robotService.Update(robot);
+            mission.Robot = robot;
+
+            // Mock failing ISAR:
+            _robotControllerMock.IsarServiceMock
+                .Setup(isar => isar.StartMission(robot, mission))
+                .Throws(new MissionException("ISAR Failed test message"));
+
+            // Expect failed because robot does not exist
             AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Failed, mission);
         }
     }
