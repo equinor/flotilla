@@ -37,7 +37,7 @@ namespace Api.Services.Models
         public IsarPose Pose { get; set; }
 
         [JsonPropertyName("tag")]
-        public string Tag { get; set; }
+        public string? Tag { get; set; }
 
         [JsonPropertyName("inspections")]
         public List<IsarInspectionDefinition> Inspections { get; set; }
@@ -46,12 +46,7 @@ namespace Api.Services.Models
         {
             Id = missionTask.IsarTaskId;
             Pose = new IsarPose(missionTask.RobotPose);
-            Tag =
-                missionTask.TagId
-                ?? throw new ArgumentNullException(
-                    nameof(missionTask.TagId),
-                    "Cannot create IsarTask without a TagId"
-                );
+            Tag = missionTask.TagId;
             var isarInspections = new List<IsarInspectionDefinition>();
             foreach (var inspection in missionTask.Inspections)
             {
