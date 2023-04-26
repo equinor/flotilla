@@ -89,6 +89,7 @@ namespace Api.Database.Models
             Inspections = taskQuery.Inspections
                 .Select(inspection => new Inspection(inspection))
                 .ToList();
+            TagId = taskQuery.TagId;
             InspectionTarget = taskQuery.InspectionTarget;
             RobotPose = taskQuery.RobotPose;
             TaskOrder = taskQuery.TaskOrder;
