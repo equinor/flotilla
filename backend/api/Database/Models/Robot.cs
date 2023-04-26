@@ -19,6 +19,7 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public string IsarId { get; set; }
 
+        [Required]
         public virtual RobotModel Model { get; set; }
 
         [Required]
