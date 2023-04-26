@@ -102,7 +102,7 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Robot>> PostRobot([FromBody] CreateRobotQuery robot)
+    public async Task<ActionResult<Robot>> CreateRobot([FromBody] CreateRobotQuery robot)
     {
         _logger.LogInformation("Creating new robot");
         try
