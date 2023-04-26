@@ -12,6 +12,7 @@ namespace Api.Services
         public abstract Task<Robot?> ReadById(string id);
         public abstract Task<Robot?> ReadByIsarId(string isarId);
         public abstract Task<Robot> Update(Robot robot);
+        public abstract Task<Robot?> Delete(string id);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -86,6 +87,18 @@ namespace Api.Services
             var entry = _context.Update(robot);
             await _context.SaveChangesAsync();
             return entry.Entity;
+        }
+
+        public async Task<Robot?> Delete(string id)
+        {
+            var robot = await GetRobotsWithSubModels().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            if (robot is null)
+                return null;
+
+            _context.Robots.Remove(robot);
+            await _context.SaveChangesAsync();
+
+            return robot;
         }
     }
 }

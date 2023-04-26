@@ -123,7 +123,7 @@ public class RobotController : ControllerBase
     /// </summary>
     /// <remarks>
     /// </remarks>
-    /// <response code="200"> The robot was succesfully updated </response>
+    /// <response code="200"> The robot was successfully updated </response>
     /// <response code="400"> The robot data is invalid </response>
     /// <response code="404"> There was no robot with the given ID in the database </response>
     [HttpPut]
@@ -163,6 +163,24 @@ public class RobotController : ControllerBase
             _logger.LogError(e, "Error while updating robot with id={id}", id);
             throw;
         }
+    }
+
+    /// <summary>
+    /// Deletes the robot with the specified id from the database.
+    /// </summary>
+    [HttpDelete]
+    [Route("{id}")]
+    [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<Robot>> DeleteRobot([FromRoute] string id)
+    {
+        var robot = await _robotService.Delete(id);
+        if (robot is null)
+            return NotFound($"Robot with id {id} not found");
+        return Ok(robot);
     }
 
     /// <summary>
