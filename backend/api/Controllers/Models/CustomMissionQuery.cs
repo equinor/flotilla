@@ -17,6 +17,8 @@ namespace Api.Controllers.Models
 
         public Position InspectionTarget { get; set; }
 
+        public string? TagId { get; set; }
+
         public Pose RobotPose { get; set; }
 
         public List<CustomInspectionQuery> Inspections { get; set; }
