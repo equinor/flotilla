@@ -41,7 +41,7 @@ const mapEchoMissionToString = (missions: EchoMission[]): Map<string, EchoMissio
 const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
     var robotMap = new Map<string, Robot>()
     robots.map((robot: Robot) => {
-        robotMap.set(robot.name + ' (' + robot.model + ')', robot)
+        robotMap.set(robot.name + ' (' + robot.model.type + ')', robot)
     })
     return robotMap
 }
