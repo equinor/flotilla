@@ -18,13 +18,15 @@ public class RobotController : ControllerBase
     private readonly IIsarService _isarService;
     private readonly IMissionService _missionService;
     private readonly IRobotModelService _robotModelService;
+    private readonly IAssetDeckService _assetDeckService;
 
     public RobotController(
         ILogger<RobotController> logger,
         IRobotService robotService,
         IIsarService isarService,
         IMissionService missionService,
-        IRobotModelService robotModelService
+        IRobotModelService robotModelService,
+        IAssetDeckService assetDeckService
     )
     {
         _logger = logger;
@@ -32,6 +34,7 @@ public class RobotController : ControllerBase
         _isarService = isarService;
         _missionService = missionService;
         _robotModelService = robotModelService;
+        _assetDeckService = assetDeckService;
     }
 
     /// <summary>
@@ -654,6 +657,135 @@ public class RobotController : ControllerBase
         return Ok(mission);
     }
 
+
+    /// <summary>
+    /// Starts a mission which drives the robot to the nearest safe position
+    /// </summary>
+    /// <remarks>
+    /// <para> This query starts a localization for a given robot </para>
+    /// </remarks>
+    [HttpPost]
+    [Route("{robotId}/{asset}/{deck}/go-to-safe-position")]
+    [Authorize(Roles = Role.User)]
+    [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<Mission>> SafePosition(
+        [FromRoute] string robotId,
+        [FromRoute] string asset,
+        [FromRoute] string deck
+    )
+    {
+        var robot = await _robotService.ReadById(robotId);
+        if (robot == null)
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound("Robot not found");
+        }
+
+        var assets = await _assetDeckService.ReadByAsset(asset);
+
+        if (!assets.Any())
+        {
+            _logger.LogWarning("Could not find asset={asset}", asset);
+            return NotFound("No asset found");
+        }
+
+        var assetDeck = await _assetDeckService.ReadByAssetAndDeck(asset, deck);
+        if (assetDeck is null)
+        {
+            _logger.LogWarning("Could not find deck={deck}", deck);
+            return NotFound("No deck found");
+        }
+
+        if (assetDeck.SafePositions.Count < 1)
+        {
+            _logger.LogWarning("No safe position for asset={asset}, deck={deck}", asset, deck);
+            return NotFound("No safe positions found");
+        }
+
+        try
+        {
+            await _isarService.StopMission(robot);
+        }
+        catch (MissionException e)
+        {
+            // We want to continue driving to a safe position if the isar state is idle
+            if (e.IsarStatusCode != 409)
+            {
+                _logger.LogError(e, "Error while stopping ISAR mission");
+                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+            }
+        }
+        catch (Exception e)
+        {
+            string message = "Error in ISAR while stopping current mission, cannot drive to safe position";
+            _logger.LogError(e, "{message}", message);
+            OnIsarUnavailable(robot);
+            return StatusCode(StatusCodes.Status502BadGateway, message);
+        }
+
+        var closestSafePosition = ClosestSafePosition(robot.Pose, assetDeck.SafePositions);
+        // Cloning to avoid tracking same object
+        var clonedPose = ObjectCopier.Clone(closestSafePosition);
+        var customTaskQuery = new CustomTaskQuery
+        {
+            RobotPose = clonedPose,
+            Inspections = new List<CustomInspectionQuery>(),
+            InspectionTarget = new Position(),
+            TaskOrder = 0
+        };
+        var mission = new Mission
+        {
+            Name = "Drive to Safe Position",
+            Robot = robot,
+            AssetCode = assetDeck.AssetCode,
+            EchoMissionId = 0,
+            Status = MissionStatus.Pending,
+            DesiredStartTime = DateTimeOffset.UtcNow,
+            Tasks = new List<MissionTask>(new[] { new MissionTask(customTaskQuery) }),
+            Map = new MissionMap()
+        };
+
+        IsarMission isarMission;
+        try
+        {
+            isarMission = await _isarService.StartMission(robot, mission);
+        }
+        catch (HttpRequestException e)
+        {
+            string message = $"Could not reach ISAR at {robot.IsarUri}";
+            _logger.LogError(e, "{message}", message);
+            OnIsarUnavailable(robot);
+            return StatusCode(StatusCodes.Status502BadGateway, message);
+        }
+        catch (MissionException e)
+        {
+            _logger.LogError(e, "Error while starting ISAR mission");
+            return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+        }
+        catch (JsonException e)
+        {
+            string message = "Error while processing of the response from ISAR";
+            _logger.LogError(e, "{message}", message);
+            return StatusCode(StatusCodes.Status500InternalServerError, message);
+        }
+
+        mission.UpdateWithIsarInfo(isarMission);
+        mission.Status = MissionStatus.Ongoing;
+
+        await _missionService.Create(mission);
+
+        robot.Status = RobotStatus.Busy;
+        robot.CurrentMissionId = mission.Id;
+        await _robotService.Update(robot);
+        return Ok(mission);
+    }
+
+
     private async void OnIsarUnavailable(Robot robot)
     {
         robot.Enabled = false;
@@ -674,4 +806,34 @@ public class RobotController : ControllerBase
         robot.CurrentMissionId = null;
         await _robotService.Update(robot);
     }
+
+    private static Pose ClosestSafePosition(Pose robotPose, IList<SafePosition> safePositions)
+    {
+        if (safePositions == null || !safePositions.Any())
+        {
+            throw new ArgumentException("List of safe positions cannot be null or empty.");
+        }
+
+        var closestPose = safePositions[0].Pose;
+        float minDistance = CalculateDistance(robotPose, closestPose);
+
+        for (int i = 1; i < safePositions.Count; i++)
+        {
+            float currentDistance = CalculateDistance(robotPose, safePositions[i].Pose);
+            if (currentDistance < minDistance)
+            {
+                minDistance = currentDistance;
+                closestPose = safePositions[i].Pose;
+            }
+        }
+        return closestPose;
+    }
+
+    private static float CalculateDistance(Pose pose1, Pose pose2)
+    {
+        var pos1 = pose1.Position;
+        var pos2 = pose2.Position;
+        return (float)Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2) + Math.Pow(pos1.Z - pos2.Z, 2));
+    }
+
 }

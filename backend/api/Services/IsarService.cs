@@ -77,10 +77,10 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                string message = GetErrorDescriptionFoFailedIsarRequest(response);
+                var (message, statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 _logger.LogError("{message}: {error_response}", message, errorResponse);
-                throw new MissionException(message);
+                throw new MissionException(message, statusCode);
             }
             if (response.Content is null)
             {
@@ -117,10 +117,10 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                string message = GetErrorDescriptionFoFailedIsarRequest(response);
+                var (message, statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 _logger.LogError("{message}: {error_response}", message, errorResponse);
-                throw new MissionException(message);
+                throw new MissionException(message, statusCode);
             }
             if (response.Content is null)
             {
@@ -150,10 +150,10 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                string message = GetErrorDescriptionFoFailedIsarRequest(response);
+                var (message, statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 _logger.LogError("{message}: {error_response}", message, errorResponse);
-                throw new MissionException(message);
+                throw new MissionException(message, statusCode);
             }
             if (response.Content is null)
             {
@@ -182,10 +182,10 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                string message = GetErrorDescriptionFoFailedIsarRequest(response);
+                var (message, statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 _logger.LogError("{message}: {error_response}", message, errorResponse);
-                throw new MissionException(message);
+                throw new MissionException(message, statusCode);
             }
             if (response.Content is null)
             {
@@ -215,10 +215,10 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                string message = GetErrorDescriptionFoFailedIsarRequest(response);
+                var (message, statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 _logger.LogError("{message}: {error_response}", message, errorResponse);
-                throw new MissionException(message);
+                throw new MissionException(message, statusCode);
             }
             if (response.Content is null)
             {
@@ -244,7 +244,7 @@ namespace Api.Services
             return isarMission;
         }
 
-        private static string GetErrorDescriptionFoFailedIsarRequest(HttpResponseMessage response)
+        private static (string, int) GetErrorDescriptionFoFailedIsarRequest(HttpResponseMessage response)
         {
             var statusCode = response.StatusCode;
             string description = (int)statusCode switch
@@ -259,7 +259,7 @@ namespace Api.Services
                 _ => $"An unexpected status code '{statusCode}' was received from ISAR"
             };
 
-            return description;
+            return (description, (int)statusCode);
         }
     }
 }

@@ -208,5 +208,108 @@ namespace Api.Test
             Assert.True(mission.Id != null);
             Assert.True(mission.Status == MissionStatus.Pending);
         }
+
+        [Fact]
+        public async Task AssetDeckTest()
+        {
+            // Arrange
+            string testAsset = "testAsset";
+            string testDeck = "testDeck";
+            string assetDeckUrl = $"/asset-decks";
+            var testPose = new Pose
+            {
+                Position = new Position
+                {
+                    X = 1,
+                    Y = 2,
+                    Z = 2
+                },
+                Orientation = new Orientation
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                    W = 1
+                }
+            };
+
+            var query = new CreateAssetDeckQuery
+            {
+                AssetCode = testAsset,
+                DeckName = testDeck,
+                DefaultLocalizationPose = testPose
+            };
+
+            var content = new StringContent(
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
+
+            // Act
+            var assetDeckResponse = await _client.PostAsync(assetDeckUrl, content);
+
+            // Assert
+            Assert.True(assetDeckResponse.IsSuccessStatusCode);
+            var assetDeck = await assetDeckResponse.Content.ReadFromJsonAsync<AssetDeck>(_serializerOptions);
+            Assert.True(assetDeck != null);
+        }
+
+        [Fact]
+        public async Task SafePositionTest()
+        {
+            // Arrange - Add Safe Position
+            string testAsset = "testAsset";
+            string testDeck = "testDeck";
+            string addSafePositionUrl = $"/asset-decks/{testAsset}/{testDeck}/safe-position";
+            var testPosition = new Position
+            {
+                X = 1,
+                Y = 2,
+                Z = 2
+            };
+            var query = new Pose
+            {
+                Position = testPosition,
+                Orientation = new Orientation
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                    W = 1
+                }
+            };
+            var content = new StringContent(
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
+            var assetDeckResponse = await _client.PostAsync(addSafePositionUrl, content);
+            Assert.True(assetDeckResponse.IsSuccessStatusCode);
+            var assetDeck = await assetDeckResponse.Content.ReadFromJsonAsync<AssetDeck>(_serializerOptions);
+            Assert.True(assetDeck != null);
+
+            // Arrange - Get a Robot
+            string url = "/robots";
+            var robotResponse = await _client.GetAsync(url);
+            Assert.True(robotResponse.IsSuccessStatusCode);
+            var robots = await robotResponse.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
+            Assert.True(robots != null);
+            var robot = robots[0];
+            string robotId = robot.Id;
+
+            // Act
+            string goToSafePositionUrl = $"/robots/{robotId}/{testAsset}/{testDeck}/go-to-safe-position";
+            var missionResponse = await _client.PostAsync(goToSafePositionUrl, null);
+
+            // Assert
+            Assert.True(missionResponse.IsSuccessStatusCode);
+            var mission = await missionResponse.Content.ReadFromJsonAsync<Mission>(_serializerOptions);
+            Assert.True(mission != null);
+            Assert.True(
+                JsonSerializer.Serialize(mission.Tasks[0].RobotPose.Position) ==
+                JsonSerializer.Serialize(testPosition)
+            );
+        }
     }
 }
