@@ -2,12 +2,14 @@
 using Api.Controllers.Models;
 using Api.Services;
 using Api.Services.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("echo")]
+[Authorize(Roles = Role.Any)]
 public class EchoController : ControllerBase
 {
     private readonly ILogger<EchoController> _logger;

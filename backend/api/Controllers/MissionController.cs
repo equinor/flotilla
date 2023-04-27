@@ -3,6 +3,7 @@ using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -42,6 +43,7 @@ public class MissionController : ControllerBase
     /// <para> This query gets all missions </para>
     /// </remarks>
     [HttpGet]
+    [Authorize(Roles = Role.Any)]
     [ProducesResponseType(typeof(IList<Mission>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -97,6 +99,7 @@ public class MissionController : ControllerBase
     /// Lookup mission by specified id.
     /// </summary>
     [HttpGet]
+    [Authorize(Roles = Role.Any)]
     [Route("{id}")]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -115,6 +118,7 @@ public class MissionController : ControllerBase
     /// Get map for mission with specified id.
     /// </summary>
     [HttpGet]
+    [Authorize(Roles = Role.Any)]
     [Route("{id}/map")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -154,6 +158,7 @@ public class MissionController : ControllerBase
     /// <para> This query schedules a new mission and adds it to the database </para>
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = Role.User)]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -242,6 +247,7 @@ public class MissionController : ControllerBase
     /// <para> This query schedules a custom mission defined in the incoming json </para>
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = Role.User)]
     [Route("custom")]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -285,6 +291,7 @@ public class MissionController : ControllerBase
     /// Deletes the mission with the specified id from the database.
     /// </summary>
     [HttpDelete]
+    [Authorize(Roles = Role.Admin)]
     [Route("{id}")]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

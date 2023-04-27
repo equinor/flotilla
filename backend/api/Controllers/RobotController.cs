@@ -4,6 +4,7 @@ using Api.Database.Models;
 using Api.Services;
 using Api.Services.Models;
 using Api.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -40,6 +41,7 @@ public class RobotController : ControllerBase
     /// <para> This query gets all robots </para>
     /// </remarks>
     [HttpGet]
+    [Authorize(Roles = Role.Any)]
     [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -65,6 +67,7 @@ public class RobotController : ControllerBase
     /// <para> This query gets the robot with the specified id </para>
     /// </remarks>
     [HttpGet]
+    [Authorize(Roles = Role.Any)]
     [Route("{id}")]
     [ProducesResponseType(typeof(Robot), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -100,6 +103,7 @@ public class RobotController : ControllerBase
     /// <para> This query creates a robot and adds it to the database </para>
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = Role.Admin)]
     [ProducesResponseType(typeof(Robot), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -138,6 +142,7 @@ public class RobotController : ControllerBase
     /// <response code="400"> The robot data is invalid </response>
     /// <response code="404"> There was no robot with the given ID in the database </response>
     [HttpPut]
+    [Authorize(Roles = Role.Admin)]
     [Route("{id}")]
     [ProducesResponseType(typeof(Robot), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -180,6 +185,7 @@ public class RobotController : ControllerBase
     /// Deletes the robot with the specified id from the database.
     /// </summary>
     [HttpDelete]
+    [Authorize(Roles = Role.Admin)]
     [Route("{id}")]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -203,6 +209,7 @@ public class RobotController : ControllerBase
     /// <response code="400"> The robot data is invalid </response>
     /// <response code="404"> There was no robot with the given ID in the database </response>
     [HttpPut]
+    [Authorize(Roles = Role.Admin)]
     [Route("{id}/status")]
     [ProducesResponseType(typeof(Robot), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -247,6 +254,7 @@ public class RobotController : ControllerBase
     /// <para> Retrieves the video streams available for the given robot </para>
     /// </remarks>
     [HttpGet]
+    [Authorize(Roles = Role.User)]
     [Route("{robotId}/video-streams/")]
     [ProducesResponseType(typeof(IList<VideoStream>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -273,6 +281,7 @@ public class RobotController : ControllerBase
     /// <para> Adds a provided video stream to the given robot </para>
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = Role.Admin)]
     [Route("{robotId}/video-streams/")]
     [ProducesResponseType(typeof(Robot), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -318,6 +327,7 @@ public class RobotController : ControllerBase
     /// <para> This query starts a mission for a given robot </para>
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = Role.Admin)]
     [Route("{robotId}/start/{missionId}")]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -415,6 +425,7 @@ public class RobotController : ControllerBase
     /// <para> This query stops the current mission for a given robot </para>
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = Role.User)]
     [Route("{robotId}/stop/")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -466,6 +477,7 @@ public class RobotController : ControllerBase
     /// <para> This query pauses the current mission for a robot </para>
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = Role.User)]
     [Route("{robotId}/pause/")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -515,6 +527,7 @@ public class RobotController : ControllerBase
     /// <para> This query resumes the currently paused mission for a robot </para>
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = Role.User)]
     [Route("{robotId}/resume/")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -564,6 +577,7 @@ public class RobotController : ControllerBase
     /// <para> This query starts a localization for a given robot </para>
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = Role.User)]
     [Route("{robotId}/start-localization")]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

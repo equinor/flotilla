@@ -1,6 +1,7 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -29,6 +30,7 @@ public class RobotModelController : ControllerBase
     /// <para> This query gets all robot models </para>
     /// </remarks>
     [HttpGet]
+    [Authorize(Roles = Role.Any)]
     [ProducesResponseType(typeof(IList<RobotModel>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -52,6 +54,7 @@ public class RobotModelController : ControllerBase
     /// Lookup robot model by the robot type
     /// </summary>
     [HttpGet]
+    [Authorize(Roles = Role.Any)]
     [Route("type/{robotType}")]
     [ProducesResponseType(typeof(RobotModel), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -72,6 +75,7 @@ public class RobotModelController : ControllerBase
     /// Lookup robot model by specified id.
     /// </summary>
     [HttpGet]
+    [Authorize(Roles = Role.Any)]
     [Route("{id}")]
     [ProducesResponseType(typeof(RobotModel), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -93,6 +97,7 @@ public class RobotModelController : ControllerBase
     /// <para> This query adds a new robot model to the database </para>
     /// </remarks>
     [HttpPost]
+    [Authorize(Roles = Role.Admin)]
     [ProducesResponseType(typeof(RobotModel), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -136,6 +141,7 @@ public class RobotModelController : ControllerBase
     /// <response code="400"> The robot model data is invalid </response>
     /// <response code="404"> There was no robot model with the given ID in the database </response>
     [HttpPut]
+    [Authorize(Roles = Role.Admin)]
     [Route("{id}")]
     [ProducesResponseType(typeof(RobotModel), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -167,6 +173,7 @@ public class RobotModelController : ControllerBase
     /// <response code="400"> The robot model data is invalid </response>
     /// <response code="404"> There was no robot model with the specified robot type in the database </response>
     [HttpPut]
+    [Authorize(Roles = Role.Admin)]
     [Route("type/{robotType}")]
     [ProducesResponseType(typeof(RobotModel), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -195,6 +202,7 @@ public class RobotModelController : ControllerBase
     /// Deletes the robot model with the specified id from the database.
     /// </summary>
     [HttpDelete]
+    [Authorize(Roles = Role.Admin)]
     [Route("{id}")]
     [ProducesResponseType(typeof(RobotModel), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

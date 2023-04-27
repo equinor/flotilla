@@ -82,7 +82,6 @@ builder.Services.AddAuthorization(
     {
         options.FallbackPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
-            .RequireRole(builder.Configuration.GetSection("Authorization")["Roles"])
             .Build();
     }
 );
@@ -98,8 +97,8 @@ app.UseSwagger(
             {
                 swaggerDoc.Servers = new List<OpenApiServer>
                 {
-                    new OpenApiServer { Url = $"https://{httpReq.Host.Value}{basePath}" },
-                    new OpenApiServer { Url = $"http://{httpReq.Host.Value}{basePath}" }
+                    new() { Url = $"https://{httpReq.Host.Value}{basePath}" },
+                    new() { Url = $"http://{httpReq.Host.Value}{basePath}" }
                 };
             }
         );
