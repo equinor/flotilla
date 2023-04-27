@@ -19,6 +19,8 @@ namespace Api.Controllers.Models
 
         public string? TagId { get; set; }
 
+        public string? Description { get; set; }
+
         public Pose RobotPose { get; set; }
 
         public List<CustomInspectionQuery> Inspections { get; set; }
