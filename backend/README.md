@@ -232,3 +232,15 @@ to monitor the backend of our application.
 
 We have one application insight instance for each environment.
 The connection strings for the AI instances are stored in the keyvault.
+
+## Authorization
+
+We use role based access control (RBAC) for authorization.
+
+The access matrix looks like this:
+
+|               | Missions       | Robots | Robot Models | Asset Decks | Start Mission Directly | Stop/Pause/Resume mission |
+| ------------- | -------------- | ------ | ------------ | ----------- | ---------------------- | ------------------------- |
+| **Read Only** | Read           | Read   | Read         | Read        | ❌                     | ❌                        |
+| **User**      | Read<br>Create | Read   | Read         | Read        | ❌                     | ✔️                        |
+| **Admin**     | CRUD           | CRUD   | CRUD         | CRUD        | ✔️                     | ✔️                        |
