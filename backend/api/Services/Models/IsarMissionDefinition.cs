@@ -12,18 +12,23 @@ namespace Api.Services.Models
         [JsonPropertyName("id")]
         public string? Id { get; set; }
 
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+
         [JsonPropertyName("tasks")]
         public List<IsarTaskDefinition> Tasks { get; set; }
 
         public IsarMissionDefinition(List<IsarTaskDefinition> tasks)
         {
             Id = null;
+            Name = null;
             Tasks = tasks;
         }
 
         public IsarMissionDefinition(Mission mission)
         {
             Id = mission.IsarMissionId;
+            Name = mission.Name;
             Tasks = mission.Tasks.Select(task => new IsarTaskDefinition(task, mission)).ToList();
         }
     }
