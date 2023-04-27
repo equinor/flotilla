@@ -24,6 +24,9 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public string? TagId { get; set; }
 
+        [MaxLength(500)]
+        public string? Description { get; set; }
+
         [MaxLength(200)]
         public Uri? EchoTagLink { get; set; }
 
@@ -90,6 +93,7 @@ namespace Api.Database.Models
                 .Select(inspection => new Inspection(inspection))
                 .ToList();
             TagId = taskQuery.TagId;
+            Description = taskQuery.Description;
             InspectionTarget = taskQuery.InspectionTarget;
             RobotPose = taskQuery.RobotPose;
             TaskOrder = taskQuery.TaskOrder;
