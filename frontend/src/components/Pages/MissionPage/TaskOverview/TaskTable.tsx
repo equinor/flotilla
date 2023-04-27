@@ -26,6 +26,7 @@ export function TaskTable({ mission }: MissionProps) {
                 <Table.Row>
                     <Table.Cell>#</Table.Cell>
                     <Table.Cell>{Text('Tag-ID')}</Table.Cell>
+                    <Table.Cell>{Text('Description')}</Table.Cell>
                     <Table.Cell>{Text('Inspection Types')}</Table.Cell>
                     <Table.Cell>{Text('Status')}</Table.Cell>
                 </Table.Row>
@@ -43,6 +44,7 @@ function renderTasks(tasks: Task[]) {
             <Table.Row key={order}>
                 <Table.Cell>{order}</Table.Cell>
                 <Table.Cell> {renderTagId(task)}</Table.Cell>
+                <Table.Cell> {renderDescription(task)}</Table.Cell>
                 <Table.Cell> {renderInspectionTypes(task)} </Table.Cell>
                 <Table.Cell>
                     <TaskStatusDisplay status={task.status} />
@@ -63,6 +65,11 @@ function renderTagId(task: Task) {
             </Typography>
         )
     else return <Typography>{task.tagId!}</Typography>
+}
+
+function renderDescription(task: Task) {
+    if (!task.description) return <Typography>{'N/A'}</Typography>
+    return <Typography>{task.description}</Typography>
 }
 
 function renderInspectionTypes(task: Task) {

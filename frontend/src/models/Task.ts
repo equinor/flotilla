@@ -7,6 +7,7 @@ export interface Task {
     isarTaskId?: string
     taskOrder: number
     tagId?: string
+    description?: string
     echoTagLink?: string
     inspectionTarget: Position
     robotPose: Pose
