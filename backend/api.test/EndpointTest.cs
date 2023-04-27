@@ -65,9 +65,6 @@ namespace Api.Test
                                             TestAuthHandler.AuthenticationScheme
                                         )
                                             .RequireAuthenticatedUser()
-                                            .RequireRole(
-                                                configuration.GetSection("Authorization")["Roles"]
-                                            )
                                             .Build();
                                     }
                                 );
