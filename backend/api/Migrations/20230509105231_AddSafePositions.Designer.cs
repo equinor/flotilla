@@ -4,6 +4,7 @@ using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230509105231_AddSafePositions")]
+    partial class AddSafePositions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,8 +77,8 @@ namespace Api.Migrations
                     b.Property<DateTimeOffset?>("EndTime")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<long?>("EstimatedDuration")
-                        .HasColumnType("bigint");
+                    b.Property<TimeSpan?>("EstimatedDuration")
+                        .HasColumnType("time");
 
                     b.Property<string>("IsarMissionId")
                         .HasMaxLength(200)
@@ -168,9 +170,6 @@ namespace Api.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<float?>("AverageDurationPerTag")
-                        .HasColumnType("real");
 
                     b.Property<float?>("BatteryWarningThreshold")
                         .HasColumnType("real");

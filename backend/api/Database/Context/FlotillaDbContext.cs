@@ -11,6 +11,7 @@ public class FlotillaDbContext : DbContext
     public DbSet<RobotModel> RobotModels => Set<RobotModel>();
     public DbSet<Mission> Missions => Set<Mission>();
     public DbSet<AssetDeck> AssetDecks => Set<AssetDeck>();
+    public DbSet<SafePosition> SafePositions => Set<SafePosition>();
 
     public FlotillaDbContext(DbContextOptions options) : base(options) { }
 
@@ -58,10 +59,22 @@ public class FlotillaDbContext : DbContext
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
         modelBuilder.Entity<Robot>().OwnsMany(r => r.VideoStreams);
-        modelBuilder.Entity<AssetDeck>().OwnsOne(a => a.DefaultLocalizationPose);
+        modelBuilder.Entity<AssetDeck>().OwnsOne(a => a.DefaultLocalizationPose, poseBuilder =>
+        {
+            poseBuilder.OwnsOne(pose => pose.Position);
+            poseBuilder.OwnsOne(pose => pose.Orientation);
+        });
+        modelBuilder.Entity<SafePosition>().OwnsOne(s => s.Pose, poseBuilder =>
+        {
+            poseBuilder.OwnsOne(pose => pose.Position);
+            poseBuilder.OwnsOne(pose => pose.Orientation);
+        });
 
         // There can only be one robot model per robot type
         modelBuilder.Entity<RobotModel>().HasIndex(model => model.Type).IsUnique();
+
+        // There can only be one asset deck
+        modelBuilder.Entity<AssetDeck>().HasIndex(a => new { a.AssetCode, a.DeckName }).IsUnique();
     }
 
     // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations

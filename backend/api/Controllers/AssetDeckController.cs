@@ -1,6 +1,7 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -87,6 +88,13 @@ public class AssetDeckController : ControllerBase
         _logger.LogInformation("Creating new asset deck");
         try
         {
+            var existingAssetDeck = await _assetDeckService.ReadByAssetAndDeck(assetDeck.AssetCode, assetDeck.DeckName);
+            if (existingAssetDeck != null)
+            {
+                _logger.LogInformation("An asset deck for given deck and asset already exists");
+                return BadRequest($"Asset deck already exists");
+            }
+
             var newAssetDeck = await _assetDeckService.Create(assetDeck);
             _logger.LogInformation(
                 "Succesfully created new asset deck with id '{assetDeckId}'",
@@ -101,6 +109,60 @@ public class AssetDeckController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError(e, "Error while creating new asset deck");
+            throw;
+        }
+    }
+
+
+    /// <summary>
+    /// Add a safe position to a asset deck
+    /// </summary>
+    /// <remarks>
+    /// <para> This query adds a new safe position to the database </para>
+    /// </remarks>
+    [HttpPost]
+    [Authorize(Roles = Role.Admin)]
+    [Route("{asset}/{deck}/safe-position")]
+    [ProducesResponseType(typeof(AssetDeck), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<AssetDeck>> AddSafePosition(
+        [FromRoute] string asset,
+        [FromRoute] string deck,
+        [FromBody] Pose safePosition
+    )
+    {
+        _logger.LogInformation("Adding new safe position");
+        try
+        {
+            var assetDeck = await _assetDeckService.AddSafePosition(asset, deck, new SafePosition(safePosition));
+            if (assetDeck != null)
+            {
+                _logger.LogInformation("Succesfully added new safe position for asset '{assetId}' and deck '{deckId}'", asset, deck);
+                return CreatedAtAction(nameof(GetAssetDeckById), new { id = assetDeck.Id }, assetDeck); ;
+            }
+            else
+            {
+                _logger.LogInformation("Creating AssetDeck for asset '{assetId}' and deck '{deckId}'", asset, deck);
+                // Cloning to avoid tracking same object
+                var tempPose = ObjectCopier.Clone(safePosition);
+                assetDeck = await _assetDeckService.Create(
+                    new CreateAssetDeckQuery
+                    {
+                        AssetCode = asset,
+                        DeckName = deck,
+                        DefaultLocalizationPose = new Pose()
+                    },
+                    new List<Pose> { tempPose }
+                );
+                return CreatedAtAction(nameof(GetAssetDeckById), new { id = assetDeck.Id }, assetDeck);
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while creating or adding new safe zone");
             throw;
         }
     }

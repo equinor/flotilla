@@ -239,8 +239,15 @@ We use role based access control (RBAC) for authorization.
 
 The access matrix looks like this:
 
-|               | Missions       | Robots | Robot Models | Asset Decks | Start Mission Directly | Stop/Pause/Resume mission |
-| ------------- | -------------- | ------ | ------------ | ----------- | ---------------------- | ------------------------- |
-| **Read Only** | Read           | Read   | Read         | Read        | ❌                     | ❌                        |
-| **User**      | Read<br>Create | Read   | Read         | Read        | ❌                     | ✔️                        |
-| **Admin**     | CRUD           | CRUD   | CRUD         | CRUD        | ✔️                     | ✔️                        |
+|                            | **Read Only** | **User** | **Admin** |
+| -------------------------- | ------------- | -------- | --------- |
+| Asset Decks                | Read          | Read     | CRUD      |
+| Echo                       | Read          | Read     | CRUD      |
+| Missions                   | Read          | Read     | CRUD      |
+| Robots                     | Read          | Read     | CRUD      |
+| Robot Models               | Read          | Read     | CRUD      |
+| Safe Positions             | Read          | Read     | CRUD      |
+| Start Missions Directly    | ❌            | ❌       | ✔️        |
+| Stop/Pause/Resume Missions | ❌            | ✔️       | ✔️        |
+| Localize Robots            | ❌            | ✔️       | ✔️        |
+| Robot to Safe position     | ❌            | ✔️       | ✔️        |
