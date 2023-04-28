@@ -11,7 +11,7 @@ import { StatusReason } from '../StatusReason'
 const HeaderSection = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 0.4rem;
 `
 const TitleSection = styled.div`
     display: flex;
@@ -43,6 +43,13 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
                 <Typography variant="h1">{mission.name}</Typography>
                 {showControlButtons && <MissionControlButtons mission={mission} />}
             </TitleSection>
+            <Typography
+                variant="body_long_italic"
+                group="paragraph"
+                color={tokens.colors.text.static_icons__secondary.rgba}
+            >
+                {mission.description && Text('Description') + ': ' + mission.description}
+            </Typography>
             <StatusReason mission={mission}></StatusReason>
             <InfoSection>
                 <MissionStatusDisplay status={mission.status} />
