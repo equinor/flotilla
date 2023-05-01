@@ -8,6 +8,7 @@ import { useErrorHandler } from 'react-error-boundary'
 import { defaultPose, Pose } from 'models/Pose'
 import { PlaceRobotInMap, PlaceTagsInMap } from './MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
+import { TaskStatus } from 'models/Task'
 
 interface MissionProps {
     mission: Mission
@@ -34,6 +35,8 @@ export function MapView({ mission }: MissionProps) {
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
     const [previousRobotPose, setPreviousRobotPose] = useState<Pose>(defaultPose)
     const [currentRobotPose, setCurrentRobotPose] = useState<Pose>(defaultPose)
+    const [currentTaskOrder, setCurrentTaskOrder] = useState<number>()
+
     let imageObjectURL: string
 
     const updateMap = () => {
@@ -43,7 +46,7 @@ export function MapView({ mission }: MissionProps) {
         }
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
-        PlaceTagsInMap(mission, mapCanvas)
+        PlaceTagsInMap(mission, mapCanvas, currentTaskOrder)
         PlaceRobotInMap(mission, mapCanvas, currentRobotPose, previousRobotPose)
     }
 
@@ -52,6 +55,16 @@ export function MapView({ mission }: MissionProps) {
         image.src = url
         await image.decode()
         return image
+    }
+
+    const findCurrentTaskOrder = () => {
+        let index = 0
+        mission.tasks.map(function (task) {
+            if (task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused) {
+                setCurrentTaskOrder(task.taskOrder)
+            }
+            index += 1
+        })
     }
 
     useEffect(() => {
@@ -85,6 +98,14 @@ export function MapView({ mission }: MissionProps) {
             setCurrentRobotPose(mission.robot.pose)
         }
     }, [mission.robot.pose])
+
+    useEffect(() => {
+        if (mission.isCompleted) {
+            setCurrentTaskOrder(undefined)
+        } else {
+            findCurrentTaskOrder()
+        }
+    }, [mission])
 
     useEffect(() => {
         let animationFrameId = 0
