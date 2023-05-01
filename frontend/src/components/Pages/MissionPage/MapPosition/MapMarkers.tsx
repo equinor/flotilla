@@ -2,20 +2,40 @@ import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import { MissionMap } from 'models/MissionMap'
 import { Pose } from 'models/Pose'
+import { Task, TaskStatus } from 'models/Task'
 
 interface ObjectPosition {
     x: number
     y: number
 }
 
-export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement) => {
-    let tagNumber = 1
+enum MarkerStyles {
+    Completed = 'Completed',
+    Normal = 'Normal',
+    Highlighted = 'Highlighted',
+}
 
-    mission.tasks.map(function (task) {
+export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, currentTaskOrder?: number) => {
+    const maxTaskOrder: number = Math.max(
+        ...mission.tasks.map((task) => {
+            return task.taskOrder
+        })
+    )
+    if (currentTaskOrder === undefined) {
+        currentTaskOrder = mission.isCompleted ? maxTaskOrder + 1 : 0
+    }
+
+    const orderedTasks = orderTasksByDrawOrder(mission.tasks, currentTaskOrder, maxTaskOrder)
+    orderedTasks.map(function (task) {
         if (task.inspectionTarget) {
             const pixelPosition = calculateObjectPixelPosition(mission.map!, task.inspectionTarget)
-            drawTagMarker(pixelPosition[0], pixelPosition[1], map, tagNumber, 30)
-            tagNumber += 1
+            if (task.status === TaskStatus.NotStarted) {
+                drawTagMarker(pixelPosition[0], pixelPosition[1], map, task.taskOrder + 1, 30, MarkerStyles.Normal)
+            } else if (task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused) {
+                drawTagMarker(pixelPosition[0], pixelPosition[1], map, task.taskOrder + 1, 30, MarkerStyles.Highlighted)
+            } else {
+                drawTagMarker(pixelPosition[0], pixelPosition[1], map, task.taskOrder + 1, 30, MarkerStyles.Completed)
+            }
         }
     })
 }
@@ -33,6 +53,25 @@ export const PlaceRobotInMap = (
     const rad = calculateNavigatorAngle(currentRobotPose, previousRobotPose)
     drawRobotMarker(pixelPosition[0], pixelPosition[1], map, 22)
     drawNavigator(pixelPosition[0], pixelPosition[1], map, rad)
+}
+
+const orderTasksByDrawOrder = (tasks: Task[], currentTaskOrder: number, maxTaskOrder: number) => {
+    let tasksWithDrawOrder = tasks.map(function (task) {
+        var drawOrder
+        if (task.taskOrder === currentTaskOrder) {
+            drawOrder = maxTaskOrder
+        } else if (task.taskOrder < currentTaskOrder) {
+            drawOrder = task.taskOrder
+        } else {
+            drawOrder = currentTaskOrder + (maxTaskOrder - task.taskOrder)
+        }
+        return { task, drawOrder }
+    })
+
+    tasksWithDrawOrder.sort((a, b) => a.drawOrder - b.drawOrder)
+    return tasksWithDrawOrder.map(function (taskWithDrawOrder) {
+        return taskWithDrawOrder.task
+    })
 }
 
 const calculateObjectPixelPosition = (missionMap: MissionMap, objectPosition: ObjectPosition) => {
@@ -56,22 +95,40 @@ const calculateNavigatorAngle = (currentRobotPose: Pose, previousRobotPose: Pose
     return rad
 }
 
-const drawTagMarker = (p1: number, p2: number, map: HTMLCanvasElement, tagNumber: number, circleSize: number) => {
+const drawTagMarker = (
+    p1: number,
+    p2: number,
+    map: HTMLCanvasElement,
+    tagNumber: number,
+    circleSize: number,
+    style: MarkerStyles
+) => {
     const context = map.getContext('2d')
     if (context === null) {
         return
+    }
+
+    var fillColor = tokens.colors.ui.background__medium.hex
+    var textColor = 'black'
+    if (style === MarkerStyles.Completed) {
+        fillColor = tokens.colors.ui.background__medium.hex
+    } else if (style === MarkerStyles.Normal) {
+        fillColor = tokens.colors.ui.background__info.hex
+    } else if (style === MarkerStyles.Highlighted) {
+        fillColor = tokens.colors.interactive.primary__resting.hex
+        textColor = 'white'
     }
 
     context.beginPath()
     const path = new Path2D()
     path.arc(p1, map.height - p2, circleSize, 0, 2 * Math.PI)
 
-    context.fillStyle = tokens.colors.interactive.primary__resting.hex
+    context.fillStyle = fillColor
     context.strokeStyle = tokens.colors.text.static_icons__default.hex
     context.fill(path)
     context.stroke(path)
     context.font = '35pt Calibri'
-    context.fillStyle = 'white'
+    context.fillStyle = textColor
     context.textAlign = 'center'
     context.fillText(tagNumber.toString(), p1, map.height - p2 + circleSize / 2)
 }
