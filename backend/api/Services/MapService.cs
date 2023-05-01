@@ -101,6 +101,7 @@ namespace Api.Services
                 )
             };
             mission.Map = map;
+            _logger.LogInformation("Assigned map {map} to mission {mission}", mostSuitableMap, mission.Name);
         }
 
         private BlobContainerClient GetBlobContainerClient(string asset)
@@ -203,91 +204,48 @@ namespace Api.Services
             }
         }
 
-        private static string FindMostSuitableMap(
+        private string FindMostSuitableMap(
             Dictionary<string, Boundary> boundaries,
             IList<MissionTask> tasks
         )
         {
-            string mostSuitableMap = "";
+            var mapCoverage = new Dictionary<string, int>();
             foreach (var boundary in boundaries)
             {
-                if (!string.IsNullOrEmpty(mostSuitableMap))
-                {
-                    string referenceMap = mostSuitableMap;
-                    //If the current map is lower resolution than the best map, it's not worth checking.
-                    if (
-                        !CheckMapIsHigherResolution(
-                            boundary.Value.As2DMatrix(),
-                            boundaries[referenceMap].As2DMatrix()
-                        )
-                    )
-                    {
-                        continue;
-                    }
-                }
-                if (CheckTagsInBoundary(boundary.Value, tasks))
-                {
-                    mostSuitableMap = boundary.Key;
-                }
+                mapCoverage.Add(boundary.Key, FractionOfTagsWithinBoundary(boundary: boundary.Value, tasks: tasks));
             }
-            if (string.IsNullOrEmpty(mostSuitableMap))
-            {
-                throw new ArgumentOutOfRangeException(nameof(tasks));
-            }
-            return mostSuitableMap;
+            string keyOfMaxValue = mapCoverage.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+
+            if (mapCoverage[keyOfMaxValue] < 0.5) throw new ArgumentOutOfRangeException(nameof(tasks));
+
+            return keyOfMaxValue;
         }
 
-        private static bool CheckTagsInBoundary(Boundary boundary, IList<MissionTask> tasks)
+        private static bool TagWithinBoundary(Boundary boundary, MissionTask task)
         {
+            return task.InspectionTarget.X > boundary.X1
+                   && task.InspectionTarget.X < boundary.X2 && task.InspectionTarget.Y > boundary.Y1
+                   && task.InspectionTarget.Y < boundary.Y2 && task.InspectionTarget.Z > boundary.Z1
+                   && task.InspectionTarget.Z < boundary.Z2;
+        }
+
+        private int FractionOfTagsWithinBoundary(Boundary boundary, IList<MissionTask> tasks)
+        {
+            int tagsWithinBoundary = 0;
             foreach (var task in tasks)
             {
                 try
                 {
-                    if (
-                        task.InspectionTarget.X < boundary.X1
-                        || task.InspectionTarget.X > boundary.X2
-                    )
-                    {
-                        return false;
-                    }
-                    if (
-                        task.InspectionTarget.Y < boundary.Y1
-                        || task.InspectionTarget.Y > boundary.Y2
-                    )
-                    {
-                        return false;
-                    }
-                    if (
-                        task.InspectionTarget.Z < boundary.Z1
-                        || task.InspectionTarget.Z > boundary.Z2
-                    )
-                    {
-                        return false;
-                    }
+                    if (TagWithinBoundary(boundary: boundary, task: task)) tagsWithinBoundary++;
                 }
                 catch
                 {
-                    return false;
+                    _logger.LogWarning("An error occurred while checking if tag was within boundary");
                 }
             }
-            return true;
-        }
+            tagsWithinBoundary++;
 
-        private static bool CheckMapIsHigherResolution(
-            List<double[]> checkMap,
-            List<double[]> referenceMap
-        )
-        {
-            double checkMapArea =
-                (checkMap[1][0] - checkMap[0][0]) * (checkMap[1][1] - checkMap[0][1]);
-            double referenceMapArea =
-                (referenceMap[1][0] - referenceMap[0][0])
-                * (referenceMap[1][1] - referenceMap[0][1]);
-            if (checkMapArea > referenceMapArea)
-            {
-                return false;
-            }
-            return true;
+            return tagsWithinBoundary / tasks.Count;
         }
     }
 }
