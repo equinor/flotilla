@@ -58,12 +58,10 @@ export function MapView({ mission }: MissionProps) {
     }
 
     const findCurrentTaskOrder = () => {
-        let index = 0
         mission.tasks.map(function (task) {
             if (task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused) {
                 setCurrentTaskOrder(task.taskOrder)
             }
-            index += 1
         })
     }
 

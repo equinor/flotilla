@@ -3,16 +3,11 @@ import { Mission } from 'models/Mission'
 import { MissionMap } from 'models/MissionMap'
 import { Pose } from 'models/Pose'
 import { Task, TaskStatus } from 'models/Task'
+import { GetColorsFromTaskStatus } from '../MarkerStyles'
 
 interface ObjectPosition {
     x: number
     y: number
-}
-
-enum MarkerStyles {
-    Completed = 'Completed',
-    Normal = 'Normal',
-    Highlighted = 'Highlighted',
 }
 
 export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, currentTaskOrder?: number) => {
@@ -29,13 +24,7 @@ export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
     orderedTasks.map(function (task) {
         if (task.inspectionTarget) {
             const pixelPosition = calculateObjectPixelPosition(mission.map!, task.inspectionTarget)
-            if (task.status === TaskStatus.NotStarted) {
-                drawTagMarker(pixelPosition[0], pixelPosition[1], map, task.taskOrder + 1, 30, MarkerStyles.Normal)
-            } else if (task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused) {
-                drawTagMarker(pixelPosition[0], pixelPosition[1], map, task.taskOrder + 1, 30, MarkerStyles.Highlighted)
-            } else {
-                drawTagMarker(pixelPosition[0], pixelPosition[1], map, task.taskOrder + 1, 30, MarkerStyles.Completed)
-            }
+            drawTagMarker(pixelPosition[0], pixelPosition[1], map, task.taskOrder + 1, 30, task.status)
         }
     })
 }
@@ -101,34 +90,25 @@ const drawTagMarker = (
     map: HTMLCanvasElement,
     tagNumber: number,
     circleSize: number,
-    style: MarkerStyles
+    taskStatus: TaskStatus
 ) => {
     const context = map.getContext('2d')
     if (context === null) {
         return
     }
 
-    var fillColor = tokens.colors.ui.background__medium.hex
-    var textColor = 'black'
-    if (style === MarkerStyles.Completed) {
-        fillColor = tokens.colors.ui.background__medium.hex
-    } else if (style === MarkerStyles.Normal) {
-        fillColor = tokens.colors.ui.background__info.hex
-    } else if (style === MarkerStyles.Highlighted) {
-        fillColor = tokens.colors.interactive.primary__resting.hex
-        textColor = 'white'
-    }
+    const colors = GetColorsFromTaskStatus(taskStatus)
 
     context.beginPath()
     const path = new Path2D()
     path.arc(p1, map.height - p2, circleSize, 0, 2 * Math.PI)
 
-    context.fillStyle = fillColor
+    context.fillStyle = colors.fillColor
     context.strokeStyle = tokens.colors.text.static_icons__default.hex
     context.fill(path)
     context.stroke(path)
     context.font = '35pt Calibri'
-    context.fillStyle = textColor
+    context.fillStyle = colors.textColor
     context.textAlign = 'center'
     context.fillText(tagNumber.toString(), p1, map.height - p2 + circleSize / 2)
 }
