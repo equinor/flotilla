@@ -3,12 +3,14 @@ import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
 import { Text } from 'components/Contexts/LanguageContext'
-import { Task } from 'models/Task'
+import { Task, TaskStatus } from 'models/Task'
+import { tokens } from '@equinor/eds-tokens'
 
 const StyledTable = styled(Table)`
     grid-column: 1/ -1;
     font: equinor;
 `
+
 interface MissionProps {
     mission?: Mission
 }
@@ -40,9 +42,11 @@ function renderTasks(tasks: Task[]) {
     var rows = tasks?.map(function (task) {
         // Workaround for current bug in echo
         var order: number = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
+        const shouldHighlight: boolean = task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
+        const rowStyle = shouldHighlight ? { background: tokens.colors.infographic.primary__mist_blue.hex } : {}
         return (
-            <Table.Row key={order}>
-                <Table.Cell>{order}</Table.Cell>
+            <Table.Row key={order} style={rowStyle}>
+                <Table.Cell> {order}</Table.Cell>
                 <Table.Cell> {renderTagId(task)}</Table.Cell>
                 <Table.Cell> {renderDescription(task)}</Table.Cell>
                 <Table.Cell> {renderInspectionTypes(task)} </Table.Cell>
