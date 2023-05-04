@@ -78,7 +78,7 @@ function renderTagId(task: Task) {
 
     if (task.echoTagLink)
         return (
-            <Typography link href={task.echoTagLink}>
+            <Typography link href={task.echoTagLink} target="_blank">
                 {task.tagId!}
             </Typography>
         )
