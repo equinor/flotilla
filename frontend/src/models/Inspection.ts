@@ -19,7 +19,7 @@ enum InspectionStatus {
     Cancelled = 'Cancelled',
 }
 
-enum InspectionType {
+export enum InspectionType {
     Image = 'Image',
     ThermalImage = 'ThermalImage',
     Video = 'Video',
