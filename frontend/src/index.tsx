@@ -1,9 +1,9 @@
 import App from './App'
-import ReactDom from 'react-dom'
 import React from 'react'
 import { PublicClientApplication } from '@azure/msal-browser'
 import { MsalProvider } from '@azure/msal-react'
 import { msalConfig } from 'api/AuthConfig'
+import ReactDOM from 'react-dom/client'
 
 // ========================================
 
@@ -14,11 +14,14 @@ msalInstance.handleRedirectPromise().catch((error) => {
     console.error(error)
 })
 
-ReactDom.render(
+const rootElement = document.getElementById('root')
+if (!rootElement) throw new Error('Failed to find the root element')
+const root = ReactDOM.createRoot(rootElement)
+
+root.render(
     <React.StrictMode>
         <MsalProvider instance={msalInstance}>
             <App />
         </MsalProvider>
-    </React.StrictMode>,
-    document.getElementById('root')
+    </React.StrictMode>
 )
