@@ -10,6 +10,8 @@ import { Pose } from 'models/Pose'
 import { AssetDeck } from 'models/AssetDeck'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
+import { Task, TaskStatus } from 'models/Task'
+import { CreateCustomMission, CustomMissionQuery } from 'models/CustomMission'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
@@ -275,6 +277,30 @@ export class BackendAPICaller {
         const path: string = 'asset-decks'
         const result = await this.GET<AssetDeck[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
+    static async reRunMission(missionId: string, failedTasksOnly: boolean = false): Promise<Mission> {
+        let mission = await this.getMissionById(missionId)
+
+        if (failedTasksOnly) {
+            mission.tasks = mission.tasks.filter(
+                (task) => task.status != TaskStatus.PartiallySuccessful && task.status != TaskStatus.Successful
+            )
+            // Fix task ordering
+            for (let index = 0; index < mission.tasks.length; index++) {
+                mission.tasks[index].taskOrder = index
+            }
+        }
+
+        const customMission = CreateCustomMission(mission)
+
+        const path: string = 'missions/custom'
+        const body = customMission
+        const result = await BackendAPICaller.POST<CustomMissionQuery, Mission>(path, body).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
             throw e
         })
         return result.content
