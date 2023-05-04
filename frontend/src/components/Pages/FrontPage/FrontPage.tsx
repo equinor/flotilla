@@ -20,7 +20,7 @@ const HorizontalContent = styled.div`
 const MissionsContent = styled.div`
     display: flex;
     flex-wrap: wrap;
-    flex-direction: column;
+    flex-direction: row;
     gap: 2rem;
 `
 
