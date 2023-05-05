@@ -19,7 +19,7 @@ namespace Api.EventHandlers
                     new MissionQueryStringParameters
                     {
                         Status = MissionStatus.Pending,
-                        OrderBy = "DesiredStartTime desc",
+                        OrderBy = "DesiredStartTime",
                         PageSize = 100
                     }
                 )
