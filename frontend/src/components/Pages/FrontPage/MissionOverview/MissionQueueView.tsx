@@ -113,7 +113,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
             BackendAPICaller.getMissions({
                 status: MissionStatus.Pending,
                 pageSize: missionPageSize,
-                orderBy: 'DesiredStartTime desc',
+                orderBy: 'DesiredStartTime',
             }).then((missions) => {
                 setMissionQueue(missions.content)
             })
