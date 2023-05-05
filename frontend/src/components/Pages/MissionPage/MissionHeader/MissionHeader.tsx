@@ -7,6 +7,7 @@ import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { Text } from 'components/Contexts/LanguageContext'
 import { StatusReason } from '../StatusReason'
+import { MissionRestartButton } from 'components/Pages/FrontPage/MissionOverview/MissionRestartButton'
 
 const HeaderSection = styled.div`
     display: flex;
@@ -15,6 +16,7 @@ const HeaderSection = styled.div`
 `
 const TitleSection = styled.div`
     display: flex;
+    align-items: center;
     gap: 10px;
 `
 const InfoSection = styled.div`
@@ -32,16 +34,17 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
     const barToMillibar = 1000
     const isMissionCompleted = mission.endTime ? true : false
     var { startTime, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
-    var showControlButtons = false
+    var missionIsActive = false
     if (mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused) {
-        showControlButtons = true
+        missionIsActive = true
     }
 
     return (
         <HeaderSection>
             <TitleSection>
                 <Typography variant="h1">{mission.name}</Typography>
-                {showControlButtons && <MissionControlButtons mission={mission} />}
+                {missionIsActive && <MissionControlButtons mission={mission} />}
+                {mission.isCompleted && <MissionRestartButton mission={mission} />}
             </TitleSection>
             <Typography
                 variant="body_long_italic"
