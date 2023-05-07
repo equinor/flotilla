@@ -52,6 +52,11 @@ namespace Api.Database.Models
         /// </summary>
         public float? LowerPressureWarningThreshold { get; set; }
 
+        /// <summary>
+        /// The average time in seconds spent by this model on a single tag (excluding recording duration for video/audio)
+        /// </summary>
+        public float? AverageDurationPerTag { get; set; }
+
         public RobotModel() { }
 
         public RobotModel(CreateRobotModelQuery query)
