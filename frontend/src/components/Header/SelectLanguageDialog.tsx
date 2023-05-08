@@ -3,7 +3,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Button, Icon, Autocomplete, Dialog, Card } from '@equinor/eds-core-react'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 
 const StyledLanguageDialog = styled.div`
@@ -38,7 +38,7 @@ export function SelectLanguageDialog() {
                     <StyledAutoComplete>
                         <Autocomplete
                             options={Array.from(Object.values(languageOptions)).sort()}
-                            label={Text('Select language')}
+                            label={translateText('Select language')}
                             initialSelectedOptions={[]}
                             onOptionsChange={({ selectedItems }) => {
                                 selectedItems[0]
@@ -56,7 +56,7 @@ export function SelectLanguageDialog() {
                                 color="secondary"
                             >
                                 {' '}
-                                {Text('Cancel')}{' '}
+                                {translateText('Cancel')}{' '}
                             </Button>
                             <Button
                                 onClick={() => {
@@ -67,7 +67,7 @@ export function SelectLanguageDialog() {
                                 disabled={!newLanguage}
                             >
                                 {' '}
-                                {Text('Save')}
+                                {translateText('Save')}
                             </Button>
                         </StyledLanguageSection>
                     </StyledAutoComplete>

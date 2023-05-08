@@ -10,7 +10,7 @@ import {
     CircularProgress,
 } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState, useEffect } from 'react'
 import { useAssetContext } from 'components/Contexts/AssetContext'
@@ -110,7 +110,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 >
                     <>
                         <Icon name={Icons.Add} size={16} />
-                        {Text('Add mission')}
+                        {translateText('Add mission')}
                     </>
                 </Button>
             </div>
@@ -122,7 +122,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 placement="top"
             >
                 <Popover.Content>
-                    <Typography variant="body_short">{Text('Please select asset')}</Typography>
+                    <Typography variant="body_short">{translateText('Please select asset')}</Typography>
                 </Popover.Content>
             </Popover>
 
@@ -131,7 +131,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     <StyledAutoComplete>
                         <StyledLoading>
                             <CircularProgress />
-                            <Typography>{Text('Fetching missions from Echo') + '...'}</Typography>
+                            <Typography>{translateText('Fetching missions from Echo') + '...'}</Typography>
                         </StyledLoading>
                         <StyledMissionSection>
                             <Button
@@ -142,7 +142,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 color="secondary"
                             >
                                 {' '}
-                                {Text('Cancel')}{' '}
+                                {translateText('Cancel')}{' '}
                             </Button>
                         </StyledMissionSection>
                     </StyledAutoComplete>
@@ -153,7 +153,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 <Dialog open={isEmptyEchoMissionsDialogOpen} isDismissable>
                     <StyledAutoComplete>
                         <Typography variant="h5">
-                            {Text('This asset has no missions - Please create mission')}
+                            {translateText('This asset has no missions - Please create mission')}
                         </Typography>
                         <StyledMissionSection>
                             {CreateMissionButton()}
@@ -165,7 +165,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 color="secondary"
                             >
                                 {' '}
-                                {Text('Cancel')}{' '}
+                                {translateText('Cancel')}{' '}
                             </Button>
                         </StyledMissionSection>
                     </StyledAutoComplete>
@@ -175,16 +175,16 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             <StyledMissionDialog>
                 <Dialog open={isScheduleMissionDialogOpen} isDismissable>
                     <StyledAutoComplete>
-                        <Typography variant="h5">{Text('Add mission')}</Typography>
+                        <Typography variant="h5">{translateText('Add mission')}</Typography>
                         <Autocomplete
                             options={props.echoMissionsOptions}
-                            label={Text('Select missions')}
+                            label={translateText('Select missions')}
                             onOptionsChange={onChangeEchoMissionSelections}
                             multiple
                         />
                         <Autocomplete
                             options={props.robotOptions}
-                            label={Text('Select robot')}
+                            label={translateText('Select robot')}
                             onOptionsChange={onChangeRobotSelection}
                         />
                         <StyledMissionSection>
@@ -196,7 +196,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 color="secondary"
                             >
                                 {' '}
-                                {Text('Cancel')}{' '}
+                                {translateText('Cancel')}{' '}
                             </Button>
                             <Button
                                 onClick={() => {
@@ -206,7 +206,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 disabled={props.scheduleButtonDisabled}
                             >
                                 {' '}
-                                {Text('Add mission')}
+                                {translateText('Add mission')}
                             </Button>
                         </StyledMissionSection>
                     </StyledAutoComplete>

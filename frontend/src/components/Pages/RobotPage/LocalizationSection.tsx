@@ -1,5 +1,5 @@
 import { Autocomplete, AutocompleteChanges, Button, Typography } from '@equinor/eds-core-react'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
 import { AssetDeck } from 'models/AssetDeck'
@@ -41,9 +41,9 @@ export function LocalizationSection({ robot }: RobotProps) {
     }
     return (
         <>
-            <Typography variant="h2">{Text('Localization')}</Typography>
-            <Autocomplete options={assetDeckNames} label={Text('Select deck')} onOptionsChange={onSelectedDeck} />
-            <Button onClick={onClickLocalize}> {Text('Localize')} </Button>
+            <Typography variant="h2">{translateText('Localization')}</Typography>
+            <Autocomplete options={assetDeckNames} label={translateText('Select deck')} onOptionsChange={onSelectedDeck} />
+            <Button onClick={onClickLocalize}> {translateText('Localize')} </Button>
         </>
     )
 }

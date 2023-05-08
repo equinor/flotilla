@@ -2,7 +2,7 @@ import { Table, Typography } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { GetColorsFromTaskStatus } from '../MarkerStyles'
@@ -29,15 +29,15 @@ export function TaskTable({ mission }: MissionProps) {
     return (
         <StyledTable>
             <Table.Caption>
-                <Typography variant="h2">{Text('Tasks')}</Typography>
+                <Typography variant="h2">{translateText('Tasks')}</Typography>
             </Table.Caption>
             <Table.Head>
                 <Table.Row>
                     <Table.Cell>#</Table.Cell>
-                    <Table.Cell>{Text('Tag-ID')}</Table.Cell>
-                    <Table.Cell>{Text('Description')}</Table.Cell>
-                    <Table.Cell>{Text('Inspection Types')}</Table.Cell>
-                    <Table.Cell>{Text('Status')}</Table.Cell>
+                    <Table.Cell>{translateText('Tag-ID')}</Table.Cell>
+                    <Table.Cell>{translateText('Description')}</Table.Cell>
+                    <Table.Cell>{translateText('Inspection Types')}</Table.Cell>
+                    <Table.Cell>{translateText('Status')}</Table.Cell>
                 </Table.Row>
             </Table.Head>
             <Table.Body>{rows}</Table.Body>
@@ -95,9 +95,9 @@ function renderInspectionTypes(task: Task) {
         if (inspection.inspectionUrl)
             return (
                 <Typography link href={inspection.inspectionUrl}>
-                    {Text(inspection.inspectionType as string)}
+                    {translateText(inspection.inspectionType as string)}
                 </Typography>
             )
-        else return <Typography>{Text(inspection.inspectionType as string)}</Typography>
+        else return <Typography>{translateText(inspection.inspectionType as string)}</Typography>
     })
 }

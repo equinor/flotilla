@@ -6,7 +6,7 @@ import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
 import { useErrorHandler } from 'react-error-boundary'
 import styled from 'styled-components'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 import { SelectLanguageDialog } from './SelectLanguageDialog'
 import { Icons } from 'utils/icons'
 
@@ -85,7 +85,7 @@ function AssetPicker() {
             options={Array.from(mappedOptions.keys()).sort()}
             label=""
             initialSelectedOptions={[assetCode]}
-            placeholder={Text('Select asset')}
+            placeholder={translateText('Select asset')}
             onOptionsChange={({ selectedItems }) => {
                 const mapKey = mappedOptions.get(selectedItems[0])
                 if (mapKey != undefined) switchAsset(mapKey)
