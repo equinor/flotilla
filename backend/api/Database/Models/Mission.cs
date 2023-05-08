@@ -129,31 +129,44 @@ namespace Api.Database.Models
 
         public void CalculateEstimatedDuration()
         {
-            const double RobotVelocity = 1.5 * 1000 / 60; // km/t => m/min
-            const double EfficiencyFactor = 0.20;
-            const double InspectionTime = 2; // min/tag
-            const int AssumedXyMetersFromFirst = 20;
-
-            double distance = 0;
-            int numberOfTags = 0;
-            var prevPosition = new Position(
-                Tasks.First().RobotPose.Position.X + AssumedXyMetersFromFirst,
-                Tasks.First().RobotPose.Position.Y + AssumedXyMetersFromFirst,
-                Tasks.First().RobotPose.Position.Z
-            );
-            foreach (var task in Tasks)
+            if (Robot.Model.AverageDurationPerTag is not null)
             {
-                numberOfTags += task.Inspections.Count;
-                var currentPosition = task.RobotPose.Position;
-                distance +=
-                    Math.Abs(currentPosition.X - prevPosition.X)
-                    + Math.Abs(currentPosition.Y - prevPosition.Y);
-                prevPosition = currentPosition;
+                float totalInspectionDuration = Tasks.Sum(
+                    task => task.Inspections.Sum(inspection => inspection.VideoDuration ?? 0)
+                );
+                EstimatedDuration = (uint)(
+                    (Robot.Model.AverageDurationPerTag * Tasks.Count) + totalInspectionDuration
+                );
             }
-            int estimate = (int)(
-                (distance / (RobotVelocity * EfficiencyFactor)) + (numberOfTags * InspectionTime)
-            );
-            EstimatedDuration = (uint)estimate * 60;
+            else
+            {
+                const double RobotVelocity = 1.5 * 1000 / 60; // km/t => m/min
+                const double EfficiencyFactor = 0.20;
+                const double InspectionTime = 2; // min/tag
+                const int AssumedXyMetersFromFirst = 20;
+
+                double distance = 0;
+                int numberOfTags = 0;
+                var prevPosition = new Position(
+                    Tasks.First().RobotPose.Position.X + AssumedXyMetersFromFirst,
+                    Tasks.First().RobotPose.Position.Y + AssumedXyMetersFromFirst,
+                    Tasks.First().RobotPose.Position.Z
+                );
+                foreach (var task in Tasks)
+                {
+                    numberOfTags += task.Inspections.Count;
+                    var currentPosition = task.RobotPose.Position;
+                    distance +=
+                        Math.Abs(currentPosition.X - prevPosition.X)
+                        + Math.Abs(currentPosition.Y - prevPosition.Y);
+                    prevPosition = currentPosition;
+                }
+                int estimate = (int)(
+                    (distance / (RobotVelocity * EfficiencyFactor))
+                    + (numberOfTags * InspectionTime)
+                );
+                EstimatedDuration = (uint)estimate * 60;
+            }
         }
 
         public void SetToFailed()
