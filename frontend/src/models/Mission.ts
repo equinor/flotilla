@@ -28,7 +28,7 @@ export interface Mission {
     desiredStartTime: Date
     startTime?: Date
     endTime?: Date
-    estimatedDuration?: string
+    estimatedDuration?: number
     tasks: Task[]
     map?: MissionMap
 }
