@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using Api.Controllers.Models;
 
 #pragma warning disable CS8618
@@ -72,6 +73,57 @@ namespace Api.Database.Models
             BatteryWarningThreshold = updateQuery.BatteryWarningThreshold;
             UpperPressureWarningThreshold = updateQuery.UpperPressureWarningThreshold;
             LowerPressureWarningThreshold = updateQuery.LowerPressureWarningThreshold;
+        }
+
+        /// <summary>
+        /// Updates the <see cref="AverageDurationPerTag"/> based on the data in the <paramref name="recentMissionsForModelType"/> provided
+        /// </summary>
+        /// <param name="recentMissionsForModelType"></param>
+        public void UpdateAverageDurationPerTag(List<Mission> recentMissionsForModelType)
+        {
+            if (recentMissionsForModelType.Any(mission => mission.Robot.Model.Type != Type))
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        "{0} should only include missions for this model type ('{1}')",
+                        nameof(recentMissionsForModelType),
+                        Type
+                    ),
+                    nameof(recentMissionsForModelType)
+                );
+
+            // The time spent on each tasks, not including the duration of video/audio recordings
+            var timeSpentPerTask = recentMissionsForModelType
+                .SelectMany(
+                    mission =>
+                        mission.Tasks
+                            .Where(task => task.EndTime is not null && task.StartTime is not null)
+                            .Select(
+                                task =>
+                                    (task.EndTime! - task.StartTime!).Value.TotalSeconds
+                                    - task.Inspections.Sum(
+                                        inspection => inspection.VideoDuration ?? 0
+                                    )
+                            )
+                )
+                .ToList();
+
+            // Percentiles to exclude when calculating average
+            const double P1 = 0.1;
+            const double P9 = 0.9;
+            double percentile1 = timeSpentPerTask
+                .OrderBy(d => d)
+                .ElementAt((int)Math.Floor(P1 * (timeSpentPerTask.Count - 1)));
+            double percentile9 = timeSpentPerTask
+                .OrderBy(d => d)
+                .ElementAt((int)Math.Floor(P9 * (timeSpentPerTask.Count - 1)));
+
+            // Calculate average, excluding outliers by using percentiles
+            double result = timeSpentPerTask
+                .Select(d => d < percentile1 ? percentile1 : (d > percentile9 ? percentile9 : d))
+                .Average();
+
+            AverageDurationPerTag = (float)result;
         }
     }
 }
