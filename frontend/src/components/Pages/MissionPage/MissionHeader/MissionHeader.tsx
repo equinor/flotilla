@@ -60,11 +60,15 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
                 {HeaderText(translateText('Time used') + ': ' + usedTime)}
                 {!isMissionCompleted && HeaderText(translateText('Estimated time remaining') + ': ' + remainingTime)}
                 {HeaderText(translateText('Robot') + ': ' + mission.robot.name)}
-                {!isMissionCompleted && HeaderText(translateText('Battery level') + ': ' + mission.robot.batteryLevel + '%')}
+                {!isMissionCompleted &&
+                    HeaderText(translateText('Battery level') + ': ' + mission.robot.batteryLevel + '%')}
                 {!isMissionCompleted &&
                     mission.robot.pressureLevel &&
                     HeaderText(
-                        translateText('Pressure level') + ': ' + Math.round(mission.robot.pressureLevel * barToMillibar) + 'mBar'
+                        translateText('Pressure level') +
+                            ': ' +
+                            Math.round(mission.robot.pressureLevel * barToMillibar) +
+                            'mBar'
                     )}
             </InfoSection>
         </HeaderSection>

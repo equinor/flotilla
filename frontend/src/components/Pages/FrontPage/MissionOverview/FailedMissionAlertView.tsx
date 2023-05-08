@@ -55,8 +55,8 @@ function FailedMission({ mission }: MissionProps) {
 
     return (
         <Button as={Typography} onClick={goToMission} variant="ghost" color="secondary">
-            <strong>'{mission.name}'</strong> {translateText('failed on robot')} <strong>'{mission.robot.name}':</strong>{' '}
-            {mission.statusReason}
+            <strong>'{mission.name}'</strong> {translateText('failed on robot')}{' '}
+            <strong>'{mission.robot.name}':</strong> {mission.statusReason}
         </Button>
     )
 }
