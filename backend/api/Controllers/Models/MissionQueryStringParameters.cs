@@ -26,6 +26,11 @@ namespace Api.Controllers.Models
         public string? RobotId { get; set; }
 
         /// <summary>
+        /// Filter for the robot model type of the robot assigned to the mission
+        /// </summary>
+        public RobotType? RobotModelType { get; set; }
+
+        /// <summary>
         /// The search parameter for the mission name
         /// </summary>
         public string? NameSearch { get; set; }
