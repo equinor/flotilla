@@ -14,7 +14,7 @@ interface Props {
 const defaultLanguageInterface = {
     language: defaultLanguage,
     textDictionary: allLanguageDictionaries[defaultLanguage],
-    switchLanguage: (newLanguage: string) => { },
+    switchLanguage: (newLanguage: string) => {},
 }
 
 export const LanguageContext = createContext<ILanguageContext>(defaultLanguageInterface)

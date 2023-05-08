@@ -42,7 +42,11 @@ export function LocalizationSection({ robot }: RobotProps) {
     return (
         <>
             <Typography variant="h2">{translateText('Localization')}</Typography>
-            <Autocomplete options={assetDeckNames} label={translateText('Select deck')} onOptionsChange={onSelectedDeck} />
+            <Autocomplete
+                options={assetDeckNames}
+                label={translateText('Select deck')}
+                onOptionsChange={onSelectedDeck}
+            />
             <Button onClick={onClickLocalize}> {translateText('Localize')} </Button>
         </>
     )
