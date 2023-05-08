@@ -72,7 +72,10 @@ namespace Api.Database.Models
 
         public DateTimeOffset? EndTime { get; private set; }
 
-        public TimeSpan? EstimatedDuration { get; set; }
+        /// <summary>
+        /// The estimated duration of the mission in seconds
+        /// </summary>
+        public uint? EstimatedDuration { get; set; }
 
         private IList<MissionTask> _tasks;
 
@@ -150,7 +153,7 @@ namespace Api.Database.Models
             int estimate = (int)(
                 (distance / (RobotVelocity * EfficiencyFactor)) + (numberOfTags * InspectionTime)
             );
-            EstimatedDuration = TimeSpan.FromMinutes(estimate);
+            EstimatedDuration = (uint)estimate * 60;
         }
 
         public void SetToFailed()

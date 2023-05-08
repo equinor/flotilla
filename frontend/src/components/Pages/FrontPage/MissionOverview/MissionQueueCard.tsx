@@ -111,11 +111,9 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
 
 function MissionDurationDisplay({ mission }: MissionDisplayProps) {
     if (mission.estimatedDuration) {
-        let estimate = mission.estimatedDuration.split('.')
-        const days = estimate.length === 1 ? 0 : estimate[0].split(':')[0]
-        const time = estimate.length === 1 ? estimate[0].split(':') : estimate[1].split(':')
-        const hours = +days * 24 + +time[0]
-        const minutes = +time[1]
+        const hours = Math.floor(mission.estimatedDuration / 3600)
+        const remainingSeconds = mission.estimatedDuration % 3600
+        const minutes = Math.ceil(remainingSeconds / 60)
         return (
             <Typography variant="caption" color="#6F6F6F">
                 {Text('Estimated duration')}: {hours}

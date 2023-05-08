@@ -83,13 +83,11 @@ function StartUsedAndRemainingTime(mission: Mission): { startTime: string; usedT
     var startTime: string
     var remainingTime: string
     var usedTimeInMinutes: number
-    var estimatedDuration: number | undefined
+    var estimatedDurationInMinutes: number | undefined
 
     if (mission.estimatedDuration) {
-        let dateTime = mission.estimatedDuration.split('.')
-        const days = dateTime.length === 1 ? 0 : dateTime[0].split(':')[0]
-        const time = dateTime.length === 1 ? dateTime[0].split(':') : dateTime[1].split(':')
-        estimatedDuration = +time[1] + 60 * (+time[0] + +days * 24)
+        // Convert from seconds to minutes, rounding up
+        estimatedDurationInMinutes = Math.ceil(mission.estimatedDuration / 60)
     }
 
     if (mission.endTime) {
@@ -103,13 +101,13 @@ function StartUsedAndRemainingTime(mission: Mission): { startTime: string; usedT
     } else if (mission.startTime) {
         startTime = format(new Date(mission.startTime), 'HH:mm')
         usedTimeInMinutes = differenceInMinutes(Date.now(), new Date(mission.startTime))
-        if (estimatedDuration)
-            remainingTime = Math.max(estimatedDuration - usedTimeInMinutes, 0) + ' ' + Text('minutes')
+        if (estimatedDurationInMinutes)
+            remainingTime = Math.max(estimatedDurationInMinutes - usedTimeInMinutes, 0) + ' ' + Text('minutes')
         else remainingTime = 'N/A'
     } else {
         startTime = 'N/A'
         usedTimeInMinutes = 0
-        if (estimatedDuration) remainingTime = estimatedDuration + ' ' + Text('minutes')
+        if (estimatedDurationInMinutes) remainingTime = estimatedDurationInMinutes + ' ' + Text('minutes')
         else remainingTime = 'N/A'
     }
     const usedTime: string = usedTimeInMinutes + ' ' + Text('minutes')
