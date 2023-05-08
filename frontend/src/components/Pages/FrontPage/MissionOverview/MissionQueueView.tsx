@@ -23,6 +23,7 @@ const StyledMissionView = styled.div`
 const MissionTable = styled.div`
     display: grid;
     grid-template-rows: repeat(auto-fill);
+    align-items: center;
     gap: 1rem;
 `
 
