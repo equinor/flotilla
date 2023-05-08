@@ -74,6 +74,8 @@ namespace Api.Services
             return _context.Missions
                 .Include(mission => mission.Robot)
                 .ThenInclude(robot => robot.VideoStreams)
+                .Include(mission => mission.Robot)
+                .ThenInclude(robot => robot.Model)
                 .Include(mission => mission.Tasks)
                 .ThenInclude(planTask => planTask.Inspections)
                 .Include(mission => mission.Tasks)
@@ -323,6 +325,10 @@ namespace Api.Services
                 ? mission => true
                 : mission => mission.Status.Equals(parameters.Status);
 
+            Expression<Func<Mission, bool>> robotTypeFilter = parameters.RobotModelType is null
+                ? mission => true
+                : mission => mission.Robot.Model.Type.Equals(parameters.RobotModelType);
+
             Expression<Func<Mission, bool>> robotIdFilter = parameters.RobotId is null
                 ? mission => true
                 : mission => mission.Robot.Id.Equals(parameters.RobotId);
@@ -369,7 +375,10 @@ namespace Api.Services
                             Expression.Invoke(desiredStartTimeFilter, mission),
                             Expression.AndAlso(
                                 Expression.Invoke(startTimeFilter, mission),
-                                Expression.Invoke(endTimeFilter, mission)
+                                Expression.AndAlso(
+                                    Expression.Invoke(endTimeFilter, mission),
+                                    Expression.Invoke(robotTypeFilter, mission)
+                                )
                             )
                         )
                     )
