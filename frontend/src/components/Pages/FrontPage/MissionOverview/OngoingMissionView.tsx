@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { OngoingMissionCard } from './OngoingMissionCard'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
@@ -84,7 +84,7 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     return (
         <StyledOngoingMissionView>
             <Typography variant="h1" color="resting">
-                {Text('Ongoing Missions')}
+                {translateText('Ongoing Missions')}
             </Typography>
             <OngoingMissionSection>
                 {missionsToDisplay.length > 0 && missionDisplay}
@@ -93,7 +93,7 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
             <ButtonStyle>
                 <Button variant="outlined" onClick={routeChange}>
                     <Icon name={Icons.Historic} />
-                    {Text('History')}
+                    {translateText('History')}
                 </Button>
             </ButtonStyle>
         </StyledOngoingMissionView>

@@ -3,7 +3,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 
 interface MissionProps {
     mission?: Mission
@@ -44,7 +44,7 @@ function NoPositionPlaceholder() {
     return (
         <StyledPlaceholder>
             <Typography variant="h4" color="disabled">
-                {Text('No robot position available')}
+                {translateText('No robot position available')}
             </Typography>
         </StyledPlaceholder>
     )
@@ -82,7 +82,7 @@ export function MapPositionView({ mission }: MissionProps): JSX.Element {
     return (
         <MapPositionSection>
             <Typography color="resting" variant="h2">
-                {Text('Robot position')}
+                {translateText('Robot position')}
             </Typography>
             {positionText === '' && <NoPositionPlaceholder />}
             {positionText !== '' && <PositionDisplay positionText={positionText} />}
