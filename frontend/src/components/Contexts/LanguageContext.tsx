@@ -14,7 +14,7 @@ interface Props {
 const defaultLanguageInterface = {
     language: defaultLanguage,
     textDictionary: allLanguageDictionaries[defaultLanguage],
-    switchLanguage: (newLanguage: string) => {},
+    switchLanguage: (newLanguage: string) => { },
 }
 
 export const LanguageContext = createContext<ILanguageContext>(defaultLanguageInterface)
@@ -46,12 +46,11 @@ export const LanguageProvider: FC<Props> = ({ children }) => {
 
 export const useLanguageContext = () => useContext(LanguageContext)
 
-export function Text(id: string) {
+export const translateText = (id: string): string => {
     const languageContext = useContext(LanguageContext)
     if (languageContext.textDictionary[id]) {
         return languageContext.textDictionary[id]
-    } else {
-        console.warn(`Translation issue: "${id}" has no translation to language "${languageContext.language}"`)
-        return id
     }
+    console.warn(`Translation issue: "${id}" has no translation to language "${languageContext.language}"`)
+    return id
 }

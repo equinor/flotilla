@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
 import { RefreshProps } from './MissionHistoryPage'
 import styled from 'styled-components'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 import { useErrorHandler } from 'react-error-boundary'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { BackendAPICaller } from 'api/ApiCaller'
@@ -79,15 +79,15 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     return (
         <>
             <TableWithHeader>
-                <Typography variant="h1">{Text('Mission History')}</Typography>
+                <Typography variant="h1">{translateText('Mission History')}</Typography>
                 <Table>
                     <Table>
                         <Table.Head sticky>
                             <Table.Row>
-                                <Table.Cell>{Text('Status')}</Table.Cell>
-                                <Table.Cell>{Text('Name')}</Table.Cell>
-                                <Table.Cell>{Text('Robot')}</Table.Cell>
-                                <Table.Cell>{Text('Completion Time')}</Table.Cell>
+                                <Table.Cell>{translateText('Status')}</Table.Cell>
+                                <Table.Cell>{translateText('Name')}</Table.Cell>
+                                <Table.Cell>{translateText('Robot')}</Table.Cell>
+                                <Table.Cell>{translateText('Completion Time')}</Table.Cell>
                             </Table.Row>
                         </Table.Head>
                         {isLoading && (

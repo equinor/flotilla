@@ -9,7 +9,7 @@ import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { EchoMission } from 'models/EchoMission'
 import { Robot } from 'models/Robot'
 import { RefreshProps } from '../FrontPage'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { useErrorHandler } from 'react-error-boundary'
 import { CreateMissionButton } from './CreateMissionButton'
@@ -145,7 +145,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     return (
         <StyledMissionView>
             <Typography variant="h1" color="resting">
-                {Text('Mission Queue')}
+                {translateText('Mission Queue')}
             </Typography>
             <MissionTable>
                 {missionQueue.length > 0 && missionQueueDisplay}

@@ -1,5 +1,5 @@
 import { Button, Typography, Popover, Icon } from '@equinor/eds-core-react'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState } from 'react'
 import { useAssetContext } from 'components/Contexts/AssetContext'
@@ -40,7 +40,7 @@ export const CreateMissionButton = (): JSX.Element => {
                 >
                     <>
                         <Icon name={Icons.ExternalLink} size={16}></Icon>
-                        {Text('Create mission')}
+                        {translateText('Create mission')}
                     </>
                 </Button>
             </div>
@@ -52,7 +52,7 @@ export const CreateMissionButton = (): JSX.Element => {
                 placement="top"
             >
                 <Popover.Content>
-                    <Typography variant="body_short">{Text('Please select asset')}</Typography>
+                    <Typography variant="body_short">{translateText('Please select asset')}</Typography>
                 </Popover.Content>
             </Popover>
         </>

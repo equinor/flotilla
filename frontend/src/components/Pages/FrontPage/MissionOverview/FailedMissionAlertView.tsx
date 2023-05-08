@@ -9,7 +9,7 @@ import { MissionStatusDisplay } from './MissionStatusDisplay'
 import { RefreshProps } from '../FrontPage'
 import { useNavigate } from 'react-router-dom'
 import { addMinutes, max } from 'date-fns'
-import { Text } from 'components/Contexts/LanguageContext'
+import { translateText } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useErrorHandler } from 'react-error-boundary'
 
@@ -55,7 +55,7 @@ function FailedMission({ mission }: MissionProps) {
 
     return (
         <Button as={Typography} onClick={goToMission} variant="ghost" color="secondary">
-            <strong>'{mission.name}'</strong> {Text('failed on robot')} <strong>'{mission.robot.name}':</strong>{' '}
+            <strong>'{mission.name}'</strong> {translateText('failed on robot')} <strong>'{mission.robot.name}':</strong>{' '}
             {mission.statusReason}
         </Button>
     )
@@ -71,7 +71,7 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
     return (
         <Button as={Typography} onClick={goToHistory} variant="ghost" color="secondary">
             <strong>{missions.length}</strong>{' '}
-            {' ' + Text("missions failed recently. See 'Mission History' for more information.")}
+            {' ' + translateText("missions failed recently. See 'Mission History' for more information.")}
         </Button>
     )
 }
