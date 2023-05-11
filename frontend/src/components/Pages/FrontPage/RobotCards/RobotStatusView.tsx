@@ -6,6 +6,7 @@ import { useErrorHandler } from 'react-error-boundary'
 import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
+import { useAssetContext } from 'components/Contexts/AssetContext'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 
 const RobotCardSection = styled.div`
@@ -18,7 +19,6 @@ const RobotView = styled.div`
     grid-column: 1/ -1;
     gap: 1rem;
 `
-
 export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     const handleError = useErrorHandler()
 
@@ -41,9 +41,27 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
         //.catch((e) => handleError(e))
     }
 
-    var robotDisplay = robots.map(function (robot) {
-        return <RobotStatusCard key={robot.id} robot={robot} />
+    const { assetCode } = useAssetContext()
+
+    var filteredRobots = robots.filter(function (robot) {
+        return (
+            robot.currentAsset === assetCode ||
+            (typeof robot.currentAsset === 'string' && robot.currentAsset.includes('default')) ||
+            robot.currentAsset === undefined
+        )
     })
+
+    var robotDisplay
+    if (assetCode === '') {
+        robotDisplay = robots.map(function (robot) {
+            return <RobotStatusCard key={robot.id} robot={robot} />
+        })
+    } else {
+        robotDisplay = filteredRobots.map(function (robot) {
+            return <RobotStatusCard key={robot.id} robot={robot} />
+        })
+    }
+
     const sortRobotsByStatus = (robots: Robot[]): Robot[] => {
         const sortedRobots = robots.sort((robot, robotToCompareWith) =>
             robot.status! > robotToCompareWith.status! ? 1 : -1
