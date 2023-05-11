@@ -118,6 +118,7 @@ namespace Api.EventHandlers
                     Name = isarRobotInfo.RobotName,
                     RobotType = isarRobotInfo.RobotType,
                     SerialNumber = isarRobotInfo.SerialNumber,
+                    CurrentAsset = isarRobotInfo.CurrentAsset,
                     VideoStreams = isarRobotInfo.VideoStreamQueries,
                     Host = isarRobotInfo.Host,
                     Port = isarRobotInfo.Port,
@@ -185,6 +186,12 @@ namespace Api.EventHandlers
             {
                 updatedFields.Add($"\nPort ({robot.Port} -> {isarRobotInfo.Port})\n");
                 robot.Port = isarRobotInfo.Port;
+            }
+
+            if (!isarRobotInfo.CurrentAsset.Equals(robot.CurrentAsset))
+            {
+                updatedFields.Add($"\nCurrentAsset ({robot.CurrentAsset} -> {isarRobotInfo.CurrentAsset})\n");
+                robot.CurrentAsset = isarRobotInfo.CurrentAsset;
             }
 
             if (!updatedFields.IsNullOrEmpty())
