@@ -8,7 +8,7 @@ export const CreateMissionButton = (): JSX.Element => {
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const { assetCode } = useAssetContext()
     const anchorRef = useRef<HTMLButtonElement>(null)
-    const echoURL = 'https://echo.equinor.com/mp?instCode='
+    const echoURL = 'https://echo.equinor.com/missionplanner?instCode='
 
     let timer: ReturnType<typeof setTimeout>
     const openPopover = () => {
