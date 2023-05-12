@@ -332,4 +332,15 @@ export class BackendAPICaller {
         })
         return result.content
     }
+
+    static async postSafePosition(robotId: string) {
+        const path: string = `robots/${robotId}/go-to-safe-position`
+        const body = {}
+
+        const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
 }

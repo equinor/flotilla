@@ -298,8 +298,26 @@ namespace Api.Test
             var robot = robots[0];
             string robotId = robot.Id;
 
+            // Arrange - Localize the robot
+            string localizeUrl = "/robots/start-localization";
+            var localizationBody = new ScheduleLocalizationMissionQuery
+            {
+                RobotId = robotId,
+                DeckId = assetDeck.Id,
+                LocalizationPose = query
+            };
+            var localizationContent = new StringContent(
+                JsonSerializer.Serialize(localizationBody),
+                null,
+                "application/json"
+            );
+            var localizationMission = await _client.PostAsync(localizeUrl, localizationContent);
+
+            // Assert
+            Assert.True(localizationMission.IsSuccessStatusCode);
+
             // Act
-            string goToSafePositionUrl = $"/robots/{robotId}/{testAsset}/{testDeck}/go-to-safe-position";
+            string goToSafePositionUrl = $"/robots/{robotId}/go-to-safe-position";
             var missionResponse = await _client.PostAsync(goToSafePositionUrl, null);
 
             // Assert

@@ -303,7 +303,16 @@ namespace Api.EventHandlers
                 return;
             }
 
-            robot.Status = flotillaMission.IsCompleted ? RobotStatus.Available : RobotStatus.Busy;
+            if (robot.Status != RobotStatus.SafePosition)
+            {
+                robot.Status = flotillaMission.IsCompleted ? RobotStatus.Available : RobotStatus.Busy;
+
+            }
+            else
+            {
+                Console.WriteLine("ola");
+            }
+
             if (flotillaMission.IsCompleted)
             {
                 robot.CurrentMissionId = null;

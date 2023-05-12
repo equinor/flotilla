@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { tokens } from '@equinor/eds-tokens'
+import { StopRobotDialog } from './StopDialogs'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -26,13 +26,9 @@ const ButtonStyle = styled.div`
     display: block;
 `
 const OngoingMissionHeader = styled.div`
-    display: flex;
-    flex-direction: row;
-    gap: 2rem;
-`
-const Square = styled.div`
-    width: 12px;
-    height: 12px;
+    display: grid;
+    grid-direction: column;
+    gap: 0.5rem;
 `
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
@@ -68,21 +64,13 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
         navigate(path)
     }
 
-    const stopAll = () => {
-        //TO DO
-        //Go to safe zone
-    }
-
     return (
         <StyledOngoingMissionView>
             <OngoingMissionHeader>
                 <Typography variant="h1" color="resting">
                     {TranslateText('Ongoing Missions')}
                 </Typography>
-                <Button color="danger" variant="outlined" onClick={stopAll}>
-                    <Square style={{ background: tokens.colors.interactive.danger__resting.hex }} />
-                    {TranslateText('Stop all')}
-                </Button>
+                <StopRobotDialog missions={missions} />
             </OngoingMissionHeader>
             <OngoingMissionSection>
                 {missions.length > 0 && missionDisplay}

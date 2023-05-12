@@ -734,7 +734,7 @@ public class RobotController : ControllerBase
     /// <para> This query starts a localization for a given robot </para>
     /// </remarks>
     [HttpPost]
-    [Route("{robotId}/{asset}/{deck}/go-to-safe-position")]
+    [Route("{robotId}/go-to-safe-position")]
     [Authorize(Roles = Role.User)]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -743,18 +743,25 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Mission>> SafePosition(
-        [FromRoute] string robotId,
-        [FromRoute] string asset,
-        [FromRoute] string deck
+        [FromRoute] string robotId
     )
     {
         var robot = await _robotService.ReadById(robotId);
+
         if (robot == null)
         {
             _logger.LogWarning("Could not find robot with id={id}", robotId);
             return NotFound("Robot not found");
         }
 
+        if (robot.CurrentAssetDeck is null)
+        {
+            _logger.LogWarning("Could not find asset deck for robot with id={id}", robotId);
+            return NotFound("Deck information not found");
+        }
+
+        string? deck = robot.CurrentAssetDeck.DeckName;
+        string? asset = robot.CurrentAssetDeck.AssetCode;
         var assets = await _assetDeckService.ReadByAsset(asset);
 
         if (!assets.Any())
@@ -764,6 +771,7 @@ public class RobotController : ControllerBase
         }
 
         var assetDeck = await _assetDeckService.ReadByAssetAndDeck(asset, deck);
+
         if (assetDeck is null)
         {
             _logger.LogWarning("Could not find deck={deck}", deck);
@@ -796,6 +804,28 @@ public class RobotController : ControllerBase
             OnIsarUnavailable(robot);
             return StatusCode(StatusCodes.Status502BadGateway, message);
         }
+
+        var missions = new MissionQueryStringParameters
+        {
+            Statuses = new List<MissionStatus> { MissionStatus.Pending, MissionStatus.Ongoing, MissionStatus.Pending },
+            RobotId = robotId,
+            PageSize = 100
+        };
+
+        var missionQueue = await _missionService.ReadAll(missions);
+
+        if (missionQueue.Count > 0)
+        {
+            foreach (var currentMission in missionQueue)
+            {
+                await _missionService.Delete(currentMission.Id);
+            };
+        }
+
+        robot.CurrentMissionId = null;
+        robot.Status = RobotStatus.Available;
+        await _robotService.Update(robot);
+
 
         var closestSafePosition = ClosestSafePosition(robot.Pose, assetDeck.SafePositions);
         // Cloning to avoid tracking same object
@@ -847,7 +877,7 @@ public class RobotController : ControllerBase
 
         await _missionService.Create(mission);
 
-        robot.Status = RobotStatus.Busy;
+        robot.Status = RobotStatus.SafePosition;
         robot.CurrentMissionId = mission.Id;
         await _robotService.Update(robot);
         return Ok(mission);

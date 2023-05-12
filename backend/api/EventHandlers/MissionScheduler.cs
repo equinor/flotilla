@@ -58,6 +58,11 @@ namespace Api.EventHandlers
                         continue;
                     }
 
+                    if (freshMission.Robot.Status == RobotStatus.SafePosition)
+                    {
+                        continue;
+                    }
+
                     try
                     {
                         await StartMission(queuedMission);

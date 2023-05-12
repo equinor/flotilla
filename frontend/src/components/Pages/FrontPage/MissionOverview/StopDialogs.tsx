@@ -1,11 +1,13 @@
 import { Button, Dialog, Typography, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { TranslateText, useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useState, useEffect } from 'react'
 import { tokens } from '@equinor/eds-tokens'
-import { Mission } from 'models/Mission'
+import { Mission, MissionStatus } from 'models/Mission'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
+import { BackendAPICaller } from 'api/ApiCaller'
+import { Robot } from 'models/Robot'
 
 const StyledDisplayButtons = styled.div`
     display: flex;
@@ -26,8 +28,21 @@ const StyledText = styled.div`
     gap: 1rem;
 `
 
+const StyledButton = styled.div`
+    width: 250px;
+`
+
+const Square = styled.div`
+    width: 12px;
+    height: 12px;
+`
+
 interface MissionProps {
     mission: Mission
+}
+
+interface MissionList {
+    missions: Mission[]
 }
 
 export enum ControlButton {
@@ -93,6 +108,68 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
                             onClick={() => handleClick(ControlButton.Stop, mission)}
                         >
                             {TranslateText('Stop mission')}
+                        </Button>
+                    </StyledDisplayButtons>
+                </Dialog.Actions>
+            </StyledDialog>
+        </>
+    )
+}
+
+export function StopRobotDialog({ missions }: MissionList) {
+    const [isStopRobotDialogOpen, setIsStopRobotDialogOpen] = useState<boolean>(false)
+
+    const openDialog = () => {
+        setIsStopRobotDialogOpen(true)
+    }
+
+    const stopAll = () => {
+        BackendAPICaller.getEnabledRobots().then((robots: Robot[]) => {
+            for (var robot of robots) {
+                BackendAPICaller.postSafePosition(robot.id)
+            }
+        })
+        setIsStopRobotDialogOpen(false)
+        return
+    }
+
+    return (
+        <>
+            <StyledButton>
+                <Button color="danger" variant="outlined" onClick={openDialog}>
+                    <Square style={{ background: tokens.colors.interactive.danger__resting.hex }} />
+                    {TranslateText('Send robots to safe zone')}
+                </Button>
+            </StyledButton>
+            <StyledDialog open={isStopRobotDialogOpen} isDismissable>
+                <Dialog.Header>
+                    <Dialog.Title>
+                        <Typography variant="h5">{TranslateText('Send robots to safe zone') + '?'}</Typography>
+                    </Dialog.Title>
+                </Dialog.Header>
+                <Dialog.CustomContent>
+                    <StyledText>
+                        <Typography variant="body_long">
+                            {TranslateText('Send robots to safe zone long text')}
+                        </Typography>
+                        <Typography variant="body_long">
+                            {TranslateText('Send robots to safe confirmation text')}
+                        </Typography>
+                    </StyledText>
+                </Dialog.CustomContent>
+                <Dialog.Actions>
+                    <StyledDisplayButtons>
+                        <Button
+                            variant="outlined"
+                            color="danger"
+                            onClick={() => {
+                                setIsStopRobotDialogOpen(false)
+                            }}
+                        >
+                            {TranslateText('Cancel')}
+                        </Button>
+                        <Button variant="contained" color="danger" onClick={stopAll}>
+                            {TranslateText('Send robots to safe zone')}
                         </Button>
                     </StyledDisplayButtons>
                 </Dialog.Actions>
