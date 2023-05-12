@@ -11,7 +11,6 @@ import { Robot } from 'models/Robot'
 import { RefreshProps } from '../FrontPage'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
-import { useErrorHandler } from 'react-error-boundary'
 import { CreateMissionButton } from './CreateMissionButton'
 
 const StyledMissionView = styled.div`
@@ -33,7 +32,7 @@ const MissionButtonView = styled.div`
 `
 const mapEchoMissionToString = (missions: EchoMission[]): Map<string, EchoMission> => {
     var missionMap = new Map<string, EchoMission>()
-    missions.map((mission: EchoMission) => {
+    missions.forEach((mission: EchoMission) => {
         missionMap.set(mission.id + ': ' + mission.name, mission)
     })
     return missionMap
@@ -41,7 +40,7 @@ const mapEchoMissionToString = (missions: EchoMission[]): Map<string, EchoMissio
 
 const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
     var robotMap = new Map<string, Robot>()
-    robots.map((robot: Robot) => {
+    robots.forEach((robot: Robot) => {
         robotMap.set(robot.name + ' (' + robot.model.type + ')', robot)
     })
     return robotMap
@@ -49,7 +48,6 @@ const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
 
 export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const missionPageSize = 100
-    const handleError = useErrorHandler()
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMission[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
@@ -67,12 +65,11 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
             setEchoMissions(echoMissionsMap)
             setIsFetchingEchoMissions(false)
         })
-        //.catch((e) => handleError(e))
     }
 
     const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
         var echoMissionsToSchedule: EchoMission[] = []
-        selectedEchoMissions.map((selectedEchoMission: string) => {
+        selectedEchoMissions.forEach((selectedEchoMission: string) => {
             if (echoMissions) echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as EchoMission)
         })
         setSelectedEchoMissions(echoMissionsToSchedule)
@@ -86,8 +83,8 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const onScheduleButtonPress = () => {
         if (selectedRobot === undefined) return
 
-        selectedEchoMissions.map((mission: EchoMission) => {
-            BackendAPICaller.postMission(mission.id, selectedRobot.id, assetCode) //.catch((e) => handleError(e))
+        selectedEchoMissions.forEach((mission: EchoMission) => {
+            BackendAPICaller.postMission(mission.id, selectedRobot.id, assetCode)
         })
 
         setSelectedEchoMissions([])
@@ -95,7 +92,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }
 
     const onDeleteMission = (mission: Mission) => {
-        BackendAPICaller.deleteMission(mission.id) //.catch((e) => handleError(e))
+        BackendAPICaller.deleteMission(mission.id)
     }
 
     useEffect(() => {
@@ -104,10 +101,9 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                 const mappedRobots: Map<string, Robot> = mapRobotsToString(robots)
                 setRobotOptions(mappedRobots)
             })
-            //.catch((e) => handleError(e))
         }, refreshInterval)
         return () => clearInterval(id)
-    }, [])
+    }, [refreshInterval])
 
     useEffect(() => {
         const id = setInterval(() => {
@@ -118,10 +114,9 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
             }).then((missions) => {
                 setMissionQueue(missions.content)
             })
-            //.catch((e) => handleError(e))
         }, refreshInterval)
         return () => clearInterval(id)
-    }, [])
+    }, [refreshInterval])
 
     useEffect(() => {
         if (selectedRobot === undefined || selectedEchoMissions.length === 0) {

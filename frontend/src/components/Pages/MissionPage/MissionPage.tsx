@@ -8,7 +8,6 @@ import styled from 'styled-components'
 import { MissionHeader } from './MissionHeader/MissionHeader'
 import { BackButton } from './MissionHeader/BackButton'
 import { MissionMapView } from './MapPosition/MissionMapView'
-import { useErrorHandler } from 'react-error-boundary'
 import { BackendAPICaller } from 'api/ApiCaller'
 
 import { Header } from 'components/Header/Header'
@@ -36,7 +35,6 @@ const VideoStreamSection = styled.div`
 
 export function MissionPage() {
     const { missionId } = useParams()
-    const handleError = useErrorHandler()
     const [videoStreams, setVideoStreams] = useState<VideoStream[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
 
@@ -46,9 +44,8 @@ export function MissionPage() {
                 setSelectedMission(mission)
                 updateVideoStreams(mission)
             })
-            //.catch((e) => handleError(e))
         }
-    }, [])
+    }, [missionId])
 
     useEffect(() => {
         const timeDelay = 1000
@@ -57,17 +54,15 @@ export function MissionPage() {
                 BackendAPICaller.getMissionById(missionId).then((mission) => {
                     setSelectedMission(mission)
                 })
-                //.catch((e) => handleError(e))
             }
         }, timeDelay)
         return () => clearInterval(id)
-    }, [])
+    }, [missionId])
 
     const updateVideoStreams = (mission: Mission) => {
         BackendAPICaller.getVideoStreamsByRobotId(mission.robot.id).then((streams) => {
             setVideoStreams(streams)
         })
-        //.catch((e) => handleError(e))
     }
 
     return (

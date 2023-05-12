@@ -4,7 +4,6 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
-import { useErrorHandler } from 'react-error-boundary'
 import styled from 'styled-components'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 import { SelectLanguageDialog } from './SelectLanguageDialog'
@@ -68,8 +67,6 @@ export function Header({ page }: { page: string }) {
 }
 
 function AssetPicker(page: string) {
-    const handleError = useErrorHandler()
-
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
     const { assetCode, switchAsset } = useAssetContext()
     useEffect(() => {
@@ -77,7 +74,6 @@ function AssetPicker(page: string) {
             const mapping = mapAssetCodeToName(response)
             setAllPlantsMap(mapping)
         })
-        //.catch((e) => handleError(e))
     }, [])
     const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
     return (
@@ -89,7 +85,7 @@ function AssetPicker(page: string) {
             placeholder={TranslateText('Select asset')}
             onOptionsChange={({ selectedItems }) => {
                 const mapKey = mappedOptions.get(selectedItems[0])
-                if (mapKey != undefined) switchAsset(mapKey)
+                if (mapKey !== undefined) switchAsset(mapKey)
                 else switchAsset('')
             }}
         />
@@ -98,7 +94,7 @@ function AssetPicker(page: string) {
 
 const mapAssetCodeToName = (echoPlantInfoArray: EchoPlantInfo[]): Map<string, string> => {
     var mapping = new Map<string, string>()
-    echoPlantInfoArray.map((echoPlantInfo: EchoPlantInfo) => {
+    echoPlantInfoArray.forEach((echoPlantInfo: EchoPlantInfo) => {
         mapping.set(echoPlantInfo.projectDescription, echoPlantInfo.installationCode)
     })
     return mapping

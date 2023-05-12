@@ -10,7 +10,7 @@ import { Pose } from 'models/Pose'
 import { AssetDeck } from 'models/AssetDeck'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
-import { Task, TaskStatus } from 'models/Task'
+import { TaskStatus } from 'models/Task'
 import { CreateCustomMission, CustomMissionQuery } from 'models/CustomMission'
 import { MissionMap } from 'models/MissionMap'
 
@@ -297,7 +297,7 @@ export class BackendAPICaller {
 
         if (failedTasksOnly) {
             mission.tasks = mission.tasks.filter(
-                (task) => task.status != TaskStatus.PartiallySuccessful && task.status != TaskStatus.Successful
+                (task) => task.status !== TaskStatus.PartiallySuccessful && task.status !== TaskStatus.Successful
             )
             // Fix task ordering
             for (let index = 0; index < mission.tasks.length; index++) {

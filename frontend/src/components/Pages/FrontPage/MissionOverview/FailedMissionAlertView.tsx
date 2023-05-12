@@ -3,7 +3,7 @@ import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Mission, MissionStatus } from 'models/Mission'
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import { MissionStatusDisplay } from './MissionStatusDisplay'
 import { RefreshProps } from '../FrontPage'
@@ -11,7 +11,6 @@ import { useNavigate } from 'react-router-dom'
 import { addMinutes, max } from 'date-fns'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
-import { useErrorHandler } from 'react-error-boundary'
 
 const StyledCard = styled(Card)`
     width: 100%;
@@ -28,10 +27,6 @@ const Horizontal = styled.div`
 
 const Indent = styled.div`
     padding: 0px 9px;
-`
-
-const SeveralMissionPad = styled.div`
-    padding: 7px 20px;
 `
 
 const Center = styled.div`
@@ -77,8 +72,6 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
 }
 
 export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
-    const handleError = useErrorHandler()
-
     const PageSize: number = 100
     // The default amount of minutes in the past for failed missions to generate an alert
     const DefaultTimeInterval: number = 10
@@ -89,7 +82,7 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
     const DismissalTimeSessionKeyName: string = 'lastDismissalTime'
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
 
-    const getLastDismissalTime = (): Date => {
+    const getLastDismissalTime = useCallback((): Date => {
         const sessionValue = sessionStorage.getItem(DismissalTimeSessionKeyName)
 
         var lastTime: Date
@@ -104,28 +97,27 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
         }
 
         return lastTime
-    }
+    }, [DefaultTimeInterval, MaxTimeInterval, DismissalTimeSessionKeyName])
 
     const dismissCurrentMissions = () => {
         sessionStorage.setItem(DismissalTimeSessionKeyName, JSON.stringify(Date.now()))
         setRecentFailedMissions([])
     }
 
-    const updateRecentFailedMissions = () => {
+    const updateRecentFailedMissions = useCallback(() => {
         const lastDismissTime: Date = getLastDismissalTime()
         BackendAPICaller.getMissions({ status: MissionStatus.Failed, pageSize: PageSize }).then((missions) => {
             const newRecentFailedMissions = missions.content.filter((m) => new Date(m.endTime!) > lastDismissTime)
             setRecentFailedMissions(newRecentFailedMissions)
         })
-        //.catch((e) => handleError(e))
-    }
+    }, [PageSize, getLastDismissalTime])
 
     useEffect(() => {
         const id = setInterval(() => {
             updateRecentFailedMissions()
         }, refreshInterval)
         return () => clearInterval(id)
-    }, [])
+    }, [refreshInterval, updateRecentFailedMissions])
 
     var missionDisplay = <FailedMission mission={recentFailedMissions[0]} />
     var severalMissions = <SeveralFailedMissions missions={recentFailedMissions} />

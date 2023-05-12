@@ -1,10 +1,9 @@
 import { Card } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
-import { useErrorHandler } from 'react-error-boundary'
 import { defaultPose, Pose } from 'models/Pose'
 import { PlaceRobotInMap, PlaceTagsInMap } from '../../../../utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
@@ -29,7 +28,6 @@ const StyledMap = styled.canvas`
 `
 
 export function MissionMapView({ mission }: MissionProps) {
-    const handleError = useErrorHandler()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
@@ -37,9 +35,9 @@ export function MissionMapView({ mission }: MissionProps) {
     const [currentRobotPose, setCurrentRobotPose] = useState<Pose>(defaultPose)
     const [currentTaskOrder, setCurrentTaskOrder] = useState<number>()
 
-    let imageObjectURL: string
+    const imageObjectURL = useRef<string>('')
 
-    const updateMap = () => {
+    const updateMap = useCallback(() => {
         let context = mapCanvas.getContext('2d')
         if (context === null) {
             return
@@ -48,7 +46,7 @@ export function MissionMapView({ mission }: MissionProps) {
         context?.drawImage(mapImage, 0, 0)
         PlaceTagsInMap(mission, mapCanvas, currentTaskOrder)
         PlaceRobotInMap(mission, mapCanvas, currentRobotPose, previousRobotPose)
-    }
+    }, [currentRobotPose, currentTaskOrder, mapCanvas, mapImage, mission, previousRobotPose])
 
     const getMeta = async (url: string) => {
         const image = new Image()
@@ -57,24 +55,24 @@ export function MissionMapView({ mission }: MissionProps) {
         return image
     }
 
-    const findCurrentTaskOrder = () => {
-        mission.tasks.map(function (task) {
+    const findCurrentTaskOrder = useCallback(() => {
+        mission.tasks.forEach(function (task) {
             if (task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused) {
                 setCurrentTaskOrder(task.taskOrder)
             }
         })
-    }
+    }, [mission.tasks])
 
     useEffect(() => {
         BackendAPICaller.getMap(mission.assetCode!, mission.map?.mapName!)
             .then((imageBlob) => {
-                imageObjectURL = URL.createObjectURL(imageBlob)
+                imageObjectURL.current = URL.createObjectURL(imageBlob)
             })
             .catch(() => {
-                imageObjectURL = NoMap
+                imageObjectURL.current = NoMap
             })
             .then(() => {
-                getMeta(imageObjectURL).then((img) => {
+                getMeta(imageObjectURL.current).then((img) => {
                     const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement
                     mapCanvas.width = img.width
                     mapCanvas.height = img.height
@@ -87,15 +85,14 @@ export function MissionMapView({ mission }: MissionProps) {
                     setMapImage(img)
                 })
             })
-        //.catch((e) => handleError(e))
-    }, [])
+    }, [mission.assetCode, mission.id, mission.map?.mapName])
 
     useEffect(() => {
         if (mission.robot.pose) {
             setPreviousRobotPose(currentRobotPose)
             setCurrentRobotPose(mission.robot.pose)
         }
-    }, [mission.robot.pose])
+    }, [currentRobotPose, mission.robot.pose])
 
     useEffect(() => {
         if (mission.isCompleted) {
@@ -103,7 +100,7 @@ export function MissionMapView({ mission }: MissionProps) {
         } else {
             findCurrentTaskOrder()
         }
-    }, [mission])
+    }, [findCurrentTaskOrder, mission])
 
     useEffect(() => {
         let animationFrameId = 0

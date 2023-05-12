@@ -1,6 +1,6 @@
 import { Button, Typography, Icon } from '@equinor/eds-core-react'
 import { Mission, MissionStatus } from 'models/Mission'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
@@ -9,7 +9,6 @@ import { TranslateText } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
-import { useErrorHandler } from 'react-error-boundary'
 import { PaginatedResponse } from 'models/PaginatedResponse'
 import { BackendAPICaller } from 'api/ApiCaller'
 
@@ -30,15 +29,30 @@ const ButtonStyle = styled.div`
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     const missionPageSize = 100
-    const handleError = useErrorHandler()
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [pausedMissions, setPausedMissions] = useState<Mission[]>([])
     const [missionsToDisplay, setMissionsToDisplay] = useState<Mission[]>([])
 
+    const getCurrentMissions = (status: MissionStatus): Promise<PaginatedResponse<Mission>> => {
+        return BackendAPICaller.getMissions({ status: status, pageSize: missionPageSize, orderBy: 'StartTime desc' })
+    }
+
+    const updateOngoingMissions = useCallback(() => {
+        getCurrentMissions(MissionStatus.Ongoing).then((missions) => {
+            setOngoingMissions(missions.content)
+        })
+    }, [])
+
+    const updatePausedMissions = useCallback(() => {
+        getCurrentMissions(MissionStatus.Paused).then((missions) => {
+            setPausedMissions(missions.content)
+        })
+    }, [])
+
     useEffect(() => {
         updateOngoingMissions()
         updatePausedMissions()
-    }, [])
+    }, [updateOngoingMissions, updatePausedMissions])
 
     useEffect(() => {
         const id = setInterval(() => {
@@ -46,25 +60,7 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
             updatePausedMissions()
         }, refreshInterval)
         return () => clearInterval(id)
-    }, [])
-
-    const getCurrentMissions = (status: MissionStatus): Promise<PaginatedResponse<Mission>> => {
-        return BackendAPICaller.getMissions({ status: status, pageSize: missionPageSize, orderBy: 'StartTime desc' })
-    }
-
-    const updateOngoingMissions = () => {
-        getCurrentMissions(MissionStatus.Ongoing).then((missions) => {
-            setOngoingMissions(missions.content)
-        })
-        //.catch((e) => handleError(e))
-    }
-
-    const updatePausedMissions = () => {
-        getCurrentMissions(MissionStatus.Paused).then((missions) => {
-            setPausedMissions(missions.content)
-        })
-        //.catch((e) => handleError(e))
-    }
+    }, [refreshInterval, updateOngoingMissions, updatePausedMissions])
 
     useEffect(() => {
         const missions: Mission[] = ongoingMissions.concat(pausedMissions)

@@ -22,7 +22,7 @@ export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
     }
 
     const orderedTasks = orderTasksByDrawOrder(mission.tasks, currentTaskOrder, maxTaskOrder)
-    orderedTasks.map(function (task) {
+    orderedTasks.forEach(function (task) {
         if (task.inspectionTarget) {
             const pixelPosition = calculateObjectPixelPosition(mission.map!, task.inspectionTarget)
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, task.taskOrder + 1, 30, task.status)
@@ -82,7 +82,7 @@ const calculateObjectPixelPosition = (missionMap: MissionMap, objectPosition: Ob
     const b2 = missionMap.transformationMatrices.d2
     const p1 = a1 * x1 + b1
     const p2 = a2 * x2 + b2
-    return new Array(p1, p2)
+    return [p1, p2]
 }
 
 const calculateNavigatorAngle = (currentRobotPose: Pose, previousRobotPose: Pose) => {
@@ -149,7 +149,6 @@ const drawNavigator = (p1: number, p2: number, map: HTMLCanvasElement, rad: numb
     if (context === null) {
         return
     }
-    const time = new Date()
     context.beginPath()
     context.fillStyle = 'white'
     context.strokeStyle = tokens.colors.text.static_icons__default.hex
