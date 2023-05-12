@@ -23,6 +23,8 @@ From the flotilla root directory, run the following command:
 docker compose up --build broker
 ```
 
+If address is already in use, you might have to kill the mosquitto process `sudo pkill mosquitto`
+
 ## Authentication
 
 The broker has been setup with role based authentication.
