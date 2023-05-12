@@ -188,7 +188,7 @@ namespace Api.EventHandlers
                 robot.Port = isarRobotInfo.Port;
             }
 
-            if (!isarRobotInfo.CurrentAsset.Equals(robot.CurrentAsset))
+            if (!isarRobotInfo.CurrentAsset.Equals(robot.CurrentAsset, StringComparison.Ordinal))
             {
                 updatedFields.Add($"\nCurrentAsset ({robot.CurrentAsset} -> {isarRobotInfo.CurrentAsset})\n");
                 robot.CurrentAsset = isarRobotInfo.CurrentAsset;
