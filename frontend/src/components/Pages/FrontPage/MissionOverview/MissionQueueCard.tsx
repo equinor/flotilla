@@ -5,7 +5,7 @@ import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { translateText } from 'components/Contexts/LanguageContext'
+import { TranslateText } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 
 interface MissionQueueCardProps {
@@ -59,10 +59,10 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
                         <Typography variant="body_short_bold">{mission.name}</Typography>
                     </Button>
                     <Typography variant="caption" color="#6F6F6F">
-                        {translateText('Robot')}: {mission.robot.name}
+                        {TranslateText('Robot')}: {mission.robot.name}
                     </Typography>
                     <Typography variant="caption" color="#6F6F6F">
-                        {translateText('Tasks')}: {numberOfTasks}
+                        {TranslateText('Tasks')}: {numberOfTasks}
                     </Typography>
                     <MissionDurationDisplay mission={mission} />
                 </HorizontalNonButtonContent>
@@ -77,7 +77,7 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
                 <Dialog open={confirmDeleteDialogOpen} isDismissable>
                     <StyledConfirmDialog>
                         <Typography variant="h5">
-                            {translateText('Please confirm that you want to remove the mission from the queue:')}
+                            {TranslateText('Please confirm that you want to remove the mission from the queue:')}
                         </Typography>
                         <Typography bold>{mission.name}</Typography>
                         <StyledButtonSection>
@@ -89,7 +89,7 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
                                 color="secondary"
                             >
                                 {' '}
-                                {translateText('Cancel')}{' '}
+                                {TranslateText('Cancel')}{' '}
                             </Button>
                             <Button
                                 color="danger"
@@ -99,7 +99,7 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
                                 }}
                             >
                                 {' '}
-                                {translateText('Remove mission')}
+                                {TranslateText('Remove mission')}
                             </Button>
                         </StyledButtonSection>
                     </StyledConfirmDialog>
@@ -116,15 +116,15 @@ function MissionDurationDisplay({ mission }: MissionDisplayProps) {
         const minutes = Math.ceil(remainingSeconds / 60)
         return (
             <Typography variant="caption" color="#6F6F6F">
-                {translateText('Estimated duration')}: {hours}
-                {translateText('h')} {minutes}
-                {translateText('min')}
+                {TranslateText('Estimated duration')}: {hours}
+                {TranslateText('h')} {minutes}
+                {TranslateText('min')}
             </Typography>
         )
     }
     return (
         <Typography variant="caption" color="#6F6F6F">
-            {translateText('Estimated duration: not available')}
+            {TranslateText('Estimated duration: not available')}
         </Typography>
     )
 }

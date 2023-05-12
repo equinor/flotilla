@@ -6,7 +6,7 @@ import { useErrorHandler } from 'react-error-boundary'
 import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
-import { translateText } from 'components/Contexts/LanguageContext'
+import { TranslateText } from 'components/Contexts/LanguageContext'
 
 const RobotCardSection = styled.div`
     display: flex;
@@ -54,7 +54,7 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     return (
         <RobotView>
             <Typography color="resting" variant="h2">
-                {translateText('Robots')}
+                {TranslateText('Robots')}
             </Typography>
             <RobotCardSection>
                 {robots.length > 0 && robotDisplay}

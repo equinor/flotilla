@@ -5,7 +5,7 @@ import { VideoStream } from 'models/VideoStream'
 import { VideoStreamCard } from './VideoStreamCards'
 import styled from 'styled-components'
 import ReactModal from 'react-modal'
-import { translateText } from 'components/Contexts/LanguageContext'
+import { TranslateText } from 'components/Contexts/LanguageContext'
 
 const VideoStreamContent = styled.div`
     display: flex;
@@ -53,7 +53,7 @@ export function VideoStreamWindow({ videoStreams }: VideoStreamWindowProps) {
     const videoStream = fullScreenStream
     return (
         <>
-            <Typography variant="h2">{translateText('Camera')}</Typography>
+            <Typography variant="h2">{TranslateText('Camera')}</Typography>
             <VideoStreamContent>
                 {fullScreenMode === false && videoCards}
                 {videoStream && (
