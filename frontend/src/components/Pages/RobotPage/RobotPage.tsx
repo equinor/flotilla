@@ -26,9 +26,8 @@ export function RobotPage() {
             BackendAPICaller.getRobotById(robotId).then((robot) => {
                 setSelectedRobot(robot)
             })
-            //.catch((e) => handleError(e))
         }
-    }, [])
+    }, [robotId])
 
     return (
         <>

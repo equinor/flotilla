@@ -39,6 +39,15 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
         missionIsActive = true
     }
 
+    const translatedStartDate = TranslateText('Start date')
+    const translatedStartTime = TranslateText('Start time')
+    const translatedUsedTime = TranslateText('Time used')
+    const translatedEstimatedTimeRemaining = TranslateText('Estimated time remaining')
+    const translatedRobot = TranslateText('Robot')
+    const translatedBatteryLevel = TranslateText('Battery level')
+    const translatedPressureLevel = TranslateText('Pressure level')
+    const translatedDescription = TranslateText('Description')
+
     return (
         <HeaderSection>
             <TitleSection>
@@ -51,25 +60,21 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
                 group="paragraph"
                 color={tokens.colors.text.static_icons__secondary.rgba}
             >
-                {mission.description && TranslateText('Description') + ': ' + mission.description}
+                {mission.description && `${translatedDescription}: ${mission.description}`}
             </Typography>
             <StatusReason mission={mission}></StatusReason>
             <InfoSection>
                 <MissionStatusDisplay status={mission.status} />
-                {HeaderText(TranslateText('Start date') + ': ' + startDate)}
-                {HeaderText(TranslateText('Start time') + ': ' + startTime)}
-                {HeaderText(TranslateText('Time used') + ': ' + usedTime)}
-                {!isMissionCompleted && HeaderText(TranslateText('Estimated time remaining') + ': ' + remainingTime)}
-                {HeaderText(TranslateText('Robot') + ': ' + mission.robot.name)}
-                {!isMissionCompleted &&
-                    HeaderText(TranslateText('Battery level') + ': ' + mission.robot.batteryLevel + '%')}
+                {HeaderText(`${translatedStartDate}: ${startDate}`)}
+                {HeaderText(`${translatedStartTime}: ${startTime}`)}
+                {HeaderText(`${translatedUsedTime}: ${usedTime}`)}
+                {!isMissionCompleted && HeaderText(`${translatedEstimatedTimeRemaining}: ${remainingTime}`)}
+                {HeaderText(`${translatedRobot}: ${mission.robot.name}`)}
+                {!isMissionCompleted && HeaderText(`${translatedBatteryLevel}: ${mission.robot.batteryLevel}%`)}
                 {!isMissionCompleted &&
                     mission.robot.pressureLevel &&
                     HeaderText(
-                        TranslateText('Pressure level') +
-                            ': ' +
-                            Math.round(mission.robot.pressureLevel * barToMillibar) +
-                            'mBar'
+                        `${translatedPressureLevel}: ${Math.round(mission.robot.pressureLevel * barToMillibar)}mBar`
                     )}
             </InfoSection>
         </HeaderSection>
@@ -95,7 +100,7 @@ function StartUsedAndRemainingTime(mission: Mission): {
     var remainingTime: string
     var usedTimeInMinutes: number
     var estimatedDurationInMinutes: number | undefined
-
+    const translatedMinutes = TranslateText('minutes')
     if (mission.estimatedDuration) {
         // Convert from seconds to minutes, rounding up
         estimatedDurationInMinutes = Math.ceil(mission.estimatedDuration / 60)
@@ -117,15 +122,15 @@ function StartUsedAndRemainingTime(mission: Mission): {
         startDate = format(new Date(mission.startTime), 'dd/MM/yyy')
         usedTimeInMinutes = differenceInMinutes(Date.now(), new Date(mission.startTime))
         if (estimatedDurationInMinutes)
-            remainingTime = Math.max(estimatedDurationInMinutes - usedTimeInMinutes, 0) + ' ' + TranslateText('minutes')
+            remainingTime = Math.max(estimatedDurationInMinutes - usedTimeInMinutes, 0) + ' ' + translatedMinutes
         else remainingTime = 'N/A'
     } else {
         startTime = 'N/A'
         startDate = 'N/A'
         usedTimeInMinutes = 0
-        if (estimatedDurationInMinutes) remainingTime = estimatedDurationInMinutes + ' ' + TranslateText('minutes')
+        if (estimatedDurationInMinutes) remainingTime = estimatedDurationInMinutes + ' ' + translatedMinutes
         else remainingTime = 'N/A'
     }
-    const usedTime: string = usedTimeInMinutes + ' ' + TranslateText('minutes')
+    const usedTime: string = usedTimeInMinutes + ' ' + translatedMinutes
     return { startTime, startDate, usedTime, remainingTime }
 }

@@ -3,7 +3,6 @@ import { CircularProgress, Icon } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { useState } from 'react'
 import { tokens } from '@equinor/eds-tokens'
-import { useErrorHandler } from 'react-error-boundary'
 import { Task, TaskStatus } from 'models/Task'
 import { BackendAPICaller } from 'api/ApiCaller'
 import styled from 'styled-components'
@@ -38,7 +37,6 @@ const checkIfTasksStarted = (tasks: Task[]): boolean => {
 
 export function MissionControlButtons({ mission }: MissionProps) {
     const [isWaitingForResponse, setIsWaitingForResponse] = useState<boolean>(false)
-    const handleError = useErrorHandler()
     const handleClick = (button: ControlButton) => {
         switch (button) {
             case ControlButton.Pause: {

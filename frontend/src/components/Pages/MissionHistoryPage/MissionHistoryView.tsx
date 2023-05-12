@@ -1,11 +1,10 @@
 import { CircularProgress, Pagination, Table, Typography } from '@equinor/eds-core-react'
 import { Mission, MissionStatus } from 'models/Mission'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
 import { RefreshProps } from './MissionHistoryPage'
 import styled from 'styled-components'
 import { TranslateText } from 'components/Contexts/LanguageContext'
-import { useErrorHandler } from 'react-error-boundary'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { BackendAPICaller } from 'api/ApiCaller'
 
@@ -22,29 +21,24 @@ const StyledLoading = styled.div`
 `
 
 export function MissionHistoryView({ refreshInterval }: RefreshProps) {
-    const handleError = useErrorHandler()
     const pageSize: number = 10
 
-    const completedStatuses = [
-        MissionStatus.Aborted,
-        MissionStatus.Cancelled,
-        MissionStatus.Successful,
-        MissionStatus.PartiallySuccessful,
-        MissionStatus.Failed,
-    ]
+    const completedStatuses = useMemo(
+        () => [
+            MissionStatus.Aborted,
+            MissionStatus.Cancelled,
+            MissionStatus.Successful,
+            MissionStatus.PartiallySuccessful,
+            MissionStatus.Failed,
+        ],
+        []
+    )
     const [completedMissions, setCompletedMissions] = useState<Mission[]>([])
     const [paginationDetails, setPaginationDetails] = useState<PaginationHeader>()
     const [currentPage, setCurrentPage] = useState<number>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
-    useEffect(() => {
-        const id = setInterval(() => {
-            updateCompletedMissions()
-        }, refreshInterval)
-        return () => clearInterval(id)
-    }, [currentPage])
-
-    const updateCompletedMissions = () => {
+    const updateCompletedMissions = useCallback(() => {
         const page = currentPage ?? 1
         BackendAPICaller.getMissions({ pageSize: pageSize, pageNumber: page, orderBy: 'EndTime desc, Name' }).then(
             (paginatedMissions) => {
@@ -53,8 +47,15 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
                 setIsLoading(false)
             }
         )
-        //.catch((e) => handleError(e))
-    }
+    }, [completedStatuses, currentPage, pageSize])
+
+    useEffect(() => {
+        updateCompletedMissions()
+        const id = setInterval(() => {
+            updateCompletedMissions()
+        }, refreshInterval)
+        return () => clearInterval(id)
+    }, [refreshInterval, updateCompletedMissions, currentPage])
 
     var missionsDisplay = completedMissions.map(function (mission, index) {
         return <HistoricMissionCard key={index} index={index} mission={mission} />

@@ -109,21 +109,28 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
 }
 
 function MissionDurationDisplay({ mission }: MissionDisplayProps) {
+    const translateEstimatedDuration = TranslateText('Estimated duration')
+    const translateH = TranslateText('h')
+    const translateMin = TranslateText('min')
+    const translateNotAvailable = TranslateText('Estimated duration: not available')
+
     if (mission.estimatedDuration) {
         const hours = Math.floor(mission.estimatedDuration / 3600)
         const remainingSeconds = mission.estimatedDuration % 3600
         const minutes = Math.ceil(remainingSeconds / 60)
+
         return (
             <Typography variant="caption" color="#6F6F6F">
-                {TranslateText('Estimated duration')}: {hours}
-                {TranslateText('h')} {minutes}
-                {TranslateText('min')}
+                {translateEstimatedDuration}: {hours}
+                {translateH} {minutes}
+                {translateMin}
             </Typography>
         )
     }
+
     return (
         <Typography variant="caption" color="#6F6F6F">
-            {TranslateText('Estimated duration: not available')}
+            {translateNotAvailable}
         </Typography>
     )
 }

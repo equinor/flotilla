@@ -2,7 +2,6 @@ import { Mission } from 'models/Mission'
 import { Button, EdsProvider, Icon, Menu, Tooltip } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { useErrorHandler } from 'react-error-boundary'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { config } from 'config'
 import { useNavigate } from 'react-router-dom'
@@ -40,12 +39,10 @@ export function MissionRestartButton({ mission }: MissionProps) {
         navigate(path)
     }
 
-    const handleError = useErrorHandler()
     const startReRun = (option: ReRunOptions) => {
-        BackendAPICaller.reRunMission(mission.id, option == ReRunOptions.ReRunFailed).then((mission) =>
+        BackendAPICaller.reRunMission(mission.id, option === ReRunOptions.ReRunFailed).then((mission) =>
             navigateToHome()
         )
-        //.catch((e) => handleError(e))
     }
 
     return (
