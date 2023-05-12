@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import { RobotImage } from './RobotImage'
 import { useNavigate } from 'react-router-dom'
 import { BatteryStatus } from 'models/Battery'
-import { translateText } from 'components/Contexts/LanguageContext'
+import { TranslateText } from 'components/Contexts/LanguageContext'
 import PressureStatusView from './PressureStatusView'
 import { config } from 'config'
 import { RobotType } from 'models/RobotModel'
@@ -81,7 +81,7 @@ export function RobotStatusCardPlaceholder() {
             <div>
                 <RobotImage robotType={RobotType.NoneType} />
                 <Typography variant="h5" color="disabled">
-                    {translateText('No robot connected')}
+                    {TranslateText('No robot connected')}
                 </Typography>
                 <Typography variant="body_short" color="disabled">
                     ----

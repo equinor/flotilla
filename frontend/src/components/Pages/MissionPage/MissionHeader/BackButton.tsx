@@ -1,6 +1,6 @@
 import { Button, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { translateText } from 'components/Contexts/LanguageContext'
+import { TranslateText } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { Icons } from 'utils/icons'
 
@@ -14,7 +14,7 @@ export function BackButton() {
     return (
         <StyledButton variant="ghost" onClick={() => navigate(-1)}>
             <Icon name={Icons.ArrowBack} size={16} />
-            {translateText('Back')}
+            {TranslateText('Back')}
         </StyledButton>
     )
 }

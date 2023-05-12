@@ -5,7 +5,7 @@ import { format, differenceInMinutes } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
-import { translateText } from 'components/Contexts/LanguageContext'
+import { TranslateText } from 'components/Contexts/LanguageContext'
 import { StatusReason } from '../StatusReason'
 import { MissionRestartButton } from 'components/Pages/FrontPage/MissionOverview/MissionRestartButton'
 
@@ -51,21 +51,21 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
                 group="paragraph"
                 color={tokens.colors.text.static_icons__secondary.rgba}
             >
-                {mission.description && translateText('Description') + ': ' + mission.description}
+                {mission.description && TranslateText('Description') + ': ' + mission.description}
             </Typography>
             <StatusReason mission={mission}></StatusReason>
             <InfoSection>
                 <MissionStatusDisplay status={mission.status} />
-                {HeaderText(translateText('Start time') + ': ' + startTime)}
-                {HeaderText(translateText('Time used') + ': ' + usedTime)}
-                {!isMissionCompleted && HeaderText(translateText('Estimated time remaining') + ': ' + remainingTime)}
-                {HeaderText(translateText('Robot') + ': ' + mission.robot.name)}
+                {HeaderText(TranslateText('Start time') + ': ' + startTime)}
+                {HeaderText(TranslateText('Time used') + ': ' + usedTime)}
+                {!isMissionCompleted && HeaderText(TranslateText('Estimated time remaining') + ': ' + remainingTime)}
+                {HeaderText(TranslateText('Robot') + ': ' + mission.robot.name)}
                 {!isMissionCompleted &&
-                    HeaderText(translateText('Battery level') + ': ' + mission.robot.batteryLevel + '%')}
+                    HeaderText(TranslateText('Battery level') + ': ' + mission.robot.batteryLevel + '%')}
                 {!isMissionCompleted &&
                     mission.robot.pressureLevel &&
                     HeaderText(
-                        translateText('Pressure level') +
+                        TranslateText('Pressure level') +
                             ': ' +
                             Math.round(mission.robot.pressureLevel * barToMillibar) +
                             'mBar'
@@ -106,14 +106,14 @@ function StartUsedAndRemainingTime(mission: Mission): { startTime: string; usedT
         startTime = format(new Date(mission.startTime), 'HH:mm')
         usedTimeInMinutes = differenceInMinutes(Date.now(), new Date(mission.startTime))
         if (estimatedDurationInMinutes)
-            remainingTime = Math.max(estimatedDurationInMinutes - usedTimeInMinutes, 0) + ' ' + translateText('minutes')
+            remainingTime = Math.max(estimatedDurationInMinutes - usedTimeInMinutes, 0) + ' ' + TranslateText('minutes')
         else remainingTime = 'N/A'
     } else {
         startTime = 'N/A'
         usedTimeInMinutes = 0
-        if (estimatedDurationInMinutes) remainingTime = estimatedDurationInMinutes + ' ' + translateText('minutes')
+        if (estimatedDurationInMinutes) remainingTime = estimatedDurationInMinutes + ' ' + TranslateText('minutes')
         else remainingTime = 'N/A'
     }
-    const usedTime: string = usedTimeInMinutes + ' ' + translateText('minutes')
+    const usedTime: string = usedTimeInMinutes + ' ' + TranslateText('minutes')
     return { startTime, usedTime, remainingTime }
 }

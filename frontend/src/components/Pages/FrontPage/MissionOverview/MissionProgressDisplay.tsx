@@ -2,7 +2,7 @@ import { Typography } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { translateText } from 'components/Contexts/LanguageContext'
+import { TranslateText } from 'components/Contexts/LanguageContext'
 import { Task } from 'models/Task'
 
 const StyledTagCount = styled.div`
@@ -27,7 +27,7 @@ export function MissionProgressDisplay({ mission }: MissionProps) {
     return (
         <StyledTagCount>
             <Typography>
-                {translateText('Task')} {completedTasks}/{tasks.length}
+                {TranslateText('Task')} {completedTasks}/{tasks.length}
             </Typography>
         </StyledTagCount>
     )
