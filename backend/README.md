@@ -31,7 +31,12 @@ To set up the backend on **Windows/Mac**, install visual studio and include the 
 If you already have visual studio installed, you can open the "Visual Studio Installer" and modify your install to add the workload.
 
 To set up the backend on **Linux**, install .NET for linux
-[here](https://docs.microsoft.com/en-us/dotnet/core/install/linux).
+[here](https://docs.microsoft.com/en-us/dotnet/core/install/linux).  
+You need to also install the dev certificate for local .NET development on linux.  
+Follow
+[this guide](https://learn.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-7.0&tabs=visual-studio%2Clinux-ubuntu#trust-https-certificate-on-linux),
+for each of the browser(s) you wish to trust it in.  
+**NB:** You probably need to run the commands with `sudo` prefixed to have permission to change them.
 
 For the configuration to be able to read secrets from the keyvault, you will need to have the client secret stored locally in your secret manager.
 
