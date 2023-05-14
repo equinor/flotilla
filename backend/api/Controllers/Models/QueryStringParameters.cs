@@ -3,7 +3,7 @@
     public abstract class QueryStringParameters
     {
         public const string PaginationHeader = "X-Pagination";
-        public const int MaxPageSize = 100;
+        public const int MaxPageSize = 1000;
 
         /// <summary>
         /// Defaults to '1' if left empty
@@ -14,7 +14,7 @@
 
         /// <summary>
         /// <para>Defaults to '10' if left empty.</para>
-        /// Max value is '100'
+        /// Max value is '1000'
         /// </summary>
         public int PageSize
         {
