@@ -1,4 +1,5 @@
-﻿using Api.Database.Models;
+﻿using System.Collections.Concurrent;
+using Api.Database.Models;
 using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
@@ -15,7 +16,7 @@ namespace Api.EventHandlers
 
         private readonly int _isarConnectionTimeout;
 
-        private readonly Dictionary<string, Timer> _isarConnectionTimers = new();
+        private readonly ConcurrentDictionary<string, Timer> _isarConnectionTimers = new();
         private readonly ILogger<IsarConnectionEventHandler> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
 
@@ -76,12 +77,12 @@ namespace Api.EventHandlers
                 var timer = new Timer(_isarConnectionTimeout * 1000);
                 timer.Elapsed += (_, _) => OnTimeoutEvent(isarRobotHeartbeat);
                 timer.Start();
-                _isarConnectionTimers.Add(robot.IsarId, timer);
-                _logger.LogInformation(
-                    "Added new timer for ISAR '{isarId}' ('{robotName}')",
-                    robot.IsarId,
-                    robot.Name
-                );
+                if (_isarConnectionTimers.TryAdd(robot.IsarId, timer))
+                    _logger.LogInformation(
+                        "Added new timer for ISAR '{isarId}' ('{robotName}')",
+                        robot.IsarId,
+                        robot.Name
+                    );
             }
 
             _logger.LogDebug(
@@ -138,7 +139,7 @@ namespace Api.EventHandlers
             if (_isarConnectionTimers.TryGetValue(robotHeartbeatMessage.IsarId, out var timer))
             {
                 timer.Close();
-                _isarConnectionTimers.Remove(robotHeartbeatMessage.IsarId);
+                _isarConnectionTimers.Remove(robotHeartbeatMessage.IsarId, out _);
             }
         }
     }
