@@ -34,8 +34,6 @@ namespace Api.Database.Models
         /// The type of robot model
         /// </summary>
         [Required]
-        //Save robot type as string in database
-        [Column(TypeName = "nvarchar(56)")]
         public RobotType Type { get; set; }
 
         /// <summary>
