@@ -3,8 +3,8 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -17,32 +17,32 @@ namespace Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.8")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("ProductVersion", "7.0.11")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Api.Database.Models.Area", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("DeckId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("InstallationId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("PlantId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -52,27 +52,27 @@ namespace Api.Migrations
 
                     b.HasIndex("PlantId");
 
-                    b.ToTable("Areas", (string)null);
+                    b.ToTable("Areas");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Deck", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("InstallationId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("PlantId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -80,67 +80,67 @@ namespace Api.Migrations
 
                     b.HasIndex("PlantId");
 
-                    b.ToTable("Decks", (string)null);
+                    b.ToTable("Decks");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Installation", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("InstallationCode")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("character varying(10)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("InstallationCode")
                         .IsUnique();
 
-                    b.ToTable("Installations", (string)null);
+                    b.ToTable("Installations");
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionDefinition", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("AreaId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Comment")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<long?>("InspectionFrequency")
                         .HasColumnType("bigint");
 
                     b.Property<string>("InstallationCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeprecated")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LastRunId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("SourceId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -150,31 +150,31 @@ namespace Api.Migrations
 
                     b.HasIndex("SourceId");
 
-                    b.ToTable("MissionDefinitions", (string)null);
+                    b.ToTable("MissionDefinitions");
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionRun", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("AreaId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Comment")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("character varying(450)");
 
                     b.Property<DateTimeOffset>("DesiredStartTime")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("EndTime")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long?>("EstimatedDuration")
                         .HasColumnType("bigint");
@@ -182,33 +182,34 @@ namespace Api.Migrations
                     b.Property<string>("InstallationCode")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("IsarMissionId")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("MissionId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("RobotId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("StartTime")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("StatusReason")
                         .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("character varying(450)");
 
                     b.HasKey("Id");
 
@@ -216,28 +217,28 @@ namespace Api.Migrations
 
                     b.HasIndex("RobotId");
 
-                    b.ToTable("MissionRuns", (string)null);
+                    b.ToTable("MissionRuns");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Plant", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("InstallationId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("PlantCode")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("character varying(10)");
 
                     b.HasKey("Id");
 
@@ -246,52 +247,52 @@ namespace Api.Migrations
                     b.HasIndex("PlantCode")
                         .IsUnique();
 
-                    b.ToTable("Plants", (string)null);
+                    b.ToTable("Plants");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Robot", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<float>("BatteryLevel")
                         .HasColumnType("real");
 
                     b.Property<string>("CurrentAreaId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("CurrentInstallation")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("CurrentMissionId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Host")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("IsarId")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("ModelId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("Port")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<float?>("PressureLevel")
                         .HasColumnType("real");
@@ -299,10 +300,11 @@ namespace Api.Migrations
                     b.Property<string>("SerialNumber")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -310,14 +312,32 @@ namespace Api.Migrations
 
                     b.HasIndex("ModelId");
 
-                    b.ToTable("Robots", (string)null);
+                    b.ToTable("Robots");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.RobotBatteryTimeseries", b =>
+                {
+                    b.Property<float>("BatteryLevel")
+                        .HasColumnType("real");
+
+                    b.Property<string>("MissionId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RobotId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.ToTable("RobotBatteryTimeseries");
                 });
 
             modelBuilder.Entity("Api.Database.Models.RobotModel", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<float?>("AverageDurationPerTag")
                         .HasColumnType("real");
@@ -330,7 +350,7 @@ namespace Api.Migrations
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(56)");
+                        .HasColumnType("text");
 
                     b.Property<float?>("UpperPressureWarningThreshold")
                         .HasColumnType("real");
@@ -340,41 +360,96 @@ namespace Api.Migrations
                     b.HasIndex("Type")
                         .IsUnique();
 
-                    b.ToTable("RobotModels", (string)null);
+                    b.ToTable("RobotModels");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.RobotPoseTimeseries", b =>
+                {
+                    b.Property<string>("MissionId")
+                        .HasColumnType("text");
+
+                    b.Property<float>("OrientationW")
+                        .HasColumnType("real");
+
+                    b.Property<float>("OrientationX")
+                        .HasColumnType("real");
+
+                    b.Property<float>("OrientationY")
+                        .HasColumnType("real");
+
+                    b.Property<float>("OrientationZ")
+                        .HasColumnType("real");
+
+                    b.Property<float>("PositionX")
+                        .HasColumnType("real");
+
+                    b.Property<float>("PositionY")
+                        .HasColumnType("real");
+
+                    b.Property<float>("PositionZ")
+                        .HasColumnType("real");
+
+                    b.Property<string>("RobotId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.ToTable("RobotPoseTimeseries");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.RobotPressureTimeseries", b =>
+                {
+                    b.Property<string>("MissionId")
+                        .HasColumnType("text");
+
+                    b.Property<float>("Pressure")
+                        .HasColumnType("real");
+
+                    b.Property<string>("RobotId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("Time")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.ToTable("RobotPressureTimeseries");
                 });
 
             modelBuilder.Entity("Api.Database.Models.SafePosition", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("AreaId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AreaId");
 
-                    b.ToTable("SafePositions", (string)null);
+                    b.ToTable("SafePositions");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Source", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("SourceId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sources", (string)null);
+                    b.ToTable("Sources");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Area", b =>
@@ -396,22 +471,22 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.OwnsOne("Api.Database.Models.Area.DefaultLocalizationPose#Api.Database.Models.Pose", "DefaultLocalizationPose", b1 =>
+                    b.OwnsOne("Api.Database.Models.Pose", "DefaultLocalizationPose", b1 =>
                         {
                             b1.Property<string>("AreaId")
-                                .HasColumnType("nvarchar(450)");
+                                .HasColumnType("text");
 
                             b1.HasKey("AreaId");
 
-                            b1.ToTable("Areas", (string)null);
+                            b1.ToTable("Areas");
 
                             b1.WithOwner()
                                 .HasForeignKey("AreaId");
 
-                            b1.OwnsOne("Api.Database.Models.Area.DefaultLocalizationPose#Api.Database.Models.Pose.Orientation#Api.Database.Models.Orientation", "Orientation", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Orientation", "Orientation", b2 =>
                                 {
                                     b2.Property<string>("PoseAreaId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<float>("W")
                                         .HasColumnType("real");
@@ -427,16 +502,16 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseAreaId");
 
-                                    b2.ToTable("Areas", (string)null);
+                                    b2.ToTable("Areas");
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseAreaId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.Area.DefaultLocalizationPose#Api.Database.Models.Pose.Position#Api.Database.Models.Position", "Position", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Position", "Position", b2 =>
                                 {
                                     b2.Property<string>("PoseAreaId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<float>("X")
                                         .HasColumnType("real");
@@ -449,7 +524,7 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseAreaId");
 
-                                    b2.ToTable("Areas", (string)null);
+                                    b2.ToTable("Areas");
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseAreaId");
@@ -462,74 +537,74 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsOne("Api.Database.Models.Area.MapMetadata#Api.Database.Models.MapMetadata", "MapMetadata", b1 =>
+                    b.OwnsOne("Api.Database.Models.MapMetadata", "MapMetadata", b1 =>
                         {
                             b1.Property<string>("AreaId")
-                                .HasColumnType("nvarchar(450)");
+                                .HasColumnType("text");
 
                             b1.Property<string>("MapName")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
+                                .HasColumnType("character varying(200)");
 
                             b1.HasKey("AreaId");
 
-                            b1.ToTable("Areas", (string)null);
+                            b1.ToTable("Areas");
 
                             b1.WithOwner()
                                 .HasForeignKey("AreaId");
 
-                            b1.OwnsOne("Api.Database.Models.Area.MapMetadata#Api.Database.Models.MapMetadata.Boundary#Api.Database.Models.Boundary", "Boundary", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Boundary", "Boundary", b2 =>
                                 {
                                     b2.Property<string>("MapMetadataAreaId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<double>("X1")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("X2")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("Y1")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("Y2")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("Z1")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("Z2")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.HasKey("MapMetadataAreaId");
 
-                                    b2.ToTable("Areas", (string)null);
+                                    b2.ToTable("Areas");
 
                                     b2.WithOwner()
                                         .HasForeignKey("MapMetadataAreaId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.Area.MapMetadata#Api.Database.Models.MapMetadata.TransformationMatrices#Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
+                            b1.OwnsOne("Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
                                 {
                                     b2.Property<string>("MapMetadataAreaId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<double>("C1")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("C2")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("D1")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("D2")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.HasKey("MapMetadataAreaId");
 
-                                    b2.ToTable("Areas", (string)null);
+                                    b2.ToTable("Areas");
 
                                     b2.WithOwner()
                                         .HasForeignKey("MapMetadataAreaId");
@@ -609,74 +684,74 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Api.Database.Models.MissionRun.Map#Api.Database.Models.MapMetadata", "Map", b1 =>
+                    b.OwnsOne("Api.Database.Models.MapMetadata", "Map", b1 =>
                         {
                             b1.Property<string>("MissionRunId")
-                                .HasColumnType("nvarchar(450)");
+                                .HasColumnType("text");
 
                             b1.Property<string>("MapName")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
+                                .HasColumnType("character varying(200)");
 
                             b1.HasKey("MissionRunId");
 
-                            b1.ToTable("MissionRuns", (string)null);
+                            b1.ToTable("MissionRuns");
 
                             b1.WithOwner()
                                 .HasForeignKey("MissionRunId");
 
-                            b1.OwnsOne("Api.Database.Models.MissionRun.Map#Api.Database.Models.MapMetadata.Boundary#Api.Database.Models.Boundary", "Boundary", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Boundary", "Boundary", b2 =>
                                 {
                                     b2.Property<string>("MapMetadataMissionRunId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<double>("X1")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("X2")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("Y1")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("Y2")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("Z1")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("Z2")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.HasKey("MapMetadataMissionRunId");
 
-                                    b2.ToTable("MissionRuns", (string)null);
+                                    b2.ToTable("MissionRuns");
 
                                     b2.WithOwner()
                                         .HasForeignKey("MapMetadataMissionRunId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.MissionRun.Map#Api.Database.Models.MapMetadata.TransformationMatrices#Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
+                            b1.OwnsOne("Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
                                 {
                                     b2.Property<string>("MapMetadataMissionRunId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<double>("C1")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("C2")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("D1")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.Property<double>("D2")
-                                        .HasColumnType("float");
+                                        .HasColumnType("double precision");
 
                                     b2.HasKey("MapMetadataMissionRunId");
 
-                                    b2.ToTable("MissionRuns", (string)null);
+                                    b2.ToTable("MissionRuns");
 
                                     b2.WithOwner()
                                         .HasForeignKey("MapMetadataMissionRunId");
@@ -689,60 +764,109 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsMany("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask", "Tasks", b1 =>
+                    b.OwnsMany("Api.Database.Models.MissionTask", "Tasks", b1 =>
                         {
                             b1.Property<string>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("nvarchar(450)");
+                                .HasColumnType("text");
 
                             b1.Property<string>("Description")
                                 .HasMaxLength(500)
-                                .HasColumnType("nvarchar(500)");
+                                .HasColumnType("character varying(500)");
 
                             b1.Property<int?>("EchoPoseId")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("EchoTagLink")
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
+                                .HasColumnType("character varying(200)");
 
                             b1.Property<DateTimeOffset?>("EndTime")
-                                .HasColumnType("datetimeoffset");
+                                .HasColumnType("timestamp with time zone");
 
                             b1.Property<string>("IsarTaskId")
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
+                                .HasColumnType("character varying(200)");
 
                             b1.Property<string>("MissionRunId")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(450)");
+                                .HasColumnType("text");
 
                             b1.Property<DateTimeOffset?>("StartTime")
-                                .HasColumnType("datetimeoffset");
+                                .HasColumnType("timestamp with time zone");
 
-                            b1.Property<int>("Status")
-                                .HasColumnType("int");
+                            b1.Property<string>("Status")
+                                .IsRequired()
+                                .HasColumnType("text");
 
                             b1.Property<string>("TagId")
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
+                                .HasColumnType("character varying(200)");
 
                             b1.Property<int>("TaskOrder")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("Id");
 
                             b1.HasIndex("MissionRunId");
 
-                            b1.ToTable("MissionTask", (string)null);
+                            b1.ToTable("MissionTask");
 
                             b1.WithOwner()
                                 .HasForeignKey("MissionRunId");
 
-                            b1.OwnsOne("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask.InspectionTarget#Api.Database.Models.Position", "InspectionTarget", b2 =>
+                            b1.OwnsMany("Api.Database.Models.Inspection", "Inspections", b2 =>
+                                {
+                                    b2.Property<string>("Id")
+                                        .ValueGeneratedOnAdd()
+                                        .HasColumnType("text");
+
+                                    b2.Property<string>("AnalysisType")
+                                        .HasColumnType("text");
+
+                                    b2.Property<DateTimeOffset?>("EndTime")
+                                        .HasColumnType("timestamp with time zone");
+
+                                    b2.Property<string>("InspectionType")
+                                        .IsRequired()
+                                        .HasColumnType("text");
+
+                                    b2.Property<string>("InspectionUrl")
+                                        .HasMaxLength(250)
+                                        .HasColumnType("character varying(250)");
+
+                                    b2.Property<string>("IsarStepId")
+                                        .HasMaxLength(200)
+                                        .HasColumnType("character varying(200)");
+
+                                    b2.Property<string>("MissionTaskId")
+                                        .IsRequired()
+                                        .HasColumnType("text");
+
+                                    b2.Property<DateTimeOffset?>("StartTime")
+                                        .HasColumnType("timestamp with time zone");
+
+                                    b2.Property<string>("Status")
+                                        .IsRequired()
+                                        .HasColumnType("text");
+
+                                    b2.Property<float?>("VideoDuration")
+                                        .HasColumnType("real");
+
+                                    b2.HasKey("Id");
+
+                                    b2.HasIndex("MissionTaskId");
+
+                                    b2.ToTable("Inspection");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MissionTaskId");
+                                });
+
+                            b1.OwnsOne("Api.Database.Models.Position", "InspectionTarget", b2 =>
                                 {
                                     b2.Property<string>("MissionTaskId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<float>("X")
                                         .HasColumnType("real");
@@ -755,74 +879,28 @@ namespace Api.Migrations
 
                                     b2.HasKey("MissionTaskId");
 
-                                    b2.ToTable("MissionTask", (string)null);
+                                    b2.ToTable("MissionTask");
 
                                     b2.WithOwner()
                                         .HasForeignKey("MissionTaskId");
                                 });
 
-                            b1.OwnsMany("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask.Inspections#Api.Database.Models.Inspection", "Inspections", b2 =>
-                                {
-                                    b2.Property<string>("Id")
-                                        .ValueGeneratedOnAdd()
-                                        .HasColumnType("nvarchar(450)");
-
-                                    b2.Property<int?>("AnalysisType")
-                                        .HasColumnType("int");
-
-                                    b2.Property<DateTimeOffset?>("EndTime")
-                                        .HasColumnType("datetimeoffset");
-
-                                    b2.Property<int>("InspectionType")
-                                        .HasColumnType("int");
-
-                                    b2.Property<string>("InspectionUrl")
-                                        .HasMaxLength(250)
-                                        .HasColumnType("nvarchar(250)");
-
-                                    b2.Property<string>("IsarStepId")
-                                        .HasMaxLength(200)
-                                        .HasColumnType("nvarchar(200)");
-
-                                    b2.Property<string>("MissionTaskId")
-                                        .IsRequired()
-                                        .HasColumnType("nvarchar(450)");
-
-                                    b2.Property<DateTimeOffset?>("StartTime")
-                                        .HasColumnType("datetimeoffset");
-
-                                    b2.Property<int>("Status")
-                                        .HasColumnType("int");
-
-                                    b2.Property<float?>("VideoDuration")
-                                        .HasColumnType("real");
-
-                                    b2.HasKey("Id");
-
-                                    b2.HasIndex("MissionTaskId");
-
-                                    b2.ToTable("Inspection", (string)null);
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("MissionTaskId");
-                                });
-
-                            b1.OwnsOne("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask.RobotPose#Api.Database.Models.Pose", "RobotPose", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Pose", "RobotPose", b2 =>
                                 {
                                     b2.Property<string>("MissionTaskId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.HasKey("MissionTaskId");
 
-                                    b2.ToTable("MissionTask", (string)null);
+                                    b2.ToTable("MissionTask");
 
                                     b2.WithOwner()
                                         .HasForeignKey("MissionTaskId");
 
-                                    b2.OwnsOne("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask.RobotPose#Api.Database.Models.Pose.Orientation#Api.Database.Models.Orientation", "Orientation", b3 =>
+                                    b2.OwnsOne("Api.Database.Models.Orientation", "Orientation", b3 =>
                                         {
                                             b3.Property<string>("PoseMissionTaskId")
-                                                .HasColumnType("nvarchar(450)");
+                                                .HasColumnType("text");
 
                                             b3.Property<float>("W")
                                                 .HasColumnType("real");
@@ -838,16 +916,16 @@ namespace Api.Migrations
 
                                             b3.HasKey("PoseMissionTaskId");
 
-                                            b3.ToTable("MissionTask", (string)null);
+                                            b3.ToTable("MissionTask");
 
                                             b3.WithOwner()
                                                 .HasForeignKey("PoseMissionTaskId");
                                         });
 
-                                    b2.OwnsOne("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask.RobotPose#Api.Database.Models.Pose.Position#Api.Database.Models.Position", "Position", b3 =>
+                                    b2.OwnsOne("Api.Database.Models.Position", "Position", b3 =>
                                         {
                                             b3.Property<string>("PoseMissionTaskId")
-                                                .HasColumnType("nvarchar(450)");
+                                                .HasColumnType("text");
 
                                             b3.Property<float>("X")
                                                 .HasColumnType("real");
@@ -860,7 +938,7 @@ namespace Api.Migrations
 
                                             b3.HasKey("PoseMissionTaskId");
 
-                                            b3.ToTable("MissionTask", (string)null);
+                                            b3.ToTable("MissionTask");
 
                                             b3.WithOwner()
                                                 .HasForeignKey("PoseMissionTaskId");
@@ -914,22 +992,22 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Api.Database.Models.Robot.Pose#Api.Database.Models.Pose", "Pose", b1 =>
+                    b.OwnsOne("Api.Database.Models.Pose", "Pose", b1 =>
                         {
                             b1.Property<string>("RobotId")
-                                .HasColumnType("nvarchar(450)");
+                                .HasColumnType("text");
 
                             b1.HasKey("RobotId");
 
-                            b1.ToTable("Robots", (string)null);
+                            b1.ToTable("Robots");
 
                             b1.WithOwner()
                                 .HasForeignKey("RobotId");
 
-                            b1.OwnsOne("Api.Database.Models.Robot.Pose#Api.Database.Models.Pose.Orientation#Api.Database.Models.Orientation", "Orientation", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Orientation", "Orientation", b2 =>
                                 {
                                     b2.Property<string>("PoseRobotId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<float>("W")
                                         .HasColumnType("real");
@@ -945,16 +1023,16 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseRobotId");
 
-                                    b2.ToTable("Robots", (string)null);
+                                    b2.ToTable("Robots");
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseRobotId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.Robot.Pose#Api.Database.Models.Pose.Position#Api.Database.Models.Position", "Position", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Position", "Position", b2 =>
                                 {
                                     b2.Property<string>("PoseRobotId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<float>("X")
                                         .HasColumnType("real");
@@ -967,7 +1045,7 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseRobotId");
 
-                                    b2.ToTable("Robots", (string)null);
+                                    b2.ToTable("Robots");
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseRobotId");
@@ -980,39 +1058,39 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsMany("Api.Database.Models.Robot.VideoStreams#Api.Database.Models.VideoStream", "VideoStreams", b1 =>
+                    b.OwnsMany("Api.Database.Models.VideoStream", "VideoStreams", b1 =>
                         {
                             b1.Property<string>("Id")
                                 .ValueGeneratedOnAdd()
-                                .HasColumnType("nvarchar(450)");
+                                .HasColumnType("text");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
+                                .HasColumnType("character varying(200)");
 
                             b1.Property<string>("RobotId")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(450)");
+                                .HasColumnType("text");
 
                             b1.Property<bool>("ShouldRotate270Clockwise")
-                                .HasColumnType("bit");
+                                .HasColumnType("boolean");
 
                             b1.Property<string>("Type")
                                 .IsRequired()
                                 .HasMaxLength(64)
-                                .HasColumnType("nvarchar(64)");
+                                .HasColumnType("character varying(64)");
 
                             b1.Property<string>("Url")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
+                                .HasColumnType("character varying(200)");
 
                             b1.HasKey("Id");
 
                             b1.HasIndex("RobotId");
 
-                            b1.ToTable("VideoStream", (string)null);
+                            b1.ToTable("VideoStream");
 
                             b1.WithOwner()
                                 .HasForeignKey("RobotId");
@@ -1034,22 +1112,22 @@ namespace Api.Migrations
                         .WithMany("SafePositions")
                         .HasForeignKey("AreaId");
 
-                    b.OwnsOne("Api.Database.Models.SafePosition.Pose#Api.Database.Models.Pose", "Pose", b1 =>
+                    b.OwnsOne("Api.Database.Models.Pose", "Pose", b1 =>
                         {
                             b1.Property<string>("SafePositionId")
-                                .HasColumnType("nvarchar(450)");
+                                .HasColumnType("text");
 
                             b1.HasKey("SafePositionId");
 
-                            b1.ToTable("SafePositions", (string)null);
+                            b1.ToTable("SafePositions");
 
                             b1.WithOwner()
                                 .HasForeignKey("SafePositionId");
 
-                            b1.OwnsOne("Api.Database.Models.SafePosition.Pose#Api.Database.Models.Pose.Orientation#Api.Database.Models.Orientation", "Orientation", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Orientation", "Orientation", b2 =>
                                 {
                                     b2.Property<string>("PoseSafePositionId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<float>("W")
                                         .HasColumnType("real");
@@ -1065,16 +1143,16 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseSafePositionId");
 
-                                    b2.ToTable("SafePositions", (string)null);
+                                    b2.ToTable("SafePositions");
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseSafePositionId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.SafePosition.Pose#Api.Database.Models.Pose.Position#Api.Database.Models.Position", "Position", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Position", "Position", b2 =>
                                 {
                                     b2.Property<string>("PoseSafePositionId")
-                                        .HasColumnType("nvarchar(450)");
+                                        .HasColumnType("text");
 
                                     b2.Property<float>("X")
                                         .HasColumnType("real");
@@ -1087,7 +1165,7 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseSafePositionId");
 
-                                    b2.ToTable("SafePositions", (string)null);
+                                    b2.ToTable("SafePositions");
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseSafePositionId");
