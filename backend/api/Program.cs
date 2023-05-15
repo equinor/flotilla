@@ -61,6 +61,15 @@ builder.Services.AddScoped<IPlantService, PlantService>();
 builder.Services.AddScoped<IDeckService, DeckService>();
 builder.Services.AddScoped<ISourceService, SourceService>();
 builder.Services.AddScoped<IRobotModelService, RobotModelService>();
+
+bool useInMemoryDatabase = builder.Configuration
+    .GetSection("Database")
+    .GetValue<bool>("UseInMemoryDatabase");
+
+if (useInMemoryDatabase)
+    builder.Services.AddScoped<ITimeseriesService, TimeseriesServiceSqlLite>();
+else
+    builder.Services.AddScoped<ITimeseriesService, TimeseriesService>();
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
 
