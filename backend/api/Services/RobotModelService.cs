@@ -1,6 +1,7 @@
 ﻿using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Services
 {
@@ -31,6 +32,14 @@ namespace Api.Services
         public RobotModelService(FlotillaDbContext context)
         {
             _context = context;
+
+            if (ReadAll().Result.IsNullOrEmpty())
+            {
+                // If no models in database, add default ones
+                // Robot models are essentially database enums and should just be added to all databases
+                // They can then be modified later with other values if needed
+                InitDb.AddRobotModelsToDatabase(context);
+            }
         }
 
         public async Task<IEnumerable<RobotModel>> ReadAll()
