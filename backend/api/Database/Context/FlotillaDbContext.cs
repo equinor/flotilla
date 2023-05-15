@@ -18,6 +18,11 @@ public class FlotillaDbContext : DbContext
     public DbSet<Source> Sources => Set<Source>();
     public DbSet<SafePosition> SafePositions => Set<SafePosition>();
 
+    // Timeseries:
+    public DbSet<RobotPressureTimeseries> RobotPressureTimeseries => Set<RobotPressureTimeseries>();
+    public DbSet<RobotBatteryTimeseries> RobotBatteryTimeseries => Set<RobotBatteryTimeseries>();
+    public DbSet<RobotPoseTimeseries> RobotPoseTimeseries => Set<RobotPoseTimeseries>();
+
     public FlotillaDbContext(DbContextOptions options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
