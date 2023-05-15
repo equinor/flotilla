@@ -528,15 +528,8 @@ public static class InitDb
         return new List<MissionRun>(new[] { missionRun1, missionRun2, missionRun3, missionRun4, missionRun5, missionRun6, missionRun7 });
     }
 
-    public static void PopulateDb(FlotillaDbContext context)
+    public static void AddRobotModelsToDatabase(FlotillaDbContext context)
     {
-        // To make sure we are not trying to initialize database more than once during tests
-        if (context.Robots.Any())
-        {
-            return;
-        }
-
-        // Create robot models for the test database
         foreach (var type in Enum.GetValues<RobotType>())
         {
             RobotModel model =
@@ -550,6 +543,17 @@ public static class InitDb
             context.Add(model);
         }
         context.SaveChanges();
+    }
+
+    public static void PopulateDb(FlotillaDbContext context)
+    {
+        // To make sure we are not trying to initialize database more than once during tests
+        if (context.Robots.Any())
+        {
+            return;
+        }
+
+        AddRobotModelsToDatabase(context);
 
         foreach (var robot in robots)
         {
