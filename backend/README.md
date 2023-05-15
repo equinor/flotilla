@@ -24,6 +24,7 @@ Useful documentation of concepts and features in the .NET frameworks can be foun
     - [CSharpier](#csharpier)
     - [Dotnet format](#dotnet-format)
   - [Monitoring](#monitoring)
+  - [Authorization](#authorization)
 
 ## Setup
 
