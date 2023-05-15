@@ -46,13 +46,19 @@ namespace Api.Configurations
             }
             else
             {
+                string? connection = configuration["Database:PostgreSqlConnectionString"];
                 // Setting splitting behavior explicitly to avoid warning
                 services.AddDbContext<FlotillaDbContext>(
                     options =>
-                        options.UseSqlServer(
-                            configuration["Database:ConnectionString"],
-                            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
-                        )
+                        options.UseNpgsql(
+                            connection,
+                            o =>
+                            {
+                                o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
+                                o.EnableRetryOnFailure();
+                            }
+                        ),
+                    ServiceLifetime.Transient
                 );
             }
             return services;

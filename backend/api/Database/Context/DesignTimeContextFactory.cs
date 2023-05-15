@@ -30,27 +30,30 @@ namespace Api.Database.Context
                 .AddEnvironmentVariables()
                 .Build();
 
-            string? keyVaultUri = config.GetSection("KeyVault")["VaultUri"];
-            if (keyVaultUri != null)
-            {
-                // Connect to keyvault
-                var keyVault = new SecretClient(
-                    new Uri(keyVaultUri),
-                    new DefaultAzureCredential(
-                        new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
-                    )
-                );
-                // Get connection string
-                string? connectionString = keyVault.GetSecret("Database--ConnectionString").Value.Value;
+            string? keyVaultUri = config.GetSection("KeyVault")["VaultUri"] ?? throw new KeyNotFoundException("No key vault in config");
 
-                var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
-                optionsBuilder.UseSqlServer(
-                    connectionString,
-                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
-                );
-                return new FlotillaDbContext(optionsBuilder.Options);
-            }
-            throw new KeyNotFoundException("No key vault in config");
+            // Connect to keyvault
+            var keyVault = new SecretClient(
+                new Uri(keyVaultUri),
+                new DefaultAzureCredential(
+                    new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
+                )
+            );
+
+            // Get connection string
+            string? connectionString = keyVault
+                .GetSecret("Database--PostgreSqlConnectionString")
+                .Value.Value;
+
+            var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
+
+            // Setting splitting behavior explicitly to avoid warning
+            optionsBuilder.UseNpgsql(
+                connectionString,
+                o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+            );
+
+            return new FlotillaDbContext(optionsBuilder.Options);
         }
     }
 }
