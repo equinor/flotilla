@@ -460,6 +460,7 @@ namespace Api.EventHandlers
         {
             var provider = GetServiceProvider();
             var robotService = provider.GetRequiredService<IRobotService>();
+            var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
 
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
             var robot = await robotService.ReadByIsarId(batteryStatus.IsarId);
@@ -475,6 +476,15 @@ namespace Api.EventHandlers
             {
                 robot.BatteryLevel = batteryStatus.BatteryLevel;
                 await robotService.Update(robot);
+                await timeseriesService.Create(
+                    new RobotBatteryTimeseries()
+                    {
+                        MissionId = robot.CurrentMissionId,
+                        BatteryLevel = batteryStatus.BatteryLevel,
+                        RobotId = robot.Id,
+                        Time = DateTimeOffset.UtcNow
+                    }
+                );
                 _logger.LogDebug(
                     "Updated battery on robot '{robotName}' with ISAR id '{isarId}'",
                     robot.Name,
@@ -487,6 +497,7 @@ namespace Api.EventHandlers
         {
             var provider = GetServiceProvider();
             var robotService = provider.GetRequiredService<IRobotService>();
+            var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
 
             var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
             var robot = await robotService.ReadByIsarId(pressureStatus.IsarId);
@@ -502,6 +513,15 @@ namespace Api.EventHandlers
             {
                 robot.PressureLevel = pressureStatus.PressureLevel;
                 await robotService.Update(robot);
+                await timeseriesService.Create(
+                    new RobotPressureTimeseries
+                    {
+                        MissionId = robot.CurrentMissionId,
+                        Pressure = pressureStatus.PressureLevel,
+                        RobotId = robot.Id,
+                        Time = DateTimeOffset.UtcNow
+                    }
+                );
                 _logger.LogDebug(
                     "Updated pressure on '{robotName}' with ISAR id '{isarId}'",
                     robot.Name,
@@ -514,6 +534,7 @@ namespace Api.EventHandlers
         {
             var provider = GetServiceProvider();
             var robotService = provider.GetRequiredService<IRobotService>();
+            var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
 
             var poseStatus = (IsarPoseMessage)mqttArgs.Message;
             var robot = await robotService.ReadByIsarId(poseStatus.IsarId);
@@ -542,6 +563,14 @@ namespace Api.EventHandlers
                 }
 
                 await robotService.Update(robot);
+                await timeseriesService.Create(
+                    new RobotPoseTimeseries(robot.Pose)
+                    {
+                        MissionId = robot.CurrentMissionId,
+                        RobotId = robot.Id,
+                        Time = DateTimeOffset.UtcNow
+                    }
+                );
                 _logger.LogDebug(
                     "Updated pose on robot '{robotName}' with ISAR id '{isarId}'",
                     robot.Name,
