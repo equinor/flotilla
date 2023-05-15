@@ -100,7 +100,13 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
 
     return (
         <>
-            <div onPointerEnter={handleHover} onPointerLeave={handleClose} onFocus={openPopover} onBlur={handleClose}>
+            <div
+                onPointerDown={handleHover}
+                onPointerEnter={handleHover}
+                onPointerLeave={handleClose}
+                onFocus={openPopover}
+                onBlur={handleClose}
+            >
                 <Button
                     onClick={() => {
                         onClickScheduleMission()

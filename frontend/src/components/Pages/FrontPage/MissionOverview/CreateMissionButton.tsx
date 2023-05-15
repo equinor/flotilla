@@ -30,7 +30,13 @@ export const CreateMissionButton = (): JSX.Element => {
 
     return (
         <>
-            <div onPointerEnter={handleHover} onPointerLeave={handleClose} onFocus={openPopover} onBlur={handleClose}>
+            <div
+                onPointerDown={handleHover}
+                onPointerEnter={handleHover}
+                onPointerLeave={handleClose}
+                onFocus={openPopover}
+                onBlur={handleClose}
+            >
                 <Button
                     onClick={() => {
                         window.open(echoURL + assetCode)
