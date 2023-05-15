@@ -101,6 +101,11 @@ public class FlotillaDbContext : DbContext
         modelBuilder.Entity<Plant>().HasOne(p => p.Installation).WithMany().OnDelete(DeleteBehavior.Restrict);
     }
 
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties(typeof(Enum)).HaveConversion<string>();
+    }
+
     // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations
     // here: https://docs.microsoft.com/en-us/ef/core/providers/sqlite/limitations#query-limitations
     // To work around this, when the Sqlite database provider is used, all model properties of type DateTimeOffset
