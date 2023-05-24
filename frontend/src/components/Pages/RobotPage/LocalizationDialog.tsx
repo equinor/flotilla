@@ -6,12 +6,13 @@ import { useState, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { AssetDeck } from 'models/AssetDeck'
 import { Robot } from 'models/Robot'
-import { AssetDeckMapView } from '../MissionPage/MapPosition/MapView'
+import { AssetDeckMapView } from './AssetDeckMapView'
 
 const StyledDialog = styled(Card)`
     display: flex;
     padding: 1rem;
     width: 600px;
+    right: 175px;
 `
 const StyledAutoComplete = styled.div`
     display: flex;
@@ -95,6 +96,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                             onOptionsChange={onSelectedDeck}
                         />
                     </StyledAutoComplete>
+                    {selectedAssetDeck && <AssetDeckMapView assetDeck={selectedAssetDeck} />}
                     <StyledButtons>
                         <Button
                             onClick={() => {
