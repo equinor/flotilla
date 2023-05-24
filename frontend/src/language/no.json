@@ -73,5 +73,7 @@
     "Select deck": "Velg dekk",
     "Localize": "Lokaliser",
     "Localization": "Lokalisering",
-    "Robot status": "Robotsatus"
+    "Robot status": "Robotsatus",
+    "Stop": "Stopp",
+    "Start": "Start"
 }
