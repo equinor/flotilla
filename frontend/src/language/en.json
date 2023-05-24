@@ -73,5 +73,7 @@
     "Select deck": "Select deck",
     "Localize": "Localize",
     "Localization": "Localization",
-    "Robot status": "Robot status"
+    "Robot status": "Robot status",
+    "Stop": "Stopp",
+    "Start": "Start"
 }
