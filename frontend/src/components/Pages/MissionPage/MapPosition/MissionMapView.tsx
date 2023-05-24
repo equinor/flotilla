@@ -28,7 +28,7 @@ const StyledMap = styled.canvas`
     margin: auto;
 `
 
-export function MapView({ mission }: MissionProps) {
+export function MissionMapView({ mission }: MissionProps) {
     const handleError = useErrorHandler()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))

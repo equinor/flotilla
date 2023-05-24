@@ -4,6 +4,7 @@ import { MissionMap } from 'models/MissionMap'
 import { Pose } from 'models/Pose'
 import { Task, TaskStatus } from 'models/Task'
 import { GetColorsFromTaskStatus } from '../MarkerStyles'
+import { Position } from 'models/Position'
 
 interface ObjectPosition {
     x: number
@@ -26,6 +27,15 @@ export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
             const pixelPosition = calculateObjectPixelPosition(mission.map!, task.inspectionTarget)
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, task.taskOrder + 1, 30, task.status)
         }
+    })
+}
+
+export const PlacePositionsInMap = (missionMap: MissionMap, map: HTMLCanvasElement, positions: Position[]) => {
+    var index = 1
+    positions.map(function (position) {
+        const pixelPosition = calculateObjectPixelPosition(missionMap, position)
+        drawTagMarker(pixelPosition[0], pixelPosition[1], map, index, 30, TaskStatus.NotStarted)
+        index += 1
     })
 }
 

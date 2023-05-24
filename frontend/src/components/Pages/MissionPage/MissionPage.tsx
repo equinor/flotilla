@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { MissionHeader } from './MissionHeader/MissionHeader'
 import { BackButton } from './MissionHeader/BackButton'
-import { MapView } from './MapPosition/MapView'
+import { MissionMapView } from './MapPosition/MissionMapView'
 import { useErrorHandler } from 'react-error-boundary'
 import { BackendAPICaller } from 'api/ApiCaller'
 
@@ -80,7 +80,7 @@ export function MissionPage() {
                         <MissionHeader mission={selectedMission} />
                         <TaskAndMapSection>
                             <TaskTable mission={selectedMission} />
-                            <MapView mission={selectedMission} />
+                            <MissionMapView mission={selectedMission} />
                         </TaskAndMapSection>
                         <VideoStreamSection>
                             {videoStreams.length > 0 && <VideoStreamWindow videoStreams={videoStreams} />}
