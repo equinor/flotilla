@@ -13,14 +13,18 @@ public class AssetDeckController : ControllerBase
 {
     private readonly IAssetDeckService _assetDeckService;
 
+    private readonly IMapService _mapService;
+
     private readonly ILogger<AssetDeckController> _logger;
 
     public AssetDeckController(
         ILogger<AssetDeckController> logger,
+        IMapService mapService,
         IAssetDeckService assetDeckService
     )
     {
         _logger = logger;
+        _mapService = mapService;
         _assetDeckService = assetDeckService;
     }
 
@@ -184,5 +188,47 @@ public class AssetDeckController : ControllerBase
         if (assetDeck is null)
             return NotFound($"Asset deck with id {id} not found");
         return Ok(assetDeck);
+    }
+
+    /// <summary>
+    /// Gets map metadata for localization poses belonging to asset deck with specified id
+    /// </summary>
+    [HttpGet]
+    [Authorize(Roles = Role.Any)]
+    [Route("{id}/map-metadata")]
+    [ProducesResponseType(typeof(MissionMap), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<MissionMap>> GetMapMetadata([FromRoute] string id)
+    {
+        var assetDeck = await _assetDeckService.ReadById(id);
+        if (assetDeck is null)
+        {
+            _logger.LogError("Asset deck not found for asset deck ID {assetDeckId}", id);
+            return NotFound("Could not find this asset deck");
+        }
+
+        MissionMap? map;
+        var positions = new List<Position>
+        {
+            assetDeck.DefaultLocalizationPose.Position
+        };
+        try
+        {
+            map = await _mapService.ChooseMapFromPositions(positions, assetDeck.AssetCode);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            _logger.LogWarning("Unable to find a map for asset deck '{assetDeckId}'", assetDeck.Id);
+            return NotFound("Could not find map suited for the positions in this asset deck");
+        }
+
+        if (map == null)
+        {
+            return NotFound("Could not find map for this asset deck");
+        }
+        return Ok(map);
     }
 }
