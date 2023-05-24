@@ -247,8 +247,8 @@ export class BackendAPICaller {
         return BackendAPICaller.postControlMissionRequest(path, robotId)
     }
 
-    static async getMap(missionId: string): Promise<Blob> {
-        const path: string = 'missions/' + missionId + '/map'
+    static async getMap(assetCode: string, mapName: string): Promise<Blob> {
+        const path: string = 'missions/' + assetCode + '/' + mapName + '/map'
         const url = `${config.BACKEND_URL}/${path}`
 
         const headers = {
