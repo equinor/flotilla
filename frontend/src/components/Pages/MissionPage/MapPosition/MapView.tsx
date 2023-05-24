@@ -66,7 +66,7 @@ export function MapView({ mission }: MissionProps) {
     }
 
     useEffect(() => {
-        BackendAPICaller.getMap(mission.id)
+        BackendAPICaller.getMap(mission.assetCode!, mission.map?.mapName!)
             .then((imageBlob) => {
                 imageObjectURL = URL.createObjectURL(imageBlob)
             })

@@ -11,7 +11,8 @@ namespace Api.Services
 {
     public interface IMapService
     {
-        public abstract Task<byte[]> FetchMapImage(Mission mission);
+        public abstract Task<byte[]> FetchMapImage(string mapName, string assetCode);
+        public abstract Task<MissionMap?> ChooseMapFromPositions(IList<Position> positions, string assetCode);
         public abstract Task AssignMapToMission(Mission mission);
     }
 
@@ -32,18 +33,17 @@ namespace Api.Services
             _blobOptions = blobOptions;
         }
 
-        public async Task<byte[]> FetchMapImage(Mission mission)
+        public async Task<byte[]> FetchMapImage(string mapName, string assetCode)
         {
-            return await DownloadMapImageFromBlobStorage(mission);
+            return await DownloadMapImageFromBlobStorage(mapName, assetCode);
         }
 
-        public async Task AssignMapToMission(Mission mission)
+        public async Task<MissionMap?> ChooseMapFromPositions(IList<Position> positions, string assetCode)
         {
-            string mostSuitableMap;
             var boundaries = new Dictionary<string, Boundary>();
             var imageSizes = new Dictionary<string, int[]>();
             var blobContainerClient = GetBlobContainerClient(
-                mission.AssetCode.ToLower(CultureInfo.CurrentCulture)
+                assetCode.ToLower(CultureInfo.CurrentCulture)
             );
             try
             {
@@ -75,20 +75,14 @@ namespace Api.Services
             {
                 _logger.LogWarning(
                     "Unable to find any map files for asset code {AssetCode}: {error message}",
-                    mission.AssetCode,
+                    assetCode,
                     e.Message
                 );
-                return;
+                return null;
             }
-            try
-            {
-                mostSuitableMap = FindMostSuitableMap(boundaries, mission.Tasks);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                _logger.LogWarning("Unable to find a map for mission '{missionId}'", mission.Id);
-                return;
-            }
+
+            string mostSuitableMap = FindMostSuitableMap(boundaries, positions);
+
             var map = new MissionMap
             {
                 MapName = mostSuitableMap,
@@ -100,8 +94,34 @@ namespace Api.Services
                     imageSizes[mostSuitableMap][1]
                 )
             };
+            return map;
+        }
+
+        public async Task AssignMapToMission(Mission mission)
+        {
+            MissionMap? map;
+            var positions = new List<Position>();
+            foreach (var task in mission.Tasks)
+            {
+                positions.Add(task.InspectionTarget);
+            }
+            try
+            {
+                map = await ChooseMapFromPositions(positions, mission.AssetCode);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                _logger.LogWarning("Unable to find a map for mission '{missionId}'", mission.Id);
+                return;
+            }
+
+            if (map == null)
+            {
+                return;
+            }
+
             mission.Map = map;
-            _logger.LogInformation("Assigned map {map} to mission {mission}", mostSuitableMap, mission.Name);
+            _logger.LogInformation("Assigned map {map} to mission {mission}", map.MapName, mission.Name);
         }
 
         private BlobContainerClient GetBlobContainerClient(string asset)
@@ -118,18 +138,12 @@ namespace Api.Services
             return containerClient;
         }
 
-        private async Task<byte[]> DownloadMapImageFromBlobStorage(Mission currentMission)
+        private async Task<byte[]> DownloadMapImageFromBlobStorage(string mapName, string assetCode)
         {
-            if (currentMission.Map is null)
-                throw new ArgumentNullException(
-                    nameof(currentMission.Map),
-                    "Cannot fetch map image from blob when map is null"
-                );
-
             var blobContainerClient = GetBlobContainerClient(
-                currentMission.AssetCode.ToLower(CultureInfo.CurrentCulture)
+                assetCode.ToLower(CultureInfo.CurrentCulture)
             );
-            var blobClient = blobContainerClient.GetBlobClient(currentMission.Map.MapName);
+            var blobClient = blobContainerClient.GetBlobClient(mapName);
 
             await using var stream = await blobClient.OpenReadAsync();
 
@@ -206,37 +220,37 @@ namespace Api.Services
 
         private string FindMostSuitableMap(
             Dictionary<string, Boundary> boundaries,
-            IList<MissionTask> tasks
+            IList<Position> positions
         )
         {
             var mapCoverage = new Dictionary<string, float>();
             foreach (var boundary in boundaries)
             {
-                mapCoverage.Add(boundary.Key, FractionOfTagsWithinBoundary(boundary: boundary.Value, tasks: tasks));
+                mapCoverage.Add(boundary.Key, FractionOfTagsWithinBoundary(boundary: boundary.Value, positions: positions));
             }
             string keyOfMaxValue = mapCoverage.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
 
-            if (mapCoverage[keyOfMaxValue] < 0.5) throw new ArgumentOutOfRangeException(nameof(tasks));
+            if (mapCoverage[keyOfMaxValue] < 0.5) throw new ArgumentOutOfRangeException(nameof(positions));
 
             return keyOfMaxValue;
         }
 
-        private static bool TagWithinBoundary(Boundary boundary, MissionTask task)
+        private static bool TagWithinBoundary(Boundary boundary, Position position)
         {
-            return task.InspectionTarget.X > boundary.X1
-                   && task.InspectionTarget.X < boundary.X2 && task.InspectionTarget.Y > boundary.Y1
-                   && task.InspectionTarget.Y < boundary.Y2 && task.InspectionTarget.Z > boundary.Z1
-                   && task.InspectionTarget.Z < boundary.Z2;
+            return position.X > boundary.X1
+                   && position.X < boundary.X2 && position.Y > boundary.Y1
+                   && position.Y < boundary.Y2 && position.Z > boundary.Z1
+                   && position.Z < boundary.Z2;
         }
 
-        private float FractionOfTagsWithinBoundary(Boundary boundary, IList<MissionTask> tasks)
+        private float FractionOfTagsWithinBoundary(Boundary boundary, IList<Position> positions)
         {
             int tagsWithinBoundary = 0;
-            foreach (var task in tasks)
+            foreach (var position in positions)
             {
                 try
                 {
-                    if (TagWithinBoundary(boundary: boundary, task: task)) tagsWithinBoundary++;
+                    if (TagWithinBoundary(boundary: boundary, position: position)) tagsWithinBoundary++;
                 }
                 catch
                 {
@@ -245,7 +259,7 @@ namespace Api.Services
             }
             tagsWithinBoundary++;
 
-            return tagsWithinBoundary / (float)tasks.Count;
+            return tagsWithinBoundary / (float)positions.Count;
         }
     }
 }

@@ -119,7 +119,7 @@ public class MissionController : ControllerBase
     /// </summary>
     [HttpGet]
     [Authorize(Roles = Role.Any)]
-    [Route("{id}/map")]
+    [Route("{assetCode}/{mapName}/map")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -127,27 +127,16 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<byte[]>> GetMap([FromRoute] string id)
+    public async Task<ActionResult<byte[]>> GetMap([FromRoute] string assetCode, string mapName)
     {
-        var mission = await _missionService.ReadById(id);
-        if (mission is null)
-        {
-            _logger.LogError("Mission not found for mission ID {missionId}", id);
-            throw new MissionNotFoundException("Mission not found");
-        }
-
         try
         {
-            byte[] mapStream = await _mapService.FetchMapImage(mission);
+            byte[] mapStream = await _mapService.FetchMapImage(mapName, assetCode);
             return File(mapStream, "image/png");
         }
         catch (Azure.RequestFailedException)
         {
             return NotFound("Could not find map for this area.");
-        }
-        catch (MissionNotFoundException)
-        {
-            return NotFound("Could not find this mission");
         }
     }
 
