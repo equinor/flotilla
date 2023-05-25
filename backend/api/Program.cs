@@ -9,6 +9,7 @@ using Api.Services;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 
@@ -118,6 +119,10 @@ app.UseSwaggerUI(
         c.OAuthUsePkce();
     }
 );
+
+var option = new RewriteOptions();
+option.AddRedirect("^$", "swagger");
+app.UseRewriter(option);
 
 app.UseCors(
     corsBuilder =>
