@@ -35,7 +35,7 @@ export function FrontPage() {
 
     return (
         <>
-            <Header />
+            <Header page={'root'} />
             <StyledFrontPage>
                 <FailedMissionAlertView refreshInterval={refreshInterval} />
                 <HorizontalContent>

@@ -21,7 +21,7 @@ export function MissionHistoryPage() {
 
     return (
         <>
-            <Header />
+            <Header page={'history'} />
             <StyledMissionPage>
                 <BackButton />
                 <MissionHistoryView refreshInterval={refreshInterval} />

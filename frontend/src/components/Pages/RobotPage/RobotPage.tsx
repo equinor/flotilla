@@ -32,7 +32,7 @@ export function RobotPage() {
 
     return (
         <>
-            <Header />
+            <Header page={'robot'} />
             <StyledRobotPage>
                 <BackButton />
                 <Typography variant="h1">{selectedRobot?.name + ' (' + selectedRobot?.model.type + ')'}</Typography>

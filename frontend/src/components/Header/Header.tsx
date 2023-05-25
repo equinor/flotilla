@@ -34,7 +34,7 @@ const StyledTopBarContent = styled(TopBar.CustomContent)`
     gap: 0px 3rem;
 `
 
-export function Header() {
+export function Header({ page }: { page: string }) {
     return (
         <StyledTopBar>
             <HandPointer>
@@ -48,7 +48,7 @@ export function Header() {
                     </Typography>
                 </TopBar.Header>
             </HandPointer>
-            <StyledTopBarContent>{AssetPicker()}</StyledTopBarContent>
+            <StyledTopBarContent>{AssetPicker(page)}</StyledTopBarContent>
             <TopBar.Actions>
                 <IconStyle>
                     <Button variant="ghost_icon" onClick={() => console.log('Clicked account icon')}>
@@ -67,13 +67,7 @@ export function Header() {
     )
 }
 
-function AssetPicker() {
-    const [view, setView] = useState("")
-    useEffect(() => {
-        let pathSource = window.location.pathname.split("/")[1]
-        setView(pathSource ? pathSource : "root")
-    }, [window.location])
-
+function AssetPicker(page: string) {
     const handleError = useErrorHandler()
 
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
@@ -90,7 +84,7 @@ function AssetPicker() {
         <Autocomplete
             options={Array.from(mappedOptions.keys()).sort()}
             label=""
-            disabled={view !== "root"}
+            disabled={page !== "root"}
             initialSelectedOptions={[assetCode]}
             placeholder={TranslateText('Select asset')}
             onOptionsChange={({ selectedItems }) => {
