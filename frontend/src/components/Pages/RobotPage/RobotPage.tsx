@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { BackButton } from '../MissionPage/MissionHeader/BackButton'
 import { LocalizationSection } from './LocalizationSection'
+import { Header } from 'components/Header/Header'
 
 const StyledRobotPage = styled.div`
     display: flex;
@@ -13,6 +14,7 @@ const StyledRobotPage = styled.div`
     justify-content: start;
     flex-direction: column;
     gap: 1rem;
+    margin: 2rem;
 `
 
 export function RobotPage() {
@@ -29,10 +31,13 @@ export function RobotPage() {
     }, [])
 
     return (
-        <StyledRobotPage>
-            <BackButton />
-            <Typography variant="h1">{selectedRobot?.name + ' (' + selectedRobot?.model.type + ')'}</Typography>
-            {selectedRobot !== undefined && <LocalizationSection robot={selectedRobot} />}
-        </StyledRobotPage>
+        <>
+            <Header />
+            <StyledRobotPage>
+                <BackButton />
+                <Typography variant="h1">{selectedRobot?.name + ' (' + selectedRobot?.model.type + ')'}</Typography>
+                {selectedRobot !== undefined && <LocalizationSection robot={selectedRobot} />}
+            </StyledRobotPage>
+        </>
     )
 }

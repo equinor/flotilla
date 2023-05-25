@@ -11,12 +11,15 @@ import { MapView } from './MapPosition/MapView'
 import { useErrorHandler } from 'react-error-boundary'
 import { BackendAPICaller } from 'api/ApiCaller'
 
+import { Header } from 'components/Header/Header'
+
 const StyledMissionPage = styled.div`
     display: flex;
     flex-wrap: wrap;
     justify-content: start;
     flex-direction: column;
     gap: 1rem;
+    margin: 2rem;
 `
 const TaskAndMapSection = styled.div`
     display: flex;
@@ -68,20 +71,23 @@ export function MissionPage() {
     }
 
     return (
-        <StyledMissionPage>
-            <BackButton />
-            {selectedMission !== undefined && (
-                <>
-                    <MissionHeader mission={selectedMission} />
-                    <TaskAndMapSection>
-                        <TaskTable mission={selectedMission} />
-                        <MapView mission={selectedMission} />
-                    </TaskAndMapSection>
-                    <VideoStreamSection>
-                        {videoStreams.length > 0 && <VideoStreamWindow videoStreams={videoStreams} />}
-                    </VideoStreamSection>
-                </>
-            )}
-        </StyledMissionPage>
+        <>
+            <Header />
+            <StyledMissionPage>
+                <BackButton />
+                {selectedMission !== undefined && (
+                    <>
+                        <MissionHeader mission={selectedMission} />
+                        <TaskAndMapSection>
+                            <TaskTable mission={selectedMission} />
+                            <MapView mission={selectedMission} />
+                        </TaskAndMapSection>
+                        <VideoStreamSection>
+                            {videoStreams.length > 0 && <VideoStreamWindow videoStreams={videoStreams} />}
+                        </VideoStreamSection>
+                    </>
+                )}
+            </StyledMissionPage>
+        </>
     )
 }
