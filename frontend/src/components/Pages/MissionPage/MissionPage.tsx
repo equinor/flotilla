@@ -72,7 +72,7 @@ export function MissionPage() {
 
     return (
         <>
-            <Header />
+            <Header page={'mission'} />
             <StyledMissionPage>
                 <BackButton />
                 {selectedMission !== undefined && (
