@@ -84,7 +84,7 @@ function AssetPicker(page: string) {
         <Autocomplete
             options={Array.from(mappedOptions.keys()).sort()}
             label=""
-            disabled={page !== "root"}
+            disabled={page === 'mission'}
             initialSelectedOptions={[assetCode]}
             placeholder={TranslateText('Select asset')}
             onOptionsChange={({ selectedItems }) => {
