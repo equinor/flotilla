@@ -1,5 +1,6 @@
 import { MissionHistoryView } from './MissionHistoryView'
 import { BackButton } from '../MissionPage/MissionHeader/BackButton'
+import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
 
 const StyledMissionPage = styled.div`
@@ -8,6 +9,7 @@ const StyledMissionPage = styled.div`
     justify-content: start;
     flex-direction: column;
     gap: 1rem;
+    margin: 2rem;
 `
 
 export type RefreshProps = {
@@ -18,9 +20,12 @@ export function MissionHistoryPage() {
     const refreshInterval = 1000
 
     return (
-        <StyledMissionPage>
-            <BackButton />
-            <MissionHistoryView refreshInterval={refreshInterval} />
-        </StyledMissionPage>
+        <>
+            <Header />
+            <StyledMissionPage>
+                <BackButton />
+                <MissionHistoryView refreshInterval={refreshInterval} />
+            </StyledMissionPage>
+        </>
     )
 }

@@ -68,6 +68,12 @@ export function Header() {
 }
 
 function AssetPicker() {
+    const [view, setView] = useState("")
+    useEffect(() => {
+        let pathSource = window.location.pathname.split("/")[1]
+        setView(pathSource ? pathSource : "root")
+    }, [window.location])
+
     const handleError = useErrorHandler()
 
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
@@ -84,6 +90,7 @@ function AssetPicker() {
         <Autocomplete
             options={Array.from(mappedOptions.keys()).sort()}
             label=""
+            disabled={view !== "root"}
             initialSelectedOptions={[assetCode]}
             placeholder={TranslateText('Select asset')}
             onOptionsChange={({ selectedItems }) => {

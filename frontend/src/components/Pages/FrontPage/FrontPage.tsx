@@ -2,12 +2,14 @@ import { MissionQueueView } from 'components/Pages/FrontPage/MissionOverview/Mis
 import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/OngoingMissionView'
 import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusView'
 import { FailedMissionAlertView } from './MissionOverview/FailedMissionAlertView'
+import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
 
 const StyledFrontPage = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
     gap: 3rem;
+    margin: 2rem;
 `
 
 const HorizontalContent = styled.div`
@@ -32,15 +34,18 @@ export function FrontPage() {
     const refreshInterval = 1000
 
     return (
-        <StyledFrontPage>
-            <FailedMissionAlertView refreshInterval={refreshInterval} />
-            <HorizontalContent>
-                <MissionsContent>
-                    <OngoingMissionView refreshInterval={refreshInterval} />
-                    <MissionQueueView refreshInterval={refreshInterval} />
-                </MissionsContent>
-            </HorizontalContent>
-            <RobotStatusSection refreshInterval={refreshInterval} />
-        </StyledFrontPage>
+        <>
+            <Header />
+            <StyledFrontPage>
+                <FailedMissionAlertView refreshInterval={refreshInterval} />
+                <HorizontalContent>
+                    <MissionsContent>
+                        <OngoingMissionView refreshInterval={refreshInterval} />
+                        <MissionQueueView refreshInterval={refreshInterval} />
+                    </MissionsContent>
+                </HorizontalContent>
+                <RobotStatusSection refreshInterval={refreshInterval} />
+            </StyledFrontPage>
+        </>
     )
 }
