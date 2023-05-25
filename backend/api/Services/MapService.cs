@@ -257,7 +257,6 @@ namespace Api.Services
                     _logger.LogWarning("An error occurred while checking if tag was within boundary");
                 }
             }
-            tagsWithinBoundary++;
 
             return tagsWithinBoundary / (float)positions.Count;
         }
