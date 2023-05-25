@@ -6,7 +6,7 @@ import { Icons } from 'utils/icons'
 
 const BatteryStatusTile = styled.div`
     display: flex;
-    align-items: center;
+    align-items: end;
     justify-content: flex-end;
 `
 
@@ -45,8 +45,8 @@ const BatteryStatusView = ({ battery, batteryStatus }: BatteryStatusViewProps): 
 
     return (
         <BatteryStatusTile>
-            <Typography>{battery_value}</Typography>
             <Icon name={battery_icon} color={icon_color} size={24} />
+            <Typography style={{ color: tokens.colors.text.static_icons__tertiary.rgba }}>{battery_value}</Typography>
         </BatteryStatusTile>
     )
 }
