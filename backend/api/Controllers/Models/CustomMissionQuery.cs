@@ -30,7 +30,7 @@ namespace Api.Controllers.Models
     {
         public string RobotId { get; set; }
 
-        public DateTimeOffset DesiredStartTime { get; set; }
+        public DateTimeOffset? DesiredStartTime { get; set; }
 
         public string AssetCode { get; set; }
 
