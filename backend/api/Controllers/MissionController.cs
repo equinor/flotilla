@@ -273,7 +273,7 @@ public class MissionController : ControllerBase
             Robot = robot,
             EchoMissionId = 0,
             Status = MissionStatus.Pending,
-            DesiredStartTime = customMissionQuery.DesiredStartTime,
+            DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTimeOffset.UtcNow,
             Tasks = missionTasks,
             AssetCode = customMissionQuery.AssetCode,
             Map = new MissionMap()
