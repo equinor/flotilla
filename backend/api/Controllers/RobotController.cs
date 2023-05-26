@@ -643,7 +643,7 @@ public class RobotController : ControllerBase
     /// </remarks>
     [HttpPost]
     [Authorize(Roles = Role.User)]
-    [Route("{robotId}/start-localization")]
+    [Route("start-localization")]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -651,14 +651,14 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Mission>> StartLocalizationMission(
-        [FromRoute] string robotId,
-        [FromBody] Pose localizationPose
+        [FromBody] ScheduleLocalizationMissionQuery scheduleLocalizationMissionQuery
     )
     {
-        var robot = await _robotService.ReadById(robotId);
+        var robot = await _robotService.ReadById(scheduleLocalizationMissionQuery.RobotId);
+
         if (robot == null)
         {
-            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            _logger.LogWarning("Could not find robot with id={id}", scheduleLocalizationMissionQuery.RobotId);
             return NotFound("Robot not found");
         }
 
@@ -666,7 +666,7 @@ public class RobotController : ControllerBase
         {
             _logger.LogWarning(
                 "Robot '{id}' is not available ({status})",
-                robotId,
+                scheduleLocalizationMissionQuery.RobotId,
                 robot.Status.ToString()
             );
             return Conflict($"The Robot is not available ({robot.Status})");
@@ -686,7 +686,7 @@ public class RobotController : ControllerBase
         IsarMission isarMission;
         try
         {
-            isarMission = await _isarService.StartLocalizationMission(robot, localizationPose);
+            isarMission = await _isarService.StartLocalizationMission(robot, scheduleLocalizationMissionQuery.LocalizationPose);
         }
         catch (HttpRequestException e)
         {
@@ -712,9 +712,11 @@ public class RobotController : ControllerBase
 
         await _missionService.Create(mission);
 
+        robot.CurrentAssetDeckId = scheduleLocalizationMissionQuery.DeckId;
         robot.Status = RobotStatus.Busy;
         robot.CurrentMissionId = mission.Id;
         await _robotService.Update(robot);
+
         return Ok(mission);
     }
 
