@@ -507,10 +507,10 @@ public class MissionController : ControllerBase
     }
 
     /// <summary>
-    /// Reorder the missions using the list of mission ids in 'missionOrder'.
+    /// Reorder the start times of the two provided mission IDs.
     /// </summary>
     /// <remarks>
-    /// <para> This mission changes the ordering of all missions using a given ordering </para>
+    /// <para> This mission changes the ordering of the missions with the provided IDs </para>
     /// </remarks>
     [HttpPost]
     [Authorize(Roles = Role.User)]
@@ -521,15 +521,25 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+<<<<<<< HEAD
     public async Task<ActionResult<IList<MissionRun>>> Reorder(
         [FromQuery] MissionRunQueryStringParameters parameters,
         [FromBody] ReorderMissionQuery missionOrder
+=======
+    public async Task<ActionResult<IList<Mission>>> Reorder(
+        [FromQuery] MissionQueryStringParameters parameters,
+        [FromBody] ReorderMissionQuery reorderMissions
+>>>>>>> 8af4e3f (Swap 2 mission start times at a time)
     )
     {
         List<MissionRun> missions;
         try
         {
+<<<<<<< HEAD
             missions = await _missionRunService.Reorder(parameters, missionOrder.missionOrder);
+=======
+            missions = await _missionService.Reorder(parameters, reorderMissions.Mission1, reorderMissions.Mission2);
+>>>>>>> 8af4e3f (Swap 2 mission start times at a time)
         }
         catch (InvalidDataException e)
         {

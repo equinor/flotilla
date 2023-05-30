@@ -12,7 +12,7 @@ interface MissionQueueCardProps {
     mission: Mission
     order: number
     onDeleteMission: (mission: Mission) => void
-    onReorderMission: (mission: Mission, offset: number) => void
+    onReorderMission: (missionIndex1: number, missionIndex2: number) => void
 }
 
 interface MissionDisplayProps {
@@ -64,17 +64,17 @@ export function MissionQueueCard({ mission, order, onDeleteMission, onReorderMis
             <HorizontalContent>
                 <HorizontalNonButtonContent>
                     <Checkbox />
-                        <Chip variant="active">
-                            <Typography variant="caption" color="#6F6F6F">
-                                {order + 1}
-                            </Typography>
-                        </Chip>
-                    <Button variant="ghost" onClick={() => onReorderMission(mission, -1)} >
+                    <Chip variant="active">
+                        <Typography variant="caption" color="#6F6F6F">
+                            {order + 1}
+                        </Typography>
+                    </Chip>
+                    <Button variant="ghost" onClick={() => onReorderMission(order, order - 1)}>
                         <IconStyle>
                             <Icon name={Icons.ChevronUp} size={16} />
                         </IconStyle>
                     </Button>
-                    <Button variant="ghost" onClick={() => onReorderMission(mission, 1)} >
+                    <Button variant="ghost" onClick={() => onReorderMission(order, order + 1)}>
                         <IconStyle>
                             <Icon name={Icons.ChevronDown} size={16} />
                         </IconStyle>

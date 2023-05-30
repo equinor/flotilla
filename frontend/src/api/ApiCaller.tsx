@@ -297,11 +297,11 @@ export class BackendAPICaller {
         })
     }
 
-    static async updateMissionOrder(parameters: MissionRunQueryParameters, missionOrder: string[]) {
+    static async updateMissionOrder(parameters: MissionRunQueryParameters, missionId1: string, missionId2: string) {
         let path: string = BackendAPICaller.buildMissionQueryPath('missions/reorder', parameters)
-        console.log(missionOrder)
         const body = {
-            missionOrder: missionOrder
+            mission1: missionId1,
+            mission2: missionId2,
         }
         const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
             console.log(e)

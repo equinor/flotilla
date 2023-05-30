@@ -20,7 +20,7 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId);
 
-        public Task<List<MissionRun>> Reorder(MissionRunQueryStringParameters parameters, string[] ordering);
+        public Task<PagedList<MissionRun>> Reorder(MissionRunQueryStringParameters parameters, string mission1, string mission2);
 
         public Task<MissionRun> Update(MissionRun mission);
 
@@ -116,7 +116,8 @@ namespace Api.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<MissionRun>> Reorder(MissionRunQueryStringParameters parameters, string[] ordering) {
+        public async Task<PagedList<MissionRun>> Reorder(MissionRunQueryStringParameters parameters, string mission1, string mission2)
+        {
             var query = GetMissionRunsWithSubModels();
             var filter = ConstructFilter(parameters);
 
@@ -134,24 +135,17 @@ namespace Api.Services
                 parameters.PageSize
             );
 
-            var newMissions = new List<MissionRun>();
-            int i = 0;
-            foreach (var missionId in ordering)
-            {
-                var mission = missions.Find(m => m.Id == missionId);
-                if (mission is null)
-                {
-                    // TODO: missions may be gone by the time this is reached
-                    // TODO: do reordering between two missions at a time,
-                    //       this makes it easier to detect failure
-                    continue;
-                }
+            int index1 = missions.FindIndex((m) => m.Id == mission1);
+            int index2 = missions.FindIndex((m) => m.Id == mission2);
 
-                mission.DesiredStartTime = missions[i].DesiredStartTime;
-                i++;
-            }
+            var firstMission = missions[index1];
+            var secondMission = missions[index2];
+            (firstMission.DesiredStartTime, secondMission.DesiredStartTime) = (secondMission.DesiredStartTime, firstMission.DesiredStartTime);
+            missions[index1] = secondMission;
+            missions[index2] = firstMission;
+
             await _context.SaveChangesAsync();
-            return newMissions;
+            return missions;
         }
 
         public async Task<MissionRun> Update(MissionRun missionRun)

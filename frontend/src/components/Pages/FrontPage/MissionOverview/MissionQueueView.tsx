@@ -44,9 +44,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const { missionQueue } = useMissionQueueContext()
 
     const missionPageSize = 100
-    const [missionMap, setMissionMap] = useState<{ [id: string] : Mission }>({})
-    const [missionOrder, setMissionOrder] = useState<string[]>(Object.keys(missionMap))
-
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<MissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [echoMissions, setEchoMissions] = useState<Map<string, MissionDefinition>>(
@@ -95,39 +92,24 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
 
     const onDeleteMission = (mission: Mission) => {
         BackendAPICaller.deleteMission(mission.id) //.catch((e) => handleError(e))
-        let localMissionOrder = missionOrder
-        const index = localMissionOrder.indexOf(mission.id, 0);
-        if (index > -1) {
-            missionOrder.splice(index, 1);
-        }
-        setMissionOrder(localMissionOrder)
     }
 
-    const onReorderMission = (mission1: Mission, mission2: Mission) => {
-        let localOrdering = missionOrder
-        let missionIndex: number = localOrdering.findIndex(id => id === mission.id)
-        if (missionIndex + offset >= localOrdering.length || missionIndex + offset < 0)
+    const onReorderMission = (missionIndex1: number, missionIndex2: number) => {
+        if (
+            missionIndex1 >= missionQueue.length ||
+            missionIndex1 < 0 ||
+            missionIndex2 >= missionQueue.length ||
+            missionIndex2 < 0
+        )
             return
-        var element = localOrdering[missionIndex];
-        localOrdering.splice(missionIndex, 1);
-        localOrdering.splice(missionIndex + offset, 0, element);
-        setMissionOrder(localOrdering)
-        // TODO: rely on the ordering we get from the API and accept that
-        // it's slow. Instead send requests of swapping start time between
-        // two missions. This way we ensure consistency between frontend/backend.
-        // We can more easily detect failure this way. Document this in PR, that
-        // we first tried to send the total ordering within one requested page, and
-        // update frontend first, but that the consistency issues became too much
-        // so that to ensure consistency and to easily detect failure in the frontend
-        // we instead just rely on backend info for the true ordering. Mention
-        // that we originally had a map of missions and a list of ID orderings. Now
-        // we will instead go back to using one list of missions
         BackendAPICaller.updateMissionOrder(
             {
                 status: MissionStatus.Pending,
-                pageSize: missionPageSize
-            }, 
-            localOrdering)
+                pageSize: missionPageSize,
+            },
+            missionQueue[missionIndex1].id,
+            missionQueue[missionIndex2].id
+        )
     }
 
     useEffect(() => {
@@ -146,15 +128,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                 pageSize: missionPageSize,
                 orderBy: 'DesiredStartTime',
             }).then((missions) => {
-                let localMissionMap: {[id: string] : Mission} = {}
-                missions.content.forEach(mission => {
-                    localMissionMap[mission.id] = mission
-                })
-                setMissionMap(localMissionMap)
-
-                let difference = missions.content.map(m => m.id).filter(x => !missionOrder.includes(x));
-                missionOrder.push(...difference)
-                setMissionOrder(missionOrder)
+                setMissionQueue(missions.content)
             })
         }, refreshInterval)
         return () => clearInterval(id)
@@ -176,11 +150,15 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         }
     }, [robotOptions, installationCode])
 
-    var missionQueueDisplay = missionOrder.map((id, index) => {
-        if (!id || !missionMap[id])
-            return
-        return <MissionQueueCard key={id} order={index} mission={missionMap[id]} onDeleteMission={onDeleteMission} onReorderMission={onReorderMission} />
-    })
+    var missionQueueDisplay = missionQueue.map((mission, index) => (
+        <MissionQueueCard
+            key={mission.id}
+            order={index}
+            mission={mission}
+            onDeleteMission={onDeleteMission}
+            onReorderMission={onReorderMission}
+        />
+    ))
 
     return (
         <StyledMissionView>
@@ -188,8 +166,8 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                 {TranslateText('Mission Queue')}
             </Typography>
             <MissionTable>
-                {missionOrder.length > 0 && missionQueueDisplay}
-                {missionOrder.length === 0 && <EmptyMissionQueuePlaceholder />}
+                {missionQueue.length > 0 && missionQueueDisplay}
+                {missionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
             </MissionTable>
             <MissionButtonView>
                 <ScheduleMissionDialog
