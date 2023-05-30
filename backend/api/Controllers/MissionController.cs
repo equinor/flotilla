@@ -260,7 +260,6 @@ public class MissionController : ControllerBase
             Description = customMissionQuery.Description,
             Comment = customMissionQuery.Comment,
             Robot = robot,
-            EchoMissionId = 0,
             Status = MissionStatus.Pending,
             DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTimeOffset.UtcNow,
             Tasks = missionTasks,
