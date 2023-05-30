@@ -33,7 +33,7 @@ interface MissionHeaderProps {
 export function MissionHeader({ mission }: MissionHeaderProps) {
     const barToMillibar = 1000
     const isMissionCompleted = mission.endTime ? true : false
-    var { startTime, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
+    var { startTime, startDate, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
     var missionIsActive = false
     if (mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused) {
         missionIsActive = true
@@ -56,6 +56,7 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
             <StatusReason mission={mission}></StatusReason>
             <InfoSection>
                 <MissionStatusDisplay status={mission.status} />
+                {HeaderText(TranslateText('Start date') + ': ' + startDate)}
                 {HeaderText(TranslateText('Start time') + ': ' + startTime)}
                 {HeaderText(TranslateText('Time used') + ': ' + usedTime)}
                 {!isMissionCompleted && HeaderText(TranslateText('Estimated time remaining') + ': ' + remainingTime)}
@@ -83,8 +84,14 @@ function HeaderText(text: string) {
     )
 }
 
-function StartUsedAndRemainingTime(mission: Mission): { startTime: string; usedTime: string; remainingTime: string } {
+function StartUsedAndRemainingTime(mission: Mission): {
+    startTime: string
+    startDate: string
+    usedTime: string
+    remainingTime: string
+} {
     var startTime: string
+    var startDate: string
     var remainingTime: string
     var usedTimeInMinutes: number
     var estimatedDurationInMinutes: number | undefined
@@ -98,22 +105,27 @@ function StartUsedAndRemainingTime(mission: Mission): { startTime: string; usedT
         startTime = mission.startTime
             ? format(new Date(mission.startTime), 'HH:mm')
             : format(new Date(mission.endTime), 'HH:mm')
+        startDate = mission.startTime
+            ? format(new Date(mission.startTime), 'dd/MM/yyy')
+            : format(new Date(mission.endTime), 'dd/MM/yyy')
         usedTimeInMinutes = mission.startTime
             ? differenceInMinutes(new Date(mission.endTime), new Date(mission.startTime))
             : 0
         remainingTime = 'N/A'
     } else if (mission.startTime) {
         startTime = format(new Date(mission.startTime), 'HH:mm')
+        startDate = format(new Date(mission.startTime), 'dd/MM/yyy')
         usedTimeInMinutes = differenceInMinutes(Date.now(), new Date(mission.startTime))
         if (estimatedDurationInMinutes)
             remainingTime = Math.max(estimatedDurationInMinutes - usedTimeInMinutes, 0) + ' ' + TranslateText('minutes')
         else remainingTime = 'N/A'
     } else {
         startTime = 'N/A'
+        startDate = 'N/A'
         usedTimeInMinutes = 0
         if (estimatedDurationInMinutes) remainingTime = estimatedDurationInMinutes + ' ' + TranslateText('minutes')
         else remainingTime = 'N/A'
     }
     const usedTime: string = usedTimeInMinutes + ' ' + TranslateText('minutes')
-    return { startTime, usedTime, remainingTime }
+    return { startTime, startDate, usedTime, remainingTime }
 }
