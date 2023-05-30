@@ -5,7 +5,7 @@ import { TaskStatusDisplay } from './TaskStatusDisplay'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
-import { GetColorsFromTaskStatus } from '../MarkerStyles'
+import { GetColorsFromTaskStatus } from '../../../../utils/MarkerStyles'
 
 const StyledTable = styled(Table)`
     grid-column: 1/ -1;

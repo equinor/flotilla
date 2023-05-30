@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
 import { useErrorHandler } from 'react-error-boundary'
 import { defaultPose, Pose } from 'models/Pose'
-import { PlaceRobotInMap, PlaceTagsInMap } from './MapMarkers'
+import { PlaceRobotInMap, PlaceTagsInMap } from '../../../../utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
 
