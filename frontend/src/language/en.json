@@ -76,5 +76,6 @@
     "Localize robot": "Localize robot",
     "Robot status": "Robot status",
     "Stop": "Stop",
-    "Start": "Start"
+    "Start": "Start",
+    "Pause": "Pause"
 }
