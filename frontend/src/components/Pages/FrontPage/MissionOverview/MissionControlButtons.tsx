@@ -1,13 +1,12 @@
 import { Mission, MissionStatus } from 'models/Mission'
 import { Button, CircularProgress, Icon } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
-import { useState } from 'react'
 import { tokens } from '@equinor/eds-tokens'
 import { Task, TaskStatus } from 'models/Task'
-import { BackendAPICaller } from 'api/ApiCaller'
 import styled from 'styled-components'
 import { Typography } from '@equinor/eds-core-react'
 import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 
 interface MissionProps {
     mission: Mission
@@ -36,38 +35,17 @@ const checkIfTasksStarted = (tasks: Task[]): boolean => {
 }
 
 export function MissionControlButtons({ mission }: MissionProps) {
-    const [isWaitingForResponse, setIsWaitingForResponse] = useState<boolean>(false)
-    const handleClick = (button: ControlButton) => {
-        switch (button) {
-            case ControlButton.Pause: {
-                setIsWaitingForResponse(true)
-                BackendAPICaller.pauseMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
-                //.catch((e) => handleError(e))
-                break
-            }
-            case ControlButton.Resume: {
-                setIsWaitingForResponse(true)
-                BackendAPICaller.resumeMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
-                //.catch((e) => handleError(e))
-                break
-            }
-            case ControlButton.Stop: {
-                setIsWaitingForResponse(true)
-                BackendAPICaller.stopMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
-                //.catch((e) => handleError(e))
-                break
-            }
-        }
-    }
+    const handleError = useErrorHandler()
+    const { missionControlState, handleClick } = useMissionControlContext()
 
     const renderControlIcon = (missionStatus: MissionStatus) => {
-        if (isWaitingForResponse) {
+        if (missionControlState.isWaitingForResponse) {
             return <CircularProgress size={32} />
         } else if (missionStatus === MissionStatus.Ongoing) {
             return (
                 <ButtonStyle>
                     <ButtonText>
-                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Stop)}>
+                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Stop, mission)}>
                             <Icon
                                 name={Icons.StopButton}
                                 style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
@@ -77,7 +55,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
                         <Typography>{TranslateText('Stop')}</Typography>
                     </ButtonText>
                     <ButtonText>
-                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Pause)}>
+                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Pause, mission)}>
                             <Icon
                                 name={Icons.PauseButton}
                                 style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
@@ -92,7 +70,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
             return (
                 <ButtonStyle>
                     <ButtonText>
-                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Stop)}>
+                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Stop, mission)}>
                             <Icon
                                 name={Icons.StopButton}
                                 style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
@@ -102,7 +80,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
                         <Typography variant="caption">{TranslateText('Stop')}</Typography>
                     </ButtonText>
                     <ButtonText>
-                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Resume)}>
+                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Resume, mission)}>
                             <Icon
                                 name={Icons.PlayButton}
                                 style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
