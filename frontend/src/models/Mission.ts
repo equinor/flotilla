@@ -15,7 +15,7 @@ export enum MissionStatus {
 
 export interface Mission {
     id: string
-    echoMissionId: number
+    echoMissionId?: number
     isarMissionId?: string
     name: string
     description?: string

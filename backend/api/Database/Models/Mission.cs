@@ -11,9 +11,8 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        [Required]
         [MaxLength(200)]
-        public int EchoMissionId { get; set; }
+        public int? EchoMissionId { get; set; }
 
         [MaxLength(200)]
         public string? IsarMissionId { get; set; }
