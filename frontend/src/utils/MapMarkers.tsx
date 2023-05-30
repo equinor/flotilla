@@ -3,7 +3,7 @@ import { Mission } from 'models/Mission'
 import { MissionMap } from 'models/MissionMap'
 import { Pose } from 'models/Pose'
 import { Task, TaskStatus } from 'models/Task'
-import { GetColorsFromTaskStatus } from '../MarkerStyles'
+import { GetColorsFromTaskStatus } from './MarkerStyles'
 import { Position } from 'models/Position'
 
 interface ObjectPosition {
