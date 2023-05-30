@@ -136,9 +136,8 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getMissionRuns(parameters: MissionRunQueryParameters): Promise<PaginatedResponse<Mission>> {
-        let path: string = 'missions/runs?'
-
+    static buildMissionQueryPath(endpointPath: string, parameters: MissionRunQueryParameters) {
+        let path: string = endpointPath + '?'
         // Always filter by currently selected installation
         const installationCode: string | null = BackendAPICaller.installationCode
         if (installationCode) path = path + 'InstallationCode=' + installationCode + '&'
@@ -168,7 +167,13 @@ export class BackendAPICaller {
         if (parameters.maxEndTime) path = path + 'MaxEndTime=' + parameters.maxEndTime + '&'
         if (parameters.minDesiredStartTime) path = path + 'MinDesiredStartTime=' + parameters.minDesiredStartTime + '&'
         if (parameters.maxDesiredStartTime) path = path + 'MaxDesiredStartTime=' + parameters.maxDesiredStartTime + '&'
+        return path
+    }
 
+    static async getMissionRuns(parameters: MissionRunQueryParameters): Promise<PaginatedResponse<Mission>> {
+        // Always filter by currently selected installation
+        const installationCode: string | null = BackendAPICaller.installationCode
+        let path: string = BackendAPICaller.buildMissionQueryPath('missions/runs', parameters)
         const result = await BackendAPICaller.GET<Mission[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
@@ -290,6 +295,20 @@ export class BackendAPICaller {
             console.error(`Failed to PUT /${path}: ` + e)
             throw e
         })
+    }
+
+    static async updateMissionOrder(parameters: MissionRunQueryParameters, missionOrder: string[]) {
+        let path: string = BackendAPICaller.buildMissionQueryPath('missions/reorder', parameters)
+        console.log(missionOrder)
+        const body = {
+            missionOrder: missionOrder
+        }
+        const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
+            console.log(e)
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
+        return result.content
     }
 
     static async deleteMission(missionId: string) {

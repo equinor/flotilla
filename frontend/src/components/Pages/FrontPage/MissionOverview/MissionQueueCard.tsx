@@ -1,4 +1,4 @@
-import { Button, Card, Checkbox, Dialog, Icon, Typography } from '@equinor/eds-core-react'
+import { Button, Card, Checkbox, Chip, Dialog, Icon, Typography } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
@@ -10,15 +10,23 @@ import { Icons } from 'utils/icons'
 
 interface MissionQueueCardProps {
     mission: Mission
+    order: number
     onDeleteMission: (mission: Mission) => void
+    onReorderMission: (mission: Mission, offset: number) => void
 }
 
 interface MissionDisplayProps {
     mission: Mission
 }
 
+const IconStyle = styled.div`
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+`
+
 const StyledMissionCard = styled(Card)`
-    width: 900px;
+    width: 1080px;
     display: flex;
 `
 const HorizontalContent = styled.div`
@@ -28,7 +36,7 @@ const HorizontalContent = styled.div`
 `
 const HorizontalNonButtonContent = styled.div`
     display: grid;
-    grid-template-columns: 50px 400px auto 90px 180px;
+    grid-template-columns: 50px 20px 30px 30px 400px auto 90px 180px;
     align-items: center;
 `
 
@@ -41,7 +49,7 @@ const StyledButtonSection = styled.div`
     grid-template-columns: auto auto;
 `
 
-export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardProps) {
+export function MissionQueueCard({ mission, order, onDeleteMission, onReorderMission }: MissionQueueCardProps) {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const routeChange = () => {
@@ -54,15 +62,30 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
     return (
         <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <HorizontalContent>
-                <HorizontalNonButtonContent onClick={routeChange}>
+                <HorizontalNonButtonContent>
                     <Checkbox />
-                    <Button variant="ghost" fullWidth>
+                        <Chip variant="active">
+                            <Typography variant="caption" color="#6F6F6F">
+                                {order + 1}
+                            </Typography>
+                        </Chip>
+                    <Button variant="ghost" onClick={() => onReorderMission(mission, -1)} >
+                        <IconStyle>
+                            <Icon name={Icons.ChevronUp} size={16} />
+                        </IconStyle>
+                    </Button>
+                    <Button variant="ghost" onClick={() => onReorderMission(mission, 1)} >
+                        <IconStyle>
+                            <Icon name={Icons.ChevronDown} size={16} />
+                        </IconStyle>
+                    </Button>
+                    <Button variant="ghost" fullWidth onClick={routeChange}>
                         <Typography variant="body_short_bold">{mission.name}</Typography>
                     </Button>
-                    <Typography variant="caption" color="#6F6F6F">
+                    <Typography variant="caption" color="#6F6F6F" onClick={routeChange}>
                         {TranslateText('Robot')}: {mission.robot.name}
                     </Typography>
-                    <Typography variant="caption" color="#6F6F6F">
+                    <Typography variant="caption" color="#6F6F6F" onClick={routeChange}>
                         {TranslateText('Tasks')}: {numberOfTasks}
                     </Typography>
                     <MissionDurationDisplay mission={mission} />

@@ -20,6 +20,8 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId);
 
+        public Task<List<MissionRun>> Reorder(MissionRunQueryStringParameters parameters, string[] ordering);
+
         public Task<MissionRun> Update(MissionRun mission);
 
         public Task<MissionRun?> UpdateMissionRunStatusByIsarMissionId(
@@ -112,6 +114,44 @@ namespace Api.Services
                 .Where(m => m.MissionId == missionId && m.EndTime == null)
                 .OrderBy(m => m.DesiredStartTime)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<MissionRun>> Reorder(MissionRunQueryStringParameters parameters, string[] ordering) {
+            var query = GetMissionRunsWithSubModels();
+            var filter = ConstructFilter(parameters);
+
+            query = query.Where(filter);
+
+            SearchByName(ref query, parameters.NameSearch);
+            SearchByRobotName(ref query, parameters.RobotNameSearch);
+            SearchByTag(ref query, parameters.TagSearch);
+
+            SortingService.ApplySort(ref query, parameters.OrderBy);
+
+            var missions = await PagedList<MissionRun>.ToPagedListAsync(
+                query,
+                parameters.PageNumber,
+                parameters.PageSize
+            );
+
+            var newMissions = new List<MissionRun>();
+            int i = 0;
+            foreach (var missionId in ordering)
+            {
+                var mission = missions.Find(m => m.Id == missionId);
+                if (mission is null)
+                {
+                    // TODO: missions may be gone by the time this is reached
+                    // TODO: do reordering between two missions at a time,
+                    //       this makes it easier to detect failure
+                    continue;
+                }
+
+                mission.DesiredStartTime = missions[i].DesiredStartTime;
+                i++;
+            }
+            await _context.SaveChangesAsync();
+            return newMissions;
         }
 
         public async Task<MissionRun> Update(MissionRun missionRun)

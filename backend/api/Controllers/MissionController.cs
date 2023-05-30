@@ -507,6 +507,40 @@ public class MissionController : ControllerBase
     }
 
     /// <summary>
+    /// Reorder the missions using the list of mission ids in 'missionOrder'.
+    /// </summary>
+    /// <remarks>
+    /// <para> This mission changes the ordering of all missions using a given ordering </para>
+    /// </remarks>
+    [HttpPost]
+    [Authorize(Roles = Role.User)]
+    [Route("reorder")]
+    [ProducesResponseType(typeof(IList<MissionRun>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IList<MissionRun>>> Reorder(
+        [FromQuery] MissionRunQueryStringParameters parameters,
+        [FromBody] ReorderMissionQuery missionOrder
+    )
+    {
+        List<MissionRun> missions;
+        try
+        {
+            missions = await _missionRunService.Reorder(parameters, missionOrder.missionOrder);
+        }
+        catch (InvalidDataException e)
+        {
+            _logger.LogError(e.Message);
+            return BadRequest(e.Message);
+        }
+
+        return Ok(missions);
+    }
+
+    /// <summary>
     /// Deletes the mission definition with the specified id from the database.
     /// </summary>
     [HttpDelete]
