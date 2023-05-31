@@ -32,12 +32,13 @@ const StyledMissionCard = styled(Card)`
 `
 const HorizontalContent = styled.div`
     display: grid;
-    grid-template-columns: auto 50px;
+    grid-template-columns: auto 30px 30px 50px;
     align-items: center;
 `
 const HorizontalNonButtonContent = styled.div`
     display: grid;
-    grid-template-columns: 50px 20px 30px 30px 400px auto 90px 180px;
+    padding-left: 10px;
+    grid-template-columns: 20px 400px auto 90px 180px;
     align-items: center;
 `
 
@@ -50,7 +51,13 @@ const StyledButtonSection = styled.div`
     grid-template-columns: auto auto;
 `
 
-export function MissionQueueCard({ mission, order, reorderDisabled, onDeleteMission, onReorderMission }: MissionQueueCardProps) {
+export function MissionQueueCard({
+    mission,
+    order,
+    reorderDisabled,
+    onDeleteMission,
+    onReorderMission,
+}: MissionQueueCardProps) {
     let navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
     const routeChange = () => {
@@ -63,34 +70,31 @@ export function MissionQueueCard({ mission, order, reorderDisabled, onDeleteMiss
     return (
         <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <HorizontalContent>
-                <HorizontalNonButtonContent>
-                    <Checkbox />
+                <HorizontalNonButtonContent onClick={routeChange}>
                     <Chip variant="active">
-                        <Typography variant="caption" color="#6F6F6F">
-                            {order + 1}
-                        </Typography>
+                        <Typography variant="body_short_bold">{order + 1}</Typography>
                     </Chip>
-                    <Button variant="ghost" disabled={reorderDisabled} onClick={() => onReorderMission(order, order - 1)}>
-                        <IconStyle>
-                            <Icon name={Icons.ChevronUp} size={16} />
-                        </IconStyle>
-                    </Button>
-                    <Button variant="ghost" disabled={reorderDisabled} onClick={() => onReorderMission(order, order + 1)}>
-                        <IconStyle>
-                            <Icon name={Icons.ChevronDown} size={16} />
-                        </IconStyle>
-                    </Button>
-                    <Button variant="ghost" fullWidth onClick={routeChange}>
+                    <Button variant="ghost" fullWidth>
                         <Typography variant="body_short_bold">{mission.name}</Typography>
                     </Button>
-                    <Typography variant="caption" color="#6F6F6F" onClick={routeChange}>
+                    <Typography variant="caption" color="#6F6F6F">
                         {TranslateText('Robot')}: {mission.robot.name}
                     </Typography>
-                    <Typography variant="caption" color="#6F6F6F" onClick={routeChange}>
+                    <Typography variant="caption" color="#6F6F6F">
                         {TranslateText('Tasks')}: {numberOfTasks}
                     </Typography>
                     <MissionDurationDisplay mission={mission} />
                 </HorizontalNonButtonContent>
+                <Button variant="ghost" disabled={reorderDisabled} onClick={() => onReorderMission(order, order - 1)}>
+                    <IconStyle>
+                        <Icon name={Icons.ChevronUp} size={16} />
+                    </IconStyle>
+                </Button>
+                <Button variant="ghost" disabled={reorderDisabled} onClick={() => onReorderMission(order, order + 1)}>
+                    <IconStyle>
+                        <Icon name={Icons.ChevronDown} size={16} />
+                    </IconStyle>
+                </Button>
                 <Button
                     variant="ghost_icon"
                     onClick={() => {

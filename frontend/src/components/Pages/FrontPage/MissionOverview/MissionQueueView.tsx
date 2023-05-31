@@ -115,9 +115,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
             },
             missionQueue[missionIndex1].id,
             missionQueue[missionIndex2].id
-        ).then(() =>
-            setAttemptingReorder(false)
-        )//.catch((e) => handleError(e))
+        ).then(() => setAttemptingReorder(false)) //.catch((e) => handleError(e))
     }
 
     useEffect(() => {
