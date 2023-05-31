@@ -209,7 +209,7 @@ namespace Api.Services
             IList<MissionTask> tasks
         )
         {
-            var mapCoverage = new Dictionary<string, int>();
+            var mapCoverage = new Dictionary<string, float>();
             foreach (var boundary in boundaries)
             {
                 mapCoverage.Add(boundary.Key, FractionOfTagsWithinBoundary(boundary: boundary.Value, tasks: tasks));
@@ -229,7 +229,7 @@ namespace Api.Services
                    && task.InspectionTarget.Z < boundary.Z2;
         }
 
-        private int FractionOfTagsWithinBoundary(Boundary boundary, IList<MissionTask> tasks)
+        private float FractionOfTagsWithinBoundary(Boundary boundary, IList<MissionTask> tasks)
         {
             int tagsWithinBoundary = 0;
             foreach (var task in tasks)
@@ -245,7 +245,7 @@ namespace Api.Services
             }
             tagsWithinBoundary++;
 
-            return tagsWithinBoundary / tasks.Count;
+            return tagsWithinBoundary / (float)tasks.Count;
         }
     }
 }
