@@ -1,4 +1,4 @@
-import { Table, Typography } from '@equinor/eds-core-react'
+import { Chip, Table, Typography } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
@@ -10,12 +10,6 @@ import { GetColorsFromTaskStatus } from '../../../../utils/MarkerStyles'
 const StyledTable = styled(Table)`
     grid-column: 1/ -1;
     font: equinor;
-`
-
-const Circle = styled.div`
-    border-radius: 50%;
-    text-align: center;
-    min-width: 1.2rem;
 `
 
 interface MissionProps {
@@ -57,9 +51,11 @@ function renderTasks(tasks: Task[]) {
         return (
             <Table.Row key={order} style={rowStyle}>
                 <Table.Cell>
-                    <Circle style={{ background: markerColors.fillColor, color: markerColors.textColor }}>
-                        {order}
-                    </Circle>
+                    <Chip style={{ background: markerColors.fillColor }}>
+                        <Typography variant="body_short_bold" style={{ color: markerColors.textColor }}>
+                            {order}
+                        </Typography>
+                    </Chip>
                 </Table.Cell>
                 <Table.Cell> {renderTagId(task)}</Table.Cell>
                 <Table.Cell> {renderDescription(task)}</Table.Cell>
