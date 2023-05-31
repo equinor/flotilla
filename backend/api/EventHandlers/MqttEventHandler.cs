@@ -12,16 +12,13 @@ using Microsoft.IdentityModel.Tokens;
 namespace Api.EventHandlers
 {
     /// <summary>
-    /// A background service which listens to events and performs callback functions.
+    ///     A background service which listens to events and performs callback functions.
     /// </summary>
     public class MqttEventHandler : EventHandlerBase
     {
+        private readonly IConfiguration _configuration;
         private readonly ILogger<MqttEventHandler> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly IConfiguration _configuration;
-
-        private IServiceProvider GetServiceProvider() =>
-            _scopeFactory.CreateScope().ServiceProvider;
 
         public MqttEventHandler(
             ILogger<MqttEventHandler> logger,
@@ -35,6 +32,11 @@ namespace Api.EventHandlers
             _scopeFactory = scopeFactory;
 
             Subscribe();
+        }
+
+        private IServiceProvider GetServiceProvider()
+        {
+            return _scopeFactory.CreateScope().ServiceProvider;
         }
 
         public override void Subscribe()
@@ -84,7 +86,9 @@ namespace Api.EventHandlers
             }
 
             if (robot.Status == isarRobotStatus.RobotStatus)
+            {
                 return;
+            }
 
             robot.Status = isarRobotStatus.RobotStatus;
             robot = await robotService.Update(robot);
@@ -112,7 +116,7 @@ namespace Api.EventHandlers
                     isarRobotInfo.RobotName
                 );
 
-                var robotQuery = new CreateRobotQuery()
+                var robotQuery = new CreateRobotQuery
                 {
                     IsarId = isarRobotInfo.IsarId,
                     Name = isarRobotInfo.RobotName,
@@ -152,57 +156,21 @@ namespace Api.EventHandlers
 
             if (isarRobotInfo.VideoStreamQueries is not null)
             {
-                var updatedStreams = isarRobotInfo.VideoStreamQueries
-                    .Select(
-                        stream =>
-                            new VideoStream
-                            {
-                                Name = stream.Name,
-                                Url = stream.Url,
-                                Type = stream.Type
-                            }
-                    )
-                    .ToList();
-
-                if (
-                    !(
-                        updatedStreams.Count == robot.VideoStreams.Count
-                        && updatedStreams.TrueForAll(stream => robot.VideoStreams.Contains(stream))
-                    )
-                )
-                {
-                    updatedFields.Add(
-                        $"\nVideoStreams ({JsonSerializer.Serialize(robot.VideoStreams, new JsonSerializerOptions() { WriteIndented = true })} "
-                        + "\n-> "
-                        + $"\n{JsonSerializer.Serialize(updatedStreams, new JsonSerializerOptions() { WriteIndented = true })})\n"
-                    );
-                    robot.VideoStreams = updatedStreams;
-                }
+                UpdateVideoStreamsIfChanged(isarRobotInfo.VideoStreamQueries, ref robot, ref updatedFields);
             }
 
             if (isarRobotInfo.Host is not null)
             {
-                if (!isarRobotInfo.Host.Equals(robot.Host, StringComparison.Ordinal))
-                {
-                    updatedFields.Add($"\nHost ({robot.Host} -> {isarRobotInfo.Host})\n");
-                    robot.Host = isarRobotInfo.Host;
-                }
+                UpdateHostIfChanged(isarRobotInfo.Host, ref robot, ref updatedFields);
             }
 
-            if (!isarRobotInfo.Port.Equals(robot.Port))
+            UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
+
+            if (isarRobotInfo.CurrentAsset is not null)
             {
-                updatedFields.Add($"\nPort ({robot.Port} -> {isarRobotInfo.Port})\n");
-                robot.Port = isarRobotInfo.Port;
+                UpdateCurrentAssetIfChanged(isarRobotInfo.CurrentAsset, ref robot, ref updatedFields);
             }
 
-            if (isarRobotInfo.CurrentAsset is not null){
-                if (!isarRobotInfo.CurrentAsset.Equals(robot.CurrentAsset, StringComparison.Ordinal))
-                {
-                    updatedFields.Add($"\nCurrentAsset ({robot.CurrentAsset} -> {isarRobotInfo.CurrentAsset})\n");
-                    robot.CurrentAsset = isarRobotInfo.CurrentAsset;
-                }
-            }
-            
             if (!updatedFields.IsNullOrEmpty())
             {
                 robot = await robotService.Update(robot);
@@ -214,6 +182,69 @@ namespace Api.EventHandlers
                 );
             }
         }
+
+        private static void UpdateVideoStreamsIfChanged(List<CreateVideoStreamQuery> videoStreamQueries,
+            ref Robot robot, ref List<string> updatedFields)
+        {
+            var updatedStreams = videoStreamQueries
+                .Select(
+                    stream =>
+                        new VideoStream { Name = stream.Name, Url = stream.Url, Type = stream.Type }
+                )
+                .ToList();
+
+            var existingVideoStreams = robot.VideoStreams;
+            if (
+                updatedStreams.Count == robot.VideoStreams.Count
+                && updatedStreams.TrueForAll(stream => existingVideoStreams.Contains(stream))
+            )
+            {
+                return;
+            }
+
+            updatedFields.Add(
+                $"\nVideoStreams ({JsonSerializer.Serialize(robot.VideoStreams, new JsonSerializerOptions { WriteIndented = true })} "
+                + "\n-> "
+                + $"\n{JsonSerializer.Serialize(updatedStreams, new JsonSerializerOptions { WriteIndented = true })})\n"
+            );
+            robot.VideoStreams = updatedStreams;
+        }
+
+        private static void UpdateHostIfChanged(string host, ref Robot robot, ref List<string> updatedFields)
+        {
+            if (host.Equals(robot.Host, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            updatedFields.Add($"\nHost ({robot.Host} -> {host})\n");
+            robot.Host = host;
+        }
+
+        private static void UpdatePortIfChanged(int port, ref Robot robot,
+            ref List<string> updatedFields)
+        {
+            if (port.Equals(robot.Port))
+            {
+                return;
+            }
+
+            updatedFields.Add($"\nPort ({robot.Port} -> {port})\n");
+            robot.Port = port;
+        }
+
+        private static void UpdateCurrentAssetIfChanged(string newCurrentAsset, ref Robot robot,
+            ref List<string> updatedFields)
+        {
+            if (newCurrentAsset.Equals(robot.CurrentAsset, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            updatedFields.Add($"\nCurrentAsset ({robot.CurrentAsset} -> {newCurrentAsset})\n");
+            robot.CurrentAsset = newCurrentAsset;
+        }
+
 
         private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
@@ -275,7 +306,9 @@ namespace Api.EventHandlers
 
             robot.Status = flotillaMission.IsCompleted ? RobotStatus.Available : RobotStatus.Busy;
             if (flotillaMission.IsCompleted)
+            {
                 robot.CurrentMissionId = null;
+            }
 
             await robotService.Update(robot);
             _logger.LogInformation(
@@ -294,7 +327,7 @@ namespace Api.EventHandlers
                     .AddDays(-timeRangeInDays)
                     .ToUnixTimeSeconds();
                 var missionsForEstimation = await missionService.ReadAll(
-                    new MissionQueryStringParameters()
+                    new MissionQueryStringParameters
                     {
                         MinDesiredStartTime = minEpochTime,
                         RobotModelType = robot.Model.Type,
@@ -341,6 +374,7 @@ namespace Api.EventHandlers
             );
 
             if (success)
+            {
                 _logger.LogInformation(
                     "Task '{id}' updated to '{status}' for robot '{robotName}' with ISAR id '{isarId}'",
                     task.TaskId,
@@ -348,6 +382,7 @@ namespace Api.EventHandlers
                     task.RobotName,
                     task.IsarId
                 );
+            }
         }
 
         private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
@@ -360,7 +395,9 @@ namespace Api.EventHandlers
             // Flotilla does not care about DriveTo or localization steps
             var stepType = IsarStep.StepTypeFromString(step.StepType);
             if (stepType is IsarStepType.DriveToPose || stepType is IsarStepType.Localize)
+            {
                 return;
+            }
 
             IsarStepStatus status;
             try
@@ -385,6 +422,7 @@ namespace Api.EventHandlers
             );
 
             if (success)
+            {
                 _logger.LogInformation(
                     "Inspection '{id}' updated to '{status}' for robot '{robotName}' with ISAR id '{isarId}'",
                     step.StepId,
@@ -392,6 +430,7 @@ namespace Api.EventHandlers
                     step.RobotName,
                     step.IsarId
                 );
+            }
         }
 
         private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
