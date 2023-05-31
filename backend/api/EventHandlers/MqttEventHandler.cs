@@ -148,38 +148,45 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var updatedStreams = isarRobotInfo.VideoStreamQueries
-                .Select(
-                    stream =>
-                        new VideoStream
-                        {
-                            Name = stream.Name,
-                            Url = stream.Url,
-                            Type = stream.Type
-                        }
-                )
-                .ToList();
-
             List<string> updatedFields = new();
-            if (
-                !(
-                    updatedStreams.Count == robot.VideoStreams.Count
-                    && updatedStreams.TrueForAll(stream => robot.VideoStreams.Contains(stream))
-                )
-            )
+
+            if (isarRobotInfo.VideoStreamQueries is not null)
             {
-                updatedFields.Add(
-                    $"\nVideoStreams ({JsonSerializer.Serialize(robot.VideoStreams, new JsonSerializerOptions() { WriteIndented = true })} "
+                var updatedStreams = isarRobotInfo.VideoStreamQueries
+                    .Select(
+                        stream =>
+                            new VideoStream
+                            {
+                                Name = stream.Name,
+                                Url = stream.Url,
+                                Type = stream.Type
+                            }
+                    )
+                    .ToList();
+
+                if (
+                    !(
+                        updatedStreams.Count == robot.VideoStreams.Count
+                        && updatedStreams.TrueForAll(stream => robot.VideoStreams.Contains(stream))
+                    )
+                )
+                {
+                    updatedFields.Add(
+                        $"\nVideoStreams ({JsonSerializer.Serialize(robot.VideoStreams, new JsonSerializerOptions() { WriteIndented = true })} "
                         + "\n-> "
                         + $"\n{JsonSerializer.Serialize(updatedStreams, new JsonSerializerOptions() { WriteIndented = true })})\n"
-                );
-                robot.VideoStreams = updatedStreams;
+                    );
+                    robot.VideoStreams = updatedStreams;
+                }
             }
 
-            if (!isarRobotInfo.Host.Equals(robot.Host, StringComparison.Ordinal))
+            if (isarRobotInfo.Host is not null)
             {
-                updatedFields.Add($"\nHost ({robot.Host} -> {isarRobotInfo.Host})\n");
-                robot.Host = isarRobotInfo.Host;
+                if (!isarRobotInfo.Host.Equals(robot.Host, StringComparison.Ordinal))
+                {
+                    updatedFields.Add($"\nHost ({robot.Host} -> {isarRobotInfo.Host})\n");
+                    robot.Host = isarRobotInfo.Host;
+                }
             }
 
             if (!isarRobotInfo.Port.Equals(robot.Port))
@@ -188,12 +195,14 @@ namespace Api.EventHandlers
                 robot.Port = isarRobotInfo.Port;
             }
 
-            if (!isarRobotInfo.CurrentAsset.Equals(robot.CurrentAsset, StringComparison.Ordinal))
-            {
-                updatedFields.Add($"\nCurrentAsset ({robot.CurrentAsset} -> {isarRobotInfo.CurrentAsset})\n");
-                robot.CurrentAsset = isarRobotInfo.CurrentAsset;
+            if (isarRobotInfo.CurrentAsset is not null){
+                if (!isarRobotInfo.CurrentAsset.Equals(robot.CurrentAsset, StringComparison.Ordinal))
+                {
+                    updatedFields.Add($"\nCurrentAsset ({robot.CurrentAsset} -> {isarRobotInfo.CurrentAsset})\n");
+                    robot.CurrentAsset = isarRobotInfo.CurrentAsset;
+                }
             }
-
+            
             if (!updatedFields.IsNullOrEmpty())
             {
                 robot = await robotService.Update(robot);
