@@ -11,6 +11,7 @@ import { Icons } from 'utils/icons'
 interface MissionQueueCardProps {
     mission: Mission
     order: number
+    reorderDisabled: boolean
     onDeleteMission: (mission: Mission) => void
     onReorderMission: (missionIndex1: number, missionIndex2: number) => void
 }
@@ -49,9 +50,9 @@ const StyledButtonSection = styled.div`
     grid-template-columns: auto auto;
 `
 
-export function MissionQueueCard({ mission, order, onDeleteMission, onReorderMission }: MissionQueueCardProps) {
-    const { TranslateText } = useLanguageContext()
+export function MissionQueueCard({ mission, order, reorderDisabled, onDeleteMission, onReorderMission }: MissionQueueCardProps) {
     let navigate = useNavigate()
+    const { TranslateText } = useLanguageContext()
     const routeChange = () => {
         let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
@@ -69,12 +70,12 @@ export function MissionQueueCard({ mission, order, onDeleteMission, onReorderMis
                             {order + 1}
                         </Typography>
                     </Chip>
-                    <Button variant="ghost" onClick={() => onReorderMission(order, order - 1)}>
+                    <Button variant="ghost" disabled={reorderDisabled} onClick={() => onReorderMission(order, order - 1)}>
                         <IconStyle>
                             <Icon name={Icons.ChevronUp} size={16} />
                         </IconStyle>
                     </Button>
-                    <Button variant="ghost" onClick={() => onReorderMission(order, order + 1)}>
+                    <Button variant="ghost" disabled={reorderDisabled} onClick={() => onReorderMission(order, order + 1)}>
                         <IconStyle>
                             <Icon name={Icons.ChevronDown} size={16} />
                         </IconStyle>

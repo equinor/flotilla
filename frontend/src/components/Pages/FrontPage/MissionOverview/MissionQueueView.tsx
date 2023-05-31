@@ -44,6 +44,8 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const { missionQueue } = useMissionQueueContext()
 
     const missionPageSize = 100
+    const [attemptingReorder, setAttemptingReorder] = useState(false)
+    const [reorderResultsReceived, setReorderResultsReceived] = useState(true)
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<MissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [echoMissions, setEchoMissions] = useState<Map<string, MissionDefinition>>(
@@ -100,8 +102,12 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
             missionIndex1 < 0 ||
             missionIndex2 >= missionQueue.length ||
             missionIndex2 < 0
-        )
+        ) {
             return
+        }
+
+        setAttemptingReorder(true)
+        setReorderResultsReceived(false)
         BackendAPICaller.updateMissionOrder(
             {
                 status: MissionStatus.Pending,
@@ -109,8 +115,16 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
             },
             missionQueue[missionIndex1].id,
             missionQueue[missionIndex2].id
-        )
+        ).then(() =>
+            setAttemptingReorder(false)
+        )//.catch((e) => handleError(e))
     }
+
+    useEffect(() => {
+        if (!attemptingReorder) {
+            setReorderResultsReceived(true)
+        }
+    }, [missionQueue])
 
     useEffect(() => {
         const id = setInterval(() => {
@@ -153,6 +167,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     var missionQueueDisplay = missionQueue.map((mission, index) => (
         <MissionQueueCard
             key={mission.id}
+            reorderDisabled={!reorderResultsReceived}
             order={index}
             mission={mission}
             onDeleteMission={onDeleteMission}
