@@ -92,7 +92,6 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
                                 {TranslateText('Cancel')}{' '}
                             </Button>
                             <Button
-                                color="danger"
                                 onClick={() => {
                                     onDeleteMission(mission)
                                     setConfirmDeleteDialogOpen(false)
