@@ -446,6 +446,17 @@ public class MissionController : ControllerBase
         if (robot is null)
             return NotFound($"Could not find robot with id {customMissionQuery.RobotId}");
 
+        var installationResults = await _echoService.GetEchoPlantInfos();
+        if (installationResults == null)
+            return NotFound("Unable to retrieve plant information from Echo");
+
+        var installationResult = installationResults
+            .Where(
+                installation => installation.PlantCode.ToUpperInvariant() == customMissionQuery.InstallationCode.ToUpperInvariant()
+            ).FirstOrDefault();
+        if (installationResult == null)
+            return NotFound($"Could not find installation with id {customMissionQuery.InstallationCode}");
+
         var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 
         Area? area = null;
