@@ -10,7 +10,7 @@ namespace Api.Services
 {
     public interface IEchoService
     {
-        public abstract Task<IList<EchoMission>> GetMissions(string? installationCode);
+        public abstract Task<IList<MissionDefinition>> GetAvailableMissions(string? installationCode);
 
         public abstract Task<EchoMission> GetMissionById(int missionId);
 
@@ -31,7 +31,7 @@ namespace Api.Services
             _logger = logger;
         }
 
-        public async Task<IList<EchoMission>> GetMissions(string? installationCode)
+        public async Task<IList<MissionDefinition>> GetAvailableMissions(string? installationCode)
         {
             string relativePath = string.IsNullOrEmpty(installationCode)
               ? $"robots/robot-plan?Status=Ready"
@@ -54,9 +54,9 @@ namespace Api.Services
             if (echoMissions is null)
                 throw new JsonException("Failed to deserialize missions from Echo");
 
-            var missions = ProcessEchoMissions(echoMissions);
+            var availableMissions = ProcessAvailableEchoMission(echoMissions);
 
-            return missions;
+            return availableMissions;
         }
 
         public async Task<EchoMission> GetMissionById(int missionId)
@@ -170,21 +170,34 @@ namespace Api.Services
             return tags;
         }
 
-        private List<EchoMission> ProcessEchoMissions(List<EchoMissionResponse> echoMissions)
+        private List<MissionDefinition> ProcessAvailableEchoMission(List<EchoMissionResponse> echoMissions)
         {
-            var missions = new List<EchoMission>();
+            var availableMissions = new List<MissionDefinition>();
 
             foreach (var echoMission in echoMissions)
             {
-                var mission = ProcessEchoMission(echoMission);
-
-                if (mission is null)
+                if (echoMission.PlanItems is null)
                     continue;
-
-                missions.Add(mission);
+                try
+                {
+                    var mission = new MissionDefinition()
+                    {
+                        EchoMissionId = echoMission.Id,
+                        Name = echoMission.Name,
+                        AssetCode = echoMission.InstallationCode,
+                    };
+                    availableMissions.Add(mission);
+                }
+                catch (InvalidDataException e)
+                {
+                    _logger.LogWarning(
+                        "Echo mission with ID '{id}' is invalid: '{message}'",
+                        echoMission.Id,
+                        e.Message
+                    );
+                }
             }
-
-            return missions;
+            return availableMissions;
         }
 
         private EchoMission? ProcessEchoMission(EchoMissionResponse echoMission)
