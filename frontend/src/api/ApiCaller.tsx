@@ -1,5 +1,5 @@
 import { config } from 'config'
-import { EchoMission, EchoPlantInfo } from 'models/EchoMission'
+import { EchoPlantInfo } from 'models/EchoMission'
 import { Mission } from 'models/Mission'
 import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
@@ -13,6 +13,7 @@ import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 import { TaskStatus } from 'models/Task'
 import { CreateCustomMission, CustomMissionQuery } from 'models/CustomMission'
 import { MissionMap } from 'models/MissionMap'
+import { MissionDefinition } from 'models/MissionDefinition'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
@@ -157,9 +158,9 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    static async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
-        const path: string = 'echo/missions?installationCode=' + installationCode
-        const result = await BackendAPICaller.GET<EchoMission[]>(path).catch((e) => {
+    static async getAvailableEchoMission(installationCode: string = ''): Promise<MissionDefinition[]> {
+        const path: string = 'echo/available-missions?installationCode=' + installationCode
+        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })

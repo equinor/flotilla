@@ -19,10 +19,17 @@ namespace Api.Test.Mocks
                 Tags = new List<EchoTag>()
             };
 
-        public async Task<IList<EchoMission>> GetMissions(string? installationCode)
+        public MissionDefinition MockMissionDefinition =
+            new()
+            {
+                EchoMissionId = 1,
+                Name = "test",
+            };
+
+        public async Task<IList<MissionDefinition>> GetAvailableMissions(string? installationCode)
         {
             await Task.Run(() => Thread.Sleep(1));
-            return new List<EchoMission>(new EchoMission[] { MockEchoMission });
+            return new List<MissionDefinition>(new MissionDefinition[] { MockMissionDefinition });
         }
 
         public async Task<EchoMission> GetMissionById(int missionId)

@@ -6,12 +6,12 @@ import { useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
-import { EchoMission } from 'models/EchoMission'
 import { Robot } from 'models/Robot'
 import { RefreshProps } from '../FrontPage'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 import { useAssetContext } from 'components/Contexts/AssetContext'
 import { CreateMissionButton } from './CreateMissionButton'
+import { MissionDefinition } from 'models/MissionDefinition'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -30,10 +30,10 @@ const MissionButtonView = styled.div`
     display: flex;
     gap: 1rem;
 `
-const mapEchoMissionToString = (missions: EchoMission[]): Map<string, EchoMission> => {
-    var missionMap = new Map<string, EchoMission>()
-    missions.forEach((mission: EchoMission) => {
-        missionMap.set(mission.id + ': ' + mission.name, mission)
+const mapEchoMissionToString = (missions: MissionDefinition[]): Map<string, MissionDefinition> => {
+    var missionMap = new Map<string, MissionDefinition>()
+    missions.forEach((mission: MissionDefinition) => {
+        missionMap.set(mission.echoMissionId + ': ' + mission.name, mission)
     })
     return missionMap
 }
@@ -49,9 +49,11 @@ const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
 export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const missionPageSize = 100
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
-    const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMission[]>([])
+    const [selectedEchoMissions, setSelectedEchoMissions] = useState<MissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
-    const [echoMissions, setEchoMissions] = useState<Map<string, EchoMission>>(new Map<string, EchoMission>())
+    const [echoMissions, setEchoMissions] = useState<Map<string, MissionDefinition>>(
+        new Map<string, MissionDefinition>()
+    )
     const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>(new Map<string, Robot>())
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
     const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
@@ -60,17 +62,17 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
 
     const fetchEchoMissions = () => {
         setIsFetchingEchoMissions(true)
-        BackendAPICaller.getEchoMissions(assetCode as string).then((missions) => {
-            const echoMissionsMap: Map<string, EchoMission> = mapEchoMissionToString(missions)
+        BackendAPICaller.getAvailableEchoMission(assetCode as string).then((missions) => {
+            const echoMissionsMap: Map<string, MissionDefinition> = mapEchoMissionToString(missions)
             setEchoMissions(echoMissionsMap)
             setIsFetchingEchoMissions(false)
         })
     }
 
     const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
-        var echoMissionsToSchedule: EchoMission[] = []
+        var echoMissionsToSchedule: MissionDefinition[] = []
         selectedEchoMissions.forEach((selectedEchoMission: string) => {
-            if (echoMissions) echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as EchoMission)
+            if (echoMissions) echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as MissionDefinition)
         })
         setSelectedEchoMissions(echoMissionsToSchedule)
     }
@@ -83,8 +85,8 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const onScheduleButtonPress = () => {
         if (selectedRobot === undefined) return
 
-        selectedEchoMissions.forEach((mission: EchoMission) => {
-            BackendAPICaller.postMission(mission.id, selectedRobot.id, assetCode)
+        selectedEchoMissions.forEach((mission: MissionDefinition) => {
+            BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, assetCode)
         })
 
         setSelectedEchoMissions([])
