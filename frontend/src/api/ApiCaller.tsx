@@ -124,15 +124,6 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getAllEchoMissions(): Promise<EchoMission[]> {
-        const path: string = 'echo/missions'
-        const result = await BackendAPICaller.GET<EchoMission[]>(path).catch((e) => {
-            console.error(`Failed to GET /${path}: ` + e)
-            throw e
-        })
-        return result.content
-    }
-
     static async getMissions(parameters: MissionQueryParameters): Promise<PaginatedResponse<Mission>> {
         let path: string = 'missions?'
 
