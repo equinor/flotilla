@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { MissionQueueCard } from './MissionQueueCard'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
-import { Mission } from 'models/Mission'
+import { Mission, MissionStatus } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { Robot } from 'models/Robot'
@@ -110,12 +110,17 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         setReorderResultsReceived(false)
         BackendAPICaller.updateMissionOrder(
             {
-                status: MissionStatus.Pending,
+                statuses: [MissionStatus.Pending],
                 pageSize: missionPageSize,
             },
             missionQueue[missionIndex1].id,
             missionQueue[missionIndex2].id
-        ).then(() => setAttemptingReorder(false)) //.catch((e) => handleError(e))
+        )
+            .then(() => setAttemptingReorder(false))
+            .catch((e) => {
+                setAttemptingReorder(false)
+                // handleError(e)
+            })
     }
 
     useEffect(() => {
@@ -128,19 +133,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         const id = setInterval(() => {
             BackendAPICaller.getEnabledRobots().then((robots) => {
                 setRobotOptions(robots)
-            })
-        }, refreshInterval)
-        return () => clearInterval(id)
-    }, [refreshInterval])
-
-    useEffect(() => {
-        const id = setInterval(() => {
-            BackendAPICaller.getMissionRuns({
-                status: MissionStatus.Pending,
-                pageSize: missionPageSize,
-                orderBy: 'DesiredStartTime',
-            }).then((missions) => {
-                setMissionQueue(missions.content)
             })
         }, refreshInterval)
         return () => clearInterval(id)
