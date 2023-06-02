@@ -12,7 +12,7 @@ namespace Api.Test.Mocks
         public async Task<MissionMap?> ChooseMapFromPositions(IList<Position> positions, string assetCode)
         {
             await Task.Run(() => Thread.Sleep(1));
-            return null;
+            return new MissionMap();
         }
 
         public async Task AssignMapToMission(Mission mission)
