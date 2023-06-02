@@ -131,8 +131,9 @@ namespace Api.Database.Models
 
         public Pose(EchoVector enuPosition, EchoVector axis, float angle)
         {
+            float clockAngle = -angle;
             Position = new Position(enuPosition.East, enuPosition.North, enuPosition.Up);
-            Orientation = AxisAngleToQuaternion(axis, angle);
+            Orientation = AxisAngleToQuaternion(axis, clockAngle);
         }
 
         public Pose(Position position, Orientation orientation)
