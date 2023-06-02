@@ -68,7 +68,7 @@ namespace Api.Test.Services
             if (orientation.Z >= 0)
                 angle = 2 * MathF.Acos(qw);
 
-            return new AxisAngle(new EchoVector(0, 0, 1), angle);
+            return new AxisAngle(new EchoVector(0, 0, 1), -angle);
         }
 
         public class AxisAngle
