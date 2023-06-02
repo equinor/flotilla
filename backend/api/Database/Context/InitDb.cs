@@ -6,6 +6,7 @@ public static class InitDb
 {
     private static readonly List<Robot> robots = GetRobots();
     private static readonly List<Mission> missions = GetMissions();
+    private static readonly List<AssetDeck> assetDecks = GetAssetDecks();
 
     private static VideoStream VideoStream =>
         new()
@@ -112,6 +113,19 @@ public static class InitDb
         return new List<Mission>(new[] { mission1, mission2, mission3 });
     }
 
+    private static List<AssetDeck> GetAssetDecks()
+    {
+        var assetDeck1 = new AssetDeck
+        {
+            Id = "TestId",
+            DeckName = "Placeholder deck 1",
+            AssetCode = "Placeholder asset",
+            DefaultLocalizationPose = new Pose()
+        };
+
+        return new List<AssetDeck>(new[] { assetDeck1 });
+    }
+
     public static void PopulateDb(FlotillaDbContext context)
     {
         // To make sure we are not trying to initialize database more than once during tests
@@ -155,6 +169,7 @@ public static class InitDb
         }
         context.AddRange(robots);
         context.AddRange(missions);
+        context.AddRange(assetDecks);
         context.SaveChanges();
     }
 }

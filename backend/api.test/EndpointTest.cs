@@ -311,5 +311,23 @@ namespace Api.Test
                 JsonSerializer.Serialize(testPosition)
             );
         }
+
+        [Fact]
+        public async Task GetMapMetadata()
+        {
+            var inputOutputPairs = new Dictionary<string, HttpStatusCode>(){
+                {"TestId", HttpStatusCode.OK},
+                {"InvalidId", HttpStatusCode.NotFound}
+            };
+
+            foreach (string input in inputOutputPairs.Keys)
+            {
+                string assetDeckId = input;
+                string url = $"/asset-decks/{assetDeckId}/map-metadata";
+                var response = await _client.GetAsync(url);
+                Assert.Equal(inputOutputPairs[input], response.StatusCode);
+
+            }
+        }
     }
 }
