@@ -28,7 +28,7 @@ namespace Api.Database.Models
 
         public string CurrentAsset { get; set; }
 
-        public string CurrentAssetDeckId { get; set; }
+        public AssetDeck CurrentAssetDeck { get; set; }
 
         public float BatteryLevel { get; set; }
 
@@ -69,12 +69,12 @@ namespace Api.Database.Models
 
         public Robot()
         {
+            CurrentAssetDeck = new AssetDeck();
             VideoStreams = new List<VideoStream>();
             IsarId = "defaultIsarId";
             Name = "defaultId";
             SerialNumber = "defaultSerialNumber";
             CurrentAsset = "defaultAsset";
-            CurrentAssetDeckId = "defaultDeckId";
             Status = RobotStatus.Offline;
             Enabled = false;
             Host = "localhost";
@@ -99,8 +99,8 @@ namespace Api.Database.Models
             IsarId = createQuery.IsarId;
             Name = createQuery.Name;
             SerialNumber = createQuery.SerialNumber;
+            CurrentAssetDeck = createQuery.CurrentAssetDeck;
             CurrentAsset = createQuery.CurrentAsset;
-            CurrentAssetDeckId = "defaultDeckId";
             VideoStreams = videoStreams;
             Host = createQuery.Host;
             Port = createQuery.Port;

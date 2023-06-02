@@ -23,5 +23,7 @@ namespace Api.Controllers.Models
         public bool Enabled { get; set; }
 
         public RobotStatus Status { get; set; }
+
+        public AssetDeck CurrentAssetDeck { get; set; }
     }
 }
