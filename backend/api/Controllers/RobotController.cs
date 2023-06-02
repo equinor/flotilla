@@ -672,6 +672,14 @@ public class RobotController : ControllerBase
             return Conflict($"The Robot is not available ({robot.Status})");
         }
 
+        var deck = await _assetDeckService.ReadById(scheduleLocalizationMissionQuery.DeckId);
+
+        if (deck == null)
+        {
+            _logger.LogWarning("Could not find deck with id={id}", scheduleLocalizationMissionQuery.DeckId);
+            return NotFound("Deck not found");
+        }
+
         var mission = new Mission
         {
             Name = "Localization Mission",
@@ -712,7 +720,7 @@ public class RobotController : ControllerBase
 
         await _missionService.Create(mission);
 
-        robot.CurrentAssetDeckId = scheduleLocalizationMissionQuery.DeckId;
+        robot.CurrentAssetDeck = deck;
         robot.Status = RobotStatus.Busy;
         robot.CurrentMissionId = mission.Id;
         await _robotService.Update(robot);

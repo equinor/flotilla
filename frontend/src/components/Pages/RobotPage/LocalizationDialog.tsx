@@ -71,7 +71,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
 
     const onClickLocalize = () => {
         if (selectedAssetDeck) {
-            BackendAPICaller.postLocalizationMission(selectedAssetDeck?.defaultLocalizationPose, robot.id)
+            BackendAPICaller.postLocalizationMission(selectedAssetDeck?.defaultLocalizationPose, robot.id, selectedAssetDeck.id)
         }
         onLocalizationDialogClose()
     }
