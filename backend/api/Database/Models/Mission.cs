@@ -34,6 +34,8 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public string AssetCode { get; set; }
 
+        public IList<string>? AssetDecks { get; set; }
+
         [Required]
         public virtual Robot Robot { get; set; }
 
@@ -70,6 +72,8 @@ namespace Api.Database.Models
         public DateTimeOffset? StartTime { get; private set; }
 
         public DateTimeOffset? EndTime { get; private set; }
+
+        public TimeSpan? MissionFrequency { get; set; }
 
         /// <summary>
         /// The estimated duration of the mission in seconds

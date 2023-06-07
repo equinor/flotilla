@@ -8,8 +8,10 @@ export interface CustomMissionQuery {
     description?: string
     comment?: string
     assetCode?: string
+    assetDecks?: string[]
     robotId: string
     desiredStartTime: Date
+    missionFrequency?: string // The string format is 0.00:00:00.0000, D.DD:H.HH:m.mm
     tasks: CustomTaskQuery[]
 }
 
@@ -34,8 +36,10 @@ export function CreateCustomMission(mission: Mission): CustomMissionQuery {
         description: mission.description,
         comment: mission.comment,
         assetCode: mission.assetCode,
+        assetDecks: mission.assetDecks,
         robotId: mission.robot.id,
         desiredStartTime: new Date(),
+        missionFrequency: mission.missionFrequency,
         tasks: mission.tasks.map<CustomTaskQuery>((task) => {
             const customTask: CustomTaskQuery = {
                 taskOrder: task.taskOrder,

@@ -32,7 +32,12 @@ namespace Api.Controllers.Models
 
         public DateTimeOffset? DesiredStartTime { get; set; }
 
+        // The string format is 0.00:00:00.0000, D.DD:H.HH:m.mm
+        public TimeSpan? MissionFrequency { get; set; }
+
         public string AssetCode { get; set; }
+
+        public List<string>? AssetDecks { get; set; }
 
         public string Name { get; set; }
 

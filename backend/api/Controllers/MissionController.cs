@@ -254,6 +254,10 @@ public class MissionController : ControllerBase
 
         var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 
+        // TODO: verify customMissionQuery.AssetDeck against customMissionQuery.AssetCode
+
+        customMissionQuery.AssetDecks ??= new List<string>();
+
         var scheduledMission = new Mission
         {
             Name = customMissionQuery.Name,
@@ -264,6 +268,8 @@ public class MissionController : ControllerBase
             DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTimeOffset.UtcNow,
             Tasks = missionTasks,
             AssetCode = customMissionQuery.AssetCode,
+            AssetDecks = customMissionQuery.AssetDecks,
+            MissionFrequency = customMissionQuery.MissionFrequency,
             Map = new MissionMap()
         };
 

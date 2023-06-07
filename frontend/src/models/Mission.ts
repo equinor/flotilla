@@ -22,10 +22,12 @@ export interface Mission {
     statusReason?: string
     comment?: string
     assetCode?: string
+    assetDecks?: string[]
     robot: Robot
     status: MissionStatus
     isCompleted: boolean
     desiredStartTime: Date
+    missionFrequency?: string // The string format is 0.00:00:00.0000, D.DD:H.HH:m.mm
     startTime?: Date
     endTime?: Date
     estimatedDuration?: number
