@@ -1,5 +1,5 @@
 import { Mission, MissionStatus } from 'models/Mission'
-import { CircularProgress, Icon } from '@equinor/eds-core-react'
+import { Button, CircularProgress, Icon } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { useState } from 'react'
 import { tokens } from '@equinor/eds-tokens'
@@ -67,21 +67,23 @@ export function MissionControlButtons({ mission }: MissionProps) {
             return (
                 <ButtonStyle>
                     <ButtonText>
-                        <Icon
-                            name={Icons.StopButton}
-                            style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
-                            size={40}
-                            onClick={() => handleClick(ControlButton.Stop)}
-                        />
+                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Stop)}>
+                            <Icon
+                                name={Icons.StopButton}
+                                style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                                size={40}
+                            />
+                        </Button>
                         <Typography>{TranslateText('Stop')}</Typography>
                     </ButtonText>
                     <ButtonText>
-                        <Icon
-                            name={Icons.PauseButton}
-                            style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
-                            size={40}
-                            onClick={() => handleClick(ControlButton.Pause)}
-                        />
+                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Pause)}>
+                            <Icon
+                                name={Icons.PauseButton}
+                                style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                                size={40}
+                            />
+                        </Button>
                         <Typography>{TranslateText('Pause')}</Typography>
                     </ButtonText>
                 </ButtonStyle>
@@ -90,21 +92,23 @@ export function MissionControlButtons({ mission }: MissionProps) {
             return (
                 <ButtonStyle>
                     <ButtonText>
-                        <Icon
-                            name={Icons.StopButton}
-                            style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
-                            size={40}
-                            onClick={() => handleClick(ControlButton.Stop)}
-                        />
+                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Stop)}>
+                            <Icon
+                                name={Icons.StopButton}
+                                style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                                size={40}
+                            />
+                        </Button>
                         <Typography variant="caption">{TranslateText('Stop')}</Typography>
                     </ButtonText>
                     <ButtonText>
-                        <Icon
-                            name={Icons.PlayButton}
-                            style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
-                            size={40}
-                            onClick={() => handleClick(ControlButton.Resume)}
-                        />
+                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Resume)}>
+                            <Icon
+                                name={Icons.PlayButton}
+                                style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                                size={40}
+                            />
+                        </Button>
                         <Typography variant="caption">{TranslateText('Start')}</Typography>
                     </ButtonText>
                 </ButtonStyle>
