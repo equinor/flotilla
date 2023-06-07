@@ -18,6 +18,15 @@ const StyledMissionCard = styled(Card)`
     width: 432px;
     padding: 10px;
 `
+
+const StyledTitle = styled(Card)`
+    width: 70%;
+    height: 80%;
+    padding: 5px;
+    :hover {
+        background-color: #deedee;
+    }
+`
 const HorizontalContent = styled.div`
     display: grid;
     grid-template-columns: auto auto auto;
@@ -51,11 +60,11 @@ export function OngoingMissionCard({ mission }: MissionProps) {
     return (
         <StyledMissionCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <TopContent>
-                <div onClick={routeChange}>
+                <StyledTitle variant="default" onClick={routeChange}>
                     <Typography variant="h6" color="primary">
                         {mission.name}
                     </Typography>
-                </div>
+                </StyledTitle>
                 <div>
                     <MissionControlButtons mission={mission} />
                 </div>

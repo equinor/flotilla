@@ -30,7 +30,7 @@ const HoverableStyledCard = styled(Card)`
     }
 `
 
-const HorisontalContent = styled.div`
+const HorizontalContent = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -47,7 +47,7 @@ function cardContent({ robot }: RobotProps) {
     return (
         <div>
             <RobotImage robotType={robot.model.type} />
-            <HorisontalContent>
+            <HorizontalContent>
                 <VerticalContent>
                     <Typography variant="h5">{robot.name}</Typography>
                     <Typography variant="caption">{robot.model.type}</Typography>
@@ -57,7 +57,7 @@ function cardContent({ robot }: RobotProps) {
                     <PressureStatusView pressure={robot.pressureLevel} />
                     <BatteryStatusView battery={robot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
                 </VerticalContent>
-            </HorisontalContent>
+            </HorizontalContent>
         </div>
     )
 }
@@ -86,10 +86,10 @@ export function RobotStatusCardPlaceholder() {
                 <Typography variant="body_short" color="disabled">
                     ----
                 </Typography>
-                <HorisontalContent>
+                <HorizontalContent>
                     <RobotStatusChip />
                     <BatteryStatusView />
-                </HorisontalContent>
+                </HorizontalContent>
             </div>
         </StyledCard>
     )
