@@ -7,6 +7,7 @@ import { MissionHistoryPage } from './MissionHistoryPage/MissionHistoryPage'
 import { RobotPage } from './RobotPage/RobotPage'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
 import { APIUpdater } from 'components/Contexts/APIUpdater'
+import { AssetDecksPage } from './AssetDecks/AssetDecksPage'
 
 export function FlotillaSite() {
     return (
@@ -25,6 +26,7 @@ export function FlotillaSite() {
                                     path={`${config.FRONTEND_BASE_ROUTE}/history`}
                                     element={<MissionHistoryPage />}
                                 />
+                                <Route path={`${config.FRONTEND_BASE_ROUTE}/assetdecks`} element={<AssetDecksPage />} />
                                 <Route path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`} element={<RobotPage />} />
                             </Routes>
                         </BrowserRouter>
