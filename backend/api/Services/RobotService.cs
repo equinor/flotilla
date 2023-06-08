@@ -30,7 +30,7 @@ namespace Api.Services
 
         private IQueryable<Robot> GetRobotsWithSubModels()
         {
-            return _context.Robots.Include(r => r.VideoStreams).Include(r => r.Model).Include(r => r.CurrentAssetDeck);
+            return _context.Robots.Include(r => r.VideoStreams).Include(r => r.Model).Include(r => r.CurrentArea);
         }
 
         public async Task<Robot> Create(Robot newRobot)

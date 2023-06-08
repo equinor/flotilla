@@ -1,13 +1,14 @@
 import { InspectionType } from './Inspection'
 import { MissionStatus } from './Mission'
 
-export interface MissionQueryParameters {
+export interface MissionRunQueryParameters {
     statuses?: MissionStatus[]
     robotId?: string
     nameSearch?: string
     robotNameSearch?: string
     tagSearch?: string
     inspectionTypes?: InspectionType[]
+    area?: string
     minStartTime?: number
     maxStartTime?: number
     minEndTime?: number

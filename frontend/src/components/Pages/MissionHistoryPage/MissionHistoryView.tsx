@@ -47,7 +47,7 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     } = useMissionFilterContext()
 
     const updateFilteredMissions = useCallback(() => {
-        BackendAPICaller.getMissions({
+        BackendAPICaller.getMissionRuns({
             statuses: statuses,
             nameSearch: missionName,
             robotNameSearch: robotName,

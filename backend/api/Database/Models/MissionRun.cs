@@ -5,14 +5,14 @@ using Api.Services.Models;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
-    public class Mission
+    public class MissionRun
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
         [MaxLength(200)]
-        public int? EchoMissionId { get; set; }
+        public string MissionId { get; set; }
 
         [MaxLength(200)]
         public string? IsarMissionId { get; set; }
@@ -31,8 +31,9 @@ namespace Api.Database.Models
         public string? Comment { get; set; }
 
         [Required]
-        [MaxLength(200)]
         public string AssetCode { get; set; }
+
+        public Area? Area { get; set; }
 
         [Required]
         public virtual Robot Robot { get; set; }

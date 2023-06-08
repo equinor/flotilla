@@ -10,7 +10,7 @@ namespace Api.Services
 {
     public interface IEchoService
     {
-        public abstract Task<IList<MissionDefinition>> GetAvailableMissions(string? installationCode);
+        public abstract Task<IList<CondensedMissionDefinition>> GetAvailableMissions(string? installationCode);
 
         public abstract Task<EchoMission> GetMissionById(int missionId);
 
@@ -31,7 +31,7 @@ namespace Api.Services
             _logger = logger;
         }
 
-        public async Task<IList<MissionDefinition>> GetAvailableMissions(string? installationCode)
+        public async Task<IList<CondensedMissionDefinition>> GetAvailableMissions(string? installationCode)
         {
             string relativePath = string.IsNullOrEmpty(installationCode)
               ? $"robots/robot-plan?Status=Ready"
@@ -83,6 +83,33 @@ namespace Api.Services
             if (mission == null)
             {
                 throw new InvalidDataException($"EchoMission with id: {missionId} is invalid.");
+            }
+
+            return mission;
+        }
+
+        public async Task<EchoMission> GetMissionByPath(string relativePath)
+        {
+            var response = await _echoApi.CallWebApiForAppAsync(
+                ServiceName,
+                options =>
+                {
+                    options.HttpMethod = HttpMethod.Get;
+                    options.RelativePath = relativePath;
+                }
+            );
+
+            response.EnsureSuccessStatusCode();
+
+            var echoMission = await response.Content.ReadFromJsonAsync<EchoMissionResponse>();
+
+            if (echoMission is null)
+                throw new JsonException("Failed to deserialize mission from Echo");
+
+            var mission = ProcessEchoMission(echoMission);
+            if (mission == null)
+            {
+                throw new InvalidDataException($"EchoMission with relative path: {relativePath} is invalid.");
             }
 
             return mission;
@@ -170,9 +197,9 @@ namespace Api.Services
             return tags;
         }
 
-        private List<MissionDefinition> ProcessAvailableEchoMission(List<EchoMissionResponse> echoMissions)
+        private List<CondensedMissionDefinition> ProcessAvailableEchoMission(List<EchoMissionResponse> echoMissions)
         {
-            var availableMissions = new List<MissionDefinition>();
+            var availableMissions = new List<CondensedMissionDefinition>();
 
             foreach (var echoMission in echoMissions)
             {
@@ -180,7 +207,7 @@ namespace Api.Services
                     continue;
                 try
                 {
-                    var mission = new MissionDefinition()
+                    var mission = new CondensedMissionDefinition()
                     {
                         EchoMissionId = echoMission.Id,
                         Name = echoMission.Name,

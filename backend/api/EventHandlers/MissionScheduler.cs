@@ -13,10 +13,10 @@ namespace Api.EventHandlers
         private readonly int _timeDelay;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        private IList<Mission> MissionQueue =>
+        private IList<MissionRun> MissionQueue =>
             MissionService
                 .ReadAll(
-                    new MissionQueryStringParameters
+                    new MissionRunQueryStringParameters
                     {
                         Statuses = new List<MissionStatus> { MissionStatus.Pending },
                         OrderBy = "DesiredStartTime",
@@ -25,8 +25,8 @@ namespace Api.EventHandlers
                 )
                 .Result;
 
-        private IMissionService MissionService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionService>();
+        private IMissionRunService MissionService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
         private RobotController RobotController =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<RobotController>();
@@ -80,7 +80,7 @@ namespace Api.EventHandlers
             }
         }
 
-        private async Task StartMission(Mission queuedMission)
+        private async Task StartMission(MissionRun queuedMission)
         {
             var result = await RobotController.StartMission(
                 queuedMission.Robot.Id,

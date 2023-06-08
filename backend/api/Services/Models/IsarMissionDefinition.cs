@@ -25,7 +25,7 @@ namespace Api.Services.Models
             Tasks = tasks;
         }
 
-        public IsarMissionDefinition(Mission mission)
+        public IsarMissionDefinition(MissionRun mission)
         {
             Id = mission.IsarMissionId;
             Name = mission.Name;
@@ -47,7 +47,7 @@ namespace Api.Services.Models
         [JsonPropertyName("inspections")]
         public List<IsarInspectionDefinition> Inspections { get; set; }
 
-        public IsarTaskDefinition(MissionTask missionTask, Mission mission)
+        public IsarTaskDefinition(MissionTask missionTask, MissionRun mission)
         {
             Id = missionTask.IsarTaskId;
             Pose = new IsarPose(missionTask.RobotPose);
@@ -81,7 +81,7 @@ namespace Api.Services.Models
         [JsonPropertyName("metadata")]
         public Dictionary<string, string?>? Metadata { get; set; }
 
-        public IsarInspectionDefinition(Inspection inspection, MissionTask task, Mission mission)
+        public IsarInspectionDefinition(Inspection inspection, MissionTask task, MissionRun mission)
         {
             Id = inspection.IsarStepId;
             Type = inspection.InspectionType.ToString();

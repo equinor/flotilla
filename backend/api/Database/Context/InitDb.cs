@@ -5,8 +5,13 @@ namespace Api.Database.Context;
 public static class InitDb
 {
     private static readonly List<Robot> robots = GetRobots();
-    private static readonly List<Mission> missions = GetMissions();
-    private static readonly List<AssetDeck> assetDecks = GetAssetDecks();
+    private static readonly List<Asset> assets = GetAssets();
+    private static readonly List<Installation> installations = GetInstallations();
+    private static readonly List<Deck> decks = GetDecks();
+    private static readonly List<Area> areas = GetAreas();
+    private static readonly List<Source> sources = GetSources();
+    private static readonly List<MissionDefinition> missionDefinitions = GetMissionDefinitions();
+    private static readonly List<MissionRun> missionRuns = GetMissionRuns();
 
     private static VideoStream VideoStream =>
         new()
@@ -73,57 +78,177 @@ public static class InitDb
         return new List<Robot>(new Robot[] { robot1, robot2, robot3 });
     }
 
-    private static List<Mission> GetMissions()
+    private static List<Asset> GetAssets()
     {
-        var mission1 = new Mission
+        var asset1 = new Asset
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = "Johan Sverdrup",
+            ShortName = "JSV"
+        };
+
+        return new List<Asset>(new Asset[] { asset1 });
+    }
+
+    private static List<Installation> GetInstallations()
+    {
+        var installation1 = new Installation
+        {
+            Id = Guid.NewGuid().ToString(),
+            Asset = assets[0],
+            Name = "Johan Sverdrup - P1",
+            ShortName = "P1"
+        };
+
+        return new List<Installation>(new Installation[] { installation1 });
+    }
+
+    private static List<Deck> GetDecks()
+    {
+        var deck1 = new Deck
+        {
+            Id = Guid.NewGuid().ToString(),
+            Installation = installations[0],
+            Name = "TestDeck"
+        };
+
+        return new List<Deck>(new Deck[] { deck1 });
+    }
+
+    private static List<Area> GetAreas()
+    {
+        var area1 = new Area
+        {
+            Id = Guid.NewGuid().ToString(),
+            Deck = decks[0],
+            Name = "AP320",
+            Map = new MapMetadata(),
+            DefaultLocalizationPose = new Pose {},
+            SafePositions = new List<SafePosition>()
+        };
+
+        var area2 = new Area
+        {
+            Id = Guid.NewGuid().ToString(),
+            Deck = decks[0],
+            Name = "AP330",
+            Map = new MapMetadata(),
+            DefaultLocalizationPose = new Pose {},
+            SafePositions = new List<SafePosition>()
+        };
+
+        var area3 = new Area
+        {
+            Id = "TestId",
+            Deck = decks[0],
+            Name = "testArea",
+            Map = new MapMetadata(),
+            DefaultLocalizationPose = new Pose { },
+            SafePositions = new List<SafePosition>()
+        };
+
+        return new List<Area>(new Area[] { area1, area2, area3 });
+    }
+
+    private static List<Source> GetSources()
+    {
+        var source1 = new Source
+        {
+            Id = Guid.NewGuid().ToString(),
+            URL = "https://google.com/",
+            Type = MissionSourceType.Echo
+        };
+
+        var source2 = new Source
+        {
+            Id = Guid.NewGuid().ToString(),
+            URL = "https://google.com/",
+            Type = MissionSourceType.Custom
+        };
+
+        return new List<Source>(new Source[] { source1, source2 });
+    }
+
+    private static List<MissionDefinition> GetMissionDefinitions()
+    {
+        var mission1 = new MissionDefinition
+        {
+            Name = "Placeholder Mission 1",
+            Id = Guid.NewGuid().ToString(),
+            AssetCode = areas[0].Deck.Installation.Asset.ShortName,
+            Area = areas[0],
+            Source = sources[0],
+            Comment = "Interesting comment",
+            InspectionFrequency = TimeSpan.Parse("14:00:0:0"),
+            LastRun = null
+        };
+
+        var mission2 = new MissionDefinition
+        {
+            Name = "Placeholder Mission 2",
+            Id = Guid.NewGuid().ToString(),
+            AssetCode = areas[1].Deck.Installation.Asset.ShortName,
+            Area = areas[1],
+            Source = sources[1],
+            InspectionFrequency = TimeSpan.Parse("7:00:0:0"),
+            LastRun = null
+        };
+
+        var mission3 = new MissionDefinition
+        {
+            Name = "Placeholder Mission 3",
+            Id = Guid.NewGuid().ToString(),
+            AssetCode = areas[1].Deck.Installation.Asset.ShortName,
+            Area = areas[1],
+            Source = sources[1],
+            LastRun = null
+        };
+
+        return new List<MissionDefinition>(new[] { mission1, mission2, mission3 });
+    }
+
+    private static List<MissionRun> GetMissionRuns()
+    {
+        var mission1 = new MissionRun
         {
             Name = "Placeholder Mission 1",
             Robot = robots[0],
-            AssetCode = "test",
-            EchoMissionId = 95,
+            AssetCode = areas[0].Deck.Installation.Asset.ShortName,
+            Area = areas[0],
+            MissionId = missionDefinitions[0].Id,
             Status = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(),
             MapMetadata = new MapMetadata()
         };
 
-        var mission2 = new Mission
+        var mission2 = new MissionRun
         {
             Name = "Placeholder Mission 2",
             Robot = robots[1],
-            AssetCode = "test",
-            EchoMissionId = 95,
+            AssetCode = areas[1].Deck.Installation.Asset.ShortName,
+            Area = areas[1],
+            MissionId = missionDefinitions[0].Id,
             Status = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(),
             MapMetadata = new MapMetadata()
         };
 
-        var mission3 = new Mission
+        var mission3 = new MissionRun
         {
             Name = "Placeholder Mission 3",
             Robot = robots[2],
-            AssetCode = "kaa",
+            AssetCode = areas[1].Deck.Installation.Asset.ShortName,
+            Area = areas[1],
+            MissionId = missionDefinitions[1].Id,
             Status = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(),
             MapMetadata = new MapMetadata()
         };
 
-        return new List<Mission>(new[] { mission1, mission2, mission3 });
-    }
-
-    private static List<AssetDeck> GetAssetDecks()
-    {
-        var assetDeck1 = new AssetDeck
-        {
-            Id = "TestId",
-            DeckName = "Placeholder deck 1",
-            AssetCode = "Placeholder asset",
-            DefaultLocalizationPose = new Pose()
-        };
-
-        return new List<AssetDeck>(new[] { assetDeck1 });
+        return new List<MissionRun>(new[] { mission1, mission2, mission3 });
     }
 
     public static void PopulateDb(FlotillaDbContext context)
@@ -159,7 +284,7 @@ public static class InitDb
         robots[1].Model = models.Find(model => model.Type == RobotType.ExR2)!;
         robots[2].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
 
-        foreach (var mission in missions)
+        foreach (var mission in missionRuns)
         {
             var task = ExampleTask;
             task.Inspections.Add(Inspection);
@@ -168,8 +293,9 @@ public static class InitDb
             mission.Tasks = tasks;
         }
         context.AddRange(robots);
-        context.AddRange(missions);
-        context.AddRange(assetDecks);
+        context.AddRange(missionDefinitions);
+        context.AddRange(missionRuns);
+        context.AddRange(areas);
         context.SaveChanges();
     }
 }

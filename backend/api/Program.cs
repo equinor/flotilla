@@ -40,15 +40,17 @@ builder.Services.ConfigureDatabase(builder.Configuration);
 builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.AddScoped<IRobotService, RobotService>();
-builder.Services.AddScoped<IMissionService, MissionService>();
+builder.Services.AddScoped<IMissionRunService, MissionRunService>();
+builder.Services.AddScoped<IMissionDefinitionService, MissionDefinitionService>();
 builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<IStidService, StidService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IBlobService, BlobService>();
-builder.Services.AddScoped<IAssetDeckService, AssetDeckService>();
+builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IRobotModelService, RobotModelService>();
 builder.Services.AddScoped<RobotController>();
+builder.Services.AddScoped<ISourceService, SourceService>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MqttService>();
@@ -57,6 +59,7 @@ builder.Services.AddHostedService<MissionScheduler>();
 
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));
 builder.Services.Configure<MapBlobOptions>(builder.Configuration.GetSection("Maps"));
+builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Blob"));
 
 builder.Services
     .AddControllers()

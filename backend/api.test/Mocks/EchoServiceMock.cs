@@ -19,17 +19,17 @@ namespace Api.Test.Mocks
                 Tags = new List<EchoTag>()
             };
 
-        public MissionDefinition MockMissionDefinition =
+        public CondensedMissionDefinition MockMissionDefinition =
             new()
             {
                 EchoMissionId = 1,
                 Name = "test",
             };
 
-        public async Task<IList<MissionDefinition>> GetAvailableMissions(string? installationCode)
+        public async Task<IList<CondensedMissionDefinition>> GetAvailableMissions(string? installationCode)
         {
             await Task.Run(() => Thread.Sleep(1));
-            return new List<MissionDefinition>(new MissionDefinition[] { MockMissionDefinition });
+            return new List<CondensedMissionDefinition>(new CondensedMissionDefinition[] { MockMissionDefinition });
         }
 
         public async Task<EchoMission> GetMissionById(int missionId)
@@ -47,6 +47,11 @@ namespace Api.Test.Mocks
         {
             await Task.Run(() => Thread.Sleep(1));
             return new EchoPoseResponse();
+        }
+
+        public Task<EchoMission> GetMissionByPath(string relativePath)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -6,5 +6,7 @@
         public int EchoMissionId { get; set; }
         public DateTimeOffset DesiredStartTime { get; set; }
         public string AssetCode { get; set; }
+        public string AreaName { get; set; }
+        public TimeSpan? InspectionFrequency { get; set; }
     }
 }
