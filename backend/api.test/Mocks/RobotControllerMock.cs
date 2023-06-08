@@ -10,17 +10,17 @@ namespace Api.Test.Mocks
         public Mock<IIsarService> IsarServiceMock;
         public Mock<IRobotService> RobotServiceMock;
         public Mock<IRobotModelService> RobotModelServiceMock;
-        public Mock<IMissionService> MissionServiceMock;
+        public Mock<IMissionRunService> MissionServiceMock;
         public Mock<RobotController> Mock;
-        public Mock<IAssetDeckService> AssetDeckServiceMock;
+        public Mock<IAreaService> AreaServiceMock;
 
         public RobotControllerMock()
         {
-            MissionServiceMock = new Mock<IMissionService>();
+            MissionServiceMock = new Mock<IMissionRunService>();
             IsarServiceMock = new Mock<IIsarService>();
             RobotServiceMock = new Mock<IRobotService>();
             RobotModelServiceMock = new Mock<IRobotModelService>();
-            AssetDeckServiceMock = new Mock<IAssetDeckService>();
+            AreaServiceMock = new Mock<IAreaService>();
 
             var mockLoggerController = new Mock<ILogger<RobotController>>();
 
@@ -30,7 +30,7 @@ namespace Api.Test.Mocks
                 IsarServiceMock.Object,
                 MissionServiceMock.Object,
                 RobotModelServiceMock.Object,
-                AssetDeckServiceMock.Object
+                AreaServiceMock.Object
             )
             {
                 CallBase = true

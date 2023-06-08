@@ -79,7 +79,7 @@ namespace Api.Database.Models
         /// Updates the <see cref="AverageDurationPerTag"/> based on the data in the <paramref name="recentMissionsForModelType"/> provided
         /// </summary>
         /// <param name="recentMissionsForModelType"></param>
-        public void UpdateAverageDurationPerTag(List<Mission> recentMissionsForModelType)
+        public void UpdateAverageDurationPerTag(List<MissionRun> recentMissionsForModelType)
         {
             if (recentMissionsForModelType.Any(mission => mission.Robot.Model.Type != Type))
                 throw new ArgumentException(

@@ -22,24 +22,24 @@ namespace Api.Test.EventHandlers
     [Collection("Database collection")]
     public class TestMissionScheduler : IDisposable
     {
-        private static Mission ScheduledMission =>
+        private static MissionRun ScheduledMission =>
             new()
             {
                 Name = "testMission",
-                EchoMissionId = 2,
+                MissionId = Guid.NewGuid().ToString(),
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTimeOffset.Now,
-                AssetCode = "TestAsset",
                 MapMetadata = new MapMetadata()
                 {
                     MapName = "TestMap",
                     Boundary = new(),
                     TransformationMatrices = new()
-                }
+                },
+                Area = new Area()
             };
 
         private readonly MissionScheduler _scheduledMissionEventHandler;
-        private readonly IMissionService _missionService;
+        private readonly IMissionRunService _missionService;
         private readonly IRobotService _robotService;
         private readonly RobotControllerMock _robotControllerMock;
         private readonly FlotillaDbContext _context;
@@ -49,11 +49,11 @@ namespace Api.Test.EventHandlers
             // Using Moq https://github.com/moq/moq4
 
             var schedulerLogger = new Mock<ILogger<MissionScheduler>>().Object;
-            var missionLogger = new Mock<ILogger<MissionService>>().Object;
+            var missionLogger = new Mock<ILogger<MissionRunService>>().Object;
 
             // Mock ScheduledMissionService:
             _context = fixture.NewContext;
-            _missionService = new MissionService(_context, missionLogger);
+            _missionService = new MissionRunService(_context, missionLogger);
             _robotService = new RobotService(_context);
             _robotControllerMock = new RobotControllerMock();
 
@@ -61,7 +61,7 @@ namespace Api.Test.EventHandlers
 
             // Mock injection of MissionService:
             mockServiceProvider
-                .Setup(p => p.GetService(typeof(IMissionService)))
+                .Setup(p => p.GetService(typeof(IMissionRunService)))
                 .Returns(_missionService);
             // Mock injection of RobotService:
             mockServiceProvider
@@ -105,7 +105,7 @@ namespace Api.Test.EventHandlers
         private async void AssertExpectedStatusChange(
             MissionStatus preStatus,
             MissionStatus postStatus,
-            Mission mission
+            MissionRun mission
         )
         {
             // ARRANGE

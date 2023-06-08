@@ -2,9 +2,9 @@
 
 namespace Api.Controllers.Models
 {
-    public class MissionQueryStringParameters : QueryStringParameters
+    public class MissionRunQueryStringParameters : QueryStringParameters
     {
-        public MissionQueryStringParameters()
+        public MissionRunQueryStringParameters()
         {
             // Default order is desired start time
             OrderBy = "DesiredStartTime desc";
@@ -19,6 +19,11 @@ namespace Api.Controllers.Models
         /// Filter for the asset code of the mission
         /// </summary>
         public string? AssetCode { get; set; }
+
+        /// <summary>
+        /// Filter for the area of the mission
+        /// </summary>
+        public string? Area { get; set; }
 
         /// <summary>
         /// Filter for the robot id of the robot assigned to the mission
@@ -83,6 +88,5 @@ namespace Api.Controllers.Models
         public long MaxDesiredStartTime { get; set; } = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
 
         #endregion Time Filters
-
     }
 }

@@ -248,7 +248,7 @@ namespace Api.EventHandlers
         private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var missionService = provider.GetRequiredService<IMissionService>();
+            var missionService = provider.GetRequiredService<IMissionRunService>();
             var robotService = provider.GetRequiredService<IRobotService>();
             var robotModelService = provider.GetRequiredService<IRobotModelService>();
 
@@ -256,7 +256,7 @@ namespace Api.EventHandlers
             MissionStatus status;
             try
             {
-                status = Mission.MissionStatusFromString(isarMission.Status);
+                status = MissionRun.MissionStatusFromString(isarMission.Status);
             }
             catch (ArgumentException e)
             {
@@ -326,7 +326,7 @@ namespace Api.EventHandlers
                     .AddDays(-timeRangeInDays)
                     .ToUnixTimeSeconds();
                 var missionsForEstimation = await missionService.ReadAll(
-                    new MissionQueryStringParameters
+                    new MissionRunQueryStringParameters
                     {
                         MinDesiredStartTime = minEpochTime,
                         RobotModelType = robot.Model.Type,
@@ -349,7 +349,7 @@ namespace Api.EventHandlers
         private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var missionService = provider.GetRequiredService<IMissionService>();
+            var missionService = provider.GetRequiredService<IMissionRunService>();
             var task = (IsarTaskMessage)mqttArgs.Message;
             IsarTaskStatus status;
             try
@@ -387,7 +387,7 @@ namespace Api.EventHandlers
         private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var missionService = provider.GetRequiredService<IMissionService>();
+            var missionService = provider.GetRequiredService<IMissionRunService>();
 
             var step = (IsarStepMessage)mqttArgs.Message;
 

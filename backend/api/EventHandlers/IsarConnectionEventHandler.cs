@@ -18,8 +18,8 @@ namespace Api.EventHandlers
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
 
-        private IMissionService MissionService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionService>();
+        private IMissionRunService MissionService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
         private readonly Dictionary<string, System.Timers.Timer> _isarConnectionTimers = new();
 
