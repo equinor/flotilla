@@ -15,14 +15,14 @@ namespace Api.Test.Services
     public class MissionServiceTest : IDisposable
     {
         private readonly FlotillaDbContext _context;
-        private readonly ILogger<MissionService> _logger;
-        private readonly MissionService _missionService;
+        private readonly ILogger<MissionRunService> _logger;
+        private readonly MissionRunService _missionService;
 
         public MissionServiceTest(DatabaseFixture fixture)
         {
             _context = fixture.NewContext;
-            _logger = new Mock<ILogger<MissionService>>().Object;
-            _missionService = new MissionService(_context, _logger);
+            _logger = new Mock<ILogger<MissionRunService>>().Object;
+            _missionService = new MissionRunService(_context, _logger);
         }
 
         public void Dispose()
@@ -43,22 +43,22 @@ namespace Api.Test.Services
         {
             var robot = _context.Robots.First();
             int nReportsBefore = _missionService
-                .ReadAll(new MissionQueryStringParameters())
+                .ReadAll(new MissionRunQueryStringParameters())
                 .Result.Count;
 
-            Mission mission =
+            MissionRun mission =
                 new()
                 {
                     Name = "testMission",
                     Robot = robot,
                     MapMetadata = new MapMetadata() { MapName = "testMap" },
-                    AssetCode = "testAsset",
+                    Area = new Area(),
                     DesiredStartTime = DateTime.Now
                 };
 
             await _missionService.Create(mission);
             int nReportsAfter = _missionService
-                .ReadAll(new MissionQueryStringParameters())
+                .ReadAll(new MissionRunQueryStringParameters())
                 .Result.Count;
 
             Assert.Equal(nReportsBefore + 1, nReportsAfter);

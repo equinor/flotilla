@@ -31,7 +31,7 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     const [missions, setMissions] = useState<Mission[]>([])
 
     const updateOngoingAndPausedMissions = useCallback(() => {
-        BackendAPICaller.getMissions({
+        BackendAPICaller.getMissionRuns({
             statuses: [MissionStatus.Ongoing, MissionStatus.Paused],
             pageSize: missionPageSize,
             orderBy: 'StartTime desc',

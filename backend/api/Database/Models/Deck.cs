@@ -1,10 +1,10 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
-    public class AssetDeck
+    public class Deck
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -12,15 +12,10 @@ namespace Api.Database.Models
 
         [Required]
         [MaxLength(200)]
-        public string AssetCode { get; set; }
+        public Installation Installation { get; set; }
 
         [Required]
         [MaxLength(200)]
-        public string DeckName { get; set; }
-
-        [Required]
-        public Pose DefaultLocalizationPose { get; set; }
-
-        public IList<SafePosition> SafePositions { get; set; }
+        public string Name { get; set; }
     }
 }

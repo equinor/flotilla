@@ -9,7 +9,7 @@ namespace Api.Services
     {
         public Task<byte[]> FetchMapImage(string mapName, string assetCode);
         public Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string assetCode);
-        public Task AssignMapToMission(Mission mission);
+        public Task AssignMapToMission(MissionRun mission);
     }
 
     public class MapService : IMapService
@@ -70,7 +70,7 @@ namespace Api.Services
             return map;
         }
 
-        public async Task AssignMapToMission(Mission mission)
+        public async Task AssignMapToMission(MissionRun mission)
         {
             MapMetadata? mapMetadata;
             var positions = new List<Position>();

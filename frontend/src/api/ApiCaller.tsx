@@ -4,7 +4,8 @@ import { Mission } from 'models/Mission'
 import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
 import { filterRobots } from 'utils/filtersAndSorts'
-import { MissionQueryParameters } from 'models/MissionQueryParameters'
+import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
+import { MissionDefinitionQueryParameters, SourceType } from 'models/MissionDefinitionQueryParameters'
 import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'models/PaginatedResponse'
 import { Pose } from 'models/Pose'
 import { AssetDeck } from 'models/AssetDeck'
@@ -14,6 +15,7 @@ import { TaskStatus } from 'models/Task'
 import { CreateCustomMission, CustomMissionQuery } from 'models/CustomMission'
 import { MapMetadata } from 'models/MapMetadata'
 import { MissionDefinition } from 'models/MissionDefinition'
+import { EchoMission } from 'models/EchoMission'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
@@ -125,8 +127,17 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getMissions(parameters: MissionQueryParameters): Promise<PaginatedResponse<Mission>> {
-        let path: string = 'missions?'
+    static async getAllEchoMissions(): Promise<EchoMission[]> {
+        const path: string = 'echo/missions'
+        const result = await BackendAPICaller.GET<EchoMission[]>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
+    static async getMissionRuns(parameters: MissionRunQueryParameters): Promise<PaginatedResponse<Mission>> {
+        let path: string = 'missions/runs?'
 
         // Always filter by currently selected asset
         const assetCode: string | null = BackendAPICaller.assetCode
@@ -143,6 +154,7 @@ export class BackendAPICaller {
             })
         }
 
+        if (parameters.area) path = path + 'Area=' + parameters.area + '&'
         if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
         if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
         if (parameters.orderBy) path = path + 'OrderBy=' + parameters.orderBy + '&'
@@ -171,6 +183,43 @@ export class BackendAPICaller {
     static async getAvailableEchoMission(installationCode: string = ''): Promise<MissionDefinition[]> {
         const path: string = 'echo/available-missions?installationCode=' + installationCode
         const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
+    static async getMissionDefinitions(
+        parameters: MissionDefinitionQueryParameters
+    ): Promise<PaginatedResponse<Mission>> {
+        let path: string = 'missions/definitions?'
+
+        // Always filter by currently selected asset
+        const assetCode: string | null = BackendAPICaller.assetCode
+        if (assetCode) path = path + 'AssetCode=' + assetCode + '&'
+
+        if (parameters.area) path = path + 'Area=' + parameters.area + '&'
+        if (parameters.sourceType) path = path + 'SourceType=' + parameters.sourceType + '&'
+        if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
+        if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
+        if (parameters.orderBy) path = path + 'OrderBy=' + parameters.orderBy + '&'
+        if (parameters.nameSearch) path = path + 'NameSearch=' + parameters.nameSearch + '&'
+        if (parameters.sourceType) path = path + 'SourceType=' + parameters.sourceType + '&'
+
+        const result = await BackendAPICaller.GET<Mission[]>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        if (!result.headers.has(PaginationHeaderName)) {
+            console.error('No Pagination header received ("' + PaginationHeaderName + '")')
+        }
+        const pagination: PaginationHeader = JSON.parse(result.headers.get(PaginationHeaderName)!)
+        return { pagination: pagination, content: result.content }
+    }
+
+    static async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
+        const path: string = 'echo/missions?installationCode=' + installationCode
+        const result = await BackendAPICaller.GET<EchoMission[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
@@ -212,6 +261,7 @@ export class BackendAPICaller {
             echoMissionId: echoMissionId,
             desiredStartTime: new Date(),
             assetCode: assetCode,
+            areaName: '',
         }
         const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch((e) => {
             console.error(`Failed to POST /${path}: ` + e)
@@ -311,6 +361,8 @@ export class BackendAPICaller {
 
     static async reRunMission(missionId: string, failedTasksOnly: boolean = false): Promise<Mission> {
         let mission = await this.getMissionById(missionId)
+
+        // TODO: utilise reschedule endpoint instead of copying
 
         if (failedTasksOnly) {
             mission.tasks = mission.tasks.filter(
