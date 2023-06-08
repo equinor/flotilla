@@ -1,12 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿#nullable disable
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
-#nullable disable
 namespace Api.Database.Models
 {
     [Owned]
     public class MissionMap
     {
+        public MissionMap()
+        {
+            MapName = "DefaultMapName";
+            Boundary = new Boundary();
+            TransformationMatrices = new TransformationMatrices();
+        }
+
         [Required]
         [MaxLength(200)]
         public string MapName { get; set; }
@@ -16,36 +23,11 @@ namespace Api.Database.Models
 
         [Required]
         public TransformationMatrices TransformationMatrices { get; set; }
-
-        public MissionMap()
-        {
-            MapName = "DefaultMapName";
-            Boundary = new Boundary();
-            TransformationMatrices = new TransformationMatrices();
-        }
     }
 
     [Owned]
     public class Boundary
     {
-        [Required]
-        public double X1 { get; set; }
-
-        [Required]
-        public double Y1 { get; set; }
-
-        [Required]
-        public double X2 { get; set; }
-
-        [Required]
-        public double Y2 { get; set; }
-
-        [Required]
-        public double Z1 { get; set; }
-
-        [Required]
-        public double Z2 { get; set; }
-
         public Boundary()
         {
             X1 = 0;
@@ -58,17 +40,35 @@ namespace Api.Database.Models
 
         public Boundary(double x1, double y1, double x2, double y2, double z1, double z2)
         {
-            X1 = x1;
-            Y1 = y1;
-            X2 = x2;
-            Y2 = y2;
-            Z1 = z1;
-            Z2 = z2;
+            X1 = Math.Min(x1, x2);
+            X2 = Math.Max(x1, x2);
+            Y1 = Math.Min(y1, y2);
+            Y2 = Math.Max(y1, y2);
+            Z1 = Math.Min(z1, z2);
+            Z2 = Math.Max(z1, z2);
         }
+
+        [Required]
+        public double X1 { get; set; }
+
+        [Required]
+        public double X2 { get; set; }
+
+        [Required]
+        public double Y1 { get; set; }
+
+        [Required]
+        public double Y2 { get; set; }
+
+        [Required]
+        public double Z1 { get; set; }
+
+        [Required]
+        public double Z2 { get; set; }
 
         public List<double[]> As2DMatrix()
         {
-            return new List<double[]> { new double[] { X1, Y1 }, new double[] { X2, Y2 } };
+            return new List<double[]> { new[] { X1, Y1 }, new[] { X2, Y2 } };
         }
     }
 }
