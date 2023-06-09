@@ -91,19 +91,15 @@ namespace Api.Database.Models
         [Required]
         public Orientation Orientation { get; set; }
 
-        private static float AxisAngleToQuaternionElement(float rotationAxis, float angle)
-        {
-            float quaterionElement = rotationAxis * MathF.Sin(angle / 2);
-            return quaterionElement;
-        }
-
-        public Orientation AxisAngleToQuaternion(EchoVector axis, float angle)
+        // Since this is a ground robot the only quaternion vector 
+        // that makes sense is up (0, 0, 1)
+        public Orientation AxisAngleToQuaternion(float angle)
         {
             var quaternion = new Orientation()
             {
-                X = AxisAngleToQuaternionElement(axis.East, angle),
-                Y = AxisAngleToQuaternionElement(axis.North, angle),
-                Z = AxisAngleToQuaternionElement(axis.Up, angle),
+                X = 0,
+                Y = 0,
+                Z = MathF.Sin(angle / 2),
                 W = MathF.Cos(angle / 2)
             };
             return quaternion;
@@ -129,11 +125,11 @@ namespace Api.Database.Models
             Orientation = new Orientation(x_ori, y_ori, z_ori, w);
         }
 
-        public Pose(EchoVector enuPosition, EchoVector axis, float angle)
+        public Pose(EchoVector enuPosition, float angle)
         {
             float clockAngle = -angle;
             Position = new Position(enuPosition.East, enuPosition.North, enuPosition.Up);
-            Orientation = AxisAngleToQuaternion(axis, clockAngle);
+            Orientation = AxisAngleToQuaternion(clockAngle);
         }
 
         public Pose(Position position, Orientation orientation)
