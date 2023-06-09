@@ -10,20 +10,20 @@ namespace Api.Test.Services
         [Fact]
         public void TestRotation()
         {
-            var mockAngleAxisParameters = new EchoVector(1, 0, 0);
+            var mockAngleAxisParameters = new EchoVector(0, 0, 1);
             float mockAngle = MathF.PI / 2;
 
             var expected = new Orientation()
             {
-                X = 0.7071F,
+                X = 0,
                 Y = 0,
-                Z = 0,
+                Z = 0.7071F,
                 W = 0.7071F
             };
 
             Assert.Equal(
                 expected.X,
-                new Pose(mockAngleAxisParameters, mockAngleAxisParameters, mockAngle).Orientation.X,
+                new Pose(mockAngleAxisParameters, mockAngle).Orientation.Z,
                 3.0
             );
         }
@@ -44,7 +44,6 @@ namespace Api.Test.Services
 
             var flotillaPose = new Pose(
                 echoPose.Position,
-                echoPose.Orientation.Axis,
                 echoPose.Orientation.Angle
             );
             Assert.Equal(predefinedOrientation, flotillaPose.Orientation);
