@@ -674,6 +674,7 @@ public class RobotController : ControllerBase
 
         var deck = await _assetDeckService.ReadById(scheduleLocalizationMissionQuery.DeckId);
 
+
         if (deck == null)
         {
             _logger.LogWarning("Could not find deck with id={id}", scheduleLocalizationMissionQuery.DeckId);
@@ -694,7 +695,7 @@ public class RobotController : ControllerBase
         IsarMission isarMission;
         try
         {
-            isarMission = await _isarService.StartLocalizationMission(robot, scheduleLocalizationMissionQuery.LocalizationPose);
+            isarMission = await _isarService.StartLocalizationMission(robot, deck.DefaultLocalizationPose);
         }
         catch (HttpRequestException e)
         {
