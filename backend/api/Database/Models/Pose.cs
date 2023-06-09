@@ -91,7 +91,7 @@ namespace Api.Database.Models
         [Required]
         public Orientation Orientation { get; set; }
 
-        // Since this is a ground robot the only quaternion vector 
+        // Since this is a ground robot the only quaternion vector
         // that makes sense is up (0, 0, 1)
         public Orientation AxisAngleToQuaternion(float angle)
         {
@@ -127,9 +127,8 @@ namespace Api.Database.Models
 
         public Pose(EchoVector enuPosition, float angle)
         {
-            float clockAngle = -angle;
             Position = new Position(enuPosition.East, enuPosition.North, enuPosition.Up);
-            Orientation = AxisAngleToQuaternion(clockAngle);
+            Orientation = AxisAngleToQuaternion(angle);
         }
 
         public Pose(Position position, Orientation orientation)
