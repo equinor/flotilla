@@ -8,7 +8,6 @@ interface RobotProps {
 }
 
 export function LocalizationSection({ robot }: RobotProps) {
-
     return (
         <>
             <Typography variant="h2">{TranslateText('Localization')}</Typography>
