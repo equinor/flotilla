@@ -22,13 +22,6 @@ namespace Api.Database.Models
         public Pose DefaultLocalizationPose { get; set; }
 
         public IList<SafePosition> SafePositions { get; set; }
-
-        public AssetDeck()
-        {
-            AssetCode = "defaultAsset";
-            DeckName = "defaultDeckName";
-            DefaultLocalizationPose = new Pose();
-        }
     }
 
     public class SafePosition

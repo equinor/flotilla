@@ -28,7 +28,7 @@ namespace Api.Database.Models
 
         public string CurrentAsset { get; set; }
 
-        public AssetDeck CurrentAssetDeck { get; set; }
+        public AssetDeck? CurrentAssetDeck { get; set; }
 
         public float BatteryLevel { get; set; }
 
@@ -69,7 +69,6 @@ namespace Api.Database.Models
 
         public Robot()
         {
-            CurrentAssetDeck = new AssetDeck();
             VideoStreams = new List<VideoStream>();
             IsarId = "defaultIsarId";
             Name = "defaultId";
