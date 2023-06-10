@@ -7,6 +7,15 @@ import styled from 'styled-components'
 import { BackButton } from '../MissionPage/MissionHeader/BackButton'
 import { LocalizationSection } from './LocalizationSection'
 import { Header } from 'components/Header/Header'
+import { RobotImage } from '../FrontPage/RobotCards/RobotImage'
+import { MoveRobotArm } from './RobotArmMovement'
+import PressureStatusView from '../FrontPage/RobotCards/PressureStatusView'
+import BatteryStatusView from '../FrontPage/RobotCards/BatteryStatusView'
+import { BatteryStatus } from 'models/Battery'
+import { RobotStatusChip } from '../FrontPage/RobotCards/RobotStatusChip'
+import { RobotStatus } from 'models/Robot'
+import { RobotType } from 'models/RobotModel'
+import { TranslateText } from 'components/Contexts/LanguageContext'
 
 const StyledRobotPage = styled.div`
     display: flex;
@@ -16,7 +25,6 @@ const StyledRobotPage = styled.div`
     gap: 1rem;
     margin: 2rem;
 `
-
 export function RobotPage() {
     const { robotId } = useParams()
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
@@ -28,14 +36,30 @@ export function RobotPage() {
             })
         }
     }, [robotId])
-
     return (
         <>
             <Header page={'robot'} />
             <StyledRobotPage>
                 <BackButton />
                 <Typography variant="h1">{selectedRobot?.name + ' (' + selectedRobot?.model.type + ')'}</Typography>
-                {selectedRobot !== undefined && <LocalizationSection robot={selectedRobot} />}
+                <RobotImage robotType={selectedRobot?.model.type} />
+                {selectedRobot && (
+                    <>
+                        <BatteryStatusView battery={selectedRobot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
+                        <PressureStatusView pressure={selectedRobot.pressureLevel} />
+                        <RobotStatusChip status={selectedRobot.status} />
+                        <LocalizationSection robot={selectedRobot} />
+                        {selectedRobot.status === RobotStatus.Available &&
+                            selectedRobot.model.type === RobotType.TaurobInspector && (
+                                <>
+                                    <Typography variant="h1">{TranslateText('Move robot arm')}</Typography>
+                                    <MoveRobotArm robot={selectedRobot} armPosition="battery_change" />
+                                    <MoveRobotArm robot={selectedRobot} armPosition="transport" />
+                                    <MoveRobotArm robot={selectedRobot} armPosition="lookout" />
+                                </>
+                            )}
+                    </>
+                )}
             </StyledRobotPage>
         </>
     )
