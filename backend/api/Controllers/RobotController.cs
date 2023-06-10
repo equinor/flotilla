@@ -573,6 +573,68 @@ public class RobotController : ControllerBase
         return NoContent();
     }
 
+
+    /// <summary>
+    /// Post new arm position ("battery_change", "transport", "lookout") for the robot with id 'robotId'
+    /// </summary>
+    /// <remarks>
+    /// <para> This query moves the arm to a given position for a given robot </para>
+    /// </remarks>
+    [HttpPut]
+    [Authorize(Roles = Role.User)]
+    [Route("{robotId}/SetArmPosition/{armPosition}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> SetArmPosition(
+        [FromRoute] string robotId,
+        [FromRoute] string armPosition
+    )
+    {
+        var robot = await _robotService.ReadById(robotId);
+        if (robot == null)
+        {
+            string errorMessage = $"Could not find robot with id {robotId}";
+            _logger.LogWarning(errorMessage);
+            return NotFound(errorMessage);
+        }
+
+        if (robot.Status is not RobotStatus.Available)
+        {
+            string errorMessage = $"Robot {robotId} has status ({robot.Status}) and is not available";
+            _logger.LogWarning(errorMessage);
+            return Conflict(errorMessage);
+        }
+        try
+        {
+            await _isarService.StartMoveArm(robot, armPosition);
+        }
+        catch (HttpRequestException e)
+        {
+            string errorMessage = $"Error connecting to ISAR at {robot.IsarUri}";
+            _logger.LogError(e, "{Message}", errorMessage);
+            OnIsarUnavailable(robot);
+            return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
+        }
+        catch (MissionException e)
+        {
+            string errorMessage = $"An error occurred while setting the arm position mission";
+            _logger.LogError(e, "{Message}", errorMessage);
+            return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
+        }
+        catch (JsonException e)
+        {
+            string errorMessage = "Error while processing of the response from ISAR";
+            _logger.LogError(e, "{Message}", errorMessage);
+            return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+        }
+
+        return NoContent();
+    }
+
     /// <summary>
     /// Start a localization mission with localization in the pose 'localizationPose' for the robot with id 'robotId'
     /// </summary>
@@ -629,7 +691,7 @@ public class RobotController : ControllerBase
         catch (HttpRequestException e)
         {
             string message = $"Could not reach ISAR at {robot.IsarUri}";
-            _logger.LogError(e, "{message}", message);
+            _logger.LogError(e, "{Message}", message);
             OnIsarUnavailable(robot);
             return StatusCode(StatusCodes.Status502BadGateway, message);
         }
@@ -641,7 +703,7 @@ public class RobotController : ControllerBase
         catch (JsonException e)
         {
             string message = "Error while processing of the response from ISAR";
-            _logger.LogError(e, "{message}", message);
+            _logger.LogError(e, "{Message}", message);
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 

@@ -42,6 +42,7 @@
                 "TakeThermalImage" => IsarStepType.TakeThermalImage,
                 "TakeThermalVideo" => IsarStepType.TakeThermalVideo,
                 "Localize" => IsarStepType.Localize,
+                "MoveArm" => IsarStepType.MoveArm,
                 _
                   => throw new ArgumentException(
                       $"Failed to parse step type '{isarClassName}' - not supported"
@@ -67,6 +68,7 @@
         TakeVideo,
         TakeThermalImage,
         TakeThermalVideo,
-        RecordAudio
+        RecordAudio,
+        MoveArm
     }
 }

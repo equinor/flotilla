@@ -84,6 +84,12 @@ export class BackendAPICaller {
     ): Promise<{ content: TContent; headers: Headers }> {
         return BackendAPICaller.query('POST', path, body)
     }
+    private static async PUT<TBody, TContent>(
+        path: string,
+        body?: TBody
+    ): Promise<{ content: TContent; headers: Headers }> {
+        return BackendAPICaller.query('PUT', path, body)
+    }
 
     private static async DELETE<TBody, TContent>(
         path: string,
@@ -223,6 +229,14 @@ export class BackendAPICaller {
             throw e
         })
         return result.content
+    }
+
+    static async setArmPosition(robotId: string, armPosition: string): Promise<void> {
+        const path: string = `robots/${robotId}/SetArmPosition/${armPosition}`
+        await BackendAPICaller.PUT(path).catch((e) => {
+            console.error(`Failed to PUT /${path}: ` + e)
+            throw e
+        })
     }
 
     static async deleteMission(missionId: string) {
