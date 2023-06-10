@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
-
 var builder = WebApplication.CreateBuilder(args);
 
 Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentName}'\n");
@@ -26,7 +25,10 @@ if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
     builder.Configuration.AddAzureKeyVault(
         new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
         new DefaultAzureCredential(
-            new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
+            new DefaultAzureCredentialOptions
+            {
+                ExcludeSharedTokenCacheCredential = true
+            }
         )
     );
 }
@@ -43,6 +45,7 @@ builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<IStidService, StidService>();
 builder.Services.AddScoped<IMapService, MapService>();
+builder.Services.AddScoped<IBlobService, BlobService>();
 builder.Services.AddScoped<IAssetDeckService, AssetDeckService>();
 builder.Services.AddScoped<IRobotModelService, RobotModelService>();
 builder.Services.AddScoped<RobotController>();
@@ -98,8 +101,14 @@ app.UseSwagger(
             {
                 swaggerDoc.Servers = new List<OpenApiServer>
                 {
-                    new() { Url = $"https://{httpReq.Host.Value}{basePath}" },
-                    new() { Url = $"http://{httpReq.Host.Value}{basePath}" }
+                    new()
+                    {
+                        Url = $"https://{httpReq.Host.Value}{basePath}"
+                    },
+                    new()
+                    {
+                        Url = $"http://{httpReq.Host.Value}{basePath}"
+                    }
                 };
             }
         );
@@ -113,7 +122,9 @@ app.UseSwaggerUI(
         c.OAuthAdditionalQueryStringParams(
             new Dictionary<string, string>
             {
-                { "Resource", builder.Configuration["AzureAd:ClientId"] }
+                {
+                    "Resource", builder.Configuration["AzureAd:ClientId"]
+                }
             }
         );
         c.OAuthUsePkce();

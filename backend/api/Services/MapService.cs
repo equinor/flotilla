@@ -1,88 +1,61 @@
 ﻿using System.Globalization;
 using Api.Database.Models;
 using Api.Options;
-using Azure;
-using Azure.Identity;
-using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Options;
-
 namespace Api.Services
 {
     public interface IMapService
     {
-        public abstract Task<byte[]> FetchMapImage(string mapName, string assetCode);
-        public abstract Task<MissionMap?> ChooseMapFromPositions(IList<Position> positions, string assetCode);
-        public abstract Task AssignMapToMission(Mission mission);
+        public Task<byte[]> FetchMapImage(string mapName, string assetCode);
+        public Task<MissionMap?> ChooseMapFromPositions(IList<Position> positions, string assetCode);
+        public Task AssignMapToMission(Mission mission);
     }
 
     public class MapService : IMapService
     {
-        private readonly ILogger<MapService> _logger;
-        private readonly IOptions<AzureAdOptions> _azureOptions;
         private readonly IOptions<MapBlobOptions> _blobOptions;
+        private readonly IBlobService _blobService;
+        private readonly ILogger<MapService> _logger;
+
 
         public MapService(
             ILogger<MapService> logger,
-            IOptions<AzureAdOptions> azureOptions,
-            IOptions<MapBlobOptions> blobOptions
+            IOptions<MapBlobOptions> blobOptions,
+            IBlobService blobService
         )
         {
             _logger = logger;
-            _azureOptions = azureOptions;
             _blobOptions = blobOptions;
+            _blobService = blobService;
         }
 
         public async Task<byte[]> FetchMapImage(string mapName, string assetCode)
         {
-            return await DownloadMapImageFromBlobStorage(mapName, assetCode);
+            return await _blobService.DownloadBlob(mapName, assetCode, _blobOptions.Value.StorageAccount);
         }
 
         public async Task<MissionMap?> ChooseMapFromPositions(IList<Position> positions, string assetCode)
         {
             var boundaries = new Dictionary<string, Boundary>();
             var imageSizes = new Dictionary<string, int[]>();
-            var blobContainerClient = GetBlobContainerClient(
-                assetCode.ToLower(CultureInfo.CurrentCulture)
-            );
-            try
-            {
-                var resultSegment = blobContainerClient
-                    .GetBlobsAsync(BlobTraits.Metadata)
-                    .AsPages();
 
-                await foreach (var blobPage in resultSegment)
-                {
-                    foreach (var blobItem in blobPage.Values)
-                    {
-                        try
-                        {
-                            boundaries.Add(blobItem.Name, ExtractMapMetadata(blobItem));
-                            imageSizes.Add(blobItem.Name, ExtractImageSize(blobItem));
-                        }
-                        catch (FormatException)
-                        {
-                            continue;
-                        }
-                        catch (KeyNotFoundException)
-                        {
-                            continue;
-                        }
-                    }
-                }
-            }
-            catch (RequestFailedException e)
+            var blobs = _blobService.FetchAllBlobs(assetCode, _blobOptions.Value.StorageAccount);
+
+            await foreach (var blob in blobs)
             {
-                _logger.LogWarning(
-                    "Unable to find any map files for asset code {AssetCode}: {error message}",
-                    assetCode,
-                    e.Message
-                );
-                return null;
+                try
+                {
+                    boundaries.Add(blob.Name, ExtractMapMetadata(blob));
+                    imageSizes.Add(blob.Name, ExtractImageSize(blob));
+                }
+                catch (Exception e) when (e is FormatException || e is KeyNotFoundException)
+                {
+                    _logger.LogWarning(e, "Failed to extract boundary and image size for {MapName}", blob.Name);
+                }
             }
 
             string mostSuitableMap = FindMostSuitableMap(boundaries, positions);
-
             var map = new MissionMap
             {
                 MapName = mostSuitableMap,
@@ -122,36 +95,6 @@ namespace Api.Services
 
             mission.Map = map;
             _logger.LogInformation("Assigned map {map} to mission {mission}", map.MapName, mission.Name);
-        }
-
-        private BlobContainerClient GetBlobContainerClient(string asset)
-        {
-            var serviceClient = new BlobServiceClient(
-                new Uri($"https://{_blobOptions.Value.StorageAccount}.blob.core.windows.net"),
-                new ClientSecretCredential(
-                    _azureOptions.Value.TenantId,
-                    _azureOptions.Value.ClientId,
-                    _azureOptions.Value.ClientSecret
-                )
-            );
-            var containerClient = serviceClient.GetBlobContainerClient(asset);
-            return containerClient;
-        }
-
-        private async Task<byte[]> DownloadMapImageFromBlobStorage(string mapName, string assetCode)
-        {
-            var blobContainerClient = GetBlobContainerClient(
-                assetCode.ToLower(CultureInfo.CurrentCulture)
-            );
-            var blobClient = blobContainerClient.GetBlobClient(mapName);
-
-            await using var stream = await blobClient.OpenReadAsync();
-
-            byte[] result = new byte[stream.Length];
-            // ReSharper disable once MustUseReturnValue
-            await stream.ReadAsync(result);
-
-            return result;
         }
 
         private Boundary ExtractMapMetadata(BlobItem map)
@@ -205,7 +148,10 @@ namespace Api.Services
             {
                 int x = int.Parse(map.Metadata["imageWidth"], CultureInfo.CurrentCulture);
                 int y = int.Parse(map.Metadata["imageHeight"], CultureInfo.CurrentCulture);
-                return new int[] { x, y };
+                return new[]
+                {
+                    x, y
+                };
             }
             catch (FormatException e)
             {
@@ -226,11 +172,14 @@ namespace Api.Services
             var mapCoverage = new Dictionary<string, float>();
             foreach (var boundary in boundaries)
             {
-                mapCoverage.Add(boundary.Key, FractionOfTagsWithinBoundary(boundary: boundary.Value, positions: positions));
+                mapCoverage.Add(boundary.Key, FractionOfTagsWithinBoundary(boundary.Value, positions));
             }
             string keyOfMaxValue = mapCoverage.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
 
-            if (mapCoverage[keyOfMaxValue] < 0.5) throw new ArgumentOutOfRangeException(nameof(positions));
+            if (mapCoverage[keyOfMaxValue] < 0.5)
+            {
+                throw new ArgumentOutOfRangeException(nameof(positions));
+            }
 
             return keyOfMaxValue;
         }
@@ -250,7 +199,10 @@ namespace Api.Services
             {
                 try
                 {
-                    if (TagWithinBoundary(boundary: boundary, position: position)) tagsWithinBoundary++;
+                    if (TagWithinBoundary(boundary, position))
+                    {
+                        tagsWithinBoundary++;
+                    }
                 }
                 catch
                 {
