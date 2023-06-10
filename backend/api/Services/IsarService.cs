@@ -17,6 +17,8 @@ namespace Api.Services
         public abstract Task<IsarControlMissionResponse> ResumeMission(Robot robot);
 
         public abstract Task<IsarMission> StartLocalizationMission(Robot robot, Pose localizationMission);
+
+        public abstract Task<IsarMission> StartMoveArm(Robot robot, string armPosition);
     }
 
     public class IsarService : IIsarService
@@ -239,6 +241,47 @@ namespace Api.Services
             _logger.LogInformation(
                 "ISAR Localization Mission '{missionId}' started on robot '{robotId}'",
                 isarMission.IsarMissionId,
+                robot.Id
+            );
+            return isarMission;
+        }
+        public async Task<IsarMission> StartMoveArm(Robot robot, string armPosition)
+        {
+            string armPositionPath = $"schedule/move_arm/{armPosition}";
+            var response = await CallApi(
+                HttpMethod.Post,
+                robot.IsarUri,
+                armPositionPath
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var (message, statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                _logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                throw new MissionException(message, statusCode);
+            }
+            if (response.Content is null)
+            {
+                string errorMessage = "Could not read content from start move arm";
+                _logger.LogError(errorMessage);
+                throw new MissionException(errorMessage);
+            }
+
+            var isarMissionResponse =
+                await response.Content.ReadFromJsonAsync<IsarStartMissionResponse>();
+            if (isarMissionResponse is null)
+            {
+                string errorMessage = $"Failed to move arm to '{armPosition}' from ISAR";
+                _logger.LogError(errorMessage);
+                throw new JsonException(errorMessage);
+            }
+
+            var isarMission = new IsarMission(isarMissionResponse);
+
+            _logger.LogInformation(
+                "ISAR move arm to '{armPosition}' started on robot '{robotId}'",
+                armPosition,
                 robot.Id
             );
             return isarMission;
