@@ -29,24 +29,18 @@ namespace Api.Services
             var blobContainerClient = GetBlobContainerClient(containerName, accountName);
             var blobClient = blobContainerClient.GetBlobClient(blobName);
 
-            await using var stream = await blobClient.OpenReadAsync();
+            using var memoryStream = new MemoryStream();
+            await blobClient.DownloadToAsync(memoryStream);
 
-            byte[] result = new byte[stream.Length];
-
-            // ReSharper disable once MustUseReturnValue
-            await stream.ReadAsync(result);
-
-            return result;
+            return memoryStream.ToArray();
         }
 
         public AsyncPageable<BlobItem> FetchAllBlobs(string containerName, string accountName)
         {
             var blobContainerClient = GetBlobContainerClient(containerName, accountName);
-
-            AsyncPageable<BlobItem> blobs;
             try
             {
-                blobs = blobContainerClient.GetBlobsAsync(BlobTraits.Metadata);
+                return blobContainerClient.GetBlobsAsync(BlobTraits.Metadata);
             }
             catch (RequestFailedException e)
             {
@@ -55,7 +49,6 @@ namespace Api.Services
                 throw;
             }
 
-            return blobs;
         }
 
         private BlobContainerClient GetBlobContainerClient(string containerName, string accountName)
