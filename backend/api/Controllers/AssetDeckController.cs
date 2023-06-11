@@ -103,7 +103,7 @@ namespace Api.Controllers
 
                 var newAssetDeck = await _assetDeckService.Create(assetDeck);
                 _logger.LogInformation(
-                    "Succesfully created new asset deck with id '{assetDeckId}'",
+                    "Successfully created new asset deck with id '{AssetDeckId}'",
                     newAssetDeck.Id
                 );
                 return CreatedAtAction(
@@ -149,20 +149,22 @@ namespace Api.Controllers
                 var assetDeck = await _assetDeckService.AddSafePosition(asset, deck, new SafePosition(safePosition));
                 if (assetDeck != null)
                 {
-                    _logger.LogInformation("Succesfully added new safe position for asset '{assetId}' and deck '{deckId}'", asset, deck);
+                    _logger.LogInformation("Successfully added new safe position for asset '{AssetId}' and deck '{DeckId}'", asset, deck);
                     return CreatedAtAction(nameof(GetAssetDeckById), new
                     {
                         id = assetDeck.Id
                     }, assetDeck);
                     ;
                 }
-                _logger.LogInformation("Creating AssetDeck for asset '{assetId}' and deck '{deckId}'", asset, deck);
+                _logger.LogInformation("Creating AssetDeck for asset '{AssetId}' and deck '{DeckId}'", asset, deck);
                 // Cloning to avoid tracking same object
                 var tempPose = ObjectCopier.Clone(safePosition);
                 assetDeck = await _assetDeckService.Create(
                     new CreateAssetDeckQuery
                     {
-                        AssetCode = asset, DeckName = deck, DefaultLocalizationPose = new Pose()
+                        AssetCode = asset,
+                        DeckName = deck,
+                        DefaultLocalizationPose = new Pose()
                     },
                     new List<Pose>
                     {
@@ -218,7 +220,7 @@ namespace Api.Controllers
             var assetDeck = await _assetDeckService.ReadById(id);
             if (assetDeck is null)
             {
-                _logger.LogError("Asset deck not found for asset deck ID {assetDeckId}", id);
+                _logger.LogError("Asset deck not found for asset deck ID {AssetDeckId}", id);
                 return NotFound("Could not find this asset deck");
             }
 
