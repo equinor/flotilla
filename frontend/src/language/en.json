@@ -78,5 +78,10 @@
     "Robot status": "Robot status",
     "Stop": "Stop",
     "Start": "Start",
-    "Pause": "Pause"
+    "Pause": "Pause",
+    "Set robot arm to ": "Set robot arm to ",
+    "Moving arm to ": "Moving arm to ",
+    " Error message: ": " Error message: ",
+    "Error moving robot arm to ": "Error moving robot arm to ",
+    "Move robot arm": "Move robot arm"
 }
