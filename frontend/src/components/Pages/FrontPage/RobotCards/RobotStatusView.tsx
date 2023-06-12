@@ -50,7 +50,7 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
 
     var filteredRobots = robots.filter(function (robot) {
         return (
-            robot.currentAsset === assetCode.toLowerCase() ||
+            robot.currentAsset === assetCode ||
             (typeof robot.currentAsset === 'string' && robot.currentAsset.includes('default')) ||
             robot.currentAsset === undefined
         )
