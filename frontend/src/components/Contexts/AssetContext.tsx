@@ -21,8 +21,8 @@ export const AssetProvider: FC<Props> = ({ children }) => {
     const [assetCode, setAsset] = useState(previousAsset || defaultAsset.assetCode)
 
     const switchAsset = (selectedAsset: string) => {
-        setAsset(selectedAsset)
-        window.localStorage.setItem('assetString', selectedAsset)
+        setAsset(selectedAsset.toLowerCase())
+        window.localStorage.setItem('assetString', selectedAsset.toLowerCase())
     }
 
     return (

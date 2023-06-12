@@ -81,7 +81,7 @@ function AssetPicker(page: string) {
             options={Array.from(mappedOptions.keys()).sort()}
             label=""
             disabled={page === 'mission'}
-            initialSelectedOptions={[assetCode]}
+            initialSelectedOptions={[assetCode.toUpperCase()]}
             placeholder={TranslateText('Select asset')}
             onOptionsChange={({ selectedItems }) => {
                 const mapKey = mappedOptions.get(selectedItems[0])
