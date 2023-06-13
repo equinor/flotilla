@@ -1,4 +1,5 @@
-﻿using Api.Options;
+﻿using System.Globalization;
+using Api.Options;
 using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
@@ -61,7 +62,7 @@ namespace Api.Services
                     _azureOptions.Value.ClientSecret
                 )
             );
-            var containerClient = serviceClient.GetBlobContainerClient(containerName);
+            var containerClient = serviceClient.GetBlobContainerClient(containerName.ToLower(CultureInfo.CurrentCulture));
             return containerClient;
         }
     }
