@@ -34,7 +34,7 @@ export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
 
 export const PlacePositionsInMap = (missionMap: MissionMap, map: HTMLCanvasElement, positions: Position[]) => {
     var index = 1
-    positions.map(function (position) {
+    positions.forEach(function (position) {
         const pixelPosition = calculateObjectPixelPosition(missionMap, position)
         drawTagMarker(pixelPosition[0], pixelPosition[1], map, index, 30, TaskStatus.NotStarted)
         index += 1
