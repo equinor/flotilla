@@ -1,27 +1,8 @@
-import { Button, Card } from '@equinor/eds-core-react'
-import styled from 'styled-components'
+import { Button } from '@equinor/eds-core-react'
 import { useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
 import { TranslateText } from 'components/Contexts/LanguageContext'
-
-const StyledDialog = styled(Card)`
-    display: flex;
-    padding: 1rem;
-    width: 600px;
-    right: 175px;
-`
-const StyledAutoComplete = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-`
-
-const StyledButtons = styled.div`
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-`
 
 interface RobotProps {
     robot: Robot
