@@ -4,7 +4,6 @@ import { MissionMap } from 'models/MissionMap'
 import { Pose } from 'models/Pose'
 import { Task, TaskStatus } from 'models/Task'
 import { GetColorsFromTaskStatus } from './MarkerStyles'
-import { Position } from 'models/Position'
 
 interface ObjectPosition {
     x: number
@@ -32,21 +31,9 @@ export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
     })
 }
 
-export const PlacePositionsInMap = (missionMap: MissionMap, map: HTMLCanvasElement, positions: Position[]) => {
-    var index = 1
-    positions.forEach(function (position) {
-        const pixelPosition = calculateObjectPixelPosition(missionMap, position)
-        drawTagMarker(pixelPosition[0], pixelPosition[1], map, index, 30, TaskStatus.NotStarted)
-        index += 1
-    })
-}
-
-export const PlaceRobotInMap = (mission: Mission, map: HTMLCanvasElement, currentRobotPose: Pose) => {
-    if (mission.robot.pose === undefined) {
-        return
-    }
-    const pixelPosition = calculateObjectPixelPosition(mission.map!, currentRobotPose.position)
-    const rad = calculateNavigatorAngle(currentRobotPose)
+export const PlaceRobotInMap = (missionMap: MissionMap, map: HTMLCanvasElement, robotPose: Pose) => {
+    const pixelPosition = calculateObjectPixelPosition(missionMap, robotPose.position)
+    const rad = calculateNavigatorAngle(robotPose)
     drawRobotMarker(pixelPosition[0], pixelPosition[1], map, 22)
     drawNavigator(pixelPosition[0], pixelPosition[1], map, rad)
 }
