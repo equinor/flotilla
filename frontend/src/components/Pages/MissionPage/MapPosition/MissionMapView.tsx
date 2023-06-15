@@ -31,8 +31,6 @@ export function MissionMapView({ mission }: MissionProps) {
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
-    const [previousRobotPose, setPreviousRobotPose] = useState<Pose>(defaultPose)
-    const [currentRobotPose, setCurrentRobotPose] = useState<Pose>(defaultPose)
     const [currentTaskOrder, setCurrentTaskOrder] = useState<number>()
 
     const imageObjectURL = useRef<string>('')
@@ -45,8 +43,10 @@ export function MissionMapView({ mission }: MissionProps) {
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
         PlaceTagsInMap(mission, mapCanvas, currentTaskOrder)
-        PlaceRobotInMap(mission, mapCanvas, currentRobotPose, previousRobotPose)
-    }, [currentRobotPose, currentTaskOrder, mapCanvas, mapImage, mission, previousRobotPose])
+        if (mission.robot.pose) {
+            PlaceRobotInMap(mission, mapCanvas, mission.robot.pose)
+        }
+    }, [mission.robot.pose, currentTaskOrder, mapCanvas, mapImage, mission])
 
     const getMeta = async (url: string) => {
         const image = new Image()
@@ -86,13 +86,6 @@ export function MissionMapView({ mission }: MissionProps) {
                 })
             })
     }, [mission.assetCode, mission.id, mission.map?.mapName])
-
-    useEffect(() => {
-        if (mission.robot.pose) {
-            setPreviousRobotPose(currentRobotPose)
-            setCurrentRobotPose(mission.robot.pose)
-        }
-    }, [currentRobotPose, mission.robot.pose])
 
     useEffect(() => {
         if (mission.isCompleted) {
