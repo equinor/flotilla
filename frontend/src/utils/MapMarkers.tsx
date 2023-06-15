@@ -41,17 +41,12 @@ export const PlacePositionsInMap = (missionMap: MissionMap, map: HTMLCanvasEleme
     })
 }
 
-export const PlaceRobotInMap = (
-    mission: Mission,
-    map: HTMLCanvasElement,
-    currentRobotPose: Pose,
-    previousRobotPose: Pose
-) => {
+export const PlaceRobotInMap = (mission: Mission, map: HTMLCanvasElement, currentRobotPose: Pose) => {
     if (mission.robot.pose === undefined) {
         return
     }
     const pixelPosition = calculateObjectPixelPosition(mission.map!, currentRobotPose.position)
-    const rad = calculateNavigatorAngle(currentRobotPose, previousRobotPose)
+    const rad = calculateNavigatorAngle(currentRobotPose)
     drawRobotMarker(pixelPosition[0], pixelPosition[1], map, 22)
     drawNavigator(pixelPosition[0], pixelPosition[1], map, rad)
 }
@@ -87,11 +82,8 @@ const calculateObjectPixelPosition = (missionMap: MissionMap, objectPosition: Ob
     return [p1, p2]
 }
 
-const calculateNavigatorAngle = (currentRobotPose: Pose, previousRobotPose: Pose) => {
-    let rad = Math.atan2(
-        currentRobotPose.position.y - previousRobotPose.position.y,
-        currentRobotPose.position.x - previousRobotPose.position.x
-    )
+const calculateNavigatorAngle = (currentRobotPose: Pose) => {
+    let rad = 2 * Math.atan2(currentRobotPose.orientation.z, currentRobotPose.orientation.w)
     rad = -rad + Math.PI / 2
     return rad
 }
