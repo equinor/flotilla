@@ -33,6 +33,10 @@ const StyledTopBarContent = styled(TopBar.CustomContent)`
     gap: 0px 3rem;
 `
 
+const SelectLanguageWrapper = styled.div`
+    margin-left: 1.5rem;
+`
+
 export function Header({ page }: { page: string }) {
     return (
         <StyledTopBar>
@@ -60,7 +64,7 @@ export function Header({ page }: { page: string }) {
                         <Icon name={Icons.Notifications} size={16} />
                     </Button>
                 </IconStyle>
-                {SelectLanguageDialog()}
+                <SelectLanguageWrapper>{SelectLanguage()}</SelectLanguageWrapper>
             </TopBar.Actions>
         </StyledTopBar>
     )
