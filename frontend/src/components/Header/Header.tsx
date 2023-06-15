@@ -6,7 +6,7 @@ import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { TranslateText } from 'components/Contexts/LanguageContext'
-import { SelectLanguageDialog } from './SelectLanguageDialog'
+import { SelectLanguage } from './LanguageSelector'
 import { Icons } from 'utils/icons'
 
 const StyledTopBar = styled(TopBar)`
