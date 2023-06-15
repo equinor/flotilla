@@ -25,6 +25,13 @@ const StyledRobotPage = styled.div`
     gap: 1rem;
     margin: 2rem;
 `
+
+const StyledButtons = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+`
+
 export function RobotPage() {
     const { robotId } = useParams()
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
@@ -53,9 +60,11 @@ export function RobotPage() {
                             selectedRobot.model.type === RobotType.TaurobInspector && (
                                 <>
                                     <Typography variant="h2">{TranslateText('Move robot arm')}</Typography>
-                                    <MoveRobotArm robot={selectedRobot} armPosition="battery_change" />
-                                    <MoveRobotArm robot={selectedRobot} armPosition="transport" />
-                                    <MoveRobotArm robot={selectedRobot} armPosition="lookout" />
+                                    <StyledButtons>
+                                        <MoveRobotArm robot={selectedRobot} armPosition="battery_change" />
+                                        <MoveRobotArm robot={selectedRobot} armPosition="transport" />
+                                        <MoveRobotArm robot={selectedRobot} armPosition="lookout" />
+                                    </StyledButtons>
                                 </>
                             )}
                     </>

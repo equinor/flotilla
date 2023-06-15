@@ -14,10 +14,15 @@ const StyledDialog = styled(Card)`
     width: 600px;
     right: 175px;
 `
+
 const StyledAutoComplete = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
+`
+
+const StyledLocalizationButton = styled.div`
+    display: flex;
 `
 
 const StyledButtons = styled.div`
@@ -75,17 +80,18 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
 
     return (
         <>
-            <Button
-                onClick={() => {
-                    onClickLocalizeRobot()
-                }}
-            >
-                <>
-                    <Icon name={Icons.PinDrop} size={16} />
-                    {TranslateText('Localize robot')}
-                </>
-            </Button>
-
+            <StyledLocalizationButton>
+                <Button
+                    onClick={() => {
+                        onClickLocalizeRobot()
+                    }}
+                >
+                    <>
+                        <Icon name={Icons.PinDrop} size={16} />
+                        {TranslateText('Localize robot')}
+                    </>
+                </Button>
+            </StyledLocalizationButton>
             <Dialog open={isLocalizationDialogOpen} isDismissable>
                 <StyledDialog>
                     <Typography variant="h2">{TranslateText('Localize robot')}</Typography>
