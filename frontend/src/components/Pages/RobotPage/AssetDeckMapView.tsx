@@ -3,9 +3,8 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
 import { useErrorHandler } from 'react-error-boundary'
-import { PlacePositionsInMap } from '../../../utils/MapMarkers'
+import { PlaceRobotInMap } from '../../../utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { Position } from 'models/Position'
 import { MissionMap } from 'models/MissionMap'
 import { AssetDeck } from 'models/AssetDeck'
 
@@ -40,8 +39,6 @@ export function AssetDeckMapView({ assetDeck }: AssetDeckProps) {
     const [imageObjectURL, setImageObjectURL] = useState<string>()
     const [isLoading, setIsLoading] = useState<boolean>()
 
-    var positions: Position[] = [assetDeck.defaultLocalizationPose.position]
-
     const updateMap = () => {
         let context = mapCanvas.getContext('2d')
         if (context === null) {
@@ -50,7 +47,7 @@ export function AssetDeckMapView({ assetDeck }: AssetDeckProps) {
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
         if (missionMap) {
-            PlacePositionsInMap(missionMap, mapCanvas, positions)
+            PlaceRobotInMap(missionMap, mapCanvas, assetDeck.defaultLocalizationPose)
         }
     }
 

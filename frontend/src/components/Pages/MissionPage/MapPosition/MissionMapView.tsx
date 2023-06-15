@@ -43,8 +43,8 @@ export function MissionMapView({ mission }: MissionProps) {
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
         PlaceTagsInMap(mission, mapCanvas, currentTaskOrder)
-        if (mission.robot.pose) {
-            PlaceRobotInMap(mission, mapCanvas, mission.robot.pose)
+        if (mission.robot.pose && mission.map) {
+            PlaceRobotInMap(mission.map, mapCanvas, mission.robot.pose)
         }
     }, [mission.robot.pose, currentTaskOrder, mapCanvas, mapImage, mission])
 
