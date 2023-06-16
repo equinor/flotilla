@@ -12,8 +12,6 @@ namespace Api.Controllers.Models
 
         public string SerialNumber { get; set; }
 
-        public string CurrentAsset { get; set; }
-
         public IList<CreateVideoStreamQuery> VideoStreams { get; set; }
 
         public string Host { get; set; }
