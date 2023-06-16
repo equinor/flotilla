@@ -40,19 +40,16 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
             case ControlButton.Pause: {
                 setIsWaitingForResponse(true)
                 BackendAPICaller.pauseMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
-                //.catch((e) => handleError(e))
                 break
             }
             case ControlButton.Resume: {
                 setIsWaitingForResponse(true)
                 BackendAPICaller.resumeMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
-                //.catch((e) => handleError(e))
                 break
             }
             case ControlButton.Stop: {
                 setIsWaitingForResponse(true)
                 BackendAPICaller.stopMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
-                //.catch((e) => handleError(e))
                 break
             }
         }

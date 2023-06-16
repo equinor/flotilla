@@ -8,7 +8,6 @@ function App() {
     return (
         <LanguageProvider>
             <MissionControlProvider>
-                {/* // <ErrorBoundary fallbackRender={({ error, resetErrorBoundary }) => ErrorFallback(error)}> */}
                 <>
                     <UnauthenticatedTemplate>
                         <div className="sign-in-page">
@@ -19,7 +18,6 @@ function App() {
                         <FlotillaSite />
                     </AuthenticatedTemplate>
                 </>
-                {/* </ErrorBoundary> */}
             </MissionControlProvider>
         </LanguageProvider>
     )
