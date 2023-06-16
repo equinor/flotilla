@@ -1,4 +1,4 @@
-export interface MissionMap {
+export interface MapMetadata {
     mapName: string
     boundary: Boundary
     transformationMatrices: TransformationMatrices

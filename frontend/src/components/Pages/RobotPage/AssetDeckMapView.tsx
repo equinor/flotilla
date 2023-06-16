@@ -5,7 +5,7 @@ import NoMap from 'mediaAssets/NoMap.png'
 import { useErrorHandler } from 'react-error-boundary'
 import { PlaceRobotInMap } from '../../../utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { MissionMap } from 'models/MissionMap'
+import { MapMetadata } from 'models/MapMetadata'
 import { AssetDeck } from 'models/AssetDeck'
 
 interface AssetDeckProps {
@@ -35,7 +35,7 @@ export function AssetDeckMapView({ assetDeck }: AssetDeckProps) {
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
-    const [missionMap, setMissionMap] = useState<MissionMap>()
+    const [mapMetadata, setMapMetadata] = useState<MapMetadata>()
     const [imageObjectURL, setImageObjectURL] = useState<string>()
     const [isLoading, setIsLoading] = useState<boolean>()
 
@@ -46,8 +46,8 @@ export function AssetDeckMapView({ assetDeck }: AssetDeckProps) {
         }
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
-        if (missionMap) {
-            PlaceRobotInMap(missionMap, mapCanvas, assetDeck.defaultLocalizationPose)
+        if (mapMetadata) {
+            PlaceRobotInMap(mapMetadata, mapCanvas, assetDeck.defaultLocalizationPose)
         }
     }
 
@@ -63,7 +63,7 @@ export function AssetDeckMapView({ assetDeck }: AssetDeckProps) {
         setImageObjectURL(undefined)
         BackendAPICaller.getAssetDeckMapMetadata(assetDeck.id)
             .then((mapMetadata) => {
-                setMissionMap(mapMetadata)
+                setMapMetadata(mapMetadata)
                 BackendAPICaller.getMap(assetDeck.assetCode, mapMetadata.mapName)
                     .then((imageBlob) => {
                         setImageObjectURL(URL.createObjectURL(imageBlob))
@@ -73,7 +73,7 @@ export function AssetDeckMapView({ assetDeck }: AssetDeckProps) {
                     })
             })
             .catch(() => {
-                setMissionMap(undefined)
+                setMapMetadata(undefined)
                 setImageObjectURL(NoMap)
             })
         //.catch((e) => handleError(e))

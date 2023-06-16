@@ -54,8 +54,8 @@ public class FlotillaDbContext : DbContext
             }
         );
 
-        modelBuilder.Entity<Mission>().OwnsOne(m => m.Map).OwnsOne(t => t.TransformationMatrices);
-        modelBuilder.Entity<Mission>().OwnsOne(m => m.Map).OwnsOne(b => b.Boundary);
+        modelBuilder.Entity<Mission>().OwnsOne(m => m.MapMetadata).OwnsOne(t => t.TransformationMatrices);
+        modelBuilder.Entity<Mission>().OwnsOne(m => m.MapMetadata).OwnsOne(b => b.Boundary);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
         modelBuilder.Entity<Robot>().OwnsMany(r => r.VideoStreams);

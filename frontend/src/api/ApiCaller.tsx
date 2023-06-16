@@ -12,7 +12,7 @@ import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 import { TaskStatus } from 'models/Task'
 import { CreateCustomMission, CustomMissionQuery } from 'models/CustomMission'
-import { MissionMap } from 'models/MissionMap'
+import { MapMetadata } from 'models/MapMetadata'
 import { MissionDefinition } from 'models/MissionDefinition'
 
 /** Implements the request sent to the backend api. */
@@ -289,9 +289,9 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getAssetDeckMapMetadata(id: string): Promise<MissionMap> {
+    static async getAssetDeckMapMetadata(id: string): Promise<MapMetadata> {
         const path: string = 'asset-decks/' + id + '/map-metadata'
-        const result = await this.GET<MissionMap>(path).catch((e) => {
+        const result = await this.GET<MapMetadata>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })

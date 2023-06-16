@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Api.Database.Models
 {
     [Owned]
-    public class MissionMap
+    public class MapMetadata
     {
-        public MissionMap()
+        public MapMetadata()
         {
             MapName = "DefaultMapName";
             Boundary = new Boundary();

@@ -680,7 +680,7 @@ public class RobotController : ControllerBase
             Status = MissionStatus.Pending,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(),
-            Map = new MissionMap()
+            MapMetadata = new MapMetadata()
         };
 
         IsarMission isarMission;
@@ -807,7 +807,7 @@ public class RobotController : ControllerBase
             Status = MissionStatus.Pending,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(new[] { new MissionTask(customTaskQuery) }),
-            Map = new MissionMap()
+            MapMetadata = new MapMetadata()
         };
 
         IsarMission isarMission;

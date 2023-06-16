@@ -30,7 +30,7 @@ namespace Api.Test.EventHandlers
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTimeOffset.Now,
                 AssetCode = "TestAsset",
-                Map = new MissionMap()
+                MapMetadata = new MapMetadata()
                 {
                     MapName = "TestMap",
                     Boundary = new(),
