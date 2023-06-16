@@ -210,12 +210,12 @@ namespace Api.Controllers
         [HttpGet]
         [Authorize(Roles = Role.Any)]
         [Route("{id}/map-metadata")]
-        [ProducesResponseType(typeof(MissionMap), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MapMetadata), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MissionMap>> GetMapMetadata([FromRoute] string id)
+        public async Task<ActionResult<MapMetadata>> GetMapMetadata([FromRoute] string id)
         {
             var assetDeck = await _assetDeckService.ReadById(id);
             if (assetDeck is null)
@@ -224,14 +224,14 @@ namespace Api.Controllers
                 return NotFound("Could not find this asset deck");
             }
 
-            MissionMap? map;
+            MapMetadata? mapMetadata;
             var positions = new List<Position>
             {
                 assetDeck.DefaultLocalizationPose.Position
             };
             try
             {
-                map = await _mapService.ChooseMapFromPositions(positions, assetDeck.AssetCode);
+                mapMetadata = await _mapService.ChooseMapFromPositions(positions, assetDeck.AssetCode);
             }
             catch (RequestFailedException e)
             {
@@ -246,11 +246,11 @@ namespace Api.Controllers
                 return NotFound(errorMessage);
             }
 
-            if (map == null)
+            if (mapMetadata == null)
             {
                 return NotFound("A map which contained at least half of the points in this mission could not be found");
             }
-            return Ok(map);
+            return Ok(mapMetadata);
         }
     }
 }

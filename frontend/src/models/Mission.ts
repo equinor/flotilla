@@ -1,4 +1,4 @@
-import { MissionMap } from './MissionMap'
+import { MapMetadata } from './MapMetadata'
 import { Robot } from './Robot'
 import { Task } from './Task'
 
@@ -30,5 +30,5 @@ export interface Mission {
     endTime?: Date
     estimatedDuration?: number
     tasks: Task[]
-    map?: MissionMap
+    mapMetadata?: MapMetadata
 }

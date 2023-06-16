@@ -8,7 +8,7 @@ namespace Api.Services
     public interface IMapService
     {
         public Task<byte[]> FetchMapImage(string mapName, string assetCode);
-        public Task<MissionMap?> ChooseMapFromPositions(IList<Position> positions, string assetCode);
+        public Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string assetCode);
         public Task AssignMapToMission(Mission mission);
     }
 
@@ -35,7 +35,7 @@ namespace Api.Services
             return await _blobService.DownloadBlob(mapName, assetCode, _blobOptions.Value.StorageAccount);
         }
 
-        public async Task<MissionMap?> ChooseMapFromPositions(IList<Position> positions, string assetCode)
+        public async Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string assetCode)
         {
             var boundaries = new Dictionary<string, Boundary>();
             var imageSizes = new Dictionary<string, int[]>();
@@ -56,7 +56,7 @@ namespace Api.Services
             }
 
             string mostSuitableMap = FindMostSuitableMap(boundaries, positions);
-            var map = new MissionMap
+            var map = new MapMetadata
             {
                 MapName = mostSuitableMap,
                 Boundary = boundaries[mostSuitableMap],
@@ -72,7 +72,7 @@ namespace Api.Services
 
         public async Task AssignMapToMission(Mission mission)
         {
-            MissionMap? map;
+            MapMetadata? mapMetadata;
             var positions = new List<Position>();
             foreach (var task in mission.Tasks)
             {
@@ -80,7 +80,7 @@ namespace Api.Services
             }
             try
             {
-                map = await ChooseMapFromPositions(positions, mission.AssetCode);
+                mapMetadata = await ChooseMapFromPositions(positions, mission.AssetCode);
             }
             catch (ArgumentOutOfRangeException)
             {
@@ -88,13 +88,13 @@ namespace Api.Services
                 return;
             }
 
-            if (map == null)
+            if (mapMetadata == null)
             {
                 return;
             }
 
-            mission.Map = map;
-            _logger.LogInformation("Assigned map {map} to mission {mission}", map.MapName, mission.Name);
+            mission.MapMetadata = mapMetadata;
+            _logger.LogInformation("Assigned map {map} to mission {mission}", mapMetadata.MapName, mission.Name);
         }
 
         private Boundary ExtractMapMetadata(BlobItem map)

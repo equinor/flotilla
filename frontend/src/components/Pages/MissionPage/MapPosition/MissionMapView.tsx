@@ -43,8 +43,8 @@ export function MissionMapView({ mission }: MissionProps) {
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
         PlaceTagsInMap(mission, mapCanvas, currentTaskOrder)
-        if (mission.robot.pose && mission.map) {
-            PlaceRobotInMap(mission.map, mapCanvas, mission.robot.pose)
+        if (mission.robot.pose && mission.mapMetadata) {
+            PlaceRobotInMap(mission.mapMetadata, mapCanvas, mission.robot.pose)
         }
     }, [mission.robot.pose, currentTaskOrder, mapCanvas, mapImage, mission])
 
@@ -64,7 +64,7 @@ export function MissionMapView({ mission }: MissionProps) {
     }, [mission.tasks])
 
     useEffect(() => {
-        BackendAPICaller.getMap(mission.assetCode!, mission.map?.mapName!)
+        BackendAPICaller.getMap(mission.assetCode!, mission.mapMetadata?.mapName!)
             .then((imageBlob) => {
                 imageObjectURL.current = URL.createObjectURL(imageBlob)
             })
@@ -85,7 +85,7 @@ export function MissionMapView({ mission }: MissionProps) {
                     setMapImage(img)
                 })
             })
-    }, [mission.assetCode, mission.id, mission.map?.mapName])
+    }, [mission.assetCode, mission.id, mission.mapMetadata?.mapName])
 
     useEffect(() => {
         if (mission.isCompleted) {

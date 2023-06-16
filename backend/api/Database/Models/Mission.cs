@@ -62,7 +62,7 @@ namespace Api.Database.Models
                     or MissionStatus.PartiallySuccessful
                     or MissionStatus.Failed;
 
-        public MissionMap? Map { get; set; }
+        public MapMetadata? MapMetadata { get; set; }
 
         [Required]
         public DateTimeOffset DesiredStartTime { get; set; }

@@ -216,7 +216,7 @@ public class MissionController : ControllerBase
             DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
             Tasks = missionTasks,
             AssetCode = scheduledMissionQuery.AssetCode,
-            Map = new MissionMap()
+            MapMetadata = new MapMetadata()
         };
 
         await _mapService.AssignMapToMission(scheduledMission);
@@ -264,7 +264,7 @@ public class MissionController : ControllerBase
             DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTimeOffset.UtcNow,
             Tasks = missionTasks,
             AssetCode = customMissionQuery.AssetCode,
-            Map = new MissionMap()
+            MapMetadata = new MapMetadata()
         };
 
         await _mapService.AssignMapToMission(scheduledMission);

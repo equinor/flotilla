@@ -95,7 +95,7 @@ namespace Api.Services.Models
             Duration = inspection.VideoDuration;
             var metadata = new Dictionary<string, string?>
             {
-                { "map", mission.Map?.MapName },
+                { "map", mission.MapMetadata?.MapName },
                 { "description", mission.Description },
                 { "estimated_duration", mission.EstimatedDuration.ToString() },
                 { "asset_code", mission.AssetCode },

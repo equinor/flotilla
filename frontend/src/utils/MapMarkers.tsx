@@ -1,6 +1,6 @@
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
-import { MissionMap } from 'models/MissionMap'
+import { MapMetadata } from 'models/MapMetadata'
 import { Pose } from 'models/Pose'
 import { Task, TaskStatus } from 'models/Task'
 import { GetColorsFromTaskStatus } from './MarkerStyles'
@@ -23,7 +23,7 @@ export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
     const orderedTasks = orderTasksByDrawOrder(mission.tasks, currentTaskOrder, maxTaskOrder)
     orderedTasks.forEach(function (task) {
         if (task.inspectionTarget) {
-            const pixelPosition = calculateObjectPixelPosition(mission.map!, task.inspectionTarget)
+            const pixelPosition = calculateObjectPixelPosition(mission.mapMetadata!, task.inspectionTarget)
             // Workaround for current bug in echo
             const order = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
@@ -31,8 +31,8 @@ export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
     })
 }
 
-export const PlaceRobotInMap = (missionMap: MissionMap, map: HTMLCanvasElement, robotPose: Pose) => {
-    const pixelPosition = calculateObjectPixelPosition(missionMap, robotPose.position)
+export const PlaceRobotInMap = (mapMetadata: MapMetadata, map: HTMLCanvasElement, robotPose: Pose) => {
+    const pixelPosition = calculateObjectPixelPosition(mapMetadata, robotPose.position)
     const rad = calculateNavigatorAngle(robotPose)
     drawRobotMarker(pixelPosition[0], pixelPosition[1], map, 22)
     drawNavigator(pixelPosition[0], pixelPosition[1], map, rad)
@@ -57,13 +57,13 @@ const orderTasksByDrawOrder = (tasks: Task[], currentTaskOrder: number, maxTaskO
     })
 }
 
-const calculateObjectPixelPosition = (missionMap: MissionMap, objectPosition: ObjectPosition) => {
+const calculateObjectPixelPosition = (mapMetadata: MapMetadata, objectPosition: ObjectPosition) => {
     const x1 = objectPosition.x
     const x2 = objectPosition.y
-    const a1 = missionMap.transformationMatrices.c1
-    const a2 = missionMap.transformationMatrices.c2
-    const b1 = missionMap.transformationMatrices.d1
-    const b2 = missionMap.transformationMatrices.d2
+    const a1 = mapMetadata.transformationMatrices.c1
+    const a2 = mapMetadata.transformationMatrices.c2
+    const b1 = mapMetadata.transformationMatrices.d1
+    const b2 = mapMetadata.transformationMatrices.d2
     const p1 = a1 * x1 + b1
     const p2 = a2 * x2 + b2
     return [p1, p2]
