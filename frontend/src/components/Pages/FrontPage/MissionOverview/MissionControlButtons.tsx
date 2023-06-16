@@ -35,7 +35,6 @@ const checkIfTasksStarted = (tasks: Task[]): boolean => {
 }
 
 export function MissionControlButtons({ mission }: MissionProps) {
-    const handleError = useErrorHandler()
     const { missionControlState, handleClick } = useMissionControlContext()
 
     const renderControlIcon = (missionStatus: MissionStatus) => {
