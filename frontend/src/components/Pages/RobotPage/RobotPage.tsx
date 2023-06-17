@@ -20,7 +20,7 @@ import { TranslateText } from 'components/Contexts/LanguageContext'
 const StyledRobotPage = styled.div`
     display: flex;
     flex-wrap: wrap;
-    justify-content: start;
+    justify-content: flex-start;
     flex-direction: column;
     gap: 1rem;
     margin: 2rem;
@@ -31,7 +31,20 @@ const StyledButtons = styled.div`
     flex-direction: row;
     gap: 1rem;
 `
+const RobotInfo = styled.div`
+    display: flex;
+    align-items: start;
+    gap: 1rem;
+`
+const VerticalContent = styled.div<{ $alignItems?: string }>`
+    display: flex;
+    flex-direction: column;
+    align-items: ${(props) => props.$alignItems};
+    justify-content: flex-end;
+    gap: 2rem;
+`
 
+const updateSiteTimer = 1000
 export function RobotPage() {
     const { robotId } = useParams()
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
@@ -43,18 +56,40 @@ export function RobotPage() {
             })
         }
     }, [robotId])
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            if (selectedRobot) {
+                BackendAPICaller.getRobotById(selectedRobot.id).then((updatedRobot) => {
+                    setSelectedRobot(updatedRobot)
+                })
+            }
+        }, updateSiteTimer)
+
+        return () => {
+            clearInterval(intervalId)
+        }
+    }, [selectedRobot])
     return (
         <>
             <Header page={'robot'} />
             <StyledRobotPage>
                 <BackButton />
                 <Typography variant="h1">{selectedRobot?.name + ' (' + selectedRobot?.model.type + ')'}</Typography>
-                <RobotImage robotType={selectedRobot?.model.type} />
+                <RobotInfo>
+                    <RobotImage height="350px" robotType={selectedRobot?.model.type} />
+                    <VerticalContent $alignItems="start">
+                        <BatteryStatusView
+                            itemSize={48}
+                            battery={selectedRobot?.batteryLevel}
+                            batteryStatus={BatteryStatus.Normal}
+                        />
+                        <PressureStatusView itemSize={48} pressure={selectedRobot?.pressureLevel} />
+                        <RobotStatusChip status={selectedRobot?.status} />
+                    </VerticalContent>
+                </RobotInfo>
                 {selectedRobot && (
                     <>
-                        <BatteryStatusView battery={selectedRobot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
-                        <PressureStatusView pressure={selectedRobot.pressureLevel} />
-                        <RobotStatusChip status={selectedRobot.status} />
                         <LocalizationSection robot={selectedRobot} />
                         {selectedRobot.status === RobotStatus.Available &&
                             selectedRobot.model.type === RobotType.TaurobInspector && (
