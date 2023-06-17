@@ -10,12 +10,11 @@ import { Icon } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 interface TypeProps {
     robotType?: RobotType
+    height?: string
 }
 
-const StyledImage = styled.img`
-    object-fit: contain;
-    height: 200px;
-    width: 100%;
+const StyledImage = styled.img<{ $height?: string }>`
+    height: ${(props) => props.$height};
 `
 
 const StyledIcon = styled(Icon)`
@@ -27,7 +26,7 @@ const StyledIcon = styled(Icon)`
     color: #6f6f6f;
 `
 
-export function RobotImage({ robotType }: TypeProps) {
+export function RobotImage({ robotType, height = '200px' }: TypeProps) {
     var robotImage
     switch (robotType) {
         case RobotType.TaurobInspector: {
@@ -61,5 +60,5 @@ export function RobotImage({ robotType }: TypeProps) {
             return <StyledIcon name={Icons.Image} title={robotType} />
         }
     }
-    return <StyledImage alt={robotType} src={robotImage} />
+    return <StyledImage height={height} alt={robotType} src={robotImage} />
 }

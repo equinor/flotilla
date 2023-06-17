@@ -4,18 +4,21 @@ import { Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 
-const BatteryStatusTile = styled.div`
+const BatteryAlignment = styled.div`
     display: flex;
-    align-items: end;
-    justify-content: flex-end;
+    align-items: center;
 `
 
+const StyledTopography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
+    font-size: ${(props) => props.$fontSize};
+`
 export interface BatteryStatusViewProps {
     battery?: number
     batteryStatus?: BatteryStatus
+    itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
 }
 
-const BatteryStatusView = ({ battery, batteryStatus }: BatteryStatusViewProps): JSX.Element => {
+const BatteryStatusView = ({ battery, batteryStatus, itemSize = 24 }: BatteryStatusViewProps): JSX.Element => {
     let battery_icon
     let icon_color: string = tokens.colors.interactive.primary__resting.hex
     let battery_value: string
@@ -44,10 +47,12 @@ const BatteryStatusView = ({ battery, batteryStatus }: BatteryStatusViewProps): 
     }
 
     return (
-        <BatteryStatusTile>
-            <Icon name={battery_icon} color={icon_color} size={24} />
-            <Typography style={{ color: tokens.colors.text.static_icons__tertiary.rgba }}>{battery_value}</Typography>
-        </BatteryStatusTile>
+        <BatteryAlignment>
+            <Icon name={battery_icon} color={icon_color} size={itemSize} />
+            <StyledTopography $fontSize={itemSize} style={{ color: tokens.colors.text.static_icons__tertiary.rgba }}>
+                {battery_value}
+            </StyledTopography>
+        </BatteryAlignment>
     )
 }
 
