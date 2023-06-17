@@ -20,8 +20,6 @@ namespace Api.EventHandlers
         private readonly ILogger<MqttEventHandler> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public object CurrentAssetDeck { get; private set; }
-
         public MqttEventHandler(
             ILogger<MqttEventHandler> logger,
             IServiceScopeFactory scopeFactory,
@@ -237,7 +235,7 @@ namespace Api.EventHandlers
         private static void UpdateCurrentAssetIfChanged(string newCurrentAsset, ref Robot robot,
             ref List<string> updatedFields)
         {
-            if (newCurrentAsset.Equals(robot.CurrentAssetDeck.AssetCode, StringComparison.Ordinal))
+            if ((robot.CurrentAssetDeck.AssetCode != null) && newCurrentAsset.Equals(robot.CurrentAssetDeck.AssetCode, StringComparison.Ordinal))
             {
                 return;
             }
