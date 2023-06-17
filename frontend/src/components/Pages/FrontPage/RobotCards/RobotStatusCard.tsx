@@ -37,23 +37,24 @@ const HorizontalContent = styled.div`
     padding-top: 2px;
 `
 
-const VerticalContent = styled.div`
+const VerticalContent = styled.div<{ $alignItems?: string }>`
     display: flex;
     flex-direction: column;
+    align-items: ${(props) => props.$alignItems};
     justify-content: flex-end;
 `
 
 function cardContent({ robot }: RobotProps) {
     return (
         <div>
-            <RobotImage robotType={robot.model.type} />
+            <RobotImage robotType={robot.model.type} height="200px" />
             <HorizontalContent>
-                <VerticalContent>
+                <VerticalContent $alignItems="start">
                     <Typography variant="h5">{robot.name}</Typography>
                     <Typography variant="caption">{robot.model.type}</Typography>
                     <RobotStatusChip status={robot.status} />
                 </VerticalContent>
-                <VerticalContent>
+                <VerticalContent $alignItems="end">
                     <PressureStatusView pressure={robot.pressureLevel} />
                     <BatteryStatusView battery={robot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
                 </VerticalContent>
