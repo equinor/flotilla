@@ -810,6 +810,7 @@ public class RobotController : ControllerBase
         {
             Name = "Drive to Safe Position",
             Robot = robot,
+            AssetCode = asset,
             Area = area,
             Status = MissionStatus.Pending,
             DesiredStartTime = DateTimeOffset.UtcNow,

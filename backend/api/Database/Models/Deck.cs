@@ -11,8 +11,10 @@ namespace Api.Database.Models
         public string Id { get; set; }
 
         [Required]
-        [MaxLength(200)]
         public Installation Installation { get; set; }
+
+        [Required]
+        public Asset Asset { get; set; }
 
         [Required]
         [MaxLength(200)]

@@ -22,6 +22,18 @@ namespace Api.Test.EventHandlers
     [Collection("Database collection")]
     public class TestMissionScheduler : IDisposable
     {
+        private static readonly Asset testAsset = new()
+        {
+            ShortName = "test",
+            Name = "test test"
+        };
+        private static readonly Installation testInstallation = new()
+        {
+            ShortName = "test",
+            Name = "test test",
+            Asset = testAsset
+        };
+
         private static MissionRun ScheduledMission =>
             new()
             {
@@ -29,13 +41,33 @@ namespace Api.Test.EventHandlers
                 MissionId = Guid.NewGuid().ToString(),
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTimeOffset.Now,
+                Area = new Area
+                {
+                    Deck = new Deck
+                    {
+                        Installation = testInstallation,
+                        Asset = testAsset,
+                        Name = "testDeck"
+                    },
+                    Asset = testAsset,
+                    Installation = testInstallation,
+                    Name = "testArea",
+                    MapMetadata = new MapMetadata()
+                    {
+                        MapName = "TestMap",
+                        Boundary = new(),
+                        TransformationMatrices = new()
+                    },
+                    DefaultLocalizationPose = new Pose(),
+                    SafePositions = new List<SafePosition>()
+                },
                 MapMetadata = new MapMetadata()
                 {
                     MapName = "TestMap",
                     Boundary = new(),
                     TransformationMatrices = new()
                 },
-                Area = new Area()
+                AssetCode = "testAsset"
             };
 
         private readonly MissionScheduler _scheduledMissionEventHandler;
