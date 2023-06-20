@@ -460,8 +460,7 @@ public class MissionController : ControllerBase
         if (area == null)
             return NotFound($"Could not find area with name {customMissionQuery.AreaName} in asset {customMissionQuery.AssetCode}");
 
-        // TODO: upload file to blobstorage and then pass the URL to MissionDefinition Source
-        var customMissionId = Guid.NewGuid().ToString();
+        string customMissionId = Guid.NewGuid().ToString();
         var sourceURL = await _sourceService.UploadSource(customMissionId, missionTasks);
 
         var customMissionDefinition = new MissionDefinition

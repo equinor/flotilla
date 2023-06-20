@@ -12,7 +12,7 @@ namespace Api.Database.Models
         public string Id { get; set; }
 
         [MaxLength(200)]
-        public string MissionId { get; set; }
+        public string? MissionId { get; set; }
 
         [MaxLength(200)]
         public string? IsarMissionId { get; set; }
