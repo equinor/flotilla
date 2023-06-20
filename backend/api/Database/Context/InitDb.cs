@@ -109,6 +109,7 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Installation = installations[0],
+            Asset = installations[0].Asset,
             Name = "TestDeck"
         };
 
@@ -121,8 +122,10 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Deck = decks[0],
+            Installation = decks[0].Installation,
+            Asset = decks[0].Installation.Asset,
             Name = "AP320",
-            Map = new MapMetadata(),
+            MapMetadata = new MapMetadata(),
             DefaultLocalizationPose = new Pose {},
             SafePositions = new List<SafePosition>()
         };
@@ -131,8 +134,10 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Deck = decks[0],
+            Installation = decks[0].Installation,
+            Asset = decks[0].Installation.Asset,
             Name = "AP330",
-            Map = new MapMetadata(),
+            MapMetadata = new MapMetadata(),
             DefaultLocalizationPose = new Pose {},
             SafePositions = new List<SafePosition>()
         };
@@ -141,8 +146,10 @@ public static class InitDb
         {
             Id = "TestId",
             Deck = decks[0],
+            Installation = decks[0].Installation,
+            Asset = decks[0].Installation.Asset,
             Name = "testArea",
-            Map = new MapMetadata(),
+            MapMetadata = new MapMetadata(),
             DefaultLocalizationPose = new Pose { },
             SafePositions = new List<SafePosition>()
         };
@@ -179,7 +186,7 @@ public static class InitDb
             Area = areas[0],
             Source = sources[0],
             Comment = "Interesting comment",
-            InspectionFrequency = TimeSpan.Parse("14:00:0:0"),
+            InspectionFrequency = new DateTime().AddDays(12) - new DateTime(),
             LastRun = null
         };
 
@@ -190,7 +197,7 @@ public static class InitDb
             AssetCode = areas[1].Deck.Installation.Asset.ShortName,
             Area = areas[1],
             Source = sources[1],
-            InspectionFrequency = TimeSpan.Parse("7:00:0:0"),
+            InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
             LastRun = null
         };
 

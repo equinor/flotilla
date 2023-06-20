@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
@@ -46,13 +47,40 @@ namespace Api.Test.Services
                 .ReadAll(new MissionRunQueryStringParameters())
                 .Result.Count;
 
+            var testAsset = new Asset
+            {
+                ShortName = "test",
+                Name = "test test"
+            };
+            var testInstallation = new Installation
+            {
+                ShortName = "test",
+                Name = "test test",
+                Asset = testAsset
+            };
+
             MissionRun mission =
                 new()
                 {
                     Name = "testMission",
                     Robot = robot,
                     MapMetadata = new MapMetadata() { MapName = "testMap" },
-                    Area = new Area(),
+                    Area = new Area
+                    {
+                        Deck = new Deck
+                        {
+                            Installation = testInstallation,
+                            Asset = testAsset,
+                            Name = "testDeck"
+                        },
+                        Asset = testAsset,
+                        Installation = testInstallation,
+                        Name = "testArea",
+                        MapMetadata = new MapMetadata() { MapName = "testMap" },
+                        DefaultLocalizationPose = new Pose(),
+                        SafePositions = new List<SafePosition>()
+                    },
+                    AssetCode = "testAsset",
                     DesiredStartTime = DateTime.Now
                 };
 

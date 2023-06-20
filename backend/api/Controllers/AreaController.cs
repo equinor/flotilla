@@ -68,10 +68,19 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Area>> GetAreaById([FromRoute] string id)
         {
-            var area = await _areaService.ReadById(id);
-            if (area == null)
-                return NotFound($"Could not find area with id {id}");
-            return Ok(area);
+            try
+            {
+                var area = await _areaService.ReadById(id);
+                if (area == null)
+                    return NotFound($"Could not find area with id {id}");
+                return Ok(area);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error during GET of areas from database");
+                throw;
+            }
+
         }
 
         /// <summary>
@@ -81,7 +90,7 @@ namespace Api.Controllers
         /// <para> This query adds a new area to the database </para>
         /// </remarks>
         [HttpPost]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Roles = Role.Admin)]
         [ProducesResponseType(typeof(Area), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -95,7 +104,7 @@ namespace Api.Controllers
                 var existingArea = await _areaService.ReadByAssetAndName(area.AssetCode, area.AreaName);
                 if (existingArea != null)
                 {
-                    _logger.LogInformation("An ara for given name and asset already exists");
+                    _logger.LogInformation("An area for given name and asset already exists");
                     return BadRequest($"Area already exists");
                 }
 

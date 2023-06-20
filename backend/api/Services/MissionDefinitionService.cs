@@ -41,12 +41,10 @@ namespace Api.Services
     public class MissionDefinitionService : IMissionDefinitionService
     {
         private readonly FlotillaDbContext _context;
-        private readonly ILogger<MissionDefinitionService> _logger;
 
-        public MissionDefinitionService(FlotillaDbContext context, ILogger<MissionDefinitionService> logger)
+        public MissionDefinitionService(FlotillaDbContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
         public async Task<MissionDefinition> Create(MissionDefinition mission)
