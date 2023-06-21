@@ -235,13 +235,18 @@ namespace Api.EventHandlers
         private static void UpdateCurrentAssetIfChanged(string newCurrentAsset, ref Robot robot,
             ref List<string> updatedFields)
         {
-            if ((robot.CurrentAssetDeck.AssetCode != null) && newCurrentAsset.Equals(robot.CurrentAssetDeck.AssetCode, StringComparison.Ordinal))
+            if (robot.CurrentAssetDeck != null)
             {
-                return;
+                if (newCurrentAsset.Equals(robot.CurrentAssetDeck.AssetCode, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                updatedFields.Add($"\nCurrentAsset ({robot.CurrentAssetDeck.AssetCode} -> {newCurrentAsset})\n");
+
+                robot.CurrentAssetDeck.AssetCode = newCurrentAsset;
             }
 
-            updatedFields.Add($"\nCurrentAsset ({robot.CurrentAssetDeck.AssetCode} -> {newCurrentAsset})\n");
-            robot.CurrentAssetDeck.AssetCode = newCurrentAsset;
         }
 
 
