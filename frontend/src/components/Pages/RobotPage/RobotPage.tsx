@@ -14,8 +14,8 @@ import BatteryStatusView from '../FrontPage/RobotCards/BatteryStatusView'
 import { BatteryStatus } from 'models/Battery'
 import { RobotStatusChip } from '../FrontPage/RobotCards/RobotStatusChip'
 import { RobotStatus } from 'models/Robot'
-import { RobotType } from 'models/RobotModel'
 import { TranslateText } from 'components/Contexts/LanguageContext'
+import { RobotType } from 'models/RobotModel'
 
 const StyledRobotPage = styled.div`
     display: flex;
@@ -106,17 +106,28 @@ export function RobotPage() {
                         </RobotInfo>
 
                         <LocalizationSection robot={selectedRobot} />
-                        {selectedRobot.status === RobotStatus.Available &&
-                            selectedRobot.model.type === RobotType.TaurobInspector && (
-                                <>
-                                    <Typography variant="h2">{TranslateText('Move robot arm')}</Typography>
-                                    <StyledButtons>
-                                        <MoveRobotArm robot={selectedRobot} armPosition="battery_change" />
-                                        <MoveRobotArm robot={selectedRobot} armPosition="transport" />
-                                        <MoveRobotArm robot={selectedRobot} armPosition="lookout" />
-                                    </StyledButtons>
-                                </>
-                            )}
+                        {selectedRobot.model.type === RobotType.TaurobInspector && (
+                            <>
+                                <Typography variant="h2">{TranslateText('Move robot arm')}</Typography>
+                                <StyledButtons>
+                                    <MoveRobotArm
+                                        robot={selectedRobot}
+                                        armPosition="battery_change"
+                                        isRobotAvailable={selectedRobot.status === RobotStatus.Available}
+                                    />
+                                    <MoveRobotArm
+                                        robot={selectedRobot}
+                                        armPosition="transport"
+                                        isRobotAvailable={selectedRobot.status === RobotStatus.Available}
+                                    />
+                                    <MoveRobotArm
+                                        robot={selectedRobot}
+                                        armPosition="lookout"
+                                        isRobotAvailable={selectedRobot.status === RobotStatus.Available}
+                                    />
+                                </StyledButtons>
+                            </>
+                        )}
                     </>
                 )}
             </StyledRobotPage>

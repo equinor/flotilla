@@ -104,5 +104,7 @@
     "Select max start time": "Select max start time",
     "Select min end time": "Select min end time",
     "Select max end time": "Select max end time",
-    "selected": "selected"
+    "selected": "selected",
+    "This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.": "This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.",
+    "Close": "Close"
 }
