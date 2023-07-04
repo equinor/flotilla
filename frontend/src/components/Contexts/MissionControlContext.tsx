@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, FC } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Mission } from 'models/Mission'
-import { ControlButton } from 'components/Pages/FrontPage/MissionOverview/MissionControlButtons'
+import { ControlButton } from 'components/Pages/FrontPage/MissionOverview/StopMissionDialog'
 
 interface IMissionControlState {
     isWaitingForResponse: boolean

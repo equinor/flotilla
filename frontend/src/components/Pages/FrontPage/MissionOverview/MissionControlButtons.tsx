@@ -7,15 +7,10 @@ import styled from 'styled-components'
 import { Typography } from '@equinor/eds-core-react'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
+import { StopMissionDialog, ControlButton } from './StopMissionDialog'
 
 interface MissionProps {
     mission: Mission
-}
-
-export enum ControlButton {
-    Pause,
-    Stop,
-    Resume,
 }
 
 const ButtonStyle = styled.div`
@@ -44,14 +39,8 @@ export function MissionControlButtons({ mission }: MissionProps) {
             return (
                 <ButtonStyle>
                     <ButtonText>
-                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Stop, mission)}>
-                            <Icon
-                                name={Icons.StopButton}
-                                style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
-                                size={40}
-                            />
-                        </Button>
-                        <Typography>{TranslateText('Stop')}</Typography>
+                        <StopMissionDialog mission={mission} />
+                        <Typography variant="caption">{TranslateText('Stop')}</Typography>
                     </ButtonText>
                     <ButtonText>
                         <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Pause, mission)}>
@@ -61,7 +50,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
                                 size={40}
                             />
                         </Button>
-                        <Typography>{TranslateText('Pause')}</Typography>
+                        <Typography variant="caption">{TranslateText('Pause')}</Typography>
                     </ButtonText>
                 </ButtonStyle>
             )
@@ -69,13 +58,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
             return (
                 <ButtonStyle>
                     <ButtonText>
-                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Stop, mission)}>
-                            <Icon
-                                name={Icons.StopButton}
-                                style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
-                                size={40}
-                            />
-                        </Button>
+                        <StopMissionDialog mission={mission} />
                         <Typography variant="caption">{TranslateText('Stop')}</Typography>
                     </ButtonText>
                     <ButtonText>
