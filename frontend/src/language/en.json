@@ -89,5 +89,8 @@
     "North": "North",
     "East": "East",
     "South": "South",
-    "West": "West"
+    "West": "West",
+    "Stop button pressed warning text": "You are about to stop the entire mission and the robot will be sent back to the charging station. The robot will start from the begining if you run the mission again.",
+    "Stop button pressed confirmation text": "Are you sure you want to stop the mission?",
+    "Stop mission": "Stop mission"
 }

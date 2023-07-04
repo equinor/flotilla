@@ -89,5 +89,8 @@
     "North": "Nord",
     "East": "Øst",
     "South": "Sør",
-    "West": "Vest"
+    "West": "Vest",
+    "Stop button pressed warning text": "Du er i ferd med å stoppe hele oppdraget og roboten vil bli sendt tilbake til ladepunktet sitt. For å kjøre oppdraget igjen må roboten starte fra begynnelsen.",
+    "Stop button pressed confirmation text": "Er du sikker på at du vil stoppe oppdraget?",
+    "Stop mission": "Stopp oppdraget"
 }
