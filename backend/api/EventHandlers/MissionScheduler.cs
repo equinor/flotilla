@@ -18,7 +18,7 @@ namespace Api.EventHandlers
                 .ReadAll(
                     new MissionQueryStringParameters
                     {
-                        Status = MissionStatus.Pending,
+                        Statuses = new List<MissionStatus> { MissionStatus.Pending },
                         OrderBy = "DesiredStartTime",
                         PageSize = 100
                     }

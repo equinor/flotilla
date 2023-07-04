@@ -307,7 +307,7 @@ namespace Api.Services
         }
 
         /// <summary>
-        /// Filters by <see cref="MissionQueryStringParameters.AssetCode"/> and <see cref="MissionQueryStringParameters.Status"/>
+        /// Filters by <see cref="MissionQueryStringParameters.AssetCode"/> and <see cref="MissionQueryStringParameters.Statuses"/>
         ///
         /// <para>Uses LINQ Expression trees (see <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees"/>)</para>
         /// </summary>
@@ -321,9 +321,9 @@ namespace Api.Services
                 : mission =>
                       mission.AssetCode.ToLower().Equals(parameters.AssetCode.Trim().ToLower());
 
-            Expression<Func<Mission, bool>> statusFilter = parameters.Status is null
+            Expression<Func<Mission, bool>> statusFilter = parameters.Statuses is null
                 ? mission => true
-                : mission => mission.Status.Equals(parameters.Status);
+                : mission => parameters.Statuses.Contains(mission.Status);
 
             Expression<Func<Mission, bool>> robotTypeFilter = parameters.RobotModelType is null
                 ? mission => true

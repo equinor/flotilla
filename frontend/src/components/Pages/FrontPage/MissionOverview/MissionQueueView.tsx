@@ -110,7 +110,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     useEffect(() => {
         const id = setInterval(() => {
             BackendAPICaller.getMissions({
-                status: MissionStatus.Pending,
+                statuses: [MissionStatus.Pending],
                 pageSize: missionPageSize,
                 orderBy: 'DesiredStartTime',
             }).then((missions) => {
