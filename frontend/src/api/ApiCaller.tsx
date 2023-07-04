@@ -132,7 +132,12 @@ export class BackendAPICaller {
         const assetCode: string | null = BackendAPICaller.assetCode
         if (assetCode) path = path + 'AssetCode=' + assetCode + '&'
 
-        if (parameters.status) path = path + 'status=' + parameters.status + '&'
+        if (parameters.statuses) {
+            parameters.statuses.forEach((status) => {
+                path = path + 'Statuses=' + status + '&'
+            })
+        }
+
         if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
         if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
         if (parameters.orderBy) path = path + 'OrderBy=' + parameters.orderBy + '&'

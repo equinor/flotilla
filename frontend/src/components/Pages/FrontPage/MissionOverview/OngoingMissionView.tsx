@@ -34,7 +34,11 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     const [missionsToDisplay, setMissionsToDisplay] = useState<Mission[]>([])
 
     const getCurrentMissions = (status: MissionStatus): Promise<PaginatedResponse<Mission>> => {
-        return BackendAPICaller.getMissions({ status: status, pageSize: missionPageSize, orderBy: 'StartTime desc' })
+        return BackendAPICaller.getMissions({
+            statuses: [status],
+            pageSize: missionPageSize,
+            orderBy: 'StartTime desc',
+        })
     }
 
     const updateOngoingMissions = useCallback(() => {

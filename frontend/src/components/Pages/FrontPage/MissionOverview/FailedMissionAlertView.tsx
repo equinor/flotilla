@@ -106,7 +106,7 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
 
     const updateRecentFailedMissions = useCallback(() => {
         const lastDismissTime: Date = getLastDismissalTime()
-        BackendAPICaller.getMissions({ status: MissionStatus.Failed, pageSize: PageSize }).then((missions) => {
+        BackendAPICaller.getMissions({ statuses: [MissionStatus.Failed], pageSize: PageSize }).then((missions) => {
             const newRecentFailedMissions = missions.content.filter((m) => new Date(m.endTime!) > lastDismissTime)
             setRecentFailedMissions(newRecentFailedMissions)
         })

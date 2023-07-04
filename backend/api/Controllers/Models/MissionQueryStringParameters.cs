@@ -11,9 +11,9 @@ namespace Api.Controllers.Models
         }
 
         /// <summary>
-        /// Filter for the current status of the mission
+        /// Filter for current status of the mission equal to any of Statuses
         /// </summary>
-        public MissionStatus? Status { get; set; }
+        public List<MissionStatus>? Statuses { get; set; }
 
         /// <summary>
         /// Filter for the asset code of the mission

@@ -1,7 +1,7 @@
 import { MissionStatus } from './Mission'
 
 export interface MissionQueryParameters {
-    status?: MissionStatus
+    statuses?: MissionStatus[]
     robotId?: string
     nameSearch?: string
     robotNameSearch?: string
