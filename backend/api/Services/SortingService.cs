@@ -1,4 +1,4 @@
-﻿using System.Linq.Dynamic.Core;
+using System.Linq.Dynamic.Core;
 using System.Reflection;
 using System.Text;
 using Api.Database.Models;
@@ -39,7 +39,8 @@ namespace Api.Services
                     pi =>
                         pi.Name.Equals(
                             propertyFromQueryName,
-                            StringComparison.Ordinal)
+                            StringComparison.InvariantCultureIgnoreCase
+                        )
                 );
 
                 if (objectProperty == null)
