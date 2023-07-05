@@ -1,7 +1,5 @@
 ﻿using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -81,7 +79,7 @@ namespace Api.Services
 
             SearchByName(ref query, parameters.NameSearch);
 
-            ApplySort(ref query, parameters.OrderBy);
+            SortingService.ApplySort(ref query, parameters.OrderBy);
 
             return await PagedList<MissionDefinition>.ToPagedListAsync(
                 query,
@@ -162,62 +160,6 @@ namespace Api.Services
 
             // Constructing the resulting lambda expression by combining parameter and body
             return Expression.Lambda<Func<MissionDefinition, bool>>(body, missionRunExpression);
-        }
-
-        private static void ApplySort(ref IQueryable<MissionDefinition> missionDefinitions, string orderByQueryString)
-        {
-            if (!missionDefinitions.Any())
-                return;
-
-            if (string.IsNullOrWhiteSpace(orderByQueryString))
-            {
-                missionDefinitions = missionDefinitions.OrderBy(x => x.Name);
-                return;
-            }
-
-            string[] orderParams = orderByQueryString
-                .Trim()
-                .Split(',')
-                .Select(parameterString => parameterString.Trim())
-                .ToArray();
-
-            var propertyInfos = typeof(MissionDefinition).GetProperties(
-                BindingFlags.Public | BindingFlags.Instance
-            );
-            var orderQueryBuilder = new StringBuilder();
-
-            foreach (string param in orderParams)
-            {
-                if (string.IsNullOrWhiteSpace(param))
-                    continue;
-
-                string propertyFromQueryName = param.Split(" ")[0];
-                var objectProperty = propertyInfos.FirstOrDefault(
-                    pi =>
-                        pi.Name.Equals(
-                            propertyFromQueryName,
-                            StringComparison.InvariantCultureIgnoreCase
-                        )
-                );
-
-                if (objectProperty == null)
-                    throw new InvalidDataException(
-                        $"Mission has no property '{propertyFromQueryName}' for ordering"
-                    );
-
-                string sortingOrder = param.EndsWith(" desc", StringComparison.OrdinalIgnoreCase)
-                  ? "descending"
-                  : "ascending";
-
-                string sortParameter = $"{objectProperty.Name} {sortingOrder}, ";
-                orderQueryBuilder.Append(sortParameter);
-            }
-
-            string orderQuery = orderQueryBuilder.ToString().TrimEnd(',', ' ');
-
-            missionDefinitions = string.IsNullOrWhiteSpace(orderQuery)
-              ? missionDefinitions.OrderBy(missionDefinition => missionDefinition.Name)
-              : missionDefinitions.OrderBy(orderQuery);
         }
     }
 }

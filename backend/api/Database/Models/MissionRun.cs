@@ -5,7 +5,7 @@ using Api.Services.Models;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
-    public class MissionRun
+    public class MissionRun : SortableRecord
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
