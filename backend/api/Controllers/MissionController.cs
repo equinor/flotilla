@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
@@ -17,7 +18,7 @@ public class MissionController : ControllerBase
     private readonly IAreaService _areaService;
     private readonly IRobotService _robotService;
     private readonly IEchoService _echoService;
-    private readonly ISourceService _sourceService;
+    private readonly ICustomMissionService _customMissionService;
     private readonly ILogger<MissionController> _logger;
     private readonly IStidService _stidService;
     private readonly IMapService _mapService;
@@ -28,7 +29,7 @@ public class MissionController : ControllerBase
         IAreaService areaService,
         IRobotService robotService,
         IEchoService echoService,
-        ISourceService sourceService,
+        ICustomMissionService customMissionService,
         ILogger<MissionController> logger,
         IMapService mapService,
         IStidService stidService
@@ -39,7 +40,7 @@ public class MissionController : ControllerBase
         _areaService = areaService;
         _robotService = robotService;
         _echoService = echoService;
-        _sourceService = sourceService;
+        _customMissionService = customMissionService;
         _mapService = mapService;
         _stidService = stidService;
         _logger = logger;
@@ -49,7 +50,7 @@ public class MissionController : ControllerBase
     /// List all mission runs in the Flotilla database
     /// </summary>
     /// <remarks>
-    /// <para> This query gets all missions </para>
+    /// <para> This query gets all mission runs </para>
     /// </remarks>
     [HttpGet("runs")]
     [Authorize(Roles = Role.Any)]
@@ -75,10 +76,10 @@ public class MissionController : ControllerBase
             return BadRequest("Max EndTime cannot be less than min EndTime");
         }
 
-        PagedList<MissionRun> missions;
+        PagedList<MissionRun> missionRuns;
         try
         {
-            missions = await _missionRunService.ReadAll(parameters);
+            missionRuns = await _missionRunService.ReadAll(parameters);
         }
         catch (InvalidDataException e)
         {
@@ -88,12 +89,12 @@ public class MissionController : ControllerBase
 
         var metadata = new
         {
-            missions.TotalCount,
-            missions.PageSize,
-            missions.CurrentPage,
-            missions.TotalPages,
-            missions.HasNext,
-            missions.HasPrevious
+            missionRuns.TotalCount,
+            missionRuns.PageSize,
+            missionRuns.CurrentPage,
+            missionRuns.TotalPages,
+            missionRuns.HasNext,
+            missionRuns.HasPrevious
         };
 
         Response.Headers.Add(
@@ -101,14 +102,14 @@ public class MissionController : ControllerBase
             JsonSerializer.Serialize(metadata)
         );
 
-        return Ok(missions);
+        return Ok(missionRuns);
     }
 
     /// <summary>
     /// List all mission definitions in the Flotilla database
     /// </summary>
     /// <remarks>
-    /// <para> This query gets all missions </para>
+    /// <para> This query gets all mission definitions </para>
     /// </remarks>
     [HttpGet("definitions")]
     [Authorize(Roles = Role.Any)]
@@ -121,11 +122,10 @@ public class MissionController : ControllerBase
         [FromQuery] MissionDefinitionQueryStringParameters parameters
     )
     {
-        // TODO: define new parameters using primarily area and source type
-        PagedList<MissionDefinition> missions;
+        PagedList<MissionDefinition> missionDefinitions;
         try
         {
-            missions = await _missionDefinitionService.ReadAll(parameters);
+            missionDefinitions = await _missionDefinitionService.ReadAll(parameters);
         }
         catch (InvalidDataException e)
         {
@@ -135,12 +135,12 @@ public class MissionController : ControllerBase
 
         var metadata = new
         {
-            missions.TotalCount,
-            missions.PageSize,
-            missions.CurrentPage,
-            missions.TotalPages,
-            missions.HasNext,
-            missions.HasPrevious
+            missionDefinitions.TotalCount,
+            missionDefinitions.PageSize,
+            missionDefinitions.CurrentPage,
+            missionDefinitions.TotalPages,
+            missionDefinitions.HasNext,
+            missionDefinitions.HasPrevious
         };
 
         Response.Headers.Add(
@@ -148,7 +148,7 @@ public class MissionController : ControllerBase
             JsonSerializer.Serialize(metadata)
         );
 
-        return Ok(missions);
+        return Ok(missionDefinitions);
     }
 
     /// <summary>
@@ -164,10 +164,10 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<MissionRun>> GetMissionRunById([FromRoute] string id)
     {
-        var mission = await _missionRunService.ReadById(id);
-        if (mission == null)
-            return NotFound($"Could not find mission with id {id}");
-        return Ok(mission);
+        var missioRun = await _missionRunService.ReadById(id);
+        if (missioRun == null)
+            return NotFound($"Could not find mission run with id {id}");
+        return Ok(missioRun);
     }
 
     /// <summary>
@@ -183,10 +183,10 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<MissionDefinition>> GetMissionDefinitionById([FromRoute] string id)
     {
-        var mission = await _missionDefinitionService.ReadById(id);
-        if (mission == null)
-            return NotFound($"Could not find mission with id {id}");
-        return Ok(mission);
+        var missionDefinition = await _missionDefinitionService.ReadById(id);
+        if (missionDefinition == null)
+            return NotFound($"Could not find mission definition with id {id}");
+        return Ok(missionDefinition);
     }
 
     /// <summary>
@@ -216,12 +216,12 @@ public class MissionController : ControllerBase
     }
 
     /// <summary>
-    /// Reschedule an existing mission
+    /// Schedule an existing mission definition
     /// </summary>
     /// <remarks>
-    /// <para> This query reschedules an existing mission and adds it to the database </para>
+    /// <para> This query schedules an existing mission and adds it to the database </para>
     /// </remarks>
-    [HttpPost("{missionId}/reschedule")]
+    [HttpPost("schedule")]
     [Authorize(Roles = Role.User)]
     [ProducesResponseType(typeof(MissionRun), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -229,42 +229,26 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<MissionRun>> Rechedule(
-        [FromRoute] string missionId,
-        [FromBody] RescheduleMissionQuery rescheduledMissionQuery
+    public async Task<ActionResult<MissionRun>> Schedule(
+        [FromBody] ScheduleMissionQuery scheduledMissionQuery
     )
     {
-        var robot = await _robotService.ReadById(rescheduledMissionQuery.RobotId);
+        var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
         if (robot is null)
-            return NotFound($"Could not find robot with id {rescheduledMissionQuery.RobotId}");
+            return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
 
-        MissionDefinition? missionDefinition;
-        try
-        {
-            missionDefinition = await _missionDefinitionService.ReadById(missionId);
-            if (missionDefinition == null)
-                return NotFound("Mission definition not found");
-        }
-        catch (HttpRequestException e)
-        {
-            if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
-            {
-                _logger.LogWarning(
-                    "Could not find mission definition with id={id}",
-                    missionId
-                );
-                return NotFound("Mission definition not found");
-            }
-
-            _logger.LogError(e, "Error getting mission database");
-            return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
-        }
+        var missionDefinition = await _missionDefinitionService.ReadById(scheduledMissionQuery.MissionDefinitionId);
+        if (missionDefinition == null)
+            return NotFound("Mission definition not found");
 
         List<MissionTask>? missionTasks;
-        switch (missionDefinition.Source.Type)
+        missionTasks = missionDefinition.Source.Type switch
         {
-            case MissionSourceType.Echo:
-                missionTasks = _echoService.GetMissionById(Int32.Parse(missionDefinition.Source.Id)).Result.Tags
+            MissionSourceType.Echo =>
+                // CultureInfo is not important here since we are not using decimal points
+                missionTasks = _echoService.GetMissionById(
+                        int.Parse(missionDefinition.Source.SourceId, new CultureInfo("en-US"))
+                    ).Result.Tags
                     .Select(
                         t =>
                         {
@@ -274,39 +258,37 @@ public class MissionController : ControllerBase
                             return new MissionTask(t, tagPosition);
                         }
                     )
-                    .ToList();
-                break;
-            case MissionSourceType.Custom:
-                missionTasks = _sourceService.GetMissionTasksFromURL(missionDefinition.Source.URL);
-                break;
-            default:
-                return BadRequest("Invalid mission source type provided");
-        }
+                    .ToList(),
+            MissionSourceType.Custom =>
+                missionTasks = await _customMissionService.GetMissionTasksFromMissionId(missionDefinition.Source.SourceId),
+            _ =>
+                throw new MissionSourceTypeException($"Mission type {missionDefinition.Source.Type} is not accounted for")
+        };
 
         if (missionTasks == null)
             return NotFound("No mission tasks were found for the requested mission");
 
-        var scheduledMission = new MissionRun
+        var missionRun = new MissionRun
         {
             Name = missionDefinition.Name,
             Robot = robot,
             MissionId = missionDefinition.Id,
             Status = MissionStatus.Pending,
-            DesiredStartTime = rescheduledMissionQuery.DesiredStartTime,
+            DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
             Tasks = missionTasks,
             AssetCode = missionDefinition.AssetCode,
             Area = missionDefinition.Area,
             MapMetadata = new MapMetadata()
         };
 
-        await _mapService.AssignMapToMission(scheduledMission);
+        await _mapService.AssignMapToMission(missionRun);
 
-        if (scheduledMission.Tasks.Any())
-            scheduledMission.CalculateEstimatedDuration();
+        if (missionRun.Tasks.Any())
+            missionRun.CalculateEstimatedDuration();
 
-        var newMission = await _missionRunService.Create(scheduledMission);
+        var newMissionRun = await _missionRunService.Create(missionRun);
 
-        return CreatedAtAction(nameof(GetMissionRunById), new { id = newMission.Id }, newMission);
+        return CreatedAtAction(nameof(GetMissionRunById), new { id = newMissionRun.Id }, newMissionRun);
     }
 
     /// <summary>
@@ -327,6 +309,8 @@ public class MissionController : ControllerBase
         [FromBody] ScheduledMissionQuery scheduledMissionQuery
     )
     {
+        // TODO: once we have a good way of creating mission definitions for echo missions,
+        //       we can delete this endpoint
         var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
         if (robot is null)
             return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
@@ -380,6 +364,7 @@ public class MissionController : ControllerBase
 
         if (area == null)
         {
+            // This is disabled for now as the Area database is not yet populated
             //return NotFound($"Could not find area with name {scheduledMissionQuery.AreaName} in asset {scheduledMissionQuery.AssetCode}");
         }
 
@@ -390,8 +375,7 @@ public class MissionController : ControllerBase
             Id = Guid.NewGuid().ToString(),
             Source = new Source
             {
-                Id = Guid.NewGuid().ToString(),
-                URL = $"robots/robot-plan/{echoMission.Id}", // Could use echoMission.URL here, but that would necessitate new retrieval methods
+                SourceId = $"{echoMission.Id}",
                 Type = MissionSourceType.Echo
             },
             Name = echoMission.Name,
@@ -400,7 +384,7 @@ public class MissionController : ControllerBase
             Area = area
         };
 
-        var scheduledMission = new MissionRun
+        var missionRun = new MissionRun
         {
             Name = echoMission.Name,
             Robot = robot,
@@ -413,16 +397,16 @@ public class MissionController : ControllerBase
             MapMetadata = new MapMetadata()
         };
 
-        await _mapService.AssignMapToMission(scheduledMission);
+        await _mapService.AssignMapToMission(missionRun);
 
-        if (scheduledMission.Tasks.Any())
-            scheduledMission.CalculateEstimatedDuration();
+        if (missionRun.Tasks.Any())
+            missionRun.CalculateEstimatedDuration();
 
         var newMissionDefinition = await _missionDefinitionService.Create(scheduledMissionDefinition);
 
-        var newMission = await _missionRunService.Create(scheduledMission);
+        var newMissionRun = await _missionRunService.Create(missionRun);
 
-        return CreatedAtAction(nameof(GetMissionRunById), new { id = newMission.Id }, newMission);
+        return CreatedAtAction(nameof(GetMissionRunById), new { id = newMissionRun.Id }, newMissionRun);
     }
 
     /// <summary>
@@ -444,11 +428,6 @@ public class MissionController : ControllerBase
         [FromBody] CustomMissionQuery customMissionQuery
     )
     {
-
-        // TODO: only allow admins
-
-        // TODO: create new endpoint for scheduling existing custom missions
-
         var robot = await _robotService.ReadById(customMissionQuery.RobotId);
         if (robot is null)
             return NotFound($"Could not find robot with id {customMissionQuery.RobotId}");
@@ -460,16 +439,13 @@ public class MissionController : ControllerBase
         if (area == null)
             return NotFound($"Could not find area with name {customMissionQuery.AreaName} in asset {customMissionQuery.AssetCode}");
 
-        string customMissionId = Guid.NewGuid().ToString();
-        var sourceURL = await _sourceService.UploadSource(customMissionId, missionTasks);
+        string sourceURL = await _customMissionService.UploadSource(missionTasks);
 
         var customMissionDefinition = new MissionDefinition
         {
-            Id = customMissionId,
             Source = new Source
             {
-                Id = Guid.NewGuid().ToString(),
-                URL = sourceURL.ToString(),
+                SourceId = sourceURL.ToString(),
                 Type = MissionSourceType.Echo
             },
             Name = customMissionQuery.Name,
@@ -500,9 +476,9 @@ public class MissionController : ControllerBase
 
         var newMissionDefinition = await _missionDefinitionService.Create(customMissionDefinition);
 
-        var newMission = await _missionRunService.Create(scheduledMission);
+        var newMissionRun = await _missionRunService.Create(scheduledMission);
 
-        return CreatedAtAction(nameof(GetMissionRunById), new { id = newMission.Id }, newMission);
+        return CreatedAtAction(nameof(GetMissionRunById), new { id = newMissionRun.Id }, newMissionRun);
     }
 
     /// <summary>
@@ -518,10 +494,10 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<MissionDefinition>> DeleteMissionDefinition([FromRoute] string id)
     {
-        var mission = await _missionDefinitionService.Delete(id);
-        if (mission is null)
+        var missionDefinition = await _missionDefinitionService.Delete(id);
+        if (missionDefinition is null)
             return NotFound($"Mission definition with id {id} not found");
-        return Ok(mission);
+        return Ok(missionDefinition);
     }
 
     /// <summary>
@@ -537,9 +513,9 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<MissionRun>> DeleteMissionRun([FromRoute] string id)
     {
-        var mission = await _missionRunService.Delete(id);
-        if (mission is null)
+        var missionRun = await _missionRunService.Delete(id);
+        if (missionRun is null)
             return NotFound($"Mission run with id {id} not found");
-        return Ok(mission);
+        return Ok(missionRun);
     }
 }

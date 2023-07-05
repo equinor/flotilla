@@ -11,34 +11,12 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        [MaxLength(200)]
+        //[Required] // See "Drive to Safe Position" mission in RobotController.cs
         public string? MissionId { get; set; }
-
-        [MaxLength(200)]
-        public string? IsarMissionId { get; set; }
 
         [Required]
         [MaxLength(200)]
         public string Name { get; set; }
-
-        [MaxLength(450)]
-        public string? Description { get; set; }
-
-        [MaxLength(450)]
-        public string? StatusReason { get; set; }
-
-        [MaxLength(1000)]
-        public string? Comment { get; set; }
-
-        [Required]
-        public string AssetCode { get; set; }
-
-        public Area? Area { get; set; }
-
-        [Required]
-        public virtual Robot Robot { get; set; }
-
-        private MissionStatus _status;
 
         [Required]
         public MissionStatus Status
@@ -55,6 +33,40 @@ namespace Api.Database.Models
             }
         }
 
+        [Required]
+        [MaxLength(200)]
+        public string AssetCode { get; set; }
+
+        [Required]
+        public DateTimeOffset DesiredStartTime { get; set; }
+
+        [Required]
+        public virtual Robot Robot { get; set; }
+
+        // The tasks are always returned ordered by their order field
+        [Required]
+        public IList<MissionTask> Tasks
+        {
+            get { return _tasks.OrderBy(t => t.TaskOrder).ToList(); }
+            set { _tasks = value; }
+        }
+
+        [MaxLength(200)]
+        public string? IsarMissionId { get; set; }
+
+        [MaxLength(450)]
+        public string? Description { get; set; }
+
+        [MaxLength(450)]
+        public string? StatusReason { get; set; }
+
+        [MaxLength(1000)]
+        public string? Comment { get; set; }
+
+        public Area? Area { get; set; }
+
+        private MissionStatus _status;
+
         public bool IsCompleted =>
             _status
                 is MissionStatus.Aborted
@@ -64,9 +76,6 @@ namespace Api.Database.Models
                     or MissionStatus.Failed;
 
         public MapMetadata? MapMetadata { get; set; }
-
-        [Required]
-        public DateTimeOffset DesiredStartTime { get; set; }
 
         public DateTimeOffset? StartTime { get; private set; }
 
@@ -78,14 +87,6 @@ namespace Api.Database.Models
         public uint? EstimatedDuration { get; set; }
 
         private IList<MissionTask> _tasks;
-
-        // The tasks are always returned ordered by their order field
-        [Required]
-        public IList<MissionTask> Tasks
-        {
-            get { return _tasks.OrderBy(t => t.TaskOrder).ToList(); }
-            set { _tasks = value; }
-        }
 
         public void UpdateWithIsarInfo(IsarMission isarMission)
         {

@@ -40,7 +40,7 @@ export function MissionPage() {
 
     useEffect(() => {
         if (missionId) {
-            BackendAPICaller.getMissionById(missionId).then((mission) => {
+            BackendAPICaller.getMissionRunById(missionId).then((mission) => {
                 setSelectedMission(mission)
                 updateVideoStreams(mission)
             })
@@ -51,7 +51,7 @@ export function MissionPage() {
         const timeDelay = 1000
         const id = setInterval(() => {
             if (missionId) {
-                BackendAPICaller.getMissionById(missionId).then((mission) => {
+                BackendAPICaller.getMissionRunById(missionId).then((mission) => {
                     setSelectedMission(mission)
                 })
             }

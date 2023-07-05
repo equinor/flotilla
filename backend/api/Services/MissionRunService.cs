@@ -14,7 +14,7 @@ namespace Api.Services
 {
     public interface IMissionRunService
     {
-        public abstract Task<MissionRun> Create(MissionRun mission);
+        public abstract Task<MissionRun> Create(MissionRun missionRun);
 
         public abstract Task<PagedList<MissionRun>> ReadAll(MissionRunQueryStringParameters parameters);
 
@@ -22,7 +22,7 @@ namespace Api.Services
 
         public abstract Task<MissionRun> Update(MissionRun mission);
 
-        public abstract Task<MissionRun?> UpdateMissionStatusByIsarMissionId(
+        public abstract Task<MissionRun?> UpdateMissionRunStatusByIsarMissionId(
             string isarMissionId,
             MissionStatus missionStatus
         );
@@ -69,34 +69,34 @@ namespace Api.Services
             _logger = logger;
         }
 
-        private IQueryable<MissionRun> GetMissionsWithSubModels()
+        private IQueryable<MissionRun> GetMissionRunsWithSubModels()
         {
             return _context.MissionRuns
-                .Include(mission => mission.Area)
-                .ThenInclude(a => a.Deck)
-                .ThenInclude(d => d.Installation)
-                .ThenInclude(i => i.Asset)
-                .Include(mission => mission.Robot)
+                .Include(missionRun => missionRun.Area)
+                .ThenInclude(area => area.Deck)
+                .ThenInclude(deck => deck.Installation)
+                .ThenInclude(installation => installation.Asset)
+                .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.VideoStreams)
-                .Include(mission => mission.Robot)
+                .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.Model)
-                .Include(mission => mission.Tasks)
+                .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(planTask => planTask.Inspections)
-                .Include(mission => mission.Tasks)
+                .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspections);
         }
 
-        public async Task<MissionRun> Create(MissionRun mission)
+        public async Task<MissionRun> Create(MissionRun missionRun)
         {
-            await _context.MissionRuns.AddAsync(mission);
+            await _context.MissionRuns.AddAsync(missionRun);
             await _context.SaveChangesAsync();
 
-            return mission;
+            return missionRun;
         }
 
         public async Task<PagedList<MissionRun>> ReadAll(MissionRunQueryStringParameters parameters)
         {
-            var query = GetMissionsWithSubModels();
+            var query = GetMissionRunsWithSubModels();
             var filter = ConstructFilter(parameters);
 
             query = query.Where(filter);
@@ -116,50 +116,50 @@ namespace Api.Services
 
         public async Task<MissionRun?> ReadById(string id)
         {
-            return await GetMissionsWithSubModels()
-                .FirstOrDefaultAsync(mission => mission.Id.Equals(id));
+            return await GetMissionRunsWithSubModels()
+                .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
         }
 
-        public async Task<MissionRun> Update(MissionRun mission)
+        public async Task<MissionRun> Update(MissionRun missionRun)
         {
-            var entry = _context.Update(mission);
+            var entry = _context.Update(missionRun);
             await _context.SaveChangesAsync();
             return entry.Entity;
         }
 
         public async Task<MissionRun?> Delete(string id)
         {
-            var mission = await GetMissionsWithSubModels()
+            var missionRun = await GetMissionRunsWithSubModels()
                 .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
-            if (mission is null)
+            if (missionRun is null)
             {
                 return null;
             }
 
-            _context.MissionRuns.Remove(mission);
+            _context.MissionRuns.Remove(missionRun);
             await _context.SaveChangesAsync();
 
-            return mission;
+            return missionRun;
         }
 
         #region ISAR Specific methods
 
         private async Task<MissionRun?> ReadByIsarMissionId(string isarMissionId)
         {
-            return await GetMissionsWithSubModels()
+            return await GetMissionRunsWithSubModels()
                 .FirstOrDefaultAsync(
-                    mission =>
-                        mission.IsarMissionId != null && mission.IsarMissionId.Equals(isarMissionId)
+                    missionRun =>
+                        missionRun.IsarMissionId != null && missionRun.IsarMissionId.Equals(isarMissionId)
                 );
         }
 
-        public async Task<MissionRun?> UpdateMissionStatusByIsarMissionId(
+        public async Task<MissionRun?> UpdateMissionRunStatusByIsarMissionId(
             string isarMissionId,
             MissionStatus missionStatus
         )
         {
-            var mission = await ReadByIsarMissionId(isarMissionId);
-            if (mission is null)
+            var missionRun = await ReadByIsarMissionId(isarMissionId);
+            if (missionRun is null)
             {
                 _logger.LogWarning(
                     "Could not update mission status for ISAR mission with id: {id} as the mission was not found",
@@ -168,11 +168,11 @@ namespace Api.Services
                 return null;
             }
 
-            mission.Status = missionStatus;
+            missionRun.Status = missionStatus;
 
             await _context.SaveChangesAsync();
 
-            return mission;
+            return missionRun;
         }
 
         public async Task<bool> UpdateTaskStatusByIsarTaskId(
@@ -181,18 +181,18 @@ namespace Api.Services
             IsarTaskStatus taskStatus
         )
         {
-            var mission = await ReadByIsarMissionId(isarMissionId);
-            if (mission is null)
+            var missionRun = await ReadByIsarMissionId(isarMissionId);
+            if (missionRun is null)
             {
                 _logger.LogWarning(
-                    "Could not update task status for ISAR task with id: {id} in mission with id: {missionId} as the mission was not found",
+                    "Could not update task status for ISAR task with id: {id} in mission run with id: {missionId} as the mission was not found",
                     isarTaskId,
                     isarMissionId
                 );
                 return false;
             }
 
-            var task = mission.GetTaskByIsarId(isarTaskId);
+            var task = missionRun.GetTaskByIsarId(isarTaskId);
             if (task is null)
             {
                 _logger.LogWarning(
@@ -203,12 +203,12 @@ namespace Api.Services
             }
 
             task.UpdateStatus(taskStatus);
-            if (taskStatus == IsarTaskStatus.InProgress && mission.Status != MissionStatus.Ongoing)
+            if (taskStatus == IsarTaskStatus.InProgress && missionRun.Status != MissionStatus.Ongoing)
             {
                 // If mission was set to failed and then ISAR recovered connection, we need to reset the coming tasks
-                mission.Status = MissionStatus.Ongoing;
+                missionRun.Status = MissionStatus.Ongoing;
                 foreach (
-                    var taskItem in mission.Tasks.Where(
+                    var taskItem in missionRun.Tasks.Where(
                         taskItem => taskItem.TaskOrder > task.TaskOrder
                     )
                 )
@@ -233,8 +233,8 @@ namespace Api.Services
             IsarStepStatus stepStatus
         )
         {
-            var mission = await ReadByIsarMissionId(isarMissionId);
-            if (mission is null)
+            var missionRun = await ReadByIsarMissionId(isarMissionId);
+            if (missionRun is null)
             {
                 _logger.LogWarning(
                     "Could not update step status for ISAR inspection with id: {id} in mission with id: {missionId} as the mission was not found",
@@ -244,7 +244,7 @@ namespace Api.Services
                 return false;
             }
 
-            var task = mission.GetTaskByIsarId(isarTaskId);
+            var task = missionRun.GetTaskByIsarId(isarTaskId);
             if (task is null)
             {
                 _logger.LogWarning(
@@ -274,35 +274,35 @@ namespace Api.Services
 
         #endregion ISAR Specific methods
 
-        private static void SearchByName(ref IQueryable<MissionRun> missions, string? name)
+        private static void SearchByName(ref IQueryable<MissionRun> missionRuns, string? name)
         {
-            if (!missions.Any() || string.IsNullOrWhiteSpace(name))
+            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(name))
                 return;
 
-            missions = missions.Where(
-                mission =>
-                    mission.Name != null && mission.Name.ToLower().Contains(name.Trim().ToLower())
+            missionRuns = missionRuns.Where(
+                missionRun =>
+                    missionRun.Name != null && missionRun.Name.ToLower().Contains(name.Trim().ToLower())
             );
         }
 
-        private static void SearchByRobotName(ref IQueryable<MissionRun> missions, string? robotName)
+        private static void SearchByRobotName(ref IQueryable<MissionRun> missionRuns, string? robotName)
         {
-            if (!missions.Any() || string.IsNullOrWhiteSpace(robotName))
+            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(robotName))
                 return;
 
-            missions = missions.Where(
-                mission => mission.Robot.Name.ToLower().Contains(robotName.Trim().ToLower())
+            missionRuns = missionRuns.Where(
+                missionRun => missionRun.Robot.Name.ToLower().Contains(robotName.Trim().ToLower())
             );
         }
 
-        private static void SearchByTag(ref IQueryable<MissionRun> missions, string? tag)
+        private static void SearchByTag(ref IQueryable<MissionRun> missionRuns, string? tag)
         {
-            if (!missions.Any() || string.IsNullOrWhiteSpace(tag))
+            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(tag))
                 return;
 
-            missions = missions.Where(
-                mission =>
-                    mission.Tasks.Any(
+            missionRuns = missionRuns.Where(
+                missionRun =>
+                    missionRun.Tasks.Any(
                         task =>
                             task.TagId != null
                             && task.TagId.ToLower().Contains(tag.Trim().ToLower())
@@ -321,26 +321,26 @@ namespace Api.Services
         )
         {
             Expression<Func<MissionRun, bool>> areaFilter = parameters.Area is null
-                ? mission => true
-                : mission =>
-                      mission.Area.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
+                ? missionRun => true
+                : missionRun =>
+                      missionRun.Area.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
 
             Expression<Func<MissionRun, bool>> assetFilter = parameters.AssetCode is null
-                ? mission => true
-                : mission =>
-                      mission.AssetCode.ToLower().Equals(parameters.AssetCode.Trim().ToLower());
+                ? missionRun => true
+                : missionRun =>
+                      missionRun.AssetCode.ToLower().Equals(parameters.AssetCode.Trim().ToLower());
 
             Expression<Func<MissionRun, bool>> statusFilter = parameters.Statuses is null
                 ? mission => true
                 : mission => parameters.Statuses.Contains(mission.Status);
 
             Expression<Func<MissionRun, bool>> robotTypeFilter = parameters.RobotModelType is null
-                ? mission => true
-                : mission => mission.Robot.Model.Type.Equals(parameters.RobotModelType);
+                ? missionRun => true
+                : missionRun => missionRun.Robot.Model.Type.Equals(parameters.RobotModelType);
 
             Expression<Func<MissionRun, bool>> robotIdFilter = parameters.RobotId is null
-                ? mission => true
-                : mission => mission.Robot.Id.Equals(parameters.RobotId);
+                ? missionRun => true
+                : missionRun => missionRun.Robot.Id.Equals(parameters.RobotId);
 
             Expression<Func<MissionRun, bool>> inspectionTypeFilter = parameters.InspectionTypes is null
                 ? mission => true
@@ -353,20 +353,20 @@ namespace Api.Services
 
             var minStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinStartTime);
             var maxStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxStartTime);
-            Expression<Func<MissionRun, bool>> startTimeFilter = mission =>
-                mission.StartTime == null
+            Expression<Func<MissionRun, bool>> startTimeFilter = missionRun =>
+                missionRun.StartTime == null
                 || (
-                    DateTimeOffset.Compare(mission.StartTime.Value, minStartTime) >= 0
-                    && DateTimeOffset.Compare(mission.StartTime.Value, maxStartTime) <= 0
+                    DateTimeOffset.Compare(missionRun.StartTime.Value, minStartTime) >= 0
+                    && DateTimeOffset.Compare(missionRun.StartTime.Value, maxStartTime) <= 0
                 );
 
             var minEndTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinEndTime);
             var maxEndTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxEndTime);
-            Expression<Func<MissionRun, bool>> endTimeFilter = mission =>
-                mission.EndTime == null
+            Expression<Func<MissionRun, bool>> endTimeFilter = missionRun =>
+                missionRun.EndTime == null
                 || (
-                    DateTimeOffset.Compare(mission.EndTime.Value, minEndTime) >= 0
-                    && DateTimeOffset.Compare(mission.EndTime.Value, maxEndTime) <= 0
+                    DateTimeOffset.Compare(missionRun.EndTime.Value, minEndTime) >= 0
+                    && DateTimeOffset.Compare(missionRun.EndTime.Value, maxEndTime) <= 0
                 );
 
             var minDesiredStartTime = DateTimeOffset.FromUnixTimeSeconds(
@@ -375,29 +375,29 @@ namespace Api.Services
             var maxDesiredStartTime = DateTimeOffset.FromUnixTimeSeconds(
                 parameters.MaxDesiredStartTime
             );
-            Expression<Func<MissionRun, bool>> desiredStartTimeFilter = mission =>
-                DateTimeOffset.Compare(mission.DesiredStartTime, minDesiredStartTime) >= 0
-                && DateTimeOffset.Compare(mission.DesiredStartTime, maxDesiredStartTime) <= 0;
+            Expression<Func<MissionRun, bool>> desiredStartTimeFilter = missionRun =>
+                DateTimeOffset.Compare(missionRun.DesiredStartTime, minDesiredStartTime) >= 0
+                && DateTimeOffset.Compare(missionRun.DesiredStartTime, maxDesiredStartTime) <= 0;
 
             // The parameter of the filter expression
-            var mission = Expression.Parameter(typeof(MissionRun));
+            var missionRun = Expression.Parameter(typeof(MissionRun));
 
             // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
             Expression body = Expression.AndAlso(
-                Expression.Invoke(assetFilter, mission),
+                Expression.Invoke(assetFilter, missionRun),
                 Expression.AndAlso(
-                    Expression.Invoke(statusFilter, mission),
+                    Expression.Invoke(statusFilter, missionRun),
                     Expression.AndAlso(
-                        Expression.Invoke(robotIdFilter, mission),
+                        Expression.Invoke(robotIdFilter, missionRun),
                         Expression.AndAlso(
-                            Expression.Invoke(inspectionTypeFilter, mission),
+                            Expression.Invoke(inspectionTypeFilter, missionRun),
                             Expression.AndAlso(
-                                Expression.Invoke(desiredStartTimeFilter, mission),
+                                Expression.Invoke(desiredStartTimeFilter, missionRun),
                                 Expression.AndAlso(
-                                    Expression.Invoke(startTimeFilter, mission),
+                                    Expression.Invoke(startTimeFilter, missionRun),
                                     Expression.AndAlso(
-                                        Expression.Invoke(endTimeFilter, mission),
-                                        Expression.Invoke(robotTypeFilter, mission)
+                                        Expression.Invoke(endTimeFilter, missionRun),
+                                        Expression.Invoke(robotTypeFilter, missionRun)
                                     )
                                 )
                             )
@@ -407,17 +407,17 @@ namespace Api.Services
             );
 
             // Constructing the resulting lambda expression by combining parameter and body
-            return Expression.Lambda<Func<MissionRun, bool>>(body, mission);
+            return Expression.Lambda<Func<MissionRun, bool>>(body, missionRun);
         }
 
-        private static void ApplySort(ref IQueryable<MissionRun> missions, string orderByQueryString)
+        private static void ApplySort(ref IQueryable<MissionRun> missionRuns, string orderByQueryString)
         {
-            if (!missions.Any())
+            if (!missionRuns.Any())
                 return;
 
             if (string.IsNullOrWhiteSpace(orderByQueryString))
             {
-                missions = missions.OrderBy(x => x.Name);
+                missionRuns = missionRuns.OrderBy(x => x.Name);
                 return;
             }
 
@@ -448,7 +448,7 @@ namespace Api.Services
 
                 if (objectProperty == null)
                     throw new InvalidDataException(
-                        $"Mission has no property '{propertyFromQueryName}' for ordering"
+                        $"MissionRun has no property '{propertyFromQueryName}' for ordering"
                     );
 
                 string sortingOrder = param.EndsWith(" desc", StringComparison.OrdinalIgnoreCase)
@@ -461,9 +461,9 @@ namespace Api.Services
 
             string orderQuery = orderQueryBuilder.ToString().TrimEnd(',', ' ');
 
-            missions = string.IsNullOrWhiteSpace(orderQuery)
-              ? missions.OrderBy(mission => mission.Name)
-              : missions.OrderBy(orderQuery);
+            missionRuns = string.IsNullOrWhiteSpace(orderQuery)
+              ? missionRuns.OrderBy(missionRun => missionRun.Name)
+              : missionRuns.OrderBy(orderQuery);
         }
     }
 }

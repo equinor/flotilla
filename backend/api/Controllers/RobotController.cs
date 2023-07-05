@@ -16,7 +16,7 @@ public class RobotController : ControllerBase
     private readonly ILogger<RobotController> _logger;
     private readonly IRobotService _robotService;
     private readonly IIsarService _isarService;
-    private readonly IMissionRunService _missionService;
+    private readonly IMissionRunService _missionRunService;
     private readonly IRobotModelService _robotModelService;
     private readonly IAreaService _areaService;
 
@@ -24,7 +24,7 @@ public class RobotController : ControllerBase
         ILogger<RobotController> logger,
         IRobotService robotService,
         IIsarService isarService,
-        IMissionRunService missionService,
+        IMissionRunService missionRunService,
         IRobotModelService robotModelService,
         IAreaService areaService
     )
@@ -32,7 +32,7 @@ public class RobotController : ControllerBase
         _logger = logger;
         _robotService = robotService;
         _isarService = isarService;
-        _missionService = missionService;
+        _missionRunService = missionRunService;
         _robotModelService = robotModelService;
         _areaService = areaService;
     }
@@ -324,14 +324,14 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
-    /// Start the mission in the database with the corresponding 'missionId' for the robot with id 'robotId'
+    /// Start the mission in the database with the corresponding 'missionRunId' for the robot with id 'robotId'
     /// </summary>
     /// <remarks>
     /// <para> This query starts a mission for a given robot </para>
     /// </remarks>
     [HttpPost]
     [Authorize(Roles = Role.Admin)]
-    [Route("{robotId}/start/{missionId}")]
+    [Route("{robotId}/start/{missionRunId}")]
     [ProducesResponseType(typeof(MissionRun), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -340,7 +340,7 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<MissionRun>> StartMission(
         [FromRoute] string robotId,
-        [FromRoute] string missionId
+        [FromRoute] string missionRunId
     )
     {
         var robot = await _robotService.ReadById(robotId);
@@ -360,18 +360,18 @@ public class RobotController : ControllerBase
             return Conflict($"The Robot is not available ({robot.Status})");
         }
 
-        var mission = await _missionService.ReadById(missionId);
+        var missionRun = await _missionRunService.ReadById(missionRunId);
 
-        if (mission == null)
+        if (missionRun == null)
         {
-            _logger.LogWarning("Could not find mission with id={id}", missionId);
+            _logger.LogWarning("Could not find mission with id={id}", missionRunId);
             return NotFound("Mission not found");
         }
 
         IsarMission isarMission;
         try
         {
-            isarMission = await _isarService.StartMission(robot, mission);
+            isarMission = await _isarService.StartMission(robot, missionRun);
         }
         catch (HttpRequestException e)
         {
@@ -399,26 +399,26 @@ public class RobotController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 
-        mission.UpdateWithIsarInfo(isarMission);
-        mission.Status = MissionStatus.Ongoing;
+        missionRun.UpdateWithIsarInfo(isarMission);
+        missionRun.Status = MissionStatus.Ongoing;
 
-        await _missionService.Update(mission);
+        await _missionRunService.Update(missionRun);
 
         if (robot.CurrentMissionId != null)
         {
-            var orphanedMission = await _missionService.ReadById(robot.CurrentMissionId);
-            if (orphanedMission != null)
+            var orphanedMissionRun = await _missionRunService.ReadById(robot.CurrentMissionId);
+            if (orphanedMissionRun != null)
             {
-                orphanedMission.SetToFailed();
-                await _missionService.Update(orphanedMission);
+                orphanedMissionRun.SetToFailed();
+                await _missionRunService.Update(orphanedMissionRun);
             }
         }
 
         robot.Status = RobotStatus.Busy;
-        robot.CurrentMissionId = mission.Id;
+        robot.CurrentMissionId = missionRun.Id;
         await _robotService.Update(robot);
 
-        return Ok(mission);
+        return Ok(missionRun);
     }
 
     /// <summary>
@@ -679,11 +679,12 @@ public class RobotController : ControllerBase
             return NotFound("Area not found");
         }
 
-        var mission = new MissionRun
+        var missionRun = new MissionRun
         {
             Name = "Localization Mission",
             Robot = robot,
             Area = area,
+            AssetCode = "NA",
             Status = MissionStatus.Pending,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(),
@@ -714,16 +715,16 @@ public class RobotController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 
-        mission.UpdateWithIsarInfo(isarMission);
-        mission.Status = MissionStatus.Ongoing;
-        await _missionService.Create(mission);
+        missionRun.UpdateWithIsarInfo(isarMission);
+        missionRun.Status = MissionStatus.Ongoing;
+
+        await _missionRunService.Create(missionRun);
 
         robot.Status = RobotStatus.Busy;
-        robot.CurrentMissionId = mission.Id;
-
-        robot.CurrentArea = area;
+        robot.CurrentMissionId = missionRun.Id;
         await _robotService.Update(robot);
-        return Ok(mission);
+        robot.CurrentArea = area;
+        return Ok(missionRun);
     }
 
     /// <summary>
@@ -741,7 +742,7 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<MissionRun>> SafePosition(
+    public async Task<ActionResult<MissionRun>> SendRobotToSafePosition(
         [FromRoute] string robotId,
         [FromRoute] string asset,
         [FromRoute] string areaName
@@ -806,7 +807,8 @@ public class RobotController : ControllerBase
             InspectionTarget = new Position(),
             TaskOrder = 0
         };
-        var mission = new MissionRun
+        // TODO: The MissionId is nullable because of this mission
+        var missionRun = new MissionRun
         {
             Name = "Drive to Safe Position",
             Robot = robot,
@@ -821,7 +823,7 @@ public class RobotController : ControllerBase
         IsarMission isarMission;
         try
         {
-            isarMission = await _isarService.StartMission(robot, mission);
+            isarMission = await _isarService.StartMission(robot, missionRun);
         }
         catch (HttpRequestException e)
         {
@@ -842,15 +844,15 @@ public class RobotController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, message);
         }
 
-        mission.UpdateWithIsarInfo(isarMission);
-        mission.Status = MissionStatus.Ongoing;
+        missionRun.UpdateWithIsarInfo(isarMission);
+        missionRun.Status = MissionStatus.Ongoing;
 
-        await _missionService.Create(mission);
+        await _missionRunService.Create(missionRun);
 
         robot.Status = RobotStatus.Busy;
-        robot.CurrentMissionId = mission.Id;
+        robot.CurrentMissionId = missionRun.Id;
         await _robotService.Update(robot);
-        return Ok(mission);
+        return Ok(missionRun);
     }
 
     private async void OnIsarUnavailable(Robot robot)
@@ -859,14 +861,14 @@ public class RobotController : ControllerBase
         robot.Status = RobotStatus.Offline;
         if (robot.CurrentMissionId != null)
         {
-            var mission = await _missionService.ReadById(robot.CurrentMissionId);
-            if (mission != null)
+            var missionRun = await _missionRunService.ReadById(robot.CurrentMissionId);
+            if (missionRun != null)
             {
-                mission.SetToFailed();
-                await _missionService.Update(mission);
+                missionRun.SetToFailed();
+                await _missionRunService.Update(missionRun);
                 _logger.LogWarning(
                     "Mission '{id}' failed because ISAR could not be reached",
-                    mission.Id
+                    missionRun.Id
                 );
             }
         }
@@ -902,5 +904,4 @@ public class RobotController : ControllerBase
         var pos2 = pose2.Position;
         return (float)Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2) + Math.Pow(pos1.Z - pos2.Z, 2));
     }
-
 }

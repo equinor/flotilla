@@ -15,7 +15,6 @@ namespace Api.Services
         public abstract Task<EchoMission> GetMissionById(int missionId);
 
         public abstract Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
-
         public abstract Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId);
     }
 
@@ -79,40 +78,13 @@ namespace Api.Services
             if (echoMission is null)
                 throw new JsonException("Failed to deserialize mission from Echo");
 
-            var mission = ProcessEchoMission(echoMission);
-            if (mission == null)
+            var processedEchoMission = ProcessEchoMission(echoMission);
+            if (processedEchoMission == null)
             {
                 throw new InvalidDataException($"EchoMission with id: {missionId} is invalid.");
             }
 
-            return mission;
-        }
-
-        public async Task<EchoMission> GetMissionByPath(string relativePath)
-        {
-            var response = await _echoApi.CallWebApiForAppAsync(
-                ServiceName,
-                options =>
-                {
-                    options.HttpMethod = HttpMethod.Get;
-                    options.RelativePath = relativePath;
-                }
-            );
-
-            response.EnsureSuccessStatusCode();
-
-            var echoMission = await response.Content.ReadFromJsonAsync<EchoMissionResponse>();
-
-            if (echoMission is null)
-                throw new JsonException("Failed to deserialize mission from Echo");
-
-            var mission = ProcessEchoMission(echoMission);
-            if (mission == null)
-            {
-                throw new InvalidDataException($"EchoMission with relative path: {relativePath} is invalid.");
-            }
-
-            return mission;
+            return processedEchoMission;
         }
 
         public async Task<IList<EchoPlantInfo>> GetEchoPlantInfos()
@@ -207,13 +179,13 @@ namespace Api.Services
                     continue;
                 try
                 {
-                    var mission = new CondensedMissionDefinition()
+                    var condensedEchoMissionDefinition = new CondensedMissionDefinition()
                     {
                         EchoMissionId = echoMission.Id,
                         Name = echoMission.Name,
                         AssetCode = echoMission.InstallationCode,
                     };
-                    availableMissions.Add(mission);
+                    availableMissions.Add(condensedEchoMissionDefinition);
                 }
                 catch (InvalidDataException e)
                 {

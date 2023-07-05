@@ -25,11 +25,11 @@ namespace Api.Services.Models
             Tasks = tasks;
         }
 
-        public IsarMissionDefinition(MissionRun mission)
+        public IsarMissionDefinition(MissionRun missionRun)
         {
-            Id = mission.IsarMissionId;
-            Name = mission.Name;
-            Tasks = mission.Tasks.Select(task => new IsarTaskDefinition(task, mission)).ToList();
+            Id = missionRun.IsarMissionId;
+            Name = missionRun.Name;
+            Tasks = missionRun.Tasks.Select(task => new IsarTaskDefinition(task, missionRun)).ToList();
         }
     }
 
@@ -47,7 +47,7 @@ namespace Api.Services.Models
         [JsonPropertyName("inspections")]
         public List<IsarInspectionDefinition> Inspections { get; set; }
 
-        public IsarTaskDefinition(MissionTask missionTask, MissionRun mission)
+        public IsarTaskDefinition(MissionTask missionTask, MissionRun missionRun)
         {
             Id = missionTask.IsarTaskId;
             Pose = new IsarPose(missionTask.RobotPose);
@@ -55,7 +55,7 @@ namespace Api.Services.Models
             var isarInspections = new List<IsarInspectionDefinition>();
             foreach (var inspection in missionTask.Inspections)
             {
-                isarInspections.Add(new IsarInspectionDefinition(inspection, missionTask, mission));
+                isarInspections.Add(new IsarInspectionDefinition(inspection, missionTask, missionRun));
             }
             Inspections = isarInspections;
         }
@@ -81,7 +81,7 @@ namespace Api.Services.Models
         [JsonPropertyName("metadata")]
         public Dictionary<string, string?>? Metadata { get; set; }
 
-        public IsarInspectionDefinition(Inspection inspection, MissionTask task, MissionRun mission)
+        public IsarInspectionDefinition(Inspection inspection, MissionTask task, MissionRun missionRun)
         {
             Id = inspection.IsarStepId;
             Type = inspection.InspectionType.ToString();
@@ -95,12 +95,12 @@ namespace Api.Services.Models
             Duration = inspection.VideoDuration;
             var metadata = new Dictionary<string, string?>
             {
-                { "map", mission.MapMetadata?.MapName },
-                { "description", mission.Description },
-                { "estimated_duration", mission.EstimatedDuration.ToString() },
-                { "asset_code", mission.AssetCode },
-                { "mission_name", mission.Name },
-                { "status_reason", mission.StatusReason }
+                { "map", missionRun.MapMetadata?.MapName },
+                { "description", missionRun.Description },
+                { "estimated_duration", missionRun.EstimatedDuration.ToString() },
+                { "asset_code", missionRun.AssetCode },
+                { "mission_name", missionRun.Name },
+                { "status_reason", missionRun.StatusReason }
             };
             Metadata = metadata;
         }

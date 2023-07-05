@@ -102,17 +102,104 @@ namespace Api.Test
             GC.SuppressFinalize(this);
         }
 
+        private async Task PopulateAreaDb(string assetName, string installationName, string deckName, string areaName)
+        {
+            string assetUrl = $"/assets";
+            string installationUrl = $"/installations";
+            string deckUrl = $"/decks";
+            string areaUrl = $"/areas";
+            var testPose = new Pose
+            {
+                Position = new Position
+                {
+                    X = 1,
+                    Y = 2,
+                    Z = 2
+                },
+                Orientation = new Orientation
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                    W = 1
+                }
+            };
+
+            var assetQuery = new CreateAssetQuery
+            {
+                AssetCode = assetName,
+                Name = assetName
+            };
+
+            var installationQuery = new CreateInstallationQuery
+            {
+                AssetCode = assetName,
+                InstallationCode = installationName,
+                Name = installationName
+            };
+
+            var deckQuery = new CreateDeckQuery
+            {
+                AssetCode = assetName,
+                InstallationCode = installationName,
+                Name = deckName
+            };
+
+            var areaQuery = new CreateAreaQuery
+            {
+                AssetCode = assetName,
+                InstallationCode = installationName,
+                DeckName = deckName,
+                AreaName = areaName,
+                DefaultLocalizationPose = testPose
+            };
+
+            var assetContent = new StringContent(
+                JsonSerializer.Serialize(assetQuery),
+                null,
+                "application/json"
+            );
+
+            var installationContent = new StringContent(
+                JsonSerializer.Serialize(installationQuery),
+                null,
+                "application/json"
+            );
+
+            var deckContent = new StringContent(
+                JsonSerializer.Serialize(deckQuery),
+                null,
+                "application/json"
+            );
+
+            var areaContent = new StringContent(
+                JsonSerializer.Serialize(areaQuery),
+                null,
+                "application/json"
+            );
+
+            // Act
+            var assetResponse = await _client.PostAsync(assetUrl, assetContent);
+            Assert.NotNull(assetResponse);
+            var installationResponse = await _client.PostAsync(installationUrl, installationContent);
+            Assert.NotNull(installationResponse);
+            var deckResponse = await _client.PostAsync(deckUrl, deckContent);
+            Assert.NotNull(deckResponse);
+            var areaResponse = await _client.PostAsync(areaUrl, areaContent);
+            Assert.NotNull(areaResponse);
+        }
+
         #region MissionsController
         [Fact]
         public async Task MissionsTest()
         {
             string url = "/missions/runs";
             var response = await _client.GetAsync(url);
-            var missions = await response.Content.ReadFromJsonAsync<List<MissionRun>>(
+            var missionRuns = await response.Content.ReadFromJsonAsync<List<MissionRun>>(
                 _serializerOptions
             );
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(missions != null && missions.Count == 3);
+            Assert.True(missionRuns != null && missionRuns.Count == 3);
         }
 
         [Fact]
@@ -177,22 +264,25 @@ namespace Api.Test
         public async Task StartMissionTest()
         {
             // Arrange
-            string url = "/robots";
-            var response = await _client.GetAsync(url);
+            string robotUrl = "/robots";
+            string missionsUrl = "/missions";
+            var response = await _client.GetAsync(robotUrl);
             Assert.True(response.IsSuccessStatusCode);
             var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
             Assert.True(robots != null);
             var robot = robots[0];
             string robotId = robot.Id;
+            string testAsset = "TestAsset";
+            string testArea = "testArea";
+            int echoMissionId = 95;
 
             // Act
-            url = "/missions";
             var query = new ScheduledMissionQuery
             {
                 RobotId = robotId,
-                AssetCode = "JSV",
-                AreaName = "testArea",
-                EchoMissionId = 95,
+                AssetCode = testAsset,
+                AreaName = testArea,
+                EchoMissionId = echoMissionId,
                 DesiredStartTime = DateTimeOffset.UtcNow
             };
             var content = new StringContent(
@@ -200,14 +290,14 @@ namespace Api.Test
                 null,
                 "application/json"
             );
-            response = await _client.PostAsync(url, content);
+            response = await _client.PostAsync(missionsUrl, content);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var mission = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            Assert.True(mission != null);
-            Assert.True(mission.Id != null);
-            Assert.True(mission.Status == MissionStatus.Pending);
+            var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            Assert.True(missionRun != null);
+            Assert.True(missionRun.Id != null);
+            Assert.True(missionRun.Status == MissionStatus.Pending);
         }
 
         [Fact]
@@ -218,6 +308,9 @@ namespace Api.Test
             string testInstallation = "TestInstallation";
             string testDeck = "testDeck2";
             string testArea = "testArea";
+            string assetUrl = $"/assets";
+            string installationUrl = $"/installations";
+            string deckUrl = $"/decks";
             string areaUrl = $"/areas";
             var testPose = new Pose
             {
@@ -236,25 +329,69 @@ namespace Api.Test
                 }
             };
 
-            var query = new CreateAreaQuery
+            var assetQuery = new CreateAssetQuery
             {
                 AssetCode = testAsset,
-                InstallationName = testInstallation,
+                Name = testAsset
+            };
+
+            var installationQuery = new CreateInstallationQuery
+            {
+                AssetCode = testAsset,
+                InstallationCode = testInstallation,
+                Name = testInstallation
+            };
+
+            var deckQuery = new CreateDeckQuery
+            {
+                AssetCode = testAsset,
+                InstallationCode = testInstallation,
+                Name = testDeck
+            };
+
+            var areaQuery = new CreateAreaQuery
+            {
+                AssetCode = testAsset,
+                InstallationCode = testInstallation,
                 DeckName = testDeck,
                 AreaName = testArea,
                 DefaultLocalizationPose = testPose
             };
 
-            var content = new StringContent(
-                JsonSerializer.Serialize(query),
+            var assetContent = new StringContent(
+                JsonSerializer.Serialize(assetQuery),
+                null,
+                "application/json"
+            );
+
+            var installationContent = new StringContent(
+                JsonSerializer.Serialize(installationQuery),
+                null,
+                "application/json"
+            );
+
+            var deckContent = new StringContent(
+                JsonSerializer.Serialize(deckQuery),
+                null,
+                "application/json"
+            );
+
+            var areaContent = new StringContent(
+                JsonSerializer.Serialize(areaQuery),
                 null,
                 "application/json"
             );
 
             // Act
-            var areaResponse = await _client.PostAsync(areaUrl, content);
+            var assetResponse = await _client.PostAsync(assetUrl, assetContent);
+            var installationResponse = await _client.PostAsync(installationUrl, installationContent);
+            var deckResponse = await _client.PostAsync(deckUrl, deckContent);
+            var areaResponse = await _client.PostAsync(areaUrl, areaContent);
 
             // Assert
+            Assert.True(assetResponse.IsSuccessStatusCode);
+            Assert.True(installationResponse.IsSuccessStatusCode);
+            Assert.True(deckResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<Area>(_serializerOptions);
             Assert.True(area != null);
@@ -291,6 +428,9 @@ namespace Api.Test
                 null,
                 "application/json"
             );
+
+            await PopulateAreaDb("testAsset", "testInstallation", "testDeck", "testArea");
+
             var areaResponse = await _client.PostAsync(addSafePositionUrl, content);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<Area>(_serializerOptions);
@@ -311,10 +451,10 @@ namespace Api.Test
 
             // Assert
             Assert.True(missionResponse.IsSuccessStatusCode);
-            var mission = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            Assert.True(mission != null);
+            var missionRun = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            Assert.True(missionRun != null);
             Assert.True(
-                JsonSerializer.Serialize(mission.Tasks[0].RobotPose.Position) ==
+                JsonSerializer.Serialize(missionRun.Tasks[0].RobotPose.Position) ==
                 JsonSerializer.Serialize(testPosition)
             );
         }

@@ -8,7 +8,7 @@ namespace Api.Services
 {
     public interface IIsarService
     {
-        public abstract Task<IsarMission> StartMission(Robot robot, MissionRun mission);
+        public abstract Task<IsarMission> StartMission(Robot robot, MissionRun missionRun);
 
         public abstract Task<IsarControlMissionResponse> StopMission(Robot robot);
 
@@ -68,13 +68,13 @@ namespace Api.Services
             return response;
         }
 
-        public async Task<IsarMission> StartMission(Robot robot, MissionRun mission)
+        public async Task<IsarMission> StartMission(Robot robot, MissionRun missionRun)
         {
             var response = await CallApi(
                 HttpMethod.Post,
                 robot.IsarUri,
                 "schedule/start-mission",
-                new { mission_definition = new IsarMissionDefinition(mission) }
+                new { mission_definition = new IsarMissionDefinition(missionRun) }
             );
 
             if (!response.IsSuccessStatusCode)

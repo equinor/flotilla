@@ -18,7 +18,7 @@ namespace Api.EventHandlers
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
 
-        private IMissionRunService MissionService =>
+        private IMissionRunService MissionRunService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
         private readonly Dictionary<string, System.Timers.Timer> _isarConnectionTimers = new();
@@ -119,16 +119,16 @@ namespace Api.EventHandlers
                 robot.Status = RobotStatus.Offline;
                 if (robot.CurrentMissionId != null)
                 {
-                    var mission = await MissionService.ReadById(robot.CurrentMissionId);
-                    if (mission != null)
+                    var missionRun = await MissionRunService.ReadById(robot.CurrentMissionId);
+                    if (missionRun != null)
                     {
                         _logger.LogError(
                             "Mission '{missionId}' ('{missionName}') failed due to ISAR timeout",
-                            mission.Id,
-                            mission.Name
+                            missionRun.Id,
+                            missionRun.Name
                         );
-                        mission.SetToFailed();
-                        await MissionService.Update(mission);
+                        missionRun.SetToFailed();
+                        await MissionRunService.Update(missionRun);
                     }
                 }
                 robot.CurrentMissionId = null;

@@ -246,7 +246,10 @@ The access matrix looks like this:
 
 |                            | **Read Only** | **User** | **Admin** |
 | -------------------------- | ------------- | -------- | --------- |
-| Asset Decks                | Read          | Read     | CRUD      |
+| Area                       | Read          | Read     | CRUD      |
+| Deck                       | Read          | Read     | CRUD      |
+| Installation               | Read          | Read     | CRUD      |
+| Asset                      | Read          | Read     | CRUD      |
 | Echo                       | Read          | Read     | CRUD      |
 | Missions                   | Read          | Read     | CRUD      |
 | Robots                     | Read          | Read     | CRUD      |
