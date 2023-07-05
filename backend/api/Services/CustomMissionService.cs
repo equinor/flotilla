@@ -25,11 +25,6 @@ namespace Api.Services
             _blobService = blobService;
         }
 
-        public async Task<Uri> UploadFile(string fileName, Stream fileStream)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<string> UploadSource(List<MissionTask> tasks)
         {
             string json = JsonSerializer.Serialize(tasks);
