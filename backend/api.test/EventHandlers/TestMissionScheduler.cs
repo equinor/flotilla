@@ -24,12 +24,12 @@ namespace Api.Test.EventHandlers
     {
         private static readonly Asset testAsset = new()
         {
-            ShortName = "test",
+            AssetCode = "test",
             Name = "test test"
         };
         private static readonly Installation testInstallation = new()
         {
-            ShortName = "test",
+            InstallationCode = "test",
             Name = "test test",
             Asset = testAsset
         };
@@ -71,7 +71,7 @@ namespace Api.Test.EventHandlers
             };
 
         private readonly MissionScheduler _scheduledMissionEventHandler;
-        private readonly IMissionRunService _missionService;
+        private readonly IMissionRunService _missionRunService;
         private readonly IRobotService _robotService;
         private readonly RobotControllerMock _robotControllerMock;
         private readonly FlotillaDbContext _context;
@@ -85,7 +85,7 @@ namespace Api.Test.EventHandlers
 
             // Mock ScheduledMissionService:
             _context = fixture.NewContext;
-            _missionService = new MissionRunService(_context, missionLogger);
+            _missionRunService = new MissionRunService(_context, missionLogger);
             _robotService = new RobotService(_context);
             _robotControllerMock = new RobotControllerMock();
 
@@ -94,7 +94,7 @@ namespace Api.Test.EventHandlers
             // Mock injection of MissionService:
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IMissionRunService)))
-                .Returns(_missionService);
+                .Returns(_missionRunService);
             // Mock injection of RobotService:
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IRobotService)))
@@ -137,7 +137,7 @@ namespace Api.Test.EventHandlers
         private async void AssertExpectedStatusChange(
             MissionStatus preStatus,
             MissionStatus postStatus,
-            MissionRun mission
+            MissionRun missionRun
         )
         {
             // ARRANGE
@@ -145,18 +145,18 @@ namespace Api.Test.EventHandlers
             var cts = new CancellationTokenSource();
 
             // Add Scheduled mission
-            await _missionService.Create(mission);
+            await _missionRunService.Create(missionRun);
 
             _robotControllerMock.RobotServiceMock
-                .Setup(service => service.ReadById(mission.Robot.Id))
-                .Returns(async () => mission.Robot);
+                .Setup(service => service.ReadById(missionRun.Robot.Id))
+                .Returns(async () => missionRun.Robot);
 
             _robotControllerMock.MissionServiceMock
-                .Setup(service => service.ReadById(mission.Id))
-                .Returns(async () => mission);
+                .Setup(service => service.ReadById(missionRun.Id))
+                .Returns(async () => missionRun);
 
             // Assert start conditions
-            var preMission = await _missionService.ReadById(mission.Id);
+            var preMission = await _missionRunService.ReadById(missionRun.Id);
             Assert.NotNull(preMission);
             Assert.Equal(preStatus, preMission!.Status);
 
@@ -170,7 +170,7 @@ namespace Api.Test.EventHandlers
             // ASSERT
 
             // Verify status change
-            var postMission = await _missionService.ReadById(mission.Id);
+            var postMission = await _missionRunService.ReadById(missionRun.Id);
             Assert.NotNull(postMission);
             Assert.Equal(postStatus, postMission!.Status);
         }
@@ -179,33 +179,33 @@ namespace Api.Test.EventHandlers
         // Test that if robot is busy, mission awaits available robot
         public async void ScheduledMissionPendingIfRobotBusy()
         {
-            var mission = ScheduledMission;
+            var missionRun = ScheduledMission;
 
             // Get real robot to avoid error on robot model
             var robot = (await _robotService.ReadAll()).First(
                 r => r is { Status: RobotStatus.Busy, Enabled: true }
             );
-            mission.Robot = robot;
+            missionRun.Robot = robot;
 
             // Expect failed because robot does not exist
-            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Pending, mission);
+            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Pending, missionRun);
         }
 
         [Fact]
         // Test that if robot is available, mission is started
         public async void ScheduledMissionStartedIfRobotAvailable()
         {
-            var mission = ScheduledMission;
+            var missionRun = ScheduledMission;
 
             // Get real robot to avoid error on robot model
             var robot = (await _robotService.ReadAll()).First(
                 r => r is { Status: RobotStatus.Available, Enabled: true }
             );
-            mission.Robot = robot;
+            missionRun.Robot = robot;
 
             // Mock successful Start Mission:
             _robotControllerMock.IsarServiceMock
-                .Setup(isar => isar.StartMission(robot, mission))
+                .Setup(isar => isar.StartMission(robot, missionRun))
                 .Returns(
                     async () =>
                         new IsarMission(
@@ -218,29 +218,29 @@ namespace Api.Test.EventHandlers
                 );
 
             // Expect failed because robot does not exist
-            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Ongoing, mission);
+            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Ongoing, missionRun);
         }
 
         [Fact]
         // Test that if ISAR fails, mission is set to failed
         public async void ScheduledMissionFailedIfIsarUnavailable()
         {
-            var mission = ScheduledMission;
+            var missionRun = ScheduledMission;
 
             // Get real robot to avoid error on robot model
             var robot = (await _robotService.ReadAll()).First();
             robot.Enabled = true;
             robot.Status = RobotStatus.Available;
             await _robotService.Update(robot);
-            mission.Robot = robot;
+            missionRun.Robot = robot;
 
             // Mock failing ISAR:
             _robotControllerMock.IsarServiceMock
-                .Setup(isar => isar.StartMission(robot, mission))
+                .Setup(isar => isar.StartMission(robot, missionRun))
                 .Throws(new MissionException("ISAR Failed test message"));
 
             // Expect failed because robot does not exist
-            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Failed, mission);
+            AssertExpectedStatusChange(MissionStatus.Pending, MissionStatus.Failed, missionRun);
         }
     }
 }

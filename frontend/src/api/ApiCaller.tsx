@@ -8,7 +8,7 @@ import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
 import { MissionDefinitionQueryParameters, SourceType } from 'models/MissionDefinitionQueryParameters'
 import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'models/PaginatedResponse'
 import { Pose } from 'models/Pose'
-import { AssetDeck } from 'models/AssetDeck'
+import { Area } from 'models/Area'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 import { TaskStatus } from 'models/Task'
@@ -226,8 +226,8 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getMissionById(missionId: string): Promise<Mission> {
-        const path: string = 'missions/' + missionId
+    static async getMissionRunById(missionId: string): Promise<Mission> {
+        const path: string = 'missions/runs/' + missionId
         const result = await BackendAPICaller.GET<Mission>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
@@ -261,7 +261,7 @@ export class BackendAPICaller {
             echoMissionId: echoMissionId,
             desiredStartTime: new Date(),
             assetCode: assetCode,
-            areaName: '',
+            areaName: '', // TODO: we need a way of populating the area database, then including area in MissionDefinition
         }
         const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch((e) => {
             console.error(`Failed to POST /${path}: ` + e)
@@ -341,17 +341,17 @@ export class BackendAPICaller {
         }
     }
 
-    static async getAssetDecks(): Promise<AssetDeck[]> {
-        const path: string = 'asset-decks'
-        const result = await this.GET<AssetDeck[]>(path).catch((e) => {
+    static async getAreas(): Promise<Area[]> {
+        const path: string = 'areas'
+        const result = await this.GET<Area[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
         return result.content
     }
 
-    static async getAssetDeckMapMetadata(id: string): Promise<MapMetadata> {
-        const path: string = 'asset-decks/' + id + '/map-metadata'
+    static async getAreasMapMetadata(id: string): Promise<MapMetadata> {
+        const path: string = 'areas/' + id + '/map-metadata'
         const result = await this.GET<MapMetadata>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
@@ -360,7 +360,7 @@ export class BackendAPICaller {
     }
 
     static async reRunMission(missionId: string, failedTasksOnly: boolean = false): Promise<Mission> {
-        let mission = await this.getMissionById(missionId)
+        let mission = await this.getMissionRunById(missionId)
 
         // TODO: utilise reschedule endpoint instead of copying
 

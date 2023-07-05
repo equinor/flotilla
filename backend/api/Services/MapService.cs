@@ -3,6 +3,7 @@ using Api.Database.Models;
 using Api.Options;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Options;
+
 namespace Api.Services
 {
     public interface IMapService
@@ -70,21 +71,21 @@ namespace Api.Services
             return map;
         }
 
-        public async Task AssignMapToMission(MissionRun mission)
+        public async Task AssignMapToMission(MissionRun missionRun)
         {
             MapMetadata? mapMetadata;
             var positions = new List<Position>();
-            foreach (var task in mission.Tasks)
+            foreach (var task in missionRun.Tasks)
             {
                 positions.Add(task.InspectionTarget);
             }
             try
             {
-                mapMetadata = await ChooseMapFromPositions(positions, mission.AssetCode);
+                mapMetadata = await ChooseMapFromPositions(positions, missionRun.AssetCode);
             }
             catch (ArgumentOutOfRangeException)
             {
-                _logger.LogWarning("Unable to find a map for mission '{missionId}'", mission.Id);
+                _logger.LogWarning("Unable to find a map for mission '{missionId}'", missionRun.Id);
                 return;
             }
 
@@ -93,8 +94,8 @@ namespace Api.Services
                 return;
             }
 
-            mission.MapMetadata = mapMetadata;
-            _logger.LogInformation("Assigned map {map} to mission {mission}", mapMetadata.MapName, mission.Name);
+            missionRun.MapMetadata = mapMetadata;
+            _logger.LogInformation("Assigned map {map} to mission {mission}", mapMetadata.MapName, missionRun.Name);
         }
 
         private Boundary ExtractMapMetadata(BlobItem map)

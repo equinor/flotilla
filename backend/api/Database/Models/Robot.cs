@@ -99,7 +99,7 @@ namespace Api.Database.Models
             Name = createQuery.Name;
             SerialNumber = createQuery.SerialNumber;
             CurrentAsset = createQuery.CurrentAsset;
-            CurrentArea = createQuery.CurrentAssetDeck;
+            CurrentArea = createQuery.CurrentArea;
             VideoStreams = videoStreams;
             Host = createQuery.Host;
             Port = createQuery.Port;

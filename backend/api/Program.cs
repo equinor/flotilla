@@ -48,9 +48,12 @@ builder.Services.AddScoped<IStidService, StidService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IBlobService, BlobService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
+builder.Services.AddScoped<IAssetService, AssetService>();
+builder.Services.AddScoped<IInstallationService, InstallationService>();
+builder.Services.AddScoped<IDeckService, DeckService>();
 builder.Services.AddScoped<IRobotModelService, RobotModelService>();
 builder.Services.AddScoped<RobotController>();
-builder.Services.AddScoped<ISourceService, SourceService>();
+builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MqttService>();

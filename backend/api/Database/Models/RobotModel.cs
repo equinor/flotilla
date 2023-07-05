@@ -76,27 +76,27 @@ namespace Api.Database.Models
         }
 
         /// <summary>
-        /// Updates the <see cref="AverageDurationPerTag"/> based on the data in the <paramref name="recentMissionsForModelType"/> provided
+        /// Updates the <see cref="AverageDurationPerTag"/> based on the data in the <paramref name="recentMissionRunsForModelType"/> provided
         /// </summary>
-        /// <param name="recentMissionsForModelType"></param>
-        public void UpdateAverageDurationPerTag(List<MissionRun> recentMissionsForModelType)
+        /// <param name="recentMissionRunsForModelType"></param>
+        public void UpdateAverageDurationPerTag(List<MissionRun> recentMissionRunsForModelType)
         {
-            if (recentMissionsForModelType.Any(mission => mission.Robot.Model.Type != Type))
+            if (recentMissionRunsForModelType.Any(missionRun => missionRun.Robot.Model.Type != Type))
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         "{0} should only include missions for this model type ('{1}')",
-                        nameof(recentMissionsForModelType),
+                        nameof(recentMissionRunsForModelType),
                         Type
                     ),
-                    nameof(recentMissionsForModelType)
+                    nameof(recentMissionRunsForModelType)
                 );
 
             // The time spent on each tasks, not including the duration of video/audio recordings
-            var timeSpentPerTask = recentMissionsForModelType
+            var timeSpentPerTask = recentMissionRunsForModelType
                 .SelectMany(
-                    mission =>
-                        mission.Tasks
+                    missionRun =>
+                        missionRun.Tasks
                             .Where(task => task.EndTime is not null && task.StartTime is not null)
                             .Select(
                                 task =>

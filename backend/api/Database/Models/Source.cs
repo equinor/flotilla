@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 #pragma warning disable CS8618
 namespace Api.Database.Models
@@ -6,12 +7,11 @@ namespace Api.Database.Models
     public class Source
     {
         [Key]
-        [Required]
-        [MaxLength(200)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
         [Required]
-        public string URL { get; set; }
+        public string SourceId { get; set; }
 
         [Required]
         public MissionSourceType Type { get; set; }

@@ -16,6 +16,6 @@ namespace Api.Database.Models
 
         [Required]
         [MaxLength(10)]
-        public string ShortName { get; set; }
+        public string AssetCode { get; set; }
     }
 }
