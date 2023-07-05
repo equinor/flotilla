@@ -84,7 +84,7 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Name = "Johan Sverdrup",
-            ShortName = "JSV"
+            AssetCode = "JSV"
         };
 
         return new List<Asset>(new Asset[] { asset1 });
@@ -97,7 +97,7 @@ public static class InitDb
             Id = Guid.NewGuid().ToString(),
             Asset = assets[0],
             Name = "Johan Sverdrup - P1",
-            ShortName = "P1"
+            InstallationCode = "P1"
         };
 
         return new List<Installation>(new Installation[] { installation1 });
@@ -126,7 +126,7 @@ public static class InitDb
             Asset = decks[0].Installation.Asset,
             Name = "AP320",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = new Pose {},
+            DefaultLocalizationPose = new Pose { },
             SafePositions = new List<SafePosition>()
         };
 
@@ -138,7 +138,7 @@ public static class InitDb
             Asset = decks[0].Installation.Asset,
             Name = "AP330",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = new Pose {},
+            DefaultLocalizationPose = new Pose { },
             SafePositions = new List<SafePosition>()
         };
 
@@ -161,15 +161,13 @@ public static class InitDb
     {
         var source1 = new Source
         {
-            Id = Guid.NewGuid().ToString(),
-            URL = "https://google.com/",
+            SourceId = "https://google.com/",
             Type = MissionSourceType.Echo
         };
 
         var source2 = new Source
         {
-            Id = Guid.NewGuid().ToString(),
-            URL = "https://google.com/",
+            SourceId = "https://google.com/",
             Type = MissionSourceType.Custom
         };
 
@@ -178,11 +176,11 @@ public static class InitDb
 
     private static List<MissionDefinition> GetMissionDefinitions()
     {
-        var mission1 = new MissionDefinition
+        var missionDefinition1 = new MissionDefinition
         {
-            Name = "Placeholder Mission 1",
             Id = Guid.NewGuid().ToString(),
-            AssetCode = areas[0].Deck.Installation.Asset.ShortName,
+            Name = "Placeholder Mission 1",
+            AssetCode = areas[0].Deck.Installation.Asset.AssetCode,
             Area = areas[0],
             Source = sources[0],
             Comment = "Interesting comment",
@@ -190,37 +188,37 @@ public static class InitDb
             LastRun = null
         };
 
-        var mission2 = new MissionDefinition
+        var missionDefinition2 = new MissionDefinition
         {
-            Name = "Placeholder Mission 2",
             Id = Guid.NewGuid().ToString(),
-            AssetCode = areas[1].Deck.Installation.Asset.ShortName,
+            Name = "Placeholder Mission 2",
+            AssetCode = areas[1].Deck.Installation.Asset.AssetCode,
             Area = areas[1],
             Source = sources[1],
             InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
             LastRun = null
         };
 
-        var mission3 = new MissionDefinition
+        var missionDefinition3 = new MissionDefinition
         {
-            Name = "Placeholder Mission 3",
             Id = Guid.NewGuid().ToString(),
-            AssetCode = areas[1].Deck.Installation.Asset.ShortName,
+            Name = "Placeholder Mission 3",
+            AssetCode = areas[1].Deck.Installation.Asset.AssetCode,
             Area = areas[1],
             Source = sources[1],
             LastRun = null
         };
 
-        return new List<MissionDefinition>(new[] { mission1, mission2, mission3 });
+        return new List<MissionDefinition>(new[] { missionDefinition1, missionDefinition2, missionDefinition3 });
     }
 
     private static List<MissionRun> GetMissionRuns()
     {
-        var mission1 = new MissionRun
+        var missionRun1 = new MissionRun
         {
             Name = "Placeholder Mission 1",
             Robot = robots[0],
-            AssetCode = areas[0].Deck.Installation.Asset.ShortName,
+            AssetCode = areas[0].Deck.Installation.Asset.AssetCode,
             Area = areas[0],
             MissionId = missionDefinitions[0].Id,
             Status = MissionStatus.Successful,
@@ -229,11 +227,11 @@ public static class InitDb
             MapMetadata = new MapMetadata()
         };
 
-        var mission2 = new MissionRun
+        var missionRun2 = new MissionRun
         {
             Name = "Placeholder Mission 2",
             Robot = robots[1],
-            AssetCode = areas[1].Deck.Installation.Asset.ShortName,
+            AssetCode = areas[1].Deck.Installation.Asset.AssetCode,
             Area = areas[1],
             MissionId = missionDefinitions[0].Id,
             Status = MissionStatus.Successful,
@@ -241,12 +239,13 @@ public static class InitDb
             Tasks = new List<MissionTask>(),
             MapMetadata = new MapMetadata()
         };
+        missionDefinitions[0].LastRun = missionRun2;
 
-        var mission3 = new MissionRun
+        var missionRun3 = new MissionRun
         {
             Name = "Placeholder Mission 3",
             Robot = robots[2],
-            AssetCode = areas[1].Deck.Installation.Asset.ShortName,
+            AssetCode = areas[1].Deck.Installation.Asset.AssetCode,
             Area = areas[1],
             MissionId = missionDefinitions[1].Id,
             Status = MissionStatus.Successful,
@@ -255,7 +254,9 @@ public static class InitDb
             MapMetadata = new MapMetadata()
         };
 
-        return new List<MissionRun>(new[] { mission1, mission2, mission3 });
+        missionDefinitions[1].LastRun = missionRun3;
+
+        return new List<MissionRun>(new[] { missionRun1, missionRun2, missionRun3 });
     }
 
     public static void PopulateDb(FlotillaDbContext context)
@@ -291,13 +292,13 @@ public static class InitDb
         robots[1].Model = models.Find(model => model.Type == RobotType.ExR2)!;
         robots[2].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
 
-        foreach (var mission in missionRuns)
+        foreach (var missionRun in missionRuns)
         {
             var task = ExampleTask;
             task.Inspections.Add(Inspection);
             task.Inspections.Add(Inspection2);
             var tasks = new List<MissionTask> { task };
-            mission.Tasks = tasks;
+            missionRun.Tasks = tasks;
         }
         context.AddRange(robots);
         context.AddRange(missionDefinitions);

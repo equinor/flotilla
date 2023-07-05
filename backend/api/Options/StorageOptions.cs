@@ -3,6 +3,6 @@
     public class StorageOptions
     {
         public string CustomMissionContainerName { get; set; } = "";
-        public string ConnectionString { get; set; } = "";
+        public string AccountName { get; set; } = "";
     }
 }

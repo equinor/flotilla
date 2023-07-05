@@ -12,13 +12,13 @@ namespace Api.Services
 {
     public interface IMissionDefinitionService
     {
-        public abstract Task<MissionDefinition> Create(MissionDefinition mission);
+        public abstract Task<MissionDefinition> Create(MissionDefinition missionDefinition);
 
         public abstract Task<MissionDefinition?> ReadById(string id);
 
         public abstract Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters);
 
-        public abstract Task<MissionDefinition> Update(MissionDefinition mission);
+        public abstract Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
         public abstract Task<MissionDefinition?> Delete(string id);
     }
@@ -47,35 +47,34 @@ namespace Api.Services
             _context = context;
         }
 
-        public async Task<MissionDefinition> Create(MissionDefinition mission)
+        public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
         {
-            await _context.MissionDefinitions.AddAsync(mission);
+            await _context.MissionDefinitions.AddAsync(missionDefinition);
             await _context.SaveChangesAsync();
 
-            return mission;
+            return missionDefinition;
         }
 
-        private IQueryable<MissionDefinition> GetMissionsWithSubModels()
+        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
         {
             return _context.MissionDefinitions
-                .Include(mission => mission.Area)
-                .ThenInclude(robot => robot.Deck)
-                .ThenInclude(robot => robot.Installation)
-                .ThenInclude(robot => robot.Asset)
-                .Include(mission => mission.Source)
-                .Include(mission => mission.LastRun)
-                .ThenInclude(planTask => planTask == null ? null : planTask.StartTime);
+                .Include(missionDefinition => missionDefinition.Area)
+                .ThenInclude(area => area.Deck)
+                .ThenInclude(area => area.Installation)
+                .ThenInclude(area => area.Asset)
+                .Include(missionDefinition => missionDefinition.Source)
+                .Include(missionDefinition => missionDefinition.LastRun);
         }
 
         public async Task<MissionDefinition?> ReadById(string id)
         {
-            return await GetMissionsWithSubModels()
-                .FirstOrDefaultAsync(mission => mission.Id.Equals(id));
+            return await GetMissionDefinitionsWithSubModels().Where(m => m.Deprecated == false)
+                .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
         }
 
         public async Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters)
         {
-            var query = GetMissionsWithSubModels();
+            var query = GetMissionDefinitionsWithSubModels().Where(m => m.Deprecated == false);
             var filter = ConstructFilter(parameters);
 
             query = query.Where(filter);
@@ -91,9 +90,9 @@ namespace Api.Services
             );
         }
 
-        public async Task<MissionDefinition> Update(MissionDefinition mission)
+        public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)
         {
-            var entry = _context.Update(mission);
+            var entry = _context.Update(missionDefinition);
             await _context.SaveChangesAsync();
             return entry.Entity;
         }
@@ -101,26 +100,26 @@ namespace Api.Services
         public async Task<MissionDefinition?> Delete(string id)
         {
             // We do not delete the source here as more than one mission definition may be using it
-            var mission = await ReadById(id);
-            if (mission is null)
+            var missionDefinition = await ReadById(id);
+            if (missionDefinition is null)
             {
                 return null;
             }
 
-            _context.MissionDefinitions.Remove(mission);
+            missionDefinition.Deprecated = true;
             await _context.SaveChangesAsync();
 
-            return mission;
+            return missionDefinition;
         }
 
-        private static void SearchByName(ref IQueryable<MissionDefinition> missions, string? name)
+        private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)
         {
-            if (!missions.Any() || string.IsNullOrWhiteSpace(name))
+            if (!missionDefinitions.Any() || string.IsNullOrWhiteSpace(name))
                 return;
 
-            missions = missions.Where(
-                mission =>
-                    mission.Name != null && mission.Name.ToLower().Contains(name.Trim().ToLower())
+            missionDefinitions = missionDefinitions.Where(
+                missionDefinition =>
+                    missionDefinition.Name != null && missionDefinition.Name.ToLower().Contains(name.Trim().ToLower())
             );
         }
 
@@ -135,44 +134,44 @@ namespace Api.Services
         )
         {
             Expression<Func<MissionDefinition, bool>> areaFilter = parameters.Area is null
-                ? mission => true
-                : mission =>
-                      mission.Area.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
+                ? missionDefinition => true
+                : missionDefinition =>
+                      missionDefinition.Area.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
 
             Expression<Func<MissionDefinition, bool>> assetFilter = parameters.AssetCode is null
-                ? mission => true
-                : mission =>
-                      mission.AssetCode.ToLower().Equals(parameters.AssetCode.Trim().ToLower());
+                ? missionDefinition => true
+                : missionDefinition =>
+                      missionDefinition.AssetCode.ToLower().Equals(parameters.AssetCode.Trim().ToLower());
 
             Expression<Func<MissionDefinition, bool>> missionTypeFilter = parameters.SourceType is null
-                ? mission => true
-                : mission =>
-                      mission.Source.Type.Equals(parameters.SourceType);
+                ? missionDefinition => true
+                : missionDefinition =>
+                      missionDefinition.Source.Type.Equals(parameters.SourceType);
 
             // The parameter of the filter expression
-            var mission = Expression.Parameter(typeof(MissionRun));
+            var missionRunExpression = Expression.Parameter(typeof(MissionRun));
 
             // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
             Expression body = Expression.AndAlso(
-                Expression.Invoke(assetFilter, mission),
+                Expression.Invoke(assetFilter, missionRunExpression),
                 Expression.AndAlso(
-                    Expression.Invoke(areaFilter, mission),
-                    Expression.Invoke(missionTypeFilter, mission)
+                    Expression.Invoke(areaFilter, missionRunExpression),
+                    Expression.Invoke(missionTypeFilter, missionRunExpression)
                     )
                 );
 
             // Constructing the resulting lambda expression by combining parameter and body
-            return Expression.Lambda<Func<MissionDefinition, bool>>(body, mission);
+            return Expression.Lambda<Func<MissionDefinition, bool>>(body, missionRunExpression);
         }
 
-        private static void ApplySort(ref IQueryable<MissionDefinition> missions, string orderByQueryString)
+        private static void ApplySort(ref IQueryable<MissionDefinition> missionDefinitions, string orderByQueryString)
         {
-            if (!missions.Any())
+            if (!missionDefinitions.Any())
                 return;
 
             if (string.IsNullOrWhiteSpace(orderByQueryString))
             {
-                missions = missions.OrderBy(x => x.Name);
+                missionDefinitions = missionDefinitions.OrderBy(x => x.Name);
                 return;
             }
 
@@ -216,9 +215,9 @@ namespace Api.Services
 
             string orderQuery = orderQueryBuilder.ToString().TrimEnd(',', ' ');
 
-            missions = string.IsNullOrWhiteSpace(orderQuery)
-              ? missions.OrderBy(mission => mission.Name)
-              : missions.OrderBy(orderQuery);
+            missionDefinitions = string.IsNullOrWhiteSpace(orderQuery)
+              ? missionDefinitions.OrderBy(missionDefinition => missionDefinition.Name)
+              : missionDefinitions.OrderBy(orderQuery);
         }
     }
 }

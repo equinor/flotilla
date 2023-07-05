@@ -17,13 +17,13 @@ namespace Api.Test.Services
     {
         private readonly FlotillaDbContext _context;
         private readonly ILogger<MissionRunService> _logger;
-        private readonly MissionRunService _missionService;
+        private readonly MissionRunService _missionRunService;
 
         public MissionServiceTest(DatabaseFixture fixture)
         {
             _context = fixture.NewContext;
             _logger = new Mock<ILogger<MissionRunService>>().Object;
-            _missionService = new MissionRunService(_context, _logger);
+            _missionRunService = new MissionRunService(_context, _logger);
         }
 
         public void Dispose()
@@ -35,35 +35,36 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var mission = await _missionService.ReadById("some_id_that_does_not_exist");
-            Assert.Null(mission);
+            var missionRun = await _missionRunService.ReadById("some_id_that_does_not_exist");
+            Assert.Null(missionRun);
         }
 
         [Fact]
         public async Task Create()
         {
             var robot = _context.Robots.First();
-            int nReportsBefore = _missionService
+            int nReportsBefore = _missionRunService
                 .ReadAll(new MissionRunQueryStringParameters())
                 .Result.Count;
 
             var testAsset = new Asset
             {
-                ShortName = "test",
+                AssetCode = "test",
                 Name = "test test"
             };
             var testInstallation = new Installation
             {
-                ShortName = "test",
+                InstallationCode = "test",
                 Name = "test test",
                 Asset = testAsset
             };
 
-            MissionRun mission =
+            MissionRun missionRun =
                 new()
                 {
                     Name = "testMission",
                     Robot = robot,
+                    MissionId = Guid.NewGuid().ToString(),
                     MapMetadata = new MapMetadata() { MapName = "testMap" },
                     Area = new Area
                     {
@@ -84,8 +85,8 @@ namespace Api.Test.Services
                     DesiredStartTime = DateTime.Now
                 };
 
-            await _missionService.Create(mission);
-            int nReportsAfter = _missionService
+            await _missionRunService.Create(missionRun);
+            int nReportsAfter = _missionRunService
                 .ReadAll(new MissionRunQueryStringParameters())
                 .Result.Count;
 

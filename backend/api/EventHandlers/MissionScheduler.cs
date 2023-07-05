@@ -13,8 +13,8 @@ namespace Api.EventHandlers
         private readonly int _timeDelay;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        private IList<MissionRun> MissionQueue =>
-            MissionService
+        private IList<MissionRun> MissionRunQueue =>
+            MissionRunService
                 .ReadAll(
                     new MissionRunQueryStringParameters
                     {
@@ -25,7 +25,7 @@ namespace Api.EventHandlers
                 )
                 .Result;
 
-        private IMissionRunService MissionService =>
+        private IMissionRunService MissionRunService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
         private RobotController RobotController =>
@@ -42,17 +42,17 @@ namespace Api.EventHandlers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                foreach (var queuedMission in MissionQueue)
+                foreach (var queuedMissionRun in MissionRunQueue)
                 {
-                    var freshMission = MissionService.ReadById(queuedMission.Id).Result;
-                    if (freshMission == null)
+                    var freshMissionRun = MissionRunService.ReadById(queuedMissionRun.Id).Result;
+                    if (freshMissionRun == null)
                     {
                         continue;
                     }
                     if (
-                        freshMission.Robot.Status is not RobotStatus.Available
-                        || !freshMission.Robot.Enabled
-                        || freshMission.DesiredStartTime > DateTimeOffset.UtcNow
+                        freshMissionRun.Robot.Status is not RobotStatus.Available
+                        || !freshMissionRun.Robot.Enabled
+                        || freshMissionRun.DesiredStartTime > DateTimeOffset.UtcNow
                     )
                     {
                         continue;
@@ -60,31 +60,31 @@ namespace Api.EventHandlers
 
                     try
                     {
-                        await StartMission(queuedMission);
+                        await StartMissionRun(queuedMissionRun);
                     }
                     catch (MissionException e)
                     {
                         const MissionStatus NewStatus = MissionStatus.Failed;
                         _logger.LogWarning(
-                            "Mission {id} was not started successfully. Status updated to '{status}'.\nReason: {failReason}",
-                            queuedMission.Id,
+                            "Mission run {id} was not started successfully. Status updated to '{status}'.\nReason: {failReason}",
+                            queuedMissionRun.Id,
                             NewStatus,
                             e.Message
                         );
-                        queuedMission.Status = NewStatus;
-                        queuedMission.StatusReason = $"Failed to start: '{e.Message}'";
-                        await MissionService.Update(queuedMission);
+                        queuedMissionRun.Status = NewStatus;
+                        queuedMissionRun.StatusReason = $"Failed to start: '{e.Message}'";
+                        await MissionRunService.Update(queuedMissionRun);
                     }
                 }
                 await Task.Delay(_timeDelay, stoppingToken);
             }
         }
 
-        private async Task StartMission(MissionRun queuedMission)
+        private async Task StartMissionRun(MissionRun queuedMissionRun)
         {
             var result = await RobotController.StartMission(
-                queuedMission.Robot.Id,
-                queuedMission.Id
+                queuedMissionRun.Robot.Id,
+                queuedMissionRun.Id
             );
             if (result.Result is not OkObjectResult)
             {
@@ -93,7 +93,7 @@ namespace Api.EventHandlers
                     errorMessage = returnObject.Value?.ToString() ?? errorMessage;
                 throw new MissionException(errorMessage);
             }
-            _logger.LogInformation("Started mission '{id}'", queuedMission.Id);
+            _logger.LogInformation("Started mission run '{id}'", queuedMissionRun.Id);
         }
     }
 }

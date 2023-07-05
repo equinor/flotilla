@@ -6,14 +6,14 @@ import { useErrorHandler } from 'react-error-boundary'
 import { PlaceRobotInMap, InverseCalculatePixelPosition } from '../../../utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { MapMetadata } from 'models/MapMetadata'
-import { AssetDeck } from 'models/AssetDeck'
+import { Area } from 'models/Area'
 import { Position } from 'models/Position'
 import { Pose } from 'models/Pose'
 import { TranslateText } from 'components/Contexts/LanguageContext'
-
 import { MapCompass } from 'utils/MapCompass'
-interface AssetDeckProps {
-    assetDeck: AssetDeck
+
+interface AreaProps {
+    area: Area
     localizationPose: Pose
     setLocalizationPose: (newPose: Pose) => void
 }
@@ -44,7 +44,7 @@ const StyledMapCompass = styled.div`
     align-items: end;
 `
 
-export function AssetDeckMapView({ assetDeck, localizationPose, setLocalizationPose }: AssetDeckProps) {
+export function AreaMapView({ area, localizationPose, setLocalizationPose }: AreaProps) {
     const handleError = useErrorHandler()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
@@ -75,10 +75,10 @@ export function AssetDeckMapView({ assetDeck, localizationPose, setLocalizationP
     useEffect(() => {
         setIsLoading(true)
         setImageObjectURL(undefined)
-        BackendAPICaller.getAssetDeckMapMetadata(assetDeck.id)
+        BackendAPICaller.getAreasMapMetadata(area.id)
             .then((mapMetadata) => {
                 setMapMetadata(mapMetadata)
-                BackendAPICaller.getMap(assetDeck.assetCode, mapMetadata.mapName)
+                BackendAPICaller.getMap(area.assetCode, mapMetadata.mapName)
                     .then((imageBlob) => {
                         setImageObjectURL(URL.createObjectURL(imageBlob))
                     })
@@ -91,7 +91,7 @@ export function AssetDeckMapView({ assetDeck, localizationPose, setLocalizationP
                 setImageObjectURL(NoMap)
             })
         //.catch((e) => handleError(e))
-    }, [assetDeck])
+    }, [area])
 
     useEffect(() => {
         if (!imageObjectURL) {
@@ -139,7 +139,7 @@ export function AssetDeckMapView({ assetDeck, localizationPose, setLocalizationP
             return
         }
         const assetPosition = InverseCalculatePixelPosition(mapMetadata, pixelPosition)
-        let newPose: Pose = assetDeck.defaultLocalizationPose
+        let newPose: Pose = area.defaultLocalizationPose
         newPose.position.x = assetPosition[0]
         newPose.position.y = assetPosition[1]
         setLocalizationPose(newPose)

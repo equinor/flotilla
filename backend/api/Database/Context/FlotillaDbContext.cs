@@ -26,12 +26,12 @@ public class FlotillaDbContext : DbContext
         // https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities
         // https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities#collections-of-owned-types
         modelBuilder.Entity<MissionRun>(
-            missionEntity =>
+            missionRunEntity =>
             {
                 if (isSqlLite)
-                    AddConverterForDateTimeOffsets(ref missionEntity);
-                missionEntity.OwnsMany(
-                    mission => mission.Tasks,
+                    AddConverterForDateTimeOffsets(ref missionRunEntity);
+                missionRunEntity.OwnsMany(
+                    missionRun => missionRun.Tasks,
                     taskEntity =>
                     {
                         if (isSqlLite)
@@ -55,11 +55,13 @@ public class FlotillaDbContext : DbContext
                         );
                     }
                 );
+                //missionRunEntity.HasOne(missionRun => missionRun.MissionDefinition);
             }
         );
 
         modelBuilder.Entity<MissionRun>().OwnsOne(m => m.MapMetadata).OwnsOne(t => t.TransformationMatrices);
         modelBuilder.Entity<MissionRun>().OwnsOne(m => m.MapMetadata).OwnsOne(b => b.Boundary);
+        //modelBuilder.Entity<MissionDefinition>().HasOne(m => m.LastRun).WithOne(m => m.MissionDefinition).HasForeignKey<MissionRun>(m => m.Id);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
         modelBuilder.Entity<Robot>().OwnsMany(r => r.VideoStreams);
@@ -82,8 +84,8 @@ public class FlotillaDbContext : DbContext
         modelBuilder.Entity<RobotModel>().HasIndex(model => model.Type).IsUnique();
 
         // There can only be one unique asset and installation shortname
-        modelBuilder.Entity<Asset>().HasIndex(a => new { a.ShortName }).IsUnique();
-        modelBuilder.Entity<Installation>().HasIndex(a => new { a.ShortName }).IsUnique();
+        modelBuilder.Entity<Asset>().HasIndex(a => new { a.AssetCode }).IsUnique();
+        modelBuilder.Entity<Installation>().HasIndex(a => new { a.InstallationCode }).IsUnique();
     }
 
     // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations

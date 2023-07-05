@@ -1,7 +1,9 @@
 import { Pose } from './Pose'
 
-export interface AssetDeck {
+export interface Area {
     id: string
+    areaName: string
+    installationCode: string
     assetCode: string
     deckName: string
     defaultLocalizationPose: Pose
