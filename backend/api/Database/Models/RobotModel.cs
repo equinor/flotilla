@@ -34,6 +34,8 @@ namespace Api.Database.Models
         /// The type of robot model
         /// </summary>
         [Required]
+        //Save robot type as string in database
+        [Column(TypeName = "nvarchar(56)")]
         public RobotType Type { get; set; }
 
         /// <summary>
@@ -105,9 +107,7 @@ namespace Api.Database.Models
                             )
                 )
                 .ToList();
-            // If no valid task times, return
-            if (timeSpentPerTask.All(time => time < 0))
-                return;
+
             // Percentiles to exclude when calculating average
             const double P1 = 0.1;
             const double P9 = 0.9;

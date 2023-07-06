@@ -122,6 +122,7 @@ namespace Api.EventHandlers
                     Name = isarRobotInfo.RobotName,
                     RobotType = isarRobotInfo.RobotType,
                     SerialNumber = isarRobotInfo.SerialNumber,
+                    CurrentAsset = isarRobotInfo.CurrentAsset,
                     VideoStreams = isarRobotInfo.VideoStreamQueries,
                     Host = isarRobotInfo.Host,
                     Port = isarRobotInfo.Port,
@@ -235,18 +236,13 @@ namespace Api.EventHandlers
         private static void UpdateCurrentAssetIfChanged(string newCurrentAsset, ref Robot robot,
             ref List<string> updatedFields)
         {
-            if (robot.CurrentAssetDeck != null)
+            if (newCurrentAsset.Equals(robot.CurrentAsset, StringComparison.Ordinal))
             {
-                if (newCurrentAsset.Equals(robot.CurrentAssetDeck.AssetCode, StringComparison.Ordinal))
-                {
-                    return;
-                }
-
-                updatedFields.Add($"\nCurrentAsset ({robot.CurrentAssetDeck.AssetCode} -> {newCurrentAsset})\n");
-
-                robot.CurrentAssetDeck.AssetCode = newCurrentAsset;
+                return;
             }
 
+            updatedFields.Add($"\nCurrentAsset ({robot.CurrentAsset} -> {newCurrentAsset})\n");
+            robot.CurrentAsset = newCurrentAsset;
         }
 
 
