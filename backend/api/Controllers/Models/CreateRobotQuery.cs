@@ -12,6 +12,8 @@ namespace Api.Controllers.Models
 
         public string SerialNumber { get; set; }
 
+        public string CurrentAsset { get; set; }
+
         public IList<CreateVideoStreamQuery> VideoStreams { get; set; }
 
         public string Host { get; set; }
@@ -21,7 +23,5 @@ namespace Api.Controllers.Models
         public bool Enabled { get; set; }
 
         public RobotStatus Status { get; set; }
-
-        public AssetDeck CurrentAssetDeck { get; set; }
     }
 }

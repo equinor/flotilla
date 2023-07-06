@@ -643,7 +643,7 @@ public class RobotController : ControllerBase
     /// </remarks>
     [HttpPost]
     [Authorize(Roles = Role.User)]
-    [Route("start-localization")]
+    [Route("{robotId}/start-localization")]
     [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -651,14 +651,14 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Mission>> StartLocalizationMission(
-        [FromBody] ScheduleLocalizationMissionQuery scheduleLocalizationMissionQuery
+        [FromRoute] string robotId,
+        [FromBody] Pose localizationPose
     )
     {
-        var robot = await _robotService.ReadById(scheduleLocalizationMissionQuery.RobotId);
-
+        var robot = await _robotService.ReadById(robotId);
         if (robot == null)
         {
-            _logger.LogWarning("Could not find robot with id={id}", scheduleLocalizationMissionQuery.RobotId);
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
             return NotFound("Robot not found");
         }
 
@@ -666,19 +666,10 @@ public class RobotController : ControllerBase
         {
             _logger.LogWarning(
                 "Robot '{id}' is not available ({status})",
-                scheduleLocalizationMissionQuery.RobotId,
+                robotId,
                 robot.Status.ToString()
             );
             return Conflict($"The Robot is not available ({robot.Status})");
-        }
-
-        var deck = await _assetDeckService.ReadById(scheduleLocalizationMissionQuery.DeckId);
-
-
-        if (deck == null)
-        {
-            _logger.LogWarning("Could not find deck with id={id}", scheduleLocalizationMissionQuery.DeckId);
-            return NotFound("Deck not found");
         }
 
         var mission = new Mission
@@ -695,7 +686,7 @@ public class RobotController : ControllerBase
         IsarMission isarMission;
         try
         {
-            isarMission = await _isarService.StartLocalizationMission(robot, deck.DefaultLocalizationPose);
+            isarMission = await _isarService.StartLocalizationMission(robot, localizationPose);
         }
         catch (HttpRequestException e)
         {
@@ -721,11 +712,9 @@ public class RobotController : ControllerBase
 
         await _missionService.Create(mission);
 
-        robot.CurrentAssetDeck = deck;
         robot.Status = RobotStatus.Busy;
         robot.CurrentMissionId = mission.Id;
         await _robotService.Update(robot);
-
         return Ok(mission);
     }
 
