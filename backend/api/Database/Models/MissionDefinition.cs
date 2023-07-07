@@ -18,7 +18,7 @@ namespace Api.Database.Models
         public string Name { get; set; }
 
         [Required]
-        public string AssetCode { get; set; }
+        public string InstallationCode { get; set; }
 
         [MaxLength(1000)]
         public string? Comment { get; set; }
@@ -29,6 +29,6 @@ namespace Api.Database.Models
 
         public Area? Area { get; set; }
 
-        public bool Deprecated { get; set; }
+        public bool IsDeprecated { get; set; }
     }
 }

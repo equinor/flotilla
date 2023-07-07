@@ -9,7 +9,7 @@ import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { Robot } from 'models/Robot'
 import { RefreshProps } from '../FrontPage'
 import { TranslateText } from 'components/Contexts/LanguageContext'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
 import { MissionDefinition } from 'models/MissionDefinition'
 
@@ -58,11 +58,11 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
     const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
     const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
-    const { assetCode } = useAssetContext()
+    const { installationCode } = useInstallationContext()
 
     const fetchEchoMissions = () => {
         setIsFetchingEchoMissions(true)
-        BackendAPICaller.getAvailableEchoMission(assetCode as string).then((missions) => {
+        BackendAPICaller.getAvailableEchoMission(installationCode as string).then((missions) => {
             const echoMissionsMap: Map<string, MissionDefinition> = mapEchoMissionToString(missions)
             setEchoMissions(echoMissionsMap)
             setIsFetchingEchoMissions(false)
@@ -87,7 +87,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
 
         selectedEchoMissions.forEach((mission: MissionDefinition) => {
             // TODO: as a final parameter here we likely want mission.AreaName, and maybe also installation and deck codes
-            BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, assetCode)
+            BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode)
         })
 
         setSelectedEchoMissions([])
@@ -130,12 +130,12 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }, [selectedRobot, selectedEchoMissions])
 
     useEffect(() => {
-        if (Array.from(robotOptions.keys()).length === 0 || assetCode === '') {
+        if (Array.from(robotOptions.keys()).length === 0 || installationCode === '') {
             setFrontPageScheduleButtonDisabled(true)
         } else {
             setFrontPageScheduleButtonDisabled(false)
         }
-    }, [robotOptions, assetCode])
+    }, [robotOptions, installationCode])
 
     var missionQueueDisplay = missionQueue.map(function (mission, index) {
         return <MissionQueueCard key={index} mission={mission} onDeleteMission={onDeleteMission} />

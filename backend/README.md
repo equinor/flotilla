@@ -248,8 +248,8 @@ The access matrix looks like this:
 | -------------------------- | ------------- | -------- | --------- |
 | Area                       | Read          | Read     | CRUD      |
 | Deck                       | Read          | Read     | CRUD      |
+| Plant                      | Read          | Read     | CRUD      |
 | Installation               | Read          | Read     | CRUD      |
-| Asset                      | Read          | Read     | CRUD      |
 | Echo                       | Read          | Read     | CRUD      |
 | Missions                   | Read          | Read     | CRUD      |
 | Robots                     | Read          | Read     | CRUD      |

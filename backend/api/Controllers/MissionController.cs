@@ -194,7 +194,7 @@ public class MissionController : ControllerBase
     /// </summary>
     [HttpGet]
     [Authorize(Roles = Role.Any)]
-    [Route("{assetCode}/{mapName}/map")]
+    [Route("{installationCode}/{mapName}/map")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -202,11 +202,11 @@ public class MissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<byte[]>> GetMap([FromRoute] string assetCode, string mapName)
+    public async Task<ActionResult<byte[]>> GetMap([FromRoute] string installationCode, string mapName)
     {
         try
         {
-            byte[] mapStream = await _mapService.FetchMapImage(mapName, assetCode);
+            byte[] mapStream = await _mapService.FetchMapImage(mapName, installationCode);
             return File(mapStream, "image/png");
         }
         catch (Azure.RequestFailedException)
@@ -253,7 +253,7 @@ public class MissionController : ControllerBase
                         t =>
                         {
                             var tagPosition = _stidService
-                                .GetTagPosition(t.TagId, missionDefinition.AssetCode)
+                                .GetTagPosition(t.TagId, missionDefinition.InstallationCode)
                                 .Result;
                             return new MissionTask(t, tagPosition);
                         }
@@ -276,7 +276,7 @@ public class MissionController : ControllerBase
             Status = MissionStatus.Pending,
             DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
             Tasks = missionTasks,
-            AssetCode = missionDefinition.AssetCode,
+            InstallationCode = missionDefinition.InstallationCode,
             Area = missionDefinition.Area,
             MapMetadata = new MapMetadata()
         };
@@ -353,19 +353,19 @@ public class MissionController : ControllerBase
                 t =>
                 {
                     var tagPosition = _stidService
-                        .GetTagPosition(t.TagId, scheduledMissionQuery.AssetCode)
+                        .GetTagPosition(t.TagId, scheduledMissionQuery.InstallationCode)
                         .Result;
                     return new MissionTask(t, tagPosition);
                 }
             )
             .ToList();
 
-        var area = await _areaService.ReadByAssetAndName(scheduledMissionQuery.AssetCode, scheduledMissionQuery.AreaName);
+        var area = await _areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
 
         if (area == null)
         {
             // This is disabled for now as the Area database is not yet populated
-            //return NotFound($"Could not find area with name {scheduledMissionQuery.AreaName} in asset {scheduledMissionQuery.AssetCode}");
+            //return NotFound($"Could not find area with name {scheduledMissionQuery.AreaName} in installation {scheduledMissionQuery.InstallationCode}");
         }
 
         // TODO: search for if a source with the given type and URL exists, then reuse it
@@ -380,7 +380,7 @@ public class MissionController : ControllerBase
             },
             Name = echoMission.Name,
             InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
-            AssetCode = scheduledMissionQuery.AssetCode,
+            InstallationCode = scheduledMissionQuery.InstallationCode,
             Area = area
         };
 
@@ -392,7 +392,7 @@ public class MissionController : ControllerBase
             Status = MissionStatus.Pending,
             DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
             Tasks = missionTasks,
-            AssetCode = scheduledMissionQuery.AssetCode,
+            InstallationCode = scheduledMissionQuery.InstallationCode,
             Area = area,
             MapMetadata = new MapMetadata()
         };
@@ -434,10 +434,10 @@ public class MissionController : ControllerBase
 
         var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 
-        var area = await _areaService.ReadByAssetAndName(customMissionQuery.AssetCode, customMissionQuery.AreaName);
+        var area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName);
 
         if (area == null)
-            return NotFound($"Could not find area with name {customMissionQuery.AreaName} in asset {customMissionQuery.AssetCode}");
+            return NotFound($"Could not find area with name {customMissionQuery.AreaName} in installation {customMissionQuery.InstallationCode}");
 
         string sourceURL = await _customMissionService.UploadSource(missionTasks);
 
@@ -450,7 +450,7 @@ public class MissionController : ControllerBase
             },
             Name = customMissionQuery.Name,
             InspectionFrequency = customMissionQuery.InspectionFrequency,
-            AssetCode = customMissionQuery.AssetCode,
+            InstallationCode = customMissionQuery.InstallationCode,
             Area = area
         };
 
@@ -464,7 +464,7 @@ public class MissionController : ControllerBase
             Status = MissionStatus.Pending,
             DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTimeOffset.UtcNow,
             Tasks = missionTasks,
-            AssetCode = customMissionQuery.AssetCode,
+            InstallationCode = customMissionQuery.InstallationCode,
             Area = area,
             MapMetadata = new MapMetadata()
         };

@@ -11,7 +11,6 @@ namespace Api.Controllers
     public class InstallationController : ControllerBase
     {
         private readonly IInstallationService _installationService;
-        private readonly IAssetService _assetService;
 
         private readonly IMapService _mapService;
 
@@ -20,14 +19,12 @@ namespace Api.Controllers
         public InstallationController(
             ILogger<InstallationController> logger,
             IMapService mapService,
-            IInstallationService installationService,
-            IAssetService assetService
+            IInstallationService installationService
         )
         {
             _logger = logger;
             _mapService = mapService;
             _installationService = installationService;
-            _assetService = assetService;
         }
 
         /// <summary>
@@ -103,12 +100,7 @@ namespace Api.Controllers
             _logger.LogInformation("Creating new installation");
             try
             {
-                var existingAsset = await _assetService.ReadByName(installation.AssetCode);
-                if (existingAsset == null)
-                {
-                    return NotFound($"Asset with asset code {installation.AssetCode} not found");
-                }
-                var existingInstallation = await _installationService.ReadByAssetAndName(existingAsset, installation.InstallationCode);
+                var existingInstallation = await _installationService.ReadByName(installation.InstallationCode);
                 if (existingInstallation != null)
                 {
                     _logger.LogInformation("An installation for given name and installation already exists");

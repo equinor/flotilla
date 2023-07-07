@@ -47,16 +47,16 @@ namespace Api.Test.Services
                 .ReadAll(new MissionRunQueryStringParameters())
                 .Result.Count;
 
-            var testAsset = new Asset
-            {
-                AssetCode = "test",
-                Name = "test test"
-            };
             var testInstallation = new Installation
             {
                 InstallationCode = "test",
+                Name = "test test"
+            };
+            var testPlant = new Plant
+            {
+                PlantCode = "test",
                 Name = "test test",
-                Asset = testAsset
+                Installation = testInstallation
             };
 
             MissionRun missionRun =
@@ -70,18 +70,18 @@ namespace Api.Test.Services
                     {
                         Deck = new Deck
                         {
+                            Plant = testPlant,
                             Installation = testInstallation,
-                            Asset = testAsset,
                             Name = "testDeck"
                         },
-                        Asset = testAsset,
                         Installation = testInstallation,
+                        Plant = testPlant,
                         Name = "testArea",
                         MapMetadata = new MapMetadata() { MapName = "testMap" },
                         DefaultLocalizationPose = new Pose(),
                         SafePositions = new List<SafePosition>()
                     },
-                    AssetCode = "testAsset",
+                    InstallationCode = "testInstallation",
                     DesiredStartTime = DateTime.Now
                 };
 

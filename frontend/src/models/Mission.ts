@@ -21,7 +21,7 @@ export interface Mission {
     description?: string
     statusReason?: string
     comment?: string
-    assetCode?: string
+    installationCode?: string
     robot: Robot
     status: MissionStatus
     isCompleted: boolean

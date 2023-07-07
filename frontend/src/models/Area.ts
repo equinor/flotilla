@@ -3,8 +3,8 @@ import { Pose } from './Pose'
 export interface Area {
     id: string
     areaName: string
+    plantCode: string
     installationCode: string
-    assetCode: string
     deckName: string
     defaultLocalizationPose: Pose
 }

@@ -11,8 +11,8 @@ namespace Api.Controllers
     public class DeckController : ControllerBase
     {
         private readonly IDeckService _deckService;
-        private readonly IAssetService _assetService;
         private readonly IInstallationService _installationService;
+        private readonly IPlantService _plantService;
 
         private readonly IMapService _mapService;
 
@@ -22,15 +22,15 @@ namespace Api.Controllers
             ILogger<DeckController> logger,
             IMapService mapService,
             IDeckService deckService,
-            IAssetService assetService,
-            IInstallationService installationService
+            IInstallationService installationService,
+            IPlantService plantService
         )
         {
             _logger = logger;
             _mapService = mapService;
             _deckService = deckService;
-            _assetService = assetService;
             _installationService = installationService;
+            _plantService = plantService;
         }
 
         /// <summary>
@@ -106,17 +106,17 @@ namespace Api.Controllers
             _logger.LogInformation("Creating new deck");
             try
             {
-                var existingAsset = await _assetService.ReadByName(deck.AssetCode);
-                if (existingAsset == null)
-                {
-                    return NotFound($"Could not find asset with name {deck.AssetCode}");
-                }
-                var existingInstallation = await _installationService.ReadByAssetAndName(existingAsset, deck.InstallationCode);
+                var existingInstallation = await _installationService.ReadByName(deck.InstallationCode);
                 if (existingInstallation == null)
                 {
                     return NotFound($"Could not find installation with name {deck.InstallationCode}");
                 }
-                var existingDeck = await _deckService.ReadByAssetAndInstallationAndName(existingAsset, existingInstallation, deck.Name);
+                var existingPlant = await _plantService.ReadByInstallationAndName(existingInstallation, deck.PlantCode);
+                if (existingPlant == null)
+                {
+                    return NotFound($"Could not find plant with name {deck.PlantCode}");
+                }
+                var existingDeck = await _deckService.ReadByInstallationAndPlantAndName(existingInstallation, existingPlant, deck.Name);
                 if (existingDeck != null)
                 {
                     _logger.LogInformation("An deck for given name and deck already exists");

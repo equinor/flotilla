@@ -20,7 +20,7 @@ import { EchoMission } from 'models/EchoMission'
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
     static accessToken: string
-    static assetCode: string
+    static installationCode: string
 
     /**  API is not ready until access token has been set for the first time */
     private static async ApiReady() {
@@ -139,9 +139,9 @@ export class BackendAPICaller {
     static async getMissionRuns(parameters: MissionRunQueryParameters): Promise<PaginatedResponse<Mission>> {
         let path: string = 'missions/runs?'
 
-        // Always filter by currently selected asset
-        const assetCode: string | null = BackendAPICaller.assetCode
-        if (assetCode) path = path + 'AssetCode=' + assetCode + '&'
+        // Always filter by currently selected installation
+        const installationCode: string | null = BackendAPICaller.installationCode
+        if (installationCode) path = path + 'InstallationCode=' + installationCode + '&'
 
         if (parameters.statuses) {
             parameters.statuses.forEach((status) => {
@@ -194,9 +194,9 @@ export class BackendAPICaller {
     ): Promise<PaginatedResponse<Mission>> {
         let path: string = 'missions/definitions?'
 
-        // Always filter by currently selected asset
-        const assetCode: string | null = BackendAPICaller.assetCode
-        if (assetCode) path = path + 'AssetCode=' + assetCode + '&'
+        // Always filter by currently selected installation
+        const installationCode: string | null = BackendAPICaller.installationCode
+        if (installationCode) path = path + 'InstallationCode=' + installationCode + '&'
 
         if (parameters.area) path = path + 'Area=' + parameters.area + '&'
         if (parameters.sourceType) path = path + 'SourceType=' + parameters.sourceType + '&'
@@ -252,7 +252,7 @@ export class BackendAPICaller {
         })
         return result.content
     }
-    static async postMission(echoMissionId: number, robotId: string, assetCode: string | null) {
+    static async postMission(echoMissionId: number, robotId: string, installationCode: string | null) {
         const path: string = 'missions'
         const robots: Robot[] = await BackendAPICaller.getEnabledRobots()
         const desiredRobot = filterRobots(robots, robotId)
@@ -260,7 +260,7 @@ export class BackendAPICaller {
             robotId: desiredRobot[0].id,
             echoMissionId: echoMissionId,
             desiredStartTime: new Date(),
-            assetCode: assetCode,
+            installationCode: installationCode,
             areaName: '', // TODO: we need a way of populating the area database, then including area in MissionDefinition
         }
         const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch((e) => {
@@ -315,8 +315,8 @@ export class BackendAPICaller {
         return BackendAPICaller.postControlMissionRequest(path, robotId)
     }
 
-    static async getMap(assetCode: string, mapName: string): Promise<Blob> {
-        const path: string = 'missions/' + assetCode + '/' + mapName + '/map'
+    static async getMap(installationCode: string, mapName: string): Promise<Blob> {
+        const path: string = 'missions/' + installationCode + '/' + mapName + '/map'
         const url = `${config.BACKEND_URL}/${path}`
 
         const headers = {

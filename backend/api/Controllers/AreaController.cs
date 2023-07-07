@@ -47,10 +47,10 @@ namespace Api.Controllers
             _logger.LogInformation("Creating new area");
             try
             {
-                var existingArea = await _areaService.ReadByAssetAndName(area.AssetCode, area.AreaName);
+                var existingArea = await _areaService.ReadByInstallationAndName(area.InstallationCode, area.AreaName);
                 if (existingArea != null)
                 {
-                    _logger.LogWarning("An area for given name and asset already exists");
+                    _logger.LogWarning("An area for given name and installation already exists");
                     return Conflict($"Area already exists");
                 }
 
@@ -63,8 +63,8 @@ namespace Api.Controllers
                 {
                     Id = newArea.Id,
                     DeckName = newArea.Deck.Name,
+                    PlantCode = newArea.Plant.PlantCode,
                     InstallationCode = newArea.Installation.InstallationCode,
-                    AssetCode = newArea.Asset.AssetCode,
                     AreaName = newArea.Name,
                     MapMetadata = newArea.MapMetadata,
                     DefaultLocalizationPose = newArea.DefaultLocalizationPose,
@@ -91,35 +91,35 @@ namespace Api.Controllers
         /// </remarks>
         [HttpPost]
         [Authorize(Roles = Role.Admin)]
-        [Route("{assetCode}/{installationCode}/{deckName}/{areaName}/safe-position")]
+        [Route("{installationCode}/{plantCode}/{deckName}/{areaName}/safe-position")]
         [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<AreaResponse>> AddSafePosition(
-            [FromRoute] string assetCode,
             [FromRoute] string installationCode,
+            [FromRoute] string plantCode,
             [FromRoute] string deckName,
             [FromRoute] string areaName,
             [FromBody] Pose safePosition
         )
         {
-            _logger.LogInformation(@"Adding new safe position to {Asset}, {Installation}, 
-                {Deck}, {Area}", assetCode, installationCode, deckName, areaName);
+            _logger.LogInformation(@"Adding new safe position to {Installation}, {Plant}, 
+                {Deck}, {Area}", installationCode, plantCode, deckName, areaName);
             try
             {
-                var area = await _areaService.AddSafePosition(assetCode, areaName, new SafePosition(safePosition));
+                var area = await _areaService.AddSafePosition(installationCode, areaName, new SafePosition(safePosition));
                 if (area != null)
                 {
-                    _logger.LogInformation(@"Successfully added new safe position for asset '{assetId}' 
-                        and name '{name}'", assetCode, areaName);
+                    _logger.LogInformation(@"Successfully added new safe position for installation '{installationId}' 
+                        and name '{name}'", installationCode, areaName);
                     var response = new AreaResponse
                     {
                         Id = area.Id,
                         DeckName = area.Deck.Name,
+                        PlantCode = area.Plant.PlantCode,
                         InstallationCode = area.Installation.InstallationCode,
-                        AssetCode = area.Asset.AssetCode,
                         AreaName = area.Name,
                         MapMetadata = area.MapMetadata,
                         DefaultLocalizationPose = area.DefaultLocalizationPose,
@@ -129,9 +129,9 @@ namespace Api.Controllers
                 }
                 else
                 {
-                    _logger.LogInformation(@"No area with asset {assetCode}, installation {installationCode}, 
-                        deck {deckName} and name {areaName} could be found.", assetCode, installationCode, deckName, areaName);
-                    return NotFound(@$"No area with asset {assetCode}, installation {installationCode}, 
+                    _logger.LogInformation(@"No area with installation {installationCode}, plant {plantCode}, 
+                        deck {deckName} and name {areaName} could be found.", installationCode, plantCode, deckName, areaName);
+                    return NotFound(@$"No area with installation {installationCode}, plant {plantCode}, 
                         deck {deckName} and name {areaName} could be found.");
                 }
             }
@@ -162,8 +162,8 @@ namespace Api.Controllers
             {
                 Id = area.Id,
                 DeckName = area.Deck.Name,
+                PlantCode = area.Plant.PlantCode,
                 InstallationCode = area.Installation.InstallationCode,
-                AssetCode = area.Asset.AssetCode,
                 AreaName = area.Name,
                 MapMetadata = area.MapMetadata,
                 DefaultLocalizationPose = area.DefaultLocalizationPose,
@@ -173,10 +173,10 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// List all asset areas in the Flotilla database
+        /// List all installation areas in the Flotilla database
         /// </summary>
         /// <remarks>
-        /// <para> This query gets all asset areas </para>
+        /// <para> This query gets all installation areas </para>
         /// </remarks>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
@@ -194,8 +194,8 @@ namespace Api.Controllers
                 {
                     Id = area.Id,
                     DeckName = area.Deck.Name,
+                    PlantCode = area.Plant.PlantCode,
                     InstallationCode = area.Installation.InstallationCode,
-                    AssetCode = area.Asset.AssetCode,
                     AreaName = area.Name,
                     MapMetadata = area.MapMetadata,
                     DefaultLocalizationPose = area.DefaultLocalizationPose,
@@ -232,8 +232,8 @@ namespace Api.Controllers
                 {
                     Id = area.Id,
                     DeckName = area.Deck.Name,
+                    PlantCode = area.Plant.PlantCode,
                     InstallationCode = area.Installation.InstallationCode,
-                    AssetCode = area.Asset.AssetCode,
                     AreaName = area.Name,
                     MapMetadata = area.MapMetadata,
                     DefaultLocalizationPose = area.DefaultLocalizationPose,
@@ -277,7 +277,7 @@ namespace Api.Controllers
             };
             try
             {
-                mapMetadata = await _mapService.ChooseMapFromPositions(positions, area.Deck.Installation.Asset.AssetCode);
+                mapMetadata = await _mapService.ChooseMapFromPositions(positions, area.Deck.Plant.Installation.InstallationCode);
             }
             catch (RequestFailedException e)
             {

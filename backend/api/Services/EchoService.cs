@@ -183,7 +183,7 @@ namespace Api.Services
                     {
                         EchoMissionId = echoMission.Id,
                         Name = echoMission.Name,
-                        AssetCode = echoMission.InstallationCode,
+                        InstallationCode = echoMission.InstallationCode,
                     };
                     availableMissions.Add(condensedEchoMissionDefinition);
                 }
@@ -209,7 +209,7 @@ namespace Api.Services
                 {
                     Id = echoMission.Id,
                     Name = echoMission.Name,
-                    AssetCode = echoMission.InstallationCode,
+                    InstallationCode = echoMission.InstallationCode,
                     URL = new Uri($"https://echo.equinor.com/mp?editId={echoMission.Id}"),
                     Tags = ProcessPlanItems(echoMission.PlanItems, echoMission.InstallationCode)
                 };
@@ -238,7 +238,7 @@ namespace Api.Services
 
                 var echoPlantInfo = new EchoPlantInfo()
                 {
-                    InstallationCode = plant.InstallationCode,
+                    PlantCode = plant.InstallationCode,
                     ProjectDescription = plant.ProjectDescription
                 };
 

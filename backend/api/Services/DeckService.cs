@@ -12,11 +12,11 @@ namespace Api.Services
 
         public abstract Task<Deck?> ReadById(string id);
 
-        public abstract Task<IEnumerable<Deck>> ReadByAsset(string assetCode);
+        public abstract Task<IEnumerable<Deck>> ReadByInstallation(string installationCode);
 
         public abstract Task<Deck?> ReadByName(string deckName);
 
-        public abstract Task<Deck?> ReadByAssetAndInstallationAndName(Asset asset, Installation installation, string deckName);
+        public abstract Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string deckName);
 
         public abstract Task<Deck> Create(CreateDeckQuery newDeck);
 
@@ -39,14 +39,14 @@ namespace Api.Services
     public class DeckService : IDeckService
     {
         private readonly FlotillaDbContext _context;
-        private readonly IAssetService _assetService;
         private readonly IInstallationService _installationService;
+        private readonly IPlantService _plantService;
 
-        public DeckService(FlotillaDbContext context, IAssetService assetService, IInstallationService installationService)
+        public DeckService(FlotillaDbContext context, IInstallationService installationService, IPlantService plantService)
         {
             _context = context;
-            _assetService = assetService;
             _installationService = installationService;
+            _plantService = plantService;
         }
 
         public async Task<IEnumerable<Deck>> ReadAll()
@@ -65,13 +65,13 @@ namespace Api.Services
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<IEnumerable<Deck>> ReadByAsset(string assetCode)
+        public async Task<IEnumerable<Deck>> ReadByInstallation(string installationCode)
         {
-            var asset = await _assetService.ReadByName(assetCode);
-            if (asset == null)
+            var installation = await _installationService.ReadByName(installationCode);
+            if (installation == null)
                 return new List<Deck>();
             return await _context.Decks.Where(a =>
-                a.Asset.Id.Equals(asset.Id)).ToListAsync();
+                a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
         public async Task<Deck?> ReadByName(string deckName)
@@ -83,35 +83,35 @@ namespace Api.Services
             ).FirstOrDefaultAsync();
         }
 
-        public async Task<Deck?> ReadByAssetAndInstallationAndName(Asset asset, Installation installation, string name)
+        public async Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string name)
         {
             return await _context.Decks.Where(a =>
+                a.Plant.Id.Equals(plant.Id) &&
                 a.Installation.Id.Equals(installation.Id) &&
-                a.Asset.Id.Equals(asset.Id) &&
                 a.Name.ToLower().Equals(name.ToLower())
-            ).Include(d => d.Installation).Include(i => i.Asset).FirstOrDefaultAsync();
+            ).Include(d => d.Plant).Include(i => i.Installation).FirstOrDefaultAsync();
         }
 
         public async Task<Deck> Create(CreateDeckQuery newDeckQuery)
         {
-            var asset = await _assetService.ReadByName(newDeckQuery.AssetCode);
-            if (asset == null)
-            {
-                throw new AssetNotFoundException($"No asset with name {newDeckQuery.AssetCode} could be found");
-            }
-            var installation = await _installationService.ReadByAssetAndName(asset, newDeckQuery.InstallationCode);
+            var installation = await _installationService.ReadByName(newDeckQuery.InstallationCode);
             if (installation == null)
             {
                 throw new InstallationNotFoundException($"No installation with name {newDeckQuery.InstallationCode} could be found");
             }
-            var deck = await ReadByAssetAndInstallationAndName(asset, installation, newDeckQuery.Name);
+            var plant = await _plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode);
+            if (plant == null)
+            {
+                throw new PlantNotFoundException($"No plant with name {newDeckQuery.PlantCode} could be found");
+            }
+            var deck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name);
             if (deck == null)
             {
                 deck = new Deck
                 {
                     Name = newDeckQuery.Name,
-                    Asset = asset,
-                    Installation = installation
+                    Installation = installation,
+                    Plant = plant
                 };
                 await _context.Decks.AddAsync(deck);
                 await _context.SaveChangesAsync();

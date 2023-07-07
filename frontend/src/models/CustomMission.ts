@@ -7,7 +7,7 @@ export interface CustomMissionQuery {
     name: string
     description?: string
     comment?: string
-    assetCode?: string
+    installationCode?: string
     robotId: string
     desiredStartTime: Date
     tasks: CustomTaskQuery[]
@@ -33,7 +33,7 @@ export function CreateCustomMission(mission: Mission): CustomMissionQuery {
         name: mission.name,
         description: mission.description,
         comment: mission.comment,
-        assetCode: mission.assetCode,
+        installationCode: mission.installationCode,
         robotId: mission.robot.id,
         desiredStartTime: new Date(),
         tasks: mission.tasks.map<CustomTaskQuery>((task) => {

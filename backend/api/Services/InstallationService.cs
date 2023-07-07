@@ -1,7 +1,6 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
-using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
@@ -12,11 +11,7 @@ namespace Api.Services
 
         public abstract Task<Installation?> ReadById(string id);
 
-        public abstract Task<IEnumerable<Installation>> ReadByAsset(string assetCode);
-
-        public abstract Task<Installation?> ReadByAssetAndName(Asset asset, string installationCode);
-
-        public abstract Task<Installation?> ReadByAssetAndName(string assetCode, string installationCode);
+        public abstract Task<Installation?> ReadByName(string installation);
 
         public abstract Task<Installation> Create(CreateInstallationQuery newInstallation);
 
@@ -39,12 +34,10 @@ namespace Api.Services
     public class InstallationService : IInstallationService
     {
         private readonly FlotillaDbContext _context;
-        private readonly IAssetService _assetService;
 
-        public InstallationService(FlotillaDbContext context, IAssetService assetService)
+        public InstallationService(FlotillaDbContext context)
         {
             _context = context;
-            _assetService = assetService;
         }
 
         public async Task<IEnumerable<Installation>> ReadAll()
@@ -54,7 +47,7 @@ namespace Api.Services
 
         private IQueryable<Installation> GetInstallations()
         {
-            return _context.Installations.Include(i => i.Asset);
+            return _context.Installations;
         }
 
         public async Task<Installation?> ReadById(string id)
@@ -63,52 +56,29 @@ namespace Api.Services
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<IEnumerable<Installation>> ReadByAsset(string assetCode)
+        public async Task<Installation?> ReadByName(string installationCode)
         {
-            var asset = await _assetService.ReadByName(assetCode);
-            if (asset == null)
-                return new List<Installation>();
-            return await _context.Installations.Where(a =>
-                a.Asset.Id.Equals(asset.Id)).ToListAsync();
-        }
-
-        public async Task<Installation?> ReadByAssetAndName(Asset asset, string installationCode)
-        {
-            return await _context.Installations.Where(a =>
-                a.InstallationCode.ToLower().Equals(installationCode.ToLower()) &&
-                a.Asset.Id.Equals(asset.Id)).FirstOrDefaultAsync();
-        }
-
-        public async Task<Installation?> ReadByAssetAndName(string assetCode, string installationCode)
-        {
-            var asset = await _assetService.ReadByName(assetCode);
-            if (asset == null)
+            if (installationCode == null)
                 return null;
             return await _context.Installations.Where(a =>
-                a.Asset.Id.Equals(asset.Id) &&
                 a.InstallationCode.ToLower().Equals(installationCode.ToLower())
             ).FirstOrDefaultAsync();
         }
 
         public async Task<Installation> Create(CreateInstallationQuery newInstallationQuery)
         {
-            var asset = await _assetService.ReadByName(newInstallationQuery.AssetCode);
-            if (asset == null)
-            {
-                throw new AssetNotFoundException($"No asset with name {newInstallationQuery.AssetCode} could be found");
-            }
-            var installation = await ReadByAssetAndName(asset, newInstallationQuery.InstallationCode);
+            var installation = await ReadByName(newInstallationQuery.InstallationCode);
             if (installation == null)
             {
                 installation = new Installation
                 {
                     Name = newInstallationQuery.Name,
-                    InstallationCode = newInstallationQuery.InstallationCode,
-                    Asset = asset,
+                    InstallationCode = newInstallationQuery.InstallationCode
                 };
                 await _context.Installations.AddAsync(installation);
                 await _context.SaveChangesAsync();
             }
+
             return installation!;
         }
 

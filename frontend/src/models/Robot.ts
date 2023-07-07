@@ -15,7 +15,7 @@ export interface Robot {
     name?: string
     model: RobotModel
     serialNumber?: string
-    currentAsset: string
+    currentInstallation: string
     batteryLevel?: number
     batteryStatus?: BatteryStatus
     pressureLevel?: number

@@ -38,7 +38,7 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
-    /// List all robots on the asset.
+    /// List all robots on the installation.
     /// </summary>
     /// <remarks>
     /// <para> This query gets all robots </para>
@@ -683,8 +683,8 @@ public class RobotController : ControllerBase
         {
             Name = "Localization Mission",
             Robot = robot,
+            InstallationCode = "NA",
             Area = area,
-            AssetCode = "NA",
             Status = MissionStatus.Pending,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(),
@@ -734,7 +734,7 @@ public class RobotController : ControllerBase
     /// <para> This query starts a localization for a given robot </para>
     /// </remarks>
     [HttpPost]
-    [Route("{robotId}/{asset}/{areaName}/go-to-safe-position")]
+    [Route("{robotId}/{installation}/{areaName}/go-to-safe-position")]
     [Authorize(Roles = Role.User)]
     [ProducesResponseType(typeof(MissionRun), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -744,7 +744,7 @@ public class RobotController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<MissionRun>> SendRobotToSafePosition(
         [FromRoute] string robotId,
-        [FromRoute] string asset,
+        [FromRoute] string installation,
         [FromRoute] string areaName
     )
     {
@@ -755,15 +755,15 @@ public class RobotController : ControllerBase
             return NotFound("Robot not found");
         }
 
-        var assets = await _areaService.ReadByAsset(asset);
+        var installations = await _areaService.ReadByInstallation(installation);
 
-        if (!assets.Any())
+        if (!installations.Any())
         {
-            _logger.LogWarning("Could not find asset={asset}", asset);
-            return NotFound("No asset found");
+            _logger.LogWarning("Could not find installation={installation}", installation);
+            return NotFound("No installation found");
         }
 
-        var area = await _areaService.ReadByAssetAndName(asset, areaName);
+        var area = await _areaService.ReadByInstallationAndName(installation, areaName);
         if (area is null)
         {
             _logger.LogWarning("Could not find area={areaName}", areaName);
@@ -772,7 +772,7 @@ public class RobotController : ControllerBase
 
         if (area.SafePositions.Count < 1)
         {
-            _logger.LogWarning("No safe position for asset={asset}, area={areaName}", asset, areaName);
+            _logger.LogWarning("No safe position for installation={installation}, area={areaName}", installation, areaName);
             return NotFound("No safe positions found");
         }
 
@@ -812,7 +812,7 @@ public class RobotController : ControllerBase
         {
             Name = "Drive to Safe Position",
             Robot = robot,
-            AssetCode = asset,
+            InstallationCode = installation,
             Area = area,
             Status = MissionStatus.Pending,
             DesiredStartTime = DateTimeOffset.UtcNow,

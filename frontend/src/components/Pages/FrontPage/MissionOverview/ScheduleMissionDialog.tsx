@@ -13,7 +13,7 @@ import styled from 'styled-components'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState, useEffect } from 'react'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
 
 interface IProps {
@@ -58,7 +58,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [isScheduleMissionsPressed, setIsScheduleMissionsPressed] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
-    const { assetCode } = useAssetContext()
+    const { installationCode } = useInstallationContext()
 
     useEffect(() => {
         if (!props.isFetchingEchoMissions && isScheduleMissionsPressed) {
@@ -124,11 +124,11 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             <Popover
                 anchorEl={anchorRef.current}
                 onClose={handleClose}
-                open={isPopoverOpen && assetCode === ''}
+                open={isPopoverOpen && installationCode === ''}
                 placement="top"
             >
                 <Popover.Content>
-                    <Typography variant="body_short">{TranslateText('Please select asset')}</Typography>
+                    <Typography variant="body_short">{TranslateText('Please select installation')}</Typography>
                 </Popover.Content>
             </Popover>
 
@@ -159,7 +159,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 <Dialog open={isEmptyEchoMissionsDialogOpen} isDismissable>
                     <StyledAutoComplete>
                         <Typography variant="h5">
-                            {TranslateText('This asset has no missions - Please create mission')}
+                            {TranslateText('This installation has no missions - Please create mission')}
                         </Typography>
                         <StyledMissionSection>
                             {CreateMissionButton()}

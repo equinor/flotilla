@@ -72,8 +72,8 @@ namespace Api.Services
             return _context.MissionRuns
                 .Include(missionRun => missionRun.Area)
                 .ThenInclude(area => area.Deck)
-                .ThenInclude(deck => deck.Installation)
-                .ThenInclude(installation => installation.Asset)
+                .ThenInclude(deck => deck.Plant)
+                .ThenInclude(plant => plant.Installation)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.VideoStreams)
                 .Include(missionRun => missionRun.Robot)
@@ -309,7 +309,7 @@ namespace Api.Services
         }
 
         /// <summary>
-        /// Filters by <see cref="MissionRunQueryStringParameters.AssetCode"/> and <see cref="MissionRunQueryStringParameters.Status"/>
+        /// Filters by <see cref="MissionRunQueryStringParameters.InstallationCode"/> and <see cref="MissionRunQueryStringParameters.Status"/>
         ///
         /// <para>Uses LINQ Expression trees (see <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees"/>)</para>
         /// </summary>
@@ -323,10 +323,10 @@ namespace Api.Services
                 : missionRun =>
                       missionRun.Area.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
 
-            Expression<Func<MissionRun, bool>> assetFilter = parameters.AssetCode is null
+            Expression<Func<MissionRun, bool>> installationFilter = parameters.InstallationCode is null
                 ? missionRun => true
                 : missionRun =>
-                      missionRun.AssetCode.ToLower().Equals(parameters.AssetCode.Trim().ToLower());
+                      missionRun.InstallationCode.ToLower().Equals(parameters.InstallationCode.Trim().ToLower());
 
             Expression<Func<MissionRun, bool>> statusFilter = parameters.Statuses is null
                 ? mission => true
@@ -382,7 +382,7 @@ namespace Api.Services
 
             // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
             Expression body = Expression.AndAlso(
-                Expression.Invoke(assetFilter, missionRun),
+                Expression.Invoke(installationFilter, missionRun),
                 Expression.AndAlso(
                     Expression.Invoke(statusFilter, missionRun),
                     Expression.AndAlso(
