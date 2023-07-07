@@ -26,7 +26,7 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public string SerialNumber { get; set; }
 
-        public string CurrentAsset { get; set; }
+        public string CurrentInstallation { get; set; }
 
         public Area? CurrentArea { get; set; }
 
@@ -73,7 +73,7 @@ namespace Api.Database.Models
             IsarId = "defaultIsarId";
             Name = "defaultId";
             SerialNumber = "defaultSerialNumber";
-            CurrentAsset = "defaultAsset";
+            CurrentInstallation = "defaultAsset";
             Status = RobotStatus.Offline;
             Enabled = false;
             Host = "localhost";
@@ -98,7 +98,7 @@ namespace Api.Database.Models
             IsarId = createQuery.IsarId;
             Name = createQuery.Name;
             SerialNumber = createQuery.SerialNumber;
-            CurrentAsset = createQuery.CurrentAsset;
+            CurrentInstallation = createQuery.CurrentInstallation;
             CurrentArea = createQuery.CurrentArea;
             VideoStreams = videoStreams;
             Host = createQuery.Host;

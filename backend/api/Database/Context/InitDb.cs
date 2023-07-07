@@ -5,8 +5,8 @@ namespace Api.Database.Context;
 public static class InitDb
 {
     private static readonly List<Robot> robots = GetRobots();
-    private static readonly List<Asset> assets = GetAssets();
     private static readonly List<Installation> installations = GetInstallations();
+    private static readonly List<Plant> plants = GetPlants();
     private static readonly List<Deck> decks = GetDecks();
     private static readonly List<Area> areas = GetAreas();
     private static readonly List<Source> sources = GetSources();
@@ -34,73 +34,29 @@ public static class InitDb
             RobotPose = new Pose()
         };
 
-    private static List<Robot> GetRobots()
-    {
-        var robot1 = new Robot
-        {
-            IsarId = "c68b679d-308b-460f-9fe0-87eaadbd8a6e",
-            Name = "R2-D2",
-            SerialNumber = "D2",
-            Status = RobotStatus.Available,
-            Enabled = true,
-            Host = "localhost",
-            Port = 3000,
-            VideoStreams = new List<VideoStream>(),
-            Pose = new Pose()
-        };
-
-        var robot2 = new Robot
-        {
-            Name = "Shockwave",
-            IsarId = "c68b679d-308b-460f-9fe0-87eaadbd1234",
-            SerialNumber = "SS79",
-            Status = RobotStatus.Busy,
-            Enabled = true,
-            Host = "localhost",
-            Port = 3000,
-            VideoStreams = new List<VideoStream>(),
-            Pose = new Pose()
-        };
-
-        var robot3 = new Robot
-        {
-            Name = "Ultron",
-            IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
-            SerialNumber = "Earth616",
-            Status = RobotStatus.Available,
-            Enabled = false,
-            Host = "localhost",
-            Port = 3000,
-            VideoStreams = new List<VideoStream>(),
-            Pose = new Pose()
-        };
-
-        return new List<Robot>(new Robot[] { robot1, robot2, robot3 });
-    }
-
-    private static List<Asset> GetAssets()
-    {
-        var asset1 = new Asset
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = "Johan Sverdrup",
-            AssetCode = "JSV"
-        };
-
-        return new List<Asset>(new Asset[] { asset1 });
-    }
-
     private static List<Installation> GetInstallations()
     {
         var installation1 = new Installation
         {
             Id = Guid.NewGuid().ToString(),
-            Asset = assets[0],
-            Name = "Johan Sverdrup - P1",
-            InstallationCode = "P1"
+            Name = "Johan Sverdrup",
+            InstallationCode = "JSV"
         };
 
         return new List<Installation>(new Installation[] { installation1 });
+    }
+
+    private static List<Plant> GetPlants()
+    {
+        var plant1 = new Plant
+        {
+            Id = Guid.NewGuid().ToString(),
+            Installation = installations[0],
+            Name = "Johan Sverdrup - P1",
+            PlantCode = "P1"
+        };
+
+        return new List<Plant>(new Plant[] { plant1 });
     }
 
     private static List<Deck> GetDecks()
@@ -108,8 +64,8 @@ public static class InitDb
         var deck1 = new Deck
         {
             Id = Guid.NewGuid().ToString(),
-            Installation = installations[0],
-            Asset = installations[0].Asset,
+            Plant = plants[0],
+            Installation = plants[0].Installation,
             Name = "TestDeck"
         };
 
@@ -122,8 +78,8 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Deck = decks[0],
-            Installation = decks[0].Installation,
-            Asset = decks[0].Installation.Asset,
+            Plant = decks[0].Plant,
+            Installation = decks[0].Plant.Installation,
             Name = "AP320",
             MapMetadata = new MapMetadata(),
             DefaultLocalizationPose = new Pose { },
@@ -134,8 +90,8 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Deck = decks[0],
-            Installation = decks[0].Installation,
-            Asset = decks[0].Installation.Asset,
+            Plant = decks[0].Plant,
+            Installation = decks[0].Plant.Installation,
             Name = "AP330",
             MapMetadata = new MapMetadata(),
             DefaultLocalizationPose = new Pose { },
@@ -146,8 +102,8 @@ public static class InitDb
         {
             Id = "TestId",
             Deck = decks[0],
-            Installation = decks[0].Installation,
-            Asset = decks[0].Installation.Asset,
+            Plant = decks[0].Plant,
+            Installation = decks[0].Plant.Installation,
             Name = "testArea",
             MapMetadata = new MapMetadata(),
             DefaultLocalizationPose = new Pose { },
@@ -174,13 +130,60 @@ public static class InitDb
         return new List<Source>(new Source[] { source1, source2 });
     }
 
+    private static List<Robot> GetRobots()
+    {
+        var robot1 = new Robot
+        {
+            IsarId = "c68b679d-308b-460f-9fe0-87eaadbd8a6e",
+            Name = "R2-D2",
+            SerialNumber = "D2",
+            Status = RobotStatus.Available,
+            Enabled = true,
+            Host = "localhost",
+            Port = 3000,
+            CurrentInstallation = "JSV",
+            VideoStreams = new List<VideoStream>(),
+            Pose = new Pose()
+        };
+
+        var robot2 = new Robot
+        {
+            Name = "Shockwave",
+            IsarId = "c68b679d-308b-460f-9fe0-87eaadbd1234",
+            SerialNumber = "SS79",
+            Status = RobotStatus.Busy,
+            Enabled = true,
+            Host = "localhost",
+            Port = 3000,
+            CurrentInstallation = "JSV",
+            VideoStreams = new List<VideoStream>(),
+            Pose = new Pose()
+        };
+
+        var robot3 = new Robot
+        {
+            Name = "Ultron",
+            IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
+            SerialNumber = "Earth616",
+            Status = RobotStatus.Available,
+            Enabled = false,
+            Host = "localhost",
+            Port = 3000,
+            CurrentInstallation = "JSV",
+            VideoStreams = new List<VideoStream>(),
+            Pose = new Pose()
+        };
+
+        return new List<Robot>(new Robot[] { robot1, robot2, robot3 });
+    }
+
     private static List<MissionDefinition> GetMissionDefinitions()
     {
         var missionDefinition1 = new MissionDefinition
         {
             Id = Guid.NewGuid().ToString(),
             Name = "Placeholder Mission 1",
-            AssetCode = areas[0].Deck.Installation.Asset.AssetCode,
+            InstallationCode = areas[0].Deck.Plant.Installation.InstallationCode,
             Area = areas[0],
             Source = sources[0],
             Comment = "Interesting comment",
@@ -192,7 +195,7 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Name = "Placeholder Mission 2",
-            AssetCode = areas[1].Deck.Installation.Asset.AssetCode,
+            InstallationCode = areas[1].Deck.Plant.Installation.InstallationCode,
             Area = areas[1],
             Source = sources[1],
             InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
@@ -203,7 +206,7 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Name = "Placeholder Mission 3",
-            AssetCode = areas[1].Deck.Installation.Asset.AssetCode,
+            InstallationCode = areas[1].Deck.Plant.Installation.InstallationCode,
             Area = areas[1],
             Source = sources[1],
             LastRun = null
@@ -218,7 +221,7 @@ public static class InitDb
         {
             Name = "Placeholder Mission 1",
             Robot = robots[0],
-            AssetCode = areas[0].Deck.Installation.Asset.AssetCode,
+            InstallationCode = areas[0].Deck.Plant.Installation.InstallationCode,
             Area = areas[0],
             MissionId = missionDefinitions[0].Id,
             Status = MissionStatus.Successful,
@@ -231,7 +234,7 @@ public static class InitDb
         {
             Name = "Placeholder Mission 2",
             Robot = robots[1],
-            AssetCode = areas[1].Deck.Installation.Asset.AssetCode,
+            InstallationCode = areas[1].Deck.Plant.Installation.InstallationCode,
             Area = areas[1],
             MissionId = missionDefinitions[0].Id,
             Status = MissionStatus.Successful,
@@ -245,7 +248,7 @@ public static class InitDb
         {
             Name = "Placeholder Mission 3",
             Robot = robots[2],
-            AssetCode = areas[1].Deck.Installation.Asset.AssetCode,
+            InstallationCode = areas[1].Deck.Plant.Installation.InstallationCode,
             Area = areas[1],
             MissionId = missionDefinitions[1].Id,
             Status = MissionStatus.Successful,

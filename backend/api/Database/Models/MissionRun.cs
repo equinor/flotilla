@@ -35,7 +35,7 @@ namespace Api.Database.Models
 
         [Required]
         [MaxLength(200)]
-        public string AssetCode { get; set; }
+        public string InstallationCode { get; set; }
 
         [Required]
         public DateTimeOffset DesiredStartTime { get; set; }

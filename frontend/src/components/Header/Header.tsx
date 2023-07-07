@@ -1,7 +1,7 @@
 import { config } from 'config'
 import { Button, Icon, TopBar, Autocomplete, Typography } from '@equinor/eds-core-react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -51,7 +51,7 @@ export function Header({ page }: { page: string }) {
                     </Typography>
                 </TopBar.Header>
             </HandPointer>
-            <StyledTopBarContent>{AssetPicker(page)}</StyledTopBarContent>
+            <StyledTopBarContent>{InstallationPicker(page)}</StyledTopBarContent>
             <TopBar.Actions>
                 <IconStyle>
                     <Button variant="ghost_icon" onClick={() => console.log('Clicked account icon')}>
@@ -70,12 +70,12 @@ export function Header({ page }: { page: string }) {
     )
 }
 
-function AssetPicker(page: string) {
+function InstallationPicker(page: string) {
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
-    const { assetCode, switchAsset } = useAssetContext()
+    const { installationCode, switchInstallation } = useInstallationContext()
     useEffect(() => {
         BackendAPICaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
-            const mapping = mapAssetCodeToName(response)
+            const mapping = mapInstallationCodeToName(response)
             setAllPlantsMap(mapping)
         })
     }, [])
@@ -85,21 +85,21 @@ function AssetPicker(page: string) {
             options={Array.from(mappedOptions.keys()).sort()}
             label=""
             disabled={page === 'mission'}
-            initialSelectedOptions={[assetCode.toUpperCase()]}
-            placeholder={TranslateText('Select asset')}
+            initialSelectedOptions={[installationCode.toUpperCase()]}
+            placeholder={TranslateText('Select installation')}
             onOptionsChange={({ selectedItems }) => {
                 const mapKey = mappedOptions.get(selectedItems[0])
-                if (mapKey !== undefined) switchAsset(mapKey)
-                else switchAsset('')
+                if (mapKey !== undefined) switchInstallation(mapKey)
+                else switchInstallation('')
             }}
         />
     )
 }
 
-const mapAssetCodeToName = (echoPlantInfoArray: EchoPlantInfo[]): Map<string, string> => {
+const mapInstallationCodeToName = (echoPlantInfoArray: EchoPlantInfo[]): Map<string, string> => {
     var mapping = new Map<string, string>()
     echoPlantInfoArray.forEach((echoPlantInfo: EchoPlantInfo) => {
-        mapping.set(echoPlantInfo.projectDescription, echoPlantInfo.installationCode)
+        mapping.set(echoPlantInfo.projectDescription, echoPlantInfo.plantCode)
     })
     return mapping
 }

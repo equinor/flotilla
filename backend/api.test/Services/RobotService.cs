@@ -71,7 +71,7 @@ namespace Api.Test.Services
                 IsarId = "",
                 SerialNumber = "",
                 VideoStreams = new List<CreateVideoStreamQuery>() { videoStreamQuery },
-                CurrentAsset = "",
+                CurrentInstallation = "",
                 RobotType = RobotType.Robot,
                 Host = "",
                 Port = 1,

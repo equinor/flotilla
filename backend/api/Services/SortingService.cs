@@ -1,4 +1,4 @@
-using System.Linq.Dynamic.Core;
+﻿using System.Linq.Dynamic.Core;
 using System.Reflection;
 using System.Text;
 using Api.Database.Models;

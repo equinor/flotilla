@@ -7,7 +7,7 @@ namespace Api.Controllers.Models
 
         public string Name { get; set; }
 
-        public string AssetCode { get; set; }
+        public string InstallationCode { get; set; }
 
         public Uri URL { get; set; }
 

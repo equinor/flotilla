@@ -213,7 +213,7 @@ public class RobotModelController : ControllerBase
     {
         var robotModel = await _robotModelService.Delete(id);
         if (robotModel is null)
-            return NotFound($"Asset deck with id {id} not found");
+            return NotFound($"Area with id {id} not found");
         return Ok(robotModel);
     }
 

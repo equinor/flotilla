@@ -32,7 +32,7 @@ namespace Api.Controllers.Models
 
         public DateTimeOffset? DesiredStartTime { get; set; }
 
-        public string AssetCode { get; set; }
+        public string InstallationCode { get; set; }
 
         public TimeSpan? InspectionFrequency { get; set; }
 

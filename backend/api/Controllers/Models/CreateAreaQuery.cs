@@ -4,8 +4,8 @@ namespace Api.Controllers.Models
 {
     public struct CreateAreaQuery
     {
-        public string AssetCode { get; set; }
         public string InstallationCode { get; set; }
+        public string PlantCode { get; set; }
         public string DeckName { get; set; }
         public string AreaName { get; set; }
 

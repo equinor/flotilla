@@ -2,17 +2,17 @@ import { Button, Typography, Popover, Icon } from '@equinor/eds-core-react'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState } from 'react'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 export const CreateMissionButton = (): JSX.Element => {
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
-    const { assetCode } = useAssetContext()
+    const { installationCode } = useInstallationContext()
     const anchorRef = useRef<HTMLButtonElement>(null)
     const echoURL = 'https://echo.equinor.com/missionplanner?instCode='
 
     let timer: ReturnType<typeof setTimeout>
     const openPopover = () => {
-        if (assetCode === '') setIsPopoverOpen(true)
+        if (installationCode === '') setIsPopoverOpen(true)
     }
 
     const closePopover = () => setIsPopoverOpen(false)
@@ -39,9 +39,9 @@ export const CreateMissionButton = (): JSX.Element => {
             >
                 <Button
                     onClick={() => {
-                        window.open(echoURL + assetCode)
+                        window.open(echoURL + installationCode)
                     }}
-                    disabled={assetCode === ''}
+                    disabled={installationCode === ''}
                     ref={anchorRef}
                 >
                     <>
@@ -54,11 +54,11 @@ export const CreateMissionButton = (): JSX.Element => {
             <Popover
                 anchorEl={anchorRef.current}
                 onClose={handleClose}
-                open={isPopoverOpen && assetCode === ''}
+                open={isPopoverOpen && installationCode === ''}
                 placement="top"
             >
                 <Popover.Content>
-                    <Typography variant="body_short">{TranslateText('Please select asset')}</Typography>
+                    <Typography variant="body_short">{TranslateText('Please select installation')}</Typography>
                 </Popover.Content>
             </Popover>
         </>

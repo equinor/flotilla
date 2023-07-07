@@ -11,9 +11,9 @@ namespace Api.Controllers.Models
         }
 
         /// <summary>
-        /// Filter for the asset code of the mission
+        /// Filter for the installation code of the mission
         /// </summary>
-        public string? AssetCode { get; set; }
+        public string? InstallationCode { get; set; }
 
         /// <summary>
         /// Filter for the area of the mission

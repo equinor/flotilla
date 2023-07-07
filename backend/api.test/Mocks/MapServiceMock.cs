@@ -9,7 +9,7 @@ namespace Api.Test.Mocks
 {
     public class MockMapService : IMapService
     {
-        public async Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string assetCode)
+        public async Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string installationCode)
         {
             await Task.Run(() => Thread.Sleep(1));
             return new MapMetadata();
@@ -20,7 +20,7 @@ namespace Api.Test.Mocks
             await Task.Run(() => Thread.Sleep(1));
         }
 
-        public async Task<byte[]> FetchMapImage(string mapName, string assetCode)
+        public async Task<byte[]> FetchMapImage(string mapName, string installationCode)
         {
             await Task.Run(() => Thread.Sleep(1));
             string filePath = Directory.GetCurrentDirectory() + "Images/MockMapImage.png";

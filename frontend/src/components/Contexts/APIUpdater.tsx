@@ -1,6 +1,6 @@
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useContext } from 'react'
-import { AssetContext } from './AssetContext'
+import { InstallationContext } from './InstallationContext'
 import { AuthContext } from './AuthProvider'
 
 type Props = {
@@ -10,8 +10,8 @@ type Props = {
 // Can't use contexts inside the static class so we need a component to update it
 export const APIUpdater = (props: Props) => {
     const accessToken = useContext(AuthContext)
-    const assetCode = useContext(AssetContext).assetCode
+    const installationCode = useContext(InstallationContext).installationCode
     BackendAPICaller.accessToken = accessToken
-    BackendAPICaller.assetCode = assetCode
+    BackendAPICaller.installationCode = installationCode
     return <>{props.children}</>
 }

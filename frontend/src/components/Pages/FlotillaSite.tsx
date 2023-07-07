@@ -2,7 +2,7 @@ import { config } from 'config'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { FrontPage } from './FrontPage/FrontPage'
 import { MissionPage } from './MissionPage/MissionPage'
-import { AssetProvider } from 'components/Contexts/AssetContext'
+import { InstallationProvider } from 'components/Contexts/InstallationContext'
 import { MissionHistoryPage } from './MissionHistoryPage/MissionHistoryPage'
 import { RobotPage } from './RobotPage/RobotPage'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
@@ -11,7 +11,7 @@ import { APIUpdater } from 'components/Contexts/APIUpdater'
 export function FlotillaSite() {
     return (
         <>
-            <AssetProvider>
+            <InstallationProvider>
                 <AuthProvider>
                     <APIUpdater>
                         <BrowserRouter>
@@ -30,7 +30,7 @@ export function FlotillaSite() {
                         </BrowserRouter>
                     </APIUpdater>
                 </AuthProvider>
-            </AssetProvider>
+            </InstallationProvider>
         </>
     )
 }
