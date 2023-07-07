@@ -45,6 +45,11 @@ namespace Api.Controllers.Models
         /// </summary>
         public string? TagSearch { get; set; }
 
+        /// <summary>
+        /// Filter for an inspection type in the mission equal to any of InspectionTypes
+        /// </summary>
+        public List<InspectionType>? InspectionTypes { get; set; }
+
         #region Time Filters
 
         /// <summary>

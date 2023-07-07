@@ -1,3 +1,4 @@
+import { InspectionType } from './Inspection'
 import { MissionStatus } from './Mission'
 
 export interface MissionQueryParameters {
@@ -6,6 +7,7 @@ export interface MissionQueryParameters {
     nameSearch?: string
     robotNameSearch?: string
     tagSearch?: string
+    inspectionTypes?: InspectionType[]
     minStartTime?: number
     maxStartTime?: number
     minEndTime?: number

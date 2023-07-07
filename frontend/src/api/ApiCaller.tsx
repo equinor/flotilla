@@ -137,6 +137,11 @@ export class BackendAPICaller {
                 path = path + 'Statuses=' + status + '&'
             })
         }
+        if (parameters.inspectionTypes) {
+            parameters.inspectionTypes.forEach((inspectionType) => {
+                path = path + 'InspectionTypes=' + inspectionType + '&'
+            })
+        }
 
         if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
         if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
