@@ -333,6 +333,15 @@ namespace Api.Services
                 ? mission => true
                 : mission => mission.Robot.Id.Equals(parameters.RobotId);
 
+            Expression<Func<Mission, bool>> inspectionTypeFilter = parameters.InspectionTypes is null
+                ? mission => true
+                : mission => mission.Tasks.Any(
+                        task =>
+                            task.Inspections.Any(
+                                inspection => parameters.InspectionTypes.Contains(inspection.InspectionType)
+                            )
+                );
+
             var minStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinStartTime);
             var maxStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxStartTime);
             Expression<Func<Mission, bool>> startTimeFilter = mission =>
@@ -372,12 +381,15 @@ namespace Api.Services
                     Expression.AndAlso(
                         Expression.Invoke(robotIdFilter, mission),
                         Expression.AndAlso(
-                            Expression.Invoke(desiredStartTimeFilter, mission),
+                            Expression.Invoke(inspectionTypeFilter, mission),
                             Expression.AndAlso(
-                                Expression.Invoke(startTimeFilter, mission),
+                                Expression.Invoke(desiredStartTimeFilter, mission),
                                 Expression.AndAlso(
-                                    Expression.Invoke(endTimeFilter, mission),
-                                    Expression.Invoke(robotTypeFilter, mission)
+                                    Expression.Invoke(startTimeFilter, mission),
+                                    Expression.AndAlso(
+                                        Expression.Invoke(endTimeFilter, mission),
+                                        Expression.Invoke(robotTypeFilter, mission)
+                                    )
                                 )
                             )
                         )
