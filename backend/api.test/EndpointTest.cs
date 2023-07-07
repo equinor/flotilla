@@ -102,10 +102,10 @@ namespace Api.Test
             GC.SuppressFinalize(this);
         }
 
-        private async Task PopulateAreaDb(string assetName, string installationName, string deckName, string areaName)
+        private async Task PopulateAreaDb(string installationCode, string plantCode, string deckName, string areaName)
         {
-            string assetUrl = $"/assets";
             string installationUrl = $"/installations";
+            string plantUrl = $"/plants";
             string deckUrl = $"/decks";
             string areaUrl = $"/areas";
             var testPose = new Pose
@@ -125,43 +125,43 @@ namespace Api.Test
                 }
             };
 
-            var assetQuery = new CreateAssetQuery
-            {
-                AssetCode = assetName,
-                Name = assetName
-            };
-
             var installationQuery = new CreateInstallationQuery
             {
-                AssetCode = assetName,
-                InstallationCode = installationName,
-                Name = installationName
+                InstallationCode = installationCode,
+                Name = installationCode
+            };
+
+            var plantQuery = new CreatePlantQuery
+            {
+                InstallationCode = installationCode,
+                PlantCode = plantCode,
+                Name = plantCode
             };
 
             var deckQuery = new CreateDeckQuery
             {
-                AssetCode = assetName,
-                InstallationCode = installationName,
+                InstallationCode = installationCode,
+                PlantCode = plantCode,
                 Name = deckName
             };
 
             var areaQuery = new CreateAreaQuery
             {
-                AssetCode = assetName,
-                InstallationCode = installationName,
+                InstallationCode = installationCode,
+                PlantCode = plantCode,
                 DeckName = deckName,
                 AreaName = areaName,
                 DefaultLocalizationPose = testPose
             };
 
-            var assetContent = new StringContent(
-                JsonSerializer.Serialize(assetQuery),
+            var installationContent = new StringContent(
+                JsonSerializer.Serialize(installationQuery),
                 null,
                 "application/json"
             );
 
-            var installationContent = new StringContent(
-                JsonSerializer.Serialize(installationQuery),
+            var plantContent = new StringContent(
+                JsonSerializer.Serialize(plantQuery),
                 null,
                 "application/json"
             );
@@ -179,10 +179,10 @@ namespace Api.Test
             );
 
             // Act
-            var assetResponse = await _client.PostAsync(assetUrl, assetContent);
-            Assert.NotNull(assetResponse);
             var installationResponse = await _client.PostAsync(installationUrl, installationContent);
             Assert.NotNull(installationResponse);
+            var plantResponse = await _client.PostAsync(plantUrl, plantContent);
+            Assert.NotNull(plantResponse);
             var deckResponse = await _client.PostAsync(deckUrl, deckContent);
             Assert.NotNull(deckResponse);
             var areaResponse = await _client.PostAsync(areaUrl, areaContent);
@@ -272,7 +272,7 @@ namespace Api.Test
             Assert.True(robots != null);
             var robot = robots[0];
             string robotId = robot.Id;
-            string testAsset = "TestAsset";
+            string testInstallation = "TestInstallation";
             string testArea = "testArea";
             int echoMissionId = 95;
 
@@ -280,7 +280,7 @@ namespace Api.Test
             var query = new ScheduledMissionQuery
             {
                 RobotId = robotId,
-                AssetCode = testAsset,
+                InstallationCode = testInstallation,
                 AreaName = testArea,
                 EchoMissionId = echoMissionId,
                 DesiredStartTime = DateTimeOffset.UtcNow
@@ -304,12 +304,12 @@ namespace Api.Test
         public async Task AreaTest()
         {
             // Arrange
-            string testAsset = "TestAsset";
             string testInstallation = "TestInstallation";
+            string testPlant = "TestPlant";
             string testDeck = "testDeck2";
             string testArea = "testArea";
-            string assetUrl = $"/assets";
             string installationUrl = $"/installations";
+            string plantUrl = $"/plants";
             string deckUrl = $"/decks";
             string areaUrl = $"/areas";
             var testPose = new Pose
@@ -329,43 +329,43 @@ namespace Api.Test
                 }
             };
 
-            var assetQuery = new CreateAssetQuery
-            {
-                AssetCode = testAsset,
-                Name = testAsset
-            };
-
             var installationQuery = new CreateInstallationQuery
             {
-                AssetCode = testAsset,
                 InstallationCode = testInstallation,
                 Name = testInstallation
             };
 
+            var plantQuery = new CreatePlantQuery
+            {
+                InstallationCode = testInstallation,
+                PlantCode = testPlant,
+                Name = testPlant
+            };
+
             var deckQuery = new CreateDeckQuery
             {
-                AssetCode = testAsset,
                 InstallationCode = testInstallation,
+                PlantCode = testPlant,
                 Name = testDeck
             };
 
             var areaQuery = new CreateAreaQuery
             {
-                AssetCode = testAsset,
                 InstallationCode = testInstallation,
+                PlantCode = testPlant,
                 DeckName = testDeck,
                 AreaName = testArea,
                 DefaultLocalizationPose = testPose
             };
 
-            var assetContent = new StringContent(
-                JsonSerializer.Serialize(assetQuery),
+            var installationContent = new StringContent(
+                JsonSerializer.Serialize(installationQuery),
                 null,
                 "application/json"
             );
 
-            var installationContent = new StringContent(
-                JsonSerializer.Serialize(installationQuery),
+            var plantContent = new StringContent(
+                JsonSerializer.Serialize(plantQuery),
                 null,
                 "application/json"
             );
@@ -383,14 +383,14 @@ namespace Api.Test
             );
 
             // Act
-            var assetResponse = await _client.PostAsync(assetUrl, assetContent);
             var installationResponse = await _client.PostAsync(installationUrl, installationContent);
+            var plantResponse = await _client.PostAsync(plantUrl, plantContent);
             var deckResponse = await _client.PostAsync(deckUrl, deckContent);
             var areaResponse = await _client.PostAsync(areaUrl, areaContent);
 
             // Assert
-            Assert.True(assetResponse.IsSuccessStatusCode);
             Assert.True(installationResponse.IsSuccessStatusCode);
+            Assert.True(plantResponse.IsSuccessStatusCode);
             Assert.True(deckResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<Area>(_serializerOptions);
@@ -401,11 +401,11 @@ namespace Api.Test
         public async Task SafePositionTest()
         {
             // Arrange - Add Safe Position
-            string testAsset = "testAsset";
             string testInstallation = "testInstallation";
+            string testPlant = "testPlant";
             string testDeck = "testDeck";
             string testArea = "testArea";
-            string addSafePositionUrl = $"/areas/{testAsset}/{testInstallation}/{testDeck}/{testArea}/safe-position";
+            string addSafePositionUrl = $"/areas/{testInstallation}/{testPlant}/{testDeck}/{testArea}/safe-position";
             var testPosition = new Position
             {
                 X = 1,
@@ -429,7 +429,7 @@ namespace Api.Test
                 "application/json"
             );
 
-            await PopulateAreaDb("testAsset", "testInstallation", "testDeck", "testArea");
+            await PopulateAreaDb("testInstallation", "testPlant", "testDeck", "testArea");
 
             var areaResponse = await _client.PostAsync(addSafePositionUrl, content);
             Assert.True(areaResponse.IsSuccessStatusCode);
@@ -446,7 +446,7 @@ namespace Api.Test
             string robotId = robot.Id;
 
             // Act
-            string goToSafePositionUrl = $"/robots/{robotId}/{testAsset}/{testArea}/go-to-safe-position";
+            string goToSafePositionUrl = $"/robots/{robotId}/{testInstallation}/{testArea}/go-to-safe-position";
             var missionResponse = await _client.PostAsync(goToSafePositionUrl, null);
 
             // Assert

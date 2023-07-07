@@ -58,21 +58,21 @@ namespace Api.Services
             return _context.MissionDefinitions
                 .Include(missionDefinition => missionDefinition.Area)
                 .ThenInclude(area => area.Deck)
+                .ThenInclude(area => area.Plant)
                 .ThenInclude(area => area.Installation)
-                .ThenInclude(area => area.Asset)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastRun);
         }
 
         public async Task<MissionDefinition?> ReadById(string id)
         {
-            return await GetMissionDefinitionsWithSubModels().Where(m => m.Deprecated == false)
+            return await GetMissionDefinitionsWithSubModels().Where(m => m.IsDeprecated == false)
                 .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
         }
 
         public async Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters)
         {
-            var query = GetMissionDefinitionsWithSubModels().Where(m => m.Deprecated == false);
+            var query = GetMissionDefinitionsWithSubModels().Where(m => m.IsDeprecated == false);
             var filter = ConstructFilter(parameters);
 
             query = query.Where(filter);
@@ -104,7 +104,7 @@ namespace Api.Services
                 return null;
             }
 
-            missionDefinition.Deprecated = true;
+            missionDefinition.IsDeprecated = true;
             await _context.SaveChangesAsync();
 
             return missionDefinition;
@@ -122,7 +122,7 @@ namespace Api.Services
         }
 
         /// <summary>
-        /// Filters by <see cref="MissionDefinitionQueryStringParameters.AssetCode"/> and <see cref="MissionDefinitionQueryStringParameters.Status"/>
+        /// Filters by <see cref="MissionDefinitionQueryStringParameters.InstallationCode"/> and <see cref="MissionDefinitionQueryStringParameters.Status"/>
         ///
         /// <para>Uses LINQ Expression trees (see <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees"/>)</para>
         /// </summary>
@@ -136,10 +136,10 @@ namespace Api.Services
                 : missionDefinition =>
                       missionDefinition.Area.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
 
-            Expression<Func<MissionDefinition, bool>> assetFilter = parameters.AssetCode is null
+            Expression<Func<MissionDefinition, bool>> installationFilter = parameters.InstallationCode is null
                 ? missionDefinition => true
                 : missionDefinition =>
-                      missionDefinition.AssetCode.ToLower().Equals(parameters.AssetCode.Trim().ToLower());
+                      missionDefinition.InstallationCode.ToLower().Equals(parameters.InstallationCode.Trim().ToLower());
 
             Expression<Func<MissionDefinition, bool>> missionTypeFilter = parameters.SourceType is null
                 ? missionDefinition => true
@@ -151,7 +151,7 @@ namespace Api.Services
 
             // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
             Expression body = Expression.AndAlso(
-                Expression.Invoke(assetFilter, missionRunExpression),
+                Expression.Invoke(installationFilter, missionRunExpression),
                 Expression.AndAlso(
                     Expression.Invoke(areaFilter, missionRunExpression),
                     Expression.Invoke(missionTypeFilter, missionRunExpression)

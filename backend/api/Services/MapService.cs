@@ -8,8 +8,8 @@ namespace Api.Services
 {
     public interface IMapService
     {
-        public Task<byte[]> FetchMapImage(string mapName, string assetCode);
-        public Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string assetCode);
+        public Task<byte[]> FetchMapImage(string mapName, string installationCode);
+        public Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string installationCode);
         public Task AssignMapToMission(MissionRun mission);
     }
 
@@ -31,17 +31,17 @@ namespace Api.Services
             _blobService = blobService;
         }
 
-        public async Task<byte[]> FetchMapImage(string mapName, string assetCode)
+        public async Task<byte[]> FetchMapImage(string mapName, string installationCode)
         {
-            return await _blobService.DownloadBlob(mapName, assetCode, _blobOptions.Value.StorageAccount);
+            return await _blobService.DownloadBlob(mapName, installationCode, _blobOptions.Value.StorageAccount);
         }
 
-        public async Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string assetCode)
+        public async Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string installationCode)
         {
             var boundaries = new Dictionary<string, Boundary>();
             var imageSizes = new Dictionary<string, int[]>();
 
-            var blobs = _blobService.FetchAllBlobs(assetCode, _blobOptions.Value.StorageAccount);
+            var blobs = _blobService.FetchAllBlobs(installationCode, _blobOptions.Value.StorageAccount);
 
             await foreach (var blob in blobs)
             {
@@ -81,7 +81,7 @@ namespace Api.Services
             }
             try
             {
-                mapMetadata = await ChooseMapFromPositions(positions, missionRun.AssetCode);
+                mapMetadata = await ChooseMapFromPositions(positions, missionRun.InstallationCode);
             }
             catch (ArgumentOutOfRangeException)
             {

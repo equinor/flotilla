@@ -78,7 +78,7 @@ export function AreaMapView({ area, localizationPose, setLocalizationPose }: Are
         BackendAPICaller.getAreasMapMetadata(area.id)
             .then((mapMetadata) => {
                 setMapMetadata(mapMetadata)
-                BackendAPICaller.getMap(area.assetCode, mapMetadata.mapName)
+                BackendAPICaller.getMap(area.installationCode, mapMetadata.mapName)
                     .then((imageBlob) => {
                         setImageObjectURL(URL.createObjectURL(imageBlob))
                     })

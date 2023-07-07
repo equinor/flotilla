@@ -75,7 +75,7 @@ export function MissionMapView({ mission }: MissionProps) {
     }, [mission.tasks])
 
     useEffect(() => {
-        BackendAPICaller.getMap(mission.assetCode!, mission.mapMetadata?.mapName!)
+        BackendAPICaller.getMap(mission.installationCode!, mission.mapMetadata?.mapName!)
             .then((imageBlob) => {
                 imageObjectURL.current = URL.createObjectURL(imageBlob)
             })
@@ -96,7 +96,7 @@ export function MissionMapView({ mission }: MissionProps) {
                     setMapImage(img)
                 })
             })
-    }, [mission.assetCode, mission.id, mission.mapMetadata?.mapName])
+    }, [mission.installationCode, mission.id, mission.mapMetadata?.mapName])
 
     useEffect(() => {
         if (mission.isCompleted) {

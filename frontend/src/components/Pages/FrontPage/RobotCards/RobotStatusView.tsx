@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
-import { useAssetContext } from 'components/Contexts/AssetContext'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 
 const RobotCardSection = styled.div`
@@ -46,18 +46,18 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
         return () => clearInterval(id)
     }, [refreshInterval, updateRobots])
 
-    const { assetCode } = useAssetContext()
+    const { installationCode } = useInstallationContext()
 
     var filteredRobots = robots.filter(function (robot) {
         return (
-            robot.currentAsset === assetCode ||
-            (typeof robot.currentAsset === 'string' && robot.currentAsset.includes('default')) ||
-            robot.currentAsset === undefined
+            robot.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase() ||
+            (typeof robot.currentInstallation === 'string' && robot.currentInstallation.includes('default')) ||
+            robot.currentInstallation === undefined
         )
     })
 
     var robotDisplay
-    if (assetCode === '') {
+    if (installationCode === '') {
         robotDisplay = robots.map(function (robot) {
             return <RobotStatusCard key={robot.id} robot={robot} />
         })

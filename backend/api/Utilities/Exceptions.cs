@@ -16,14 +16,14 @@
         public MissionSourceTypeException(string message) : base(message) { }
     }
 
-    public class AssetNotFoundException : Exception
-    {
-        public AssetNotFoundException(string message) : base(message) { }
-    }
-
     public class InstallationNotFoundException : Exception
     {
         public InstallationNotFoundException(string message) : base(message) { }
+    }
+
+    public class PlantNotFoundException : Exception
+    {
+        public PlantNotFoundException(string message) : base(message) { }
     }
 
     public class DeckNotFoundException : Exception

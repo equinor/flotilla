@@ -23,7 +23,7 @@ public class EchoController : ControllerBase
     }
 
     /// <summary>
-    /// List all available Echo missions for the asset
+    /// List all available Echo missions for the installation
     /// </summary>
     /// <remarks>
     /// These missions are created in the Echo mission planner
@@ -36,11 +36,11 @@ public class EchoController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<IList<CondensedMissionDefinition>>> GetAvailableEchoMissions(string? installationCode)
+    public async Task<ActionResult<IList<CondensedMissionDefinition>>> GetAvailableEchoMissions(string? plantCode)
     {
         try
         {
-            var missions = await _echoService.GetAvailableMissions(installationCode);
+            var missions = await _echoService.GetAvailableMissions(plantCode);
             return Ok(missions);
         }
         catch (HttpRequestException e)

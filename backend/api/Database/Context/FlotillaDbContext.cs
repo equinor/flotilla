@@ -11,10 +11,12 @@ public class FlotillaDbContext : DbContext
     public DbSet<RobotModel> RobotModels => Set<RobotModel>();
     public DbSet<MissionRun> MissionRuns => Set<MissionRun>();
     public DbSet<MissionDefinition> MissionDefinitions => Set<MissionDefinition>();
+    public DbSet<Plant> Plants => Set<Plant>();
     public DbSet<Installation> Installations => Set<Installation>();
-    public DbSet<Asset> Assets => Set<Asset>();
     public DbSet<Deck> Decks => Set<Deck>();
+    public DbSet<AssetDeck> AssetDecks => Set<AssetDeck>();
     public DbSet<Area> Areas => Set<Area>();
+    public DbSet<Source> Sources => Set<Source>();
     public DbSet<SafePosition> SafePositions => Set<SafePosition>();
 
     public FlotillaDbContext(DbContextOptions options) : base(options) { }
@@ -59,6 +61,7 @@ public class FlotillaDbContext : DbContext
             }
         );
 
+        modelBuilder.Entity<MissionDefinition>().HasOne(m => m.Source);
         modelBuilder.Entity<MissionRun>().OwnsOne(m => m.MapMetadata).OwnsOne(t => t.TransformationMatrices);
         modelBuilder.Entity<MissionRun>().OwnsOne(m => m.MapMetadata).OwnsOne(b => b.Boundary);
         //modelBuilder.Entity<MissionDefinition>().HasOne(m => m.LastRun).WithOne(m => m.MissionDefinition).HasForeignKey<MissionRun>(m => m.Id);
@@ -71,8 +74,11 @@ public class FlotillaDbContext : DbContext
             poseBuilder.OwnsOne(pose => pose.Orientation);
         });
         modelBuilder.Entity<Area>().HasOne(a => a.Deck);
-        modelBuilder.Entity<Deck>().HasOne(a => a.Installation);
-        modelBuilder.Entity<Installation>().HasOne(a => a.Asset);
+        modelBuilder.Entity<Area>().HasOne(a => a.Installation);
+        modelBuilder.Entity<Area>().HasOne(a => a.Plant);
+        modelBuilder.Entity<Deck>().HasOne(d => d.Plant);
+        modelBuilder.Entity<Deck>().HasOne(d => d.Installation);
+        modelBuilder.Entity<Plant>().HasOne(a => a.Installation);
 
         modelBuilder.Entity<SafePosition>().OwnsOne(s => s.Pose, poseBuilder =>
         {
@@ -83,9 +89,9 @@ public class FlotillaDbContext : DbContext
         // There can only be one robot model per robot type
         modelBuilder.Entity<RobotModel>().HasIndex(model => model.Type).IsUnique();
 
-        // There can only be one unique asset and installation shortname
-        modelBuilder.Entity<Asset>().HasIndex(a => new { a.AssetCode }).IsUnique();
+        // There can only be one unique installation and plant shortname
         modelBuilder.Entity<Installation>().HasIndex(a => new { a.InstallationCode }).IsUnique();
+        modelBuilder.Entity<Plant>().HasIndex(a => new { a.PlantCode }).IsUnique();
     }
 
     // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations

@@ -18,6 +18,6 @@ export interface EchoInspection {
 }
 
 export interface EchoPlantInfo {
-    installationCode: string
+    plantCode: string
     projectDescription: string
 }

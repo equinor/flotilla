@@ -122,7 +122,7 @@ namespace Api.EventHandlers
                     Name = isarRobotInfo.RobotName,
                     RobotType = isarRobotInfo.RobotType,
                     SerialNumber = isarRobotInfo.SerialNumber,
-                    CurrentAsset = isarRobotInfo.CurrentAsset,
+                    CurrentInstallation = isarRobotInfo.CurrentInstallation,
                     VideoStreams = isarRobotInfo.VideoStreamQueries,
                     Host = isarRobotInfo.Host,
                     Port = isarRobotInfo.Port,
@@ -166,9 +166,9 @@ namespace Api.EventHandlers
 
             UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
 
-            if (isarRobotInfo.CurrentAsset is not null)
+            if (isarRobotInfo.CurrentInstallation is not null)
             {
-                UpdateCurrentAssetIfChanged(isarRobotInfo.CurrentAsset, ref robot, ref updatedFields);
+                UpdateCurrentInstallationIfChanged(isarRobotInfo.CurrentInstallation, ref robot, ref updatedFields);
             }
 
             if (!updatedFields.IsNullOrEmpty())
@@ -233,16 +233,16 @@ namespace Api.EventHandlers
             robot.Port = port;
         }
 
-        private static void UpdateCurrentAssetIfChanged(string newCurrentAsset, ref Robot robot,
+        private static void UpdateCurrentInstallationIfChanged(string newCurrentInstallation, ref Robot robot,
             ref List<string> updatedFields)
         {
-            if (newCurrentAsset.Equals(robot.CurrentAsset, StringComparison.Ordinal))
+            if (newCurrentInstallation.Equals(robot.CurrentInstallation, StringComparison.Ordinal))
             {
                 return;
             }
 
-            updatedFields.Add($"\nCurrentAsset ({robot.CurrentAsset} -> {newCurrentAsset})\n");
-            robot.CurrentAsset = newCurrentAsset;
+            updatedFields.Add($"\nCurrentInstallation ({robot.CurrentInstallation} -> {newCurrentInstallation})\n");
+            robot.CurrentInstallation = newCurrentInstallation;
         }
 
         private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
