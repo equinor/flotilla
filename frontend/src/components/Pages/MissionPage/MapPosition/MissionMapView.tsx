@@ -4,7 +4,6 @@ import { Mission } from 'models/Mission'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
-import { defaultPose, Pose } from 'models/Pose'
 import { PlaceRobotInMap, PlaceTagsInMap } from '../../../../utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
@@ -46,7 +45,7 @@ export function MissionMapView({ mission }: MissionProps) {
         if (mission.robot.pose && mission.mapMetadata) {
             PlaceRobotInMap(mission.mapMetadata, mapCanvas, mission.robot.pose)
         }
-    }, [mission.robot.pose, currentTaskOrder, mapCanvas, mapImage, mission])
+    }, [currentTaskOrder, mapCanvas, mapImage, mission])
 
     const getMeta = async (url: string) => {
         const image = new Image()

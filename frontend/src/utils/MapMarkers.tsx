@@ -38,6 +38,35 @@ export const PlaceRobotInMap = (mapMetadata: MapMetadata, map: HTMLCanvasElement
     drawNavigator(pixelPosition[0], pixelPosition[1], map, rad)
 }
 
+export const InverseCalculatePixelPosition = (mapMetadata: MapMetadata, pixelPosition: ObjectPosition) => {
+    const p1 = pixelPosition.x
+    const p2 = pixelPosition.y
+
+    const a1 = mapMetadata.transformationMatrices.c1
+    const a2 = mapMetadata.transformationMatrices.c2
+    const b1 = mapMetadata.transformationMatrices.d1
+    const b2 = mapMetadata.transformationMatrices.d2
+
+    const x1 = (p1 - b1) / a1
+    const x2 = (p2 - b2) / a2
+
+    return [x1, x2]
+}
+
+const calculateObjectPixelPosition = (mapMetadata: MapMetadata, objectPosition: ObjectPosition) => {
+    const x1 = objectPosition.x
+    const x2 = objectPosition.y
+
+    const a1 = mapMetadata.transformationMatrices.c1
+    const a2 = mapMetadata.transformationMatrices.c2
+    const b1 = mapMetadata.transformationMatrices.d1
+    const b2 = mapMetadata.transformationMatrices.d2
+
+    const p1 = a1 * x1 + b1
+    const p2 = a2 * x2 + b2
+    return [p1, p2]
+}
+
 const orderTasksByDrawOrder = (tasks: Task[], currentTaskOrder: number, maxTaskOrder: number) => {
     let tasksWithDrawOrder = tasks.map(function (task) {
         var drawOrder
@@ -55,18 +84,6 @@ const orderTasksByDrawOrder = (tasks: Task[], currentTaskOrder: number, maxTaskO
     return tasksWithDrawOrder.map(function (taskWithDrawOrder) {
         return taskWithDrawOrder.task
     })
-}
-
-const calculateObjectPixelPosition = (mapMetadata: MapMetadata, objectPosition: ObjectPosition) => {
-    const x1 = objectPosition.x
-    const x2 = objectPosition.y
-    const a1 = mapMetadata.transformationMatrices.c1
-    const a2 = mapMetadata.transformationMatrices.c2
-    const b1 = mapMetadata.transformationMatrices.d1
-    const b2 = mapMetadata.transformationMatrices.d2
-    const p1 = a1 * x1 + b1
-    const p2 = a2 * x2 + b2
-    return [p1, p2]
 }
 
 const calculateNavigatorAngle = (currentRobotPose: Pose) => {

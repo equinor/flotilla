@@ -79,10 +79,15 @@
     "Robot status": "Robot status",
     "Stop": "Stop",
     "Start": "Start",
-    "Pause": "Pause",
     "Set robot arm to ": "Set robot arm to ",
     "Moving arm to ": "Moving arm to ",
     " Error message: ": " Error message: ",
     "Error moving robot arm to ": "Error moving robot arm to ",
-    "Move robot arm": "Move robot arm"
+    "Move robot arm": "Move robot arm",
+    "Click on the map to move the localization position": "Click on the map to move the localization position",
+    "Select direction": "Select direction",
+    "North": "North",
+    "East": "East",
+    "South": "South",
+    "West": "West"
 }
