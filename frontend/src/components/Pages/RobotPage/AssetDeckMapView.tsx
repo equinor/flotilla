@@ -1,15 +1,20 @@
-import { CircularProgress } from '@equinor/eds-core-react'
-import { useEffect, useState } from 'react'
+import { CircularProgress, Typography } from '@equinor/eds-core-react'
+import { MouseEvent, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
 import { useErrorHandler } from 'react-error-boundary'
-import { PlaceRobotInMap } from '../../../utils/MapMarkers'
+import { PlaceRobotInMap, InverseCalculatePixelPosition } from '../../../utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { MapMetadata } from 'models/MapMetadata'
 import { AssetDeck } from 'models/AssetDeck'
+import { Position } from 'models/Position'
+import { Pose } from 'models/Pose'
+import { TranslateText } from 'components/Contexts/LanguageContext'
 
 interface AssetDeckProps {
     assetDeck: AssetDeck
+    localizationPose: Pose
+    setLocalizationPose: (newPose: Pose) => void
 }
 
 const StyledMap = styled.canvas`
@@ -30,7 +35,7 @@ const StyledLoading = styled.div`
     justify-content: center;
 `
 
-export function AssetDeckMapView({ assetDeck }: AssetDeckProps) {
+export function AssetDeckMapView({ assetDeck, localizationPose, setLocalizationPose }: AssetDeckProps) {
     const handleError = useErrorHandler()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
@@ -47,7 +52,7 @@ export function AssetDeckMapView({ assetDeck }: AssetDeckProps) {
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
         if (mapMetadata) {
-            PlaceRobotInMap(mapMetadata, mapCanvas, assetDeck.defaultLocalizationPose)
+            PlaceRobotInMap(mapMetadata, mapCanvas, localizationPose)
         }
     }
 
@@ -112,6 +117,25 @@ export function AssetDeckMapView({ assetDeck }: AssetDeckProps) {
         }
     }, [updateMap, mapContext])
 
+    const onClickMap = (event: MouseEvent): void => {
+        var rect = mapCanvas.getBoundingClientRect(),
+            scaleX = mapCanvas.width / rect.width,
+            scaleY = mapCanvas.height / rect.height
+        const pixelPosition: Position = {
+            x: (event.clientX - rect.left) * scaleX,
+            y: (rect.bottom - event.clientY) * scaleY,
+            z: 0,
+        }
+        if (!mapMetadata) {
+            return
+        }
+        const assetPosition = InverseCalculatePixelPosition(mapMetadata, pixelPosition)
+        let newPose: Pose = assetDeck.defaultLocalizationPose
+        newPose.position.x = assetPosition[0]
+        newPose.position.y = assetPosition[1]
+        setLocalizationPose(newPose)
+    }
+
     return (
         <>
             {isLoading && (
@@ -120,9 +144,16 @@ export function AssetDeckMapView({ assetDeck }: AssetDeckProps) {
                 </StyledLoading>
             )}
             {!isLoading && (
-                <StyledMapLimits>
-                    <StyledMap id="mapCanvas" />
-                </StyledMapLimits>
+                <>
+                    {mapMetadata && (
+                        <Typography variant="body_short_italic">
+                            {TranslateText('Click on the map to move the localization position')}
+                        </Typography>
+                    )}
+                    <StyledMapLimits>
+                        <StyledMap id="mapCanvas" onClick={onClickMap} />
+                    </StyledMapLimits>
+                </>
             )}
         </>
     )
