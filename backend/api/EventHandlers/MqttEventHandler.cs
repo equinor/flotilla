@@ -245,7 +245,6 @@ namespace Api.EventHandlers
             robot.CurrentAsset = newCurrentAsset;
         }
 
-
         private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();

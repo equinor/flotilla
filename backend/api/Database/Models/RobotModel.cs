@@ -108,6 +108,10 @@ namespace Api.Database.Models
                 )
                 .ToList();
 
+            // If no valid task times, return
+            if (timeSpentPerTask.All(time => time < 0))
+                return;
+
             // Percentiles to exclude when calculating average
             const double P1 = 0.1;
             const double P9 = 0.9;

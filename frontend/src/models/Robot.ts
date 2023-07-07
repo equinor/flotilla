@@ -1,3 +1,4 @@
+import { AssetDeck } from './AssetDeck'
 import { BatteryStatus } from './Battery'
 import { Pose } from './Pose'
 import { RobotModel } from './RobotModel'
@@ -26,4 +27,5 @@ export interface Robot {
     port?: number
     videoStreams?: VideoStream[]
     isarUri?: string
+    currentAssetDeck?: AssetDeck
 }
