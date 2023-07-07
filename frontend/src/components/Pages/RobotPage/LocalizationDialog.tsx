@@ -97,11 +97,10 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
 
     const onClickLocalize = () => {
         if (selectedAssetDeck && localisationPose) {
-            BackendAPICaller.postLocalizationMission(localisationPose, robot.id)
+            BackendAPICaller.postLocalizationMission(localisationPose, robot.id, selectedAssetDeck.id)
         }
         onLocalizationDialogClose()
     }
-
     const assetDeckNames = assetDecks ? Array.from(getAssetDeckNames(assetDecks).keys()).sort() : []
 
     return (

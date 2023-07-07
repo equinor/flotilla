@@ -14,6 +14,8 @@ namespace Api.Controllers.Models
 
         public string CurrentAsset { get; set; }
 
+        public AssetDeck CurrentAssetDeck { get; set; }
+
         public IList<CreateVideoStreamQuery> VideoStreams { get; set; }
 
         public string Host { get; set; }
