@@ -39,7 +39,7 @@ namespace Api.Services
                     pi =>
                         pi.Name.Equals(
                             propertyFromQueryName,
-                            StringComparison.InvariantCultureIgnoreCase
+                            StringComparison.Ordinal
                         )
                 );
 
