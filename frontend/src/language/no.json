@@ -92,5 +92,17 @@
     "West": "Vest",
     "Stop button pressed warning text": "Du er i ferd med å stoppe hele oppdraget og roboten vil bli sendt tilbake til ladepunktet sitt. For å kjøre oppdraget igjen må roboten starte fra begynnelsen.",
     "Stop button pressed confirmation text": "Er du sikker på at du vil stoppe oppdraget?",
-    "Stop mission": "Stopp oppdraget"
+    "Stop mission": "Stopp oppdraget",
+    "Search for missions": "Søk etter oppdrag",
+    "Search for a tag": "Søk etter tag",
+    "Search for a robot name": "Søk etter robotnavn",
+    "Filter": "Filter",
+    "Clear all filters": "Fjern alle filter",
+    "Mission status": "Oppdragsstatus",
+    "Inspection type": "Inspeksjonstype",
+    "Select min start time": "Velg min starttid",
+    "Select max start time": "Velg maks starttid",
+    "Select min end time": "Velg min sluttid",
+    "Select max end time": "Velg maks sluttid",
+    "selected": "valgte"
 }
