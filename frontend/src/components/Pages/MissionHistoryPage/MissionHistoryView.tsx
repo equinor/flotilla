@@ -1,15 +1,19 @@
 import { CircularProgress, Pagination, Table, Typography } from '@equinor/eds-core-react'
-import { Mission, MissionStatus } from 'models/Mission'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Mission } from 'models/Mission'
+import { useCallback, useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
 import { RefreshProps } from './MissionHistoryPage'
 import styled from 'styled-components'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { BackendAPICaller } from 'api/ApiCaller'
+import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'
+import { FilterSection } from './FilterSection'
 
 const TableWithHeader = styled.div`
-    gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 `
 const StyledLoading = styled.div`
     display: flex;
@@ -23,41 +27,76 @@ const StyledLoading = styled.div`
 export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     const pageSize: number = 10
 
-    const completedStatuses = useMemo(
-        () => [
-            MissionStatus.Aborted,
-            MissionStatus.Cancelled,
-            MissionStatus.Successful,
-            MissionStatus.PartiallySuccessful,
-            MissionStatus.Failed,
-        ],
-        []
-    )
-    const [completedMissions, setCompletedMissions] = useState<Mission[]>([])
+    const [filteredMissions, setFilteredMissions] = useState<Mission[]>([])
     const [paginationDetails, setPaginationDetails] = useState<PaginationHeader>()
-    const [currentPage, setCurrentPage] = useState<number>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [isResettingPage, setIsResettingPage] = useState<boolean>(false)
 
-    const updateCompletedMissions = useCallback(() => {
-        const page = currentPage ?? 1
-        BackendAPICaller.getMissions({ statuses: completedStatuses, pageSize: pageSize, pageNumber: page, orderBy: 'EndTime desc, Name' }).then(
-            (paginatedMissions) => {
-                setCompletedMissions(paginatedMissions.content)
-                setPaginationDetails(paginatedMissions.pagination)
-                setIsLoading(false)
+    const {
+        page,
+        switchPage,
+        missionName,
+        statuses,
+        robotName,
+        tagId,
+        inspectionTypes,
+        minStartTime,
+        maxStartTime,
+        minEndTime,
+        maxEndTime,
+    } = useMissionFilterContext()
+
+    const updateFilteredMissions = useCallback(() => {
+        BackendAPICaller.getMissions({
+            statuses: statuses,
+            nameSearch: missionName,
+            robotNameSearch: robotName,
+            tagSearch: tagId,
+            inspectionTypes: inspectionTypes,
+            minStartTime: minStartTime,
+            maxStartTime: maxStartTime,
+            minEndTime: minEndTime,
+            maxEndTime: maxEndTime,
+            pageSize: pageSize,
+            pageNumber: page ?? 1,
+            orderBy: 'EndTime desc, Name',
+        }).then((paginatedMissions) => {
+            setFilteredMissions(paginatedMissions.content)
+            setPaginationDetails(paginatedMissions.pagination)
+            if (page > paginatedMissions.pagination.TotalPages && paginatedMissions.pagination.TotalPages > 0) {
+                switchPage(paginatedMissions.pagination.TotalPages)
+                setIsResettingPage(true)
             }
-        )
-    }, [completedStatuses, currentPage, pageSize])
+            setIsLoading(false)
+        })
+    }, [
+        page,
+        pageSize,
+        missionName,
+        statuses,
+        robotName,
+        tagId,
+        inspectionTypes,
+        minStartTime,
+        maxStartTime,
+        minEndTime,
+        maxEndTime,
+        switchPage,
+    ])
 
     useEffect(() => {
-        updateCompletedMissions()
+        if (isResettingPage) setIsResettingPage(false)
+    }, [isResettingPage])
+
+    useEffect(() => {
+        updateFilteredMissions()
         const id = setInterval(() => {
-            updateCompletedMissions()
+            updateFilteredMissions()
         }, refreshInterval)
         return () => clearInterval(id)
-    }, [refreshInterval, updateCompletedMissions, currentPage])
+    }, [refreshInterval, updateFilteredMissions, page])
 
-    var missionsDisplay = completedMissions.map(function (mission, index) {
+    var missionsDisplay = filteredMissions.map(function (mission, index) {
         return <HistoricMissionCard key={index} index={index} mission={mission} />
     })
 
@@ -67,44 +106,44 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
                 totalItems={paginationDetails!.TotalCount}
                 itemsPerPage={paginationDetails!.PageSize}
                 withItemIndicator
-                onChange={(_, page) => onPageChange(page)}
+                defaultPage={page}
+                onChange={(_, newPage) => onPageChange(newPage)}
             ></Pagination>
         )
     }
 
-    const onPageChange = (page: number) => {
+    const onPageChange = (newPage: number) => {
         setIsLoading(true)
-        setCurrentPage(page)
+        switchPage(newPage)
     }
 
     return (
-        <>
-            <TableWithHeader>
-                <Typography variant="h1">{TranslateText('Mission History')}</Typography>
+        <TableWithHeader>
+            <Typography variant="h1">{TranslateText('Mission History')}</Typography>
+            <FilterSection />
+            <Table>
                 <Table>
-                    <Table>
-                        <Table.Head sticky>
-                            <Table.Row>
-                                <Table.Cell>{TranslateText('Status')}</Table.Cell>
-                                <Table.Cell>{TranslateText('Name')}</Table.Cell>
-                                <Table.Cell>{TranslateText('Robot')}</Table.Cell>
-                                <Table.Cell>{TranslateText('Completion Time')}</Table.Cell>
-                            </Table.Row>
-                        </Table.Head>
-                        {isLoading && (
-                            <Table.Caption captionSide={'bottom'}>
-                                <StyledLoading>
-                                    <CircularProgress />
-                                </StyledLoading>
-                            </Table.Caption>
-                        )}
-                        {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
-                    </Table>
-                    <Table.Caption captionSide={'bottom'}>
-                        {paginationDetails && paginationDetails.TotalPages > 1 && PaginationComponent()}
-                    </Table.Caption>
+                    <Table.Head sticky>
+                        <Table.Row>
+                            <Table.Cell>{TranslateText('Status')}</Table.Cell>
+                            <Table.Cell>{TranslateText('Name')}</Table.Cell>
+                            <Table.Cell>{TranslateText('Robot')}</Table.Cell>
+                            <Table.Cell>{TranslateText('Completion Time')}</Table.Cell>
+                        </Table.Row>
+                    </Table.Head>
+                    {isLoading && (
+                        <Table.Caption captionSide={'bottom'}>
+                            <StyledLoading>
+                                <CircularProgress />
+                            </StyledLoading>
+                        </Table.Caption>
+                    )}
+                    {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
                 </Table>
-            </TableWithHeader>
-        </>
+                <Table.Caption captionSide={'bottom'}>
+                    {paginationDetails && paginationDetails.TotalPages > 1 && !isResettingPage && PaginationComponent()}
+                </Table.Caption>
+            </Table>
+        </TableWithHeader>
     )
 }

@@ -31,6 +31,7 @@ import {
     pressure,
     replay,
     pin_drop,
+    filter_list,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -65,6 +66,7 @@ Icon.add({
     pressure,
     replay,
     pin_drop,
+    filter_list,
 })
 
 export enum Icons {
@@ -99,4 +101,5 @@ export enum Icons {
     Pressure = 'pressure',
     Replay = 'replay',
     PinDrop = 'pin_drop',
+    Filter = 'filter_list',
 }

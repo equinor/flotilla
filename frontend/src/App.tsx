@@ -3,6 +3,7 @@ import { SignInPage } from './components/Pages/SignInPage/SignInPage'
 import { FlotillaSite } from 'components/Pages/FlotillaSite'
 import { LanguageProvider } from 'components/Contexts/LanguageContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
+import { MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 
 function App() {
     return (
@@ -15,7 +16,9 @@ function App() {
                         </div>
                     </UnauthenticatedTemplate>
                     <AuthenticatedTemplate>
-                        <FlotillaSite />
+                        <MissionFilterProvider>
+                            <FlotillaSite />
+                        </MissionFilterProvider>
                     </AuthenticatedTemplate>
                 </>
             </MissionControlProvider>
