@@ -32,6 +32,7 @@ import {
     replay,
     pin_drop,
     filter_list,
+    navigation,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -67,6 +68,7 @@ Icon.add({
     replay,
     pin_drop,
     filter_list,
+    navigation,
 })
 
 export enum Icons {
@@ -102,4 +104,5 @@ export enum Icons {
     Replay = 'replay',
     PinDrop = 'pin_drop',
     Filter = 'filter_list',
+    Navigation = 'navigation',
 }
