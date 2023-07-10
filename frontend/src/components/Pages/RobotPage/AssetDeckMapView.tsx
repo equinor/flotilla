@@ -11,6 +11,7 @@ import { Position } from 'models/Position'
 import { Pose } from 'models/Pose'
 import { TranslateText } from 'components/Contexts/LanguageContext'
 
+import { MapCompass } from 'utils/MapCompass'
 interface AssetDeckProps {
     assetDeck: AssetDeck
     localizationPose: Pose
@@ -20,7 +21,7 @@ interface AssetDeckProps {
 const StyledMap = styled.canvas`
     object-fit: contain;
     max-height: 100%;
-    max-width: 100%;
+    max-width: 90%;
     margin: auto;
 `
 
@@ -28,11 +29,19 @@ const StyledMapLimits = styled.div`
     display: flex;
     max-height: 600px;
     max-width: 600px;
+    padding-left: 30px;
+    justify-content: center;
 `
 
 const StyledLoading = styled.div`
     display: flex;
     justify-content: center;
+`
+
+const StyledMapCompass = styled.div`
+    display: flex;
+    flex-direction: columns;
+    align-items: end;
 `
 
 export function AssetDeckMapView({ assetDeck, localizationPose, setLocalizationPose }: AssetDeckProps) {
@@ -151,7 +160,10 @@ export function AssetDeckMapView({ assetDeck, localizationPose, setLocalizationP
                         </Typography>
                     )}
                     <StyledMapLimits>
-                        <StyledMap id="mapCanvas" onClick={onClickMap} />
+                        <StyledMapCompass>
+                            <StyledMap id="mapCanvas" onClick={onClickMap} />
+                            {mapMetadata && <MapCompass />}
+                        </StyledMapCompass>
                     </StyledMapLimits>
                 </>
             )}

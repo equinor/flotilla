@@ -7,6 +7,7 @@ import NoMap from 'mediaAssets/NoMap.png'
 import { PlaceRobotInMap, PlaceTagsInMap } from '../../../../utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
+import { MapCompass } from 'utils/MapCompass'
 
 interface MissionProps {
     mission: Mission
@@ -14,16 +15,27 @@ interface MissionProps {
 
 const MapCard = styled(Card)`
     display: flex;
-    height: 600px;
-    width: 600px;
+    max-width: 600px;
     padding: 16px;
 `
 
 const StyledMap = styled.canvas`
     object-fit: contain;
     max-height: 100%;
-    max-width: 100%;
+    max-width: 90%;
     margin: auto;
+`
+
+const StyledElements = styled.div`
+    display: flex;
+    flex-direction: columns;
+    align-items: end;
+`
+
+const SyledContainer = styled.div`
+    display: flex;
+    max-height: 600px;
+    max-width: 100%;
 `
 
 export function MissionMapView({ mission }: MissionProps) {
@@ -110,7 +122,12 @@ export function MissionMapView({ mission }: MissionProps) {
 
     return (
         <MapCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
-            <StyledMap id="mapCanvas" />
+            <SyledContainer>
+                <StyledElements>
+                    <StyledMap id="mapCanvas" />
+                    {imageObjectURL.current !== NoMap && mapContext && <MapCompass />}
+                </StyledElements>
+            </SyledContainer>
         </MapCard>
     )
 }
