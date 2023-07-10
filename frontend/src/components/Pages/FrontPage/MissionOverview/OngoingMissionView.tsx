@@ -9,7 +9,6 @@ import { TranslateText } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
-import { PaginatedResponse } from 'models/PaginatedResponse'
 import { BackendAPICaller } from 'api/ApiCaller'
 
 const StyledOngoingMissionView = styled.div`
@@ -29,51 +28,30 @@ const ButtonStyle = styled.div`
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     const missionPageSize = 100
-    const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
-    const [pausedMissions, setPausedMissions] = useState<Mission[]>([])
-    const [missionsToDisplay, setMissionsToDisplay] = useState<Mission[]>([])
+    const [missions, setMissions] = useState<Mission[]>([])
 
-    const getCurrentMissions = (status: MissionStatus): Promise<PaginatedResponse<Mission>> => {
-        return BackendAPICaller.getMissions({
-            statuses: [status],
+    const updateOngoingAndPausedMissions = useCallback(() => {
+        BackendAPICaller.getMissions({
+            statuses: [MissionStatus.Ongoing, MissionStatus.Paused],
             pageSize: missionPageSize,
             orderBy: 'StartTime desc',
-        })
-    }
-
-    const updateOngoingMissions = useCallback(() => {
-        getCurrentMissions(MissionStatus.Ongoing).then((missions) => {
-            setOngoingMissions(missions.content)
-        })
-    }, [])
-
-    const updatePausedMissions = useCallback(() => {
-        getCurrentMissions(MissionStatus.Paused).then((missions) => {
-            setPausedMissions(missions.content)
+        }).then((missions) => {
+            setMissions(missions.content)
         })
     }, [])
 
     useEffect(() => {
-        updateOngoingMissions()
-        updatePausedMissions()
-    }, [updateOngoingMissions, updatePausedMissions])
+        updateOngoingAndPausedMissions()
+    }, [updateOngoingAndPausedMissions])
 
     useEffect(() => {
         const id = setInterval(() => {
-            updateOngoingMissions()
-            updatePausedMissions()
+            updateOngoingAndPausedMissions()
         }, refreshInterval)
         return () => clearInterval(id)
-    }, [refreshInterval, updateOngoingMissions, updatePausedMissions])
+    }, [refreshInterval, updateOngoingAndPausedMissions])
 
-    useEffect(() => {
-        const missions: Mission[] = ongoingMissions.concat(pausedMissions)
-        setMissionsToDisplay(missions)
-    }, [ongoingMissions, pausedMissions])
-
-    var missionDisplay = missionsToDisplay.map(function (mission, index) {
-        return <OngoingMissionCard key={index} mission={mission} />
-    })
+    var missionDisplay = missions.map((mission, index) => <OngoingMissionCard key={index} mission={mission} />)
 
     let navigate = useNavigate()
     const routeChange = () => {
@@ -87,8 +65,8 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
                 {TranslateText('Ongoing Missions')}
             </Typography>
             <OngoingMissionSection>
-                {missionsToDisplay.length > 0 && missionDisplay}
-                {missionsToDisplay.length === 0 && <NoOngoingMissionsPlaceholder />}
+                {missions.length > 0 && missionDisplay}
+                {missions.length === 0 && <NoOngoingMissionsPlaceholder />}
             </OngoingMissionSection>
             <ButtonStyle>
                 <Button variant="outlined" onClick={routeChange}>
