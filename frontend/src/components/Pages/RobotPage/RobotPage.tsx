@@ -70,26 +70,41 @@ export function RobotPage() {
             clearInterval(intervalId)
         }
     }, [selectedRobot])
+
     return (
         <>
             <Header page={'robot'} />
             <StyledRobotPage>
                 <BackButton />
-                <Typography variant="h1">{selectedRobot?.name + ' (' + selectedRobot?.model.type + ')'}</Typography>
-                <RobotInfo>
-                    <RobotImage height="350px" robotType={selectedRobot?.model.type} />
-                    <VerticalContent $alignItems="start">
-                        <BatteryStatusView
-                            itemSize={48}
-                            battery={selectedRobot?.batteryLevel}
-                            batteryStatus={BatteryStatus.Normal}
-                        />
-                        <PressureStatusView itemSize={48} pressure={selectedRobot?.pressureLevel} />
-                        <RobotStatusChip status={selectedRobot?.status} />
-                    </VerticalContent>
-                </RobotInfo>
                 {selectedRobot && (
                     <>
+                        <Typography variant="h1">
+                            {selectedRobot.name + ' (' + selectedRobot.model.type + ')'}
+                        </Typography>
+                        <RobotInfo>
+                            <RobotImage height="350px" robotType={selectedRobot.model.type} />
+                            <VerticalContent $alignItems="start">
+                                <BatteryStatusView
+                                    itemSize={48}
+                                    battery={selectedRobot.batteryLevel}
+                                    batteryStatus={BatteryStatus.Normal}
+                                />
+                                {selectedRobot.model.upperPressureWarningThreshold && (
+                                    <PressureStatusView
+                                        itemSize={48}
+                                        pressureInBar={selectedRobot.pressureLevel}
+                                        upperPressureWarningThreshold={
+                                            selectedRobot.model.upperPressureWarningThreshold
+                                        }
+                                        lowerPressureWarningThreshold={
+                                            selectedRobot.model.lowerPressureWarningThreshold
+                                        }
+                                    />
+                                )}
+                                <RobotStatusChip status={selectedRobot.status} />
+                            </VerticalContent>
+                        </RobotInfo>
+
                         <LocalizationSection robot={selectedRobot} />
                         {selectedRobot.status === RobotStatus.Available &&
                             selectedRobot.model.type === RobotType.TaurobInspector && (

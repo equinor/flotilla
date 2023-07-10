@@ -55,7 +55,11 @@ function cardContent({ robot }: RobotProps) {
                     <RobotStatusChip status={robot.status} />
                 </VerticalContent>
                 <VerticalContent $alignItems="end">
-                    <PressureStatusView pressure={robot.pressureLevel} />
+                    <PressureStatusView
+                        pressureInBar={robot.pressureLevel}
+                        upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
+                        lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
+                    />
                     <BatteryStatusView battery={robot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
                 </VerticalContent>
             </HorizontalContent>
