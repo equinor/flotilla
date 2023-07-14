@@ -25,8 +25,10 @@ export function MoveRobotArm({ robot, armPosition, isRobotAvailable }: RobotProp
     const moveArmButtonStyle = () => {
         if (!usable)
             return {
-                backgroundColor: tokens.colors.text.static_icons__tertiary.hex,
-                cursor: 'auto',
+                backgroundColor: tokens.colors.interactive.disabled__fill.hex,
+                color: tokens.colors.interactive.disabled__text.hex,
+                borderColor: tokens.colors.interactive.disabled__border.hex,
+                cursor: 'not-allowed',
             }
     }
     const openPopover = () => {
