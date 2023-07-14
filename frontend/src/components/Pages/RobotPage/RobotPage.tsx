@@ -46,31 +46,27 @@ const VerticalContent = styled.div<{ $alignItems?: string }>`
 
 const updateSiteTimer = 1000
 export function RobotPage() {
-    const { robotId } = useParams()
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
+    const { robotId } = useParams()
 
     useEffect(() => {
+        fetchRobotData()
+    }, [robotId])
+
+    useEffect(() => {
+        const intervalId = setInterval(fetchRobotData, updateSiteTimer)
+        return () => {
+            clearInterval(intervalId)
+        }
+    }, [])
+
+    const fetchRobotData = () => {
         if (robotId) {
             BackendAPICaller.getRobotById(robotId).then((robot) => {
                 setSelectedRobot(robot)
             })
         }
-    }, [robotId])
-
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            if (selectedRobot) {
-                BackendAPICaller.getRobotById(selectedRobot.id).then((updatedRobot) => {
-                    setSelectedRobot(updatedRobot)
-                })
-            }
-        }, updateSiteTimer)
-
-        return () => {
-            clearInterval(intervalId)
-        }
-    }, [selectedRobot])
-
+    }
     return (
         <>
             <Header page={'robot'} />
