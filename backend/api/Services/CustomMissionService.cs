@@ -10,7 +10,7 @@ namespace Api.Services
 
     public interface ICustomMissionService
     {
-        Task<string> UploadSource(List<MissionTask> tasks);
+        string UploadSource(List<MissionTask> tasks);
         Task<List<MissionTask>?> GetMissionTasksFromMissionId(string id);
     }
 
@@ -25,7 +25,7 @@ namespace Api.Services
             _blobService = blobService;
         }
 
-        public async Task<string> UploadSource(List<MissionTask> tasks)
+        public string UploadSource(List<MissionTask> tasks)
         {
             string json = JsonSerializer.Serialize(tasks);
             string id = Guid.NewGuid().ToString();
