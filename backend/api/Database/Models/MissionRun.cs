@@ -77,6 +77,10 @@ namespace Api.Database.Models
 
         public MapMetadata? MapMetadata { get; set; }
 
+        public string? ErrorReason { get; set; }
+
+        public string? ErrorDescription { get; set; }
+
         public DateTimeOffset? StartTime { get; private set; }
 
         public DateTimeOffset? EndTime { get; private set; }

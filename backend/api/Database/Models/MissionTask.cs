@@ -62,6 +62,10 @@ namespace Api.Database.Models
                     or TaskStatus.Failed
                     or TaskStatus.PartiallySuccessful;
 
+        public string? ErrorReason { get; set; }
+
+        public string? ErrorDescription { get; set; }
+
         public DateTimeOffset? StartTime { get; private set; }
 
         public DateTimeOffset? EndTime { get; private set; }

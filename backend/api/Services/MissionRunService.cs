@@ -25,10 +25,25 @@ namespace Api.Services
             MissionStatus missionStatus
         );
 
+        public abstract Task<MissionRun?> UpdateMissionRunStatusByIsarMissionId(
+            string isarMissionId,
+            MissionStatus missionStatus,
+            string? errorReason,
+            string? errorDescription
+        );
+
         public abstract Task<bool> UpdateTaskStatusByIsarTaskId(
             string isarMissionId,
             string isarTaskId,
             IsarTaskStatus taskStatus
+        );
+
+        public abstract Task<bool> UpdateTaskStatusByIsarTaskId(
+            string isarMissionId,
+            string isarTaskId,
+            IsarTaskStatus taskStatus,
+            string? errorReason,
+            string? errorDescription
         );
 
         public abstract Task<bool> UpdateStepStatusByIsarStepId(
@@ -36,6 +51,15 @@ namespace Api.Services
             string isarTaskId,
             string isarStepId,
             IsarStepStatus stepStatus
+        );
+
+        public abstract Task<bool> UpdateStepStatusByIsarStepId(
+            string isarMissionId,
+            string isarTaskId,
+            string isarStepId,
+            IsarStepStatus stepStatus,
+            string? errorReason,
+            string? errorDescription
         );
 
         public abstract Task<MissionRun?> Delete(string id);
@@ -156,6 +180,16 @@ namespace Api.Services
             MissionStatus missionStatus
         )
         {
+            return await UpdateMissionRunStatusByIsarMissionId(isarMissionId, missionStatus, null, null);
+        }
+
+        public async Task<MissionRun?> UpdateMissionRunStatusByIsarMissionId(
+            string isarMissionId,
+            MissionStatus missionStatus,
+            string? errorReason,
+            string? errorDescription
+        )
+        {
             var missionRun = await ReadByIsarMissionId(isarMissionId);
             if (missionRun is null)
             {
@@ -167,6 +201,8 @@ namespace Api.Services
             }
 
             missionRun.Status = missionStatus;
+            missionRun.ErrorReason = errorReason;
+            missionRun.ErrorDescription = errorDescription;
 
             await _context.SaveChangesAsync();
 
@@ -177,6 +213,17 @@ namespace Api.Services
             string isarMissionId,
             string isarTaskId,
             IsarTaskStatus taskStatus
+        )
+        {
+            return await UpdateTaskStatusByIsarTaskId(isarMissionId, isarTaskId, taskStatus, null, null);
+        }
+
+        public async Task<bool> UpdateTaskStatusByIsarTaskId(
+            string isarMissionId,
+            string isarTaskId,
+            IsarTaskStatus taskStatus,
+            string? errorReason,
+            string? errorDescription
         )
         {
             var missionRun = await ReadByIsarMissionId(isarMissionId);
@@ -219,6 +266,9 @@ namespace Api.Services
                 }
             }
 
+            task.ErrorReason = errorReason;
+            task.ErrorDescription = errorDescription;
+
             await _context.SaveChangesAsync();
 
             return true;
@@ -229,6 +279,18 @@ namespace Api.Services
             string isarTaskId,
             string isarStepId,
             IsarStepStatus stepStatus
+        )
+        {
+            return await UpdateStepStatusByIsarStepId(isarMissionId, isarTaskId, isarStepId, stepStatus, null, null);
+        }
+
+        public async Task<bool> UpdateStepStatusByIsarStepId(
+            string isarMissionId,
+            string isarTaskId,
+            string isarStepId,
+            IsarStepStatus stepStatus,
+            string? errorReason,
+            string? errorDescription
         )
         {
             var missionRun = await ReadByIsarMissionId(isarMissionId);
@@ -264,6 +326,9 @@ namespace Api.Services
             }
 
             inspection.UpdateStatus(stepStatus);
+
+            inspection.ErrorReason = errorReason;
+            inspection.ErrorDescription = errorDescription;
 
             await _context.SaveChangesAsync();
 

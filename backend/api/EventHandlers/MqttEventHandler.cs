@@ -270,7 +270,9 @@ namespace Api.EventHandlers
 
             var flotillaMissionRun = await missionRunService.UpdateMissionRunStatusByIsarMissionId(
                 isarMission.MissionId,
-                status
+                status,
+                isarMission.ErrorReason,
+                isarMission.ErrorDescription
             );
 
             if (flotillaMissionRun is null)
@@ -369,7 +371,9 @@ namespace Api.EventHandlers
             bool success = await missionRunService.UpdateTaskStatusByIsarTaskId(
                 task.MissionId,
                 task.TaskId,
-                status
+                status,
+                task.ErrorReason,
+                task.ErrorDescription
             );
 
             if (success)
@@ -417,7 +421,9 @@ namespace Api.EventHandlers
                 step.MissionId,
                 step.TaskId,
                 step.StepId,
-                status
+                status,
+                step.ErrorReason,
+                step.ErrorDescription
             );
 
             if (success)
