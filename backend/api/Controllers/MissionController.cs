@@ -439,7 +439,7 @@ public class MissionController : ControllerBase
         if (area == null)
             return NotFound($"Could not find area with name {customMissionQuery.AreaName} in installation {customMissionQuery.InstallationCode}");
 
-        string sourceURL = await _customMissionService.UploadSource(missionTasks);
+        string sourceURL = _customMissionService.UploadSource(missionTasks);
 
         var customMissionDefinition = new MissionDefinition
         {

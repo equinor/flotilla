@@ -402,10 +402,8 @@ namespace Api.Test
         {
             // Arrange - Add Safe Position
             string testInstallation = "testInstallation";
-            string testPlant = "testPlant";
-            string testDeck = "testDeck";
             string testArea = "testArea";
-            string addSafePositionUrl = $"/areas/{testInstallation}/{testPlant}/{testDeck}/{testArea}/safe-position";
+            string addSafePositionUrl = $"/areas/{testInstallation}/{testArea}/safe-position";
             var testPosition = new Position
             {
                 X = 1,
@@ -473,7 +471,6 @@ namespace Api.Test
                 string url = $"/areas/{areaId}/map-metadata";
                 var response = await _client.GetAsync(url);
                 Assert.Equal(inputOutputPairs[input], response.StatusCode);
-
             }
         }
     }
