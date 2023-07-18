@@ -91,7 +91,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpPost]
         [Authorize(Roles = Role.Admin)]
-        [Route("{installationCode}/{plantCode}/{deckName}/{areaName}/safe-position")]
+        [Route("{installationCode}/{areaName}/safe-position")]
         [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -99,14 +99,11 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<AreaResponse>> AddSafePosition(
             [FromRoute] string installationCode,
-            [FromRoute] string plantCode,
-            [FromRoute] string deckName,
             [FromRoute] string areaName,
             [FromBody] Pose safePosition
         )
         {
-            _logger.LogInformation(@"Adding new safe position to {Installation}, {Plant}, 
-                {Deck}, {Area}", installationCode, plantCode, deckName, areaName);
+            _logger.LogInformation(@"Adding new safe position to {Installation}, {Area}", installationCode, areaName);
             try
             {
                 var area = await _areaService.AddSafePosition(installationCode, areaName, new SafePosition(safePosition));
@@ -129,10 +126,8 @@ namespace Api.Controllers
                 }
                 else
                 {
-                    _logger.LogInformation(@"No area with installation {installationCode}, plant {plantCode}, 
-                        deck {deckName} and name {areaName} could be found.", installationCode, plantCode, deckName, areaName);
-                    return NotFound(@$"No area with installation {installationCode}, plant {plantCode}, 
-                        deck {deckName} and name {areaName} could be found.");
+                    _logger.LogInformation(@"No area with installation {installationCode} and name {areaName} could be found.", installationCode, areaName);
+                    return NotFound(@$"No area with installation {installationCode} and name {areaName} could be found.");
                 }
             }
             catch (Exception e)

@@ -111,7 +111,7 @@ namespace Api.Controllers
                 var existingPlant = await _plantService.ReadByInstallationAndName(existingInstallation, plant.PlantCode);
                 if (existingPlant != null)
                 {
-                    _logger.LogInformation("An plant for given name and plant already exists");
+                    _logger.LogInformation("A plant for given name and plant already exists");
                     return BadRequest($"Plant already exists");
                 }
 

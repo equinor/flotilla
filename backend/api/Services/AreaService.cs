@@ -107,11 +107,8 @@ namespace Api.Services
                 .Include(a => a.Plant).Include(a => a.Deck).ToListAsync();
         }
 
-        public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation? installation, Plant? plant, Deck? deck, string areaName)
+        public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName)
         {
-            if (installation == null || plant == null || deck == null)
-                return null;
-
             return await _context.Areas.Where(a =>
                 a.Deck.Id.Equals(deck.Id) &&
                 a.Plant.Id.Equals(plant.Id) &&
