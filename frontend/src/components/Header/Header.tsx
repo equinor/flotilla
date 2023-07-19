@@ -75,8 +75,10 @@ function InstallationPicker(page: string) {
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
     const { installationCode, switchInstallation } = useInstallationContext()
     useEffect(() => {
-        BackendAPICaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
-            const mapping = mapInstallationCodeToName(response)
+        BackendAPICaller.getEchoPlantInfo().then(async (response: EchoPlantInfo[]) => {
+            let activePlants = await BackendAPICaller.getActivePlants()
+            let filteredActiveEchoPlants = response.filter((plant) => activePlants.includes(plant.plantCode))
+            const mapping = mapInstallationCodeToName(filteredActiveEchoPlants)
             setAllPlantsMap(mapping)
         })
     }, [])

@@ -8,6 +8,7 @@ namespace Api.Services
     {
         public Task<Robot> Create(Robot newRobot);
         public Task<IEnumerable<Robot>> ReadAll();
+        public Task<IEnumerable<string>> ReadAllActivePlants();
         public Task<Robot?> ReadById(string id);
         public Task<Robot?> ReadByIsarId(string isarId);
         public Task<Robot> Update(Robot robot);
@@ -49,6 +50,11 @@ namespace Api.Services
         {
             return await GetRobotsWithSubModels()
                 .FirstOrDefaultAsync(robot => robot.IsarId.Equals(isarId));
+        }
+
+        public async Task<IEnumerable<string>> ReadAllActivePlants()
+        {
+            return await _context.Robots.Where(r => r.Enabled).Select(r => r.CurrentInstallation).ToListAsync();
         }
 
         public async Task<Robot> Update(Robot robot)

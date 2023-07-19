@@ -278,6 +278,32 @@ public class RobotController : ControllerBase
     }
 
     /// <summary>
+    /// Get all plants associated with an active robot.
+    /// </summary>
+    /// <remarks>
+    /// <para> Retrieves the plants that have an active robot </para>
+    /// </remarks>
+    [HttpGet]
+    [Authorize(Roles = Role.User)]
+    [Route("active-plants")]
+    [ProducesResponseType(typeof(IList<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IList<string>>> GetActivePlants()
+    {
+        var plants = await _robotService.ReadAllActivePlants();
+        if (plants == null)
+        {
+            _logger.LogWarning("Could not retrieve robot plants information");
+            throw new RobotInformationNotAvailableException("Could not retrieve robot plants information");
+        }
+
+        return Ok(plants);
+    }
+
+    /// <summary>
     /// Add a video stream to a given robot
     /// </summary>
     /// <remarks>
