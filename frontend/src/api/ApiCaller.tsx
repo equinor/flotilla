@@ -252,6 +252,16 @@ export class BackendAPICaller {
         })
         return result.content
     }
+
+    static async getActivePlants(): Promise<string[]> {
+        const path: string = 'robots/active-plants'
+        const result = await BackendAPICaller.GET<string[]>(path).catch((e: Error) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
     static async postMission(echoMissionId: number, robotId: string, installationCode: string | null) {
         const path: string = 'missions'
         const robots: Robot[] = await BackendAPICaller.getEnabledRobots()
