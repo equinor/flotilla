@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Api.Controllers.Models;
 using Api.Services.Models;
+using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 #pragma warning disable CS8618
@@ -55,6 +56,15 @@ namespace Api.Database.Models
         public string? ErrorReason { get; set; }
 
         public string? ErrorDescription { get; set; }
+
+        public string? GetError()
+        {
+            if (ErrorReason != null)
+            {
+                return IsarErrorHandling.MapIsarError(ErrorReason);
+            }
+            return null;
+        }
 
         public DateTimeOffset? StartTime { get; private set; }
 

@@ -54,12 +54,12 @@ public class MissionController : ControllerBase
     /// </remarks>
     [HttpGet("runs")]
     [Authorize(Roles = Role.Any)]
-    [ProducesResponseType(typeof(IList<MissionRun>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IList<MissionRunDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IList<MissionRun>>> GetMissionRuns(
+    public async Task<ActionResult<IList<MissionRunDto>>> GetMissionRuns(
         [FromQuery] MissionRunQueryStringParameters parameters
     )
     {
@@ -102,7 +102,9 @@ public class MissionController : ControllerBase
             JsonSerializer.Serialize(metadata)
         );
 
-        return Ok(missionRuns);
+        var missionRunDtos = missionRuns.Select(m => new MissionRunDto(m));
+
+        return Ok(missionRunDtos);
     }
 
     /// <summary>
@@ -157,17 +159,17 @@ public class MissionController : ControllerBase
     [HttpGet]
     [Authorize(Roles = Role.Any)]
     [Route("runs/{id}")]
-    [ProducesResponseType(typeof(MissionRun), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MissionRunDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<MissionRun>> GetMissionRunById([FromRoute] string id)
+    public async Task<ActionResult<MissionRunDto>> GetMissionRunById([FromRoute] string id)
     {
         var missioRun = await _missionRunService.ReadById(id);
         if (missioRun == null)
             return NotFound($"Could not find mission run with id {id}");
-        return Ok(missioRun);
+        return Ok(new MissionRunDto(missioRun));
     }
 
     /// <summary>

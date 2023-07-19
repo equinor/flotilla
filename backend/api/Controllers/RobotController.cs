@@ -368,6 +368,13 @@ public class RobotController : ControllerBase
             return NotFound("Mission not found");
         }
 
+        string? missionRunError = missionRun.GetError();
+        if (missionRunError != null)
+        {
+            _logger.LogError(new MissionException(missionRunError), $"Error in ISAR mission: {missionRunError}");
+            return StatusCode(StatusCodes.Status502BadGateway, $"Error in ISAR mission: {missionRunError}");
+        }
+
         IsarMission isarMission;
         try
         {
