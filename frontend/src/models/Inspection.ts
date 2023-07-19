@@ -9,6 +9,7 @@ export interface Inspection {
     inspectionUrl?: string
     startTime?: Date
     endTime?: Date
+    error?: string
 }
 
 enum InspectionStatus {

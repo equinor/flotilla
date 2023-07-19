@@ -107,5 +107,6 @@
     "selected": "selected",
     "This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.": "This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.",
     "Close": "Close",
-    "Localizing": "Localizing"
+    "Localizing": "Localizing",
+    "N": "N"
 }

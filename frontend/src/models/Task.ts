@@ -16,6 +16,7 @@ export interface Task {
     isCompleted: boolean
     startTime?: Date
     endTime?: Date
+    error?: string
     inspections: Inspection[]
 }
 

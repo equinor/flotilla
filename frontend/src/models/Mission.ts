@@ -31,4 +31,5 @@ export interface Mission {
     estimatedDuration?: number
     tasks: Task[]
     mapMetadata?: MapMetadata
+    error?: string
 }
