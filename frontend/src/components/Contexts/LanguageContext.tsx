@@ -5,6 +5,7 @@ interface ILanguageContext {
     language: string
     textDictionary: { [text: string]: string }
     switchLanguage: (newLanguage: string) => void
+    translate: (str: string) => string
 }
 
 interface Props {
@@ -15,6 +16,7 @@ const defaultLanguageInterface = {
     language: defaultLanguage,
     textDictionary: allLanguageDictionaries[defaultLanguage],
     switchLanguage: (newLanguage: string) => {},
+    translate: (str: string) => '',
 }
 
 export const LanguageContext = createContext<ILanguageContext>(defaultLanguageInterface)
@@ -31,12 +33,21 @@ export const LanguageProvider: FC<Props> = ({ children }) => {
         window.localStorage.setItem('flotilla-language', newLanguage)
     }
 
+    const translate = (str: string): string => {
+        if (textDictionary[str]) {
+            return textDictionary[str]
+        }
+        console.warn(`Translation issue: "${str}" has no translation to language "${language}"`)
+        return str
+    }
+
     return (
         <LanguageContext.Provider
             value={{
                 language,
                 textDictionary,
                 switchLanguage,
+                translate,
             }}
         >
             {children}

@@ -1,6 +1,6 @@
 import { Autocomplete, AutocompleteChanges, Button, Card, Dialog, Typography, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useState, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
@@ -9,6 +9,8 @@ import { Robot } from 'models/Robot'
 import { AssetDeckMapView } from './AssetDeckMapView'
 import { Pose } from 'models/Pose'
 import { Orientation } from 'models/Orientation'
+import { Mission, MissionStatus } from 'models/Mission'
+import { tokens } from '@equinor/eds-tokens'
 
 const StyledDialog = styled(Card)`
     display: flex;
@@ -23,8 +25,9 @@ const StyledAutoComplete = styled.div`
     justify-content: space-evenly;
 `
 
-const StyledLocalizationButton = styled.div`
+const StyledLocalization = styled.div`
     display: flex;
+    gap: 8px;
 `
 
 const StyledButtons = styled.div`
@@ -33,22 +36,36 @@ const StyledButtons = styled.div`
     justify-content: flex-end;
 `
 
+const StyledCard = styled(Card)`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 300px;
+    height: 36px;s
+`
+
 interface RobotProps {
     robot: Robot
 }
 
 export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
     const [isLocalizationDialogOpen, setIsLocalizationDialogOpen] = useState<boolean>(false)
+    const [missionLocalizationStatus, setMissionLocalizationInfo] = useState<string>()
     const [selectedAssetDeck, setSelectedAssetDeck] = useState<AssetDeck>()
     const [assetDecks, setAssetDecks] = useState<AssetDeck[]>()
-    const [localisationPose, setLocalizationPose] = useState<Pose>()
+    const [localizationPose, setLocalizationPose] = useState<Pose>()
     const [selectedDirection, setSelectedDirecion] = useState<Orientation>()
+    const [localizing, setLocalising] = useState<Boolean>(false)
+    const { translate } = useLanguageContext()
+
+    const colorGreen = '#A1DAA0'
+    const colorGreenToken = tokens.colors.text.static_icons__default.hex
 
     const directionMap: Map<string, Orientation> = new Map([
-        [TranslateText('North'), { x: 0, y: 0, z: 0.7071, w: 0.7071 }],
-        [TranslateText('East'), { x: 0, y: 0, z: 0, w: 1 }],
-        [TranslateText('South'), { x: 0, y: 0, z: -0.7071, w: 0.7071 }],
-        [TranslateText('West'), { x: 0, y: 0, z: 1, w: 0 }],
+        [translate('North'), { x: 0, y: 0, z: 0.7071, w: 0.7071 }],
+        [translate('East'), { x: 0, y: 0, z: 0, w: 1 }],
+        [translate('South'), { x: 0, y: 0, z: -0.7071, w: 0.7071 }],
+        [translate('West'), { x: 0, y: 0, z: 1, w: 0 }],
     ])
 
     useEffect(() => {
@@ -56,6 +73,26 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
             setAssetDecks(response)
         })
     }, [])
+
+    useEffect(() => {
+        if (selectedAssetDeck && localizationPose && localizing) {
+            BackendAPICaller.postLocalizationMission(localizationPose, robot.id, selectedAssetDeck.id)
+                .then((result: unknown) => result as Mission)
+                .then(async (mission: Mission) => {
+                    BackendAPICaller.getMissionById(mission.id)
+                    while (mission.status == MissionStatus.Ongoing || mission.status == MissionStatus.Pending) {
+                        mission = await BackendAPICaller.getMissionById(mission.id)
+                    }
+                    setLocalising(false)
+                    return mission
+                })
+                .then((mission: Mission) => setMissionLocalizationInfo(mission.status))
+                .catch((e) => {
+                    console.error(e)
+                })
+            onLocalizationDialogClose()
+        }
+    }, [localizing])
 
     const getAssetDeckNames = (assetDecks: AssetDeck[]): Map<string, AssetDeck> => {
         var assetDeckNameMap = new Map<string, AssetDeck>()
@@ -79,7 +116,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
     const onSelectedDirection = (changes: AutocompleteChanges<string>) => {
         const selectedDirection = directionMap.get(changes.selectedItems[0])
         setSelectedDirecion(selectedDirection)
-        let newPose = localisationPose
+        let newPose = localizationPose
         if (newPose && selectedDirection) {
             newPose.orientation = selectedDirection
             setLocalizationPose(newPose)
@@ -95,17 +132,15 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
         setSelectedAssetDeck(undefined)
     }
 
-    const onClickLocalize = () => {
-        if (selectedAssetDeck && localisationPose) {
-            BackendAPICaller.postLocalizationMission(localisationPose, robot.id, selectedAssetDeck.id)
-        }
-        onLocalizationDialogClose()
+    const onClickLocalize = async () => {
+        setMissionLocalizationInfo(undefined)
+        setLocalising(true)
     }
-    const assetDeckNames = assetDecks ? Array.from(getAssetDeckNames(assetDecks).keys()).sort() : []
 
+    const assetDeckNames = assetDecks ? Array.from(getAssetDeckNames(assetDecks).keys()).sort() : []
     return (
         <>
-            <StyledLocalizationButton>
+            <StyledLocalization>
                 <Button
                     onClick={() => {
                         onClickLocalizeRobot()
@@ -113,29 +148,62 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                 >
                     <>
                         <Icon name={Icons.PinDrop} size={16} />
-                        {TranslateText('Localize robot')}
+                        {translate('Localize robot')}
                     </>
                 </Button>
-            </StyledLocalizationButton>
+                {(localizing || missionLocalizationStatus) && (
+                    <>
+                        {!missionLocalizationStatus && (
+                            <StyledCard variant="info">
+                                <StyledCard.Header>
+                                    <Typography variant="body_short">{translate('Localizing') + '...'}</Typography>
+                                </StyledCard.Header>
+                            </StyledCard>
+                        )}
+                        {missionLocalizationStatus == MissionStatus.Successful && (
+                            <StyledCard style={{ background: colorGreen, color: colorGreenToken }}>
+                                <StyledCard.Header>
+                                    <Typography variant="body_short">
+                                        {translate('Localization') +
+                                            ' ' +
+                                            translate(missionLocalizationStatus).toLocaleLowerCase()}
+                                    </Typography>
+                                </StyledCard.Header>
+                            </StyledCard>
+                        )}
+                        {missionLocalizationStatus && missionLocalizationStatus !== MissionStatus.Successful && (
+                            <StyledCard variant="danger">
+                                <StyledCard.Header>
+                                    <Typography variant="body_short">
+                                        {translate('Localization') +
+                                            ' ' +
+                                            translate(missionLocalizationStatus).toLocaleLowerCase()}
+                                    </Typography>
+                                </StyledCard.Header>
+                            </StyledCard>
+                        )}
+                    </>
+                )}
+            </StyledLocalization>
             <Dialog open={isLocalizationDialogOpen} isDismissable>
                 <StyledDialog>
-                    <Typography variant="h2">{TranslateText('Localize robot')}</Typography>
+                    <Typography variant="h2">{translate('Localize robot')}</Typography>
                     <StyledAutoComplete>
                         <Autocomplete
                             options={assetDeckNames}
-                            label={TranslateText('Select deck')}
+                            label={translate('Select deck')}
                             onOptionsChange={onSelectedDeck}
                         />
                         <Autocomplete
                             options={Array.from(directionMap.keys())}
-                            label={TranslateText('Select direction')}
+                            label={translate('Select direction')}
                             onOptionsChange={onSelectedDirection}
                         />
                     </StyledAutoComplete>
-                    {selectedAssetDeck && localisationPose && (
+                    {selectedAssetDeck && localizationPose && (
                         <AssetDeckMapView
                             assetDeck={selectedAssetDeck}
-                            localizationPose={localisationPose}
+                            localizationPose={localizationPose}
                             setLocalizationPose={setLocalizationPose}
                         />
                     )}
@@ -148,11 +216,11 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                             color="secondary"
                         >
                             {' '}
-                            {TranslateText('Cancel')}{' '}
+                            {translate('Cancel')}{' '}
                         </Button>
                         <Button onClick={onClickLocalize} disabled={!selectedAssetDeck}>
                             {' '}
-                            {TranslateText('Localize')}{' '}
+                            {translate('Localize')}{' '}
                         </Button>
                     </StyledButtons>
                 </StyledDialog>
