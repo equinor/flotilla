@@ -1,4 +1,4 @@
-import { CircularProgress, Pagination, Table, Typography } from '@equinor/eds-core-react'
+import { CircularProgress, Pagination, Table, Typography, Chip } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import { useCallback, useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
@@ -7,8 +7,10 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'
+import { useMissionFilterContext, IFilterState } from 'components/Contexts/MissionFilterContext'
 import { FilterSection } from './FilterSection'
+import { MissionStatus } from 'models/Mission'
+import { InspectionType } from 'models/Inspection'
 
 const TableWithHeader = styled.div`
     display: flex;
@@ -24,6 +26,32 @@ const StyledLoading = styled.div`
     gap: 1rem;
 `
 
+const ActiveFilterList = styled.div`
+    display: flex;
+    gap: 0.7rem;
+    align-items: center;
+    margin-left: var(--page-margin);
+    margin-right: var(--page-margin);
+    margin-top: 8px;
+    min-height: 24px;
+`
+
+function isNotNullOrNotEmptyArray(value: any | any[]) {
+    if (typeof value === 'string' || typeof value === 'number') {
+        return value
+    } else if (Array.isArray(value)) {
+        return value && value.length > 0
+    }
+}
+
+function flatten(filters: IFilterState) {
+    const allFilters = []
+    for (const [filterName, filterValue] of Object.entries(filters)) {
+        allFilters.push({ name: filterName, value: filterValue })
+    }
+    return allFilters
+}
+
 export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const pageSize: number = 10
@@ -33,11 +61,25 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isResettingPage, setIsResettingPage] = useState<boolean>(false)
 
-    const {
-        page,
-        switchPage,
-        filterState
-    } = useMissionFilterContext()
+    const { page, switchPage, filterState, filterIsSet, filterFunctions } = useMissionFilterContext()
+
+    const toDisplayValue = (value: string | number | MissionStatus[] | InspectionType[]) => {
+        if (typeof value === 'string') {
+            return value
+        } else if (typeof value === 'number') {
+            // We currently assume these are dates. We may want
+            // to explicitly use the Date type in the filter context instead
+            return filterFunctions.dateTimeIntToPrettyString(value)
+        } else if (Array.isArray(value)) {
+            let valueArray = value as any[]
+            if (valueArray.length === 0) {
+                console.error('Unexpected empty array detected')
+            }
+            return valueArray[0] + valueArray.slice(1).map((val) => ', ' + val)
+        } else {
+            console.error('Unexpected filter type detected')
+        }
+    }
 
     const updateFilteredMissions = useCallback(() => {
         BackendAPICaller.getMissionRuns({
@@ -93,6 +135,21 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
         <TableWithHeader>
             <Typography variant="h1">{TranslateText('Mission History')}</Typography>
             <FilterSection />
+            {filterIsSet && (
+                <ActiveFilterList>
+                    {flatten(filterState)
+                        .filter((filter) => isNotNullOrNotEmptyArray(filter.value))
+                        .map((filter) => (
+                            <Chip
+                                key={filter.name}
+                                variant="active"
+                                onDelete={() => filterFunctions.resetFilter(filter.name)}
+                            >
+                                {filter.name}: {toDisplayValue(filter.value!)}
+                            </Chip>
+                        ))}
+                </ActiveFilterList>
+            )}
             <Table>
                 <Table.Head sticky>
                     <Table.Row>

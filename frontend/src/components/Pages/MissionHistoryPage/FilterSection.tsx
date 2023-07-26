@@ -12,7 +12,7 @@ import {
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionStatus } from 'models/Mission'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { Icons } from 'utils/icons'
 import { InspectionType } from 'models/Inspection'
 import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'
@@ -33,10 +33,6 @@ const StyledDialog = styled(Card)`
 export function FilterSection() {
     const { TranslateText } = useLanguageContext()
     const [isFilteringDialogOpen, setIsFilteringDialogOpen] = useState<boolean>(false)
-    const [formattedMinStartTime, setFormattedMinStartTime] = useState<string | undefined>(undefined)
-    const [formattedMaxStartTime, setFormattedMaxStartTime] = useState<string | undefined>(undefined)
-    const [formattedMinEndTime, setFormattedMinEndTime] = useState<string | undefined>(undefined)
-    const [formattedMaxEndTime, setFormattedMaxEndTime] = useState<string | undefined>(undefined)
     const { filterFunctions, filterState } = useMissionFilterContext()
 
     const missionStatusTranslationMap: Map<string, MissionStatus> = new Map(
@@ -50,26 +46,6 @@ export function FilterSection() {
             return [TranslateText(inspectionType), inspectionType]
         })
     )
-
-    const changeMinStartTime = (newMinStartTime: string | undefined) => {
-        filterFunctions.switchMinStartTime(newMinStartTime ? new Date(newMinStartTime).getTime() / 1000 : undefined)
-        setFormattedMinStartTime(newMinStartTime)
-    }
-
-    const changeMaxStartTime = (newMaxStartTime: string | undefined) => {
-        filterFunctions.switchMaxStartTime(newMaxStartTime ? new Date(newMaxStartTime).getTime() / 1000 : undefined)
-        setFormattedMaxStartTime(newMaxStartTime)
-    }
-
-    const changeMinEndTime = (newMinEndTime: string | undefined) => {
-        filterFunctions.switchMinEndTime(newMinEndTime ? new Date(newMinEndTime).getTime() / 1000 : undefined)
-        setFormattedMinEndTime(newMinEndTime)
-    }
-
-    const changeMaxEndTime = (newMaxEndTime: string | undefined) => {
-        filterFunctions.switchMaxEndTime(newMaxEndTime ? new Date(newMaxEndTime).getTime() / 1000 : undefined)
-        setFormattedMaxEndTime(newMaxEndTime)
-    }
 
     const onClickFilterIcon = () => {
         setIsFilteringDialogOpen(true)
@@ -166,38 +142,42 @@ export function FilterSection() {
                     />
                     <TextField
                         id="datetime"
-                        value={formattedMinStartTime}
+                        value={filterFunctions.dateTimeIntToString(filterState.minStartTime)}
                         label={TranslateText('Select min start time')}
                         type="datetime-local"
                         onChange={(changes: ChangeEvent<HTMLInputElement>) => {
-                            changeMinStartTime(changes.target.value)
+                            filterFunctions.switchMinStartTime(
+                                filterFunctions.dateTimeStringToInt(changes.target.value)
+                            )
                         }}
                     />
                     <TextField
                         id="datetime"
-                        value={formattedMaxStartTime}
+                        value={filterFunctions.dateTimeIntToString(filterState.maxStartTime)}
                         label={TranslateText('Select max start time')}
                         type="datetime-local"
                         onChange={(changes: ChangeEvent<HTMLInputElement>) => {
-                            changeMaxStartTime(changes.target.value)
+                            filterFunctions.switchMaxStartTime(
+                                filterFunctions.dateTimeStringToInt(changes.target.value)
+                            )
                         }}
                     />
                     <TextField
                         id="datetime"
-                        value={formattedMinEndTime}
+                        value={filterFunctions.dateTimeIntToString(filterState.minEndTime)}
                         label={TranslateText('Select min end time')}
                         type="datetime-local"
                         onChange={(changes: ChangeEvent<HTMLInputElement>) => {
-                            changeMinEndTime(changes.target.value)
+                            filterFunctions.switchMinEndTime(filterFunctions.dateTimeStringToInt(changes.target.value))
                         }}
                     />
                     <TextField
                         id="datetime"
-                        value={formattedMaxEndTime}
+                        value={filterFunctions.dateTimeIntToString(filterState.maxEndTime)}
                         label={TranslateText('Select max end time')}
                         type="datetime-local"
                         onChange={(changes: ChangeEvent<HTMLInputElement>) => {
-                            changeMaxEndTime(changes.target.value)
+                            filterFunctions.switchMaxEndTime(filterFunctions.dateTimeStringToInt(changes.target.value))
                         }}
                     />
                 </StyledDialog>
