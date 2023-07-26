@@ -10,7 +10,7 @@ import {
     CircularProgress,
 } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState, useEffect } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
@@ -53,6 +53,7 @@ const StyledLoading = styled.div`
 `
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
+    const { TranslateText } = useLanguageContext()
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
     const [isEmptyEchoMissionsDialogOpen, setIsEmptyEchoMissionsDialogOpen] = useState<boolean>(false)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)

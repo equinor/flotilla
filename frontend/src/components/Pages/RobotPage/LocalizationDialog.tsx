@@ -56,16 +56,16 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
     const [localizationPose, setLocalizationPose] = useState<Pose>()
     const [selectedDirection, setSelectedDirecion] = useState<Orientation>()
     const [localizing, setLocalising] = useState<Boolean>(false)
-    const { translate } = useLanguageContext()
+    const { TranslateText } = useLanguageContext()
 
     const colorGreen = '#A1DAA0'
     const colorGreenToken = tokens.colors.text.static_icons__default.hex
 
     const directionMap: Map<string, Orientation> = new Map([
-        [translate('North'), { x: 0, y: 0, z: 0.7071, w: 0.7071 }],
-        [translate('East'), { x: 0, y: 0, z: 0, w: 1 }],
-        [translate('South'), { x: 0, y: 0, z: -0.7071, w: 0.7071 }],
-        [translate('West'), { x: 0, y: 0, z: 1, w: 0 }],
+        [TranslateText('North'), { x: 0, y: 0, z: 0.7071, w: 0.7071 }],
+        [TranslateText('East'), { x: 0, y: 0, z: 0, w: 1 }],
+        [TranslateText('South'), { x: 0, y: 0, z: -0.7071, w: 0.7071 }],
+        [TranslateText('West'), { x: 0, y: 0, z: 1, w: 0 }],
     ])
 
     useEffect(() => {
@@ -146,7 +146,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                 >
                     <>
                         <Icon name={Icons.PinDrop} size={16} />
-                        {translate('Localize robot')}
+                        {TranslateText('Localize robot')}
                     </>
                 </Button>
                 {(localizing || missionLocalizationStatus) && (
@@ -154,7 +154,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                         {!missionLocalizationStatus && (
                             <StyledCard variant="info">
                                 <StyledCard.Header>
-                                    <Typography variant="body_short">{translate('Localizing') + '...'}</Typography>
+                                    <Typography variant="body_short">{TranslateText('Localizing') + '...'}</Typography>
                                 </StyledCard.Header>
                             </StyledCard>
                         )}
@@ -162,9 +162,9 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                             <StyledCard style={{ background: colorGreen, color: colorGreenToken }}>
                                 <StyledCard.Header>
                                     <Typography variant="body_short">
-                                        {translate('Localization') +
+                                        {TranslateText('Localization') +
                                             ' ' +
-                                            translate(missionLocalizationStatus).toLocaleLowerCase()}
+                                            TranslateText(missionLocalizationStatus).toLocaleLowerCase()}
                                     </Typography>
                                 </StyledCard.Header>
                             </StyledCard>
@@ -173,9 +173,9 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                             <StyledCard variant="danger">
                                 <StyledCard.Header>
                                     <Typography variant="body_short">
-                                        {translate('Localization') +
+                                        {TranslateText('Localization') +
                                             ' ' +
-                                            translate(missionLocalizationStatus).toLocaleLowerCase()}
+                                            TranslateText(missionLocalizationStatus).toLocaleLowerCase()}
                                     </Typography>
                                 </StyledCard.Header>
                             </StyledCard>
@@ -185,16 +185,16 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
             </StyledLocalization>
             <Dialog open={isLocalizationDialogOpen} isDismissable>
                 <StyledDialog>
-                    <Typography variant="h2">{translate('Localize robot')}</Typography>
+                    <Typography variant="h2">{TranslateText('Localize robot')}</Typography>
                     <StyledAutoComplete>
                         <Autocomplete
                             options={areaNames}
-                            label={translate('Select deck')}
+                            label={TranslateText('Select deck')}
                             onOptionsChange={onSelectedDeck}
                         />
                         <Autocomplete
                             options={Array.from(directionMap.keys())}
-                            label={translate('Select direction')}
+                            label={TranslateText('Select direction')}
                             onOptionsChange={onSelectedDirection}
                         />
                     </StyledAutoComplete>
@@ -214,11 +214,11 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                             color="secondary"
                         >
                             {' '}
-                            {translate('Cancel')}{' '}
+                            {TranslateText('Cancel')}{' '}
                         </Button>
                         <Button onClick={onClickLocalize} disabled={!selectedArea}>
                             {' '}
-                            {translate('Localize')}{' '}
+                            {TranslateText('Localize')}{' '}
                         </Button>
                     </StyledButtons>
                 </StyledDialog>

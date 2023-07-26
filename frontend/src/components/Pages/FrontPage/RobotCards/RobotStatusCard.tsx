@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import { RobotImage } from './RobotImage'
 import { useNavigate } from 'react-router-dom'
 import { BatteryStatus } from 'models/Battery'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import PressureStatusView from './PressureStatusView'
 import { config } from 'config'
 import { RobotType } from 'models/RobotModel'
@@ -81,6 +81,7 @@ export function RobotStatusCard({ robot }: RobotProps) {
 }
 
 export function RobotStatusCardPlaceholder() {
+    const { TranslateText } = useLanguageContext()
     return (
         <StyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <div>

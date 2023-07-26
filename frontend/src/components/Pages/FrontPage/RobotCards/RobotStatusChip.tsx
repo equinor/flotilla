@@ -1,7 +1,7 @@
 import { Chip } from '@equinor/eds-core-react'
 import { RobotStatus } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 interface StatusProps {
     status?: RobotStatus
@@ -14,6 +14,7 @@ enum StatusColors {
 }
 
 export function RobotStatusChip({ status }: StatusProps) {
+    const { TranslateText } = useLanguageContext()
     var chipColor = StatusColors.Offline
     switch (status) {
         case RobotStatus.Available: {

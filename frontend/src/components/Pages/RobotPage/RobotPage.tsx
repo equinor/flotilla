@@ -14,7 +14,7 @@ import BatteryStatusView from '../FrontPage/RobotCards/BatteryStatusView'
 import { BatteryStatus } from 'models/Battery'
 import { RobotStatusChip } from '../FrontPage/RobotCards/RobotStatusChip'
 import { RobotStatus } from 'models/Robot'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotType } from 'models/RobotModel'
 
 const StyledRobotPage = styled.div`
@@ -46,6 +46,7 @@ const VerticalContent = styled.div<{ $alignItems?: string }>`
 
 const updateSiteTimer = 1000
 export function RobotPage() {
+    const { TranslateText } = useLanguageContext()
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const { robotId } = useParams()
 

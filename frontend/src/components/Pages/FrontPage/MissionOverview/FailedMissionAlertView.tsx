@@ -9,7 +9,7 @@ import { MissionStatusDisplay } from './MissionStatusDisplay'
 import { RefreshProps } from '../FrontPage'
 import { useNavigate } from 'react-router-dom'
 import { addMinutes, max } from 'date-fns'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 
 const StyledCard = styled(Card)`
@@ -42,6 +42,7 @@ interface MissionsProps {
 }
 
 function FailedMission({ mission }: MissionProps) {
+    const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const goToMission = () => {
         let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
@@ -57,6 +58,7 @@ function FailedMission({ mission }: MissionProps) {
 }
 
 function SeveralFailedMissions({ missions }: MissionsProps) {
+    const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const goToHistory = () => {
         let path = `${config.FRONTEND_BASE_ROUTE}/history`

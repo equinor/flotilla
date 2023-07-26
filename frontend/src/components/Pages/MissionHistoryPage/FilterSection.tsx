@@ -10,7 +10,7 @@ import {
     Typography,
 } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionStatus } from 'models/Mission'
 import { ChangeEvent, useState } from 'react'
 import { Icons } from 'utils/icons'
@@ -32,6 +32,7 @@ const StyledDialog = styled(Card)`
 `
 
 export function FilterSection() {
+    const { TranslateText } = useLanguageContext()
     const [isFilteringDialogOpen, setIsFilteringDialogOpen] = useState<boolean>(false)
     const [formattedMinStartTime, setFormattedMinStartTime] = useState<string | undefined>(undefined)
     const [formattedMaxStartTime, setFormattedMaxStartTime] = useState<string | undefined>(undefined)

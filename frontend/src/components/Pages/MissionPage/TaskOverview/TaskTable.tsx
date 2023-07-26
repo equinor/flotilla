@@ -2,7 +2,7 @@ import { Chip, Table, Typography } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext, TranslateTextUnsafe } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { GetColorsFromTaskStatus } from '../../../../utils/MarkerStyles'
@@ -17,9 +17,8 @@ interface MissionProps {
 }
 
 export function TaskTable({ mission }: MissionProps) {
-    var rows
-    if (mission && mission.tasks.length > 0) rows = renderTasks(mission.tasks)
-
+    const { TranslateText } = useLanguageContext()
+    var rows = mission && mission.tasks.length > 0 ? renderTasks(mission.tasks) : <></>
     return (
         <StyledTable>
             <Table.Caption>
@@ -91,9 +90,9 @@ function renderInspectionTypes(task: Task) {
         if (inspection.inspectionUrl)
             return (
                 <Typography link href={inspection.inspectionUrl}>
-                    {TranslateText(inspection.inspectionType as string)}
+                    {TranslateTextUnsafe(inspection.inspectionType as string)}
                 </Typography>
             )
-        else return <Typography>{TranslateText(inspection.inspectionType as string)}</Typography>
+        else return <Typography>{TranslateTextUnsafe(inspection.inspectionType as string)}</Typography>
     })
 }

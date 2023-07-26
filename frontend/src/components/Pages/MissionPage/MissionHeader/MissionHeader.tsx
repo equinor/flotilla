@@ -5,7 +5,7 @@ import { format, differenceInMinutes } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext, TranslateTextUnsafe } from 'components/Contexts/LanguageContext'
 import { StatusReason } from '../StatusReason'
 import { MissionRestartButton } from 'components/Pages/FrontPage/MissionOverview/MissionRestartButton'
 
@@ -31,6 +31,7 @@ interface MissionHeaderProps {
 }
 
 export function MissionHeader({ mission }: MissionHeaderProps) {
+    const { TranslateText } = useLanguageContext()
     const barToMillibar = 1000
     const isMissionCompleted = mission.endTime ? true : false
     var { startTime, startDate, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
@@ -100,7 +101,7 @@ function StartUsedAndRemainingTime(mission: Mission): {
     var remainingTime: string
     var usedTimeInMinutes: number
     var estimatedDurationInMinutes: number | undefined
-    const translatedMinutes = TranslateText('minutes')
+    const translatedMinutes = TranslateTextUnsafe('minutes')
     if (mission.estimatedDuration) {
         // Convert from seconds to minutes, rounding up
         estimatedDurationInMinutes = Math.ceil(mission.estimatedDuration / 60)

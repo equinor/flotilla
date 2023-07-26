@@ -2,7 +2,7 @@ import { Typography } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 
@@ -14,6 +14,7 @@ interface MissionProps {
 }
 
 export function MissionProgressDisplay({ mission }: MissionProps) {
+    const { TranslateText } = useLanguageContext()
     const tasks = mission.tasks
 
     const [completedTasks, setCompletedTasks] = useState<number>(0)

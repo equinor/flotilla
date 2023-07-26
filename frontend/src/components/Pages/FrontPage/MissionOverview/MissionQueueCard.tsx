@@ -5,7 +5,7 @@ import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 
 interface MissionQueueCardProps {
@@ -42,6 +42,7 @@ const StyledButtonSection = styled.div`
 `
 
 export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardProps) {
+    const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const routeChange = () => {
         let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
@@ -109,6 +110,7 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
 }
 
 function MissionDurationDisplay({ mission }: MissionDisplayProps) {
+    const { TranslateText } = useLanguageContext()
     const translateEstimatedDuration = TranslateText('Estimated duration')
     const translateH = TranslateText('h')
     const translateMin = TranslateText('min')
