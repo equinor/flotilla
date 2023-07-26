@@ -37,23 +37,7 @@ export function FilterSection() {
     const [formattedMaxStartTime, setFormattedMaxStartTime] = useState<string | undefined>(undefined)
     const [formattedMinEndTime, setFormattedMinEndTime] = useState<string | undefined>(undefined)
     const [formattedMaxEndTime, setFormattedMaxEndTime] = useState<string | undefined>(undefined)
-    const {
-        missionName,
-        switchMissionName,
-        statuses,
-        switchStatuses,
-        robotName,
-        switchRobotName,
-        tagId,
-        switchTagId,
-        inspectionTypes,
-        switchInspectionTypes,
-        switchMinStartTime,
-        switchMaxStartTime,
-        switchMinEndTime,
-        switchMaxEndTime,
-        resetFilters,
-    } = useMissionFilterContext()
+    const { filterFunctions, filterState } = useMissionFilterContext()
 
     const missionStatusTranslationMap: Map<string, MissionStatus> = new Map(
         Object.values(MissionStatus).map((missionStatus) => {
@@ -68,22 +52,22 @@ export function FilterSection() {
     )
 
     const changeMinStartTime = (newMinStartTime: string | undefined) => {
-        switchMinStartTime(newMinStartTime ? new Date(newMinStartTime).getTime() / 1000 : undefined)
+        filterFunctions.switchMinStartTime(newMinStartTime ? new Date(newMinStartTime).getTime() / 1000 : undefined)
         setFormattedMinStartTime(newMinStartTime)
     }
 
     const changeMaxStartTime = (newMaxStartTime: string | undefined) => {
-        switchMaxStartTime(newMaxStartTime ? new Date(newMaxStartTime).getTime() / 1000 : undefined)
+        filterFunctions.switchMaxStartTime(newMaxStartTime ? new Date(newMaxStartTime).getTime() / 1000 : undefined)
         setFormattedMaxStartTime(newMaxStartTime)
     }
 
     const changeMinEndTime = (newMinEndTime: string | undefined) => {
-        switchMinEndTime(newMinEndTime ? new Date(newMinEndTime).getTime() / 1000 : undefined)
+        filterFunctions.switchMinEndTime(newMinEndTime ? new Date(newMinEndTime).getTime() / 1000 : undefined)
         setFormattedMinEndTime(newMinEndTime)
     }
 
     const changeMaxEndTime = (newMaxEndTime: string | undefined) => {
-        switchMaxEndTime(newMaxEndTime ? new Date(newMaxEndTime).getTime() / 1000 : undefined)
+        filterFunctions.switchMaxEndTime(newMaxEndTime ? new Date(newMaxEndTime).getTime() / 1000 : undefined)
         setFormattedMaxEndTime(newMaxEndTime)
     }
 
@@ -96,17 +80,17 @@ export function FilterSection() {
     }
 
     const onClearFilters = () => {
-        resetFilters()
+        filterFunctions.resetFilters()
     }
 
     return (
         <>
             <StyledHeader>
                 <Search
-                    value={missionName ?? ''}
+                    value={filterState.missionName ?? ''}
                     placeholder={TranslateText('Search for missions')}
                     onChange={(changes: ChangeEvent<HTMLInputElement>) => {
-                        switchMissionName(changes.target.value)
+                        filterFunctions.switchMissionName(changes.target.value)
                     }}
                 />
                 <Button onClick={onClickFilterIcon}>
@@ -129,17 +113,17 @@ export function FilterSection() {
                     <Autocomplete
                         options={Array.from(missionStatusTranslationMap.keys())}
                         onOptionsChange={(changes: AutocompleteChanges<string>) => {
-                            switchStatuses(
+                            filterFunctions.switchStatuses(
                                 changes.selectedItems.map((selectedItem) => {
                                     return missionStatusTranslationMap.get(selectedItem)!
                                 })
                             )
                         }}
-                        placeholder={`${statuses.length}/${
+                        placeholder={`${filterState.statuses.length}/${
                             Array.from(missionStatusTranslationMap.keys()).length
                         } ${TranslateText('selected')}`}
                         label={TranslateText('Mission status')}
-                        initialSelectedOptions={statuses.map((status) => {
+                        initialSelectedOptions={filterState.statuses.map((status) => {
                             return TranslateText(status)
                         })}
                         multiple
@@ -149,17 +133,17 @@ export function FilterSection() {
                     <Autocomplete
                         options={Array.from(inspectionTypeTranslationMap.keys())}
                         onOptionsChange={(changes: AutocompleteChanges<string>) => {
-                            switchInspectionTypes(
+                            filterFunctions.switchInspectionTypes(
                                 changes.selectedItems.map((selectedItem) => {
                                     return inspectionTypeTranslationMap.get(selectedItem)!
                                 })
                             )
                         }}
-                        placeholder={`${inspectionTypes.length}/${
+                        placeholder={`${filterState.inspectionTypes.length}/${
                             Array.from(inspectionTypeTranslationMap.keys()).length
                         } ${TranslateText('selected')}`}
                         label={TranslateText('Inspection type')}
-                        initialSelectedOptions={inspectionTypes.map((inspectionType) => {
+                        initialSelectedOptions={filterState.inspectionTypes.map((inspectionType) => {
                             return TranslateText(inspectionType)
                         })}
                         multiple
@@ -167,17 +151,17 @@ export function FilterSection() {
                         onFocus={(e) => e.preventDefault()}
                     />
                     <Search
-                        value={robotName ?? ''}
+                        value={filterState.robotName ?? ''}
                         placeholder={TranslateText('Search for a robot name')}
                         onChange={(changes: ChangeEvent<HTMLInputElement>) => {
-                            switchRobotName(changes.target.value)
+                            filterFunctions.switchRobotName(changes.target.value)
                         }}
                     />
                     <Search
-                        value={tagId ?? ''}
+                        value={filterState.tagId ?? ''}
                         placeholder={TranslateText('Search for a tag')}
                         onChange={(changes: ChangeEvent<HTMLInputElement>) => {
-                            switchTagId(changes.target.value)
+                            filterFunctions.switchTagId(changes.target.value)
                         }}
                     />
                     <TextField

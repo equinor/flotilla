@@ -36,28 +36,12 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     const {
         page,
         switchPage,
-        missionName,
-        statuses,
-        robotName,
-        tagId,
-        inspectionTypes,
-        minStartTime,
-        maxStartTime,
-        minEndTime,
-        maxEndTime,
+        filterState
     } = useMissionFilterContext()
 
     const updateFilteredMissions = useCallback(() => {
         BackendAPICaller.getMissionRuns({
-            statuses: statuses,
-            nameSearch: missionName,
-            robotNameSearch: robotName,
-            tagSearch: tagId,
-            inspectionTypes: inspectionTypes,
-            minStartTime: minStartTime,
-            maxStartTime: maxStartTime,
-            minEndTime: minEndTime,
-            maxEndTime: maxEndTime,
+            ...filterState,
             pageSize: pageSize,
             pageNumber: page ?? 1,
             orderBy: 'EndTime desc, Name',
@@ -70,20 +54,7 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
             }
             setIsLoading(false)
         })
-    }, [
-        page,
-        pageSize,
-        missionName,
-        statuses,
-        robotName,
-        tagId,
-        inspectionTypes,
-        minStartTime,
-        maxStartTime,
-        minEndTime,
-        maxEndTime,
-        switchPage,
-    ])
+    }, [page, pageSize, filterState, switchPage])
 
     useEffect(() => {
         if (isResettingPage) setIsResettingPage(false)
