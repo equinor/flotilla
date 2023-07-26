@@ -5,6 +5,7 @@ import { InspectionType } from 'models/Inspection'
 interface IMissionFilterContext {
     page: number
     switchPage: (newPage: number) => void
+    filterIsSet: boolean
     filterState: {
         missionName: string | undefined
         statuses: MissionStatus[]
@@ -27,8 +28,14 @@ interface IMissionFilterContext {
         switchMinEndTime: (newMinEndTime: number | undefined) => void
         switchMaxEndTime: (newMaxEndTime: number | undefined) => void
         resetFilters: () => void
+        resetFilter: (s: string) => void
+        dateTimeStringToInt: (dateTimeString: string | undefined) => number | undefined
+        dateTimeIntToString: (dateTimeNumber: number | undefined) => string | undefined
+        dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => string | undefined
     }
 }
+
+export type IFilterState = IMissionFilterContext['filterState']
 
 interface Props {
     children: React.ReactNode
@@ -45,6 +52,7 @@ const completedStatuses = [
 const defaultMissionFilterInterface = {
     page: 1,
     switchPage: (newPage: number) => {},
+    filterIsSet: false,
     filterState: {
         missionName: undefined,
         statuses: completedStatuses,
@@ -54,7 +62,7 @@ const defaultMissionFilterInterface = {
         minStartTime: undefined,
         maxStartTime: undefined,
         minEndTime: undefined,
-        maxEndTime: undefined
+        maxEndTime: undefined,
     },
     filterFunctions: {
         switchMissionName: (newMissionName: string | undefined) => {},
@@ -66,15 +74,22 @@ const defaultMissionFilterInterface = {
         switchMaxStartTime: (newMaxStartTime: number | undefined) => {},
         switchMinEndTime: (newMinEndTime: number | undefined) => {},
         switchMaxEndTime: (newMaxEndTime: number | undefined) => {},
-        resetFilters: () => {}
-    }
+        resetFilters: () => {},
+        resetFilter: (s: string) => {},
+        dateTimeStringToInt: (dateTimeString: string | undefined) => 0,
+        dateTimeIntToString: (dateTimeNumber: number | undefined) => '',
+        dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => '',
+    },
 }
 
 export const MissionFilterContext = createContext<IMissionFilterContext>(defaultMissionFilterInterface)
 
 export const MissionFilterProvider: FC<Props> = ({ children }) => {
     const [page, setPage] = useState<number>(defaultMissionFilterInterface.page)
-    const [filterState, setFilterState] = useState<IMissionFilterContext["filterState"]>(defaultMissionFilterInterface.filterState)
+    const [filterIsSet, setFilterIsSet] = useState<boolean>(defaultMissionFilterInterface.filterIsSet)
+    const [filterState, setFilterState] = useState<IMissionFilterContext['filterState']>(
+        defaultMissionFilterInterface.filterState
+    )
 
     const switchPage = (newPage: number) => {
         setPage(newPage)
@@ -82,35 +97,75 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
 
     const filterFunctions = {
         switchMissionName: (newMissionName: string | undefined) => {
-            setFilterState({...filterState, missionName: newMissionName})
+            setFilterIsSet(true)
+            setFilterState({ ...filterState, missionName: newMissionName })
         },
         switchStatuses: (newStatuses: MissionStatus[]) => {
-            setFilterState({...filterState, statuses: newStatuses})
+            setFilterIsSet(true)
+            setFilterState({ ...filterState, statuses: newStatuses })
         },
         switchRobotName: (newRobotName: string | undefined) => {
-            setFilterState({...filterState, robotName: newRobotName})
+            setFilterIsSet(true)
+            setFilterState({ ...filterState, robotName: newRobotName })
         },
         switchTagId: (newTagId: string | undefined) => {
-            setFilterState({...filterState, tagId: newTagId})
+            setFilterIsSet(true)
+            setFilterState({ ...filterState, tagId: newTagId })
         },
         switchInspectionTypes: (newInspectionTypes: InspectionType[]) => {
-            setFilterState({...filterState, inspectionTypes: newInspectionTypes})
+            setFilterIsSet(true)
+            setFilterState({ ...filterState, inspectionTypes: newInspectionTypes })
         },
         switchMinStartTime: (newMinStartTime: number | undefined) => {
-            setFilterState({...filterState, minStartTime: newMinStartTime})
+            setFilterIsSet(true)
+            setFilterState({ ...filterState, minStartTime: newMinStartTime })
         },
         switchMaxStartTime: (newMaxStartTime: number | undefined) => {
-            setFilterState({...filterState, maxStartTime: newMaxStartTime})
+            setFilterIsSet(true)
+            setFilterState({ ...filterState, maxStartTime: newMaxStartTime })
         },
         switchMinEndTime: (newMinEndTime: number | undefined) => {
-            setFilterState({...filterState, minEndTime: newMinEndTime})
+            setFilterIsSet(true)
+            setFilterState({ ...filterState, minEndTime: newMinEndTime })
         },
         switchMaxEndTime: (newMaxEndTime: number | undefined) => {
-            setFilterState({...filterState, maxEndTime: newMaxEndTime})
+            setFilterIsSet(true)
+            setFilterState({ ...filterState, maxEndTime: newMaxEndTime })
         },
         resetFilters: () => {
+            setFilterIsSet(false)
             setFilterState(defaultMissionFilterInterface.filterState)
-        }
+        },
+        resetFilter(filterName: string) {
+            const defaultState = defaultMissionFilterInterface.filterState
+            const defaultValue = defaultState[filterName as keyof typeof defaultState]
+            setFilterState({ ...filterState, [filterName]: defaultValue })
+        },
+        dateTimeStringToInt: (dateTimeString: string | undefined) => {
+            if (dateTimeString === '' || dateTimeString === undefined) return undefined
+            return new Date(dateTimeString).getTime() / 1000
+        },
+        dateTimeIntToString: (dateTimeNumber: number | undefined) => {
+            if (dateTimeNumber === 0 || dateTimeNumber === undefined) return undefined
+            const t = new Date(dateTimeNumber * 1000)
+            const z = new Date(t.getTimezoneOffset() * 60 * 1000)
+            const tLocal = new Date(t.getTime() - z.getTime())
+            const tLocalDate = new Date(tLocal)
+            let iso = tLocalDate.toISOString()
+            iso = iso.split('.')[0]
+            return iso.slice(0, -3) // Removes :00 at the end
+        },
+        dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => {
+            if (dateTimeNumber === 0 || dateTimeNumber === undefined) return undefined
+            const t = new Date(dateTimeNumber * 1000)
+            const z = new Date(t.getTimezoneOffset() * 60 * 1000)
+            const tLocal = new Date(t.getTime() - z.getTime())
+            const tLocalDate = new Date(tLocal)
+            let iso = tLocalDate.toISOString()
+            iso = iso.split('.')[0]
+            iso = iso.replace('T', ' ')
+            return iso.slice(0, -3) // Removes :00 at the end
+        },
     }
 
     return (
@@ -119,7 +174,8 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 page,
                 switchPage,
                 filterState,
-                filterFunctions
+                filterFunctions,
+                filterIsSet,
             }}
         >
             {children}
