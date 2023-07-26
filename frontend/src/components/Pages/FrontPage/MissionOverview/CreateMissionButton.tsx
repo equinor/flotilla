@@ -1,10 +1,11 @@
 import { Button, Typography, Popover, Icon } from '@equinor/eds-core-react'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 export const CreateMissionButton = (): JSX.Element => {
+    const { TranslateText } = useLanguageContext()
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const { installationCode } = useInstallationContext()
     const anchorRef = useRef<HTMLButtonElement>(null)

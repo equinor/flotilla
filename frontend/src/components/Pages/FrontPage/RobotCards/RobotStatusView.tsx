@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 const RobotCardSection = styled.div`
     display: flex;
@@ -19,6 +19,7 @@ const RobotView = styled.div`
     gap: 1rem;
 `
 export function RobotStatusSection({ refreshInterval }: RefreshProps) {
+    const { TranslateText } = useLanguageContext()
     const [robots, setRobots] = useState<Robot[]>([])
 
     const sortRobotsByStatus = useCallback((robots: Robot[]): Robot[] => {

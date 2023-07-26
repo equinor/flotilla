@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
 import { RefreshProps } from './MissionHistoryPage'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'
@@ -25,6 +25,7 @@ const StyledLoading = styled.div`
 `
 
 export function MissionHistoryView({ refreshInterval }: RefreshProps) {
+    const { TranslateText } = useLanguageContext()
     const pageSize: number = 10
 
     const [filteredMissions, setFilteredMissions] = useState<Mission[]>([])

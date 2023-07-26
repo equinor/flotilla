@@ -5,7 +5,7 @@ interface ILanguageContext {
     language: string
     textDictionary: { [text: string]: string }
     switchLanguage: (newLanguage: string) => void
-    translate: (str: string) => string
+    TranslateText: (str: string) => string
 }
 
 interface Props {
@@ -16,7 +16,7 @@ const defaultLanguageInterface = {
     language: defaultLanguage,
     textDictionary: allLanguageDictionaries[defaultLanguage],
     switchLanguage: (newLanguage: string) => {},
-    translate: (str: string) => '',
+    TranslateText: (str: string) => '',
 }
 
 export const LanguageContext = createContext<ILanguageContext>(defaultLanguageInterface)
@@ -33,7 +33,7 @@ export const LanguageProvider: FC<Props> = ({ children }) => {
         window.localStorage.setItem('flotilla-language', newLanguage)
     }
 
-    const translate = (str: string): string => {
+    const TranslateText = (str: string): string => {
         if (textDictionary[str]) {
             return textDictionary[str]
         }
@@ -47,7 +47,7 @@ export const LanguageProvider: FC<Props> = ({ children }) => {
                 language,
                 textDictionary,
                 switchLanguage,
-                translate,
+                TranslateText,
             }}
         >
             {children}
@@ -57,7 +57,7 @@ export const LanguageProvider: FC<Props> = ({ children }) => {
 
 export const useLanguageContext = () => useContext(LanguageContext)
 
-export const TranslateText = (id: string): string => {
+export const TranslateTextUnsafe = (id: string): string => {
     const languageContext = useContext(LanguageContext)
     if (languageContext.textDictionary[id]) {
         return languageContext.textDictionary[id]

@@ -8,7 +8,7 @@ import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { Robot } from 'models/Robot'
 import { RefreshProps } from '../FrontPage'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
 import { MissionDefinition } from 'models/MissionDefinition'
@@ -47,6 +47,7 @@ const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
 }
 
 export function MissionQueueView({ refreshInterval }: RefreshProps) {
+    const { TranslateText } = useLanguageContext()
     const missionPageSize = 100
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<MissionDefinition[]>([])

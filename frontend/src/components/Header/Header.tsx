@@ -5,7 +5,7 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { SelectLanguage } from './LanguageSelector'
 import { Icons } from 'utils/icons'
 
@@ -71,6 +71,7 @@ export function Header({ page }: { page: string }) {
 }
 
 function InstallationPicker(page: string) {
+    const { TranslateText } = useLanguageContext()
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
     const { installationCode, switchInstallation } = useInstallationContext()
     useEffect(() => {

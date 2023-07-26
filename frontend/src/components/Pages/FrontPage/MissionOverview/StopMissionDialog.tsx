@@ -1,6 +1,6 @@
 import { Button, Dialog, Typography, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useState, useEffect } from 'react'
 import { tokens } from '@equinor/eds-tokens'
@@ -37,6 +37,7 @@ export enum ControlButton {
 }
 
 export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
+    const { TranslateText } = useLanguageContext()
     const [isStopMissionDialogOpen, setIsStopMissionDialogOpen] = useState<boolean>(false)
     const [missionId, setMissionId] = useState<string>()
     const { handleClick } = useMissionControlContext()

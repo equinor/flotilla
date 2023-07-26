@@ -1,18 +1,9 @@
 {
     "folders": [
 		{
-			"name": "Frontend",
-            "path": "frontend/"
-        },
-		{
-			"name": "Backend",
-			"path": "backend"
-		},
-		{
-			"name": "Root",
-            "path": "."
-        }
-    ],
+			"path": "."
+		}
+	],
     "launch": {
 		"version": "0.2.0",
 		"compounds": [

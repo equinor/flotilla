@@ -5,7 +5,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { Task, TaskStatus } from 'models/Task'
 import styled from 'styled-components'
 import { Typography } from '@equinor/eds-core-react'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { StopMissionDialog, ControlButton } from './StopMissionDialog'
 
@@ -30,6 +30,7 @@ const checkIfTasksStarted = (tasks: Task[]): boolean => {
 }
 
 export function MissionControlButtons({ mission }: MissionProps) {
+    const { TranslateText } = useLanguageContext()
     const { missionControlState, handleClick } = useMissionControlContext()
 
     const renderControlIcon = (missionStatus: MissionStatus) => {

@@ -2,7 +2,7 @@ import { Icon, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionStatus } from 'models/Mission'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 
 interface StatusProps {
@@ -37,6 +37,7 @@ export function displayIcon(status: MissionStatus) {
 }
 
 export function MissionStatusDisplay({ status }: StatusProps) {
+    const { TranslateText } = useLanguageContext()
     return (
         <StyledStatusDisplay>
             {displayIcon(status)}

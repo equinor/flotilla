@@ -1,6 +1,6 @@
 import { Button, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { Icons } from 'utils/icons'
 
@@ -10,6 +10,7 @@ const StyledButton = styled(Button)`
 `
 
 export function BackButton() {
+    const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     return (
         <StyledButton variant="ghost" onClick={() => navigate(-1)}>

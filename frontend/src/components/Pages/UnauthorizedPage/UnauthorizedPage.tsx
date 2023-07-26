@@ -1,7 +1,7 @@
 import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { Button } from '@equinor/eds-core-react'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 export const StyledCenteredPage = styled.div`
     display: flex;
@@ -13,6 +13,7 @@ export const StyledCenteredPage = styled.div`
 `
 
 export const GoToAccessITButton = () => {
+    const { TranslateText } = useLanguageContext()
     return (
         <Button href="https://accessit.equinor.com" variant="contained">
             {TranslateText('Go to AccessIT')}
@@ -21,6 +22,7 @@ export const GoToAccessITButton = () => {
 }
 
 export const UnauthorizedPage = () => {
+    const { TranslateText } = useLanguageContext()
     var errorMessage = "You don't have access to this site. Apply for access in AccessIT"
     return (
         <StyledCenteredPage>

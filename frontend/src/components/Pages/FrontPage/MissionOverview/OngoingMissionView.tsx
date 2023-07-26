@@ -5,7 +5,7 @@ import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { OngoingMissionCard } from './OngoingMissionCard'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
@@ -27,6 +27,7 @@ const ButtonStyle = styled.div`
 `
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
+    const { TranslateText } = useLanguageContext()
     const missionPageSize = 100
     const [missions, setMissions] = useState<Mission[]>([])
 

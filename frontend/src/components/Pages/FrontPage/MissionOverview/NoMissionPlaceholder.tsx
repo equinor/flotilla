@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 const StyledPlaceholder = styled.div`
     display: flex;
@@ -20,6 +20,7 @@ const StyledPlaceholder = styled.div`
 `
 
 export function NoOngoingMissionsPlaceholder() {
+    const { TranslateText } = useLanguageContext()
     return (
         <StyledPlaceholder>
             <Typography variant="h4" color="disabled">
@@ -31,6 +32,7 @@ export function NoOngoingMissionsPlaceholder() {
 }
 
 export function EmptyMissionQueuePlaceholder() {
+    const { TranslateText } = useLanguageContext()
     return (
         <StyledPlaceholder>
             <Typography variant="h4" color="disabled">

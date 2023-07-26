@@ -9,7 +9,7 @@ import { MapMetadata } from 'models/MapMetadata'
 import { Area } from 'models/Area'
 import { Position } from 'models/Position'
 import { Pose } from 'models/Pose'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MapCompass } from 'utils/MapCompass'
 
 interface AreaProps {
@@ -46,6 +46,7 @@ const StyledMapCompass = styled.div`
 
 export function AreaMapView({ area, localizationPose, setLocalizationPose }: AreaProps) {
     const handleError = useErrorHandler()
+    const { TranslateText } = useLanguageContext()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()

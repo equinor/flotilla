@@ -3,7 +3,7 @@ import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { Icon } from '@equinor/eds-core-react'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 const StyledCompass = styled.div`
     display: flex;
@@ -12,6 +12,7 @@ const StyledCompass = styled.div`
 `
 
 export const MapCompass = (): JSX.Element => {
+    const { TranslateText } = useLanguageContext()
     return (
         <>
             <StyledCompass>

@@ -2,7 +2,7 @@ import { Button, Popover, Typography } from '@equinor/eds-core-react'
 import { useState, useEffect, useRef } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { tokens } from '@equinor/eds-tokens'
 
 interface RobotProps {
@@ -13,6 +13,7 @@ interface RobotProps {
 const feedbackTimer = 10000 // Clear feedback after 10 seconds
 
 export function MoveRobotArm({ robot, armPosition, isRobotAvailable }: RobotProps) {
+    const { TranslateText } = useLanguageContext()
     const [feedback, setFeedback] = useState('')
     const [usable, setUsable] = useState(!!isRobotAvailable)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
