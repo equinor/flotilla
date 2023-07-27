@@ -5,7 +5,7 @@ import { format, differenceInMinutes } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
-import { useLanguageContext, TranslateTextUnsafe } from 'components/Contexts/LanguageContext'
+import { useLanguageContext, TranslateTextWithContext } from 'components/Contexts/LanguageContext'
 import { StatusReason } from '../StatusReason'
 import { MissionRestartButton } from 'components/Pages/FrontPage/MissionOverview/MissionRestartButton'
 
@@ -101,7 +101,7 @@ function StartUsedAndRemainingTime(mission: Mission): {
     var remainingTime: string
     var usedTimeInMinutes: number
     var estimatedDurationInMinutes: number | undefined
-    const translatedMinutes = TranslateTextUnsafe('minutes')
+    const translatedMinutes = TranslateTextWithContext('minutes')
     if (mission.estimatedDuration) {
         // Convert from seconds to minutes, rounding up
         estimatedDurationInMinutes = Math.ceil(mission.estimatedDuration / 60)
