@@ -96,15 +96,6 @@ public class FlotillaDbContext : DbContext
         modelBuilder.Entity<Deck>().HasOne(d => d.Plant).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Deck>().HasOne(d => d.Installation).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Plant>().HasOne(p => p.Installation).WithMany().OnDelete(DeleteBehavior.Restrict);
-
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            entityType.SetTableName(entityType.DisplayName());
-            entityType.GetForeignKeys()
-                .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade)
-                .ToList()
-                .ForEach(fk => fk.DeleteBehavior = DeleteBehavior.Restrict);
-        }
     }
 
     // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations
