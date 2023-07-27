@@ -57,7 +57,7 @@ export const LanguageProvider: FC<Props> = ({ children }) => {
 
 export const useLanguageContext = () => useContext(LanguageContext)
 
-export const TranslateTextUnsafe = (id: string): string => {
+export const TranslateTextWithContext = (id: string): string => {
     const languageContext = useContext(LanguageContext)
     if (languageContext.textDictionary[id]) {
         return languageContext.textDictionary[id]
