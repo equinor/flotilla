@@ -805,31 +805,10 @@ public class RobotController : ControllerBase
             return StatusCode(StatusCodes.Status502BadGateway, message);
         }
 
-        var missions = new MissionQueryStringParameters
-        {
-            Statuses = new List<MissionStatus> { MissionStatus.Pending, MissionStatus.Ongoing, MissionStatus.Pending },
-            RobotId = robotId,
-            PageSize = 100
-        };
-
-        var missionQueue = await _missionService.ReadAll(missions);
-
-        if (missionQueue.Count > 0)
-        {
-            foreach (var currentMission in missionQueue)
-            {
-                await _missionService.Delete(currentMission.Id);
-            };
-        }
-
-        robot.CurrentMissionId = null;
-        robot.Status = RobotStatus.Available;
-        await _robotService.Update(robot);
-
-
         var closestSafePosition = ClosestSafePosition(robot.Pose, assetDeck.SafePositions);
         // Cloning to avoid tracking same object
         var clonedPose = ObjectCopier.Clone(closestSafePosition);
+
         var customTaskQuery = new CustomTaskQuery
         {
             RobotPose = clonedPose,
@@ -874,12 +853,12 @@ public class RobotController : ControllerBase
 
         mission.UpdateWithIsarInfo(isarMission);
         mission.Status = MissionStatus.Ongoing;
-
         await _missionService.Create(mission);
 
         robot.Status = RobotStatus.SafePosition;
         robot.CurrentMissionId = mission.Id;
         await _robotService.Update(robot);
+
         return Ok(mission);
     }
 

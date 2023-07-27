@@ -85,7 +85,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (robot.Status == isarRobotStatus.RobotStatus)
+            if (robot.Status == isarRobotStatus.RobotStatus || robot.Status == RobotStatus.SafePosition)
             {
                 return;
             }
@@ -303,14 +303,10 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (robot.Status != RobotStatus.SafePosition)
+            if (flotillaMission.IsCompleted && robot.Status != RobotStatus.SafePosition)
             {
                 robot.Status = flotillaMission.IsCompleted ? RobotStatus.Available : RobotStatus.Busy;
 
-            }
-            else
-            {
-                Console.WriteLine("ola");
             }
 
             if (flotillaMission.IsCompleted)

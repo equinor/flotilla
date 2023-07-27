@@ -42,6 +42,7 @@
     "Available": "Available",
     "Busy": "Busy",
     "Offline": "Offline",
+    "SafePosition": "Safe zone",
     "No robot position available": "No robot position available",
     "Robot position": "Robot position",
     "Start time": "Start time",
