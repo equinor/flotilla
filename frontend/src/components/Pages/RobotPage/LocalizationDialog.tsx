@@ -96,8 +96,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
 
     const getAreaNames = (areas: Area[]): Map<string, Area> => {
         var areaNameMap = new Map<string, Area>()
-        areas.forEach((area: Area) =>
-            areaNameMap.set(area.deckName, area))
+        areas.forEach((area: Area) => areaNameMap.set(area.deckName, area))
         return areaNameMap
     }
 
