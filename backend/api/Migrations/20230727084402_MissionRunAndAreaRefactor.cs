@@ -31,12 +31,14 @@ namespace Api.Migrations
                 name: "FK_VideoStream_Robots_RobotId",
                 table: "VideoStream");
 
-            migrationBuilder.DropTable(
-                name: "Missions");
-
             migrationBuilder.DropPrimaryKey(
                 name: "PK_SafePositions",
                 table: "SafePositions");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_Missions_Robots_RobotId",
+                table: "Missions"
+            );
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_Robots",
@@ -178,6 +180,29 @@ namespace Api.Migrations
                 name: "DefaultLocalizationPose_Position_Z",
                 table: "AssetDecks");
 
+            migrationBuilder.DropColumn(
+                name: "EchoMissionId",
+                table: "Missions"
+            );
+
+            migrationBuilder.RenameColumn(
+                name: "AssetCode",
+                table: "Missions",
+                newName: "InstallationCode"
+            );
+
+            migrationBuilder.AddColumn<string>(
+                name: "AreaId",
+                table: "Missions",
+                type: "nvarchar(450)",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "MissionId",
+                table: "Missions",
+                type: "nvarchar(max)",
+                nullable: true);
+
             migrationBuilder.RenameTable(
                 name: "SafePositions",
                 newName: "SafePosition");
@@ -193,6 +218,10 @@ namespace Api.Migrations
             migrationBuilder.RenameTable(
                 name: "AssetDecks",
                 newName: "AssetDeck");
+
+            migrationBuilder.RenameTable(
+                name: "Missions",
+                newName: "MissionRun");
 
             migrationBuilder.RenameColumn(
                 name: "MissionId",
@@ -591,42 +620,6 @@ namespace Api.Migrations
                         principalTable: "Area",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MissionRun",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    MissionId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    InstallationCode = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    DesiredStartTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    RobotId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    IsarMissionId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
-                    StatusReason = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
-                    Comment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    AreaId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    StartTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    EndTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    EstimatedDuration = table.Column<long>(type: "bigint", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MissionRun", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MissionRun_Area_AreaId",
-                        column: x => x.AreaId,
-                        principalTable: "Area",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_MissionRun_Robot_RobotId",
-                        column: x => x.RobotId,
-                        principalTable: "Robot",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -1332,47 +1325,6 @@ namespace Api.Migrations
                 table: "AssetDecks",
                 column: "Id");
 
-            migrationBuilder.CreateTable(
-                name: "Missions",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RobotId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    AssetCode = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Comment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
-                    DesiredStartTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    EchoMissionId = table.Column<int>(type: "int", maxLength: 200, nullable: true),
-                    EndTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    EstimatedDuration = table.Column<long>(type: "bigint", nullable: true),
-                    IsarMissionId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    StartTime = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    StatusReason = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
-                    MapMetadata_MapName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    MapMetadata_Boundary_X1 = table.Column<double>(type: "float", nullable: true),
-                    MapMetadata_Boundary_X2 = table.Column<double>(type: "float", nullable: true),
-                    MapMetadata_Boundary_Y1 = table.Column<double>(type: "float", nullable: true),
-                    MapMetadata_Boundary_Y2 = table.Column<double>(type: "float", nullable: true),
-                    MapMetadata_Boundary_Z1 = table.Column<double>(type: "float", nullable: true),
-                    MapMetadata_Boundary_Z2 = table.Column<double>(type: "float", nullable: true),
-                    MapMetadata_TransformationMatrices_C1 = table.Column<double>(type: "float", nullable: true),
-                    MapMetadata_TransformationMatrices_C2 = table.Column<double>(type: "float", nullable: true),
-                    MapMetadata_TransformationMatrices_D1 = table.Column<double>(type: "float", nullable: true),
-                    MapMetadata_TransformationMatrices_D2 = table.Column<double>(type: "float", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Missions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Missions_Robots_RobotId",
-                        column: x => x.RobotId,
-                        principalTable: "Robots",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AssetDecks_AssetCode_DeckName",
                 table: "AssetDecks",
@@ -1380,15 +1332,15 @@ namespace Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Missions_RobotId",
-                table: "Missions",
+                name: "IX_MissionRun_RobotId",
+                table: "MissionRun",
                 column: "RobotId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_MissionTask_Missions_MissionId",
+                name: "FK_MissionTask_MissionRun_MissionId",
                 table: "MissionTask",
                 column: "MissionId",
-                principalTable: "Missions",
+                principalTable: "MissionRun",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
