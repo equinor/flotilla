@@ -111,5 +111,7 @@
     "Localizing": "Lokaliserer",
     "Send robots to safe zone": "Sende roboter til sikker sone",
     "Send robots to safe zone long text": "Du er i ferd med å sende robotene til en sikker sone og dermed stoppe alle pågående oppdrag. For å kjøre oppdragene igjen må robotene starte fra begynnelsen.",
-    "Send robots to safe confirmation text": "Er du sikker på at du vil sende alle robotene til en sikker sone?"
+    "Send robots to safe confirmation text": "Er du sikker på at du vil sende alle robotene til en sikker sone?",
+    "Dismiss robots from safe zone long text": "Normal operation can resume by continuing the missions present on the queue or remove them all.",
+    "Dismiss robots from safe zone": "Dismiss robots from safe zone"
 }

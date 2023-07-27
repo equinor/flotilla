@@ -784,27 +784,6 @@ public class RobotController : ControllerBase
             return NotFound("No safe positions found");
         }
 
-        try
-        {
-            await _isarService.StopMission(robot);
-        }
-        catch (MissionException e)
-        {
-            // We want to continue driving to a safe position if the isar state is idle
-            if (e.IsarStatusCode != 409)
-            {
-                _logger.LogError(e, "Error while stopping ISAR mission");
-                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
-            }
-        }
-        catch (Exception e)
-        {
-            string message = "Error in ISAR while stopping current mission, cannot drive to safe position";
-            _logger.LogError(e, "{message}", message);
-            OnIsarUnavailable(robot);
-            return StatusCode(StatusCodes.Status502BadGateway, message);
-        }
-
         var closestSafePosition = ClosestSafePosition(robot.Pose, assetDeck.SafePositions);
         // Cloning to avoid tracking same object
         var clonedPose = ObjectCopier.Clone(closestSafePosition);
@@ -828,6 +807,28 @@ public class RobotController : ControllerBase
         };
 
         IsarMission isarMission;
+
+        try
+        {
+            await _isarService.StopMission(robot);
+        }
+        catch (MissionException e)
+        {
+            // We want to continue driving to a safe position if the isar state is idle
+            if (e.IsarStatusCode != 409)
+            {
+                _logger.LogError(e, "Error while stopping ISAR mission");
+                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+            }
+        }
+        catch (Exception e)
+        {
+            string message = "Error in ISAR while stopping current mission, cannot drive to safe position";
+            _logger.LogError(e, "{message}", message);
+            OnIsarUnavailable(robot);
+            return StatusCode(StatusCodes.Status502BadGateway, message);
+        }
+
         try
         {
             isarMission = await _isarService.StartMission(robot, mission);
@@ -911,6 +912,87 @@ public class RobotController : ControllerBase
         var pos1 = pose1.Position;
         var pos2 = pose2.Position;
         return (float)Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2) + Math.Pow(pos1.Z - pos2.Z, 2));
+    }
+
+    /// <summary>
+    /// Starts a mission which drives the robot to the nearest safe position
+    /// </summary>
+    /// <remarks>
+    /// <para> This query starts a localization for a given robot </para>
+    /// </remarks>
+    [HttpPost]
+    [Route("{robotId}/reset-robot-state")]
+    [Authorize(Roles = Role.User)]
+    [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<Mission>> ResetRobotStatus(
+        [FromRoute] string robotId
+    )
+    {
+        var robot = await _robotService.ReadById(robotId);
+
+        if (robot == null)
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound("Robot not found");
+        }
+
+        robot.Status = RobotStatus.Available;
+        robot.CurrentMissionId = null;
+        await _robotService.Update(robot);
+
+        return Ok(robot);
+    }
+
+    /// <summary>
+    /// Starts a mission which drives the robot to the nearest safe position
+    /// </summary>
+    /// <remarks>
+    /// <para> This query starts a localization for a given robot </para>
+    /// </remarks>
+    [HttpPost]
+    [Route("{robotId}/remove-all-missions")]
+    [Authorize(Roles = Role.User)]
+    [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<Mission>> RemoveAllMissions(
+        [FromRoute] string robotId
+    )
+    {
+        var robot = await _robotService.ReadById(robotId);
+
+        if (robot == null)
+        {
+            _logger.LogWarning("Could not find robot with id={id}", robotId);
+            return NotFound("Robot not found");
+        }
+
+        var missions = new MissionQueryStringParameters
+        {
+            Statuses = new List<MissionStatus> { MissionStatus.Pending },
+            RobotId = robotId,
+            PageSize = 100
+        };
+
+        var missionQueue = await _missionService.ReadAll(missions);
+
+        if (missionQueue.Count > 0)
+        {
+            foreach (var currentMission in missionQueue)
+            {
+                await _missionService.Delete(currentMission.Id);
+            };
+        }
+
+        return Ok(robot);
     }
 
 }
