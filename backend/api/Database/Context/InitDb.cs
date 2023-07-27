@@ -183,7 +183,7 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Name = "Placeholder Mission 1",
-            InstallationCode = areas[0].Deck.Plant.Installation.InstallationCode,
+            InstallationCode = areas[0].Installation.InstallationCode,
             Area = areas[0],
             Source = sources[0],
             Comment = "Interesting comment",
@@ -195,7 +195,7 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Name = "Placeholder Mission 2",
-            InstallationCode = areas[1].Deck.Plant.Installation.InstallationCode,
+            InstallationCode = areas[1].Installation.InstallationCode,
             Area = areas[1],
             Source = sources[1],
             InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
@@ -206,7 +206,7 @@ public static class InitDb
         {
             Id = Guid.NewGuid().ToString(),
             Name = "Placeholder Mission 3",
-            InstallationCode = areas[1].Deck.Plant.Installation.InstallationCode,
+            InstallationCode = areas[1].Installation.InstallationCode,
             Area = areas[1],
             Source = sources[1],
             LastRun = null
@@ -221,7 +221,7 @@ public static class InitDb
         {
             Name = "Placeholder Mission 1",
             Robot = robots[0],
-            InstallationCode = areas[0].Deck.Plant.Installation.InstallationCode,
+            InstallationCode = areas[0].Installation.InstallationCode,
             Area = areas[0],
             MissionId = missionDefinitions[0].Id,
             Status = MissionStatus.Successful,
@@ -234,7 +234,7 @@ public static class InitDb
         {
             Name = "Placeholder Mission 2",
             Robot = robots[1],
-            InstallationCode = areas[1].Deck.Plant.Installation.InstallationCode,
+            InstallationCode = areas[1].Installation.InstallationCode,
             Area = areas[1],
             MissionId = missionDefinitions[0].Id,
             Status = MissionStatus.Successful,
@@ -248,7 +248,7 @@ public static class InitDb
         {
             Name = "Placeholder Mission 3",
             Robot = robots[2],
-            InstallationCode = areas[1].Deck.Plant.Installation.InstallationCode,
+            InstallationCode = areas[1].Installation.InstallationCode,
             Area = areas[1],
             MissionId = missionDefinitions[1].Id,
             Status = MissionStatus.Successful,

@@ -272,7 +272,7 @@ namespace Api.Controllers
             };
             try
             {
-                mapMetadata = await _mapService.ChooseMapFromPositions(positions, area.Deck.Plant.Installation.InstallationCode);
+                mapMetadata = await _mapService.ChooseMapFromPositions(positions, area.Installation.InstallationCode);
             }
             catch (RequestFailedException e)
             {

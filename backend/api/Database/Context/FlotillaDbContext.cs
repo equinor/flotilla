@@ -57,14 +57,11 @@ public class FlotillaDbContext : DbContext
                         );
                     }
                 );
-                //missionRunEntity.HasOne(missionRun => missionRun.MissionDefinition);
             }
         );
 
-        modelBuilder.Entity<MissionDefinition>().HasOne(m => m.Source);
         modelBuilder.Entity<MissionRun>().OwnsOne(m => m.MapMetadata).OwnsOne(t => t.TransformationMatrices);
         modelBuilder.Entity<MissionRun>().OwnsOne(m => m.MapMetadata).OwnsOne(b => b.Boundary);
-        //modelBuilder.Entity<MissionDefinition>().HasOne(m => m.LastRun).WithOne(m => m.MissionDefinition).HasForeignKey<MissionRun>(m => m.Id);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
         modelBuilder.Entity<Robot>().OwnsMany(r => r.VideoStreams);
@@ -73,12 +70,12 @@ public class FlotillaDbContext : DbContext
             poseBuilder.OwnsOne(pose => pose.Position);
             poseBuilder.OwnsOne(pose => pose.Orientation);
         });
-        modelBuilder.Entity<Area>().HasOne(a => a.Deck);
-        modelBuilder.Entity<Area>().HasOne(a => a.Installation);
-        modelBuilder.Entity<Area>().HasOne(a => a.Plant);
-        modelBuilder.Entity<Deck>().HasOne(d => d.Plant);
-        modelBuilder.Entity<Deck>().HasOne(d => d.Installation);
-        modelBuilder.Entity<Plant>().HasOne(a => a.Installation);
+        modelBuilder.Entity<Area>().HasOne(a => a.Deck).WithMany();
+        modelBuilder.Entity<Area>().HasOne(a => a.Installation).WithMany();
+        modelBuilder.Entity<Area>().HasOne(a => a.Plant).WithMany();
+        modelBuilder.Entity<Deck>().HasOne(d => d.Plant).WithMany();
+        modelBuilder.Entity<Deck>().HasOne(d => d.Installation).WithMany();
+        modelBuilder.Entity<Plant>().HasOne(a => a.Installation).WithMany();
 
         modelBuilder.Entity<SafePosition>().OwnsOne(s => s.Pose, poseBuilder =>
         {
@@ -92,6 +89,22 @@ public class FlotillaDbContext : DbContext
         // There can only be one unique installation and plant shortname
         modelBuilder.Entity<Installation>().HasIndex(a => new { a.InstallationCode }).IsUnique();
         modelBuilder.Entity<Plant>().HasIndex(a => new { a.PlantCode }).IsUnique();
+
+        modelBuilder.Entity<Area>().HasOne(a => a.Deck).WithMany().OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Area>().HasOne(a => a.Plant).WithMany().OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Area>().HasOne(a => a.Installation).WithMany().OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Deck>().HasOne(d => d.Plant).WithMany().OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Deck>().HasOne(d => d.Installation).WithMany().OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Plant>().HasOne(p => p.Installation).WithMany().OnDelete(DeleteBehavior.Restrict);
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            entityType.SetTableName(entityType.DisplayName());
+            entityType.GetForeignKeys()
+                .Where(fk => !fk.IsOwnership && fk.DeleteBehavior == DeleteBehavior.Cascade)
+                .ToList()
+                .ForEach(fk => fk.DeleteBehavior = DeleteBehavior.Restrict);
+        }
     }
 
     // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations
