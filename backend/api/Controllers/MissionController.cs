@@ -190,6 +190,26 @@ public class MissionController : ControllerBase
     }
 
     /// <summary>
+    /// Lookup which mission run is scheduled next for the given mission definition
+    /// </summary>
+    [HttpGet]
+    [Authorize(Roles = Role.Any)]
+    [Route("definitions/{id}/next-run")]
+    [ProducesResponseType(typeof(MissionRun), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<MissionRun>> GetNextMissionRun([FromRoute] string id)
+    {
+        var missionDefinition = await _missionDefinitionService.ReadById(id);
+        if (missionDefinition == null)
+            return NotFound($"Could not find mission definition with id {id}");
+        var nextRun = await _missionRunService.ReadNextScheduledRunByMissionId(id);
+        return Ok(nextRun);
+    }
+
+    /// <summary>
     /// Get map for mission with specified id.
     /// </summary>
     [HttpGet]
