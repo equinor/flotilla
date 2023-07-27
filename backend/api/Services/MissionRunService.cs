@@ -18,6 +18,8 @@ namespace Api.Services
 
         public abstract Task<MissionRun?> ReadById(string id);
 
+        public abstract Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId);
+
         public abstract Task<MissionRun> Update(MissionRun mission);
 
         public abstract Task<MissionRun?> UpdateMissionRunStatusByIsarMissionId(
@@ -116,6 +118,14 @@ namespace Api.Services
         {
             return await GetMissionRunsWithSubModels()
                 .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
+        }
+
+        public async Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId)
+        {
+            return await GetMissionRunsWithSubModels()
+                .Where(m => m.MissionId == missionId && m.EndTime == null)
+                .OrderBy(m => m.DesiredStartTime)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<MissionRun> Update(MissionRun missionRun)
