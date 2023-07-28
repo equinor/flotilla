@@ -1,6 +1,4 @@
-﻿
-
-using System.Text.Json;
+﻿using System.Text.Json;
 using Api.Database.Models;
 using Api.Options;
 using Microsoft.Extensions.Options;
@@ -42,6 +40,10 @@ namespace Api.Services
                 byte[] rawContent = await _blobService.DownloadBlob(id, _storageOptions.Value.CustomMissionContainerName, _storageOptions.Value.AccountName);
                 var rawBinaryContent = new BinaryData(rawContent);
                 content = rawBinaryContent.ToObjectFromJson<List<MissionTask>>();
+                foreach (var task in content)
+                {
+                    task.Id = Guid.NewGuid().ToString(); // This is needed as tasks are owned by mission runs
+                }
             }
             catch (Exception)
             {
