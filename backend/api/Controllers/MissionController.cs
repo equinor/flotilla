@@ -463,10 +463,11 @@ public class MissionController : ControllerBase
 
         var customMissionDefinition = new MissionDefinition
         {
+            Id = Guid.NewGuid().ToString(),
             Source = new Source
             {
                 SourceId = sourceURL.ToString(),
-                Type = MissionSourceType.Echo
+                Type = MissionSourceType.Custom
             },
             Name = customMissionQuery.Name,
             InspectionFrequency = customMissionQuery.InspectionFrequency,

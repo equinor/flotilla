@@ -58,6 +58,8 @@ namespace Api.Test
                                 services.AddScoped<IIsarService, MockIsarService>();
                                 services.AddScoped<IEchoService, MockEchoService>();
                                 services.AddScoped<IMapService, MockMapService>();
+                                services.AddScoped<IBlobService, MockBlobService>();
+                                services.AddScoped<ICustomMissionService, MockCustomMissionService>();
                                 services.AddAuthorization(
                                     options =>
                                     {
@@ -179,27 +181,63 @@ namespace Api.Test
             );
 
             // Act
-            var installationResponse = await _client.PostAsync(installationUrl, installationContent);
-            Assert.NotNull(installationResponse);
-            var plantResponse = await _client.PostAsync(plantUrl, plantContent);
-            Assert.NotNull(plantResponse);
-            var deckResponse = await _client.PostAsync(deckUrl, deckContent);
-            Assert.NotNull(deckResponse);
-            var areaResponse = await _client.PostAsync(areaUrl, areaContent);
-            Assert.NotNull(areaResponse);
+            _ = await _client.PostAsync(installationUrl, installationContent);
+            _ = await _client.PostAsync(plantUrl, plantContent);
+            _ = await _client.PostAsync(deckUrl, deckContent);
+            _ = await _client.PostAsync(areaUrl, areaContent);
         }
 
         #region MissionsController
         [Fact]
         public async Task MissionsTest()
         {
+            // Arrange
+            string robotUrl = "/robots";
+            string missionsUrl = "/missions";
+            var robotResponse = await _client.GetAsync(robotUrl);
+            Assert.True(robotResponse.IsSuccessStatusCode);
+            var robots = await robotResponse.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
+            Assert.True(robots != null);
+            var robot = robots[0];
+            string robotId = robot.Id;
+            string testInstallation = "TestInstallationStartMissionTest";
+            string testPlant = "TestPlantStartMissionTest";
+            string testDeck = "TestDeckStartMissionTest";
+            string testArea = "testAreaStartMissionTest";
+
+            await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+
+            int echoMissionId = 97;
+
+            // Act
+            var query = new ScheduledMissionQuery
+            {
+                RobotId = robotId,
+                InstallationCode = testInstallation,
+                AreaName = testArea,
+                EchoMissionId = echoMissionId,
+                DesiredStartTime = DateTimeOffset.UtcNow
+            };
+            var content = new StringContent(
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
+            _ = await _client.PostAsync(missionsUrl, content);
+            _ = await _client.PostAsync(missionsUrl, content);
+            _ = await _client.PostAsync(missionsUrl, content);
+
             string url = "/missions/runs";
             var response = await _client.GetAsync(url);
             var missionRuns = await response.Content.ReadFromJsonAsync<List<MissionRun>>(
                 _serializerOptions
             );
+
+            // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(missionRuns != null && missionRuns.Count == 3);
+            Assert.True(missionRuns != null);
+            missionRuns = missionRuns.FindAll(m => m.Area!.Name == testArea);
+            Assert.True(missionRuns.Count == 3);
         }
 
         [Fact]
@@ -272,8 +310,8 @@ namespace Api.Test
             Assert.True(robots != null);
             var robot = robots[0];
             string robotId = robot.Id;
-            string testInstallation = "TestInstallation";
-            string testArea = "testArea";
+            string testInstallation = "TestInstallationStartMissionTest";
+            string testArea = "testAreaStartMissionTest";
             int echoMissionId = 95;
 
             // Act
@@ -304,10 +342,10 @@ namespace Api.Test
         public async Task AreaTest()
         {
             // Arrange
-            string testInstallation = "TestInstallation";
-            string testPlant = "TestPlant";
-            string testDeck = "testDeck2";
-            string testArea = "testArea";
+            string testInstallation = "TestInstallationAreaTest";
+            string testPlant = "TestPlantAreaTest";
+            string testDeck = "testDeckAreaTest";
+            string testArea = "testAreaAreaTest";
             string installationUrl = $"/installations";
             string plantUrl = $"/plants";
             string deckUrl = $"/decks";
@@ -401,8 +439,10 @@ namespace Api.Test
         public async Task SafePositionTest()
         {
             // Arrange - Add Safe Position
-            string testInstallation = "testInstallation";
-            string testArea = "testArea";
+            string testInstallation = "testInstallationSafePositionTest";
+            string testArea = "testAreaSafePositionTest";
+            string testPlant = "testPlantSafePositionTest";
+            string testDeck = "testDeckSafePositionTest";
             string addSafePositionUrl = $"/areas/{testInstallation}/{testArea}/safe-position";
             var testPosition = new Position
             {
@@ -427,7 +467,7 @@ namespace Api.Test
                 "application/json"
             );
 
-            await PopulateAreaDb("testInstallation", "testPlant", "testDeck", "testArea");
+            await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
 
             var areaResponse = await _client.PostAsync(addSafePositionUrl, content);
             Assert.True(areaResponse.IsSuccessStatusCode);
@@ -472,6 +512,122 @@ namespace Api.Test
                 var response = await _client.GetAsync(url);
                 Assert.Equal(inputOutputPairs[input], response.StatusCode);
             }
+        }
+
+        [Fact]
+        public async Task GetNextRun()
+        {
+            // Arrange - Initialise areas
+            string customMissionsUrl = "/missions/custom";
+            string scheduleMissionsUrl = "/missions/schedule";
+
+            string testInstallation = "testInstallationNextRun";
+            string testPlant = "testPlantNextRun";
+            string testDeck = "testDeckNextRun";
+            string testArea = "testAreaNextRun";
+            string testMissionName = "testMissionNextRun";
+
+            await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+
+            // Arrange - Create custom mission definition
+            string robotUrl = "/robots";
+            var response = await _client.GetAsync(robotUrl);
+            Assert.True(response.IsSuccessStatusCode);
+            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
+            Assert.True(robots != null);
+            var robot = robots[0];
+            string robotId = robot.Id;
+
+            var query = new CustomMissionQuery
+            {
+                RobotId = robotId,
+                InstallationCode = testInstallation,
+                AreaName = testArea,
+                DesiredStartTime = new DateTimeOffset(new DateTime(3050, 1, 1)),
+                InspectionFrequency = new TimeSpan(14, 0, 0, 0),
+                Name = testMissionName,
+                Tasks = new List<CustomTaskQuery>()
+                {
+                    new CustomTaskQuery()
+                    {
+                        RobotPose = new Pose(),
+                        Inspections = new List<CustomInspectionQuery>(),
+                        InspectionTarget = new Position(),
+                        TaskOrder = 0
+                    }
+                },
+            };
+            var content = new StringContent(
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
+
+            response = await _client.PostAsync(customMissionsUrl, content);
+
+            Assert.True(response.IsSuccessStatusCode);
+            var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            Assert.True(missionRun != null);
+            Assert.True(missionRun.MissionId != null);
+            Assert.True(missionRun.Id != null);
+            Assert.True(missionRun.Status == MissionStatus.Pending);
+
+            // Arrange - Schedule missions from mission definition
+            var scheduleQuery1 = new ScheduleMissionQuery()
+            {
+                RobotId = robotId,
+                DesiredStartTime = new DateTimeOffset(new DateTime(2050, 1, 1)),
+                MissionDefinitionId = missionRun.MissionId
+            };
+            var scheduleContent1 = new StringContent(
+                JsonSerializer.Serialize(scheduleQuery1),
+                null,
+                "application/json"
+            );
+            var scheduleQuery2 = new ScheduleMissionQuery()
+            {
+                RobotId = robotId,
+                DesiredStartTime = DateTimeOffset.UtcNow,
+                MissionDefinitionId = missionRun.MissionId
+            };
+            var scheduleContent2 = new StringContent(
+                JsonSerializer.Serialize(scheduleQuery2),
+                null,
+                "application/json"
+            );
+            var scheduleQuery3 = new ScheduleMissionQuery()
+            {
+                RobotId = robotId,
+                DesiredStartTime = new DateTimeOffset(new DateTime(2100, 1, 1)),
+                MissionDefinitionId = missionRun.MissionId
+            };
+            var scheduleContent3 = new StringContent(
+                JsonSerializer.Serialize(scheduleQuery3),
+                null,
+                "application/json"
+            );
+            var missionRun1Response = await _client.PostAsync(scheduleMissionsUrl, scheduleContent1);
+            var missionRun2Response = await _client.PostAsync(scheduleMissionsUrl, scheduleContent2);
+            var missionRun3Response = await _client.PostAsync(scheduleMissionsUrl, scheduleContent3);
+            var missionRun1 = await missionRun1Response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun2 = await missionRun2Response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun3 = await missionRun3Response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+
+            // Act
+            string nextMissionUrl = $"missions/definitions/{missionRun.MissionId}/next-run";
+            var nextMissionResponse = await _client.GetAsync(nextMissionUrl);
+
+            // Assert
+            Assert.True(nextMissionResponse.IsSuccessStatusCode);
+            var nextMissionRun = await nextMissionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            Assert.NotNull(nextMissionRun);
+            Assert.NotNull(missionRun1);
+            Assert.NotNull(missionRun2);
+            Assert.NotNull(missionRun3);
+            Assert.Equal(missionRun1.MissionId, missionRun.MissionId);
+            Assert.Equal(missionRun2.MissionId, missionRun.MissionId);
+            Assert.Equal(missionRun3.MissionId, missionRun.MissionId);
+            Assert.True(nextMissionRun.Id == missionRun2.Id);
         }
     }
 }
