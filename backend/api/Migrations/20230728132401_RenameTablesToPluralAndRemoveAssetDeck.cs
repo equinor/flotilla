@@ -43,14 +43,6 @@ namespace Api.Migrations
                 table: "MissionDefinition");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_MissionRun_Area_AreaId",
-                table: "MissionRun");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_MissionRun_Robot_RobotId",
-                table: "MissionRun");
-
-            migrationBuilder.DropForeignKey(
                 name: "FK_MissionTask_MissionRun_MissionRunId",
                 table: "MissionTask");
 
@@ -153,10 +145,6 @@ namespace Api.Migrations
             migrationBuilder.DropPrimaryKey(
                 name: "PK_Plant",
                 table: "Plant");
-
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_MissionRun",
-                table: "MissionRun");
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_MissionDefinition",
@@ -685,6 +673,10 @@ namespace Api.Migrations
                 name: "PK_Plants",
                 table: "Plants",
                 column: "Id");
+
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_Missions",
+                table: "MissionRuns");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_MissionRuns",
