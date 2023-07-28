@@ -75,7 +75,7 @@ namespace Api.Database.Models
                     or MissionStatus.PartiallySuccessful
                     or MissionStatus.Failed;
 
-        public MapMetadata? MapMetadata { get; set; }
+        public MapMetadata? Map { get; set; }
 
         public DateTimeOffset? StartTime { get; private set; }
 

@@ -65,7 +65,7 @@ namespace Api.Test.Services
                     Name = "testMission",
                     Robot = robot,
                     MissionId = Guid.NewGuid().ToString(),
-                    MapMetadata = new MapMetadata() { MapName = "testMap" },
+                    Map = new MapMetadata() { MapName = "testMap" },
                     Area = new Area
                     {
                         Deck = new Deck

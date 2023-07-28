@@ -14,7 +14,6 @@ public class FlotillaDbContext : DbContext
     public DbSet<Plant> Plants => Set<Plant>();
     public DbSet<Installation> Installations => Set<Installation>();
     public DbSet<Deck> Decks => Set<Deck>();
-    public DbSet<AssetDeck> AssetDecks => Set<AssetDeck>();
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<Source> Sources => Set<Source>();
     public DbSet<SafePosition> SafePositions => Set<SafePosition>();
@@ -60,8 +59,8 @@ public class FlotillaDbContext : DbContext
             }
         );
 
-        modelBuilder.Entity<MissionRun>().OwnsOne(m => m.MapMetadata).OwnsOne(t => t.TransformationMatrices);
-        modelBuilder.Entity<MissionRun>().OwnsOne(m => m.MapMetadata).OwnsOne(b => b.Boundary);
+        modelBuilder.Entity<MissionRun>().OwnsOne(m => m.Map).OwnsOne(t => t.TransformationMatrices);
+        modelBuilder.Entity<MissionRun>().OwnsOne(m => m.Map).OwnsOne(b => b.Boundary);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
         modelBuilder.Entity<Robot>().OwnsMany(r => r.VideoStreams);

@@ -278,7 +278,7 @@ public class MissionController : ControllerBase
             Tasks = missionTasks,
             InstallationCode = missionDefinition.InstallationCode,
             Area = missionDefinition.Area,
-            MapMetadata = new MapMetadata()
+            Map = new MapMetadata()
         };
 
         await _mapService.AssignMapToMission(missionRun);
@@ -394,7 +394,7 @@ public class MissionController : ControllerBase
             Tasks = missionTasks,
             InstallationCode = scheduledMissionQuery.InstallationCode,
             Area = area,
-            MapMetadata = new MapMetadata()
+            Map = new MapMetadata()
         };
 
         await _mapService.AssignMapToMission(missionRun);
@@ -466,7 +466,7 @@ public class MissionController : ControllerBase
             Tasks = missionTasks,
             InstallationCode = customMissionQuery.InstallationCode,
             Area = area,
-            MapMetadata = new MapMetadata()
+            Map = new MapMetadata()
         };
 
         await _mapService.AssignMapToMission(scheduledMission);

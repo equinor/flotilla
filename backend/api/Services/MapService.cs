@@ -94,7 +94,7 @@ namespace Api.Services
                 return;
             }
 
-            missionRun.MapMetadata = mapMetadata;
+            missionRun.Map = mapMetadata;
             _logger.LogInformation("Assigned map {map} to mission {mission}", mapMetadata.MapName, missionRun.Name);
         }
 

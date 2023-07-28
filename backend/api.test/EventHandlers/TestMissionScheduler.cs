@@ -61,7 +61,7 @@ namespace Api.Test.EventHandlers
                     DefaultLocalizationPose = new Pose(),
                     SafePositions = new List<SafePosition>()
                 },
-                MapMetadata = new MapMetadata()
+                Map = new MapMetadata()
                 {
                     MapName = "TestMap",
                     Boundary = new(),
