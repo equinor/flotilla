@@ -116,7 +116,7 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
     )
 }
 
-export function StopRobotDialog({ missions }: MissionList) {
+export const StopRobotDialog = (): JSX.Element => {
     const [isStopRobotDialogOpen, setIsStopRobotDialogOpen] = useState<boolean>(false)
     const [statusSafePosition, setStatusSafePosition] = useState<boolean>(false)
     
@@ -171,7 +171,7 @@ export function StopRobotDialog({ missions }: MissionList) {
 
     return (
         <>  
-            {!statusSafePosition && (
+            {statusSafePosition==false && (
             <><StyledButton>
                     <Button color="danger" variant="outlined" onClick={openDialog}>
                         <Square style={{ background: tokens.colors.interactive.danger__resting.hex }} />
@@ -211,7 +211,7 @@ export function StopRobotDialog({ missions }: MissionList) {
                         </Dialog.Actions>
                     </StyledDialog></>
             )}
-            {statusSafePosition && (
+            {statusSafePosition==true && (
             <><StyledButton>
                     <Button color="danger" variant="outlined" onClick={openDialog}>
                         <Icon

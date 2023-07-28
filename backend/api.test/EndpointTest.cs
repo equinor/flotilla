@@ -259,14 +259,14 @@ namespace Api.Test
         public async Task SafePositionTest()
         {
             // Arrange - Add Safe Position
-            string testAsset = "testAsset";
-            string testDeck = "testDeck";
+            string testAsset = "jsv";
+            string testDeck = "P1 - AP320";
             string addSafePositionUrl = $"/asset-decks/{testAsset}/{testDeck}/safe-position";
             var testPosition = new Position
             {
-                X = 1,
-                Y = 2,
-                Z = 2
+                X = 311.097F,
+                Y = 85.818F,
+                Z = 526.85F
             };
             var query = new Pose
             {
@@ -275,8 +275,8 @@ namespace Api.Test
                 {
                     X = 0,
                     Y = 0,
-                    Z = 0,
-                    W = 1
+                    Z = 0.7071F,
+                    W = 0.7071F
                 }
             };
             var content = new StringContent(

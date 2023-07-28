@@ -70,7 +70,7 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
                 <Typography variant="h1" color="resting">
                     {TranslateText('Ongoing Missions')}
                 </Typography>
-                <StopRobotDialog missions={missions} />
+                <StopRobotDialog />
             </OngoingMissionHeader>
             <OngoingMissionSection>
                 {missions.length > 0 && missionDisplay}
