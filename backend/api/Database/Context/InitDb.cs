@@ -227,7 +227,7 @@ public static class InitDb
             Status = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(),
-            MapMetadata = new MapMetadata()
+            Map = new MapMetadata()
         };
 
         var missionRun2 = new MissionRun
@@ -240,7 +240,7 @@ public static class InitDb
             Status = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(),
-            MapMetadata = new MapMetadata()
+            Map = new MapMetadata()
         };
         missionDefinitions[0].LastRun = missionRun2;
 
@@ -254,7 +254,7 @@ public static class InitDb
             Status = MissionStatus.Successful,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(),
-            MapMetadata = new MapMetadata()
+            Map = new MapMetadata()
         };
 
         missionDefinitions[1].LastRun = missionRun3;
