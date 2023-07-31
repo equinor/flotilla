@@ -30,5 +30,5 @@ export interface Mission {
     endTime?: Date
     estimatedDuration?: number
     tasks: Task[]
-    mapMetadata?: MapMetadata
+    map?: MapMetadata
 }
