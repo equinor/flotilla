@@ -5,6 +5,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { config } from 'config'
 import { useNavigate } from 'react-router-dom'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
 import { useRef, useState } from 'react'
 
@@ -24,6 +25,7 @@ export enum ReRunOptions {
 }
 
 export function MissionRestartButton({ mission }: MissionProps) {
+    const { TranslateText } = useLanguageContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
     const openMenu = () => {
@@ -72,9 +74,11 @@ export function MissionRestartButton({ mission }: MissionProps) {
                     onClose={closeMenu}
                     anchorEl={anchorRef.current}
                 >
-                    <Menu.Item onClick={() => startReRun(ReRunOptions.ReRun)}>Re-run full mission</Menu.Item>
+                    <Menu.Item onClick={() => startReRun(ReRunOptions.ReRun)}>
+                        {TranslateText('Re-run full mission')}
+                    </Menu.Item>
                     <Menu.Item onClick={() => startReRun(ReRunOptions.ReRunFailed)}>
-                        Re-run failed and cancelled tasks in the mission
+                        {TranslateText('Re-run failed and cancelled tasks in the mission')}
                     </Menu.Item>
                 </Menu>
             </EdsProvider>

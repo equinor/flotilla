@@ -23,7 +23,7 @@ export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
     const orderedTasks = orderTasksByDrawOrder(mission.tasks, currentTaskOrder, maxTaskOrder)
     orderedTasks.forEach(function (task) {
         if (task.inspectionTarget) {
-            const pixelPosition = calculateObjectPixelPosition(mission.mapMetadata!, task.inspectionTarget)
+            const pixelPosition = calculateObjectPixelPosition(mission.map!, task.inspectionTarget)
             // Workaround for current bug in echo
             const order = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
