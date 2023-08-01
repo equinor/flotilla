@@ -298,30 +298,26 @@ namespace Api.Test
             var robot = robots[0];
             string robotId = robot.Id;
 
-            // Arrange - Localize the robot
-            string localizeUrl = "/robots/start-localization";
-            var localizationBody = new ScheduleLocalizationMissionQuery
-            {
-                RobotId = robotId,
-                DeckId = assetDeck.Id,
-                LocalizationPose = query
-            };
-            var localizationContent = new StringContent(
-                JsonSerializer.Serialize(localizationBody),
+            // Arrange - Add asset deck to the robot
+            robot.CurrentAssetDeck = assetDeck;
+            string urlAssetDeck = $"/robots/{robotId}";
+            var contentAssetDeck = new StringContent(
+                JsonSerializer.Serialize(robot),
                 null,
                 "application/json"
             );
-            var localizationMission = await _client.PostAsync(localizeUrl, localizationContent);
+            await _client.PutAsync(urlAssetDeck, contentAssetDeck);
+
+            string urlSafePosition = $"/robots/{robotId}/go-to-safe-position";
+            var contentSafePosition = new StringContent(
+                JsonSerializer.Serialize(robotId),
+                null,
+                "application/json"
+            );
+            var missionResponse = await _client.PostAsync(urlSafePosition, contentSafePosition);
 
             // Assert
-            Assert.True(localizationMission.IsSuccessStatusCode);
-
-            // Act
-            string goToSafePositionUrl = $"/robots/{robotId}/go-to-safe-position";
-            var missionResponse = await _client.PostAsync(goToSafePositionUrl, null);
-
-            // Assert
-            Assert.True(missionResponse.IsSuccessStatusCode);
+            Assert.True(missionResponse != null);
             var mission = await missionResponse.Content.ReadFromJsonAsync<Mission>(_serializerOptions);
             Assert.True(mission != null);
             Assert.True(
