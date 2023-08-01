@@ -81,22 +81,26 @@ export function RobotPage() {
                         <RobotInfo>
                             <RobotImage height="350px" robotType={selectedRobot.model.type} />
                             <VerticalContent $alignItems="start">
-                                <BatteryStatusView
-                                    itemSize={48}
-                                    battery={selectedRobot.batteryLevel}
-                                    batteryStatus={BatteryStatus.Normal}
-                                />
-                                {selectedRobot.model.upperPressureWarningThreshold && (
-                                    <PressureStatusView
-                                        itemSize={48}
-                                        pressureInBar={selectedRobot.pressureLevel}
-                                        upperPressureWarningThreshold={
-                                            selectedRobot.model.upperPressureWarningThreshold
-                                        }
-                                        lowerPressureWarningThreshold={
-                                            selectedRobot.model.lowerPressureWarningThreshold
-                                        }
-                                    />
+                                {selectedRobot.status !== RobotStatus.Offline && (
+                                    <>
+                                        <BatteryStatusView
+                                            itemSize={48}
+                                            battery={selectedRobot.batteryLevel}
+                                            batteryStatus={BatteryStatus.Normal}
+                                        />
+                                        {selectedRobot.model.upperPressureWarningThreshold && (
+                                            <PressureStatusView
+                                                itemSize={48}
+                                                pressureInBar={selectedRobot.pressureLevel}
+                                                upperPressureWarningThreshold={
+                                                    selectedRobot.model.upperPressureWarningThreshold
+                                                }
+                                                lowerPressureWarningThreshold={
+                                                    selectedRobot.model.lowerPressureWarningThreshold
+                                                }
+                                            />
+                                        )}
+                                    </>
                                 )}
                                 <RobotStatusChip status={selectedRobot.status} />
                             </VerticalContent>

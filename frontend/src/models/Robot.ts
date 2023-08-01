@@ -20,7 +20,7 @@ export interface Robot {
     batteryStatus?: BatteryStatus
     pressureLevel?: number
     pose?: Pose
-    status?: RobotStatus
+    status: RobotStatus
     enabled?: boolean
     host?: string
     logs?: string
