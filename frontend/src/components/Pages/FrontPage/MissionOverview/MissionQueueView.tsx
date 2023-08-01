@@ -147,6 +147,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                     robotOptions={robotOptions}
                     echoMissionsOptions={Array.from(echoMissions.keys())}
                     onSelectedMissions={onSelectedEchoMissions}
+                    selectedMissions={selectedEchoMissions}
                     onSelectedRobot={onSelectedRobot}
                     onScheduleButtonPress={onScheduleButtonPress}
                     fetchEchoMissions={fetchEchoMissions}
