@@ -13,6 +13,8 @@ namespace Api.Controllers
     {
         private readonly IAreaService _areaService;
 
+        private readonly IMissionDefinitionService _missionDefinitionService;
+
         private readonly IMapService _mapService;
 
         private readonly ILogger<AreaController> _logger;
@@ -20,12 +22,14 @@ namespace Api.Controllers
         public AreaController(
             ILogger<AreaController> logger,
             IMapService mapService,
-            IAreaService areaService
+            IAreaService areaService,
+            IMissionDefinitionService missionDefinitionService
         )
         {
             _logger = logger;
             _mapService = mapService;
             _areaService = areaService;
+            _missionDefinitionService = missionDefinitionService;
         }
 
         /// <summary>
@@ -241,7 +245,35 @@ namespace Api.Controllers
                 _logger.LogError(e, "Error during GET of areas from database");
                 throw;
             }
+        }
 
+        /// <summary>
+        /// Lookup all the mission definitions related to an area
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = Role.Any)]
+        [Route("{id}/mission-definitions")]
+        [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IList<MissionDefinition>>> GetMissionDefinitionsInArea([FromRoute] string id)
+        {
+            try
+            {
+                var area = await _areaService.ReadById(id);
+                if (area == null)
+                    return NotFound($"Could not find area with id {id}");
+
+                var missionDefinitions = await _missionDefinitionService.ReadByAreaId(area.Id);
+                return Ok(missionDefinitions);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error during GET of area missions from database");
+                throw;
+            }
         }
 
         /// <summary>
