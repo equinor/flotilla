@@ -1,7 +1,7 @@
 import { config } from 'config'
 import { Button, Icon, TopBar, Autocomplete, Typography } from '@equinor/eds-core-react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { usePlantContext } from 'components/Contexts/PlantContext'
 import { EchoPlantInfo } from 'models/EchoMission'
 import { useEffect, useState } from 'react'
 import styled from 'styled-components'
@@ -72,35 +72,40 @@ export function Header({ page }: { page: string }) {
 
 function InstallationPicker(page: string) {
     const { TranslateText } = useLanguageContext()
-    const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
-    const { installationCode, switchInstallation } = useInstallationContext()
+    const [allPlantsMap, setAllPlantsMap] = useState<{ [plantDescription: string]: EchoPlantInfo }>()
+    const { currentPlant, setPlant } = usePlantContext()
     useEffect(() => {
         BackendAPICaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
             const mapping = mapInstallationCodeToName(response)
             setAllPlantsMap(mapping)
         })
     }, [])
-    const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
+    const emptyObject: { [plantDescription: string]: EchoPlantInfo } = {}
+    const mappedOptions = allPlantsMap ? allPlantsMap : emptyObject
     return (
         <Autocomplete
-            options={Array.from(mappedOptions.keys()).sort()}
+            options={Array.from(Object.keys(mappedOptions)).sort()}
             label=""
             disabled={page === 'mission'}
-            initialSelectedOptions={[installationCode.toUpperCase()]}
+            initialSelectedOptions={[currentPlant?.projectDescription.toUpperCase()]}
             placeholder={TranslateText('Select installation')}
             onOptionsChange={({ selectedItems }) => {
-                const mapKey = mappedOptions.get(selectedItems[0])
-                if (mapKey !== undefined) switchInstallation(mapKey)
-                else switchInstallation('')
+                if (!selectedItems[0]) {
+                    setPlant(undefined)
+                } else {
+                    setPlant(mappedOptions[selectedItems[0]])
+                }
             }}
         />
     )
 }
 
-const mapInstallationCodeToName = (echoPlantInfoArray: EchoPlantInfo[]): Map<string, string> => {
-    var mapping = new Map<string, string>()
+const mapInstallationCodeToName = (
+    echoPlantInfoArray: EchoPlantInfo[]
+): { [plantDescription: string]: EchoPlantInfo } => {
+    var mapping: { [plantDescription: string]: EchoPlantInfo } = {}
     echoPlantInfoArray.forEach((echoPlantInfo: EchoPlantInfo) => {
-        mapping.set(echoPlantInfo.projectDescription, echoPlantInfo.plantCode)
+        mapping[echoPlantInfo.projectDescription] = echoPlantInfo
     })
     return mapping
 }

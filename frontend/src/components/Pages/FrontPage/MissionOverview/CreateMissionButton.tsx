@@ -2,18 +2,18 @@ import { Button, Typography, Popover, Icon } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState } from 'react'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { usePlantContext } from 'components/Contexts/PlantContext'
 
 export const CreateMissionButton = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
-    const { installationCode } = useInstallationContext()
+    const { currentPlant } = usePlantContext()
     const anchorRef = useRef<HTMLButtonElement>(null)
     const echoURL = 'https://echo.equinor.com/missionplanner?instCode='
 
     let timer: ReturnType<typeof setTimeout>
     const openPopover = () => {
-        if (installationCode === '') setIsPopoverOpen(true)
+        if (!currentPlant) setIsPopoverOpen(true)
     }
 
     const closePopover = () => setIsPopoverOpen(false)
@@ -40,9 +40,9 @@ export const CreateMissionButton = (): JSX.Element => {
             >
                 <Button
                     onClick={() => {
-                        window.open(echoURL + installationCode)
+                        window.open(echoURL + (currentPlant ? currentPlant.installationCode : ''))
                     }}
-                    disabled={installationCode === ''}
+                    disabled={currentPlant === undefined}
                     ref={anchorRef}
                 >
                     <>
@@ -55,7 +55,7 @@ export const CreateMissionButton = (): JSX.Element => {
             <Popover
                 anchorEl={anchorRef.current}
                 onClose={handleClose}
-                open={isPopoverOpen && installationCode === ''}
+                open={isPopoverOpen && !currentPlant}
                 placement="top"
             >
                 <Popover.Content>

@@ -13,7 +13,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState, useEffect } from 'react'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { usePlantContext } from 'components/Contexts/PlantContext'
 import { CreateMissionButton } from './CreateMissionButton'
 
 interface IProps {
@@ -59,7 +59,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [isScheduleMissionsPressed, setIsScheduleMissionsPressed] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
-    const { installationCode } = useInstallationContext()
+    const { currentPlant } = usePlantContext()
 
     useEffect(() => {
         if (!props.isFetchingEchoMissions && isScheduleMissionsPressed) {
@@ -125,7 +125,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             <Popover
                 anchorEl={anchorRef.current}
                 onClose={handleClose}
-                open={isPopoverOpen && installationCode === ''}
+                open={isPopoverOpen && !currentPlant}
                 placement="top"
             >
                 <Popover.Content>

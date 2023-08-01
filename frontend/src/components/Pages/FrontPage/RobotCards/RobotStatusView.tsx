@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { usePlantContext } from 'components/Contexts/PlantContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 const RobotCardSection = styled.div`
@@ -21,6 +21,7 @@ const RobotView = styled.div`
 export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const [robots, setRobots] = useState<Robot[]>([])
+    const { currentPlant } = usePlantContext()
 
     const sortRobotsByStatus = useCallback((robots: Robot[]): Robot[] => {
         const sortedRobots = robots.sort((robot, robotToCompareWith) =>
@@ -47,18 +48,17 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
         return () => clearInterval(id)
     }, [refreshInterval, updateRobots])
 
-    const { installationCode } = useInstallationContext()
-
     var filteredRobots = robots.filter(function (robot) {
         return (
-            robot.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase() ||
+            robot.currentInstallation.toLocaleLowerCase() ===
+                (currentPlant ? currentPlant.installationCode.toLocaleLowerCase() : '') ||
             (typeof robot.currentInstallation === 'string' && robot.currentInstallation.includes('default')) ||
             robot.currentInstallation === undefined
         )
     })
 
     var robotDisplay
-    if (installationCode === '') {
+    if (!currentPlant) {
         robotDisplay = robots.map(function (robot) {
             return <RobotStatusCard key={robot.id} robot={robot} />
         })

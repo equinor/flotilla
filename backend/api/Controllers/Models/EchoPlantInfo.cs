@@ -5,5 +5,6 @@ namespace Api.Controllers.Models
     {
         public string PlantCode { get; set; }
         public string ProjectDescription { get; set; }
+        public string InstallationCode { get; set; }
     }
 }

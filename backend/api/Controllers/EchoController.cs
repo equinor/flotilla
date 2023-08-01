@@ -36,11 +36,11 @@ public class EchoController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<IList<CondensedMissionDefinition>>> GetAvailableEchoMissions(string? plantCode)
+    public async Task<ActionResult<IList<CondensedMissionDefinition>>> GetAvailableEchoMissions(string? installationCode)
     {
         try
         {
-            var missions = await _echoService.GetAvailableMissions(plantCode);
+            var missions = await _echoService.GetAvailableMissions(installationCode);
             return Ok(missions);
         }
         catch (HttpRequestException e)

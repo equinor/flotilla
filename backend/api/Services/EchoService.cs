@@ -239,7 +239,8 @@ namespace Api.Services
                 var echoPlantInfo = new EchoPlantInfo()
                 {
                     PlantCode = plant.InstallationCode,
-                    ProjectDescription = plant.ProjectDescription
+                    ProjectDescription = plant.ProjectDescription,
+                    InstallationCode = plant.InstallationCode
                 };
 
                 echoPlantInfos.Add(echoPlantInfo);
