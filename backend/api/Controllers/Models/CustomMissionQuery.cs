@@ -8,7 +8,7 @@ namespace Api.Controllers.Models
 
         public float? VideoDuration { get; set; }
 
-        public string? AnalysisTypes { get; set; }
+        public AnalysisType? AnalysisType { get; set; }
     }
 
     public struct CustomTaskQuery

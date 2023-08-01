@@ -46,8 +46,7 @@ namespace Api.Database.Models
 
         public float? VideoDuration { get; set; }
 
-        [MaxLength(250)]
-        public string? AnalysisTypes { get; set; }
+        public AnalysisType? AnalysisType { get; set; }
 
         [MaxLength(250)]
         public string? InspectionUrl { get; set; }
@@ -73,7 +72,7 @@ namespace Api.Database.Models
         {
             InspectionType = inspectionQuery.InspectionType;
             VideoDuration = inspectionQuery.VideoDuration;
-            AnalysisTypes = inspectionQuery.AnalysisTypes;
+            AnalysisType = inspectionQuery.AnalysisType;
             Status = InspectionStatus.NotStarted;
         }
 
@@ -127,5 +126,11 @@ namespace Api.Database.Models
         Video,
         ThermalVideo,
         Audio
+    }
+
+    public enum AnalysisType
+    {
+        CarSeal,
+        RtjFlange,
     }
 }

@@ -72,9 +72,6 @@ namespace Api.Services.Models
         [JsonPropertyName("inspection_target")]
         public IsarPosition InspectionTarget { get; set; }
 
-        [JsonPropertyName("analysis_types")]
-        public string? AnalysisTypes { get; set; }
-
         [JsonPropertyName("duration")]
         public float? Duration { get; set; }
 
@@ -91,7 +88,6 @@ namespace Api.Services.Models
                 task.InspectionTarget.Z,
                 "asset"
             );
-            AnalysisTypes = inspection.AnalysisTypes;
             Duration = inspection.VideoDuration;
             var metadata = new Dictionary<string, string?>
             {
@@ -100,7 +96,8 @@ namespace Api.Services.Models
                 { "estimated_duration", missionRun.EstimatedDuration.ToString() },
                 { "asset_code", missionRun.InstallationCode },
                 { "mission_name", missionRun.Name },
-                { "status_reason", missionRun.StatusReason }
+                { "status_reason", missionRun.StatusReason },
+                { "analysis_type", inspection.AnalysisType.ToString() }
             };
             Metadata = metadata;
         }
