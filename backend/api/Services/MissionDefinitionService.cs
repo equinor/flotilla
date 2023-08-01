@@ -16,6 +16,7 @@ namespace Api.Services
         public abstract Task<MissionDefinition?> ReadById(string id);
 
         public abstract Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters);
+        public abstract Task<List<MissionDefinition>> ReadMissionDefinitionsBySourceId(string sourceId);
 
         public abstract Task<List<MissionDefinition>> ReadByAreaId(string areaId);
 
@@ -26,6 +27,8 @@ namespace Api.Services
         public abstract Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
 
         public abstract Task<MissionDefinition> Update(MissionDefinition missionDefinition);
+
+        public abstract Task<MissionDefinition?> UpdateLastRun(string missionId, MissionRun missionRun);
 
         public abstract Task<MissionDefinition?> Delete(string id);
     }
@@ -132,6 +135,17 @@ namespace Api.Services
             var entry = _context.Update(missionDefinition);
             await _context.SaveChangesAsync();
             return entry.Entity;
+        }
+
+        public async Task<MissionDefinition?> UpdateLastRun(string missionId, MissionRun missionRun)
+        {
+            var missionDefinition = await ReadById(missionId);
+            if (missionDefinition == null)
+            {
+                return null;
+            }
+            missionDefinition.LastRun = missionRun;
+            return await Update(missionDefinition);
         }
 
         public async Task<MissionDefinition?> Delete(string id)

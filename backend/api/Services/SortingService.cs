@@ -45,7 +45,7 @@ namespace Api.Services
 
                 if (objectProperty == null)
                     throw new InvalidDataException(
-                        $"Mission has no property '{propertyFromQueryName}' for ordering"
+                        $"{typeof(T).Name} has no property '{propertyFromQueryName}' for ordering"
                     );
 
                 string sortingOrder = param.EndsWith(" desc", StringComparison.OrdinalIgnoreCase)
