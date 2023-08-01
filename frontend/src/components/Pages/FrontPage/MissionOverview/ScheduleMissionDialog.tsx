@@ -16,6 +16,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
 import { Robot } from 'models/Robot'
+import { MissionDefinition } from 'models/MissionDefinition'
 
 interface IProps {
     robotOptions: Array<Robot>
@@ -26,6 +27,7 @@ interface IProps {
     fetchEchoMissions: () => void
     scheduleButtonDisabled: boolean
     frontPageScheduleButtonDisabled: boolean
+    selectedMissions: MissionDefinition[]
     isFetchingEchoMissions: boolean
 }
 
@@ -189,6 +191,9 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             label={TranslateText('Select missions')}
                             onOptionsChange={onChangeEchoMissionSelections}
                             multiple
+                            placeholder={`${props.selectedMissions.length}/${
+                                Array.from(props.echoMissionsOptions.keys()).length
+                            } ${TranslateText('selected')}`}
                         />
                         <Autocomplete
                             optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
