@@ -16,6 +16,8 @@ namespace Api.Services
 
         public abstract Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters);
 
+        public abstract Task<List<MissionDefinition>> ReadByAreaId(string areaId);
+
         public abstract Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
         public abstract Task<MissionDefinition?> Delete(string id);
@@ -86,6 +88,12 @@ namespace Api.Services
                 parameters.PageNumber,
                 parameters.PageSize
             );
+        }
+
+        public async Task<List<MissionDefinition>> ReadByAreaId(string areaId)
+        {
+            return await GetMissionDefinitionsWithSubModels().Where(
+                m => m.IsDeprecated == false && m.Area != null && m.Area.Id == areaId).ToListAsync();
         }
 
         public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)

@@ -104,7 +104,7 @@ namespace Api.Test
             GC.SuppressFinalize(this);
         }
 
-        private async Task PopulateAreaDb(string installationCode, string plantCode, string deckName, string areaName)
+        private async Task<(string installationId, string plantId, string deckId, string areaId)> PopulateAreaDb(string installationCode, string plantCode, string deckName, string areaName)
         {
             string installationUrl = $"/installations";
             string plantUrl = $"/plants";
@@ -181,10 +181,27 @@ namespace Api.Test
             );
 
             // Act
-            _ = await _client.PostAsync(installationUrl, installationContent);
-            _ = await _client.PostAsync(plantUrl, plantContent);
-            _ = await _client.PostAsync(deckUrl, deckContent);
-            _ = await _client.PostAsync(areaUrl, areaContent);
+            var installationResponse = await _client.PostAsync(installationUrl, installationContent);
+            Assert.NotNull(installationResponse);
+            var installation = await installationResponse.Content.ReadFromJsonAsync<Installation>(_serializerOptions);
+            Assert.NotNull(installation);
+
+            var plantResponse = await _client.PostAsync(plantUrl, plantContent);
+            Assert.NotNull(plantResponse);
+            var plant = await plantResponse.Content.ReadFromJsonAsync<Plant>(_serializerOptions);
+            Assert.NotNull(plant);
+
+            var deckResponse = await _client.PostAsync(deckUrl, deckContent);
+            Assert.NotNull(deckResponse);
+            var deck = await deckResponse.Content.ReadFromJsonAsync<Deck>(_serializerOptions);
+            Assert.NotNull(deck);
+
+            var areaResponse = await _client.PostAsync(areaUrl, areaContent);
+            Assert.NotNull(areaResponse);
+            var area = await areaResponse.Content.ReadFromJsonAsync<Area>(_serializerOptions);
+            Assert.NotNull(area);
+
+            return (installation.Id, plant.Id, deck.Id, area.Id);
         }
 
         #region MissionsController
@@ -436,13 +453,69 @@ namespace Api.Test
         }
 
         [Fact]
+        public async Task GetMissionsInAreaTest()
+        {
+            // Arrange
+            string testInstallation = "TestInstallationMissionsInAreaTest";
+            string testPlant = "TestPlantMissionsInAreaTest";
+            string testDeck = "testDeckMissionsInAreaTest";
+            string testArea = "testAreaMissionsInAreaTest";
+            string testMissionName = "testMissionInAreaTest";
+            string areaUrl = $"/areas";
+            string missionUrl = $"/missions/custom";
+            (_, _, _, string areaId) = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+
+            string url = "/robots";
+            var robotResponse = await _client.GetAsync(url);
+            Assert.True(robotResponse.IsSuccessStatusCode);
+            var robots = await robotResponse.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
+            Assert.True(robots != null);
+            var robot = robots[0];
+            string robotId = robot.Id;
+
+            var missionQuery = new CustomMissionQuery
+            {
+                RobotId = robotId,
+                DesiredStartTime = DateTimeOffset.UtcNow,
+                InstallationCode = testInstallation,
+                AreaName = testArea,
+                Name = testMissionName,
+                Tasks = new List<CustomTaskQuery>()
+            };
+
+            var missionContent = new StringContent(
+                JsonSerializer.Serialize(missionQuery),
+                null,
+                "application/json"
+            );
+
+            // Act
+            var missionResponse = await _client.PostAsync(missionUrl, missionContent);
+
+            Assert.True(missionResponse.IsSuccessStatusCode);
+            var mission = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            Assert.NotNull(mission);
+            Assert.NotNull(mission.MissionId);
+
+            // TODO: use area code and asset code in the endpoint
+            var areaMissionsResponse = await _client.GetAsync(areaUrl + $"/{areaId}/mission-definitions");
+
+            // Assert
+            Assert.True(areaMissionsResponse.IsSuccessStatusCode);
+            var missions = await areaMissionsResponse.Content.ReadFromJsonAsync<IList<MissionRun>>(_serializerOptions);
+            Assert.NotNull(missions);
+            Assert.Equal(1, missions.Count);
+            Assert.Equal(missions[0].Id, mission.MissionId);
+        }
+
+        [Fact]
         public async Task SafePositionTest()
         {
             // Arrange - Add Safe Position
             string testInstallation = "testInstallationSafePositionTest";
-            string testArea = "testAreaSafePositionTest";
             string testPlant = "testPlantSafePositionTest";
             string testDeck = "testDeckSafePositionTest";
+            string testArea = "testAreaSafePositionTest";
             string addSafePositionUrl = $"/areas/{testInstallation}/{testArea}/safe-position";
             var testPosition = new Position
             {
@@ -467,7 +540,7 @@ namespace Api.Test
                 "application/json"
             );
 
-            await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+            _ = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
 
             var areaResponse = await _client.PostAsync(addSafePositionUrl, content);
             Assert.True(areaResponse.IsSuccessStatusCode);
