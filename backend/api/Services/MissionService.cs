@@ -14,6 +14,8 @@ namespace Api.Services
 {
     public interface IMissionService
     {
+        public bool IsMissionSchedulerPaused { get; set; }
+
         public abstract Task<Mission> Create(Mission mission);
 
         public abstract Task<PagedList<Mission>> ReadAll(MissionQueryStringParameters parameters);
@@ -41,6 +43,7 @@ namespace Api.Services
         );
 
         public abstract Task<Mission?> Delete(string id);
+
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -62,6 +65,8 @@ namespace Api.Services
     {
         private readonly FlotillaDbContext _context;
         private readonly ILogger<MissionService> _logger;
+        public bool IsMissionSchedulerPaused { get; set; }
+
 
         public MissionService(FlotillaDbContext context, ILogger<MissionService> logger)
         {

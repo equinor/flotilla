@@ -58,7 +58,7 @@ namespace Api.EventHandlers
                         continue;
                     }
 
-                    if (freshMission.Robot.Status == RobotStatus.SafePosition)
+                    if (MissionService.IsMissionSchedulerPaused)
                     {
                         continue;
                     }

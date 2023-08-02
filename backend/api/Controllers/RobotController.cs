@@ -746,6 +746,8 @@ public class RobotController : ControllerBase
         [FromRoute] string robotId
     )
     {
+        _missionService.IsMissionSchedulerPaused = true;
+
         var robot = await _robotService.ReadById(robotId);
 
         if (robot == null)
@@ -783,6 +785,7 @@ public class RobotController : ControllerBase
             _logger.LogWarning("No safe position for asset={asset}, deck={deck}", asset, deck);
             return NotFound("No safe positions found");
         }
+
 
         var closestSafePosition = ClosestSafePosition(robot.Pose, assetDeck.SafePositions);
         // Cloning to avoid tracking same object
@@ -855,6 +858,28 @@ public class RobotController : ControllerBase
         mission.UpdateWithIsarInfo(isarMission);
         mission.Status = MissionStatus.Ongoing;
         await _missionService.Create(mission);
+
+        // if (robot.CurrentMissionId != null)
+        // {
+        //     var currentMission = await _missionService.ReadById(robot.CurrentMissionId);
+        //     if (currentMission == null)
+        //     {
+        //         _logger.LogWarning("Failed to get current mission={currentMission} for robot={robot.Name}", currentMission, robot.Name);
+        //     }
+        //     else
+        //     {
+        //         currentMission.DesiredStartTime = DateTimeOffset.UtcNow;
+        //         currentMission.Status = MissionStatus.Pending;
+        //         try
+        //         {
+        //             await _missionService.Update(currentMission);
+        //         }
+        //         catch (MissionException e)
+        //         {
+        //             _logger.LogError(e, "Error rescheduling current mission={currentMission} for robot={robot.Name}", currentMission, robot.Name);
+        //         }
+        //     }
+        // }
 
         robot.Status = RobotStatus.SafePosition;
         robot.CurrentMissionId = mission.Id;
@@ -941,58 +966,34 @@ public class RobotController : ControllerBase
             return NotFound("Robot not found");
         }
 
+        // If the robot was in the process of driving to the safe position
+        try
+        {
+            await _isarService.StopMission(robot);
+        }
+        catch (MissionException e)
+        {
+            // We want to continue driving to a safe position if the isar state is idle
+            if (e.IsarStatusCode != 409)
+            {
+                _logger.LogError(e, "Error while stopping ISAR mission");
+                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
+            }
+        }
+        catch (Exception e)
+        {
+            string message = "Error in ISAR while stopping current mission";
+            _logger.LogError(e, "{message}", message);
+            OnIsarUnavailable(robot);
+            return StatusCode(StatusCodes.Status502BadGateway, message);
+        }
+
         robot.Status = RobotStatus.Available;
         robot.CurrentMissionId = null;
         await _robotService.Update(robot);
 
-        return Ok(robot);
-    }
-
-    /// <summary>
-    /// Starts a mission which drives the robot to the nearest safe position
-    /// </summary>
-    /// <remarks>
-    /// <para> This query starts a localization for a given robot </para>
-    /// </remarks>
-    [HttpPost]
-    [Route("{robotId}/remove-all-missions")]
-    [Authorize(Roles = Role.User)]
-    [ProducesResponseType(typeof(Mission), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<Mission>> RemoveAllMissions(
-        [FromRoute] string robotId
-    )
-    {
-        var robot = await _robotService.ReadById(robotId);
-
-        if (robot == null)
-        {
-            _logger.LogWarning("Could not find robot with id={id}", robotId);
-            return NotFound("Robot not found");
-        }
-
-        var missions = new MissionQueryStringParameters
-        {
-            Statuses = new List<MissionStatus> { MissionStatus.Pending },
-            RobotId = robotId,
-            PageSize = 100
-        };
-
-        var missionQueue = await _missionService.ReadAll(missions);
-
-        if (missionQueue.Count > 0)
-        {
-            foreach (var currentMission in missionQueue)
-            {
-                await _missionService.Delete(currentMission.Id);
-            };
-        }
+        _missionService.IsMissionSchedulerPaused = false;
 
         return Ok(robot);
     }
-
 }

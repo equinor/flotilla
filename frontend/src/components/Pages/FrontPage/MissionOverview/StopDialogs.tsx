@@ -41,10 +41,6 @@ interface MissionProps {
     mission: Mission
 }
 
-interface MissionList {
-    missions: Mission[]
-}
-
 export enum ControlButton {
     Pause,
     Stop,
@@ -119,12 +115,12 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
 export const StopRobotDialog = (): JSX.Element => {
     const [isStopRobotDialogOpen, setIsStopRobotDialogOpen] = useState<boolean>(false)
     const [statusSafePosition, setStatusSafePosition] = useState<boolean>(false)
-    
-    const openDialog = () => {
+        
+    const openDialog = async () => {
         setIsStopRobotDialogOpen(true)
     }
 
-    const closeDialog = () => {
+    const closeDialog = async () => {
         setIsStopRobotDialogOpen(false)
     }
 
@@ -135,6 +131,7 @@ export const StopRobotDialog = (): JSX.Element => {
             }
         })
         closeDialog()
+        setStatusSafePosition(true)
         return
     }
 
@@ -148,30 +145,9 @@ export const StopRobotDialog = (): JSX.Element => {
         setStatusSafePosition(false)
     }
 
-    const removeMissions = () => {
-        BackendAPICaller.getEnabledRobots().then(async (robots: Robot[]) => {
-            for (var robot of robots) {
-                await BackendAPICaller.removeAllMissions(robot.id)
-            }
-        })
-        
-        resetRobots()
-    }
-
-
-    useEffect(() => {
-        BackendAPICaller.getEnabledRobots().then((robots: Robot[]) => {
-            for (var robot of robots) {
-                if (robot.status == RobotStatus.SafePosition){
-                    setStatusSafePosition(true)
-                }
-            }
-        })
-    }, [[openDialog]])
-
     return (
         <>  
-            {statusSafePosition==false && (
+            {!statusSafePosition && (
             <><StyledButton>
                     <Button color="danger" variant="outlined" onClick={openDialog}>
                         <Square style={{ background: tokens.colors.interactive.danger__resting.hex }} />
@@ -243,9 +219,6 @@ export const StopRobotDialog = (): JSX.Element => {
                                     } }
                                 >
                                     {TranslateText('Cancel')}
-                                </Button>
-                                <Button variant="contained" color="danger" onClick={removeMissions}>
-                                    {TranslateText('Remove all missions')}
                                 </Button>
                                 <Button variant="contained" color="danger" onClick={resetRobots}>
                                     {TranslateText('Continue missions')}
