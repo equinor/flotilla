@@ -26,13 +26,11 @@ namespace Api.Services
         public const string ServiceName = "IsarApi";
         private readonly IDownstreamWebApi _isarApi;
         private readonly ILogger<IsarService> _logger;
-        private readonly IMissionDefinitionService _missionDefinitionService;
 
-        public IsarService(ILogger<IsarService> logger, IDownstreamWebApi downstreamWebApi, IMissionDefinitionService missionDefinitionService)
+        public IsarService(ILogger<IsarService> logger, IDownstreamWebApi downstreamWebApi)
         {
             _logger = logger;
             _isarApi = downstreamWebApi;
-            _missionDefinitionService = missionDefinitionService;
         }
 
         /// <summary>
@@ -99,9 +97,6 @@ namespace Api.Services
                 _logger.LogError("Failed to deserialize mission from ISAR");
                 throw new JsonException("Failed to deserialize mission from ISAR");
             }
-
-            if (missionRun.MissionId != null)
-                await _missionDefinitionService.UpdateLastRun(missionRun.MissionId, missionRun);
 
             var isarMission = new IsarMission(isarMissionResponse);
 

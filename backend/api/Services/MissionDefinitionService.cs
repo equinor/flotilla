@@ -16,7 +16,6 @@ namespace Api.Services
         public abstract Task<MissionDefinition?> ReadById(string id);
 
         public abstract Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters);
-        public abstract Task<List<MissionDefinition>> ReadMissionDefinitionsBySourceId(string sourceId);
 
         public abstract Task<List<MissionDefinition>> ReadByAreaId(string areaId);
 
