@@ -77,7 +77,11 @@ export function OngoingMissionCard({ mission }: MissionProps) {
                     <HorizontalContent>
                         <MissionStatusDisplay status={mission.status} />
                         <MissionProgressDisplay mission={mission} />
-                        <BatteryStatusView battery={mission.robot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
+                        <BatteryStatusView
+                            battery={mission.robot.batteryLevel}
+                            batteryStatus={BatteryStatus.Normal}
+                            robotStatus={mission.robot.status}
+                        />
                     </HorizontalContent>
                 </VerticalContent>
                 <div>

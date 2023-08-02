@@ -59,8 +59,13 @@ function cardContent({ robot }: RobotProps) {
                         pressureInBar={robot.pressureLevel}
                         upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
                         lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
+                        robotStatus={robot.status}
                     />
-                    <BatteryStatusView battery={robot.batteryLevel} batteryStatus={BatteryStatus.Normal} />
+                    <BatteryStatusView
+                        battery={robot.batteryLevel}
+                        batteryStatus={BatteryStatus.Normal}
+                        robotStatus={robot.status}
+                    />
                 </VerticalContent>
             </HorizontalContent>
         </div>
@@ -94,7 +99,6 @@ export function RobotStatusCardPlaceholder() {
                 </Typography>
                 <HorizontalContent>
                     <RobotStatusChip />
-                    <BatteryStatusView />
                 </HorizontalContent>
             </div>
         </StyledCard>
