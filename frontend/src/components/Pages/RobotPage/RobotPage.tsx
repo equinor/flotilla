@@ -87,6 +87,7 @@ export function RobotPage() {
                                             itemSize={48}
                                             battery={selectedRobot.batteryLevel}
                                             batteryStatus={BatteryStatus.Normal}
+                                            robotStatus={selectedRobot.status}
                                         />
                                         {selectedRobot.model.upperPressureWarningThreshold && (
                                             <PressureStatusView
@@ -98,6 +99,7 @@ export function RobotPage() {
                                                 lowerPressureWarningThreshold={
                                                     selectedRobot.model.lowerPressureWarningThreshold
                                                 }
+                                                robotStatus={selectedRobot.status}
                                             />
                                         )}
                                     </>

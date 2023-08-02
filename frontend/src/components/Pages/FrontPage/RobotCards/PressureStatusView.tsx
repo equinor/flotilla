@@ -19,7 +19,7 @@ export interface PressureStatusViewProps {
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
     upperPressureWarningThreshold?: number
     lowerPressureWarningThreshold?: number
-    robotStatus?: RobotStatus
+    robotStatus: RobotStatus
 }
 
 const PressureStatusView = ({
@@ -38,7 +38,7 @@ const PressureStatusView = ({
         pressureInMilliBar = ''
         pressureStatus = PressureStatus.Default
         return <></>
-    } else if (robotStatus == RobotStatus.Offline) {
+    } else if (robotStatus === RobotStatus.Offline) {
         pressureInMilliBar = ''
         pressureStatus = PressureStatus.Default
     } else if (!upperPressureWarningThreshold || !lowerPressureWarningThreshold) {

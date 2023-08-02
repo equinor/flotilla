@@ -3,6 +3,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
+import { RobotStatus } from 'models/Robot'
 
 const BatteryAlignment = styled.div`
     display: flex;
@@ -16,15 +17,25 @@ export interface BatteryStatusViewProps {
     battery?: number
     batteryStatus?: BatteryStatus
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
+    robotStatus: RobotStatus
 }
 
-const BatteryStatusView = ({ battery, batteryStatus, itemSize = 24 }: BatteryStatusViewProps): JSX.Element => {
+const BatteryStatusView = ({
+    robotStatus,
+    battery,
+    batteryStatus,
+    itemSize = 24,
+}: BatteryStatusViewProps): JSX.Element => {
     let battery_icon
     let icon_color: string = tokens.colors.interactive.primary__resting.hex
     let battery_value: string
 
     if (!battery) {
         battery_value = '---%'
+        battery_icon = Icons.BatteryUnknown
+    } else if (robotStatus === RobotStatus.Offline) {
+        battery_value = ''
+        icon_color = tokens.colors.interactive.disabled__text.hex
         battery_icon = Icons.BatteryUnknown
     } else {
         battery_value = `${battery}%`
