@@ -354,15 +354,4 @@ export class BackendAPICaller {
         })
         return result.content
     }
-
-    static async removeAllMissions(robotId: string) {
-        const path: string = `robots/${robotId}/remove-all-missions`
-        const body = {}
-
-        const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
-            console.error(`Failed to POST /${path}: ` + e)
-            throw e
-        })
-        return result.content
-    }
 }

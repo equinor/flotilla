@@ -31,7 +31,13 @@ namespace Api.EventHandlers
         private RobotController RobotController =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<RobotController>();
 
-        public MissionScheduler(ILogger<MissionScheduler> logger, IServiceScopeFactory scopeFactory)
+        private IRobotService RobotService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+
+        public MissionScheduler(
+            ILogger<MissionScheduler> logger,
+            IServiceScopeFactory scopeFactory
+        )
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
@@ -45,12 +51,20 @@ namespace Api.EventHandlers
                 foreach (var queuedMission in MissionQueue)
                 {
                     var freshMission = MissionService.ReadById(queuedMission.Id).Result;
+
                     if (freshMission == null)
                     {
                         continue;
                     }
+
+                    var robot = await RobotService.ReadById(freshMission.Robot.Id);
+                    if (robot == null)
+                    {
+                        continue;
+                    }
+
                     if (
-                        freshMission.Robot.Status is not RobotStatus.Available
+                        robot.Status is not RobotStatus.Available
                         || !freshMission.Robot.Enabled
                         || freshMission.DesiredStartTime > DateTimeOffset.UtcNow
                     )
@@ -65,8 +79,10 @@ namespace Api.EventHandlers
 
                     try
                     {
-                        await StartMission(queuedMission);
+                        var result = await StartMission(queuedMission);
+                        Console.WriteLine(result);
                     }
+
                     catch (MissionException e)
                     {
                         const MissionStatus NewStatus = MissionStatus.Failed;
@@ -81,11 +97,12 @@ namespace Api.EventHandlers
                         await MissionService.Update(queuedMission);
                     }
                 }
+
                 await Task.Delay(_timeDelay, stoppingToken);
             }
         }
 
-        private async Task StartMission(Mission queuedMission)
+        private async Task<ActionResult<Mission>> StartMission(Mission queuedMission)
         {
             var result = await RobotController.StartMission(
                 queuedMission.Robot.Id,
@@ -99,6 +116,8 @@ namespace Api.EventHandlers
                 throw new MissionException(errorMessage);
             }
             _logger.LogInformation("Started mission '{id}'", queuedMission.Id);
+
+            return result;
         }
     }
 }

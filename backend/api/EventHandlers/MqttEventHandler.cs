@@ -90,6 +90,11 @@ namespace Api.EventHandlers
                 return;
             }
 
+            if (robot.Status != isarRobotStatus.RobotStatus && robot.CurrentMissionId != null)
+            {
+                return;
+            }
+
             robot.Status = isarRobotStatus.RobotStatus;
             robot = await robotService.Update(robot);
             _logger.LogInformation(

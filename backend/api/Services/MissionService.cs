@@ -171,6 +171,11 @@ namespace Api.Services
 
             mission.Status = missionStatus;
 
+            if (mission.Status == MissionStatus.Successful)
+            {
+                Console.WriteLine("");
+            }
+
             await _context.SaveChangesAsync();
 
             return mission;
