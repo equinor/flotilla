@@ -270,12 +270,12 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async postLocalizationMission(localizationPose: Pose, robotId: string, deckId: string) {
+    static async postLocalizationMission(localizationPose: Pose, robotId: string, areaId: string) {
         const path: string = 'robots/start-localization'
         const body = {
             robotId: robotId,
             localizationPose: localizationPose,
-            deckId: deckId,
+            areaId: areaId,
         }
         const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
             console.error(`Failed to POST /${path}: ` + e)
