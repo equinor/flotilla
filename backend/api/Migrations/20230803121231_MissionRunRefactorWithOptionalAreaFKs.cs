@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Api.Migrations
 {
     /// <inheritdoc />
-    public partial class MissionRunRefactorWithColumnChanges : Migration
+    public partial class MissionRunRefactorWithOptionalAreaFKs : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -136,15 +136,13 @@ namespace Api.Migrations
                 name: "DeckId",
                 table: "Areas",
                 type: "nvarchar(450)",
-                nullable: false,
-                defaultValue: "");
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "InstallationId",
                 table: "Areas",
                 type: "nvarchar(450)",
-                nullable: false,
-                defaultValue: "");
+                nullable: true);
 
             migrationBuilder.AddColumn<double>(
                 name: "MapMetadata_Boundary_X1",
@@ -220,8 +218,7 @@ namespace Api.Migrations
                 name: "PlantId",
                 table: "Areas",
                 type: "nvarchar(450)",
-                nullable: false,
-                defaultValue: "");
+                nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "Sources",
