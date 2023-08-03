@@ -29,11 +29,9 @@ namespace Api.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("DeckId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("InstallationId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
@@ -42,7 +40,6 @@ namespace Api.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("PlantId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -380,20 +377,17 @@ namespace Api.Migrations
                     b.HasOne("Api.Database.Models.Deck", "Deck")
                         .WithMany()
                         .HasForeignKey("DeckId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Api.Database.Models.Installation", "Installation")
                         .WithMany()
                         .HasForeignKey("InstallationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Api.Database.Models.Plant", "Plant")
                         .WithMany()
                         .HasForeignKey("PlantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.OwnsOne("Api.Database.Models.Pose", "DefaultLocalizationPose", b1 =>
                         {
