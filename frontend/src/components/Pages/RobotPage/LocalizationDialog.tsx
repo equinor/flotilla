@@ -96,13 +96,13 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
 
     const getAreaNames = (areas: Area[]): Map<string, Area> => {
         var areaNameMap = new Map<string, Area>()
-        areas.forEach((area: Area) => areaNameMap.set(area.deckName, area))
+        areas.forEach((area: Area) => areaNameMap.set(area.areaName, area))
         return areaNameMap
     }
 
-    const onSelectedDeck = (changes: AutocompleteChanges<string>) => {
-        const selectedDeckName = changes.selectedItems[0]
-        const selectedArea = areas?.find((area) => area.deckName === selectedDeckName)
+    const onSelectedArea = (changes: AutocompleteChanges<string>) => {
+        const selectedAreaName = changes.selectedItems[0]
+        const selectedArea = areas?.find((area) => area.areaName === selectedAreaName)
         setSelectedArea(selectedArea)
         let newPose = selectedArea?.defaultLocalizationPose
         if (newPose && selectedDirection) {
@@ -189,8 +189,8 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                     <StyledAutoComplete>
                         <Autocomplete
                             options={areaNames}
-                            label={TranslateText('Select deck')}
-                            onOptionsChange={onSelectedDeck}
+                            label={TranslateText('Select area')}
+                            onOptionsChange={onSelectedArea}
                         />
                         <Autocomplete
                             options={Array.from(directionMap.keys())}
