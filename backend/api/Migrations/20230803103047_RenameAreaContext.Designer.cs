@@ -4,6 +4,7 @@ using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230803103047_RenameAreaContext")]
+    partial class RenameAreaContext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,53 +46,6 @@ namespace Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Areas");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Deck", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("InstallationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("PlantId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InstallationId");
-
-                    b.HasIndex("PlantId");
-
-                    b.ToTable("Decks");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Installation", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("InstallationCode")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Installations");
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionRun", b =>
@@ -153,32 +108,6 @@ namespace Api.Migrations
                     b.HasIndex("RobotId");
 
                     b.ToTable("MissionRuns");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Plant", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("InstallationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("PlantCode")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InstallationId");
-
-                    b.ToTable("Plants");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Robot", b =>
@@ -361,21 +290,6 @@ namespace Api.Migrations
 
                     b.Navigation("DefaultLocalizationPose")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Deck", b =>
-                {
-                    b.HasOne("Api.Database.Models.Installation", "Installation")
-                        .WithMany()
-                        .HasForeignKey("InstallationId");
-
-                    b.HasOne("Api.Database.Models.Plant", "Plant")
-                        .WithMany()
-                        .HasForeignKey("PlantId");
-
-                    b.Navigation("Installation");
-
-                    b.Navigation("Plant");
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionRun", b =>
@@ -665,15 +579,6 @@ namespace Api.Migrations
                     b.Navigation("Robot");
 
                     b.Navigation("Tasks");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Plant", b =>
-                {
-                    b.HasOne("Api.Database.Models.Installation", "Installation")
-                        .WithMany()
-                        .HasForeignKey("InstallationId");
-
-                    b.Navigation("Installation");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Robot", b =>

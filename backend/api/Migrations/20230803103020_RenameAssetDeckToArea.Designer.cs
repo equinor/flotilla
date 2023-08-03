@@ -12,18 +12,17 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    [Migration("20230803095918_MissionRunRefactor")]
-    partial class MissionRunRefactor
+    [Migration("20230803103020_RenameAssetDeckToArea")]
+    partial class RenameAssetDeckToArea
     {
-        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.8")
+                .HasAnnotation("ProductVersion", "6.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
             modelBuilder.Entity("Api.Database.Models.Area", b =>
                 {
@@ -31,128 +30,22 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("DeckId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("InstallationId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("AssetCode")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("PlantId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeckId");
-
-                    b.HasIndex("InstallationId");
-
-                    b.HasIndex("PlantId");
-
-                    b.ToTable("Areas");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Deck", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("InstallationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("PlantId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InstallationId");
-
-                    b.HasIndex("PlantId");
-
-                    b.ToTable("Decks");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Installation", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("InstallationCode")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("DeckName")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InstallationCode")
+                    b.HasIndex("AssetCode", "DeckName")
                         .IsUnique();
 
-                    b.ToTable("Installations");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.MissionDefinition", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("AreaId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Comment")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<TimeSpan?>("InspectionFrequency")
-                        .HasColumnType("time");
-
-                    b.Property<string>("InstallationCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeprecated")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastRunId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("SourceId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AreaId");
-
-                    b.HasIndex("LastRunId");
-
-                    b.HasIndex("SourceId");
-
-                    b.ToTable("MissionDefinitions");
+                    b.ToTable("AssetDecks");
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionRun", b =>
@@ -161,8 +54,10 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("AreaId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<string>("AssetCode")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Comment")
                         .HasMaxLength(1000)
@@ -175,23 +70,19 @@ namespace Api.Migrations
                     b.Property<DateTimeOffset>("DesiredStartTime")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<int?>("EchoMissionId")
+                        .HasMaxLength(200)
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset?>("EndTime")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<long?>("EstimatedDuration")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("InstallationCode")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
                     b.Property<string>("IsarMissionId")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("MissionId")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -214,40 +105,9 @@ namespace Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AreaId");
-
                     b.HasIndex("RobotId");
 
                     b.ToTable("MissionRuns");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Plant", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("InstallationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("PlantCode")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InstallationId");
-
-                    b.HasIndex("PlantCode")
-                        .IsUnique();
-
-                    b.ToTable("Plants");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Robot", b =>
@@ -259,12 +119,12 @@ namespace Api.Migrations
                     b.Property<float>("BatteryLevel")
                         .HasColumnType("real");
 
-                    b.Property<string>("CurrentAreaId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CurrentInstallation")
+                    b.Property<string>("CurrentAsset")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CurrentAssetDeckId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("CurrentMissionId")
                         .HasColumnType("nvarchar(max)");
@@ -307,7 +167,7 @@ namespace Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CurrentAreaId");
+                    b.HasIndex("CurrentAssetDeckId");
 
                     b.HasIndex("ModelId");
 
@@ -360,44 +220,8 @@ namespace Api.Migrations
                     b.ToTable("SafePositions");
                 });
 
-            modelBuilder.Entity("Api.Database.Models.Source", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("SourceId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Sources");
-                });
-
             modelBuilder.Entity("Api.Database.Models.Area", b =>
                 {
-                    b.HasOne("Api.Database.Models.Deck", "Deck")
-                        .WithMany()
-                        .HasForeignKey("DeckId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Api.Database.Models.Installation", "Installation")
-                        .WithMany()
-                        .HasForeignKey("InstallationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Api.Database.Models.Plant", "Plant")
-                        .WithMany()
-                        .HasForeignKey("PlantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.OwnsOne("Api.Database.Models.Pose", "DefaultLocalizationPose", b1 =>
                         {
                             b1.Property<string>("AreaId")
@@ -405,7 +229,7 @@ namespace Api.Migrations
 
                             b1.HasKey("AreaId");
 
-                            b1.ToTable("Areas");
+                            b1.ToTable("AssetDecks");
 
                             b1.WithOwner()
                                 .HasForeignKey("AreaId");
@@ -429,7 +253,7 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseAreaId");
 
-                                    b2.ToTable("Areas");
+                                    b2.ToTable("AssetDecks");
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseAreaId");
@@ -451,7 +275,7 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseAreaId");
 
-                                    b2.ToTable("Areas");
+                                    b2.ToTable("AssetDecks");
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseAreaId");
@@ -464,152 +288,19 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsOne("Api.Database.Models.MapMetadata", "MapMetadata", b1 =>
-                        {
-                            b1.Property<string>("AreaId")
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<string>("MapName")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)");
-
-                            b1.HasKey("AreaId");
-
-                            b1.ToTable("Areas");
-
-                            b1.WithOwner()
-                                .HasForeignKey("AreaId");
-
-                            b1.OwnsOne("Api.Database.Models.Boundary", "Boundary", b2 =>
-                                {
-                                    b2.Property<string>("MapMetadataAreaId")
-                                        .HasColumnType("nvarchar(450)");
-
-                                    b2.Property<double>("X1")
-                                        .HasColumnType("float");
-
-                                    b2.Property<double>("X2")
-                                        .HasColumnType("float");
-
-                                    b2.Property<double>("Y1")
-                                        .HasColumnType("float");
-
-                                    b2.Property<double>("Y2")
-                                        .HasColumnType("float");
-
-                                    b2.Property<double>("Z1")
-                                        .HasColumnType("float");
-
-                                    b2.Property<double>("Z2")
-                                        .HasColumnType("float");
-
-                                    b2.HasKey("MapMetadataAreaId");
-
-                                    b2.ToTable("Areas");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("MapMetadataAreaId");
-                                });
-
-                            b1.OwnsOne("Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
-                                {
-                                    b2.Property<string>("MapMetadataAreaId")
-                                        .HasColumnType("nvarchar(450)");
-
-                                    b2.Property<double>("C1")
-                                        .HasColumnType("float");
-
-                                    b2.Property<double>("C2")
-                                        .HasColumnType("float");
-
-                                    b2.Property<double>("D1")
-                                        .HasColumnType("float");
-
-                                    b2.Property<double>("D2")
-                                        .HasColumnType("float");
-
-                                    b2.HasKey("MapMetadataAreaId");
-
-                                    b2.ToTable("Areas");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("MapMetadataAreaId");
-                                });
-
-                            b1.Navigation("Boundary")
-                                .IsRequired();
-
-                            b1.Navigation("TransformationMatrices")
-                                .IsRequired();
-                        });
-
-                    b.Navigation("Deck");
-
                     b.Navigation("DefaultLocalizationPose")
                         .IsRequired();
-
-                    b.Navigation("Installation");
-
-                    b.Navigation("MapMetadata")
-                        .IsRequired();
-
-                    b.Navigation("Plant");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Deck", b =>
-                {
-                    b.HasOne("Api.Database.Models.Installation", "Installation")
-                        .WithMany()
-                        .HasForeignKey("InstallationId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Api.Database.Models.Plant", "Plant")
-                        .WithMany()
-                        .HasForeignKey("PlantId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Installation");
-
-                    b.Navigation("Plant");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.MissionDefinition", b =>
-                {
-                    b.HasOne("Api.Database.Models.Area", "Area")
-                        .WithMany()
-                        .HasForeignKey("AreaId");
-
-                    b.HasOne("Api.Database.Models.MissionRun", "LastRun")
-                        .WithMany()
-                        .HasForeignKey("LastRunId");
-
-                    b.HasOne("Api.Database.Models.Source", "Source")
-                        .WithMany()
-                        .HasForeignKey("SourceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Area");
-
-                    b.Navigation("LastRun");
-
-                    b.Navigation("Source");
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionRun", b =>
                 {
-                    b.HasOne("Api.Database.Models.Area", "Area")
-                        .WithMany()
-                        .HasForeignKey("AreaId");
-
                     b.HasOne("Api.Database.Models.Robot", "Robot")
                         .WithMany()
                         .HasForeignKey("RobotId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Api.Database.Models.MapMetadata", "Map", b1 =>
+                    b.OwnsOne("Api.Database.Models.MapMetadata", "MapMetadata", b1 =>
                         {
                             b1.Property<string>("MissionRunId")
                                 .HasColumnType("nvarchar(450)");
@@ -883,30 +574,18 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
-                    b.Navigation("Area");
-
-                    b.Navigation("Map");
+                    b.Navigation("MapMetadata");
 
                     b.Navigation("Robot");
 
                     b.Navigation("Tasks");
                 });
 
-            modelBuilder.Entity("Api.Database.Models.Plant", b =>
-                {
-                    b.HasOne("Api.Database.Models.Installation", "Installation")
-                        .WithMany()
-                        .HasForeignKey("InstallationId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Installation");
-                });
-
             modelBuilder.Entity("Api.Database.Models.Robot", b =>
                 {
-                    b.HasOne("Api.Database.Models.Area", "CurrentArea")
+                    b.HasOne("Api.Database.Models.Area", "CurrentAssetDeck")
                         .WithMany()
-                        .HasForeignKey("CurrentAreaId");
+                        .HasForeignKey("CurrentAssetDeckId");
 
                     b.HasOne("Api.Database.Models.RobotModel", "Model")
                         .WithMany()
@@ -1018,7 +697,7 @@ namespace Api.Migrations
                                 .HasForeignKey("RobotId");
                         });
 
-                    b.Navigation("CurrentArea");
+                    b.Navigation("CurrentAssetDeck");
 
                     b.Navigation("Model");
 
