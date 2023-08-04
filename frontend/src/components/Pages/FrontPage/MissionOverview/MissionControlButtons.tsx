@@ -77,5 +77,5 @@ export function MissionControlButtons({ mission }: MissionProps) {
         }
         return <></>
     }
-    return checkIfTasksStarted(mission.tasks) ? <>{renderControlIcon(mission.status)}</> : <></>
+    return <>{renderControlIcon(mission.status)}</>
 }
