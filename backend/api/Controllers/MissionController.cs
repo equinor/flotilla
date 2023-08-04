@@ -380,15 +380,9 @@ public class MissionController : ControllerBase
             )
             .ToList();
 
-        var area = await _areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
-
-        if (area == null)
-        {
-            // This is disabled for now as the Area database is not yet populated
-            //return NotFound($"Could not find area with name {scheduledMissionQuery.AreaName} in installation {scheduledMissionQuery.InstallationCode}");
-        }
-
-        // TODO: search for if a source with the given type and URL exists, then reuse it
+        Area? area = null;
+        if (scheduledMissionQuery.AreaName != null)
+            area = await _areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
 
         var scheduledMissionDefinition = new MissionDefinition
         {
@@ -454,10 +448,9 @@ public class MissionController : ControllerBase
 
         var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 
-        var area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName);
-
-        if (area == null)
-            return NotFound($"Could not find area with name {customMissionQuery.AreaName} in installation {customMissionQuery.InstallationCode}");
+        Area? area = null;
+        if (customMissionQuery.AreaName != null)
+            area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName);
 
         string sourceURL = _customMissionService.UploadSource(missionTasks);
 
