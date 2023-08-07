@@ -74,30 +74,33 @@ function InstallationPicker(page: string) {
     const { TranslateText } = useLanguageContext()
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
     const { installationCode, switchInstallation } = useInstallationContext()
+    const [showActivePlants, setShowActivePlants] = useState<boolean>(true)
     useEffect(() => {
-        BackendAPICaller.getEchoPlantInfo().then(async (response: EchoPlantInfo[]) => {
-            let activePlants = await BackendAPICaller.getActivePlants()
-            let filteredActiveEchoPlants = response.filter((plant) => activePlants.includes(plant.plantCode))
-            const mapping = mapInstallationCodeToName(filteredActiveEchoPlants)
+        const plantPromise = showActivePlants ? 
+            BackendAPICaller.getActivePlants() : BackendAPICaller.getEchoPlantInfo()
+        plantPromise.then(async (response: EchoPlantInfo[]) => {
+            const mapping = mapInstallationCodeToName(response)
             setAllPlantsMap(mapping)
         })
     }, [])
     const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
     return (
-        <Autocomplete
-            options={Array.from(mappedOptions.keys()).sort()}
-            label=""
-            disabled={page === 'mission'}
-            initialSelectedOptions={[installationCode.toUpperCase()]}
-            placeholder={TranslateText('Select installation')}
-            onOptionsChange={({ selectedItems }) => {
-                const mapKey = mappedOptions.get(selectedItems[0])
-                if (mapKey !== undefined) switchInstallation(mapKey)
-                else switchInstallation('')
-            }}
-            autoWidth={true}
-            onFocus={(e) => e.preventDefault()}
-        />
+        <>
+            <Autocomplete
+                options={Array.from(mappedOptions.keys()).sort()}
+                label=""
+                disabled={page === 'mission'}
+                initialSelectedOptions={[installationCode.toUpperCase()]}
+                placeholder={TranslateText('Select installation')}
+                onOptionsChange={({ selectedItems }) => {
+                    const mapKey = mappedOptions.get(selectedItems[0])
+                    if (mapKey !== undefined) switchInstallation(mapKey)
+                    else switchInstallation('')
+                }}
+                autoWidth={true}
+                onFocus={(e) => e.preventDefault()}
+            />
+        </>
     )
 }
 
