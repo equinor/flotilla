@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, FC } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Mission } from 'models/Mission'
-import { ControlButton } from 'components/Pages/FrontPage/MissionOverview/StopMissionDialog'
+import { MissionStatusRequest } from 'components/Pages/FrontPage/MissionOverview/StopMissionDialog'
 
 interface IMissionControlState {
     isWaitingForResponse: boolean
@@ -13,14 +13,12 @@ interface Props {
 
 export interface IMissionControlContext {
     missionControlState: IMissionControlState
-    setIsWaitingForResponse: (isWaiting: boolean) => void
-    handleClick: (button: ControlButton, mission: Mission) => void
+    updateMissionState: (newState: MissionStatusRequest, mission: Mission) => void
 }
 
 const defaultMissionControlInterface = {
     missionControlState: { isWaitingForResponse: false },
-    setIsWaitingForResponse: (isWaiting: boolean) => {},
-    handleClick: (button: ControlButton, mission: Mission) => {},
+    updateMissionState: (newState: MissionStatusRequest, mission: Mission) => {},
 }
 
 export const MissionControlContext = createContext<IMissionControlContext>(defaultMissionControlInterface)
@@ -35,19 +33,19 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
         setMissionControlState({ isWaitingForResponse: isWaiting })
     }
 
-    const handleClick = (button: ControlButton, mission: Mission) => {
-        switch (button) {
-            case ControlButton.Pause: {
+    const updateMissionState = (newState: MissionStatusRequest, mission: Mission) => {
+        switch (newState) {
+            case MissionStatusRequest.Pause: {
                 setIsWaitingForResponse(true)
                 BackendAPICaller.pauseMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
                 break
             }
-            case ControlButton.Resume: {
+            case MissionStatusRequest.Resume: {
                 setIsWaitingForResponse(true)
                 BackendAPICaller.resumeMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
                 break
             }
-            case ControlButton.Stop: {
+            case MissionStatusRequest.Stop: {
                 setIsWaitingForResponse(true)
                 BackendAPICaller.stopMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
                 break
@@ -59,8 +57,7 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
         <MissionControlContext.Provider
             value={{
                 missionControlState,
-                setIsWaitingForResponse,
-                handleClick,
+                updateMissionState,
             }}
         >
             {children}

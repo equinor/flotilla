@@ -30,7 +30,7 @@ interface MissionProps {
     mission: Mission
 }
 
-export enum ControlButton {
+export enum MissionStatusRequest {
     Pause,
     Stop,
     Resume,
@@ -40,7 +40,7 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const [isStopMissionDialogOpen, setIsStopMissionDialogOpen] = useState<boolean>(false)
     const [missionId, setMissionId] = useState<string>()
-    const { handleClick } = useMissionControlContext()
+    const { updateMissionState } = useMissionControlContext()
 
     const openDialog = () => {
         setIsStopMissionDialogOpen(true)
@@ -91,7 +91,7 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
                         <Button
                             variant="contained"
                             color="danger"
-                            onClick={() => handleClick(ControlButton.Stop, mission)}
+                            onClick={() => updateMissionState(MissionStatusRequest.Stop, mission)}
                         >
                             {TranslateText('Stop mission')}
                         </Button>
