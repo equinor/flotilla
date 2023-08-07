@@ -21,7 +21,7 @@ import { MissionDefinition } from 'models/MissionDefinition'
 interface IProps {
     robotOptions: Array<Robot>
     echoMissionsOptions: Array<string>
-    onSelectedMissions: (missions: string[]) => void
+    onChangeMissionSelections: (missions: string[]) => void
     onSelectedRobot: (robot: Robot) => void
     onScheduleButtonPress: () => void
     fetchEchoMissions: () => void
@@ -93,13 +93,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const onClickScheduleMission = () => {
         setIsScheduleMissionsPressed(true)
         props.fetchEchoMissions()
-    }
-
-    const onChangeEchoMissionSelections = (changes: AutocompleteChanges<string>) => {
-        props.onSelectedMissions(changes.selectedItems)
-    }
-    const onChangeRobotSelection = (changes: AutocompleteChanges<Robot>) => {
-        props.onSelectedRobot(changes.selectedItems[0])
     }
 
     return (
@@ -189,7 +182,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                         <Autocomplete
                             options={props.echoMissionsOptions}
                             label={TranslateText('Select missions')}
-                            onOptionsChange={onChangeEchoMissionSelections}
+                            onOptionsChange={(changes) => props.onChangeMissionSelections(changes.selectedItems)}
                             multiple
                             placeholder={`${props.selectedMissions.length}/${
                                 Array.from(props.echoMissionsOptions.keys()).length
@@ -201,7 +194,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 (r) => r.currentInstallation.toLocaleLowerCase() == installationCode.toLocaleLowerCase()
                             )}
                             label={TranslateText('Select robot')}
-                            onOptionsChange={onChangeRobotSelection}
+                            onOptionsChange={(changes) => props.onSelectedRobot(changes.selectedItems[0])}
                         />
                         <StyledMissionSection>
                             <Button
