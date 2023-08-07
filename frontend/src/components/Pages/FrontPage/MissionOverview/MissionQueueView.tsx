@@ -38,14 +38,6 @@ const mapEchoMissionToString = (missions: MissionDefinition[]): Map<string, Miss
     return missionMap
 }
 
-const mapRobotsToString = (robots: Robot[]): Map<string, Robot> => {
-    var robotMap = new Map<string, Robot>()
-    robots.forEach((robot: Robot) => {
-        robotMap.set(robot.name + ' (' + robot.model.type + ')', robot)
-    })
-    return robotMap
-}
-
 export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const missionPageSize = 100
@@ -55,7 +47,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const [echoMissions, setEchoMissions] = useState<Map<string, MissionDefinition>>(
         new Map<string, MissionDefinition>()
     )
-    const [robotOptions, setRobotOptions] = useState<Map<string, Robot>>(new Map<string, Robot>())
+    const [robotOptions, setRobotOptions] = useState<Robot[]>([])
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
     const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
     const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
@@ -77,10 +69,10 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         })
         setSelectedEchoMissions(echoMissionsToSchedule)
     }
-    const onSelectedRobot = (selectedRobot: string) => {
+    const onSelectedRobot = (selectedRobot: Robot) => {
         if (robotOptions === undefined) return
 
-        setSelectedRobot(robotOptions.get(selectedRobot) as Robot)
+        setSelectedRobot(selectedRobot)
     }
 
     const onScheduleButtonPress = () => {
@@ -102,8 +94,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     useEffect(() => {
         const id = setInterval(() => {
             BackendAPICaller.getEnabledRobots().then((robots) => {
-                const mappedRobots: Map<string, Robot> = mapRobotsToString(robots)
-                setRobotOptions(mappedRobots)
+                setRobotOptions(robots)
             })
         }, refreshInterval)
         return () => clearInterval(id)
@@ -131,7 +122,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }, [selectedRobot, selectedEchoMissions])
 
     useEffect(() => {
-        if (Array.from(robotOptions.keys()).length === 0 || installationCode === '') {
+        if (robotOptions.length === 0 || installationCode === '') {
             setFrontPageScheduleButtonDisabled(true)
         } else {
             setFrontPageScheduleButtonDisabled(false)
@@ -153,7 +144,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
             </MissionTable>
             <MissionButtonView>
                 <ScheduleMissionDialog
-                    robotOptions={Array.from(robotOptions.keys())}
+                    robotOptions={robotOptions}
                     echoMissionsOptions={Array.from(echoMissions.keys())}
                     onSelectedMissions={onSelectedEchoMissions}
                     onSelectedRobot={onSelectedRobot}

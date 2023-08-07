@@ -15,12 +15,13 @@ import { Icons } from 'utils/icons'
 import { useRef, useState, useEffect } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
+import { Robot } from 'models/Robot'
 
 interface IProps {
-    robotOptions: Array<string>
+    robotOptions: Array<Robot>
     echoMissionsOptions: Array<string>
     onSelectedMissions: (missions: string[]) => void
-    onSelectedRobot: (robot: string) => void
+    onSelectedRobot: (robot: Robot) => void
     onScheduleButtonPress: () => void
     fetchEchoMissions: () => void
     scheduleButtonDisabled: boolean
@@ -95,7 +96,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const onChangeEchoMissionSelections = (changes: AutocompleteChanges<string>) => {
         props.onSelectedMissions(changes.selectedItems)
     }
-    const onChangeRobotSelection = (changes: AutocompleteChanges<string>) => {
+    const onChangeRobotSelection = (changes: AutocompleteChanges<Robot>) => {
         props.onSelectedRobot(changes.selectedItems[0])
     }
 
@@ -190,7 +191,10 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             multiple
                         />
                         <Autocomplete
-                            options={props.robotOptions}
+                            optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
+                            options={props.robotOptions.filter(
+                                (r) => r.currentInstallation.toLocaleLowerCase() == installationCode.toLocaleLowerCase()
+                            )}
                             label={TranslateText('Select robot')}
                             onOptionsChange={onChangeRobotSelection}
                         />
