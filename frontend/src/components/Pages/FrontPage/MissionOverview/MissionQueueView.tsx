@@ -62,11 +62,13 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         })
     }
 
-    const onSelectedEchoMissions = (selectedEchoMissions: string[]) => {
+    const onChangeMissionSelections = (selectedEchoMissions: string[]) => {
         var echoMissionsToSchedule: MissionDefinition[] = []
-        selectedEchoMissions.forEach((selectedEchoMission: string) => {
-            if (echoMissions) echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as MissionDefinition)
-        })
+        if (echoMissions) {
+            selectedEchoMissions.forEach((selectedEchoMission: string) => {
+                echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as MissionDefinition)
+            })
+        }
         setSelectedEchoMissions(echoMissionsToSchedule)
     }
     const onSelectedRobot = (selectedRobot: Robot) => {
@@ -146,7 +148,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                 <ScheduleMissionDialog
                     robotOptions={robotOptions}
                     echoMissionsOptions={Array.from(echoMissions.keys())}
-                    onSelectedMissions={onSelectedEchoMissions}
+                    onChangeMissionSelections={onChangeMissionSelections}
                     selectedMissions={selectedEchoMissions}
                     onSelectedRobot={onSelectedRobot}
                     onScheduleButtonPress={onScheduleButtonPress}
