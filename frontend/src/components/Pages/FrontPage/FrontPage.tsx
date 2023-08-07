@@ -30,6 +30,8 @@ export type RefreshProps = {
     refreshInterval: number
 }
 
+export const refreshInterval = 1000
+
 export function FrontPage() {
     const refreshInterval = 1000
 

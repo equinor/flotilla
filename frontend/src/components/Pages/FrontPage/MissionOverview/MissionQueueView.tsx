@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { MissionQueueCard } from './MissionQueueCard'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
-import { Mission, MissionStatus } from 'models/Mission'
+import { Mission } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { Robot } from 'models/Robot'
@@ -12,6 +12,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
 import { MissionDefinition } from 'models/MissionDefinition'
+import { useMissionQueueContext } from 'components/Contexts/MissionQueueContext'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -40,8 +41,8 @@ const mapEchoMissionToString = (missions: MissionDefinition[]): Map<string, Miss
 
 export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
-    const missionPageSize = 100
-    const [missionQueue, setMissionQueue] = useState<Mission[]>([])
+    const { missionQueue } = useMissionQueueContext()
+
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<MissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [echoMissions, setEchoMissions] = useState<Map<string, MissionDefinition>>(
@@ -97,19 +98,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         const id = setInterval(() => {
             BackendAPICaller.getEnabledRobots().then((robots) => {
                 setRobotOptions(robots)
-            })
-        }, refreshInterval)
-        return () => clearInterval(id)
-    }, [refreshInterval])
-
-    useEffect(() => {
-        const id = setInterval(() => {
-            BackendAPICaller.getMissionRuns({
-                statuses: [MissionStatus.Pending],
-                pageSize: missionPageSize,
-                orderBy: 'DesiredStartTime',
-            }).then((missions) => {
-                setMissionQueue(missions.content)
             })
         }, refreshInterval)
         return () => clearInterval(id)

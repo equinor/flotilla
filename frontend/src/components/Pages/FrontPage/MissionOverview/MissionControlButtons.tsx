@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
-import { StopMissionDialog, ControlButton } from './StopMissionDialog'
+import { StopMissionDialog, MissionStatusRequest } from './StopMissionDialog'
 
 interface MissionProps {
     mission: Mission
@@ -31,7 +31,7 @@ const checkIfTasksStarted = (tasks: Task[]): boolean => {
 
 export function MissionControlButtons({ mission }: MissionProps) {
     const { TranslateText } = useLanguageContext()
-    const { missionControlState, handleClick } = useMissionControlContext()
+    const { missionControlState, updateMissionState } = useMissionControlContext()
 
     const renderControlIcon = (missionStatus: MissionStatus) => {
         if (missionControlState.isWaitingForResponse) {
@@ -44,7 +44,10 @@ export function MissionControlButtons({ mission }: MissionProps) {
                         <Typography variant="caption">{TranslateText('Stop')}</Typography>
                     </ButtonText>
                     <ButtonText>
-                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Pause, mission)}>
+                        <Button
+                            variant="ghost_icon"
+                            onClick={() => updateMissionState(MissionStatusRequest.Pause, mission)}
+                        >
                             <Icon
                                 name={Icons.PauseButton}
                                 style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
@@ -63,7 +66,10 @@ export function MissionControlButtons({ mission }: MissionProps) {
                         <Typography variant="caption">{TranslateText('Stop')}</Typography>
                     </ButtonText>
                     <ButtonText>
-                        <Button variant="ghost_icon" onClick={() => handleClick(ControlButton.Resume, mission)}>
+                        <Button
+                            variant="ghost_icon"
+                            onClick={() => updateMissionState(MissionStatusRequest.Resume, mission)}
+                        >
                             <Icon
                                 name={Icons.PlayButton}
                                 style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
