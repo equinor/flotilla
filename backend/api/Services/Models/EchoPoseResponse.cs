@@ -15,8 +15,8 @@ namespace Api.Services.Models
         [JsonPropertyName("position")]
         public EchoVector Position { get; set; }
 
-        [JsonPropertyName("tiltDegClockwise")]
-        public float TiltDegreesClockwise { get; set; }
+        [JsonPropertyName("robotBodyDirectionDegrees")]
+        public float RobotBodyDirectionDegrees { get; set; }
         [JsonPropertyName("isDefault")]
         public bool IsDefault { get; set; }
     }
