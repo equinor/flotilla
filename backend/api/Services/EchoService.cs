@@ -150,7 +150,7 @@ namespace Api.Services
                     PlanOrder = planItem.SortingOrder,
                     Pose = new Pose(
                         robotPose.Position,
-                        robotPose.TiltDegreesClockwise * MathF.PI / 180
+                        robotPose.RobotBodyDirectionDegrees * MathF.PI / 180
                     ),
                     URL = new Uri(
                         $"https://stid.equinor.com/{installationCode}/tag?tagNo={planItem.Tag}"
