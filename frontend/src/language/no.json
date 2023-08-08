@@ -110,5 +110,6 @@
     "Localizing": "Lokaliserer",
     "Re-run the mission": "Kjør oppdraget på nytt",
     "Re-run full mission": "Kjør hele oppdraget på nytt",
-    "Re-run failed and cancelled tasks in the mission": "Kjør feilet og kansellerte oppgaver i oppdraget på nytt"
+    "Re-run failed and cancelled tasks in the mission": "Kjør feilet og kansellerte oppgaver i oppdraget på nytt",
+    "Only active installations": "Bare installasjoner i bruk"
 }
