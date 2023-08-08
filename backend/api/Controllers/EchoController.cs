@@ -29,14 +29,14 @@ public class EchoController : ControllerBase
     /// These missions are created in the Echo mission planner
     /// </remarks>
     [HttpGet]
-    [Route("available-missions")]
+    [Route("available-missions/{plantCode}")]
     [ProducesResponseType(typeof(List<CondensedMissionDefinition>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<IList<CondensedMissionDefinition>>> GetAvailableEchoMissions(string? plantCode)
+    public async Task<ActionResult<IList<CondensedMissionDefinition>>> GetAvailableEchoMissions([FromRoute] string? plantCode)
     {
         try
         {
