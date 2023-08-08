@@ -14,8 +14,13 @@ namespace Api.Test.Mocks
         {
             new EchoPlantInfo
             {
-                PlantCode = "jsv",
-                ProjectDescription = "Johan Sverdrup"
+                PlantCode = "testInstallationNextRun",
+                ProjectDescription = "testInstallationNextRun"
+            },
+            new EchoPlantInfo
+            {
+                PlantCode = "TestInstallationMissionsInAreaTest",
+                ProjectDescription = "TestInstallationMissionsInAreaTest"
             }
         };
 

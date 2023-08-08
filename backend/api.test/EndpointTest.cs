@@ -594,7 +594,7 @@ namespace Api.Test
             string customMissionsUrl = "/missions/custom";
             string scheduleMissionsUrl = "/missions/schedule";
 
-            string testInstallation = "jsv";
+            string testInstallation = "testInstallationNextRun";
             string testPlant = "testPlantNextRun";
             string testDeck = "testDeckNextRun";
             string testArea = "testAreaNextRun";
