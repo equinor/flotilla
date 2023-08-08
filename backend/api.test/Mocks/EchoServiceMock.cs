@@ -10,6 +10,15 @@ namespace Api.Test.Mocks
 {
     public class MockEchoService : IEchoService
     {
+        private readonly List<EchoPlantInfo> _mockEchoPlantInfo = new()
+        {
+            new EchoPlantInfo
+            {
+                PlantCode = "jsv",
+                ProjectDescription = "Johan Sverdrup"
+            }
+        };
+
         public EchoMission MockEchoMission =
             new()
             {
@@ -41,7 +50,7 @@ namespace Api.Test.Mocks
         public async Task<IList<EchoPlantInfo>> GetEchoPlantInfos()
         {
             await Task.Run(() => Thread.Sleep(1));
-            return new List<EchoPlantInfo>();
+            return _mockEchoPlantInfo;
         }
         public async Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId)
         {
