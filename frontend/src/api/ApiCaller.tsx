@@ -181,7 +181,7 @@ export class BackendAPICaller {
     }
 
     static async getAvailableEchoMission(installationCode: string = ''): Promise<MissionDefinition[]> {
-        const path: string = 'echo/available-missions?installationCode=' + installationCode
+        const path: string = 'echo/available-missions/' + installationCode
         const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
