@@ -1,5 +1,5 @@
 import { config } from 'config'
-import { Button, Icon, TopBar, Autocomplete, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, TopBar, Autocomplete, Typography, Checkbox } from '@equinor/eds-core-react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { EchoPlantInfo } from 'models/EchoMission'
@@ -76,13 +76,13 @@ function InstallationPicker(page: string) {
     const { installationCode, switchInstallation } = useInstallationContext()
     const [showActivePlants, setShowActivePlants] = useState<boolean>(true)
     useEffect(() => {
-        const plantPromise = showActivePlants ? 
-            BackendAPICaller.getActivePlants() : BackendAPICaller.getEchoPlantInfo()
+        const plantPromise = showActivePlants ? BackendAPICaller.getActivePlants() : BackendAPICaller.getEchoPlantInfo()
         plantPromise.then(async (response: EchoPlantInfo[]) => {
             const mapping = mapInstallationCodeToName(response)
             setAllPlantsMap(mapping)
         })
-    }, [])
+    }, [showActivePlants])
+
     const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
     return (
         <>
@@ -99,6 +99,11 @@ function InstallationPicker(page: string) {
                 }}
                 autoWidth={true}
                 onFocus={(e) => e.preventDefault()}
+            />
+            <Checkbox
+                label={TranslateText('Only active installations')}
+                checked={showActivePlants}
+                onChange={(e) => setShowActivePlants(e.target.checked)}
             />
         </>
     )
