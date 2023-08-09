@@ -55,7 +55,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
     const [areas, setAreas] = useState<Area[]>()
     const [localizationPose, setLocalizationPose] = useState<Pose>()
     const [selectedDirection, setSelectedDirecion] = useState<Orientation>()
-    const [localizing, setLocalising] = useState<Boolean>(false)
+    const [localizing, setLocalizing] = useState<Boolean>(false)
     const { TranslateText } = useLanguageContext()
 
     const colorGreen = '#A1DAA0'
@@ -80,10 +80,10 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                 .then((result: unknown) => result as Mission)
                 .then(async (mission: Mission) => {
                     BackendAPICaller.getMissionRunById(mission.id)
-                    while (mission.status == MissionStatus.Ongoing || mission.status == MissionStatus.Pending) {
+                    while (mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Pending) {
                         mission = await BackendAPICaller.getMissionRunById(mission.id)
                     }
-                    setLocalising(false)
+                    setLocalizing(false)
                     return mission
                 })
                 .then((mission: Mission) => setMissionLocalizationInfo(mission.status))
@@ -132,7 +132,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
 
     const onClickLocalize = async () => {
         setMissionLocalizationInfo(undefined)
-        setLocalising(true)
+        setLocalizing(true)
     }
 
     const areaNames = areas ? Array.from(getAreaNames(areas).keys()).sort() : []
@@ -158,7 +158,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                                 </StyledCard.Header>
                             </StyledCard>
                         )}
-                        {missionLocalizationStatus == MissionStatus.Successful && (
+                        {missionLocalizationStatus === MissionStatus.Successful && (
                             <StyledCard style={{ background: colorGreen, color: colorGreenToken }}>
                                 <StyledCard.Header>
                                     <Typography variant="body_short">

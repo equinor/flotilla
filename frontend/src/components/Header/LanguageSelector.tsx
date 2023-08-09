@@ -1,5 +1,4 @@
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useState } from 'react'
 import styled from 'styled-components'
 import { Button, Divider } from '@equinor/eds-core-react'
 
@@ -41,10 +40,8 @@ const VerticalBar = styled(Divider)`
 
 export function SelectLanguage() {
     const { language, switchLanguage } = useLanguageContext()
-    const [newLanguage, setNewLanguage] = useState<string>()
     const handleLanguageChange = (selectedLanguage: string) => {
         switchLanguage(selectedLanguage)
-        setNewLanguage(selectedLanguage)
     }
     return (
         <LanguageContainer>

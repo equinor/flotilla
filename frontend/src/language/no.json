@@ -106,7 +106,7 @@
     "Select max end time": "Velg maks sluttid",
     "selected": "valgte",
     "This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.": "Denne knappen er deaktivert fordi roboten ikke er tilgjengelig. Sjekk at roboten er på og ikke gjør noen andre aktiviteter.",
-    "Close": "Steng",
+    "Close": "Lukk",
     "Localizing": "Lokaliserer",
     "Re-run full mission": "Kjør hele oppdraget på nytt",
     "Re-run failed and cancelled tasks in the mission": "Kjør feilet og kansellerte oppgaver i oppdraget på nytt"
