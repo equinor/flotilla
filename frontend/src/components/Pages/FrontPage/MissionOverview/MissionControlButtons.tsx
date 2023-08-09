@@ -2,7 +2,6 @@ import { Mission, MissionStatus } from 'models/Mission'
 import { Button, CircularProgress, Icon } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { Task, TaskStatus } from 'models/Task'
 import styled from 'styled-components'
 import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -24,10 +23,6 @@ const ButtonText = styled.div`
     flex-direction: column;
     align-items: center;
 `
-
-const checkIfTasksStarted = (tasks: Task[]): boolean => {
-    return tasks.some((task) => task.status !== TaskStatus.NotStarted)
-}
 
 export function MissionControlButtons({ mission }: MissionProps) {
     const { TranslateText } = useLanguageContext()

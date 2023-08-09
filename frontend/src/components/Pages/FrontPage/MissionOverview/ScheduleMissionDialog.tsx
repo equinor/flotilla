@@ -1,6 +1,5 @@
 import {
     Autocomplete,
-    AutocompleteChanges,
     Button,
     Card,
     Dialog,
@@ -191,7 +190,8 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                         <Autocomplete
                             optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
                             options={props.robotOptions.filter(
-                                (r) => r.currentInstallation.toLocaleLowerCase() == installationCode.toLocaleLowerCase()
+                                (r) =>
+                                    r.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
                             )}
                             label={TranslateText('Select robot')}
                             onOptionsChange={(changes) => props.onSelectedRobot(changes.selectedItems[0])}
