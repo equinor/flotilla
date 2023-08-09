@@ -17,8 +17,8 @@ interface MissionProps {
 function MissionEndTimeDisplay({ mission }: MissionProps) {
     return (
         <>
-            {new Date(mission.endTime!).getFullYear() !== 1 ? (
-                <Typography>{format(new Date(mission.endTime!), 'HH:mm:ss - dd/MM/yyyy')}</Typography>
+            {mission.endTime ? (
+                <Typography>{format(new Date(mission.endTime), 'HH:mm:ss - dd/MM/yyyy')}</Typography>
             ) : (
                 <Typography>-</Typography>
             )}
