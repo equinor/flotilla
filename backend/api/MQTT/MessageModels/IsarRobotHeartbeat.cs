@@ -2,7 +2,7 @@
 namespace Api.Mqtt.MessageModels
 {
 #nullable disable
-    public class IsarRobotHeartbeat : MqttMessage
+    public class IsarRobotHeartbeatMessage : MqttMessage
     {
         [JsonPropertyName("robot_name")]
         public string RobotName { get; set; }
