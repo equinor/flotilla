@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Database.Models;
-
 namespace Api.Mqtt.MessageModels
 {
 #nullable disable
@@ -16,7 +15,7 @@ namespace Api.Mqtt.MessageModels
         public RobotStatus RobotStatus { get; set; }
 
         [JsonPropertyName("previous_robot_status")]
-        public RobotStatus PreviousRobotStatus { get; set; }
+        public RobotStatus? PreviousRobotStatus { get; set; }
 
         [JsonPropertyName("current_isar_state")]
         public string CurrentState { get; set; }
