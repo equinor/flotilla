@@ -108,6 +108,7 @@
     "This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.": "This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.",
     "Close": "Close",
     "Localizing": "Localizing",
+    "Re-run the mission": "Re-run the mission",
     "Re-run full mission": "Re-run full mission",
     "Re-run failed and cancelled tasks in the mission": "Re-run failed and cancelled tasks in the mission"
 }

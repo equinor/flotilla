@@ -49,7 +49,7 @@ export function MissionRestartButton({ mission }: MissionProps) {
 
     return (
         <Centered>
-            <Tooltip title="Re-run the mission">
+            <Tooltip title={TranslateText('Re-run the mission')} hidden={isOpen}>
                 <Button
                     ref={anchorRef}
                     variant="ghost_icon"
