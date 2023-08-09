@@ -47,7 +47,8 @@ namespace Api.Test.EventHandlers
                     {
                         Plant = testPlant,
                         Installation = testInstallation,
-                        Name = "testDeck"
+                        Name = "testDeck",
+                        DefaultLocalizationPose = new Pose()
                     },
                     Installation = testInstallation,
                     Plant = testPlant,

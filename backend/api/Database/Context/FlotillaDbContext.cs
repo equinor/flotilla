@@ -72,6 +72,11 @@ public class FlotillaDbContext : DbContext
         modelBuilder.Entity<Area>().HasOne(a => a.Deck).WithMany();
         modelBuilder.Entity<Area>().HasOne(a => a.Installation).WithMany();
         modelBuilder.Entity<Area>().HasOne(a => a.Plant).WithMany();
+        modelBuilder.Entity<Deck>().OwnsOne(a => a.DefaultLocalizationPose, poseBuilder =>
+        {
+            poseBuilder.OwnsOne(pose => pose.Position);
+            poseBuilder.OwnsOne(pose => pose.Orientation);
+        });
         modelBuilder.Entity<Deck>().HasOne(d => d.Plant).WithMany();
         modelBuilder.Entity<Deck>().HasOne(d => d.Installation).WithMany();
         modelBuilder.Entity<Plant>().HasOne(a => a.Installation).WithMany();

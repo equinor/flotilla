@@ -111,7 +111,8 @@ namespace Api.Services
                 {
                     Name = newDeckQuery.Name,
                     Installation = installation,
-                    Plant = plant
+                    Plant = plant,
+                    DefaultLocalizationPose = newDeckQuery.DefaultLocalizationPose
                 };
                 await _context.Decks.AddAsync(deck);
                 await _context.SaveChangesAsync();
