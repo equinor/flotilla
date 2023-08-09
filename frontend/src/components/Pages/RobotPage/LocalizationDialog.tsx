@@ -74,8 +74,9 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
         })
     }, [])
 
-    useEffect(() => {
-        if (selectedArea && localizationPose && localizing) {
+    const localizeRobot = () => {
+        if (selectedArea && localizationPose) {
+            onLocalizationDialogClose()
             BackendAPICaller.postLocalizationMission(localizationPose, robot.id, selectedArea.id)
                 .then((result: unknown) => result as Mission)
                 .then(async (mission: Mission) => {
@@ -90,9 +91,8 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                 .catch((e) => {
                     console.error(e)
                 })
-            onLocalizationDialogClose()
         }
-    }, [localizing])
+    }
 
     const getAreaNames = (areas: Area[]): Map<string, Area> => {
         var areaNameMap = new Map<string, Area>()
@@ -133,6 +133,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
     const onClickLocalize = async () => {
         setMissionLocalizationInfo(undefined)
         setLocalizing(true)
+        localizeRobot()
     }
 
     const areaNames = areas ? Array.from(getAreaNames(areas).keys()).sort() : []
