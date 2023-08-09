@@ -1,40 +1,58 @@
 ﻿using System.Text.RegularExpressions;
 using Api.Mqtt.MessageModels;
-
 namespace Api.Mqtt
 {
     /// <summary>
-    /// This class contains a list of topics linked to their message models
+    ///     This class contains a list of topics linked to their message models
     /// </summary>
     public static class MqttTopics
     {
         /// <summary>
-        /// A dictionary linking MQTT topics to their respective message models
+        ///     A dictionary linking MQTT topics to their respective message models
         /// </summary>
         public static readonly Dictionary<string, Type> TopicsToMessages =
             new()
             {
-                { "isar/+/robot_status", typeof(IsarRobotStatusMessage) },
-                { "isar/+/robot_info", typeof(IsarRobotInfoMessage) },
-                { "isar/+/mission", typeof(IsarMissionMessage) },
-                { "isar/+/task", typeof(IsarTaskMessage) },
-                { "isar/+/step", typeof(IsarStepMessage) },
-                { "isar/+/battery", typeof(IsarBatteryMessage) },
-                { "isar/+/pressure", typeof(IsarPressureMessage) },
-                { "isar/+/pose", typeof(IsarPoseMessage) },
+                {
+                    "isar/+/robot_status", typeof(IsarRobotStatusMessage)
+                },
+                {
+                    "isar/+/robot_info", typeof(IsarRobotInfoMessage)
+                },
+                {
+                    "isar/+/robot_heartbeat", typeof(IsarRobotHeartbeatMessage)
+                },
+                {
+                    "isar/+/mission", typeof(IsarMissionMessage)
+                },
+                {
+                    "isar/+/task", typeof(IsarTaskMessage)
+                },
+                {
+                    "isar/+/step", typeof(IsarStepMessage)
+                },
+                {
+                    "isar/+/battery", typeof(IsarBatteryMessage)
+                },
+                {
+                    "isar/+/pressure", typeof(IsarPressureMessage)
+                },
+                {
+                    "isar/+/pose", typeof(IsarPoseMessage)
+                }
             };
 
         /// <summary>
-        /// Searches a dictionary for a specific topic name and returns the corresponding value from the wildcarded dictionary
+        ///     Searches a dictionary for a specific topic name and returns the corresponding value from the wildcarded dictionary
         /// </summary>
         /// <remarks>
-        /// Will throw <see cref="InvalidOperationException"></see> if there are more than one matches for the topic.
+        ///     Will throw <see cref="InvalidOperationException"></see> if there are more than one matches for the topic.
         /// </remarks>
         /// <typeparam name="T"></typeparam>
         /// <param name="dict"></param>
         /// <param name="topic"></param>
         /// <returns>
-        /// The value corresponding to the wildcarded topic
+        ///     The value corresponding to the wildcarded topic
         /// </returns>
         /// <exception cref="InvalidOperationException">There was more than one topic pattern matching the provided topic</exception>
         public static T? GetItemByTopic<T>(this Dictionary<string, T> dict, string topic)
@@ -47,8 +65,8 @@ namespace Api.Mqtt
         }
 
         /// <summary>
-        /// Converts from mqtt topic wildcards to the corresponding
-        /// regex expression to allow for searching the dictionnary for the topic of a message
+        ///     Converts from mqtt topic wildcards to the corresponding
+        ///     regex expression to allow for searching the dictionary for the topic of a message
         /// </summary>
         /// <param name="topic"></param>
         /// <returns></returns>

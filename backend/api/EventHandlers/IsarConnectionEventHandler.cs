@@ -4,26 +4,20 @@ using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
 using Api.Utilities;
-
+using Timer = System.Timers.Timer;
 namespace Api.EventHandlers
 {
     /// <summary>
-    /// A background service which listens to events and performs callback functions.
+    ///     A background service which listens to events and performs callback functions.
     /// </summary>
     public class IsarConnectionEventHandler : EventHandlerBase
     {
-        private readonly ILogger<IsarConnectionEventHandler> _logger;
-        private readonly IServiceScopeFactory _scopeFactory;
-
-        private IRobotService RobotService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
-
-        private IMissionRunService MissionRunService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
-
-        private readonly Dictionary<string, System.Timers.Timer> _isarConnectionTimers = new();
 
         private readonly int _isarConnectionTimeout;
+
+        private readonly Dictionary<string, Timer> _isarConnectionTimers = new();
+        private readonly ILogger<IsarConnectionEventHandler> _logger;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         public IsarConnectionEventHandler(
             ILogger<IsarConnectionEventHandler> logger,
@@ -41,14 +35,20 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
+        private IRobotService RobotService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+
+        private IMissionRunService MissionRunService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
+
         public override void Subscribe()
         {
-            MqttService.MqttIsarRobotStatusReceived += OnIsarRobotStatus;
+            MqttService.MqttIsarRobotHeartbeatReceived += OnIsarRobotHeartbeat;
         }
 
         public override void Unsubscribe()
         {
-            MqttService.MqttIsarRobotStatusReceived -= OnIsarRobotStatus;
+            MqttService.MqttIsarRobotHeartbeatReceived -= OnIsarRobotHeartbeat;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -56,25 +56,25 @@ namespace Api.EventHandlers
             await stoppingToken;
         }
 
-        private async void OnIsarRobotStatus(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarRobotHeartbeat(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var isarRobotStatus = (IsarRobotStatusMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByIsarId(isarRobotStatus.IsarId);
+            var isarRobotHeartbeat = (IsarRobotHeartbeatMessage)mqttArgs.Message;
+            var robot = await RobotService.ReadByIsarId(isarRobotHeartbeat.IsarId);
 
             if (robot == null)
             {
                 _logger.LogInformation(
                     "Received message from unknown ISAR '{isarId}' ('{robotName}')",
-                    isarRobotStatus.IsarId,
-                    isarRobotStatus.RobotName
+                    isarRobotHeartbeat.IsarId,
+                    isarRobotHeartbeat.RobotName
                 );
                 return;
             }
 
             if (!_isarConnectionTimers.ContainsKey(robot.IsarId))
             {
-                var timer = new System.Timers.Timer(_isarConnectionTimeout * 1000);
-                timer.Elapsed += (_, _) => OnTimeoutEvent(isarRobotStatus);
+                var timer = new Timer(_isarConnectionTimeout * 1000);
+                timer.Elapsed += (_, _) => OnTimeoutEvent(isarRobotHeartbeat);
                 timer.Start();
                 _isarConnectionTimers.Add(robot.IsarId, timer);
                 _logger.LogInformation(
@@ -98,22 +98,22 @@ namespace Api.EventHandlers
             }
         }
 
-        private async void OnTimeoutEvent(IsarRobotStatusMessage robotStatusMessage)
+        private async void OnTimeoutEvent(IsarRobotHeartbeatMessage robotHeartbeatMessage)
         {
-            var robot = await RobotService.ReadByIsarId(robotStatusMessage.IsarId);
+            var robot = await RobotService.ReadByIsarId(robotHeartbeatMessage.IsarId);
             if (robot is null)
             {
                 _logger.LogError(
                     "Connection to ISAR instance '{id}' ('{robotName}') timed out but the corresponding robot could not be found in the database.",
-                    robotStatusMessage.IsarId,
-                    robotStatusMessage.IsarId
+                    robotHeartbeatMessage.IsarId,
+                    robotHeartbeatMessage.IsarId
                 );
             }
             else
             {
                 _logger.LogWarning(
                     "Connection to ISAR instance '{id}' timed out - It will be disabled and active missions aborted",
-                    robotStatusMessage.IsarId
+                    robotHeartbeatMessage.IsarId
                 );
                 robot.Enabled = false;
                 robot.Status = RobotStatus.Offline;
@@ -135,10 +135,10 @@ namespace Api.EventHandlers
                 await RobotService.Update(robot);
             }
 
-            if (_isarConnectionTimers.TryGetValue(robotStatusMessage.IsarId, out var timer))
+            if (_isarConnectionTimers.TryGetValue(robotHeartbeatMessage.IsarId, out var timer))
             {
                 timer.Close();
-                _isarConnectionTimers.Remove(robotStatusMessage.IsarId);
+                _isarConnectionTimers.Remove(robotHeartbeatMessage.IsarId);
             }
         }
     }

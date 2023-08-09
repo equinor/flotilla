@@ -8,37 +8,28 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Packets;
-
 namespace Api.Mqtt
 {
     public class MqttService : BackgroundService
     {
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotStatusReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotInfoReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarMissionReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarStepReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarBatteryReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarPressureReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
 
         private readonly ILogger<MqttService> _logger;
+        private readonly int _maxRetryAttempts;
 
         private readonly IManagedMqttClient _mqttClient;
 
         private readonly ManagedMqttClientOptions _options;
 
+        private readonly TimeSpan _reconnectDelay = TimeSpan.FromSeconds(5);
+
         //private readonly bool _notProduction;
 
         private readonly string _serverHost;
         private readonly int _serverPort;
-
-        private readonly TimeSpan _reconnectDelay = TimeSpan.FromSeconds(5);
-        private readonly int _maxRetryAttempts;
         private readonly bool _shouldFailOnMaxRetries;
-        private int _reconnectAttempts;
 
         private CancellationToken _cancellationToken;
+        private int _reconnectAttempts;
 
         public MqttService(ILogger<MqttService> logger, IConfiguration config)
         {
@@ -82,6 +73,15 @@ namespace Api.Mqtt
             var topics = mqttConfig.GetSection("Topics").Get<List<string>>();
             SubscribeToTopics(topics);
         }
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotStatusReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotInfoReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotHeartbeatReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarMissionReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarTaskReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarStepReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarBatteryReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarPressureReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -94,7 +94,7 @@ namespace Api.Mqtt
         }
 
         /// <summary>
-        /// The callback function for when a subscribed topic publishes a message
+        ///     The callback function for when a subscribed topic publishes a message
         /// </summary>
         /// <param name="messageReceivedEvent"> The event information for the MQTT message </param>
         private Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs messageReceivedEvent)
@@ -118,6 +118,9 @@ namespace Api.Mqtt
                     break;
                 case Type type when type == typeof(IsarRobotInfoMessage):
                     OnIsarTopicReceived<IsarRobotInfoMessage>(content);
+                    break;
+                case Type type when type == typeof(IsarRobotHeartbeatMessage):
+                    OnIsarTopicReceived<IsarRobotHeartbeatMessage>(content);
                     break;
                 case Type type when type == typeof(IsarMissionMessage):
                     OnIsarTopicReceived<IsarMissionMessage>(content);
@@ -163,7 +166,9 @@ namespace Api.Mqtt
         private Task OnConnectingFailed(ConnectingFailedEventArgs obj)
         {
             if (_reconnectAttempts == -1)
+            {
                 return Task.CompletedTask;
+            }
 
             string errorMsg =
                 "Failed to connect to MQTT broker. Exception: " + obj.Exception.Message;
@@ -200,17 +205,21 @@ namespace Api.Mqtt
             if (obj.ClientWasConnected)
             {
                 if (obj.Reason is MqttClientDisconnectReason.NormalDisconnection)
+                {
                     _logger.LogInformation(
                         "Successfully disconnected from broker at {host}:{port}",
                         _serverHost,
                         _serverPort
                     );
+                }
                 else
+                {
                     _logger.LogWarning(
                         "Lost connection to broker at {host}:{port}",
                         _serverHost,
                         _serverPort
                     );
+                }
             }
 
             return Task.CompletedTask;
@@ -232,7 +241,10 @@ namespace Api.Mqtt
             topics.ForEach(
                 topic =>
                 {
-                    topicFilters.Add(new MqttTopicFilter() { Topic = topic });
+                    topicFilters.Add(new MqttTopicFilter
+                    {
+                        Topic = topic
+                    });
                     sb.AppendLine(topic);
                 }
             );
@@ -247,11 +259,16 @@ namespace Api.Mqtt
             {
                 var options = new JsonSerializerOptions
                 {
-                    Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+                    Converters =
+                    {
+                        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+                    }
                 };
                 message = JsonSerializer.Deserialize<T>(content, options);
                 if (message is null)
+                {
                     throw new JsonException();
+                }
             }
             catch (Exception ex)
                 when (ex is JsonException or NotSupportedException or ArgumentException)
@@ -270,6 +287,7 @@ namespace Api.Mqtt
                 {
                     _ when type == typeof(IsarRobotStatusMessage) => MqttIsarRobotStatusReceived,
                     _ when type == typeof(IsarRobotInfoMessage) => MqttIsarRobotInfoReceived,
+                    _ when type == typeof(IsarRobotHeartbeatMessage) => MqttIsarRobotHeartbeatReceived,
                     _ when type == typeof(IsarMissionMessage) => MqttIsarMissionReceived,
                     _ when type == typeof(IsarTaskMessage) => MqttIsarTaskReceived,
                     _ when type == typeof(IsarStepMessage) => MqttIsarStepReceived,
@@ -277,9 +295,9 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarPressureMessage) => MqttIsarPressureReceived,
                     _ when type == typeof(IsarPoseMessage) => MqttIsarPoseReceived,
                     _
-                      => throw new NotImplementedException(
-                          $"No event defined for message type '{typeof(T).Name}'"
-                      ),
+                        => throw new NotImplementedException(
+                            $"No event defined for message type '{typeof(T).Name}'"
+                        )
                 };
                 // Event will be null if there are no subscribers
                 if (raiseEvent is not null)
