@@ -26,6 +26,8 @@ namespace Api.Database.Models
         [Required]
         public Pose DefaultLocalizationPose { get; set; }
 
+        public LocalizationPose? LocalizationPose { get; set; }
+
         public IList<SafePosition> SafePositions { get; set; }
     }
 

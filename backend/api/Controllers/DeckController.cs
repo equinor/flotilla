@@ -13,6 +13,7 @@ namespace Api.Controllers
         private readonly IDeckService _deckService;
         private readonly IInstallationService _installationService;
         private readonly IPlantService _plantService;
+        private readonly ILocalizationPoseService _localizationPoseService;
 
         private readonly IMapService _mapService;
 
@@ -23,7 +24,8 @@ namespace Api.Controllers
             IMapService mapService,
             IDeckService deckService,
             IInstallationService installationService,
-            IPlantService plantService
+            IPlantService plantService,
+            ILocalizationPoseService localizationPoseService
         )
         {
             _logger = logger;
@@ -31,6 +33,7 @@ namespace Api.Controllers
             _deckService = deckService;
             _installationService = installationService;
             _plantService = plantService;
+            _localizationPoseService = localizationPoseService;
         }
 
         /// <summary>
@@ -86,6 +89,60 @@ namespace Api.Controllers
                 throw;
             }
 
+        }
+
+        /// <summary>
+        /// Add or update the localization pose to a deck
+        /// </summary>
+        /// <remarks>
+        /// <para> This query updates an existing deck with a new localization pose </para>
+        /// </remarks>
+        [HttpPut]
+        [Route("add-localization-pose/{deckId}")]
+        [Authorize(Roles = Role.Admin)]
+        [ProducesResponseType(typeof(Deck), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Deck>> AddLocalizationPoseToDeck([FromRoute] string deckId, [FromBody] Pose localizationPose)
+        {
+            _logger.LogInformation("Updating localization pose to an existing deck");
+            try
+            {
+
+                var existingDeck = await _deckService.ReadById(deckId);
+                if (existingDeck == null)
+                {
+                    _logger.LogInformation("Could not find the deck");
+                    return BadRequest($"Deck already exists");
+                }
+
+
+                if (existingDeck.LocalizationPose != null)
+                {
+                    _logger.LogInformation("Removing old localization pose");
+                    var oldLocalizationPose = await _localizationPoseService.Delete(existingDeck.LocalizationPose.Id);
+                }
+
+                var newLocalizationPose = await _localizationPoseService.Create(localizationPose);
+                existingDeck.LocalizationPose = newLocalizationPose;
+                var updateDeck = await _deckService.Update(existingDeck);
+                _logger.LogInformation(
+                    "Succesfully created new deck with id '{deckId}'",
+                    updateDeck.Id
+                );
+                return CreatedAtAction(
+                    nameof(GetDeckById),
+                    new { id = updateDeck.Id },
+                    updateDeck
+                );
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while adding a localization pose to deck");
+                throw;
+            }
         }
 
         /// <summary>

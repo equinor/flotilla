@@ -127,6 +127,7 @@ namespace Api.Test
                 }
             };
 
+
             var installationQuery = new CreateInstallationQuery
             {
                 InstallationCode = installationCode,
@@ -144,7 +145,8 @@ namespace Api.Test
             {
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
-                Name = deckName
+                Name = deckName,
+                LocalizationPose = testPose
             };
 
             var areaQuery = new CreateAreaQuery
@@ -217,9 +219,9 @@ namespace Api.Test
             Assert.True(robots != null);
             var robot = robots[0];
             string robotId = robot.Id;
-            string testInstallation = "TestInstallationStartMissionTest";
-            string testPlant = "TestPlantStartMissionTest";
-            string testDeck = "TestDeckStartMissionTest";
+            string testInstallation = "testInstallationStartMissionTest";
+            string testPlant = "testPlantStartMissionTest";
+            string testDeck = "testDeckStartMissionTest";
             string testArea = "testAreaStartMissionTest";
 
             await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
@@ -327,7 +329,7 @@ namespace Api.Test
             Assert.True(robots != null);
             var robot = robots[0];
             string robotId = robot.Id;
-            string testInstallation = "TestInstallationStartMissionTest";
+            string testInstallation = "testInstallationStartMissionTest";
             string testArea = "testAreaStartMissionTest";
             int echoMissionId = 95;
 
@@ -359,8 +361,8 @@ namespace Api.Test
         public async Task AreaTest()
         {
             // Arrange
-            string testInstallation = "TestInstallationAreaTest";
-            string testPlant = "TestPlantAreaTest";
+            string testInstallation = "testInstallationAreaTest";
+            string testPlant = "testPlantAreaTest";
             string testDeck = "testDeckAreaTest";
             string testArea = "testAreaAreaTest";
             string installationUrl = $"/installations";
@@ -383,7 +385,23 @@ namespace Api.Test
                     W = 1
                 }
             };
+            var testLocalizationPose = new Pose
+            {
+                Position = new Position
+                {
+                    X = 1,
+                    Y = 2,
+                    Z = 3
+                },
+                Orientation = new Orientation
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                    W = 1
+                }
 
+            };
             var installationQuery = new CreateInstallationQuery
             {
                 InstallationCode = testInstallation,
@@ -401,7 +419,8 @@ namespace Api.Test
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testDeck
+                Name = testDeck,
+                LocalizationPose = testLocalizationPose
             };
 
             var areaQuery = new CreateAreaQuery
@@ -456,8 +475,8 @@ namespace Api.Test
         public async Task GetMissionsInAreaTest()
         {
             // Arrange
-            string testInstallation = "TestInstallationMissionsInAreaTest";
-            string testPlant = "TestPlantMissionsInAreaTest";
+            string testInstallation = "testInstallationMissionsInAreaTest";
+            string testPlant = "testPlantMissionsInAreaTest";
             string testDeck = "testDeckMissionsInAreaTest";
             string testArea = "testAreaMissionsInAreaTest";
             string testMissionName = "testMissionInAreaTest";

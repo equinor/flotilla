@@ -51,6 +51,7 @@ builder.Services.AddScoped<IAreaService, AreaService>();
 builder.Services.AddScoped<IInstallationService, InstallationService>();
 builder.Services.AddScoped<IPlantService, PlantService>();
 builder.Services.AddScoped<IDeckService, DeckService>();
+builder.Services.AddScoped<ILocalizationPoseService, LocalizationPoseService>();
 builder.Services.AddScoped<IRobotModelService, RobotModelService>();
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
