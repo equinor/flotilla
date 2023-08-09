@@ -15,6 +15,9 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("robot_status")]
         public RobotStatus RobotStatus { get; set; }
 
+        [JsonPropertyName("previous_robot_status")]
+        public RobotStatus PreviousRobotStatus { get; set; }
+
         [JsonPropertyName("current_isar_state")]
         public string CurrentState { get; set; }
 
