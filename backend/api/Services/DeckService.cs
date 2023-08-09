@@ -1,8 +1,10 @@
-﻿using Api.Controllers.Models;
+﻿using System.Xml;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.ObjectPool;
 
 namespace Api.Services
 {
@@ -41,12 +43,14 @@ namespace Api.Services
         private readonly FlotillaDbContext _context;
         private readonly IInstallationService _installationService;
         private readonly IPlantService _plantService;
+        private readonly ILocalizationPoseService _localizationPoseService;
 
-        public DeckService(FlotillaDbContext context, IInstallationService installationService, IPlantService plantService)
+        public DeckService(FlotillaDbContext context, IInstallationService installationService, IPlantService plantService, ILocalizationPoseService localizationPoseService)
         {
             _context = context;
             _installationService = installationService;
             _plantService = plantService;
+            _localizationPoseService = localizationPoseService;
         }
 
         public async Task<IEnumerable<Deck>> ReadAll()
@@ -56,7 +60,7 @@ namespace Api.Services
 
         private IQueryable<Deck> GetDecks()
         {
-            return _context.Decks.Include(p => p.Plant).Include(i => i.Installation);
+            return _context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(l => l.LocalizationPose);
         }
 
         public async Task<Deck?> ReadById(string id)
@@ -89,7 +93,7 @@ namespace Api.Services
                 a.Plant.Id.Equals(plant.Id) &&
                 a.Installation.Id.Equals(installation.Id) &&
                 a.Name.ToLower().Equals(name.ToLower())
-            ).Include(d => d.Plant).Include(i => i.Installation).FirstOrDefaultAsync();
+            ).Include(d => d.Plant).Include(i => i.Installation).Include(l => l.LocalizationPose).FirstOrDefaultAsync();
         }
 
         public async Task<Deck> Create(CreateDeckQuery newDeckQuery)
@@ -107,11 +111,18 @@ namespace Api.Services
             var deck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name);
             if (deck == null)
             {
+                LocalizationPose? newLocalizationPose = null;
+                if (newDeckQuery.LocalizationPose != null)
+                {
+                    newLocalizationPose = await _localizationPoseService.Create(newDeckQuery.LocalizationPose);
+                }
+
                 deck = new Deck
                 {
                     Name = newDeckQuery.Name,
                     Installation = installation,
-                    Plant = plant
+                    Plant = plant,
+                    LocalizationPose = newLocalizationPose
                 };
                 await _context.Decks.AddAsync(deck);
                 await _context.SaveChangesAsync();

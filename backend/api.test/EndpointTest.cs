@@ -127,6 +127,7 @@ namespace Api.Test
                 }
             };
 
+
             var installationQuery = new CreateInstallationQuery
             {
                 InstallationCode = installationCode,
@@ -144,7 +145,8 @@ namespace Api.Test
             {
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
-                Name = deckName
+                Name = deckName,
+                LocalizationPose = testPose
             };
 
             var areaQuery = new CreateAreaQuery
@@ -383,7 +385,23 @@ namespace Api.Test
                     W = 1
                 }
             };
+            var testLocalizationPose = new Pose
+            {
+                Position = new Position
+                {
+                    X = 1,
+                    Y = 2,
+                    Z = 3
+                },
+                Orientation = new Orientation
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                    W = 1
+                }
 
+            };
             var installationQuery = new CreateInstallationQuery
             {
                 InstallationCode = testInstallation,
@@ -401,7 +419,8 @@ namespace Api.Test
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testDeck
+                Name = testDeck,
+                LocalizationPose = testLocalizationPose
             };
 
             var areaQuery = new CreateAreaQuery

@@ -66,7 +66,8 @@ public static class InitDb
             Id = Guid.NewGuid().ToString(),
             Plant = plants[0],
             Installation = plants[0].Installation,
-            Name = "TestDeck"
+            Name = "TestDeck",
+            LocalizationPose = new LocalizationPose { }
         };
 
         return new List<Deck>(new Deck[] { deck1 });

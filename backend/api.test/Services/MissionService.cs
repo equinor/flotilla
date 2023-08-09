@@ -72,7 +72,8 @@ namespace Api.Test.Services
                         {
                             Plant = testPlant,
                             Installation = testInstallation,
-                            Name = "testDeck"
+                            Name = "testDeck",
+                            LocalizationPose = new LocalizationPose()
                         },
                         Installation = testInstallation,
                         Plant = testPlant,
