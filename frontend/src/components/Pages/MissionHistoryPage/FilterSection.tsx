@@ -18,9 +18,8 @@ import { InspectionType } from 'models/Inspection'
 import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'
 
 const StyledHeader = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 100px 150px;
     gap: 1rem;
 `
 
