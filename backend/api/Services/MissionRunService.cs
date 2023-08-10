@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Services.Events;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -73,6 +74,9 @@ namespace Api.Services
             await _context.MissionRuns.AddAsync(missionRun);
             await _context.SaveChangesAsync();
 
+            var args = new MissionRunCreatedEventArgs(missionRun.Id);
+            OnMissionRunCreated(args);
+
             return missionRun;
         }
 
@@ -129,8 +133,16 @@ namespace Api.Services
             _context.MissionRuns.Remove(missionRun);
             await _context.SaveChangesAsync();
 
+
             return missionRun;
         }
+
+        protected virtual void OnMissionRunCreated(MissionRunCreatedEventArgs e)
+        {
+            MissionRunCreated?.Invoke(this, e);
+        }
+
+        public static event EventHandler<MissionRunCreatedEventArgs> MissionRunCreated;
 
         private IQueryable<MissionRun> GetMissionRunsWithSubModels()
         {
