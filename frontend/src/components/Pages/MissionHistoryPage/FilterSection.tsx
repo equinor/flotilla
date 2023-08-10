@@ -12,7 +12,7 @@ import {
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionStatus } from 'models/Mission'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import { Icons } from 'utils/icons'
 import { InspectionType } from 'models/Inspection'
 import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'

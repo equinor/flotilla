@@ -1,4 +1,4 @@
-import { CircularProgress, Pagination, Table, Typography, Chip } from '@equinor/eds-core-react'
+import { CircularProgress, Pagination, Table, Typography, Chip, Button, Dialog } from '@equinor/eds-core-react'
 import { Mission } from 'models/Mission'
 import { useCallback, useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
@@ -11,6 +11,7 @@ import { useMissionFilterContext, IFilterState } from 'components/Contexts/Missi
 import { FilterSection } from './FilterSection'
 import { MissionStatus } from 'models/Mission'
 import { InspectionType } from 'models/Inspection'
+import { tokens } from '@equinor/eds-tokens'
 
 const TableWithHeader = styled.div`
     display: flex;
@@ -33,6 +34,7 @@ const ActiveFilterList = styled.div`
     margin-left: var(--page-margin);
     margin-right: var(--page-margin);
     margin-top: 8px;
+    flex-wrap: wrap;
     min-height: 24px;
 `
 
@@ -61,9 +63,31 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isResettingPage, setIsResettingPage] = useState<boolean>(false)
 
-    const { page, switchPage, filterState, filterIsSet, filterFunctions } = useMissionFilterContext()
+    const { page, switchPage, filterState, filterIsSet, filterFunctions, filterError, clearFilterError } =
+        useMissionFilterContext()
 
-    const toDisplayValue = (value: string | number | MissionStatus[] | InspectionType[]) => {
+    const FilterErrorDialog = () => {
+        return (
+            <>
+                <Dialog open={filterError !== ''} isDismissable onClose={() => clearFilterError()}>
+                    <Dialog.Header>
+                        <Dialog.Title>{TranslateText('Filter error')}</Dialog.Title>
+                    </Dialog.Header>
+                    <Dialog.CustomContent>
+                        <Typography variant="body_short">{filterError}</Typography>
+                    </Dialog.CustomContent>
+                    <Dialog.Actions>
+                        <Button onClick={() => clearFilterError()}>{TranslateText('Close')}</Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </>
+        )
+    }
+
+    const checkBoxBackgroundColour = tokens.colors.ui.background__info.hex
+    const checkBoxBorderColour = tokens.colors.interactive.primary__resting.hex
+
+    const toDisplayValue = (filterName: string, value: string | number | MissionStatus[] | InspectionType[]) => {
         if (typeof value === 'string') {
             return value
         } else if (typeof value === 'number') {
@@ -75,7 +99,15 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
             if (valueArray.length === 0) {
                 console.error('Unexpected empty array detected')
             }
-            return valueArray[0] + valueArray.slice(1).map((val) => ', ' + val)
+            return valueArray.map((val) => (
+                <Chip
+                    style={{ background: checkBoxBackgroundColour, borderColor: checkBoxBorderColour }}
+                    key={filterName + val}
+                    onDelete={() => filterFunctions.removeFilterElement(filterName, val)}
+                >
+                    {TranslateText(val)}
+                </Chip>
+            ))
         } else {
             console.error('Unexpected filter type detected')
         }
@@ -141,15 +173,16 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
                         .filter((filter) => isNotNullOrNotEmptyArray(filter.value))
                         .map((filter) => (
                             <Chip
+                                style={{ borderColor: checkBoxBorderColour, height: '2rem', paddingLeft: '6px' }}
                                 key={filter.name}
-                                variant="active"
-                                onDelete={() => filterFunctions.resetFilter(filter.name)}
+                                onDelete={() => filterFunctions.removeFilter(filter.name)}
                             >
-                                {filter.name}: {toDisplayValue(filter.value!)}
+                                {TranslateText(filter.name)}: {toDisplayValue(filter.name, filter.value!)}
                             </Chip>
                         ))}
                 </ActiveFilterList>
             )}
+            {filterError && <FilterErrorDialog />}
             <Table>
                 <Table.Head sticky>
                     <Table.Row>

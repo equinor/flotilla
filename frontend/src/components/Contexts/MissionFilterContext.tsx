@@ -1,11 +1,14 @@
 import { createContext, FC, useContext, useState } from 'react'
 import { MissionStatus } from 'models/Mission'
 import { InspectionType } from 'models/Inspection'
+import { useLanguageContext } from './LanguageContext'
 
 interface IMissionFilterContext {
     page: number
     switchPage: (newPage: number) => void
     filterIsSet: boolean
+    filterError: string
+    clearFilterError: () => void
     filterState: {
         missionName: string | undefined
         statuses: MissionStatus[]
@@ -29,6 +32,8 @@ interface IMissionFilterContext {
         switchMaxEndTime: (newMaxEndTime: number | undefined) => void
         resetFilters: () => void
         resetFilter: (s: string) => void
+        removeFilter: (s: string) => void
+        removeFilterElement: (filterName: string, value: any) => void
         dateTimeStringToInt: (dateTimeString: string | undefined) => number | undefined
         dateTimeIntToString: (dateTimeNumber: number | undefined) => string | undefined
         dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => string | undefined
@@ -53,6 +58,8 @@ const defaultMissionFilterInterface = {
     page: 1,
     switchPage: (newPage: number) => {},
     filterIsSet: false,
+    filterError: '',
+    clearFilterError: () => {},
     filterState: {
         missionName: undefined,
         statuses: completedStatuses,
@@ -76,6 +83,8 @@ const defaultMissionFilterInterface = {
         switchMaxEndTime: (newMaxEndTime: number | undefined) => {},
         resetFilters: () => {},
         resetFilter: (s: string) => {},
+        removeFilter: (s: string) => {},
+        removeFilterElement: (filterName: string, value: any) => {},
         dateTimeStringToInt: (dateTimeString: string | undefined) => 0,
         dateTimeIntToString: (dateTimeNumber: number | undefined) => '',
         dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => '',
@@ -85,7 +94,9 @@ const defaultMissionFilterInterface = {
 export const MissionFilterContext = createContext<IMissionFilterContext>(defaultMissionFilterInterface)
 
 export const MissionFilterProvider: FC<Props> = ({ children }) => {
+    const { TranslateText } = useLanguageContext()
     const [page, setPage] = useState<number>(defaultMissionFilterInterface.page)
+    const [filterError, setFilterError] = useState<string>(defaultMissionFilterInterface.filterError)
     const [filterIsSet, setFilterIsSet] = useState<boolean>(defaultMissionFilterInterface.filterIsSet)
     const [filterState, setFilterState] = useState<IMissionFilterContext['filterState']>(
         defaultMissionFilterInterface.filterState
@@ -93,6 +104,10 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
 
     const switchPage = (newPage: number) => {
         setPage(newPage)
+    }
+
+    const clearFilterError = () => {
+        setFilterError('')
     }
 
     const filterFunctions = {
@@ -117,20 +132,92 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
             setFilterState({ ...filterState, inspectionTypes: newInspectionTypes })
         },
         switchMinStartTime: (newMinStartTime: number | undefined) => {
-            setFilterIsSet(true)
-            setFilterState({ ...filterState, minStartTime: newMinStartTime })
+            if (
+                filterState.minEndTime &&
+                newMinStartTime &&
+                filterState.maxStartTime &&
+                (newMinStartTime > filterState.minEndTime || newMinStartTime > filterState.maxStartTime)
+            )
+                setFilterError(
+                    TranslateText('minStartTime') +
+                        ' ' +
+                        TranslateText('cannot be greater than') +
+                        ' ' +
+                        TranslateText('minEndTime') +
+                        ' ' +
+                        TranslateText('or') +
+                        TranslateText('maxStartTime')
+                )
+            else {
+                setFilterIsSet(true)
+                setFilterState({ ...filterState, minStartTime: newMinStartTime })
+            }
         },
         switchMaxStartTime: (newMaxStartTime: number | undefined) => {
-            setFilterIsSet(true)
-            setFilterState({ ...filterState, maxStartTime: newMaxStartTime })
+            if (filterState.maxEndTime && newMaxStartTime && newMaxStartTime > filterState.maxEndTime)
+                setFilterError(
+                    TranslateText('maxStartTime') +
+                        ' ' +
+                        TranslateText('cannot be greater than') +
+                        ' ' +
+                        TranslateText('maxEndTime')
+                )
+            if (filterState.minEndTime && newMaxStartTime && newMaxStartTime < filterState.minEndTime)
+                setFilterError(
+                    TranslateText('maxStartTime') +
+                        ' ' +
+                        TranslateText('cannot be less than') +
+                        ' ' +
+                        TranslateText('minStartTime')
+                )
+            else {
+                setFilterIsSet(true)
+                setFilterState({ ...filterState, maxStartTime: newMaxStartTime })
+            }
         },
         switchMinEndTime: (newMinEndTime: number | undefined) => {
-            setFilterIsSet(true)
-            setFilterState({ ...filterState, minEndTime: newMinEndTime })
+            if (filterState.maxEndTime && newMinEndTime && newMinEndTime > filterState.maxEndTime)
+                setFilterError(
+                    TranslateText('minEndTime') +
+                        ' ' +
+                        TranslateText('cannot be greater than') +
+                        ' ' +
+                        TranslateText('maxEndTime')
+                )
+            if (filterState.minStartTime && newMinEndTime && newMinEndTime < filterState.minStartTime)
+                setFilterError(
+                    TranslateText('minEndTime') +
+                        ' ' +
+                        TranslateText('cannot be less than') +
+                        ' ' +
+                        TranslateText('minStartTime')
+                )
+            else {
+                setFilterIsSet(true)
+                setFilterState({ ...filterState, minEndTime: newMinEndTime })
+            }
         },
         switchMaxEndTime: (newMaxEndTime: number | undefined) => {
-            setFilterIsSet(true)
-            setFilterState({ ...filterState, maxEndTime: newMaxEndTime })
+            if (
+                filterState.maxStartTime &&
+                newMaxEndTime &&
+                filterState.minEndTime &&
+                (newMaxEndTime < filterState.maxStartTime || newMaxEndTime < filterState.minEndTime)
+            )
+                setFilterError(
+                    TranslateText('maxEndTime') +
+                        ' ' +
+                        TranslateText('cannot be less than') +
+                        ' ' +
+                        TranslateText('minEndTime') +
+                        ' ' +
+                        TranslateText('or') +
+                        TranslateText('minEndTime')
+                )
+            else {
+                setFilterIsSet(true)
+                setFilterState({ ...filterState, maxEndTime: newMaxEndTime })
+            }
         },
         resetFilters: () => {
             setFilterIsSet(false)
@@ -140,6 +227,20 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
             const defaultState = defaultMissionFilterInterface.filterState
             const defaultValue = defaultState[filterName as keyof typeof defaultState]
             setFilterState({ ...filterState, [filterName]: defaultValue })
+        },
+        removeFilter(filterName: string) {
+            const defaultState = defaultMissionFilterInterface.filterState
+            const defaultValue = defaultState[filterName as keyof typeof defaultState]
+            const newValue = Array.isArray(defaultValue) ? [] : undefined
+            setFilterState({ ...filterState, [filterName]: newValue })
+        },
+        removeFilterElement(filterName: string, value: any) {
+            filterName = filterName.trim()
+            if (!Object.keys(filterState).includes(filterName)) return
+            const currentArray = filterState[filterName as keyof typeof filterState] as any[]
+            if (!Array.isArray(currentArray)) return
+            let newArray = currentArray.filter((val) => val !== value)
+            setFilterState({ ...filterState, [filterName]: newArray })
         },
         dateTimeStringToInt: (dateTimeString: string | undefined) => {
             if (dateTimeString === '' || dateTimeString === undefined) return undefined
@@ -176,6 +277,8 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 filterState,
                 filterFunctions,
                 filterIsSet,
+                filterError,
+                clearFilterError,
             }}
         >
             {children}
