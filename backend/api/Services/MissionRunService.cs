@@ -142,7 +142,7 @@ namespace Api.Services
             MissionRunCreated?.Invoke(this, e);
         }
 
-        public static event EventHandler<MissionRunCreatedEventArgs> MissionRunCreated;
+        public static event EventHandler<MissionRunCreatedEventArgs>? MissionRunCreated;
 
         private IQueryable<MissionRun> GetMissionRunsWithSubModels()
         {
