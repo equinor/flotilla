@@ -8,10 +8,10 @@ namespace Api.Test.Services
     public class TestPose
     {
         [Fact]
-        public void TestRotation()
+        public void TestRotationNorth()
         {
             var mockAngleAxisParameters = new EchoVector(0, 0, 1);
-            float mockAngle = MathF.PI / 2;
+            float mockAngle = 0;
 
             var expected = new Orientation()
             {
@@ -22,7 +22,51 @@ namespace Api.Test.Services
             };
 
             Assert.Equal(
-                expected.X,
+                expected.Z,
+                new Pose(mockAngleAxisParameters, mockAngle).Orientation.Z,
+                3.0
+            );
+        }
+
+        [Fact]
+        public void TestRotationSouth()
+        {
+            var mockAngleAxisParameters = new EchoVector(0, 0, 1);
+            float mockAngle = MathF.PI;
+
+            var expected = new Orientation()
+            {
+                X = 0,
+                Y = 0,
+                Z = -0.7071F,
+                W = 0.7071F
+            };
+
+            var pose = new Pose(mockAngleAxisParameters, mockAngle);
+
+            Assert.Equal(
+                expected.Z,
+                pose.Orientation.Z,
+                3.0
+            );
+        }
+
+        [Fact]
+        public void TestNegativaRotation()
+        {
+            var mockAngleAxisParameters = new EchoVector(0, 0, 1);
+            float mockAngle = -180F * MathF.PI / 180F;
+
+            var expected = new Orientation()
+            {
+                X = 0,
+                Y = 0,
+                Z = 1F,
+                W = 0
+            };
+
+            Assert.Equal(
+                expected.Z,
                 new Pose(mockAngleAxisParameters, mockAngle).Orientation.Z,
                 3.0
             );
@@ -63,6 +107,12 @@ namespace Api.Test.Services
             float angle = -2 * MathF.Acos(qw);
             if (orientation.Z >= 0)
                 angle = 2 * MathF.Acos(qw);
+
+            angle = (450 * MathF.PI / 180) - angle;
+
+            angle %= 2F * MathF.PI;
+
+            if (angle < 0) angle += 2F * MathF.PI;
 
             return new AxisAngle(new EchoVector(0, 0, 1), angle);
         }

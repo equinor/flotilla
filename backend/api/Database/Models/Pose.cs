@@ -93,8 +93,17 @@ namespace Api.Database.Models
 
         // Since this is a ground robot the only quaternion vector
         // that makes sense is up (0, 0, 1)
-        public Orientation AxisAngleToQuaternion(float angle)
+        // Echo representes North at 0deg and increases this value clockwise
+        // Our representation has East at 0deg with rotations anti-clockwise
+        public Orientation AxisAngleToQuaternion(float echoAngle)
         {
+            float angle;
+            echoAngle %= 2F * MathF.PI;
+
+            if (echoAngle < 0) echoAngle += 2F * MathF.PI;
+
+            angle = (450 * MathF.PI / 180) - echoAngle;
+
             var quaternion = new Orientation()
             {
                 X = 0,
@@ -102,6 +111,7 @@ namespace Api.Database.Models
                 Z = MathF.Sin(angle / 2),
                 W = MathF.Cos(angle / 2)
             };
+
             return quaternion;
         }
 
@@ -125,10 +135,10 @@ namespace Api.Database.Models
             Orientation = new Orientation(x_ori, y_ori, z_ori, w);
         }
 
-        public Pose(EchoVector enuPosition, float angle)
+        public Pose(EchoVector enuPosition, float echoAngle)
         {
             Position = new Position(enuPosition.East, enuPosition.North, enuPosition.Up);
-            Orientation = AxisAngleToQuaternion(angle);
+            Orientation = AxisAngleToQuaternion(echoAngle);
         }
 
         public Pose(Position position, Orientation orientation)
