@@ -9,4 +9,14 @@
         }
         public string MissionRunId { get; set; }
     }
+
+    public class RobotAvailableEventArgs : EventArgs
+    {
+
+        public RobotAvailableEventArgs(string robotId)
+        {
+            RobotId = robotId;
+        }
+        public string RobotId { get; set; }
+    }
 }

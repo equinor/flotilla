@@ -5,10 +5,10 @@ using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
+using Api.Services.Events;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.IdentityModel.Tokens;
-
 namespace Api.EventHandlers
 {
     /// <summary>
@@ -68,6 +68,13 @@ namespace Api.EventHandlers
             await stoppingToken;
         }
 
+        protected virtual void OnRobotAvailable(RobotAvailableEventArgs e)
+        {
+            RobotAvailable?.Invoke(this, e);
+        }
+
+        public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
+
         private async void OnIsarRobotStatus(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
@@ -97,6 +104,8 @@ namespace Api.EventHandlers
                 robot.Name,
                 robot.Status
             );
+
+            if (robot.Status == RobotStatus.Available) { OnRobotAvailable(new RobotAvailableEventArgs(robot.Id)); }
         }
 
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
@@ -141,7 +150,10 @@ namespace Api.EventHandlers
                     return;
                 }
 
-                var newRobot = new Robot(robotQuery) { Model = robotModel };
+                var newRobot = new Robot(robotQuery)
+                {
+                    Model = robotModel
+                };
                 newRobot = await robotService.Create(newRobot);
                 _logger.LogInformation(
                     "Added robot '{robotName}' with ISAR id '{isarId}' to database",
@@ -189,7 +201,10 @@ namespace Api.EventHandlers
             var updatedStreams = videoStreamQueries
                 .Select(
                     stream =>
-                        new VideoStream { Name = stream.Name, Url = stream.Url, Type = stream.Type }
+                        new VideoStream
+                        {
+                            Name = stream.Name, Url = stream.Url, Type = stream.Type
+                        }
                 )
                 .ToList();
 
@@ -296,25 +311,21 @@ namespace Api.EventHandlers
             if (robot is null)
             {
                 _logger.LogError(
-                    "Could not find robot '{robotName}' with ISAR id '{isarId}'. The robot status is not updated.",
+                    "Could not find robot '{robotName}' with ISAR id '{isarId}'",
                     isarMission.RobotName,
                     isarMission.IsarId
                 );
                 return;
             }
 
-            robot.Status = flotillaMissionRun.IsCompleted ? RobotStatus.Available : RobotStatus.Busy;
-            if (flotillaMissionRun.IsCompleted)
-            {
-                robot.CurrentMissionId = null;
-            }
+            if (flotillaMissionRun.IsCompleted) { robot.CurrentMissionId = null; }
 
             await robotService.Update(robot);
             _logger.LogInformation(
-                "Robot '{id}' ('{name}') - status set to '{status}'.",
+                "Robot '{id}' ('{name}') - completed mission {missionId}.",
                 robot.IsarId,
                 robot.Name,
-                robot.Status
+                flotillaMissionRun.MissionId
             );
 
             if (flotillaMissionRun.IsCompleted)
@@ -328,9 +339,7 @@ namespace Api.EventHandlers
                 var missionRunsForEstimation = await missionRunService.ReadAll(
                     new MissionRunQueryStringParameters
                     {
-                        MinDesiredStartTime = minEpochTime,
-                        RobotModelType = robot.Model.Type,
-                        PageSize = QueryStringParameters.MaxPageSize
+                        MinDesiredStartTime = minEpochTime, RobotModelType = robot.Model.Type, PageSize = QueryStringParameters.MaxPageSize
                     }
                 );
                 var model = robot.Model;

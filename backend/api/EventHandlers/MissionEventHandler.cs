@@ -31,11 +31,13 @@ namespace Api.EventHandlers
         public override void Subscribe()
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
+            MqttEventHandler.RobotAvailable += OnRobotAvailable;
         }
 
         public override void Unsubscribe()
         {
             MissionRunService.MissionRunCreated -= OnMissionRunCreated;
+            MqttEventHandler.RobotAvailable -= OnRobotAvailable;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -45,8 +47,12 @@ namespace Api.EventHandlers
 
         private async void OnMissionRunCreated(object? sender, MissionRunCreatedEventArgs e)
         {
-            Console.WriteLine("Hello World");
-            _logger.LogError("Hello, is it me you're looking for?");
+            _logger.LogInformation("Triggered MissionRunCreated event for mission run ID: {MissionRunId}", e.MissionRunId);
+        }
+
+        private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
+        {
+            _logger.LogInformation("Triggered RobotAvailable event for robot ID: {RobotId}", e.RobotId);
         }
     }
 }
