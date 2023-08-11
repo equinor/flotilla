@@ -12,9 +12,9 @@ namespace Api.Database.Models
 
         public virtual Deck? Deck { get; set; }
 
-        public virtual Plant? Plant { get; set; }
+        public virtual Plant Plant { get; set; }
 
-        public virtual Installation? Installation { get; set; }
+        public virtual Installation Installation { get; set; }
 
         [Required]
         [MaxLength(200)]
