@@ -2,8 +2,8 @@
 {
     public class ScheduleMissionQuery
     {
-        public string MissionDefinitionId { get; set; }
-        public string RobotId { get; set; }
+        public string MissionDefinitionId { get; set; } = string.Empty;
+        public string RobotId { get; set; } = string.Empty;
         public DateTimeOffset DesiredStartTime { get; set; }
     }
 }

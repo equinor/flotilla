@@ -71,7 +71,7 @@ namespace Api.Services
             if (installation == null)
                 return new List<Deck>();
             return await _context.Decks.Where(a =>
-                a.Installation.Id.Equals(installation.Id)).ToListAsync();
+                a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
         public async Task<Deck?> ReadByName(string deckName)
@@ -86,24 +86,18 @@ namespace Api.Services
         public async Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string name)
         {
             return await _context.Decks.Where(a =>
-                a.Plant.Id.Equals(plant.Id) &&
-                a.Installation.Id.Equals(installation.Id) &&
+                a.Plant != null && a.Plant.Id.Equals(plant.Id) &&
+                a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                 a.Name.ToLower().Equals(name.ToLower())
             ).Include(d => d.Plant).Include(i => i.Installation).FirstOrDefaultAsync();
         }
 
         public async Task<Deck> Create(CreateDeckQuery newDeckQuery)
         {
-            var installation = await _installationService.ReadByName(newDeckQuery.InstallationCode);
-            if (installation == null)
-            {
+            var installation = await _installationService.ReadByName(newDeckQuery.InstallationCode) ??
                 throw new InstallationNotFoundException($"No installation with name {newDeckQuery.InstallationCode} could be found");
-            }
-            var plant = await _plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode);
-            if (plant == null)
-            {
+            var plant = await _plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode) ??
                 throw new PlantNotFoundException($"No plant with name {newDeckQuery.PlantCode} could be found");
-            }
             var deck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name);
             if (deck == null)
             {

@@ -30,25 +30,27 @@ namespace Api.Database.Context
                 .AddEnvironmentVariables()
                 .Build();
 
-            string keyVaultUri = config.GetSection("KeyVault")["VaultUri"];
+            string? keyVaultUri = config.GetSection("KeyVault")["VaultUri"];
+            if (keyVaultUri != null)
+            {
+                // Connect to keyvault
+                var keyVault = new SecretClient(
+                    new Uri(keyVaultUri),
+                    new DefaultAzureCredential(
+                        new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
+                    )
+                );
+                // Get connection string
+                string? connectionString = keyVault.GetSecret("Database--ConnectionString").Value.Value;
 
-            // Connect to keyvault
-            var keyVault = new SecretClient(
-                new Uri(keyVaultUri),
-                new DefaultAzureCredential(
-                    new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
-                )
-            );
-
-            // Get connection string
-            string? connectionString = keyVault.GetSecret("Database--ConnectionString").Value.Value;
-
-            var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
-            optionsBuilder.UseSqlServer(
-                connectionString,
-                o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
-            );
-            return new FlotillaDbContext(optionsBuilder.Options);
+                var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
+                optionsBuilder.UseSqlServer(
+                    connectionString,
+                    o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                );
+                return new FlotillaDbContext(optionsBuilder.Options);
+            }
+            throw new KeyNotFoundException("No key vault in config");
         }
     }
 }

@@ -22,15 +22,23 @@ if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
 {
     // The ExcludeSharedTokenCacheCredential option is a recommended workaround by Azure for dockerization
     // See https://github.com/Azure/azure-sdk-for-net/issues/17052
-    builder.Configuration.AddAzureKeyVault(
-        new Uri(builder.Configuration.GetSection("KeyVault")["VaultUri"]),
-        new DefaultAzureCredential(
-            new DefaultAzureCredentialOptions
-            {
-                ExcludeSharedTokenCacheCredential = true
-            }
-        )
-    );
+    string? vaultUri = builder.Configuration.GetSection("KeyVault")["VaultUri"];
+    if (!string.IsNullOrEmpty(vaultUri))
+    {
+        builder.Configuration.AddAzureKeyVault(
+            new Uri(vaultUri),
+            new DefaultAzureCredential(
+                new DefaultAzureCredentialOptions
+                {
+                    ExcludeSharedTokenCacheCredential = true
+                }
+            )
+        );
+    }
+    else
+    {
+        Console.WriteLine($"NO KEYVAULT IN CONFIG");
+    }
 }
 
 builder.ConfigureLogger();
