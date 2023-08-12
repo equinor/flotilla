@@ -69,14 +69,14 @@ namespace Api.Services
             if (installation == null)
                 return new List<Plant>();
             return await _context.Plants.Where(a =>
-                a.Installation.Id.Equals(installation.Id)).ToListAsync();
+                a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
         public async Task<Plant?> ReadByInstallationAndName(Installation installation, string plantCode)
         {
             return await _context.Plants.Where(a =>
                 a.PlantCode.ToLower().Equals(plantCode.ToLower()) &&
-                a.Installation.Id.Equals(installation.Id)).FirstOrDefaultAsync();
+                a.Installation != null && a.Installation.Id.Equals(installation.Id)).FirstOrDefaultAsync();
         }
 
         public async Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode)
@@ -85,18 +85,16 @@ namespace Api.Services
             if (installation == null)
                 return null;
             return await _context.Plants.Where(a =>
-                a.Installation.Id.Equals(installation.Id) &&
+                a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                 a.PlantCode.ToLower().Equals(plantCode.ToLower())
             ).FirstOrDefaultAsync();
         }
 
         public async Task<Plant> Create(CreatePlantQuery newPlantQuery)
         {
-            var installation = await _installationService.ReadByName(newPlantQuery.InstallationCode);
-            if (installation == null)
-            {
+            var installation = await _installationService.ReadByName(newPlantQuery.InstallationCode) ??
                 throw new InstallationNotFoundException($"No installation with name {newPlantQuery.InstallationCode} could be found");
-            }
+
             var plant = await ReadByInstallationAndName(installation, newPlantQuery.PlantCode);
             if (plant == null)
             {

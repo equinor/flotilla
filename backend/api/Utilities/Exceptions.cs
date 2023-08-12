@@ -50,4 +50,9 @@
     {
         public TagPositionNotFoundException(string message) : base(message) { }
     }
+
+    public class AreaExistsException : Exception
+    {
+        public AreaExistsException(string message) : base(message) { }
+    }
 }

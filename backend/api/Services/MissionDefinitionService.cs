@@ -58,10 +58,9 @@ namespace Api.Services
         private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
         {
             return _context.MissionDefinitions
-                .Include(missionDefinition => missionDefinition.Area)
-                .ThenInclude(area => area.Deck)
-                .ThenInclude(area => area.Plant)
-                .ThenInclude(area => area.Installation)
+                .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
+                .ThenInclude(deck => deck != null ? deck.Plant : null)
+                .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastRun);
         }
@@ -130,7 +129,9 @@ namespace Api.Services
         }
 
         /// <summary>
-        /// Filters by <see cref="MissionDefinitionQueryStringParameters.InstallationCode"/> and <see cref="MissionDefinitionQueryStringParameters.Status"/>
+        /// Filters by <see cref="MissionDefinitionQueryStringParameters.InstallationCode"/>
+        /// and <see cref="MissionDefinitionQueryStringParameters.Area"/>
+        /// and <see cref="MissionDefinitionQueryStringParameters.NameSearch" />
         ///
         /// <para>Uses LINQ Expression trees (see <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees"/>)</para>
         /// </summary>
@@ -142,7 +143,7 @@ namespace Api.Services
             Expression<Func<MissionDefinition, bool>> areaFilter = parameters.Area is null
                 ? missionDefinition => true
                 : missionDefinition =>
-                      missionDefinition.Area.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
+                    missionDefinition.Area != null && missionDefinition.Area.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
 
             Expression<Func<MissionDefinition, bool>> installationFilter = parameters.InstallationCode is null
                 ? missionDefinition => true

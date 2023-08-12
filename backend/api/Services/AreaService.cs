@@ -78,7 +78,7 @@ namespace Api.Services
 
             return await _context.Areas.Where(a =>
                 a.Name.ToLower().Equals(areaName.ToLower()) &&
-                a.Installation.Id.Equals(installation.Id)
+                a.Installation != null && a.Installation.Id.Equals(installation.Id)
             ).Include(a => a.SafePositions).Include(a => a.Installation)
                 .Include(a => a.Plant).Include(a => a.Deck).FirstOrDefaultAsync();
         }
@@ -90,7 +90,7 @@ namespace Api.Services
                 return null;
 
             return await _context.Areas.Where(a =>
-                a.Installation.Id.Equals(installation.Id) &&
+                a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                 a.Name.ToLower().Equals(areaName.ToLower())
             ).Include(a => a.SafePositions).Include(a => a.Installation)
                 .Include(a => a.Plant).Include(a => a.Deck).FirstOrDefaultAsync();
@@ -103,16 +103,16 @@ namespace Api.Services
                 return new List<Area>();
 
             return await _context.Areas.Where(a =>
-                a.Installation.Id.Equals(installation.Id)).Include(a => a.SafePositions).Include(a => a.Installation)
+                a.Installation != null && a.Installation.Id.Equals(installation.Id)).Include(a => a.SafePositions).Include(a => a.Installation)
                 .Include(a => a.Plant).Include(a => a.Deck).ToListAsync();
         }
 
         public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName)
         {
             return await _context.Areas.Where(a =>
-                a.Deck.Id.Equals(deck.Id) &&
-                a.Plant.Id.Equals(plant.Id) &&
-                a.Installation.Id.Equals(installation.Id) &&
+                a.Deck != null && a.Deck.Id.Equals(deck.Id) &&
+                a.Plant != null && a.Plant.Id.Equals(plant.Id) &&
+                a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                 a.Name.ToLower().Equals(areaName.ToLower())
             ).Include(a => a.Deck).Include(d => d.Plant).Include(i => i.Installation)
                 .Include(a => a.SafePositions).FirstOrDefaultAsync();
@@ -126,29 +126,20 @@ namespace Api.Services
                 safePositions.Add(new SafePosition(pose));
             }
 
-            var installation = await _installationService.ReadByName(newAreaQuery.InstallationCode);
-            if (installation == null)
-            {
+            var installation = await _installationService.ReadByName(newAreaQuery.InstallationCode) ??
                 throw new InstallationNotFoundException($"No installation with name {newAreaQuery.InstallationCode} could be found");
-            }
 
-            var plant = await _plantService.ReadByInstallationAndName(installation, newAreaQuery.PlantCode);
-            if (plant == null)
-            {
+            var plant = await _plantService.ReadByInstallationAndName(installation, newAreaQuery.PlantCode) ??
                 throw new PlantNotFoundException($"No plant with name {newAreaQuery.PlantCode} could be found");
-            }
 
-            var deck = await _deckService.ReadByInstallationAndPlantAndName(installation, plant, newAreaQuery.DeckName);
-            if (deck == null)
-            {
+            var deck = await _deckService.ReadByInstallationAndPlantAndName(installation, plant, newAreaQuery.DeckName) ??
                 throw new DeckNotFoundException($"No deck with name {newAreaQuery.DeckName} could be found");
-            }
 
             var existingArea = await ReadByInstallationAndPlantAndDeckAndName(
                 installation, plant, deck, newAreaQuery.AreaName);
             if (existingArea != null)
             {
-                throw new AreaNotFoundException($"No area with name {newAreaQuery.AreaName} could be found");
+                throw new AreaExistsException($"Area with name {newAreaQuery.AreaName} already exists");
             }
 
             var newArea = new Area
@@ -157,9 +148,9 @@ namespace Api.Services
                 DefaultLocalizationPose = newAreaQuery.DefaultLocalizationPose,
                 SafePositions = safePositions,
                 MapMetadata = new MapMetadata(),
-                Deck = deck,
-                Plant = plant,
-                Installation = installation
+                Deck = deck!,
+                Plant = plant!,
+                Installation = installation!
             };
 
             await _context.Areas.AddAsync(newArea);

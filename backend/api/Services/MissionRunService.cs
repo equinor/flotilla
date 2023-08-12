@@ -69,6 +69,23 @@ namespace Api.Services
             _logger = logger;
         }
 
+        private IQueryable<MissionRun> GetMissionRunsWithSubModels()
+        {
+            return _context.MissionRuns
+                .Include(missionRun => missionRun.Area)
+                .ThenInclude(area => area != null ? area.Deck : null)
+                .ThenInclude(deck => deck != null ? deck.Plant : null)
+                .ThenInclude(plant => plant != null ? plant.Installation : null)
+                .Include(missionRun => missionRun.Robot)
+                .ThenInclude(robot => robot.VideoStreams)
+                .Include(missionRun => missionRun.Robot)
+                .ThenInclude(robot => robot.Model)
+                .Include(missionRun => missionRun.Tasks)
+                .ThenInclude(planTask => planTask.Inspections)
+                .Include(missionRun => missionRun.Tasks)
+                .ThenInclude(task => task.Inspections);
+        }
+
         public async Task<MissionRun> Create(MissionRun missionRun)
         {
             await _context.MissionRuns.AddAsync(missionRun);
@@ -143,23 +160,6 @@ namespace Api.Services
         }
 
         public static event EventHandler<MissionRunCreatedEventArgs>? MissionRunCreated;
-
-        private IQueryable<MissionRun> GetMissionRunsWithSubModels()
-        {
-            return _context.MissionRuns
-                .Include(missionRun => missionRun.Area)
-                .ThenInclude(area => area.Deck)
-                .ThenInclude(deck => deck.Plant)
-                .ThenInclude(plant => plant.Installation)
-                .Include(missionRun => missionRun.Robot)
-                .ThenInclude(robot => robot.VideoStreams)
-                .Include(missionRun => missionRun.Robot)
-                .ThenInclude(robot => robot.Model)
-                .Include(missionRun => missionRun.Tasks)
-                .ThenInclude(planTask => planTask.Inspections)
-                .Include(missionRun => missionRun.Tasks)
-                .ThenInclude(task => task.Inspections);
-        }
 
         private static void SearchByName(ref IQueryable<MissionRun> missionRuns, string? name)
         {
