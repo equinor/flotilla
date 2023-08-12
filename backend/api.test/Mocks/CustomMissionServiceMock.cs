@@ -27,6 +27,7 @@ namespace Api.Services
                 }
                 return content;
             }
+            await Task.CompletedTask;
             return null;
         }
     }

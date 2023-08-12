@@ -11,18 +11,20 @@ namespace Api.Test.Mocks
         public async Task<byte[]> DownloadBlob(string blobName, string containerName, string accountName)
         {
             using var memoryStream = new System.IO.MemoryStream();
+            await Task.CompletedTask;
             return memoryStream.ToArray();
         }
 
         public AsyncPageable<BlobItem> FetchAllBlobs(string containerName, string accountName)
         {
-            var page = Page<BlobItem>.FromValues(new List<BlobItem>(), continuationToken: null, null);
+            var page = Page<BlobItem>.FromValues(new List<BlobItem>(), continuationToken: null, response: null!);
             var pages = AsyncPageable<BlobItem>.FromPages(new[] { page });
             return pages;
         }
 
         public async void UploadJsonToBlob(string json, string path, string containerName, string accountName, bool overwrite = false)
         {
+            await Task.CompletedTask;
         }
     }
 }

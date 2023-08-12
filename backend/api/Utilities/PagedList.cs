@@ -33,8 +33,10 @@ namespace Api.Utilities
             int pageSize
         )
         {
+            // Adding order by constant value 1, which does not change order of rows
+            // but stops the runtime warning
             int totalCount = await source.CountAsync();
-            var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+            var items = await source.OrderBy(x => 1).Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
             return new PagedList<T>(items, pageNumber, pageSize, totalCount);
         }
     }
