@@ -93,6 +93,8 @@ function InstallationPicker(page: string) {
                 if (mapKey !== undefined) switchInstallation(mapKey)
                 else switchInstallation('')
             }}
+            autoWidth={true}
+            onFocus={(e) => e.preventDefault()}
         />
     )
 }

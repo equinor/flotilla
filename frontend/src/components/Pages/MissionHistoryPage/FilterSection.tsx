@@ -143,7 +143,9 @@ export function FilterSection() {
                             return TranslateText(status)
                         })}
                         multiple
-                    ></Autocomplete>
+                        autoWidth={true}
+                        onFocus={(e) => e.preventDefault()}
+                    />
                     <Autocomplete
                         options={Array.from(inspectionTypeTranslationMap.keys())}
                         onOptionsChange={(changes: AutocompleteChanges<string>) => {
@@ -161,7 +163,9 @@ export function FilterSection() {
                             return TranslateText(inspectionType)
                         })}
                         multiple
-                    ></Autocomplete>
+                        autoWidth={true}
+                        onFocus={(e) => e.preventDefault()}
+                    />
                     <Search
                         value={robotName ?? ''}
                         placeholder={TranslateText('Search for a robot name')}

@@ -192,11 +192,15 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
                             options={areaNames}
                             label={TranslateText('Select area')}
                             onOptionsChange={onSelectedArea}
+                            autoWidth={true}
+                            onFocus={(e) => e.preventDefault()}
                         />
                         <Autocomplete
                             options={Array.from(directionMap.keys())}
                             label={TranslateText('Select direction')}
                             onOptionsChange={onSelectedDirection}
+                            autoWidth={true}
+                            onFocus={(e) => e.preventDefault()}
                         />
                     </StyledAutoComplete>
                     {selectedArea && localizationPose && (
