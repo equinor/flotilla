@@ -32,26 +32,31 @@ interface IProps {
 
 const StyledMissionDialog = styled.div`
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
 `
 const StyledAutoComplete = styled(Card)`
     display: flex;
     justify-content: center;
     padding: 8px;
+    gap: 25px;
 `
-
 const StyledMissionSection = styled.div`
     display: flex;
     margin-left: auto;
     margin-right: 0;
+    gap: 10px;
 `
-
 const StyledLoading = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
     padding-top: 3rem;
     gap: 1rem;
+`
+const StyledDialog = styled(Dialog)`
+    display: flex;
+    padding: 1rem;
+    width: 320px;
 `
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
@@ -129,7 +134,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             </Popover>
 
             <StyledMissionDialog>
-                <Dialog open={props.isFetchingEchoMissions && isScheduleMissionsPressed} isDismissable>
+                <StyledDialog open={props.isFetchingEchoMissions && isScheduleMissionsPressed} isDismissable>
                     <StyledAutoComplete>
                         <StyledLoading>
                             <CircularProgress />
@@ -141,14 +146,14 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     setIsScheduleMissionsPressed(false)
                                 }}
                                 variant="outlined"
-                                color="secondary"
+                                color="primary"
                             >
                                 {' '}
                                 {TranslateText('Cancel')}{' '}
                             </Button>
                         </StyledMissionSection>
                     </StyledAutoComplete>
-                </Dialog>
+                </StyledDialog>
             </StyledMissionDialog>
 
             <StyledMissionDialog>
@@ -164,7 +169,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     setIsEmptyEchoMissionsDialogOpen(false)
                                 }}
                                 variant="outlined"
-                                color="secondary"
+                                color="primary"
                             >
                                 {' '}
                                 {TranslateText('Cancel')}{' '}
@@ -175,17 +180,19 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             </StyledMissionDialog>
 
             <StyledMissionDialog>
-                <Dialog open={isScheduleMissionDialogOpen} isDismissable>
+                <StyledDialog open={isScheduleMissionDialogOpen} isDismissable>
                     <StyledAutoComplete>
-                        <Typography variant="h5">{TranslateText('Add mission')}</Typography>
+                        <Typography variant="h3">{TranslateText('Add mission')}</Typography>
                         <Autocomplete
                             options={props.echoMissionsOptions}
-                            label={TranslateText('Select missions')}
                             onOptionsChange={(changes) => props.onChangeMissionSelections(changes.selectedItems)}
+                            label={TranslateText('Select missions')}
                             multiple
                             placeholder={`${props.selectedMissions.length}/${
                                 Array.from(props.echoMissionsOptions.keys()).length
                             } ${TranslateText('selected')}`}
+                            autoWidth={true}
+                            onFocus={(e) => e.preventDefault()}
                         />
                         <Autocomplete
                             optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
@@ -195,6 +202,8 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             )}
                             label={TranslateText('Select robot')}
                             onOptionsChange={(changes) => props.onSelectedRobot(changes.selectedItems[0])}
+                            autoWidth={true}
+                            onFocus={(e) => e.preventDefault()}
                         />
                         <StyledMissionSection>
                             <Button
@@ -202,7 +211,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     setIsScheduleMissionDialogOpen(false)
                                 }}
                                 variant="outlined"
-                                color="secondary"
+                                color="primary"
                             >
                                 {' '}
                                 {TranslateText('Cancel')}{' '}
@@ -219,7 +228,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             </Button>
                         </StyledMissionSection>
                     </StyledAutoComplete>
-                </Dialog>
+                </StyledDialog>
             </StyledMissionDialog>
         </>
     )
