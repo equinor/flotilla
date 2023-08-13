@@ -383,7 +383,10 @@ public class MissionController : ControllerBase
         Area? area = null;
         if (scheduledMissionQuery.AreaName != null)
             area = await _areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
-
+        if (area == null)
+        {
+            return NotFound($"Could not find area by installation '{scheduledMissionQuery.InstallationCode}' and name '{scheduledMissionQuery.AreaName}'");
+        }
         var scheduledMissionDefinition = new MissionDefinition
         {
             Id = Guid.NewGuid().ToString(),
