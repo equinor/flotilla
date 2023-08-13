@@ -217,10 +217,10 @@ namespace Api.Test
             Assert.True(robots != null);
             var robot = robots[0];
             string robotId = robot.Id;
-            string testInstallation = "TestInstallationStartMissionTest";
-            string testPlant = "TestPlantStartMissionTest";
-            string testDeck = "TestDeckStartMissionTest";
-            string testArea = "testAreaStartMissionTest";
+            string testInstallation = "TestInstallationMissionsTest";
+            string testPlant = "TestPlantMissionsTest";
+            string testDeck = "TestDeckMissionsTest";
+            string testArea = "testAreaMissionsTest";
 
             await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
 
@@ -240,12 +240,14 @@ namespace Api.Test
                 null,
                 "application/json"
             );
-            _ = await _client.PostAsync(missionsUrl, content);
-            _ = await _client.PostAsync(missionsUrl, content);
-            _ = await _client.PostAsync(missionsUrl, content);
 
-            string url = "/missions/runs";
-            var response = await _client.GetAsync(url);
+            await _client.PostAsync(missionsUrl, content);
+            await _client.PostAsync(missionsUrl, content);
+            await _client.PostAsync(missionsUrl, content);
+
+            // Increasing pageSize to 50 to ensure the missions we are looking for is included
+            string urlMissionRuns = $"/missions/runs?pageSize=50";
+            var response = await _client.GetAsync(urlMissionRuns);
             var missionRuns = await response.Content.ReadFromJsonAsync<List<MissionRun>>(
                 _serializerOptions
             );
@@ -273,6 +275,51 @@ namespace Api.Test
             string url = "/missions/runs/" + missionId;
             var response = await _client.DeleteAsync(url);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task StartMissionTest()
+        {
+            // Arrange
+            string robotUrl = "/robots";
+            string missionsUrl = "/missions";
+            var response = await _client.GetAsync(robotUrl);
+            Assert.True(response.IsSuccessStatusCode);
+            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
+            Assert.True(robots != null);
+            var robot = robots[0];
+            string robotId = robot.Id;
+            string testInstallation = "TestInstallationStartMissionTest";
+            string testPlant = "TestPlantStartMissionTest";
+            string testDeck = "TestDeckStartMissionTest";
+            string testArea = "testAreaStartMissionTest";
+            int echoMissionId = 95;
+
+            await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+
+            // Act
+            var query = new ScheduledMissionQuery
+            {
+                RobotId = robotId,
+                InstallationCode = testInstallation,
+                AreaName = testArea,
+                EchoMissionId = echoMissionId,
+                DesiredStartTime = DateTimeOffset.UtcNow
+            };
+            var content = new StringContent(
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
+
+            response = await _client.PostAsync(missionsUrl, content);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            Assert.True(missionRun != null);
+            Assert.True(missionRun.Id != null);
+            Assert.True(missionRun.Status == MissionStatus.Pending);
         }
 
         #endregion MissionsController
@@ -314,46 +361,6 @@ namespace Api.Test
             Assert.Equal(robot.Id, robotId);
         }
         #endregion RobotController
-
-        [Fact]
-        public async Task StartMissionTest()
-        {
-            // Arrange
-            string robotUrl = "/robots";
-            string missionsUrl = "/missions";
-            var response = await _client.GetAsync(robotUrl);
-            Assert.True(response.IsSuccessStatusCode);
-            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
-            Assert.True(robots != null);
-            var robot = robots[0];
-            string robotId = robot.Id;
-            string testInstallation = "TestInstallationStartMissionTest";
-            string testArea = "testAreaStartMissionTest";
-            int echoMissionId = 95;
-
-            // Act
-            var query = new ScheduledMissionQuery
-            {
-                RobotId = robotId,
-                InstallationCode = testInstallation,
-                AreaName = testArea,
-                EchoMissionId = echoMissionId,
-                DesiredStartTime = DateTimeOffset.UtcNow
-            };
-            var content = new StringContent(
-                JsonSerializer.Serialize(query),
-                null,
-                "application/json"
-            );
-            response = await _client.PostAsync(missionsUrl, content);
-
-            // Assert
-            Assert.True(response.IsSuccessStatusCode);
-            var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            Assert.True(missionRun != null);
-            Assert.True(missionRun.Id != null);
-            Assert.True(missionRun.Status == MissionStatus.Pending);
-        }
 
         [Fact]
         public async Task AreaTest()

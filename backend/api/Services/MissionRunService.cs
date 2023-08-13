@@ -204,8 +204,21 @@ namespace Api.Services
         }
 
         /// <summary>
-        ///     Filters by <see cref="MissionRunQueryStringParameters.InstallationCode" /> and
-        ///     <see cref="MissionRunQueryStringParameters.Status" />
+        ///     Filters by <see cref="MissionRunQueryStringParameters.InstallationCode" />,
+        ///     <see cref="MissionRunQueryStringParameters.Area" />,
+        ///     <see cref="MissionRunQueryStringParameters.Statuses" />,
+        ///     <see cref="MissionRunQueryStringParameters.RobotId" />,
+        ///     <see cref="MissionRunQueryStringParameters.RobotModelType" />,
+        ///     <see cref="MissionRunQueryStringParameters.NameSearch" />,
+        ///     <see cref="MissionRunQueryStringParameters.RobotNameSearch" />,
+        ///     <see cref="MissionRunQueryStringParameters.TagSearch" />,
+        ///     <see cref="MissionRunQueryStringParameters.InspectionTypes" />,
+        ///     <see cref="MissionRunQueryStringParameters.MinStartTime" />,
+        ///     <see cref="MissionRunQueryStringParameters.MaxStartTime" />,
+        ///     <see cref="MissionRunQueryStringParameters.MinEndTime" />,
+        ///     <see cref="MissionRunQueryStringParameters.MaxEndTime" />,
+        ///     <see cref="MissionRunQueryStringParameters.MinDesiredStartTime" /> and
+        ///     <see cref="MissionRunQueryStringParameters.MaxDesiredStartTime" />
         ///     <para>
         ///         Uses LINQ Expression trees (see
         ///         <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees" />)
@@ -219,6 +232,7 @@ namespace Api.Services
             Expression<Func<MissionRun, bool>> areaFilter = parameters.Area is null
                 ? missionRun => true
                 : missionRun =>
+                    missionRun.Area != null &&
                     missionRun.Area.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
 
             Expression<Func<MissionRun, bool>> installationFilter = parameters.InstallationCode is null
