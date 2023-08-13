@@ -303,6 +303,7 @@ namespace Api.Test.EventHandlers
 
             // Assert
             var postStartMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id);
+            Assert.NotNull(postStartMissionRunOne);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunOne.Status);
 
             // Rearrange
@@ -312,16 +313,17 @@ namespace Api.Test.EventHandlers
             await _missionRunService.Create(missionRunTwo);
 
             // Assert
-            var postStartMissionTunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
-            Assert.Equal(MissionStatus.Ongoing, postStartMissionTunTwo.Status);
+            var postStartMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
+            Assert.NotNull(postStartMissionRunTwo);
+            Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
         }
 
         private void SetupMocksForRobotController(Robot robot, MissionRun missionRun)
         {
             _robotControllerMock.IsarServiceMock
                 .Setup(isar => isar.StartMission(robot, missionRun))
-                .Returns(
-                    async () =>
+                .ReturnsAsync(
+                    () =>
                         new IsarMission(
                             new IsarStartMissionResponse
                             {
@@ -333,12 +335,12 @@ namespace Api.Test.EventHandlers
 
             _robotControllerMock.RobotServiceMock
                 .Setup(service => service.ReadById(robot.Id))
-                .Returns(async () => robot);
+                .ReturnsAsync(() => robot);
 
             // This mock uses "It.IsAny" rather than the specific ID as the ID is created once the object is written to the database
             _robotControllerMock.MissionServiceMock
                 .Setup(service => service.ReadById(It.IsAny<string>()))
-                .Returns(async () => missionRun);
+                .ReturnsAsync(() => missionRun);
         }
     }
 }
