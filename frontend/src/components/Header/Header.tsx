@@ -1,5 +1,5 @@
 import { config } from 'config'
-import { Button, Icon, TopBar, Autocomplete, Typography, Checkbox } from '@equinor/eds-core-react'
+import { Button, Icon, TopBar, Autocomplete, Typography, Checkbox, Dialog } from '@equinor/eds-core-react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { EchoPlantInfo } from 'models/EchoMission'
@@ -8,9 +8,11 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { SelectLanguage } from './LanguageSelector'
 import { Icons } from 'utils/icons'
+import { tokens } from '@equinor/eds-tokens'
 
 const StyledTopBar = styled(TopBar)`
     margin-bottom: 2rem;
+    align-items: center;
 `
 
 const IconStyle = styled.div`
@@ -29,8 +31,8 @@ const HandPointer = styled.div`
 const StyledTopBarContent = styled(TopBar.CustomContent)`
     display: grid;
     grid-template-columns: minmax(50px, 265px) auto;
-    align-items: end;
     gap: 0px 3rem;
+    align-items: center;
 `
 
 const SelectLanguageWrapper = styled.div`
@@ -55,13 +57,13 @@ export function Header({ page }: { page: string }) {
             <TopBar.Actions>
                 <IconStyle>
                     <Button variant="ghost_icon" onClick={() => console.log('Clicked account icon')}>
-                        <Icon name={Icons.Account} size={16} title="user" />
+                        <Icon name={Icons.Account} size={24} title="user" />
                     </Button>
                     <Button variant="ghost_icon" onClick={() => console.log('Clicked accessibility icon')}>
-                        <Icon name={Icons.Accessible} size={16} />
+                        <Icon name={Icons.Accessible} size={24} />
                     </Button>
                     <Button variant="ghost_icon" onClick={() => console.log('Clicked notification icon')}>
-                        <Icon name={Icons.Notifications} size={16} />
+                        <Icon name={Icons.Notifications} size={24} />
                     </Button>
                 </IconStyle>
                 <SelectLanguageWrapper>{SelectLanguage()}</SelectLanguageWrapper>
@@ -75,6 +77,8 @@ function InstallationPicker(page: string) {
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>()
     const { installationCode, switchInstallation } = useInstallationContext()
     const [showActivePlants, setShowActivePlants] = useState<boolean>(true)
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+
     useEffect(() => {
         const plantPromise = showActivePlants ? BackendAPICaller.getActivePlants() : BackendAPICaller.getEchoPlantInfo()
         plantPromise.then(async (response: EchoPlantInfo[]) => {
@@ -100,11 +104,28 @@ function InstallationPicker(page: string) {
                 autoWidth={true}
                 onFocus={(e) => e.preventDefault()}
             />
-            <Checkbox
-                label={TranslateText('Only active installations')}
-                checked={showActivePlants}
-                onChange={(e) => setShowActivePlants(e.target.checked)}
-            />
+            <Button variant="ghost_icon" onClick={() => setIsDialogOpen(true)}>
+                {' '}
+                <Icon
+                    name={Icons.Settings}
+                    size={24}
+                    aria-haspopup="dialog"
+                    color={tokens.colors.interactive.primary__resting.rgba}
+                />{' '}
+            </Button>
+            <Dialog open={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
+                <Dialog.Header>
+                    <Dialog.Title>{TranslateText('Installation settings')}</Dialog.Title>
+                </Dialog.Header>
+                <Dialog.Actions>
+                    <Checkbox
+                        label={TranslateText('Only active installations')}
+                        checked={showActivePlants}
+                        onChange={(e) => setShowActivePlants(e.target.checked)}
+                    />
+                    <Button onClick={() => setIsDialogOpen(false)}>{TranslateText('Close')}</Button>
+                </Dialog.Actions>
+            </Dialog>
         </>
     )
 }

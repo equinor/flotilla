@@ -33,6 +33,7 @@ import {
     pin_drop,
     filter_list,
     navigation,
+    settings,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -69,6 +70,7 @@ Icon.add({
     pin_drop,
     filter_list,
     navigation,
+    settings,
 })
 
 export enum Icons {
@@ -105,4 +107,5 @@ export enum Icons {
     PinDrop = 'pin_drop',
     Filter = 'filter_list',
     Navigation = 'navigation',
+    Settings = 'settings',
 }
