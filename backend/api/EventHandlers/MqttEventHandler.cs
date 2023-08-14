@@ -203,7 +203,9 @@ namespace Api.EventHandlers
                     stream =>
                         new VideoStream
                         {
-                            Name = stream.Name, Url = stream.Url, Type = stream.Type
+                            Name = stream.Name,
+                            Url = stream.Url,
+                            Type = stream.Type
                         }
                 )
                 .ToList();
@@ -339,7 +341,9 @@ namespace Api.EventHandlers
                 var missionRunsForEstimation = await missionRunService.ReadAll(
                     new MissionRunQueryStringParameters
                     {
-                        MinDesiredStartTime = minEpochTime, RobotModelType = robot.Model.Type, PageSize = QueryStringParameters.MaxPageSize
+                        MinDesiredStartTime = minEpochTime,
+                        RobotModelType = robot.Model.Type,
+                        PageSize = QueryStringParameters.MaxPageSize
                     }
                 );
                 var model = robot.Model;
