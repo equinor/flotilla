@@ -28,4 +28,8 @@
     <ProjectReference Include="..\api\api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="EventHandlers\" />
+  </ItemGroup>
+
 </Project>

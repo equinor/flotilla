@@ -251,15 +251,15 @@ namespace Api.Services
             var maxStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxStartTime);
             Expression<Func<MissionRun, bool>> startTimeFilter = missionRun =>
                 missionRun.StartTime == null
-                || DateTimeOffset.Compare(missionRun.StartTime.Value, minStartTime) >= 0
-                && DateTimeOffset.Compare(missionRun.StartTime.Value, maxStartTime) <= 0;
+                || (DateTimeOffset.Compare(missionRun.StartTime.Value, minStartTime) >= 0
+                && DateTimeOffset.Compare(missionRun.StartTime.Value, maxStartTime) <= 0);
 
             var minEndTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinEndTime);
             var maxEndTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxEndTime);
             Expression<Func<MissionRun, bool>> endTimeFilter = missionRun =>
                 missionRun.EndTime == null
-                || DateTimeOffset.Compare(missionRun.EndTime.Value, minEndTime) >= 0
-                && DateTimeOffset.Compare(missionRun.EndTime.Value, maxEndTime) <= 0;
+                || (DateTimeOffset.Compare(missionRun.EndTime.Value, minEndTime) >= 0
+                && DateTimeOffset.Compare(missionRun.EndTime.Value, maxEndTime) <= 0);
 
             var minDesiredStartTime = DateTimeOffset.FromUnixTimeSeconds(
                 parameters.MinDesiredStartTime

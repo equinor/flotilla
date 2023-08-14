@@ -59,7 +59,6 @@ builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MissionEventHandler>();
 builder.Services.AddHostedService<MqttService>();
 builder.Services.AddHostedService<IsarConnectionEventHandler>();
-builder.Services.AddHostedService<MissionScheduler>();
 
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));
 builder.Services.Configure<MapBlobOptions>(builder.Configuration.GetSection("Maps"));
