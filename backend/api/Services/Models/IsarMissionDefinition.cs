@@ -97,7 +97,7 @@ namespace Api.Services.Models
                 { "asset_code", missionRun.InstallationCode },
                 { "mission_name", missionRun.Name },
                 { "status_reason", missionRun.StatusReason },
-                { "analysis_type", inspection.AnalysisType.ToString() }
+                { "analysis_type", inspection.AnalysisType?.ToString() }
             };
             Metadata = metadata;
         }
