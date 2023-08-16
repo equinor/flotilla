@@ -1,7 +1,7 @@
 import { BackButton } from '../MissionPage/MissionHeader/BackButton'
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
-import { AssetDecksDialog } from 'components/Pages/AssetDecks/AssetDecksDialog'
+import { AreasDialog } from 'components/Pages/InspectionPage/InspectionDialog'
 
 const StyledMissionPage = styled.div`
     display: flex;
@@ -23,15 +23,15 @@ export type RefreshProps = {
     refreshInterval: number
 }
 
-export function AssetDecksPage() {
+export function InspectionPage() {
     const refreshInterval = 1000
 
     return (
         <>
-            <Header page={'assetdecks'} />
+            <Header page={'inspections'} />
             <StyledMissionPage>
                 <BackButton />
-                <AssetDecksDialog refreshInterval={refreshInterval} />
+                <AreasDialog refreshInterval={refreshInterval} />
             </StyledMissionPage>
         </>
     )

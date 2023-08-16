@@ -1,11 +1,11 @@
 import { Table, Card, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { TranslateText } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { AssetDeck } from 'models/AssetDeck'
-import { useAssetContext } from 'components/Contexts/AssetContext'
-import { RefreshProps } from './AssetDecksPage'
+import { Area } from 'models/Area'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { RefreshProps } from './InspectionPage'
 import { tokens } from '@equinor/eds-tokens'
 
 const StyledCard = styled(Card)`
@@ -31,30 +31,31 @@ const StyledContent = styled.div`
     gap: 4rem;
 `
 
-export function AssetDecksDialog({ refreshInterval }: RefreshProps) {
-    const [assetDecks, setAssetDecks] = useState<AssetDeck[]>()
-    const { assetCode } = useAssetContext()
+export function AreasDialog({ refreshInterval }: RefreshProps) {
+    const { TranslateText } = useLanguageContext()
+    const [Areas, setAreas] = useState<Area[]>()
+    const { installationCode } = useInstallationContext()
 
     useEffect(() => {
-        BackendAPICaller.getAssetDecks().then((response: AssetDeck[]) => {
-            setAssetDecks(response)
+        BackendAPICaller.getAreas().then((response: Area[]) => {
+            setAreas(response)
         })
     }, [])
 
-    const findSelectedDecks = (assetDecks: AssetDeck[]): AssetDeck[] => {
-        const selectedAssetDecks = assetDecks?.filter(
-            (assetDeck) => assetDeck.assetCode.toLowerCase() === assetCode.toLowerCase()
+    const findSelectedDecks = (Areas: Area[]): Area[] => {
+        const selectedAreas = Areas?.filter(
+            (Area) => Area.installationCode.toLowerCase() === installationCode.toLowerCase()
         )
-        return selectedAssetDecks
+        return selectedAreas
     }
 
-    const assetDecksList = assetDecks ? Array.from(findSelectedDecks(assetDecks)) : []
+    const AreasList = Areas ? Array.from(findSelectedDecks(Areas)) : []
 
     return (
         <>
             <StyledContent>
                 <StyledDeckCards>
-                    {assetDecksList.map((deck) => (
+                    {AreasList.map((deck) => (
                         <StyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
                             <Typography>{deck.deckName.toLocaleUpperCase()}</Typography>
                         </StyledCard>
