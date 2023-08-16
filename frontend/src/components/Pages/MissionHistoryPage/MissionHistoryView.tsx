@@ -114,8 +114,9 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     }
 
     const updateFilteredMissions = useCallback(() => {
+        const formattedFilter = filterFunctions.getFormattedFilter()!
         BackendAPICaller.getMissionRuns({
-            ...filterState,
+            ...formattedFilter,
             pageSize: pageSize,
             pageNumber: page ?? 1,
             orderBy: 'EndTime desc, Name',
