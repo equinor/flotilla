@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useState } from 'react'
+import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { MissionStatus } from 'models/Mission'
 import { InspectionType } from 'models/Inspection'
 import { useLanguageContext } from './LanguageContext'
@@ -33,6 +33,7 @@ interface IMissionFilterContext {
         resetFilters: () => void
         resetFilter: (s: string) => void
         removeFilter: (s: string) => void
+        isDefault: (filterName: string, value: any) => boolean
         removeFilterElement: (filterName: string, value: any) => void
         dateTimeStringToInt: (dateTimeString: string | undefined) => number | undefined
         dateTimeIntToString: (dateTimeNumber: number | undefined) => string | undefined
@@ -84,6 +85,7 @@ const defaultMissionFilterInterface = {
         resetFilters: () => {},
         resetFilter: (s: string) => {},
         removeFilter: (s: string) => {},
+        isDefault: (filterName: string, value: any) => true,
         removeFilterElement: (filterName: string, value: any) => {},
         dateTimeStringToInt: (dateTimeString: string | undefined) => 0,
         dateTimeIntToString: (dateTimeNumber: number | undefined) => '',
@@ -224,11 +226,13 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
             setFilterState(defaultMissionFilterInterface.filterState)
         },
         resetFilter(filterName: string) {
+            filterName = filterName.trim()
             const defaultState = defaultMissionFilterInterface.filterState
             const defaultValue = defaultState[filterName as keyof typeof defaultState]
             setFilterState({ ...filterState, [filterName]: defaultValue })
         },
         removeFilter(filterName: string) {
+            filterName = filterName.trim()
             const defaultState = defaultMissionFilterInterface.filterState
             const defaultValue = defaultState[filterName as keyof typeof defaultState]
             const newValue = Array.isArray(defaultValue) ? [] : undefined
@@ -241,6 +245,17 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
             if (!Array.isArray(currentArray)) return
             let newArray = currentArray.filter((val) => val !== value)
             setFilterState({ ...filterState, [filterName]: newArray })
+        },
+        isDefault(filterName: string, value: any) {
+            filterName = filterName.trim()
+            if (!Object.keys(filterState).includes(filterName)) return false
+            const defaultState = defaultMissionFilterInterface.filterState
+            const defaultValue = defaultState[filterName as keyof typeof defaultState]
+            if (Array.isArray(defaultValue)) {
+                return defaultValue.length === value.length && [...defaultValue].every((x) => value.includes(x))
+            } else {
+                return defaultValue === value
+            }
         },
         dateTimeStringToInt: (dateTimeString: string | undefined) => {
             if (dateTimeString === '' || dateTimeString === undefined) return undefined
@@ -268,6 +283,16 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
             return iso.slice(0, -3) // Removes :00 at the end
         },
     }
+
+    const isAllDefault = () => {
+        if (Object.keys(filterState).length !== Object.keys(defaultMissionFilterInterface.filterState).length)
+            return false
+        return Object.entries(filterState).every((entry) => filterFunctions.isDefault(entry[0], entry[1]))
+    }
+
+    useEffect(() => {
+        if (isAllDefault()) setFilterIsSet(false)
+    }, [filterState])
 
     return (
         <MissionFilterContext.Provider
