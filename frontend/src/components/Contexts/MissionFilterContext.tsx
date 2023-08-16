@@ -2,6 +2,7 @@ import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { MissionStatus } from 'models/Mission'
 import { InspectionType } from 'models/Inspection'
 import { useLanguageContext } from './LanguageContext'
+import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
 
 interface IMissionFilterContext {
     page: number
@@ -38,6 +39,7 @@ interface IMissionFilterContext {
         dateTimeStringToInt: (dateTimeString: string | undefined) => number | undefined
         dateTimeIntToString: (dateTimeNumber: number | undefined) => string | undefined
         dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => string | undefined
+        getFormattedFilter: () => MissionRunQueryParameters | undefined
     }
 }
 
@@ -90,6 +92,7 @@ const defaultMissionFilterInterface = {
         dateTimeStringToInt: (dateTimeString: string | undefined) => 0,
         dateTimeIntToString: (dateTimeNumber: number | undefined) => '',
         dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => '',
+        getFormattedFilter: () => undefined,
     },
 }
 
@@ -281,6 +284,14 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
             iso = iso.split('.')[0]
             iso = iso.replace('T', ' ')
             return iso.slice(0, -3) // Removes :00 at the end
+        },
+        getFormattedFilter: () => {
+            return {
+                ...filterState,
+                nameSearch: filterState.missionName,
+                robotNameSearch: filterState.robotName,
+                tagSearch: filterState.tagId,
+            }
         },
     }
 
