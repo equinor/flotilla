@@ -1,20 +1,20 @@
-﻿using Api.Database.Context;
+﻿using System.Diagnostics.CodeAnalysis;
+using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
-
 namespace Api.Services
 {
     public interface IRobotService
     {
-        public abstract Task<Robot> Create(Robot newRobot);
-        public abstract Task<IEnumerable<Robot>> ReadAll();
-        public abstract Task<Robot?> ReadById(string id);
-        public abstract Task<Robot?> ReadByIsarId(string isarId);
-        public abstract Task<Robot> Update(Robot robot);
-        public abstract Task<Robot?> Delete(string id);
+        public Task<Robot> Create(Robot newRobot);
+        public Task<IEnumerable<Robot>> ReadAll();
+        public Task<Robot?> ReadById(string id);
+        public Task<Robot?> ReadByIsarId(string isarId);
+        public Task<Robot> Update(Robot robot);
+        public Task<Robot?> Delete(string id);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Globalization",
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
@@ -26,11 +26,6 @@ namespace Api.Services
         public RobotService(FlotillaDbContext context)
         {
             _context = context;
-        }
-
-        private IQueryable<Robot> GetRobotsWithSubModels()
-        {
-            return _context.Robots.Include(r => r.VideoStreams).Include(r => r.Model).Include(r => r.CurrentArea);
         }
 
         public async Task<Robot> Create(Robot newRobot)
@@ -67,12 +62,19 @@ namespace Api.Services
         {
             var robot = await GetRobotsWithSubModels().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (robot is null)
+            {
                 return null;
+            }
 
             _context.Robots.Remove(robot);
             await _context.SaveChangesAsync();
 
             return robot;
+        }
+
+        private IQueryable<Robot> GetRobotsWithSubModels()
+        {
+            return _context.Robots.Include(r => r.VideoStreams).Include(r => r.Model).Include(r => r.CurrentArea);
         }
     }
 }
