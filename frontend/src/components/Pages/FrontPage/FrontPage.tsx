@@ -3,7 +3,7 @@ import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/O
 import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusView'
 import { FailedMissionAlertView } from './MissionOverview/FailedMissionAlertView'
 import { Header } from 'components/Header/Header'
-import { AssetDecksButton } from 'components/Pages/AssetDecks/AssetDecksButton'
+import { OpenInspectionPageButton } from 'components/Pages/InspectionPage/OpenInspectionPageButton'
 import styled from 'styled-components'
 
 const StyledFrontPage = styled.div`
@@ -48,7 +48,7 @@ export function FrontPage() {
                     </MissionsContent>
                 </HorizontalContent>
                 <RobotStatusSection refreshInterval={refreshInterval} />
-                <AssetDecksButton refreshInterval={refreshInterval} />
+                <OpenInspectionPageButton refreshInterval={refreshInterval} />
             </StyledFrontPage>
         </>
     )
