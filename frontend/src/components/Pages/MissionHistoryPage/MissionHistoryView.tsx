@@ -170,7 +170,11 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
             {filterIsSet && (
                 <ActiveFilterList>
                     {flatten(filterState)
-                        .filter((filter) => isNotNullOrNotEmptyArray(filter.value))
+                        .filter(
+                            (filter) =>
+                                isNotNullOrNotEmptyArray(filter.value) &&
+                                !filterFunctions.isDefault(filter.name, filter.value)
+                        )
                         .map((filter) => (
                             <Chip
                                 style={{ borderColor: checkBoxBorderColour, height: '2rem', paddingLeft: '6px' }}
