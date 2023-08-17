@@ -14,7 +14,7 @@ import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 import { TaskStatus } from 'models/Task'
 import { CreateCustomMission, CustomMissionQuery } from 'models/CustomMission'
 import { MapMetadata } from 'models/MapMetadata'
-import { MissionDefinition } from 'models/MissionDefinition'
+import { EchoMissionDefinition, MissionDefinition } from 'models/MissionDefinition'
 import { EchoMission } from 'models/EchoMission'
 
 /** Implements the request sent to the backend api. */
@@ -180,9 +180,9 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    static async getAvailableEchoMission(installationCode: string = ''): Promise<MissionDefinition[]> {
+    static async getAvailableEchoMission(installationCode: string = ''): Promise<EchoMissionDefinition[]> {
         const path: string = 'echo/available-missions/' + installationCode
-        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch((e) => {
+        const result = await BackendAPICaller.GET<EchoMissionDefinition[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
@@ -191,7 +191,7 @@ export class BackendAPICaller {
 
     static async getMissionDefinitions(
         parameters: MissionDefinitionQueryParameters
-    ): Promise<PaginatedResponse<Mission>> {
+    ): Promise<PaginatedResponse<MissionDefinition>> {
         let path: string = 'missions/definitions?'
 
         // Always filter by currently selected installation
@@ -206,7 +206,7 @@ export class BackendAPICaller {
         if (parameters.nameSearch) path = path + 'NameSearch=' + parameters.nameSearch + '&'
         if (parameters.sourceType) path = path + 'SourceType=' + parameters.sourceType + '&'
 
-        const result = await BackendAPICaller.GET<Mission[]>(path).catch((e) => {
+        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
@@ -215,6 +215,18 @@ export class BackendAPICaller {
         }
         const pagination: PaginationHeader = JSON.parse(result.headers.get(PaginationHeaderName)!)
         return { pagination: pagination, content: result.content }
+    }
+
+    static async getMissionDefinitionsInArea(
+        area: Area
+    ): Promise<MissionDefinition[]> {
+        let path: string = 'areas/' + area.id + '/mission-definitions'
+
+        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
     }
 
     static async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {

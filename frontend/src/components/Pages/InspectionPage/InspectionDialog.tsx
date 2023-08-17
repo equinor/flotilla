@@ -7,6 +7,7 @@ import { Area } from 'models/Area'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { RefreshProps } from './InspectionPage'
 import { tokens } from '@equinor/eds-tokens'
+import { MissionDefinition } from 'models/MissionDefinition'
 
 const StyledCard = styled(Card)`
     width: 200px;
@@ -16,7 +17,7 @@ const StyledCard = styled(Card)`
     }
 `
 
-const StyledDeckCards = styled.div`
+const StyledAreaCards = styled.div`
     display: flex;
     flex-direction: row;
     gap: 1rem;
@@ -31,48 +32,57 @@ const StyledContent = styled.div`
     gap: 4rem;
 `
 
+interface AreaMissionType {
+    [areaId: string]: { missionDefinitions: MissionDefinition[], area: Area }
+}
+
 export function AreasDialog({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
-    const [Areas, setAreas] = useState<Area[]>()
     const { installationCode } = useInstallationContext()
+    const [areaMissions, setAreaMissions] = useState<AreaMissionType>({})
 
     useEffect(() => {
-        BackendAPICaller.getAreas().then((response: Area[]) => {
-            setAreas(response)
+        BackendAPICaller.getAreas().then(async (areas: Area[]) => {
+            let newAreaMissions: AreaMissionType = {}
+            const filteredAreas = areas.filter((area) => area.installationCode.toLowerCase() === installationCode.toLowerCase())
+            for (const area of filteredAreas) {
+                // These calls need to be made sequentially to update areaMissions safely
+                let missionDefinitions = await BackendAPICaller.getMissionDefinitionsInArea(area)
+                if (!missionDefinitions) missionDefinitions = []
+                newAreaMissions[area.id] = { missionDefinitions: missionDefinitions, area: area }
+            }
+            setAreaMissions(newAreaMissions)
         })
-    }, [])
+    }, [installationCode])
 
-    const findSelectedDecks = (Areas: Area[]): Area[] => {
-        const selectedAreas = Areas?.filter(
-            (Area) => Area.installationCode.toLowerCase() === installationCode.toLowerCase()
-        )
-        return selectedAreas
-    }
-
-    const AreasList = Areas ? Array.from(findSelectedDecks(Areas)) : []
+    console.log(areaMissions)
 
     return (
         <>
             <StyledContent>
-                <StyledDeckCards>
-                    {AreasList.map((deck) => (
-                        <StyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
-                            <Typography>{deck.deckName.toLocaleUpperCase()}</Typography>
+                <StyledAreaCards>
+                    {Object.keys(areaMissions).map((areaId) => (
+                        <StyledCard variant="default" key={areaId} style={{ boxShadow: tokens.elevation.raised }}>
+                            <Typography>{areaMissions[areaId].area.areaName.toLocaleUpperCase()}</Typography>
+                            <Typography>{
+                                areaMissions[areaId] && areaMissions[areaId].missionDefinitions.length > 0 && 
+                                    areaMissions[areaId].missionDefinitions[0].name}</Typography>
                         </StyledCard>
                     ))}
-                </StyledDeckCards>
+                </StyledAreaCards>
                 <TableWithHeader>
-                    <Typography variant="h1">{TranslateText('Deck Inspections')}</Typography>
+                    <Typography variant="h1">{TranslateText('Area Inspections')}</Typography>
                     <Table>
-                        <Table>
-                            <Table.Head sticky>
-                                <Table.Row>
-                                    <Table.Cell>{TranslateText('Status')}</Table.Cell>
-                                    <Table.Cell>{TranslateText('Name')}</Table.Cell>
-                                    <Table.Cell>{TranslateText('Robot')}</Table.Cell>
-                                </Table.Row>
-                            </Table.Head>
-                        </Table>
+                        <Table.Head sticky>
+                            <Table.Row>
+                                <Table.Cell>{TranslateText('Status')}</Table.Cell>
+                                <Table.Cell>{TranslateText('Name')}</Table.Cell>
+                                <Table.Cell>{TranslateText('Robot')}</Table.Cell>
+                            </Table.Row>
+                        </Table.Head>
+                        <Table.Body>
+                            {}
+                        </Table.Body>
                     </Table>
                 </TableWithHeader>
             </StyledContent>

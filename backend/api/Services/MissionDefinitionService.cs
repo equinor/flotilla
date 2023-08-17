@@ -1,4 +1,5 @@
-﻿using System.Linq.Dynamic.Core;
+﻿using System.Globalization;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
@@ -17,6 +18,8 @@ namespace Api.Services
         public abstract Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters);
 
         public abstract Task<List<MissionDefinition>> ReadByAreaId(string areaId);
+
+        public abstract Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCodes);
 
         public abstract Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
 
@@ -43,10 +46,23 @@ namespace Api.Services
     public class MissionDefinitionService : IMissionDefinitionService
     {
         private readonly FlotillaDbContext _context;
+        private readonly IEchoService _echoService;
+        private readonly IStidService _stidService;
+        private readonly ICustomMissionService _customMissionService;
+        private readonly ILogger<IMissionDefinitionService> _logger;
 
-        public MissionDefinitionService(FlotillaDbContext context)
+        public MissionDefinitionService(
+            FlotillaDbContext context,
+            IEchoService echoService,
+            IStidService stidService,
+            ICustomMissionService customMissionService,
+            ILogger<IMissionDefinitionService> logger)
         {
             _context = context;
+            _echoService = echoService;
+            _stidService = stidService;
+            _customMissionService = customMissionService;
+            _logger = logger;
         }
 
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
@@ -123,6 +139,40 @@ namespace Api.Services
             await _context.SaveChangesAsync();
 
             return missionDefinition;
+        }
+
+        public async Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCode)
+        {
+            try
+            {
+                return source.Type switch
+                {
+                    MissionSourceType.Echo =>
+                        // CultureInfo is not important here since we are not using decimal points
+                        _echoService.GetMissionById(
+                                int.Parse(source.SourceId, new CultureInfo("en-US"))
+                            ).Result.Tags
+                            .Select(
+                                t =>
+                                {
+                                    var tagPosition = _stidService
+                                        .GetTagPosition(t.TagId, installationCode)
+                                        .Result;
+                                    return new MissionTask(t, tagPosition);
+                                }
+                            )
+                            .ToList(),
+                    MissionSourceType.Custom =>
+                        await _customMissionService.GetMissionTasksFromSourceId(source.SourceId),
+                    _ =>
+                        throw new MissionSourceTypeException($"Mission type {source.Type} is not accounted for")
+                };
+            }
+            catch (FormatException e)
+            {
+                _logger.LogError("Echo source ID was not formatted correctly.", e);
+                throw new FormatException("Echo source ID was not formatted correctly");
+            }
         }
 
         private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)

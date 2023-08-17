@@ -11,7 +11,7 @@ import { RefreshProps } from '../FrontPage'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
-import { MissionDefinition } from 'models/MissionDefinition'
+import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { useMissionQueueContext } from 'components/Contexts/MissionQueueContext'
 
 const StyledMissionView = styled.div`
@@ -31,9 +31,9 @@ const MissionButtonView = styled.div`
     display: flex;
     gap: 1rem;
 `
-const mapEchoMissionToString = (missions: MissionDefinition[]): Map<string, MissionDefinition> => {
-    var missionMap = new Map<string, MissionDefinition>()
-    missions.forEach((mission: MissionDefinition) => {
+const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, EchoMissionDefinition> => {
+    var missionMap = new Map<string, EchoMissionDefinition>()
+    missions.forEach((mission: EchoMissionDefinition) => {
         missionMap.set(mission.echoMissionId + ': ' + mission.name, mission)
     })
     return missionMap
@@ -43,10 +43,10 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const { missionQueue } = useMissionQueueContext()
 
-    const [selectedEchoMissions, setSelectedEchoMissions] = useState<MissionDefinition[]>([])
+    const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
-    const [echoMissions, setEchoMissions] = useState<Map<string, MissionDefinition>>(
-        new Map<string, MissionDefinition>()
+    const [echoMissions, setEchoMissions] = useState<Map<string, EchoMissionDefinition>>(
+        new Map<string, EchoMissionDefinition>()
     )
     const [robotOptions, setRobotOptions] = useState<Robot[]>([])
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
@@ -57,17 +57,17 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const fetchEchoMissions = () => {
         setIsFetchingEchoMissions(true)
         BackendAPICaller.getAvailableEchoMission(installationCode as string).then((missions) => {
-            const echoMissionsMap: Map<string, MissionDefinition> = mapEchoMissionToString(missions)
+            const echoMissionsMap: Map<string, EchoMissionDefinition> = mapEchoMissionToString(missions)
             setEchoMissions(echoMissionsMap)
             setIsFetchingEchoMissions(false)
         })
     }
 
     const onChangeMissionSelections = (selectedEchoMissions: string[]) => {
-        var echoMissionsToSchedule: MissionDefinition[] = []
+        var echoMissionsToSchedule: EchoMissionDefinition[] = []
         if (echoMissions) {
             selectedEchoMissions.forEach((selectedEchoMission: string) => {
-                echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as MissionDefinition)
+                echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as EchoMissionDefinition)
             })
         }
         setSelectedEchoMissions(echoMissionsToSchedule)
@@ -81,7 +81,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const onScheduleButtonPress = () => {
         if (selectedRobot === undefined) return
 
-        selectedEchoMissions.forEach((mission: MissionDefinition) => {
+        selectedEchoMissions.forEach((mission: EchoMissionDefinition) => {
             // TODO: as a final parameter here we likely want mission.AreaName, and maybe also installation and deck codes
             BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode)
         })

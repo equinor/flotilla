@@ -15,7 +15,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
 import { Robot } from 'models/Robot'
-import { MissionDefinition } from 'models/MissionDefinition'
+import { EchoMissionDefinition } from 'models/MissionDefinition'
 
 interface IProps {
     robotOptions: Array<Robot>
@@ -26,7 +26,7 @@ interface IProps {
     fetchEchoMissions: () => void
     scheduleButtonDisabled: boolean
     frontPageScheduleButtonDisabled: boolean
-    selectedMissions: MissionDefinition[]
+    selectedMissions: EchoMissionDefinition[]
     isFetchingEchoMissions: boolean
 }
 

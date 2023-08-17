@@ -111,6 +111,8 @@
     "Re-run the mission": "Kjør oppdraget på nytt",
     "Re-run full mission": "Kjør hele oppdraget på nytt",
     "Re-run failed and cancelled tasks in the mission": "Kjør feilet og kansellerte oppgaver i oppdraget på nytt",
+    "Area Inspections": "Områdeinspeksjoner",
+    "Areas": "Områder",
     "Only active installations": "Bare installasjoner i bruk",
     "Installation settings": "Installasjonsinstillinger"
 }
