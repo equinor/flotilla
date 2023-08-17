@@ -119,17 +119,23 @@ public static class InitDb
     {
         var source1 = new Source
         {
-            SourceId = "https://google.com/",
+            SourceId = "791",
             Type = MissionSourceType.Echo
         };
 
         var source2 = new Source
         {
-            SourceId = "https://google.com/",
-            Type = MissionSourceType.Custom
+            SourceId = "792",
+            Type = MissionSourceType.Echo
         };
 
-        return new List<Source>(new Source[] { source1, source2 });
+        var source3 = new Source
+        {
+            SourceId = "793",
+            Type = MissionSourceType.Echo
+        };
+
+        return new List<Source>(new Source[] { source1, source2, source3 });
     }
 
     private static List<Robot> GetRobots()
@@ -210,7 +216,7 @@ public static class InitDb
             Name = "Placeholder Mission 3",
             InstallationCode = areas[1].Installation!.InstallationCode,
             Area = areas[1],
-            Source = sources[1],
+            Source = sources[2],
             LastRun = null
         };
 

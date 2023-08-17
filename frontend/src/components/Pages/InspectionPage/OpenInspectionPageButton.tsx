@@ -20,7 +20,7 @@ export function OpenInspectionPageButton({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const routeChange = () => {
-        let path = `${config.FRONTEND_BASE_ROUTE}/Areas`
+        let path = `${config.FRONTEND_BASE_ROUTE}/inspections`
         navigate(path)
     }
 
