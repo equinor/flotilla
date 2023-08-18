@@ -26,21 +26,6 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
-        private IList<MissionRun> MissionRunQueue =>
-            MissionService
-                .ReadAll(
-                    new MissionRunQueryStringParameters
-                    {
-                        Statuses = new List<MissionStatus>
-                        {
-                            MissionStatus.Pending
-                        },
-                        OrderBy = "DesiredStartTime",
-                        PageSize = 100
-                    }
-                )
-                .Result;
-
         private IMissionRunService MissionService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
@@ -48,6 +33,24 @@ namespace Api.EventHandlers
 
         private RobotController RobotController =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<RobotController>();
+
+        private IList<MissionRun> MissionRunQueue(string robotId)
+        {
+            return MissionService
+                .ReadAll(
+                    new MissionRunQueryStringParameters
+                    {
+                        Statuses = new List<MissionStatus>
+                        {
+                            MissionStatus.Pending
+                        },
+                        RobotId = robotId,
+                        OrderBy = "DesiredStartTime",
+                        PageSize = 100
+                    }
+                )
+                .Result;
+        }
 
         public override void Subscribe()
         {
@@ -70,17 +73,17 @@ namespace Api.EventHandlers
         {
             _logger.LogInformation("Triggered MissionRunCreated event for mission run ID: {MissionRunId}", e.MissionRunId);
 
-            if (MissionRunQueueIsEmpty())
-            {
-                _logger.LogInformation("Mission run {MissionRunId} was not started as there are no mission runs on the queue", e.MissionRunId);
-                return;
-            }
-
             var missionRun = MissionService.ReadById(e.MissionRunId).Result;
 
             if (missionRun == null)
             {
                 _logger.LogError("Mission run with ID: {MissionRunId} was not found in the database", e.MissionRunId);
+                return;
+            }
+
+            if (MissionRunQueueIsEmpty(MissionRunQueue(missionRun.Robot.Id)))
+            {
+                _logger.LogInformation("Mission run {MissionRunId} was not started as there are no mission runs on the queue", e.MissionRunId);
                 return;
             }
 
@@ -99,13 +102,13 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (MissionRunQueueIsEmpty())
+            if (MissionRunQueueIsEmpty(MissionRunQueue(robot.Id)))
             {
                 _logger.LogInformation("The robot was changed to available but there are no mission runs in the queue to be scheduled");
                 return;
             }
 
-            var missionRun = MissionRunQueue.First(missionRun => missionRun.Robot.Id == robot.Id);
+            var missionRun = MissionRunQueue(robot.Id).First(missionRun => missionRun.Robot.Id == robot.Id);
 
             _scheduleMissionMutex.WaitOne();
             StartMissionRunIfSystemIsAvailable(missionRun);
@@ -139,14 +142,14 @@ namespace Api.EventHandlers
             }
         }
 
-        private bool MissionRunQueueIsEmpty()
+        private static bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue)
         {
-            return !MissionRunQueue.Any();
+            return !missionRunQueue.Any();
         }
 
         private async Task<bool> TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
         {
-            bool ongoingMission = await OngoingMission();
+            bool ongoingMission = await OngoingMission(robot.Id);
 
             if (ongoingMission)
             {
@@ -171,7 +174,7 @@ namespace Api.EventHandlers
             return true;
         }
 
-        private async Task<bool> OngoingMission()
+        private async Task<bool> OngoingMission(string robotId)
         {
             var ongoingMissions = await MissionService.ReadAll(
                 new MissionRunQueryStringParameters
@@ -180,6 +183,7 @@ namespace Api.EventHandlers
                     {
                         MissionStatus.Ongoing
                     },
+                    RobotId = robotId,
                     OrderBy = "DesiredStartTime",
                     PageSize = 100
                 });

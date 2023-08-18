@@ -281,6 +281,41 @@ namespace Api.Test.EventHandlers
             Assert.False(ongoingMission);
         }
 
+        [Fact]
+        public async void MissionRunIsStartedForOtherAvailableRobotIfOneRobotHasAnOngoingMissionRun()
+        {
+            // Arrange
+            var robotOne = await NewRobot(RobotStatus.Available);
+            var robotTwo = await NewRobot(RobotStatus.Available);
+            await _robotService.Create(robotOne);
+            await _robotService.Create(robotTwo);
+
+            var missionRunOne = ScheduledMission;
+            var missionRunTwo = ScheduledMission;
+
+            missionRunOne.Robot = robotOne;
+            missionRunTwo.Robot = robotTwo;
+
+            SetupMocksForRobotController(robotOne, missionRunOne);
+
+            // Act (Ensure first mission is started)
+            await _missionRunService.Create(missionRunOne);
+
+            // Assert
+            var postStartMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id);
+            Assert.Equal(MissionStatus.Ongoing, postStartMissionRunOne.Status);
+
+            // Rearrange
+            SetupMocksForRobotController(robotTwo, missionRunTwo);
+
+            // Act (Ensure second mission is started for second robot)
+            await _missionRunService.Create(missionRunTwo);
+
+            // Assert
+            var postStartMissionTunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
+            Assert.Equal(MissionStatus.Ongoing, postStartMissionTunTwo.Status);
+        }
+
         private void SetupMocksForRobotController(Robot robot, MissionRun missionRun)
         {
             _robotControllerMock.IsarServiceMock
