@@ -22,29 +22,28 @@ const StyledMissionDefinitionPage = styled.div`
 `
 
 export function MissionDefinitionPage() {
-    const { missionDefinitionId } = useParams()
-    console.log(missionDefinitionId)
+    const { missionId } = useParams()
     const [selectedMissionDefinition, setSelectedMissionDefinition] = useState<MissionDefinition>()
 
     useEffect(() => {
-        if (missionDefinitionId) {
-            BackendAPICaller.getMissionDefinitionById(missionDefinitionId).then((mission) => {
+        if (missionId) {
+            BackendAPICaller.getMissionDefinitionById(missionId).then((mission) => {
                 setSelectedMissionDefinition(mission)
             })
         }
-    }, [missionDefinitionId])
+    }, [missionId])
 
     useEffect(() => {
         const timeDelay = 1000
         const id = setInterval(() => {
-            if (missionDefinitionId) {
-                BackendAPICaller.getMissionDefinitionById(missionDefinitionId).then((mission) => {
+            if (missionId) {
+                BackendAPICaller.getMissionDefinitionById(missionId).then((mission) => {
                     setSelectedMissionDefinition(mission)
                 })
             }
         }, timeDelay)
         return () => clearInterval(id)
-    }, [missionDefinitionId])
+    }, [missionId])
 
     return (
         <>

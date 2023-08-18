@@ -299,6 +299,22 @@ export class BackendAPICaller {
         return result.content
     }
 
+    static async scheduleMissionDefinition(missionDefinitionId: string, robotId: string) {
+        const path: string = 'missions/schedule'
+        const robots: Robot[] = await BackendAPICaller.getEnabledRobots()
+        const desiredRobot = filterRobots(robots, robotId)
+        const body = {
+            robotId: desiredRobot[0].id,
+            missionDefinitionId: missionDefinitionId,
+            desiredStartTime: new Date(),
+        }
+        const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
     static async postLocalizationMission(localizationPose: Pose, robotId: string, areaId: string) {
         const path: string = 'robots/start-localization'
         const body = {
