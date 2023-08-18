@@ -1,5 +1,5 @@
 import { MissionHistoryView } from './MissionHistoryView'
-import { BackButton } from '../MissionPage/MissionHeader/BackButton'
+import { BackButton } from '../../../utils/BackButton'
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
 

@@ -114,5 +114,16 @@
     "Area Inspections": "Area Inspections",
     "Areas": "Areas",
     "Only active installations": "Only active installations",
-    "Installation settings": "Installation settings"
+    "Installation settings": "Installation settings",
+    "Last completed": "Last completed",
+    "Deadline": "Deadline",
+    "Add to queue": "Add to queue",
+    "Not yet performed": "Not yet performed",
+    "Never": "Never",
+    "Due this week": "Due this week",
+    "Due today": "Due today",
+    "Due within a month": "Due within a month",
+    "Past deadline": "Past deadline",
+    "Up to date": "Up to date",
+    "Due within two weeks": "Due within two weeks"
 }
