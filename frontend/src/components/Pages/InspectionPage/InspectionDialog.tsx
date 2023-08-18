@@ -1,4 +1,4 @@
-import { Table, Card, Typography } from '@equinor/eds-core-react'
+import { Table, Card, Typography, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState, useEffect } from 'react'
@@ -8,8 +8,10 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { RefreshProps } from './InspectionPage'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionDefinition } from 'models/MissionDefinition'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
+import { ScheduleMissionDialog } from './ScheduleMissionDialog'
+import { Icons } from 'utils/icons'
 
 const StyledCard = styled(Card)`
     width: 200px;
@@ -28,11 +30,21 @@ const StyledAreaCards = styled.div`
 const TableWithHeader = styled.div`
     gap: 2rem;
 `
+
 const StyledContent = styled.div`
     display: flex;
     flex-direction: column;
     gap: 4rem;
 `
+
+const StyledIcon = styled(Icon)`
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    scale: 50%;
+`
+
 const Circle = (fill: string) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="14" viewBox="0 0 13 14" fill="none">
         <circle cx="6.5" cy="7" r="6.5" fill={fill} />
@@ -72,6 +84,8 @@ export function AreasDialog({ refreshInterval }: RefreshProps) {
     const { installationCode } = useInstallationContext()
     const [areaMissions, setAreaMissions] = useState<AreaMissionType>({})
     const [selectedArea, setSelectedArea] = useState<Area>()
+    const [selectedMission, setSelectedMission] = useState<MissionDefinition>()
+    const [isDialogOpen, setisDialogOpen] = useState<boolean>(false)
     let navigate = useNavigate()
 
     useEffect(() => {
@@ -173,7 +187,15 @@ export function AreasDialog({ refreshInterval }: RefreshProps) {
                 <Table.Cell>{mission.comment}</Table.Cell>
                 <Table.Cell>{lastCompleted}</Table.Cell>
                 <Table.Cell>{deadline}</Table.Cell>
-                <Table.Cell>{}</Table.Cell>
+                <Table.Cell>
+                    <StyledIcon
+                        color={`${tokens.colors.interactive.focus.hex}`}
+                        name={Icons.AddOutlined}
+                        size={16}
+                        title={TranslateText('Add to queue')}
+                        onClick={() => setisDialogOpen(true)}
+                    />
+                </Table.Cell>
             </Table.Row>
         )
     }
@@ -221,6 +243,13 @@ export function AreasDialog({ refreshInterval }: RefreshProps) {
                 </StyledAreaCards>
                 {selectedArea && getInspectionsTable(selectedArea)}
             </StyledContent>
+            {isDialogOpen && (
+                    <ScheduleMissionDialog
+                        mission={selectedMission!}
+                        refreshInterval={refreshInterval}
+                        closeDialog={() => setisDialogOpen(false)}
+                    />
+                )}
         </>
     )
 }
