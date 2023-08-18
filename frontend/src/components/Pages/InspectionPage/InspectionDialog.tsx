@@ -89,6 +89,7 @@ export function AreasDialog({ refreshInterval }: RefreshProps) {
     let navigate = useNavigate()
 
     useEffect(() => {
+        setSelectedArea(undefined)
         BackendAPICaller.getAreas().then(async (areas: Area[]) => {
             let newAreaMissions: AreaMissionType = {}
             const filteredAreas = areas.filter(
@@ -193,7 +194,10 @@ export function AreasDialog({ refreshInterval }: RefreshProps) {
                         name={Icons.AddOutlined}
                         size={16}
                         title={TranslateText('Add to queue')}
-                        onClick={() => setisDialogOpen(true)}
+                        onClick={() => {
+                            setisDialogOpen(true)
+                            setSelectedMission(mission)
+                        }}
                     />
                 </Table.Cell>
             </Table.Row>
@@ -225,31 +229,35 @@ export function AreasDialog({ refreshInterval }: RefreshProps) {
         <>
             <StyledContent>
                 <StyledAreaCards>
-                    {Object.keys(areaMissions).map((areaId) => (
-                        <StyledCard
-                            variant="default"
-                            key={areaId}
-                            style={{ boxShadow: tokens.elevation.raised }}
-                            onClick={() => setSelectedArea(areaMissions[areaId].area)}
-                        >
-                            <Typography>{areaMissions[areaId].area.areaName.toLocaleUpperCase()}</Typography>
-                            <Typography>
-                                {areaMissions[areaId] &&
-                                    areaMissions[areaId].missionDefinitions.length > 0 &&
-                                    areaMissions[areaId].missionDefinitions[0].name}
-                            </Typography>
-                        </StyledCard>
-                    ))}
+                    {Object.keys(areaMissions).length > 0 ? (
+                        Object.keys(areaMissions).map((areaId) => (
+                            <StyledCard
+                                variant="default"
+                                key={areaId}
+                                style={{ boxShadow: tokens.elevation.raised }}
+                                onClick={() => setSelectedArea(areaMissions[areaId].area)}
+                            >
+                                <Typography>{areaMissions[areaId].area.areaName.toLocaleUpperCase()}</Typography>
+                                <Typography>
+                                    {areaMissions[areaId] &&
+                                        areaMissions[areaId].missionDefinitions.length > 0 &&
+                                        areaMissions[areaId].missionDefinitions[0].name}
+                                </Typography>
+                            </StyledCard>
+                        ))
+                    ) : (
+                        <Typography variant="h1">{TranslateText('No Area Inspections Available')}</Typography>
+                    )}
                 </StyledAreaCards>
                 {selectedArea && getInspectionsTable(selectedArea)}
             </StyledContent>
             {isDialogOpen && (
-                    <ScheduleMissionDialog
-                        mission={selectedMission!}
-                        refreshInterval={refreshInterval}
-                        closeDialog={() => setisDialogOpen(false)}
-                    />
-                )}
+                <ScheduleMissionDialog
+                    mission={selectedMission!}
+                    refreshInterval={refreshInterval}
+                    closeDialog={() => setisDialogOpen(false)}
+                />
+            )}
         </>
     )
 }
