@@ -25,14 +25,11 @@ namespace Api.Test.EventHandlers
     {
         private static readonly Installation testInstallation = new()
         {
-            InstallationCode = "test",
-            Name = "test test"
+            InstallationCode = "test", Name = "test test"
         };
         private static readonly Plant testPlant = new()
         {
-            PlantCode = "test",
-            Name = "test test",
-            Installation = testInstallation
+            PlantCode = "test", Name = "test test", Installation = testInstallation
         };
         private readonly FlotillaDbContext _context;
 
@@ -97,18 +94,14 @@ namespace Api.Test.EventHandlers
         {
             Deck = new Deck
             {
-                Plant = testPlant,
-                Installation = testInstallation,
-                Name = "testDeck"
+                Plant = testPlant, Installation = testInstallation, Name = "testDeck"
             },
             Installation = testInstallation,
             Plant = testPlant,
             Name = "testArea",
             MapMetadata = new MapMetadata
             {
-                MapName = "TestMap",
-                Boundary = new Boundary(),
-                TransformationMatrices = new TransformationMatrices()
+                MapName = "TestMap", Boundary = new Boundary(), TransformationMatrices = new TransformationMatrices()
             },
             DefaultLocalizationPose = null,
             SafePositions = new List<SafePosition>()
@@ -119,14 +112,13 @@ namespace Api.Test.EventHandlers
             {
                 Name = "testMission",
                 MissionId = Guid.NewGuid().ToString(),
+                MissionRunPriority = MissionRunPriority.Normal,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTimeOffset.Now,
                 Area = NewArea,
                 Map = new MapMetadata
                 {
-                    MapName = "TestMap",
-                    Boundary = new Boundary(),
-                    TransformationMatrices = new TransformationMatrices()
+                    MapName = "TestMap", Boundary = new Boundary(), TransformationMatrices = new TransformationMatrices()
                 },
                 InstallationCode = "testInstallation"
             };
@@ -327,8 +319,7 @@ namespace Api.Test.EventHandlers
                         new IsarMission(
                             new IsarStartMissionResponse
                             {
-                                MissionId = "test",
-                                Tasks = new List<IsarTaskResponse>()
+                                MissionId = "test", Tasks = new List<IsarTaskResponse>()
                             }
                         )
                 );
