@@ -1,12 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Api.Services.Models;
-
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
     public class MissionRun : SortableRecord
     {
+
+        private MissionStatus _status;
+
+        private IList<MissionTask> _tasks;
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
@@ -15,21 +18,21 @@ namespace Api.Database.Models
         public string? MissionId { get; set; }
 
         [Required]
-        [MaxLength(200)]
-        public string Name { get; set; }
-
-        [Required]
         public MissionStatus Status
         {
-            get { return _status; }
+            get => _status;
             set
             {
                 _status = value;
                 if (IsCompleted && EndTime is null)
+                {
                     EndTime = DateTimeOffset.UtcNow;
+                }
 
                 if (_status is MissionStatus.Ongoing && StartTime is null)
+                {
                     StartTime = DateTimeOffset.UtcNow;
+                }
             }
         }
 
@@ -47,9 +50,12 @@ namespace Api.Database.Models
         [Required]
         public IList<MissionTask> Tasks
         {
-            get { return _tasks.OrderBy(t => t.TaskOrder).ToList(); }
-            set { _tasks = value; }
+            get => _tasks.OrderBy(t => t.TaskOrder).ToList();
+            set => _tasks = value;
         }
+
+        [Required]
+        public MissionRunPriority MissionRunPriority { get; set; }
 
         [MaxLength(200)]
         public string? IsarMissionId { get; set; }
@@ -65,15 +71,13 @@ namespace Api.Database.Models
 
         public Area? Area { get; set; }
 
-        private MissionStatus _status;
-
         public bool IsCompleted =>
             _status
                 is MissionStatus.Aborted
-                    or MissionStatus.Cancelled
-                    or MissionStatus.Successful
-                    or MissionStatus.PartiallySuccessful
-                    or MissionStatus.Failed;
+                or MissionStatus.Cancelled
+                or MissionStatus.Successful
+                or MissionStatus.PartiallySuccessful
+                or MissionStatus.Failed;
 
         public MapMetadata? Map { get; set; }
 
@@ -82,11 +86,13 @@ namespace Api.Database.Models
         public DateTimeOffset? EndTime { get; private set; }
 
         /// <summary>
-        /// The estimated duration of the mission in seconds
+        ///     The estimated duration of the mission in seconds
         /// </summary>
         public uint? EstimatedDuration { get; set; }
 
-        private IList<MissionTask> _tasks;
+        [Required]
+        [MaxLength(200)]
+        public string Name { get; set; }
 
         public void UpdateWithIsarInfo(IsarMission isarMission)
         {
@@ -98,7 +104,6 @@ namespace Api.Database.Models
             }
         }
 
-#nullable enable
         public MissionTask? GetTaskByIsarId(string isarTaskId)
         {
             return Tasks.FirstOrDefault(
@@ -107,7 +112,6 @@ namespace Api.Database.Models
                     && task.IsarTaskId.Equals(isarTaskId, StringComparison.Ordinal)
             );
         }
-
 #nullable disable
 
         public static MissionStatus MissionStatusFromString(string status)
@@ -122,9 +126,9 @@ namespace Api.Database.Models
                 "paused" => MissionStatus.Paused,
                 "partially_successful" => MissionStatus.PartiallySuccessful,
                 _
-                  => throw new ArgumentException(
-                      $"Failed to parse mission status '{status}' as it's not supported"
-                  )
+                    => throw new ArgumentException(
+                        $"Failed to parse mission status '{status}' as it's not supported"
+                    )
             };
         }
 
@@ -136,7 +140,7 @@ namespace Api.Database.Models
                     task => task.Inspections.Sum(inspection => inspection.VideoDuration ?? 0)
                 );
                 EstimatedDuration = (uint)(
-                    (Robot.Model.AverageDurationPerTag * Tasks.Count) + totalInspectionDuration
+                    Robot.Model.AverageDurationPerTag * Tasks.Count + totalInspectionDuration
                 );
             }
             else
@@ -163,8 +167,8 @@ namespace Api.Database.Models
                     prevPosition = currentPosition;
                 }
                 int estimate = (int)(
-                    (distance / (RobotVelocity * EfficiencyFactor))
-                    + (numberOfTags * InspectionTime)
+                    distance / (RobotVelocity * EfficiencyFactor)
+                    + numberOfTags * InspectionTime
                 );
                 EstimatedDuration = (uint)estimate * 60;
             }
@@ -197,5 +201,12 @@ namespace Api.Database.Models
         Failed,
         Successful,
         PartiallySuccessful
+    }
+
+    public enum MissionRunPriority
+    {
+        Normal,
+        Response,
+        Emergency
     }
 }

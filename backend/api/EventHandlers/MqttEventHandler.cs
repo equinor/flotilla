@@ -58,7 +58,15 @@ namespace Api.EventHandlers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken) { await stoppingToken; }
 
-        protected virtual void OnRobotAvailable(RobotAvailableEventArgs e) { RobotAvailable?.Invoke(this, e); }
+        public void TriggerRobotAvailable(RobotAvailableEventArgs e)
+        {
+            OnRobotAvailable(e);
+        }
+
+        protected virtual void OnRobotAvailable(RobotAvailableEventArgs e)
+        {
+            RobotAvailable?.Invoke(this, e);
+        }
 
         public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
 
@@ -229,164 +237,181 @@ namespace Api.EventHandlers
             await robotService.Update(robot);
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission {MissionId}", robot.IsarId, robot.Name, flotillaMissionRun.MissionId);
 
-            if (!flotillaMissionRun.IsCompleted) { return; }
-
-            await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
-
-            if (flotillaMissionRun.MissionId == null) { return; }
-
-            var missionDefinition = await missionDefinitionService.ReadById(flotillaMissionRun.MissionId);
-            if (missionDefinition == null) { return; }
-
-            missionDefinition.LastRun = flotillaMissionRun;
-            await missionDefinitionService.Update(missionDefinition);
-        }
-
-        private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
-        {
-            var provider = GetServiceProvider();
-            var missionRunService = provider.GetRequiredService<IMissionRunService>();
-            var task = (IsarTaskMessage)mqttArgs.Message;
-
-            IsarTaskStatus status;
-            try { status = IsarTask.StatusFromString(task.Status); }
-            catch (ArgumentException e)
+            if (flotillaMissionRun.IsCompleted)
             {
-                _logger.LogError(e, "Failed to parse mission status from MQTT message. Mission '{Id}' was not updated", task.MissionId);
-                return;
-            }
-
-            bool success = await missionRunService.UpdateTaskStatusByIsarTaskId(task.MissionId, task.TaskId, status);
-            if (success)
-            {
-                _logger.LogInformation(
-                    "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", task.TaskId, task.Status, task.RobotName, task.IsarId);
-            }
-        }
-
-        private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
-        {
-            var provider = GetServiceProvider();
-            var missionRunService = provider.GetRequiredService<IMissionRunService>();
-
-            var step = (IsarStepMessage)mqttArgs.Message;
-
-            // Flotilla does not care about DriveTo or localization steps
-            var stepType = IsarStep.StepTypeFromString(step.StepType);
-            if (stepType is IsarStepType.DriveToPose or IsarStepType.Localize) { return; }
-
-            IsarStepStatus status;
-            try { status = IsarStep.StatusFromString(step.Status); }
-            catch (ArgumentException e)
-            {
-                _logger.LogError(e, "Failed to parse mission status from MQTT message. Mission '{Id}' was not updated", step.MissionId);
-                return;
-            }
-
-            bool success = await missionRunService.UpdateStepStatusByIsarStepId(step.MissionId, step.TaskId, step.StepId, status);
-            if (success)
-            {
-                _logger.LogInformation(
-                    "Inspection '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", step.StepId, step.Status, step.RobotName, step.IsarId);
-            }
-        }
-
-        private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
-        {
-            var provider = GetServiceProvider();
-            var robotService = provider.GetRequiredService<IRobotService>();
-            var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
-
-            var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
-
-            var robot = await robotService.ReadByIsarId(batteryStatus.IsarId);
-            if (robot == null)
-            {
-                _logger.LogWarning(
-                    "Could not find corresponding robot for battery update on robot '{RobotName}' with ISAR id '{IsarId}'", batteryStatus.RobotName, batteryStatus.IsarId);
-            }
-            else
-            {
-                robot.BatteryLevel = batteryStatus.BatteryLevel;
-                await robotService.Update(robot);
-                await timeseriesService.Create(
-                    new RobotBatteryTimeseries
+                int timeRangeInDays = _configuration.GetValue<int>(
+                    "TimeRangeForMissionDurationEstimationInDays"
+                );
+                long minEpochTime = DateTimeOffset.Now
+                    .AddDays(-timeRangeInDays)
+                    .ToUnixTimeSeconds();
+                var missionRunsForEstimation = await missionRunService.ReadAll(
+                    new MissionRunQueryStringParameters
                     {
-                        MissionId = robot.CurrentMissionId,
-                        BatteryLevel = batteryStatus.BatteryLevel,
-                        RobotId = robot.Id,
-                        Time = DateTimeOffset.UtcNow
+                        MinDesiredStartTime = minEpochTime,
+                        RobotModelType = robot.Model.Type,
+                        PageSize = QueryStringParameters.MaxPageSize
                     }
                 );
-                _logger.LogDebug("Updated battery on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
+                var model = robot.Model;
+                model.UpdateAverageDurationPerTag(missionRunsForEstimation);
+
+                await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
+
+                if (flotillaMissionRun.MissionId == null) { return; }
+
+                var missionDefinition = await missionDefinitionService.ReadById(flotillaMissionRun.MissionId);
+                if (missionDefinition == null) { return; }
+
+                missionDefinition.LastRun = flotillaMissionRun;
+                await missionDefinitionService.Update(missionDefinition);
             }
-        }
 
-        private async void OnPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
-        {
-            var provider = GetServiceProvider();
-            var robotService = provider.GetRequiredService<IRobotService>();
-            var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
-
-            var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
-
-            var robot = await robotService.ReadByIsarId(pressureStatus.IsarId);
-            if (robot == null)
+            private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
             {
-                _logger.LogWarning(
-                    "Could not find corresponding robot for pressure update on robot '{RobotName}' with ISAR id '{IsarId}'", pressureStatus.RobotName, pressureStatus.IsarId);
-            }
-            else
-            {
-                robot.PressureLevel = pressureStatus.PressureLevel;
-                await robotService.Update(robot);
-                await timeseriesService.Create(
-                    new RobotPressureTimeseries
-                    {
-                        MissionId = robot.CurrentMissionId,
-                        Pressure = pressureStatus.PressureLevel,
-                        RobotId = robot.Id,
-                        Time = DateTimeOffset.UtcNow
-                    }
-                );
-                _logger.LogDebug("Updated pressure on '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
-            }
-        }
+                var provider = GetServiceProvider();
+                var missionRunService = provider.GetRequiredService<IMissionRunService>();
+                var task = (IsarTaskMessage)mqttArgs.Message;
 
-        private async void OnPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
-        {
-            var provider = GetServiceProvider();
-            var robotService = provider.GetRequiredService<IRobotService>();
-            var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
-
-            var poseStatus = (IsarPoseMessage)mqttArgs.Message;
-
-            var robot = await robotService.ReadByIsarId(poseStatus.IsarId);
-            if (robot == null)
-            {
-                _logger.LogWarning(
-                    "Could not find corresponding robot for pose update on robot '{RobotName}' with ISAR id '{IsarId}'", poseStatus.RobotName, poseStatus.IsarId);
-            }
-            else
-            {
-                try { poseStatus.Pose.CopyIsarPoseToRobotPose(robot.Pose); }
-                catch (NullReferenceException e)
+                IsarTaskStatus status;
+                try { status = IsarTask.StatusFromString(task.Status); }
+                catch (ArgumentException e)
                 {
-                    _logger.LogWarning(
-                        "NullReferenceException while updating pose on robot '{RobotName}' with ISAR id '{IsarId}': {Message}", robot.Name, robot.IsarId, e.Message);
+                    _logger.LogError(e, "Failed to parse mission status from MQTT message. Mission '{Id}' was not updated", task.MissionId);
+                    return;
                 }
 
-                await robotService.Update(robot);
-                await timeseriesService.Create(
-                    new RobotPoseTimeseries(robot.Pose)
+                bool success = await missionRunService.UpdateTaskStatusByIsarTaskId(task.MissionId, task.TaskId, status);
+                if (success)
+                {
+                    _logger.LogInformation(
+                        "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", task.TaskId, task.Status, task.RobotName, task.IsarId);
+                }
+            }
+
+            private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
+            {
+                var provider = GetServiceProvider();
+                var missionRunService = provider.GetRequiredService<IMissionRunService>();
+
+                var step = (IsarStepMessage)mqttArgs.Message;
+
+                // Flotilla does not care about DriveTo or localization steps
+                var stepType = IsarStep.StepTypeFromString(step.StepType);
+                if (stepType is IsarStepType.DriveToPose or IsarStepType.Localize) { return; }
+
+                IsarStepStatus status;
+                try { status = IsarStep.StatusFromString(step.Status); }
+                catch (ArgumentException e)
+                {
+                    _logger.LogError(e, "Failed to parse mission status from MQTT message. Mission '{Id}' was not updated", step.MissionId);
+                    return;
+                }
+
+                bool success = await missionRunService.UpdateStepStatusByIsarStepId(step.MissionId, step.TaskId, step.StepId, status);
+                if (success)
+                {
+                    _logger.LogInformation(
+                        "Inspection '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", step.StepId, step.Status, step.RobotName, step.IsarId);
+                }
+            }
+
+            private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
+            {
+                var provider = GetServiceProvider();
+                var robotService = provider.GetRequiredService<IRobotService>();
+                var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
+
+                var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
+
+                var robot = await robotService.ReadByIsarId(batteryStatus.IsarId);
+                if (robot == null)
+                {
+                    _logger.LogWarning(
+                        "Could not find corresponding robot for battery update on robot '{RobotName}' with ISAR id '{IsarId}'", batteryStatus.RobotName, batteryStatus.IsarId);
+                }
+                else
+                {
+                    robot.BatteryLevel = batteryStatus.BatteryLevel;
+                    await robotService.Update(robot);
+                    await timeseriesService.Create(
+                        new RobotBatteryTimeseries
+                        {
+                            MissionId = robot.CurrentMissionId,
+                            BatteryLevel = batteryStatus.BatteryLevel,
+                            RobotId = robot.Id,
+                            Time = DateTimeOffset.UtcNow
+                        }
+                    );
+                    _logger.LogDebug("Updated battery on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
+                }
+            }
+
+            private async void OnPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
+            {
+                var provider = GetServiceProvider();
+                var robotService = provider.GetRequiredService<IRobotService>();
+                var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
+
+                var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
+
+                var robot = await robotService.ReadByIsarId(pressureStatus.IsarId);
+                if (robot == null)
+                {
+                    _logger.LogWarning(
+                        "Could not find corresponding robot for pressure update on robot '{RobotName}' with ISAR id '{IsarId}'", pressureStatus.RobotName, pressureStatus.IsarId);
+                }
+                else
+                {
+                    robot.PressureLevel = pressureStatus.PressureLevel;
+                    await robotService.Update(robot);
+                    await timeseriesService.Create(
+                        new RobotPressureTimeseries
+                        {
+                            MissionId = robot.CurrentMissionId,
+                            Pressure = pressureStatus.PressureLevel,
+                            RobotId = robot.Id,
+                            Time = DateTimeOffset.UtcNow
+                        }
+                    );
+                    _logger.LogDebug("Updated pressure on '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
+                }
+            }
+
+            private async void OnPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
+            {
+                var provider = GetServiceProvider();
+                var robotService = provider.GetRequiredService<IRobotService>();
+                var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
+
+                var poseStatus = (IsarPoseMessage)mqttArgs.Message;
+
+                var robot = await robotService.ReadByIsarId(poseStatus.IsarId);
+                if (robot == null)
+                {
+                    _logger.LogWarning(
+                        "Could not find corresponding robot for pose update on robot '{RobotName}' with ISAR id '{IsarId}'", poseStatus.RobotName, poseStatus.IsarId);
+                }
+                else
+                {
+                    try { poseStatus.Pose.CopyIsarPoseToRobotPose(robot.Pose); }
+                    catch (NullReferenceException e)
                     {
-                        MissionId = robot.CurrentMissionId,
-                        RobotId = robot.Id,
-                        Time = DateTimeOffset.UtcNow
+                        _logger.LogWarning(
+                            "NullReferenceException while updating pose on robot '{RobotName}' with ISAR id '{IsarId}': {Message}", robot.Name, robot.IsarId, e.Message);
                     }
-                );
-                _logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
+
+                    await robotService.Update(robot);
+                    await timeseriesService.Create(
+                        new RobotPoseTimeseries(robot.Pose)
+                        {
+                            MissionId = robot.CurrentMissionId,
+                            RobotId = robot.Id,
+                            Time = DateTimeOffset.UtcNow
+                        }
+                    );
+                    _logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
+                }
             }
         }
     }
-}
