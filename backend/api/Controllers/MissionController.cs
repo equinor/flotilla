@@ -306,6 +306,7 @@ namespace Api.Controllers
                 Name = missionDefinition.Name,
                 Robot = robot,
                 MissionId = missionDefinition.Id,
+                MissionRunPriority = MissionRunPriority.Normal,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
                 Tasks = missionTasks,
@@ -347,6 +348,8 @@ namespace Api.Controllers
             [FromBody] ScheduledMissionQuery scheduledMissionQuery
         )
         {
+            // TODO: once we have a good way of creating mission definitions for echo missions,
+            //       we can delete this endpoint
             var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
             if (robot is null)
             {
@@ -438,6 +441,7 @@ namespace Api.Controllers
                 Name = echoMission.Name,
                 Robot = robot,
                 MissionId = scheduledMissionDefinition.Id,
+                MissionRunPriority = MissionRunPriority.Normal,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
                 Tasks = missionTasks,
@@ -455,7 +459,7 @@ namespace Api.Controllers
 
             if (existingMissionDefinition == null)
             {
-                await _missionDefinitionService.Create(scheduledMissionDefinition);
+                var newMissionDefinition = await _missionDefinitionService.Create(scheduledMissionDefinition);
             }
 
             var newMissionRun = await _missionRunService.Create(missionRun);
@@ -549,6 +553,7 @@ namespace Api.Controllers
                 Name = customMissionQuery.Name,
                 Description = customMissionQuery.Description,
                 MissionId = customMissionDefinition.Id,
+                MissionRunPriority = MissionRunPriority.Normal,
                 Comment = customMissionQuery.Comment,
                 Robot = robot,
                 Status = MissionStatus.Pending,
@@ -568,7 +573,7 @@ namespace Api.Controllers
 
             if (existingMissionDefinition == null)
             {
-                await _missionDefinitionService.Create(customMissionDefinition);
+                var newMissionDefinition = await _missionDefinitionService.Create(customMissionDefinition);
             }
 
             var newMissionRun = await _missionRunService.Create(scheduledMission);
