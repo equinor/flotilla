@@ -97,7 +97,7 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
         } else if (Array.isArray(value)) {
             let valueArray = value as any[]
             if (valueArray.length === 0) {
-                console.error('Unexpected empty array detected')
+                return <>{TranslateText('None')}</>
             }
             return valueArray.map((val) => (
                 <Chip
@@ -171,16 +171,12 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
             {filterIsSet && (
                 <ActiveFilterList>
                     {flatten(filterState)
-                        .filter(
-                            (filter) =>
-                                isNotNullOrNotEmptyArray(filter.value) &&
-                                !filterFunctions.isDefault(filter.name, filter.value)
-                        )
+                        .filter((filter) => !filterFunctions.isDefault(filter.name, filter.value))
                         .map((filter) => (
                             <Chip
                                 style={{ borderColor: checkBoxBorderColour, height: '2rem', paddingLeft: '6px' }}
                                 key={filter.name}
-                                onDelete={() => filterFunctions.removeFilter(filter.name)}
+                                onDelete={() => filterFunctions.resetFilter(filter.name)}
                             >
                                 {TranslateText(filter.name)}: {toDisplayValue(filter.name, filter.value!)}
                             </Chip>
