@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Area } from 'models/Area'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { RefreshProps } from './InspectionPage'
+import { RefreshProps } from '../FrontPage/FrontPage'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router-dom'
@@ -34,7 +34,8 @@ const TableWithHeader = styled.div`
 const StyledContent = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 4rem;
+    gap: 1rem;
+    padding-bottom: 5rem;
 `
 
 const StyledIcon = styled(Icon)`
@@ -79,7 +80,7 @@ const getInspectionDeadline = (inspectionFrequency: string, lastRunTime: Date): 
     // new Date(lastRunTime.getTime() + (1000 * 60 * days) + (1000 * 60 * 60 * hours) + (1000 * 60 * 60 * 24 * days))
 }
 
-export function AreasDialog({ refreshInterval }: RefreshProps) {
+export function InspectionSection({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const [areaMissions, setAreaMissions] = useState<AreaMissionType>({})
@@ -206,7 +207,9 @@ export function AreasDialog({ refreshInterval }: RefreshProps) {
 
     const getInspectionsTable = (area: Area) => (
         <TableWithHeader>
-            <Typography variant="h1">{TranslateText('Area Inspections')}</Typography>
+            <Typography variant="h3">
+                {TranslateText('Inspection Missions') + ' ' + TranslateText('for') + ' ' + area.areaName}
+            </Typography>
             <Table>
                 <Table.Head sticky>
                     <Table.Row>
@@ -227,6 +230,7 @@ export function AreasDialog({ refreshInterval }: RefreshProps) {
 
     return (
         <>
+            <Typography variant="h1">{TranslateText('Area Inspections')}</Typography>
             <StyledContent>
                 <StyledAreaCards>
                     {Object.keys(areaMissions).length > 0 ? (
