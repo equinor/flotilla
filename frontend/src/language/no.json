@@ -126,5 +126,7 @@
     "Past deadline": "Frist utløpt",
     "Due within two weeks": "Frist innen to uker",
     "Up to date": "Oppdatert",
-    "No Area Inspections Available": "Ingen Tilgjengelige Områdeinspeksjoner"
+    "No Area Inspections Available": "Ingen Tilgjengelige Områdeinspeksjoner",
+    "Queue mission": "Legg til oppdrag i køen",
+    "This installation has no missions": "Denne installasjonen har ingen oppdrag"
 }
