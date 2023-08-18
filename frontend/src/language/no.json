@@ -114,5 +114,16 @@
     "Area Inspections": "Områdeinspeksjoner",
     "Areas": "Områder",
     "Only active installations": "Bare installasjoner i bruk",
-    "Installation settings": "Installasjonsinstillinger"
+    "Installation settings": "Installasjonsinstillinger",
+    "Last completed": "Sist fullført",
+    "Deadline": "Frist",
+    "Add to queue": "Legg til i kø",
+    "Not yet performed": "Aldri kjørt",
+    "Never": "Aldri",
+    "Due this week": "Frist denne uken",
+    "Due today": "Frist idag",
+    "Due within a month": "Frist denne måneden",
+    "Past deadline": "Frist utløpt",
+    "Due within two weeks": "Frist innen to uker",
+    "Up to date": "Oppdatert"
 }

@@ -1,6 +1,6 @@
-import { Area } from "./Area"
-import { Mission } from "./Mission"
-import { Task } from "./Task"
+import { Area } from './Area'
+import { Mission } from './Mission'
+import { Task } from './Task'
 
 export interface EchoMissionDefinition {
     echoMissionId: number

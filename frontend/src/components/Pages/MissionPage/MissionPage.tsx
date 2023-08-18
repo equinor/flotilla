@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { MissionHeader } from './MissionHeader/MissionHeader'
-import { BackButton } from './MissionHeader/BackButton'
+import { BackButton } from '../../../utils/BackButton'
 import { MissionMapView } from './MapPosition/MissionMapView'
 import { BackendAPICaller } from 'api/ApiCaller'
 

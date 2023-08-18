@@ -8,6 +8,7 @@ import { RobotPage } from './RobotPage/RobotPage'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
 import { APIUpdater } from 'components/Contexts/APIUpdater'
 import { InspectionPage } from './InspectionPage/InspectionPage'
+import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
 
 export function FlotillaSite() {
     return (
@@ -23,10 +24,17 @@ export function FlotillaSite() {
                                     element={<MissionPage />}
                                 />
                                 <Route
+                                    path={`${config.FRONTEND_BASE_ROUTE}/mission-definition/:missionId`}
+                                    element={<MissionDefinitionPage />}
+                                />
+                                <Route
                                     path={`${config.FRONTEND_BASE_ROUTE}/history`}
                                     element={<MissionHistoryPage />}
                                 />
-                                <Route path={`${config.FRONTEND_BASE_ROUTE}/inspections`} element={<InspectionPage />} />
+                                <Route
+                                    path={`${config.FRONTEND_BASE_ROUTE}/inspections`}
+                                    element={<InspectionPage />}
+                                />
                                 <Route path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`} element={<RobotPage />} />
                             </Routes>
                         </BrowserRouter>

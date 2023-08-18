@@ -217,9 +217,7 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    static async getMissionDefinitionsInArea(
-        area: Area
-    ): Promise<MissionDefinition[]> {
+    static async getMissionDefinitionsInArea(area: Area): Promise<MissionDefinition[]> {
         let path: string = 'areas/' + area.id + '/mission-definitions'
 
         const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch((e) => {
@@ -232,6 +230,15 @@ export class BackendAPICaller {
     static async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
         const path: string = 'echo/missions?installationCode=' + installationCode
         const result = await BackendAPICaller.GET<EchoMission[]>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
+    static async getMissionDefinitionById(missionId: string): Promise<MissionDefinition> {
+        const path: string = 'missions/definitions/' + missionId
+        const result = await BackendAPICaller.GET<MissionDefinition>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
