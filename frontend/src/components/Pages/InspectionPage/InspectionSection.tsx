@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { Icons } from 'utils/icons'
+import { MissionStatus } from 'models/Mission'
 
 const StyledCard = styled(Card)`
     width: 200px;
@@ -35,7 +36,6 @@ const StyledContent = styled.div`
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding-bottom: 5rem;
 `
 
 const StyledIcon = styled(Icon)`
@@ -57,6 +57,10 @@ const GreenCircle = Circle('#4BB748')
 
 interface AreaMissionType {
     [areaId: string]: { missionDefinitions: MissionDefinition[]; area: Area }
+}
+
+interface OngoingMissionType {
+    [missionId: string]: boolean
 }
 
 const formatBackendDateTimeToDate = (date: Date) => {
@@ -84,6 +88,7 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const [areaMissions, setAreaMissions] = useState<AreaMissionType>({})
+    const [ongoingMissions, setOngoingMissions] = useState<OngoingMissionType>({})
     const [selectedArea, setSelectedArea] = useState<Area>()
     const [selectedMission, setSelectedMission] = useState<MissionDefinition>()
     const [isDialogOpen, setisDialogOpen] = useState<boolean>(false)
@@ -105,6 +110,27 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
             setAreaMissions(newAreaMissions)
         })
     }, [installationCode])
+
+    const updateOngoingMissionsMap = async (areaMissions: AreaMissionType) => {
+        let newOngoingMissions: OngoingMissionType = {}
+        for (const areaId of Object.keys(areaMissions)) {
+            for (const missionDefinition of areaMissions[areaId].missionDefinitions) {
+                const missionRuns = await BackendAPICaller.getMissionRuns({
+                    statuses: [MissionStatus.Paused, MissionStatus.Pending, MissionStatus.Ongoing],
+                    missionId: missionDefinition.id,
+                })
+                newOngoingMissions[missionDefinition.id] = missionRuns.content.length > 0
+            }
+        }
+        setOngoingMissions(newOngoingMissions)
+    }
+
+    useEffect(() => {
+        const id = setInterval(() => {
+            updateOngoingMissionsMap(areaMissions)
+        }, refreshInterval)
+        return () => clearInterval(id)
+    }, [areaMissions])
 
     const getInspectionStatus = (inspectionFrequency: string, lastRunTime: Date) => {
         const deadlineDate = getInspectionDeadline(inspectionFrequency, lastRunTime)
@@ -160,21 +186,31 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
         let status
         let lastCompleted: string = ''
         let deadline: string = ''
-        if (!mission.lastRun || !mission.lastRun.endTime) {
+        const isScheduled = Object.keys(ongoingMissions).includes(mission.id) && ongoingMissions[mission.id]
+        if (isScheduled) {
             status = (
                 <>
-                    {RedCircle} {TranslateText('Not yet performed')}
+                    {GreenCircle} {TranslateText('Already scheduled')}
                 </>
             )
-            lastCompleted = TranslateText('Never')
-        } else if (mission.inspectionFrequency) {
-            status = getInspectionStatus(mission.inspectionFrequency, mission.lastRun.endTime!)
-            lastCompleted = formatDateString(mission.lastRun.endTime!)
-            deadline = getInspectionDeadline(mission.inspectionFrequency, mission.lastRun.endTime!).toDateString()
         } else {
-            status = TranslateText('No planned inspection')
-            lastCompleted = formatDateString(mission.lastRun.endTime!)
+            if (!mission.lastRun || !mission.lastRun.endTime) {
+                status = (
+                    <>
+                        {RedCircle} {TranslateText('Not yet performed')}
+                    </>
+                )
+                lastCompleted = TranslateText('Never')
+            } else if (mission.inspectionFrequency) {
+                status = getInspectionStatus(mission.inspectionFrequency, mission.lastRun.endTime!)
+                lastCompleted = formatDateString(mission.lastRun.endTime!)
+                deadline = getInspectionDeadline(mission.inspectionFrequency, mission.lastRun.endTime!).toDateString()
+            } else {
+                status = TranslateText('No planned inspection')
+                lastCompleted = formatDateString(mission.lastRun.endTime!)
+            }
         }
+
         return (
             <Table.Row key={mission.id}>
                 <Table.Cell>{status}</Table.Cell>

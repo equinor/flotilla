@@ -31,6 +31,11 @@ namespace Api.Controllers.Models
         public string? RobotId { get; set; }
 
         /// <summary>
+        /// Filter for the missionId of the mission definition related to the mission
+        /// </summary>
+        public string? MissionId { get; set; }
+
+        /// <summary>
         /// Filter for the robot model type of the robot assigned to the mission
         /// </summary>
         public RobotType? RobotModelType { get; set; }
