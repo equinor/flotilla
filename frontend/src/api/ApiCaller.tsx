@@ -159,6 +159,7 @@ export class BackendAPICaller {
         if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
         if (parameters.orderBy) path = path + 'OrderBy=' + parameters.orderBy + '&'
         if (parameters.robotId) path = path + 'RobotId=' + parameters.robotId + '&'
+        if (parameters.missionId) path = path + 'MissionId=' + parameters.missionId + '&'
         if (parameters.nameSearch) path = path + 'NameSearch=' + parameters.nameSearch + '&'
         if (parameters.robotNameSearch) path = path + 'RobotNameSearch=' + parameters.robotNameSearch + '&'
         if (parameters.tagSearch) path = path + 'TagSearch=' + parameters.tagSearch + '&'

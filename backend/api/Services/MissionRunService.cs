@@ -252,6 +252,10 @@ namespace Api.Services
                 ? missionRun => true
                 : missionRun => missionRun.Robot.Id.Equals(parameters.RobotId);
 
+            Expression<Func<MissionRun, bool>> missionIdFilter = parameters.MissionId is null
+                ? missionRun => true
+                : missionRun => missionRun.MissionId != null && missionRun.MissionId.Equals(parameters.MissionId);
+
             Expression<Func<MissionRun, bool>> inspectionTypeFilter = parameters.InspectionTypes is null
                 ? mission => true
                 : mission => mission.Tasks.Any(
@@ -296,14 +300,17 @@ namespace Api.Services
                     Expression.AndAlso(
                         Expression.Invoke(robotIdFilter, missionRun),
                         Expression.AndAlso(
-                            Expression.Invoke(inspectionTypeFilter, missionRun),
+                            Expression.Invoke(missionIdFilter, missionRun),
                             Expression.AndAlso(
-                                Expression.Invoke(desiredStartTimeFilter, missionRun),
+                                Expression.Invoke(inspectionTypeFilter, missionRun),
                                 Expression.AndAlso(
-                                    Expression.Invoke(startTimeFilter, missionRun),
+                                    Expression.Invoke(desiredStartTimeFilter, missionRun),
                                     Expression.AndAlso(
-                                        Expression.Invoke(endTimeFilter, missionRun),
-                                        Expression.Invoke(robotTypeFilter, missionRun)
+                                        Expression.Invoke(startTimeFilter, missionRun),
+                                        Expression.AndAlso(
+                                            Expression.Invoke(endTimeFilter, missionRun),
+                                            Expression.Invoke(robotTypeFilter, missionRun)
+                                        )
                                     )
                                 )
                             )
