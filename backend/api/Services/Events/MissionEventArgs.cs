@@ -19,4 +19,17 @@
         }
         public string RobotId { get; set; }
     }
+
+    public class EmergencyButtonPressedForRobotEventArgs : EventArgs
+    {
+        public EmergencyButtonPressedForRobotEventArgs(string robotId, string areaId)
+        {
+            RobotId = robotId;
+            AreaId = areaId;
+        }
+
+        public string RobotId { get; set; }
+
+        public string AreaId { get; set; }
+    }
 }
