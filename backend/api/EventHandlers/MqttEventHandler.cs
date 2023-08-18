@@ -268,6 +268,7 @@ namespace Api.EventHandlers
             var missionRunService = provider.GetRequiredService<IMissionRunService>();
             var robotService = provider.GetRequiredService<IRobotService>();
             var robotModelService = provider.GetRequiredService<IRobotModelService>();
+            var missionDefinitionService = provider.GetRequiredService<IMissionDefinitionService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
             MissionStatus status;
@@ -350,6 +351,16 @@ namespace Api.EventHandlers
                 model.UpdateAverageDurationPerTag(missionRunsForEstimation);
 
                 await robotModelService.Update(model);
+
+                if (flotillaMissionRun.MissionId != null)
+                {
+                    var missionDefinition = await missionDefinitionService.ReadById(flotillaMissionRun.MissionId);
+                    if (missionDefinition != null)
+                    {
+                        missionDefinition.LastRun = flotillaMissionRun;
+                        await missionDefinitionService.Update(missionDefinition);
+                    }
+                }
 
                 _logger.LogInformation(
                     "Robot model '{modelType}' - Updated average time spent per tag to {averageTimeSpent}s",
