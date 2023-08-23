@@ -1,5 +1,6 @@
-﻿#pragma warning disable CS8618
-namespace Api.Database.Models
+﻿using Api.Database.Models;
+
+namespace Api.Controllers.Models
 {
     public class AreaResponse
     {

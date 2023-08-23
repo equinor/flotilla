@@ -3,7 +3,6 @@ import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/O
 import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusView'
 import { FailedMissionAlertView } from './MissionOverview/FailedMissionAlertView'
 import { Header } from 'components/Header/Header'
-import { OpenInspectionPageButton } from 'components/Pages/InspectionPage/OpenInspectionPageButton'
 import styled from 'styled-components'
 import { InspectionSection } from '../InspectionPage/InspectionSection'
 

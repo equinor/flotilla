@@ -19,6 +19,8 @@ namespace Api.Services
 
         public abstract Task<List<MissionDefinition>> ReadByAreaId(string areaId);
 
+        public abstract Task<List<MissionDefinition>> ReadByDeckId(string deckId);
+
         public abstract Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCodes);
 
         public abstract Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
@@ -117,6 +119,12 @@ namespace Api.Services
         {
             return await GetMissionDefinitionsWithSubModels().Where(
                 m => m.IsDeprecated == false && m.Source.SourceId != null && m.Source.SourceId == sourceId).ToListAsync();
+        }
+
+        public async Task<List<MissionDefinition>> ReadByDeckId(string deckId)
+        {
+            return await GetMissionDefinitionsWithSubModels().Where(
+                m => m.IsDeprecated == false && m.Area != null && m.Area.Deck != null && m.Area.Deck.Id == deckId).ToListAsync();
         }
 
         public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)

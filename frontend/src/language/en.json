@@ -111,10 +111,11 @@
     "Re-run the mission": "Re-run the mission",
     "Re-run full mission": "Re-run full mission",
     "Re-run failed and cancelled tasks in the mission": "Re-run failed and cancelled tasks in the mission",
-    "Area Inspections": "Area Inspections",
+    "Deck Inspections": "Deck Inspections",
     "Areas": "Areas",
     "Only active installations": "Only active installations",
     "Installation settings": "Installation settings",
+    "Decks": "Decks",
     "Last completed": "Last completed",
     "Deadline": "Deadline",
     "Add to queue": "Add to queue",
@@ -127,6 +128,7 @@
     "Up to date": "Up to date",
     "Due within two weeks": "Due within two weeks",
     "No Area Inspections Available": "No Area Inspections Available",
+    "No Deck Inspections Available": "No Deck Inspections Available",
     "Queue mission": "Queue mission",
     "This installation has no missions": "This installation has no missions",
     "Inspection Missions": "Inspection Missions",
@@ -148,5 +150,6 @@
     "hours": "hours",
     "No inspection frequency set": "No inspection frequency set",
     "Are you sure you want to delete": "Are you sure you want to delete",
-    "Yes": "Yes"
+    "Yes": "Yes",
+    "Missions": "Missions"
 }

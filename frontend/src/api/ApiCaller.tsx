@@ -17,6 +17,7 @@ import { MapMetadata } from 'models/MapMetadata'
 import { CondensedMissionDefinition, EchoMissionDefinition, MissionDefinition } from 'models/MissionDefinition'
 import { EchoMission } from 'models/EchoMission'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
+import { Deck } from 'models/Deck'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
@@ -229,6 +230,16 @@ export class BackendAPICaller {
         return result.content
     }
 
+    static async getMissionDefinitionsInDeck(deck: Deck): Promise<CondensedMissionDefinition[]> {
+        let path: string = 'decks/' + deck.id + '/mission-definitions'
+
+        const result = await BackendAPICaller.GET<CondensedMissionDefinition[]>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
     static async updateMissionDefinition(id: string, form: MissionDefinitionUpdateForm): Promise<CondensedMissionDefinition> {
         const path: string = 'missions/definitions/' + id
         const result = await BackendAPICaller.PUT<MissionDefinitionUpdateForm, CondensedMissionDefinition>(path, form).catch((e) => {
@@ -408,6 +419,15 @@ export class BackendAPICaller {
     static async getAreas(): Promise<Area[]> {
         const path: string = 'areas'
         const result = await this.GET<Area[]>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
+    static async getDecks(): Promise<Deck[]> {
+        const path: string = 'decks'
+        const result = await this.GET<Deck[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
