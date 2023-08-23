@@ -1,4 +1,4 @@
-import { Table, Card, Typography, Icon } from '@equinor/eds-core-react'
+import { Table, Card, Typography, Icon, Button, EdsProvider } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState, useEffect } from 'react'
@@ -7,7 +7,7 @@ import { Deck } from 'models/Deck'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { RefreshProps } from '../FrontPage/FrontPage'
 import { tokens } from '@equinor/eds-tokens'
-import { CondensedMissionDefinition } from 'models/MissionDefinition'
+import { CondensedMissionDefinition, MissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
@@ -15,11 +15,20 @@ import { Icons } from 'utils/icons'
 import { MissionStatus } from 'models/Mission'
 
 const StyledCard = styled(Card)`
-    width: 200px;
-    padding: 8px;
+    width: 250px;
+    padding: 12px;
+    border-radius: 20px;
     :hover {
         background-color: #deedee;
     }
+`
+
+const StyledCardComponent = styled.div`
+    display: flex;
+    flex-direction: row;
+    padding-right: 10px;
+    gap: 10px;
+    width: 100%;
 `
 
 const StyledDeckCards = styled.div`
@@ -90,7 +99,7 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
     const [deckMissions, setDeckMissions] = useState<DeckMissionType>({})
     const [ongoingMissions, setOngoingMissions] = useState<OngoingMissionType>({})
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
-    const [selectedMission, setSelectedMission] = useState<CondensedMissionDefinition>()
+    const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setisDialogOpen] = useState<boolean>(false)
     let navigate = useNavigate()
 
@@ -111,6 +120,17 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
             setDeckMissions(newDeckMissions)
         })
     }, [installationCode])
+
+    const handleScheduleAll = (missions: CondensedMissionDefinition[]) => {
+        setisDialogOpen(true)
+        missions.sort((m1, m2) => {
+            if (!m1.lastRun) return 1
+            else if (!m2.lastRun) return -1
+            else return getInspectionDeadline(m1.inspectionFrequency, m1.lastRun.endTime!).getTime() 
+                - getInspectionDeadline(m2.inspectionFrequency, m2.lastRun.endTime!).getTime()
+        })
+        setSelectedMissions(missions)
+    }
 
     const updateOngoingMissionsMap = async (areaMissions: DeckMissionType) => {
         let newOngoingMissions: OngoingMissionType = {}
@@ -234,7 +254,7 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
                         title={TranslateText('Add to queue')}
                         onClick={() => {
                             setisDialogOpen(true)
-                            setSelectedMission(mission)
+                            setSelectedMissions([mission])
                         }}
                     />
                 </Table.Cell>
@@ -279,11 +299,16 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
                                 onClick={() => setSelectedDeck(deckMissions[deckId].deck)}
                             >
                                 <Typography>{deckMissions[deckId].deck.deckName.toLocaleUpperCase()}</Typography>
-                                <Typography>
-                                    {deckMissions[deckId] &&
-                                        deckMissions[deckId].missionDefinitions.length > 0 &&
-                                        deckMissions[deckId].missionDefinitions.length + ' ' + TranslateText('Missions')}
-                                </Typography>
+                                <StyledCardComponent>
+                                    <Typography>
+                                        {deckMissions[deckId] &&
+                                            deckMissions[deckId].missionDefinitions.length > 0 &&
+                                            deckMissions[deckId].missionDefinitions.length + ' ' + TranslateText('Missions')}
+                                    </Typography>
+                                    <EdsProvider density='compact'>
+                                        <Button onClick={() => handleScheduleAll(deckMissions[deckId].missionDefinitions)}>{TranslateText('Schedule all')}</Button>
+                                    </EdsProvider>
+                                </StyledCardComponent>
                             </StyledCard>
                         ))
                     ) : (
@@ -294,7 +319,7 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
             </StyledContent>
             {isDialogOpen && (
                 <ScheduleMissionDialog
-                    mission={selectedMission!}
+                    missions={selectedMissions!}
                     refreshInterval={refreshInterval}
                     closeDialog={() => setisDialogOpen(false)}
                 />

@@ -8,7 +8,7 @@ import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 
 interface IProps {
-    mission: CondensedMissionDefinition
+    missions: CondensedMissionDefinition[]
     refreshInterval: number
     closeDialog: () => void
 }
@@ -63,7 +63,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const onScheduleButtonPress = () => {
         if (selectedRobot === undefined) return
 
-        BackendAPICaller.scheduleMissionDefinition(props.mission.id, selectedRobot.id)
+        props.missions.forEach((mission) => BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id))
 
         setSelectedRobot(undefined)
     }
