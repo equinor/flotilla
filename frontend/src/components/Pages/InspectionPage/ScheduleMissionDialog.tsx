@@ -1,15 +1,14 @@
-import { Autocomplete, Button, Card, Dialog, Typography, Popover, Icon } from '@equinor/eds-core-react'
+import { Autocomplete, Button, Card, Dialog, Typography, Popover } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Icons } from 'utils/icons'
 import { useRef, useState, useEffect } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Robot } from 'models/Robot'
-import { MissionDefinition } from 'models/MissionDefinition'
+import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 
 interface IProps {
-    mission: MissionDefinition
+    mission: CondensedMissionDefinition
     refreshInterval: number
     closeDialog: () => void
 }
@@ -29,13 +28,6 @@ const StyledMissionSection = styled.div`
     margin-left: auto;
     margin-right: 0;
     gap: 10px;
-`
-const StyledLoading = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 3rem;
-    gap: 1rem;
 `
 const StyledDialog = styled(Dialog)`
     display: flex;

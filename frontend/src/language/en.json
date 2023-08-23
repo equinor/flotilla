@@ -131,5 +131,22 @@
     "This installation has no missions": "This installation has no missions",
     "Inspection Missions": "Inspection Missions",
     "for": "for",
-    "Already scheduled": "Already scheduled"
+    "Already scheduled": "Already scheduled",
+    "Edit": "Edit",
+    "Update mission definition": "Update mission definition",
+    "Delete": "Delete",
+    "Installation": "Installation",
+    "Area": "Area",
+    "Deck": "Deck",
+    "Plant": "Plant",
+    "Inspection frequency": "Inspection frequency",
+    "Comment": "Comment",
+    "View last run": "View last run",
+    "Mission source": "Mission source",
+    "Inspection required every": "Inspection required every",
+    "days": "days",
+    "hours": "hours",
+    "No inspection frequency set": "No inspection frequency set",
+    "Are you sure you want to delete": "Are you sure you want to delete",
+    "Yes": "Yes"
 }

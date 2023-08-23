@@ -63,18 +63,7 @@ namespace Api.Controllers
                     "Succesfully created new area with id '{areaId}'",
                     newArea.Id
                 );
-
-                var response = new AreaResponse
-                {
-                    Id = newArea.Id,
-                    DeckName = newArea.Deck?.Name ?? string.Empty,
-                    PlantCode = newArea.Plant?.PlantCode ?? string.Empty,
-                    InstallationCode = newArea.Installation?.InstallationCode ?? string.Empty,
-                    AreaName = newArea.Name,
-                    MapMetadata = newArea.MapMetadata,
-                    DefaultLocalizationPose = newArea.DefaultLocalizationPose,
-                    SafePositions = newArea.SafePositions
-                };
+                var response = new AreaResponse(newArea);
                 return CreatedAtAction(
                     nameof(GetAreaById),
                     new { id = newArea.Id },
@@ -122,17 +111,8 @@ namespace Api.Controllers
                         _logger.LogWarning(errorMessage);
                         return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
                     }
-                    var response = new AreaResponse
-                    {
-                        Id = area.Id,
-                        DeckName = area.Deck.Name,
-                        PlantCode = area.Plant.PlantCode,
-                        InstallationCode = area.Installation.InstallationCode,
-                        AreaName = area.Name,
-                        MapMetadata = area.MapMetadata,
-                        DefaultLocalizationPose = area.DefaultLocalizationPose,
-                        SafePositions = area.SafePositions
-                    };
+                    var response = new AreaResponse(area);
+
                     return CreatedAtAction(nameof(GetAreaById), new { id = area.Id }, response); ;
                 }
                 else
@@ -164,23 +144,15 @@ namespace Api.Controllers
             var area = await _areaService.Delete(id);
             if (area is null)
                 return NotFound($"Area with id {id} not found");
+
             if (area.Deck == null || area.Plant == null || area.Installation == null)
             {
                 string errorMessage = "Deck, plant or installation missing from area";
                 _logger.LogWarning(errorMessage);
                 return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
             }
-            var response = new AreaResponse
-            {
-                Id = area.Id,
-                DeckName = area.Deck.Name,
-                PlantCode = area.Plant.PlantCode,
-                InstallationCode = area.Installation.InstallationCode,
-                AreaName = area.Name,
-                MapMetadata = area.MapMetadata,
-                DefaultLocalizationPose = area.DefaultLocalizationPose,
-                SafePositions = area.SafePositions
-            };
+
+            var response = new AreaResponse(area);
             return Ok(response);
         }
 
@@ -202,17 +174,7 @@ namespace Api.Controllers
             try
             {
                 var areas = await _areaService.ReadAll();
-                var response = areas.Select(area => new AreaResponse
-                {
-                    Id = area.Id,
-                    DeckName = area.Deck?.Name ?? string.Empty,
-                    PlantCode = area.Plant?.PlantCode ?? string.Empty,
-                    InstallationCode = area.Installation?.InstallationCode ?? string.Empty,
-                    AreaName = area.Name,
-                    MapMetadata = area.MapMetadata,
-                    DefaultLocalizationPose = area.DefaultLocalizationPose,
-                    SafePositions = area.SafePositions
-                });
+                var response = areas.Select(area => new AreaResponse(area));
                 return Ok(response);
             }
             catch (Exception e)
@@ -240,23 +202,15 @@ namespace Api.Controllers
                 var area = await _areaService.ReadById(id);
                 if (area == null)
                     return NotFound($"Could not find area with id {id}");
+
                 if (area.Deck == null || area.Plant == null || area.Installation == null)
                 {
                     string errorMessage = "Deck, plant or installation missing from area";
                     _logger.LogWarning(errorMessage);
                     return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
                 }
-                var response = new AreaResponse
-                {
-                    Id = area.Id,
-                    DeckName = area.Deck.Name,
-                    PlantCode = area.Plant.PlantCode,
-                    InstallationCode = area.Installation.InstallationCode,
-                    AreaName = area.Name,
-                    MapMetadata = area.MapMetadata,
-                    DefaultLocalizationPose = area.DefaultLocalizationPose,
-                    SafePositions = area.SafePositions
-                };
+
+                var response = new AreaResponse(area);
                 return Ok(response);
             }
             catch (Exception e)
@@ -286,7 +240,7 @@ namespace Api.Controllers
                     return NotFound($"Could not find area with id {id}");
 
                 var missionDefinitions = await _missionDefinitionService.ReadByAreaId(area.Id);
-                var missionDefinitionResponses = missionDefinitions.Select(m => new CondensedMissionDefinitionResponse(m));
+                var missionDefinitionResponses = missionDefinitions.FindAll(m => !m.IsDeprecated).Select(m => new CondensedMissionDefinitionResponse(m));
                 return Ok(missionDefinitionResponses);
             }
             catch (Exception e)

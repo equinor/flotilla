@@ -26,7 +26,13 @@ namespace Api.Controllers.Models
         public virtual MissionRun? LastRun { get; set; }
 
         [JsonPropertyName("area")]
-        public Area? Area { get; set; }
+        public AreaResponse? Area { get; set; }
+
+        [JsonPropertyName("isDeprecated")]
+        public bool IsDeprecated { get; set; }
+
+        [JsonPropertyName("sourceType")]
+        public MissionSourceType SourceType { get; set; }
 
         public CondensedMissionDefinitionResponse(MissionDefinition missionDefinition)
         {
@@ -35,8 +41,10 @@ namespace Api.Controllers.Models
             InstallationCode = missionDefinition.InstallationCode;
             Comment = missionDefinition.Comment;
             InspectionFrequency = missionDefinition.InspectionFrequency;
-            Area = missionDefinition.Area;
+            Area = new AreaResponse(missionDefinition.Area);
             LastRun = missionDefinition.LastRun;
+            IsDeprecated = missionDefinition.IsDeprecated;
+            SourceType = missionDefinition.Source.Type;
         }
     }
 
@@ -46,7 +54,7 @@ namespace Api.Controllers.Models
         public string Id { get; set; }
 
         [JsonPropertyName("tasks")]
-        public List<MissionTask> Tasks { get; set; }
+        public List<MissionTask> Tasks { get; set; } = new();
 
         [JsonPropertyName("name")]
         public string Name { get; set; }
@@ -66,6 +74,12 @@ namespace Api.Controllers.Models
         [JsonPropertyName("area")]
         public Area? Area { get; set; }
 
+        [JsonPropertyName("isDeprecated")]
+        public bool IsDeprecated { get; set; }
+
+        [JsonPropertyName("sourceType")]
+        public MissionSourceType SourceType { get; set; }
+
         public MissionDefinitionResponse(IMissionDefinitionService service, MissionDefinition missionDefinition)
         {
             Id = missionDefinition.Id;
@@ -76,6 +90,8 @@ namespace Api.Controllers.Models
             Area = missionDefinition.Area;
             Tasks = service.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode).Result;
             LastRun = missionDefinition.LastRun;
+            IsDeprecated = missionDefinition.IsDeprecated;
+            SourceType = missionDefinition.Source.Type;
         }
     }
 }

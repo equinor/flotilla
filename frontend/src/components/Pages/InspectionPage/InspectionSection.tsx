@@ -7,7 +7,7 @@ import { Area } from 'models/Area'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { RefreshProps } from '../FrontPage/FrontPage'
 import { tokens } from '@equinor/eds-tokens'
-import { MissionDefinition } from 'models/MissionDefinition'
+import { CondensedMissionDefinition, MissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
@@ -56,7 +56,7 @@ const YellowCircle = Circle('#FF9200')
 const GreenCircle = Circle('#4BB748')
 
 interface AreaMissionType {
-    [areaId: string]: { missionDefinitions: MissionDefinition[]; area: Area }
+    [areaId: string]: { missionDefinitions: CondensedMissionDefinition[]; area: Area }
 }
 
 interface OngoingMissionType {
@@ -90,7 +90,7 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
     const [areaMissions, setAreaMissions] = useState<AreaMissionType>({})
     const [ongoingMissions, setOngoingMissions] = useState<OngoingMissionType>({})
     const [selectedArea, setSelectedArea] = useState<Area>()
-    const [selectedMission, setSelectedMission] = useState<MissionDefinition>()
+    const [selectedMission, setSelectedMission] = useState<CondensedMissionDefinition>()
     const [isDialogOpen, setisDialogOpen] = useState<boolean>(false)
     let navigate = useNavigate()
 
@@ -182,7 +182,7 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
         return newStr
     }
 
-    const getInspectionRow = (mission: MissionDefinition) => {
+    const getInspectionRow = (mission: CondensedMissionDefinition) => {
         let status
         let lastCompleted: string = ''
         let deadline: string = ''
