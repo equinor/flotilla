@@ -12,6 +12,7 @@ namespace Api.Controllers
     {
         private readonly IDeckService _deckService;
         private readonly IInstallationService _installationService;
+        private readonly IMissionDefinitionService _missionDefinitionService;
         private readonly IPlantService _plantService;
 
         private readonly IMapService _mapService;
@@ -25,7 +26,8 @@ namespace Api.Controllers
             IAreaService areaService,
             IDeckService deckService,
             IInstallationService installationService,
-            IPlantService plantService
+            IPlantService plantService,
+            IMissionDefinitionService missionDefinitionService
         )
         {
             _logger = logger;
@@ -34,6 +36,7 @@ namespace Api.Controllers
             _deckService = deckService;
             _installationService = installationService;
             _plantService = plantService;
+            _missionDefinitionService = missionDefinitionService;
         }
 
         /// <summary>
@@ -49,12 +52,13 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<Deck>>> GetDecks()
+        public async Task<ActionResult<IList<DeckResponse>>> GetDecks()
         {
             try
             {
                 var decks = await _deckService.ReadAll();
-                return Ok(decks);
+                var deckResponses = decks.Select(d => new DeckResponse(d)).ToList();
+                return Ok(deckResponses);
             }
             catch (Exception e)
             {
@@ -81,14 +85,43 @@ namespace Api.Controllers
                 var deck = await _deckService.ReadById(id);
                 if (deck == null)
                     return NotFound($"Could not find deck with id {id}");
-                return Ok(deck);
+                return Ok(new DeckResponse(deck));
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error during GET of deck from database");
                 throw;
             }
+        }
 
+        /// <summary>
+        /// Lookup all the mission definitions related to a deck
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = Role.Any)]
+        [Route("{id}/mission-definitions")]
+        [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetMissionDefinitionsInDeck([FromRoute] string id)
+        {
+            try
+            {
+                var deck = await _deckService.ReadById(id);
+                if (deck == null)
+                    return NotFound($"Could not find deck with id {id}");
+
+                var missionDefinitions = await _missionDefinitionService.ReadByDeckId(deck.Id);
+                var missionDefinitionResponses = missionDefinitions.FindAll(m => !m.IsDeprecated).Select(m => new CondensedMissionDefinitionResponse(m));
+                return Ok(missionDefinitionResponses);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error during GET of deck missions from database");
+                throw;
+            }
         }
 
         /// <summary>

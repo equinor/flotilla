@@ -111,8 +111,9 @@
     "Re-run the mission": "Kjør oppdraget på nytt",
     "Re-run full mission": "Kjør hele oppdraget på nytt",
     "Re-run failed and cancelled tasks in the mission": "Kjør feilet og kansellerte oppgaver i oppdraget på nytt",
-    "Area Inspections": "Områdeinspeksjoner",
+    "Deck Inspections": "Dekkinspeksjoner",
     "Areas": "Områder",
+    "Decks": "Dekk",
     "Only active installations": "Bare installasjoner i bruk",
     "Installation settings": "Installasjonsinstillinger",
     "Last completed": "Sist fullført",
@@ -127,6 +128,7 @@
     "Due within two weeks": "Frist innen to uker",
     "Up to date": "Oppdatert",
     "No Area Inspections Available": "Ingen Tilgjengelige Områdeinspeksjoner",
+    "No Deck Inspections Available": "Ingen Tilgjengelige Dekkinspeksjoner",
     "Queue mission": "Legg til oppdrag i køen",
     "This installation has no missions": "Denne installasjonen har ingen oppdrag",
     "Inspection Missions": "Inspeksjonsoppdrag",
@@ -150,5 +152,6 @@
     "hours": "timer",
     "No inspection frequency set": "Ingen inspeksjonsfrekvens satt",
     "Are you sure you want to delete": "Er du sikker at du ønsker å slette",
-    "Yes": "Ja"
+    "Yes": "Ja",
+    "Missions": "Oppdrag"
 }
