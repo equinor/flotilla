@@ -14,8 +14,9 @@ import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 import { TaskStatus } from 'models/Task'
 import { CreateCustomMission, CustomMissionQuery } from 'models/CustomMission'
 import { MapMetadata } from 'models/MapMetadata'
-import { EchoMissionDefinition, MissionDefinition } from 'models/MissionDefinition'
+import { CondensedMissionDefinition, EchoMissionDefinition, MissionDefinition } from 'models/MissionDefinition'
 import { EchoMission } from 'models/EchoMission'
+import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
@@ -218,14 +219,31 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    static async getMissionDefinitionsInArea(area: Area): Promise<MissionDefinition[]> {
+    static async getMissionDefinitionsInArea(area: Area): Promise<CondensedMissionDefinition[]> {
         let path: string = 'areas/' + area.id + '/mission-definitions'
 
-        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch((e) => {
+        const result = await BackendAPICaller.GET<CondensedMissionDefinition[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
         return result.content
+    }
+
+    static async updateMissionDefinition(id: string, form: MissionDefinitionUpdateForm): Promise<CondensedMissionDefinition> {
+        const path: string = 'missions/definitions/' + id
+        const result = await BackendAPICaller.PUT<MissionDefinitionUpdateForm, CondensedMissionDefinition>(path, form).catch((e) => {
+            console.error(`Failed to PUT /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
+    static async deleteMissionDefinition(id: string) {
+        const path: string = 'missions/definitions/' + id
+        await BackendAPICaller.DELETE(path, '').catch((e) => {
+            console.error(`Failed to DELETE /${path}: ` + e)
+            throw e
+        })
     }
 
     static async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
@@ -237,9 +255,9 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getMissionDefinitionById(missionId: string): Promise<MissionDefinition> {
-        const path: string = 'missions/definitions/' + missionId
-        const result = await BackendAPICaller.GET<MissionDefinition>(path).catch((e) => {
+    static async getMissionDefinitionById(missionId: string): Promise<CondensedMissionDefinition> {
+        const path: string = 'missions/definitions/' + missionId + '/condensed'
+        const result = await BackendAPICaller.GET<CondensedMissionDefinition>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })

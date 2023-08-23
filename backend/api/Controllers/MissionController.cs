@@ -181,6 +181,26 @@ namespace Api.Controllers
     /// </summary>
     [HttpGet]
     [Authorize(Roles = Role.Any)]
+    [Route("definitions/{id}/condensed")]
+    [ProducesResponseType(typeof(CondensedMissionDefinitionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CondensedMissionDefinitionResponse>> GetCondensedMissionDefinitionById([FromRoute] string id)
+    {
+        var missionDefinition = await _missionDefinitionService.ReadById(id);
+        if (missionDefinition == null)
+            return NotFound($"Could not find mission definition with id {id}");
+        var missionDefinitionResponse = new CondensedMissionDefinitionResponse(missionDefinition);
+        return Ok(missionDefinitionResponse);
+    }
+
+    /// <summary>
+    /// Lookup mission definition by specified id.
+    /// </summary>
+    [HttpGet]
+    [Authorize(Roles = Role.Any)]
     [Route("definitions/{id}")]
     [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -559,6 +579,52 @@ namespace Api.Controllers
                 id = newMissionRun.Id
             }, newMissionRun);
         }
+
+    /// <summary>
+    /// Updates a mission definition in the database based on id
+    /// </summary>
+    /// <response code="200"> The mission definition was successfully updated </response>
+    /// <response code="400"> The mission definition data is invalid </response>
+    /// <response code="404"> There was no mission definition with the given ID in the database </response>
+    [HttpPut]
+    [Authorize(Roles = Role.Admin)]
+    [Route("definitions/{id}")]
+    [ProducesResponseType(typeof(CondensedMissionDefinitionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<CondensedMissionDefinitionResponse>> UpdateMissionDefinitionById(
+        [FromRoute] string id,
+        [FromBody] UpdateMissionDefinitionQuery missionDefinitionQuery
+    )
+    {
+        _logger.LogInformation("Updating mission definition with id '{id}'", id);
+
+        if (!ModelState.IsValid)
+            return BadRequest("Invalid data.");
+
+        var missionDefinition = await _missionDefinitionService.ReadById(id);
+        if (missionDefinition == null)
+            return NotFound($"Could not find mission definition with id '{id}'");
+
+        if (missionDefinitionQuery.Name != null)
+        {
+            missionDefinition.Name = missionDefinitionQuery.Name;
+        }
+        if (missionDefinitionQuery.Comment != null)
+        {
+            missionDefinition.Comment = missionDefinitionQuery.Comment;
+        }
+        if (missionDefinitionQuery.InspectionFrequency != null)
+        {
+            missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
+        }
+
+        var newMissionDefinition = await _missionDefinitionService.Update(missionDefinition);
+        return new CondensedMissionDefinitionResponse(newMissionDefinition);
+    }
 
     /// <summary>
     /// Deletes the mission definition with the specified id from the database.
