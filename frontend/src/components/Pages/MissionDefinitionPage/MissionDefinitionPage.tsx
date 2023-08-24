@@ -54,31 +54,33 @@ interface IProps {
     updateMissionDefinition: (missionDefinition: CondensedMissionDefinition) => void
 }
 
-function KeyValuePairDisplay({left, right}: {left: string, right: any}) {
-    return <>
-        <Typography
-            variant="body_long_bold"
-            group="paragraph"
-            color={tokens.colors.text.static_icons__secondary.rgba}
-        >
-            {left}
-        </Typography>
-        <Typography
-            variant="body_long_italic"
-            group="paragraph"
-            color={tokens.colors.text.static_icons__secondary.rgba}
-        >
-            {right}
-        </Typography>
+function KeyValuePairDisplay({ left, right }: { left: string; right: any }) {
+    return (
+        <>
+            <Typography
+                variant="body_long_bold"
+                group="paragraph"
+                color={tokens.colors.text.static_icons__secondary.rgba}
+            >
+                {left}
+            </Typography>
+            <Typography
+                variant="body_long_italic"
+                group="paragraph"
+                color={tokens.colors.text.static_icons__secondary.rgba}
+            >
+                {right}
+            </Typography>
         </>
+    )
 }
 
-function MissionDefinitionPageBody({missionDefinition, updateMissionDefinition}: IProps) {
+function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition }: IProps) {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
 
     const displayInspectionFrequency = (inspectionFrequency: string) => {
-        const timeArray = inspectionFrequency.split(":")
+        const timeArray = inspectionFrequency.split(':')
         const days: number = +timeArray[0]
         const hours: number = +timeArray[1]
         const minutes: number = +timeArray[2]
@@ -91,31 +93,42 @@ function MissionDefinitionPageBody({missionDefinition, updateMissionDefinition}:
         return TranslateText('Inspection required every') + ' ' + returnStringArray.join(', ')
     }
 
-    return <>
+    return (
+        <>
             <KeyValuePairDisplay left={TranslateText('Comment')} right={missionDefinition.comment} />
-            <KeyValuePairDisplay 
-                left={TranslateText('Inspection frequency')} 
-                right={displayInspectionFrequency(missionDefinition.inspectionFrequency)} />
+            <KeyValuePairDisplay
+                left={TranslateText('Inspection frequency')}
+                right={displayInspectionFrequency(missionDefinition.inspectionFrequency)}
+            />
             <KeyValuePairDisplay left={TranslateText('Area')} right={missionDefinition.area.areaName} />
             <KeyValuePairDisplay left={TranslateText('Deck')} right={missionDefinition.area.deckName} />
             <KeyValuePairDisplay left={TranslateText('Plant')} right={missionDefinition.area.plantCode} />
             <KeyValuePairDisplay left={TranslateText('Installation')} right={missionDefinition.area.installationCode} />
-            <KeyValuePairDisplay left={TranslateText('Mission source')} right={TranslateText(missionDefinition.sourceType)} />
+            <KeyValuePairDisplay
+                left={TranslateText('Mission source')}
+                right={TranslateText(missionDefinition.sourceType)}
+            />
             <Button
                 disabled={missionDefinition.lastRun === null}
-                onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${missionDefinition.lastRun.id}`)}>
-                    {TranslateText('View last run') + (missionDefinition.lastRun ? '' : ': ' + TranslateText('Not yet performed'))}
+                onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${missionDefinition.lastRun.id}`)}
+            >
+                {TranslateText('View last run') +
+                    (missionDefinition.lastRun ? '' : ': ' + TranslateText('Not yet performed'))}
             </Button>
-            <MissionDefinitionEditButtons missionDefinition={missionDefinition} updateMissionDefinition={updateMissionDefinition} />
+            <MissionDefinitionEditButtons
+                missionDefinition={missionDefinition}
+                updateMissionDefinition={updateMissionDefinition}
+            />
         </>
+    )
 }
 
-function MissionDefinitionEditButtons({missionDefinition, updateMissionDefinition}: IProps) {
+function MissionDefinitionEditButtons({ missionDefinition, updateMissionDefinition }: IProps) {
     const defaultMissionDefinitionForm = {
         comment: missionDefinition.comment,
         inspectionfrequency: missionDefinition.inspectionFrequency,
         name: missionDefinition.name,
-        isDeprecated: false
+        isDeprecated: false,
     }
     const { TranslateText } = useLanguageContext()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
@@ -125,8 +138,7 @@ function MissionDefinitionEditButtons({missionDefinition, updateMissionDefinitio
     const handleSubmit = () => {
         BackendAPICaller.updateMissionDefinition(missionDefinition.id, form).then((missionDefinition) => {
             setIsEditDialogOpen(false)
-            if (missionDefinition.isDeprecated)
-            updateMissionDefinition(missionDefinition)
+            if (missionDefinition.isDeprecated) updateMissionDefinition(missionDefinition)
         })
     }
 
@@ -139,45 +151,47 @@ function MissionDefinitionEditButtons({missionDefinition, updateMissionDefinitio
 
     // TODO: need to set inspection frequency. Use two number selectors, days and hours
 
-    return <>
+    return (
+        <>
             <Button onClick={() => setIsEditDialogOpen(true)}>{TranslateText('Edit')}</Button>
             <Button onClick={() => setIsDeleteDialogOpen(true)}>{TranslateText('Delete')}</Button>
-            {isEditDialogOpen &&
+            {isEditDialogOpen && (
                 <StyledFormDialog>
-                <StyledDialog open={true}>
-                    <StyledAutoComplete>
-                        <StyledFormSection>
-                            <TextField id="commentEdit" multiline rows={3} value={form.comment} 
-                                onChange={(changes: ChangeEvent<HTMLInputElement>) => 
-                                    setForm({...form, comment: changes.target.value})
-                                }/>
-                            <TextField id="nameEdit" value={form.name} 
-                                onChange={(changes: ChangeEvent<HTMLInputElement>) => 
-                                    setForm({...form, name: changes.target.value})
-                                }/>
-                        </StyledFormSection>
-                        <StyledButtonSection>
-                            <Button
-                                onClick={handleSubmit}
-                                variant="outlined"
-                                color="primary"
-                            >
-                                {' '}
-                                {TranslateText('Update mission definition')}{' '}
-                            </Button>
-                            <Button
-                                onClick={() => setIsEditDialogOpen(false)}
-                                variant="outlined"
-                                color="primary"
-                            >
-                                {' '}
-                                {TranslateText('Cancel')}{' '}
-                            </Button>
-                        </StyledButtonSection>
-                    </StyledAutoComplete>
-                </StyledDialog>
-            </StyledFormDialog>}
-            
+                    <StyledDialog open={true}>
+                        <StyledAutoComplete>
+                            <StyledFormSection>
+                                <TextField
+                                    id="commentEdit"
+                                    multiline
+                                    rows={3}
+                                    value={form.comment}
+                                    onChange={(changes: ChangeEvent<HTMLInputElement>) =>
+                                        setForm({ ...form, comment: changes.target.value })
+                                    }
+                                />
+                                <TextField
+                                    id="nameEdit"
+                                    value={form.name}
+                                    onChange={(changes: ChangeEvent<HTMLInputElement>) =>
+                                        setForm({ ...form, name: changes.target.value })
+                                    }
+                                />
+                            </StyledFormSection>
+                            <StyledButtonSection>
+                                <Button onClick={handleSubmit} variant="outlined" color="primary">
+                                    {' '}
+                                    {TranslateText('Update mission definition')}{' '}
+                                </Button>
+                                <Button onClick={() => setIsEditDialogOpen(false)} variant="outlined" color="primary">
+                                    {' '}
+                                    {TranslateText('Cancel')}{' '}
+                                </Button>
+                            </StyledButtonSection>
+                        </StyledAutoComplete>
+                    </StyledDialog>
+                </StyledFormDialog>
+            )}
+
             {/*isDeleteDialogOpen &&
                 <StyledFormDialog>
                     <StyledDialog open={true}>
@@ -205,6 +219,7 @@ function MissionDefinitionEditButtons({missionDefinition, updateMissionDefinitio
                     </StyledDialog>
                 </StyledFormDialog>*/}
         </>
+    )
 }
 
 export function MissionDefinitionPage() {
@@ -238,10 +253,12 @@ export function MissionDefinitionPage() {
                 <StyledMissionDefinitionPage>
                     <BackButton />
                     <MissionDefinitionHeader missionDefinition={selectedMissionDefinition} />
-                    <MissionDefinitionPageBody missionDefinition={selectedMissionDefinition} updateMissionDefinition={setSelectedMissionDefinition} />
+                    <MissionDefinitionPageBody
+                        missionDefinition={selectedMissionDefinition}
+                        updateMissionDefinition={setSelectedMissionDefinition}
+                    />
                 </StyledMissionDefinitionPage>
-                )}
-            
+            )}
         </>
     )
 }
