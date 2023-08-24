@@ -7,8 +7,8 @@ import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
-import { DeckMissionType, OngoingMissionType } from './InspectionSection'
-import { getInspectionDeadline } from 'utils/StringFormatting'
+import { Inspection, OngoingMissionType, compareInspections } from './InspectionSection'
+import { getDeadlineInDays } from 'utils/StringFormatting'
 
 const TableWithHeader = styled.div`
     gap: 2rem;
@@ -34,15 +34,15 @@ const GreenCircle = Circle('#4BB748')
 
 interface IProps {
     deck: Deck
-    deckMissions: DeckMissionType
+    inspections: Inspection[]
     openDialog: () => void
     setSelectedMissions: (selectedMissions: CondensedMissionDefinition[]) => void
     ongoingMissions: OngoingMissionType
 }
 
-export function InspectionTable({ deck, deckMissions, openDialog, setSelectedMissions, ongoingMissions }: IProps) {
+export function InspectionTable({ deck, inspections, openDialog, setSelectedMissions, ongoingMissions }: IProps) {
     const { TranslateText } = useLanguageContext()
-    
+
     let navigate = useNavigate()
 
     const formatDateString = (dateStr: Date) => {
@@ -52,41 +52,40 @@ export function InspectionTable({ deck, deckMissions, openDialog, setSelectedMis
         return newStr
     }
 
-    const getInspectionStatus = (inspectionFrequency: string, lastRunTime: Date) => {
-        const deadlineDate = getInspectionDeadline(inspectionFrequency, lastRunTime)
-        // The magical number on the right is the number of milliseconds in a day
-        const deadline = new Date(deadlineDate.getTime() - new Date().getTime()).getTime() / 8.64e7
+    const getInspectionStatus = (deadlineDate: Date) => {
+        const deadlineDays = getDeadlineInDays(deadlineDate)
 
-        if (deadline <= 0) {
-            return (
-                <>
-                    {RedCircle} {TranslateText('Past deadline')}
-                </>
-            )
-        } else if (deadline > 0 && deadline <= 1) {
-            return (
-                <>
-                    {RedCircle} {TranslateText('Due today')}
-                </>
-            )
-        } else if (deadline > 1 && deadline <= 7) {
-            return (
-                <>
-                    {YellowCircle} {TranslateText('Due this week')}
-                </>
-            )
-        } else if (deadline > 7 && deadline <= 14) {
-            return (
-                <>
-                    {YellowCircle} {TranslateText('Due within two weeks')}
-                </>
-            )
-        } else if (deadline > 7 && deadline <= 30) {
-            return (
-                <>
-                    {GreenCircle} {TranslateText('Due within a month')}
-                </>
-            )
+        switch (true) {
+            case deadlineDays <= 0:
+                return (
+                    <>
+                        {RedCircle} {TranslateText('Past deadline')}
+                    </>
+                )
+            case deadlineDays > 0 && deadlineDays <= 1:
+                return (
+                    <>
+                        {RedCircle} {TranslateText('Due today')}
+                    </>
+                )
+            case deadlineDays > 1 && deadlineDays <= 7:
+                return (
+                    <>
+                        {YellowCircle} {TranslateText('Due this week')}
+                    </>
+                )
+            case deadlineDays > 7 && deadlineDays <= 14:
+                return (
+                    <>
+                        {YellowCircle} {TranslateText('Due within two weeks')}
+                    </>
+                )
+            case deadlineDays > 7 && deadlineDays <= 30:
+                return (
+                    <>
+                        {GreenCircle} {TranslateText('Due within a month')}
+                    </>
+                )
         }
         return (
             <>
@@ -95,10 +94,10 @@ export function InspectionTable({ deck, deckMissions, openDialog, setSelectedMis
         )
     }
 
-    const getInspectionRow = (mission: CondensedMissionDefinition) => {
+    const getInspectionRow = (inspection: Inspection) => {
+        const mission = inspection.missionDefinition
         let status
         let lastCompleted: string = ''
-        let deadline: string = ''
         const isScheduled = Object.keys(ongoingMissions).includes(mission.id) && ongoingMissions[mission.id]
         if (isScheduled) {
             status = (
@@ -108,22 +107,24 @@ export function InspectionTable({ deck, deckMissions, openDialog, setSelectedMis
             )
         } else {
             if (!mission.lastRun || !mission.lastRun.endTime) {
-                status = (
-                    <>
-                        {RedCircle} {TranslateText('Not yet performed')}
-                    </>
-                )
+                if (inspection.deadline) {
+                    status = (
+                        <>
+                            {RedCircle} {TranslateText('Not yet performed')}
+                        </>
+                    )
+                } else {
+                    status = TranslateText('No planned inspection')
+                }
                 lastCompleted = TranslateText('Never')
-            } else if (mission.inspectionFrequency) {
-                status = getInspectionStatus(mission.inspectionFrequency, mission.lastRun.endTime!)
-                lastCompleted = formatDateString(mission.lastRun.endTime!)
-                deadline = getInspectionDeadline(mission.inspectionFrequency, mission.lastRun.endTime!).toDateString()
             } else {
-                status = TranslateText('No planned inspection')
+                status = inspection.deadline
+                    ? getInspectionStatus(inspection.deadline)
+                    : TranslateText('No planned inspection')
                 lastCompleted = formatDateString(mission.lastRun.endTime!)
             }
         }
-    
+
         return (
             <Table.Row key={mission.id}>
                 <Table.Cell>{status}</Table.Cell>
@@ -137,7 +138,7 @@ export function InspectionTable({ deck, deckMissions, openDialog, setSelectedMis
                 </Table.Cell>
                 <Table.Cell>{mission.comment}</Table.Cell>
                 <Table.Cell>{lastCompleted}</Table.Cell>
-                <Table.Cell>{deadline}</Table.Cell>
+                <Table.Cell>{inspection.deadline ? inspection.deadline.toDateString() : ''}</Table.Cell>
                 <Table.Cell>
                     <StyledIcon
                         color={`${tokens.colors.interactive.focus.hex}`}
@@ -171,7 +172,7 @@ export function InspectionTable({ deck, deckMissions, openDialog, setSelectedMis
                     </Table.Row>
                 </Table.Head>
                 <Table.Body>
-                    {deckMissions[deck.id].missionDefinitions.map((mission) => getInspectionRow(mission))}
+                    {inspections.sort(compareInspections).map((inspection) => getInspectionRow(inspection))}
                 </Table.Body>
             </Table>
         </TableWithHeader>

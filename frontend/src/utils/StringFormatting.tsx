@@ -18,3 +18,8 @@ export const getInspectionDeadline = (inspectionFrequency: string, lastRunTime: 
     // More flexibly we can also define the deadline in terms of milliseconds:
     // new Date(lastRunTime.getTime() + (1000 * 60 * days) + (1000 * 60 * 60 * hours) + (1000 * 60 * 60 * 24 * days))
 }
+
+export const getDeadlineInDays = (deadlineDate: Date) => {
+    // The magical number on the right is the number of milliseconds in a day
+    return new Date(deadlineDate.getTime() - new Date().getTime()).getTime() / 8.64e7
+}

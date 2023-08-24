@@ -11,7 +11,7 @@ import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router-dom'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { MissionStatus } from 'models/Mission'
-import { getInspectionDeadline } from 'utils/StringFormatting'
+import { getDeadlineInDays, getInspectionDeadline } from 'utils/StringFormatting'
 import { InspectionTable } from './InspectionTable'
 
 const StyledCard = styled(Card)`
@@ -43,12 +43,28 @@ const StyledContent = styled.div`
     gap: 1rem;
 `
 
+export interface Inspection {
+    missionDefinition: CondensedMissionDefinition
+    deadline: Date | undefined
+}
+
 export interface DeckMissionType {
-    [deckId: string]: { missionDefinitions: CondensedMissionDefinition[]; deck: Deck }
+    [deckId: string]: {
+        inspections: Inspection[]
+        deck: Deck
+    }
 }
 
 export interface OngoingMissionType {
     [missionId: string]: boolean
+}
+
+export const compareInspections = (i1: Inspection, i2: Inspection) => {
+    if (!i1.missionDefinition.inspectionFrequency) return 1
+    if (!i2.missionDefinition.inspectionFrequency) return -1
+    if (!i1.missionDefinition.lastRun) return 1
+    if (!i2.missionDefinition.lastRun) return -1
+    else return i1.deadline!.getTime() - i2.deadline!.getTime()
 }
 
 export function InspectionSection({ refreshInterval }: RefreshProps) {
@@ -59,12 +75,10 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setisDialogOpen] = useState<boolean>(false)
-    let navigate = useNavigate()
 
     useEffect(() => {
         setSelectedDeck(undefined)
         BackendAPICaller.getDecks().then(async (decks: Deck[]) => {
-            console.log(decks)
             let newDeckMissions: DeckMissionType = {}
             const filteredDecks = decks.filter(
                 (deck) => deck.installationCode.toLowerCase() === installationCode.toLowerCase()
@@ -73,27 +87,33 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
                 // These calls need to be made sequentially to update areaMissions safely
                 let missionDefinitions = await BackendAPICaller.getMissionDefinitionsInDeck(deck)
                 if (!missionDefinitions) missionDefinitions = []
-                newDeckMissions[deck.id] = { missionDefinitions: missionDefinitions, deck: deck }
+                newDeckMissions[deck.id] = {
+                    inspections: missionDefinitions.map((m) => {
+                        return {
+                            missionDefinition: m,
+                            deadline: m.lastRun
+                                ? getInspectionDeadline(m.inspectionFrequency, m.lastRun.endTime!)
+                                : undefined,
+                        }
+                    }),
+                    deck: deck,
+                }
             }
             setDeckMissions(newDeckMissions)
         })
     }, [installationCode])
 
-    const handleScheduleAll = (missions: CondensedMissionDefinition[]) => {
+    const handleScheduleAll = (inspections: Inspection[]) => {
         setisDialogOpen(true)
-        missions.sort((m1, m2) => {
-            if (!m1.lastRun) return 1
-            else if (!m2.lastRun) return -1
-            else return getInspectionDeadline(m1.inspectionFrequency, m1.lastRun.endTime!).getTime() 
-                - getInspectionDeadline(m2.inspectionFrequency, m2.lastRun.endTime!).getTime()
-        })
-        setSelectedMissions(missions)
+        inspections.sort(compareInspections)
+        setSelectedMissions(inspections.map((i) => i.missionDefinition))
     }
 
     const updateOngoingMissionsMap = async (areaMissions: DeckMissionType) => {
         let newOngoingMissions: OngoingMissionType = {}
         for (const areaId of Object.keys(areaMissions)) {
-            for (const missionDefinition of areaMissions[areaId].missionDefinitions) {
+            for (const inspection of areaMissions[areaId].inspections) {
+                const missionDefinition = inspection.missionDefinition
                 const missionRuns = await BackendAPICaller.getMissionRuns({
                     statuses: [MissionStatus.Paused, MissionStatus.Pending, MissionStatus.Ongoing],
                     missionId: missionDefinition.id,
@@ -111,6 +131,27 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
         return () => clearInterval(id)
     }, [deckMissions])
 
+    const getCardColor = (deckId: string) => {
+        const inspections = deckMissions[deckId].inspections
+        if (inspections.length === 0) return 'gray'
+        const isScheduled = (m: CondensedMissionDefinition) =>
+            Object.keys(ongoingMissions).includes(m.id) && ongoingMissions[m.id]
+        const sortedInspections = inspections.filter((i) => !isScheduled(i.missionDefinition)).sort(compareInspections)
+        if (sortedInspections.length === 0) return 'green'
+
+        const nextInspection = sortedInspections[0]
+        if (!nextInspection.deadline) return 'green'
+
+        const deadlineDays = getDeadlineInDays(nextInspection.deadline)
+        switch (true) {
+            case deadlineDays <= 1:
+                return 'red'
+            case deadlineDays > 1 && deadlineDays <= 14:
+                return 'yellow'
+            case deadlineDays > 7:
+                return 'green'
+        }
+    }
 
     return (
         <>
@@ -122,18 +163,25 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
                             <StyledCard
                                 variant="default"
                                 key={deckId}
-                                style={{ boxShadow: tokens.elevation.raised }}
+                                style={{
+                                    boxShadow: tokens.elevation.raised,
+                                    borderStyle: 'solid',
+                                    borderWidth: '3px',
+                                    borderColor: `${getCardColor(deckId)}`,
+                                }}
                                 onClick={() => setSelectedDeck(deckMissions[deckId].deck)}
                             >
                                 <Typography>{deckMissions[deckId].deck.deckName.toLocaleUpperCase()}</Typography>
                                 <StyledCardComponent>
                                     <Typography>
                                         {deckMissions[deckId] &&
-                                            deckMissions[deckId].missionDefinitions.length > 0 &&
-                                            deckMissions[deckId].missionDefinitions.length + ' ' + TranslateText('Missions')}
+                                            deckMissions[deckId].inspections.length > 0 &&
+                                            deckMissions[deckId].inspections.length + ' ' + TranslateText('Missions')}
                                     </Typography>
-                                    <EdsProvider density='compact'>
-                                        <Button onClick={() => handleScheduleAll(deckMissions[deckId].missionDefinitions)}>{TranslateText('Schedule all')}</Button>
+                                    <EdsProvider density="compact">
+                                        <Button onClick={() => handleScheduleAll(deckMissions[deckId].inspections)}>
+                                            {TranslateText('Schedule all')}
+                                        </Button>
                                     </EdsProvider>
                                 </StyledCardComponent>
                             </StyledCard>
@@ -142,14 +190,15 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
                         <Typography variant="h1">{TranslateText('No Deck Inspections Available')}</Typography>
                     )}
                 </StyledDeckCards>
-                {selectedDeck && 
-                    <InspectionTable 
-                        deck={selectedDeck} 
+                {selectedDeck && (
+                    <InspectionTable
+                        deck={selectedDeck}
                         openDialog={() => setisDialogOpen(true)}
                         setSelectedMissions={setSelectedMissions}
-                        deckMissions={deckMissions}
-                        ongoingMissions={ongoingMissions} />
-                }
+                        inspections={deckMissions[selectedDeck.id].inspections}
+                        ongoingMissions={ongoingMissions}
+                    />
+                )}
             </StyledContent>
             {isDialogOpen && (
                 <ScheduleMissionDialog

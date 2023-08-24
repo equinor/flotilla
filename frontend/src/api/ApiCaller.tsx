@@ -240,9 +240,15 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async updateMissionDefinition(id: string, form: MissionDefinitionUpdateForm): Promise<CondensedMissionDefinition> {
+    static async updateMissionDefinition(
+        id: string,
+        form: MissionDefinitionUpdateForm
+    ): Promise<CondensedMissionDefinition> {
         const path: string = 'missions/definitions/' + id
-        const result = await BackendAPICaller.PUT<MissionDefinitionUpdateForm, CondensedMissionDefinition>(path, form).catch((e) => {
+        const result = await BackendAPICaller.PUT<MissionDefinitionUpdateForm, CondensedMissionDefinition>(
+            path,
+            form
+        ).catch((e) => {
             console.error(`Failed to PUT /${path}: ` + e)
             throw e
         })
