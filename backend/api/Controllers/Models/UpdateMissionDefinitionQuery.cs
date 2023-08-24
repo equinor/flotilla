@@ -1,4 +1,4 @@
-namespace Api.Controllers.Models
+﻿namespace Api.Controllers.Models
 {
     public struct UpdateMissionDefinitionQuery
     {
