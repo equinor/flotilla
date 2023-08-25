@@ -71,7 +71,31 @@ public static class InitDb
             Name = "TestDeck"
         };
 
-        return new List<Deck>(new Deck[] { deck1 });
+        var deck2 = new Deck
+        {
+            Id = Guid.NewGuid().ToString(),
+            Plant = plants[0],
+            Installation = plants[0].Installation,
+            Name = "TestDeck2"
+        };
+
+        var deck3 = new Deck
+        {
+            Id = Guid.NewGuid().ToString(),
+            Plant = plants[0],
+            Installation = plants[0].Installation,
+            Name = "TestDeck3"
+        };
+
+        var deck4 = new Deck
+        {
+            Id = Guid.NewGuid().ToString(),
+            Plant = plants[0],
+            Installation = plants[0].Installation,
+            Name = "TestDeck4"
+        };
+
+        return new List<Deck>(new Deck[] { deck1, deck2, deck3, deck4 });
     }
 
     private static List<Area> GetAreas()
@@ -102,7 +126,7 @@ public static class InitDb
 
         var area3 = new Area
         {
-            Id = "TestId",
+            Id = Guid.NewGuid().ToString(),
             Deck = decks[0],
             Plant = decks[0].Plant,
             Installation = decks[0].Plant!.Installation,
@@ -112,7 +136,43 @@ public static class InitDb
             SafePositions = new List<SafePosition>()
         };
 
-        return new List<Area>(new Area[] { area1, area2, area3 });
+        var area4 = new Area
+        {
+            Id = Guid.NewGuid().ToString(),
+            Deck = decks[1],
+            Plant = decks[1].Plant,
+            Installation = decks[1].Plant.Installation,
+            Name = "testArea2",
+            MapMetadata = new MapMetadata(),
+            DefaultLocalizationPose = new Pose { },
+            SafePositions = new List<SafePosition>()
+        };
+
+        var area5 = new Area
+        {
+            Id = Guid.NewGuid().ToString(),
+            Deck = decks[2],
+            Plant = decks[2].Plant,
+            Installation = decks[2].Plant.Installation,
+            Name = "testArea3",
+            MapMetadata = new MapMetadata(),
+            DefaultLocalizationPose = new Pose { },
+            SafePositions = new List<SafePosition>()
+        };
+
+        var area6 = new Area
+        {
+            Id = Guid.NewGuid().ToString(),
+            Deck = decks[3],
+            Plant = decks[3].Plant,
+            Installation = decks[3].Plant.Installation,
+            Name = "testArea4",
+            MapMetadata = new MapMetadata(),
+            DefaultLocalizationPose = new Pose { },
+            SafePositions = new List<SafePosition>()
+        };
+
+        return new List<Area>(new Area[] { area1, area2, area3, area4, area5, area6 });
     }
 
     private static List<Source> GetSources()
@@ -220,7 +280,56 @@ public static class InitDb
             LastRun = null
         };
 
-        return new List<MissionDefinition>(new[] { missionDefinition1, missionDefinition2, missionDefinition3 });
+        var missionDefinition4 = new MissionDefinition
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = "Placeholder Mission 4",
+            InstallationCode = areas[2].Installation.InstallationCode,
+            InspectionFrequency = new DateTime().AddDays(90) - new DateTime(),
+            Area = areas[2],
+            Source = sources[2],
+            LastRun = null
+        };
+
+        var missionDefinition5 = new MissionDefinition
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = "Placeholder Mission 5",
+            InstallationCode = areas[2].Installation.InstallationCode,
+            InspectionFrequency = new DateTime().AddDays(35) - new DateTime(),
+            Area = areas[2],
+            Source = sources[2],
+            LastRun = null
+        };
+
+        var missionDefinition6 = new MissionDefinition
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = "Placeholder Mission 6",
+            InstallationCode = areas[3].Installation.InstallationCode,
+            InspectionFrequency = new DateTime().AddDays(4) - new DateTime(),
+            Area = areas[3],
+            Source = sources[2],
+            LastRun = null
+        };
+        _ = new MissionDefinition
+        {
+            Id = Guid.NewGuid().ToString(),
+            Name = "Placeholder Mission 7",
+            InstallationCode = areas[3].Installation.InstallationCode,
+            Area = areas[4],
+            Source = sources[2],
+            LastRun = null
+        };
+
+        return new List<MissionDefinition>(new[] {
+            missionDefinition1,
+            missionDefinition2,
+            missionDefinition3,
+            missionDefinition4,
+            missionDefinition5,
+            missionDefinition6
+        });
     }
 
     private static List<MissionTask> GetMissionTasks()
@@ -463,6 +572,9 @@ public static class InitDb
         context.AddRange(robots);
         context.AddRange(missionDefinitions);
         context.AddRange(missionRuns);
+        context.AddRange(installations);
+        context.AddRange(plants);
+        context.AddRange(decks);
         context.AddRange(areas);
         context.SaveChanges();
     }

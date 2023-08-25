@@ -609,18 +609,12 @@ namespace Api.Controllers
         if (missionDefinition == null)
             return NotFound($"Could not find mission definition with id '{id}'");
 
-        if (missionDefinitionQuery.Name != null)
-        {
-            missionDefinition.Name = missionDefinitionQuery.Name;
-        }
-        if (missionDefinitionQuery.Comment != null)
-        {
-            missionDefinition.Comment = missionDefinitionQuery.Comment;
-        }
-        if (missionDefinitionQuery.InspectionFrequency != null)
-        {
-            missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
-        }
+        if (missionDefinitionQuery.Name == null)
+            return BadRequest("Name cannot be null.");
+
+        missionDefinition.Name = missionDefinitionQuery.Name;
+        missionDefinition.Comment = missionDefinitionQuery.Comment;
+        missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
 
         var newMissionDefinition = await _missionDefinitionService.Update(missionDefinition);
         return new CondensedMissionDefinitionResponse(newMissionDefinition);
