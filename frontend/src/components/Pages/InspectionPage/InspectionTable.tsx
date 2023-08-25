@@ -107,7 +107,7 @@ export function InspectionTable({ deck, inspections, openDialog, setSelectedMiss
             )
         } else {
             if (!mission.lastRun || !mission.lastRun.endTime) {
-                if (inspection.deadline) {
+                if (inspection.missionDefinition.inspectionFrequency) {
                     status = (
                         <>
                             {RedCircle} {TranslateText('Not yet performed')}
@@ -118,8 +118,8 @@ export function InspectionTable({ deck, inspections, openDialog, setSelectedMiss
                 }
                 lastCompleted = TranslateText('Never')
             } else {
-                status = inspection.deadline
-                    ? getInspectionStatus(inspection.deadline)
+                status = inspection.missionDefinition.inspectionFrequency
+                    ? getInspectionStatus(inspection.deadline!)
                     : TranslateText('No planned inspection')
                 lastCompleted = formatDateString(mission.lastRun.endTime!)
             }
@@ -136,6 +136,7 @@ export function InspectionTable({ deck, inspections, openDialog, setSelectedMiss
                         {mission.name}
                     </Typography>
                 </Table.Cell>
+                <Table.Cell>{mission.area.areaName}</Table.Cell>
                 <Table.Cell>{mission.comment}</Table.Cell>
                 <Table.Cell>{lastCompleted}</Table.Cell>
                 <Table.Cell>{inspection.deadline ? inspection.deadline.toDateString() : ''}</Table.Cell>
@@ -165,6 +166,7 @@ export function InspectionTable({ deck, inspections, openDialog, setSelectedMiss
                     <Table.Row>
                         <Table.Cell>{TranslateText('Status')}</Table.Cell>
                         <Table.Cell>{TranslateText('Name')}</Table.Cell>
+                        <Table.Cell>{TranslateText('Area')}</Table.Cell>
                         <Table.Cell>{TranslateText('Description')}</Table.Cell>
                         <Table.Cell>{TranslateText('Last completed')}</Table.Cell>
                         <Table.Cell>{TranslateText('Deadline')}</Table.Cell>

@@ -153,5 +153,9 @@
     "Yes": "Yes",
     "Missions": "Missions",
     "Schedule all": "Schedule all",
-    "No planned inspection": "No planned inspection"
+    "No planned inspection": "No planned inspection",
+    "Echo": "Echo",
+    "Custom": "Custom",
+    "Hours between inspections": "Hours between inspections",
+    "Days between inspections": "Days between inspections"
 }

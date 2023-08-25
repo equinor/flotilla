@@ -326,7 +326,7 @@ export class BackendAPICaller {
             echoMissionId: echoMissionId,
             desiredStartTime: new Date(),
             installationCode: installationCode,
-            areaName: '', // TODO: we need a way of populating the area database, then including area in MissionDefinition
+            areaName: '',
         }
         const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch((e) => {
             console.error(`Failed to POST /${path}: ` + e)

@@ -82,7 +82,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         if (selectedRobot === undefined) return
 
         selectedEchoMissions.forEach((mission: EchoMissionDefinition) => {
-            // TODO: as a final parameter here we likely want mission.AreaName, and maybe also installation and deck codes
             BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode)
         })
 

@@ -155,5 +155,7 @@
     "Yes": "Ja",
     "Missions": "Oppdrag",
     "Schedule all": "Legg til alle i køen",
-    "No planned inspection": "Ingen inspeksjon planlagt"
+    "No planned inspection": "Ingen inspeksjon planlagt",
+    "Hours between inspections": "Timer mellom inspeksjoner",
+    "Days between inspections": "Dager mellom inspeksjoner"
 }

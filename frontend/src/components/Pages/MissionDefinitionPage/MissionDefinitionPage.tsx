@@ -37,7 +37,7 @@ const StyledFormSection = styled.div`
 const StyledDialog = styled(Dialog)`
     display: flex;
     padding: 1rem;
-    width: 320px;
+    width: 620px;
 `
 
 const StyledMissionDefinitionPage = styled.div`
@@ -80,6 +80,7 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
     let navigate = useNavigate()
 
     const displayInspectionFrequency = (inspectionFrequency: string) => {
+        if (inspectionFrequency === null) return TranslateText('No inspection frequency set')
         const timeArray = inspectionFrequency.split(':')
         const days: number = +timeArray[0]
         const hours: number = +timeArray[1]
@@ -124,58 +125,102 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
 }
 
 function MissionDefinitionEditButtons({ missionDefinition, updateMissionDefinition }: IProps) {
-    const defaultMissionDefinitionForm = {
+    const defaultMissionDefinitionForm: MissionDefinitionUpdateForm = {
         comment: missionDefinition.comment,
-        inspectionfrequency: missionDefinition.inspectionFrequency,
+        inspectionFrequency: missionDefinition.inspectionFrequency,
         name: missionDefinition.name,
         isDeprecated: false,
     }
     const { TranslateText } = useLanguageContext()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false)
     const [form, setForm] = useState<MissionDefinitionUpdateForm>(defaultMissionDefinitionForm)
 
+    const updateInspectionFrequencyFormDays = (newDay: string) => {
+        if (!Number(newDay) && newDay !== '') return
+        newDay = newDay === '' ? '0' : newDay
+        if (!form.inspectionFrequency) return newDay + '.00:00:00'
+        const inspectionArray = form.inspectionFrequency.split(':')
+        if (!inspectionArray || inspectionArray.length < 2) return newDay + '.00:00:00'
+        setForm({ ...form, inspectionFrequency: newDay + '.00:' + inspectionArray[1] + ':00' })
+    }
+
+    const updateInspectionFrequencyFormHours = (newHour: string) => {
+        if (!Number(newHour) && newHour !== '') return
+        newHour = newHour === '' ? '0' : newHour
+        if (!form.inspectionFrequency) return '00:' + newHour + ':00'
+        const inspectionArray = form.inspectionFrequency.split(':')
+        if (!inspectionArray || inspectionArray.length < 2) return '00:' + newHour + ':00'
+        setForm({ ...form, inspectionFrequency: inspectionArray[0] + ':' + newHour + ':00' })
+    }
+
+    const getDayAndHoursFromInspectionFrequency = (inspectionFrequency: string | undefined): [number, number] => {
+        if (!inspectionFrequency) return [0, 0]
+        const inspectionParts = form.inspectionFrequency?.split(':')
+        if (!inspectionParts || inspectionParts.length < 2) return [0, 0]
+        return [+inspectionParts[0], +inspectionParts[1]]
+    }
+
     const handleSubmit = () => {
+        const daysAndHours = getDayAndHoursFromInspectionFrequency(form.inspectionFrequency)
+        if (daysAndHours[0] === 0 && daysAndHours[1] === 0) form.inspectionFrequency = undefined
         BackendAPICaller.updateMissionDefinition(missionDefinition.id, form).then((missionDefinition) => {
             setIsEditDialogOpen(false)
             if (missionDefinition.isDeprecated) updateMissionDefinition(missionDefinition)
         })
     }
 
-    const handleDelete = () => {
-        BackendAPICaller.deleteMissionDefinition(missionDefinition.id).then(() => {
-            setIsEditDialogOpen(false)
-            window.location.href = `${config.FRONTEND_URL}/`
-        })
-    }
-
-    // TODO: need to set inspection frequency. Use two number selectors, days and hours
+    const inspectionFrequency = getDayAndHoursFromInspectionFrequency(form.inspectionFrequency)
+    const inspectionFrequencyDays =
+        inspectionFrequency[0] === null || inspectionFrequency[0] === 0 ? '' : String(inspectionFrequency[0])
+    const inspectionFrequencyHours =
+        inspectionFrequency[1] === null || inspectionFrequency[1] === 0 ? '' : String(inspectionFrequency[1])
 
     return (
         <>
             <Button onClick={() => setIsEditDialogOpen(true)}>{TranslateText('Edit')}</Button>
-            <Button onClick={() => setIsDeleteDialogOpen(true)}>{TranslateText('Delete')}</Button>
             {isEditDialogOpen && (
                 <StyledFormDialog>
                     <StyledDialog open={true}>
                         <StyledAutoComplete>
                             <StyledFormSection>
                                 <TextField
-                                    id="commentEdit"
-                                    multiline
-                                    rows={3}
-                                    value={form.comment}
-                                    onChange={(changes: ChangeEvent<HTMLInputElement>) =>
-                                        setForm({ ...form, comment: changes.target.value })
-                                    }
-                                />
-                                <TextField
                                     id="nameEdit"
-                                    value={form.name}
+                                    value={form.name ?? ''}
+                                    label={TranslateText('Name')}
                                     onChange={(changes: ChangeEvent<HTMLInputElement>) =>
                                         setForm({ ...form, name: changes.target.value })
                                     }
                                 />
+                                <TextField
+                                    id="commentEdit"
+                                    multiline
+                                    rows={3}
+                                    label={TranslateText('Comment')}
+                                    value={form.comment ?? ''}
+                                    onChange={(changes: ChangeEvent<HTMLInputElement>) =>
+                                        setForm({ ...form, comment: changes.target.value })
+                                    }
+                                />
+                                <div>
+                                    <TextField
+                                        id="compact-textfield"
+                                        label={TranslateText('Days between inspections')}
+                                        unit={TranslateText('days')}
+                                        value={inspectionFrequencyDays}
+                                        onChange={(changes: ChangeEvent<HTMLInputElement>) =>
+                                            updateInspectionFrequencyFormDays(changes.target.value)
+                                        }
+                                    />
+                                    <TextField
+                                        id="compact-textfield"
+                                        label={TranslateText('Hours between inspections')}
+                                        unit={TranslateText('hours')}
+                                        value={inspectionFrequencyHours}
+                                        onChange={(changes: ChangeEvent<HTMLInputElement>) =>
+                                            updateInspectionFrequencyFormHours(changes.target.value)
+                                        }
+                                    />
+                                </div>
                             </StyledFormSection>
                             <StyledButtonSection>
                                 <Button onClick={handleSubmit} variant="outlined" color="primary">
@@ -191,33 +236,6 @@ function MissionDefinitionEditButtons({ missionDefinition, updateMissionDefiniti
                     </StyledDialog>
                 </StyledFormDialog>
             )}
-
-            {/*isDeleteDialogOpen &&
-                <StyledFormDialog>
-                    <StyledDialog open={true}>
-                        <StyledAutoComplete>
-                            <Typography variant="caption">{TranslateText('Are you sure you want to delete') + ' ' + missionDefinition.name + '?'}</Typography>
-                            <StyledButtonSection>
-                                <Button
-                                    onClick={handleDelete}
-                                    variant="outlined"
-                                    color="primary"
-                                >
-                                    {' '}
-                                    {TranslateText('Yes')}{' '}
-                                </Button>
-                                <Button
-                                    onClick={() => setIsEditDialogOpen(false)}
-                                    variant="outlined"
-                                    color="primary"
-                                >
-                                    {' '}
-                                    {TranslateText('Cancel')}{' '}
-                                </Button>
-                            </StyledButtonSection>
-                        </StyledAutoComplete>
-                    </StyledDialog>
-                </StyledFormDialog>*/}
         </>
     )
 }

@@ -1,6 +1,6 @@
 export interface MissionDefinitionUpdateForm {
     comment?: string
-    inspectionfrequency?: string
+    inspectionFrequency?: string
     name?: string
     isDeprecated?: boolean
 }
