@@ -254,7 +254,7 @@ export class BackendAPICaller {
     }
 
     static async getActivePlants(): Promise<EchoPlantInfo[]> {
-        const path: string = 'robots/active-plants'
+        const path: string = 'echo/active-plants'
         const result = await BackendAPICaller.GET<EchoPlantInfo[]>(path).catch((e: Error) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
