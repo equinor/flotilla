@@ -584,18 +584,21 @@ namespace Api.Test
         [Fact]
         public async Task GetMapMetadata()
         {
-            var inputOutputPairs = new Dictionary<string, HttpStatusCode>(){
-                {"TestId", HttpStatusCode.OK},
-                {"InvalidId", HttpStatusCode.NotFound}
-            };
+            string testInstallation = "testInstallationGetMapMetadata";
+            string testPlant = "testPlantGetMapMetadata";
+            string testDeck = "testDeckGetMapMetadata";
+            string testArea = "testAreaGetMapMetadata";
+            string invalidAreaId = "InvalidId";
 
-            foreach (string input in inputOutputPairs.Keys)
-            {
-                string areaId = input;
-                string url = $"/areas/{areaId}/map-metadata";
-                var response = await _client.GetAsync(url);
-                Assert.Equal(inputOutputPairs[input], response.StatusCode);
-            }
+            (_, _, _, string areaId) = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+
+            string url = $"/areas/{areaId}/map-metadata";
+            var response = await _client.GetAsync(url);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            string invalidUrl = $"/areas/{invalidAreaId}/map-metadata";
+            var responseInvalid = await _client.GetAsync(invalidUrl);
+            Assert.Equal(HttpStatusCode.NotFound, responseInvalid.StatusCode);
         }
 
         [Fact]
