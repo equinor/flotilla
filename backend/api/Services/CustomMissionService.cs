@@ -58,10 +58,17 @@ namespace Api.Services
 
         public string CalculateHashFromTasks(IList<MissionTask> tasks)
         {
-            string json = JsonSerializer.Serialize(tasks);
+            IList<MissionTask> genericTasks = new List<MissionTask>();
+            foreach (var task in tasks)
+            {
+                var taskCopy = new MissionTask(task);
+                genericTasks.Add(taskCopy);
+            }
+
+            string json = JsonSerializer.Serialize(genericTasks);
             var hasher = SHA256.Create();
             byte[] hash = hasher.ComputeHash(Encoding.UTF8.GetBytes(json));
-            return BitConverter.ToString(hash);
+            return BitConverter.ToString(hash).Replace("-", "").ToUpperInvariant();
         }
     }
 }

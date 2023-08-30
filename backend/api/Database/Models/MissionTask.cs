@@ -100,6 +100,22 @@ namespace Api.Database.Models
             Status = TaskStatus.NotStarted;
         }
 
+        // Creates a blank deepcopy of the provided task
+        public MissionTask(MissionTask copy)
+        {
+            Id = "";
+            IsarTaskId = "";
+            TaskOrder = copy.TaskOrder;
+            TagId = copy.TagId;
+            Description = copy.Description;
+            EchoTagLink = copy.EchoTagLink;
+            InspectionTarget = copy.InspectionTarget;
+            RobotPose = copy.RobotPose;
+            EchoPoseId = copy.EchoPoseId;
+            Status = copy.Status;
+            Inspections = copy.Inspections.Select(i => new Inspection(i)).ToList();
+        }
+
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
             UpdateStatus(isarTask.TaskStatus);
