@@ -76,6 +76,18 @@ namespace Api.Database.Models
             Status = InspectionStatus.NotStarted;
         }
 
+        // Creates a blank deepcopy of the provided inspection
+        public Inspection(Inspection copy)
+        {
+            Id = "";
+            IsarStepId = "";
+            Status = copy.Status;
+            InspectionType = copy.InspectionType;
+            VideoDuration = copy.VideoDuration;
+            AnalysisType = copy.AnalysisType;
+            InspectionUrl = copy.InspectionUrl;
+        }
+
         public void UpdateWithIsarInfo(IsarStep isarStep)
         {
             UpdateStatus(isarStep.StepStatus);
