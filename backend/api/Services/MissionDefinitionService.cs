@@ -156,19 +156,19 @@ namespace Api.Services
                       missionDefinition.Source.Type.Equals(parameters.SourceType);
 
             // The parameter of the filter expression
-            var missionRunExpression = Expression.Parameter(typeof(MissionRun));
+            var missionDefinitionExpression = Expression.Parameter(typeof(MissionDefinition));
 
             // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
             Expression body = Expression.AndAlso(
-                Expression.Invoke(installationFilter, missionRunExpression),
+                Expression.Invoke(installationFilter, missionDefinitionExpression),
                 Expression.AndAlso(
-                    Expression.Invoke(areaFilter, missionRunExpression),
-                    Expression.Invoke(missionTypeFilter, missionRunExpression)
+                    Expression.Invoke(areaFilter, missionDefinitionExpression),
+                    Expression.Invoke(missionTypeFilter, missionDefinitionExpression)
                     )
                 );
 
             // Constructing the resulting lambda expression by combining parameter and body
-            return Expression.Lambda<Func<MissionDefinition, bool>>(body, missionRunExpression);
+            return Expression.Lambda<Func<MissionDefinition, bool>>(body, missionDefinitionExpression);
         }
     }
 }
