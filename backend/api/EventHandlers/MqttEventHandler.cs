@@ -49,6 +49,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarBatteryReceived += OnBatteryUpdate;
             MqttService.MqttIsarPressureReceived += OnPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnPoseUpdate;
+            MqttService.MqttIsarObstacleStatusReceived += OnObstacleStatusUpdate;
         }
 
         public override void Unsubscribe()
@@ -61,6 +62,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarBatteryReceived -= OnBatteryUpdate;
             MqttService.MqttIsarPressureReceived -= OnPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnPoseUpdate;
+            MqttService.MqttIsarObstacleStatusReceived -= OnObstacleStatusUpdate;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -533,6 +535,33 @@ namespace Api.EventHandlers
                 await robotService.Update(robot);
                 _logger.LogDebug(
                     "Updated pose on robot '{robotName}' with ISAR id '{isarId}'",
+                    robot.Name,
+                    robot.IsarId
+                );
+            }
+        }
+
+        private async void OnObstacleStatusUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var provider = GetServiceProvider();
+            var robotService = provider.GetRequiredService<IRobotService>();
+
+            var obstacleStatus = (IsarObstacleStatusMessage)mqttArgs.Message;
+            var robot = await robotService.ReadByIsarId(obstacleStatus.IsarId);
+            if (robot == null)
+            {
+                _logger.LogWarning(
+                    "Could not find corresponding robot for obstacle status update on robot '{robotName}' with ISAR id '{isarId}'",
+                    obstacleStatus.RobotName,
+                    obstacleStatus.IsarId
+                );
+            }
+            else
+            {
+                robot.ObstacleDectected = obstacleStatus.ObstacleDectected;
+                await robotService.Update(robot);
+                _logger.LogDebug(
+                    "Updated obstacle status on robot '{robotName}' with ISAR id '{isarId}'",
                     robot.Name,
                     robot.IsarId
                 );

@@ -82,7 +82,7 @@ namespace Api.Mqtt
         public static event EventHandler<MqttReceivedArgs>? MqttIsarBatteryReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPressureReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
-
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarObstacleStatusReceived;
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _cancellationToken = stoppingToken;

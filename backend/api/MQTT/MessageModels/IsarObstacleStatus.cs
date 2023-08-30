@@ -6,7 +6,7 @@ namespace Api.Mqtt.MessageModels
     public class IsarObstacleStatusMessage : MqttMessage
     {
         [JsonPropertyName("obstacle_status")]
-        public float ObstacleDectected { get; set; }
+        public bool ObstacleDectected { get; set; }
 
         [JsonPropertyName("robot_name")]
         public string RobotName { get; set; }
