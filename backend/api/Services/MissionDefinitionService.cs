@@ -18,6 +18,8 @@ namespace Api.Services
 
         public abstract Task<List<MissionDefinition>> ReadByAreaId(string areaId);
 
+        public abstract Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
+
         public abstract Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
         public abstract Task<MissionDefinition?> Delete(string id);
@@ -93,6 +95,12 @@ namespace Api.Services
         {
             return await GetMissionDefinitionsWithSubModels().Where(
                 m => m.IsDeprecated == false && m.Area != null && m.Area.Id == areaId).ToListAsync();
+        }
+
+        public async Task<List<MissionDefinition>> ReadBySourceId(string sourceId)
+        {
+            return await GetMissionDefinitionsWithSubModels().Where(
+                m => m.IsDeprecated == false && m.Source.SourceId != null && m.Source.SourceId == sourceId).ToListAsync();
         }
 
         public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)

@@ -391,13 +391,25 @@ public class MissionController : ControllerBase
                 return NotFound($"Could not find area by installation '{scheduledMissionQuery.InstallationCode}' and name '{scheduledMissionQuery.AreaName}'");
         }
 
-        var source = await _sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId) ?? new Source
+        var source = await _sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId);
+        MissionDefinition? existingMissionDefinition = null;
+        if (source == null)
         {
-            SourceId = $"{echoMission.Id}",
-            Type = MissionSourceType.Echo
-        };
+            string sourceURL = _customMissionService.UploadSource(missionTasks);
+            source = new Source
+            {
+                SourceId = $"{echoMission.Id}",
+                Type = MissionSourceType.Echo
+            };
+        }
+        else
+        {
+            var missionDefinitions = await _missionDefinitionService.ReadBySourceId(source.SourceId);
+            if (missionDefinitions.Count > 0)
+                existingMissionDefinition = missionDefinitions.First();
+        }
 
-        var scheduledMissionDefinition = new MissionDefinition
+        var scheduledMissionDefinition = existingMissionDefinition ?? new MissionDefinition
         {
             Id = Guid.NewGuid().ToString(),
             Source = source,
@@ -473,6 +485,7 @@ public class MissionController : ControllerBase
             area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName);
 
         var source = await _sourceService.CheckForExistingCustomSource(missionTasks);
+        MissionDefinition? existingMissionDefinition = null;
         if (source == null)
         {
             string sourceURL = _customMissionService.UploadSource(missionTasks);
@@ -482,8 +495,14 @@ public class MissionController : ControllerBase
                 Type = MissionSourceType.Custom
             };
         }
+        else
+        {
+            var missionDefinitions = await _missionDefinitionService.ReadBySourceId(source.SourceId);
+            if (missionDefinitions.Count > 0)
+                existingMissionDefinition = missionDefinitions.First();
+        }
 
-        var customMissionDefinition = new MissionDefinition
+        var customMissionDefinition = existingMissionDefinition ?? new MissionDefinition
         {
             Id = Guid.NewGuid().ToString(),
             Source = source,

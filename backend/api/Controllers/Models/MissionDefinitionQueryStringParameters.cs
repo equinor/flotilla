@@ -6,7 +6,7 @@ namespace Api.Controllers.Models
     {
         public MissionDefinitionQueryStringParameters()
         {
-            // Default order is desired start time
+            // Default order is installation code
             OrderBy = "InstallationCode installationCode";
         }
 
