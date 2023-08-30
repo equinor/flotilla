@@ -59,6 +59,10 @@ public class FlotillaDbContext : DbContext
             }
         );
 
+        modelBuilder.Entity<MissionDefinition>()
+            .Property(m => m.InspectionFrequency)
+            .HasConversion(new TimeSpanToTicksConverter());
+
         modelBuilder.Entity<MissionRun>().OwnsOne(m => m.Map).OwnsOne(t => t.TransformationMatrices);
         modelBuilder.Entity<MissionRun>().OwnsOne(m => m.Map).OwnsOne(b => b.Boundary);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);

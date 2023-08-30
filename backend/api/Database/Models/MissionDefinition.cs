@@ -23,6 +23,7 @@ namespace Api.Database.Models
         [MaxLength(1000)]
         public string? Comment { get; set; }
 
+        [Column(TypeName = "bigint")]
         public TimeSpan? InspectionFrequency { get; set; }
 
         public virtual MissionRun? LastRun { get; set; }

@@ -4,6 +4,7 @@ using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230830075801_FormatTimeSpanAsBigInt")]
+    partial class FormatTimeSpanAsBigInt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,6 +31,9 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("DeckId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("InstallationId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -42,6 +48,8 @@ namespace Api.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DeckId");
 
                     b.HasIndex("InstallationId");
 
@@ -56,12 +64,6 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("AreaId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("DefaultLocalizationAreaId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("InstallationId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -76,14 +78,6 @@ namespace Api.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AreaId")
-                        .IsUnique()
-                        .HasFilter("[AreaId] IS NOT NULL");
-
-                    b.HasIndex("DefaultLocalizationAreaId")
-                        .IsUnique()
-                        .HasFilter("[DefaultLocalizationAreaId] IS NOT NULL");
 
                     b.HasIndex("InstallationId");
 
@@ -388,6 +382,11 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.Area", b =>
                 {
+                    b.HasOne("Api.Database.Models.Deck", "Deck")
+                        .WithMany()
+                        .HasForeignKey("DeckId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Api.Database.Models.Installation", "Installation")
                         .WithMany()
                         .HasForeignKey("InstallationId")
@@ -546,6 +545,8 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
+                    b.Navigation("Deck");
+
                     b.Navigation("DefaultLocalizationPose")
                         .IsRequired();
 
@@ -559,16 +560,6 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.Deck", b =>
                 {
-                    b.HasOne("Api.Database.Models.Area", null)
-                        .WithOne("Deck")
-                        .HasForeignKey("Api.Database.Models.Deck", "AreaId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Api.Database.Models.Area", "DefaultLocalizationArea")
-                        .WithOne()
-                        .HasForeignKey("Api.Database.Models.Deck", "DefaultLocalizationAreaId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Api.Database.Models.Installation", "Installation")
                         .WithMany()
                         .HasForeignKey("InstallationId")
@@ -580,8 +571,6 @@ namespace Api.Migrations
                         .HasForeignKey("PlantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("DefaultLocalizationArea");
 
                     b.Navigation("Installation");
 
@@ -1120,8 +1109,6 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.Area", b =>
                 {
-                    b.Navigation("Deck");
-
                     b.Navigation("SafePositions");
                 });
 #pragma warning restore 612, 618
