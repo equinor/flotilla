@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using Api.Database.Models;
 using Api.Options;
 using Microsoft.Extensions.Options;
@@ -9,7 +11,8 @@ namespace Api.Services
     public interface ICustomMissionService
     {
         string UploadSource(List<MissionTask> tasks);
-        Task<List<MissionTask>?> GetMissionTasksFromMissionId(string id);
+        Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
+        string CalculateHashFromTasks(IList<MissionTask> tasks);
     }
 
     public class CustomMissionService : ICustomMissionService
@@ -26,13 +29,13 @@ namespace Api.Services
         public string UploadSource(List<MissionTask> tasks)
         {
             string json = JsonSerializer.Serialize(tasks);
-            string id = Guid.NewGuid().ToString();
-            _blobService.UploadJsonToBlob(json, id, _storageOptions.Value.CustomMissionContainerName, _storageOptions.Value.AccountName, false);
+            string hash = CalculateHashFromTasks(tasks);
+            _blobService.UploadJsonToBlob(json, hash, _storageOptions.Value.CustomMissionContainerName, _storageOptions.Value.AccountName, false);
 
-            return id;
+            return hash;
         }
 
-        public async Task<List<MissionTask>?> GetMissionTasksFromMissionId(string id)
+        public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id)
         {
             List<MissionTask>? content;
             try
@@ -51,6 +54,14 @@ namespace Api.Services
             }
 
             return content;
+        }
+
+        public string CalculateHashFromTasks(IList<MissionTask> tasks)
+        {
+            string json = JsonSerializer.Serialize(tasks);
+            var hasher = SHA256.Create();
+            byte[] hash = hasher.ComputeHash(Encoding.UTF8.GetBytes(json));
+            return BitConverter.ToString(hash);
         }
     }
 }
