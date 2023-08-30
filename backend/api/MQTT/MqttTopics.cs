@@ -39,6 +39,9 @@ namespace Api.Mqtt
                 },
                 {
                     "isar/+/pose", typeof(IsarPoseMessage)
+                },
+                {
+                    "isar/+/obstacle_status", typeof(IsarObstacleStatusMessage)
                 }
             };
 
