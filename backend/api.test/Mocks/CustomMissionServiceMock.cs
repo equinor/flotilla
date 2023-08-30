@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Api.Database.Models;
 
@@ -16,7 +19,7 @@ namespace Api.Services
             return id;
         }
 
-        public async Task<List<MissionTask>?> GetMissionTasksFromMissionId(string id)
+        public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id)
         {
             if (mockBlobStore.ContainsKey(id))
             {
@@ -29,6 +32,14 @@ namespace Api.Services
             }
             await Task.CompletedTask;
             return null;
+        }
+
+        public string CalculateHashFromTasks(IList<MissionTask> tasks)
+        {
+            string json = JsonSerializer.Serialize(tasks);
+            var hasher = SHA256.Create();
+            byte[] hash = hasher.ComputeHash(Encoding.UTF8.GetBytes(json));
+            return BitConverter.ToString(hash);
         }
     }
 }

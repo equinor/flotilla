@@ -22,6 +22,7 @@ public class MissionController : ControllerBase
     private readonly ILogger<MissionController> _logger;
     private readonly IStidService _stidService;
     private readonly IMapService _mapService;
+    private readonly ISourceService _sourceService;
 
     public MissionController(
         IMissionDefinitionService missionDefinitionService,
@@ -32,7 +33,8 @@ public class MissionController : ControllerBase
         ICustomMissionService customMissionService,
         ILogger<MissionController> logger,
         IMapService mapService,
-        IStidService stidService
+        IStidService stidService,
+        ISourceService sourceService
     )
     {
         _missionDefinitionService = missionDefinitionService;
@@ -43,6 +45,7 @@ public class MissionController : ControllerBase
         _customMissionService = customMissionService;
         _mapService = mapService;
         _stidService = stidService;
+        _sourceService = sourceService;
         _logger = logger;
     }
 
@@ -280,7 +283,7 @@ public class MissionController : ControllerBase
                     )
                     .ToList(),
             MissionSourceType.Custom =>
-                missionTasks = await _customMissionService.GetMissionTasksFromMissionId(missionDefinition.Source.SourceId),
+                missionTasks = await _customMissionService.GetMissionTasksFromSourceId(missionDefinition.Source.SourceId),
             _ =>
                 throw new MissionSourceTypeException($"Mission type {missionDefinition.Source.Type} is not accounted for")
         };
@@ -382,19 +385,22 @@ public class MissionController : ControllerBase
 
         Area? area = null;
         if (scheduledMissionQuery.AreaName != null)
-            area = await _areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
-        if (area == null)
         {
-            return NotFound($"Could not find area by installation '{scheduledMissionQuery.InstallationCode}' and name '{scheduledMissionQuery.AreaName}'");
+            area = await _areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
+            if (area == null)
+                return NotFound($"Could not find area by installation '{scheduledMissionQuery.InstallationCode}' and name '{scheduledMissionQuery.AreaName}'");
         }
+
+        var source = await _sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId) ?? new Source
+        {
+            SourceId = $"{echoMission.Id}",
+            Type = MissionSourceType.Echo
+        };
+
         var scheduledMissionDefinition = new MissionDefinition
         {
             Id = Guid.NewGuid().ToString(),
-            Source = new Source
-            {
-                SourceId = $"{echoMission.Id}",
-                Type = MissionSourceType.Echo
-            },
+            Source = source,
             Name = echoMission.Name,
             InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
             InstallationCode = scheduledMissionQuery.InstallationCode,
@@ -466,16 +472,21 @@ public class MissionController : ControllerBase
         if (customMissionQuery.AreaName != null)
             area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName);
 
-        string sourceURL = _customMissionService.UploadSource(missionTasks);
+        var source = await _sourceService.CheckForExistingCustomSource(missionTasks);
+        if (source == null)
+        {
+            string sourceURL = _customMissionService.UploadSource(missionTasks);
+            source = new Source
+            {
+                SourceId = sourceURL.ToString(),
+                Type = MissionSourceType.Custom
+            };
+        }
 
         var customMissionDefinition = new MissionDefinition
         {
             Id = Guid.NewGuid().ToString(),
-            Source = new Source
-            {
-                SourceId = sourceURL.ToString(),
-                Type = MissionSourceType.Custom
-            },
+            Source = source,
             Name = customMissionQuery.Name,
             InspectionFrequency = customMissionQuery.InspectionFrequency,
             InstallationCode = customMissionQuery.InstallationCode,
