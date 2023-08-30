@@ -12,20 +12,14 @@ namespace Api.Controllers;
 [Route("sources")]
 public class SourceController : ControllerBase
 {
-    private readonly ICustomMissionService _customMissionService;
-    private readonly IEchoService _echoService;
     private readonly ISourceService _sourceService;
     private readonly ILogger<SourceController> _logger;
 
     public SourceController(
-        ICustomMissionService customMissionService,
-        IEchoService echoService,
         ISourceService sourceService,
         ILogger<SourceController> logger
     )
     {
-        _customMissionService = customMissionService;
-        _echoService = echoService;
         _sourceService = sourceService;
         _logger = logger;
     }

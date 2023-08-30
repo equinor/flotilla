@@ -132,7 +132,7 @@ namespace Api.Services
 
         public async Task<Source?> CheckForExistingEchoSource(int echoId)
         {
-            return await ReadBySourceId(echoId.ToString());
+            return await ReadBySourceId(echoId.ToString(CultureInfo.CurrentCulture));
         }
 
         public async Task<Source?> CheckForExistingCustomSource(IList<MissionTask> tasks)
