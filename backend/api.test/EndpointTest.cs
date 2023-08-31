@@ -183,21 +183,25 @@ namespace Api.Test
             // Act
             var installationResponse = await _client.PostAsync(installationUrl, installationContent);
             Assert.NotNull(installationResponse);
+            Assert.True(installationResponse.IsSuccessStatusCode);
             var installation = await installationResponse.Content.ReadFromJsonAsync<Installation>(_serializerOptions);
             Assert.NotNull(installation);
 
             var plantResponse = await _client.PostAsync(plantUrl, plantContent);
             Assert.NotNull(plantResponse);
+            Assert.True(plantResponse.IsSuccessStatusCode);
             var plant = await plantResponse.Content.ReadFromJsonAsync<Plant>(_serializerOptions);
             Assert.NotNull(plant);
 
             var deckResponse = await _client.PostAsync(deckUrl, deckContent);
             Assert.NotNull(deckResponse);
+            Assert.True(deckResponse.IsSuccessStatusCode);
             var deck = await deckResponse.Content.ReadFromJsonAsync<Deck>(_serializerOptions);
             Assert.NotNull(deck);
 
             var areaResponse = await _client.PostAsync(areaUrl, areaContent);
             Assert.NotNull(areaResponse);
+            Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<Area>(_serializerOptions);
             Assert.NotNull(area);
 
@@ -708,6 +712,142 @@ namespace Api.Test
             Assert.Equal(missionRun2.MissionId, missionRun.MissionId);
             Assert.Equal(missionRun3.MissionId, missionRun.MissionId);
             Assert.True(nextMissionRun.Id == missionRun2.Id);
+        }
+
+        [Fact]
+        public async Task ScheduleDuplicateCustomMissionDefinitions()
+        {
+            // Arrange - Initialise areas
+            string customMissionsUrl = "/missions/custom";
+            string missionDefinitionsUrl = "/missions/definitions";
+
+            string testInstallation = "testInstallationScheduleDuplicateCustomMissionDefinitions";
+            string testPlant = "testPlantScheduleDuplicateCustomMissionDefinitions";
+            string testDeck = "testDeckScheduleDuplicateCustomMissionDefinitions";
+            string testArea = "testAreaScheduleDuplicateCustomMissionDefinitions";
+            string testMissionName = "testMissionScheduleDuplicateCustomMissionDefinitions";
+
+            _ = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+
+            // Arrange - Create custom mission definition
+            string robotUrl = "/robots";
+            var response = await _client.GetAsync(robotUrl);
+            Assert.True(response.IsSuccessStatusCode);
+            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
+            Assert.True(robots != null);
+            var robot = robots[0];
+            string robotId = robot.Id;
+
+            var query = new CustomMissionQuery
+            {
+                RobotId = robotId,
+                InstallationCode = testInstallation,
+                AreaName = testArea,
+                DesiredStartTime = new DateTimeOffset(new DateTime(3050, 1, 1)),
+                InspectionFrequency = new TimeSpan(14, 0, 0, 0),
+                Name = testMissionName,
+                Tasks = new List<CustomTaskQuery>()
+                {
+                    new()
+                    {
+                        RobotPose = new Pose(),
+                        Inspections = new List<CustomInspectionQuery>(),
+                        InspectionTarget = new Position(),
+                        TaskOrder = 0
+                    },
+                    new()
+                    {
+                        RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
+                        Inspections = new List<CustomInspectionQuery>(),
+                        InspectionTarget = new Position(),
+                        TaskOrder = 1
+                    }
+                },
+            };
+            var content = new StringContent(
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
+
+            // Act
+            var response1 = await _client.PostAsync(customMissionsUrl, content);
+            var response2 = await _client.PostAsync(customMissionsUrl, content);
+
+            // Assert
+            Assert.True(response1.IsSuccessStatusCode);
+            Assert.True(response2.IsSuccessStatusCode);
+            var missionRun1 = await response1.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun2 = await response2.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            Assert.NotNull(missionRun1);
+            Assert.NotNull(missionRun2);
+            string? missionId1 = missionRun1.MissionId;
+            string? missionId2 = missionRun2.MissionId;
+            Assert.Equal(missionId1, missionId2);
+
+            var missionDefinitionsResponse = await _client.GetAsync(missionDefinitionsUrl);
+            var missionDefinitions = await missionDefinitionsResponse.Content.ReadFromJsonAsync<List<MissionDefinition>>(_serializerOptions);
+            Assert.NotNull(missionDefinitions);
+            Assert.NotNull(missionDefinitions.Find((m) => m.Id == missionId1));
+        }
+
+        [Fact]
+        public async Task ScheduleDuplicateEchoMissionDefinitions()
+        {
+            // Arrange - Initialise areas
+            string echoMissionsUrl = "/missions";
+            string missionDefinitionsUrl = "/missions/definitions";
+
+            string testInstallation = "testInstallationScheduleDuplicateEchoMissionDefinitions";
+            string testPlant = "testPlantScheduleDuplicateEchoMissionDefinitions";
+            string testDeck = "testDeckScheduleDuplicateEchoMissionDefinitions";
+            string testArea = "testAreaScheduleDuplicateEchoMissionDefinitions";
+
+            _ = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+
+            // Arrange - Create echo mission definition
+            string robotUrl = "/robots";
+            var response = await _client.GetAsync(robotUrl);
+            Assert.True(response.IsSuccessStatusCode);
+            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
+            Assert.True(robots != null);
+            var robot = robots[0];
+            string robotId = robot.Id;
+            int echoMissionId = 95;
+
+            var query = new ScheduledMissionQuery
+            {
+                RobotId = robotId,
+                InstallationCode = testInstallation,
+                AreaName = testArea,
+                EchoMissionId = echoMissionId,
+                DesiredStartTime = DateTimeOffset.UtcNow
+            };
+            var content = new StringContent(
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
+
+            // Act
+            var response1 = await _client.PostAsync(echoMissionsUrl, content);
+            var response2 = await _client.PostAsync(echoMissionsUrl, content);
+
+            // Assert
+            Assert.True(response1.IsSuccessStatusCode);
+            Assert.True(response2.IsSuccessStatusCode);
+            var missionRun1 = await response1.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun2 = await response2.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            Assert.NotNull(missionRun1);
+            Assert.NotNull(missionRun2);
+            string? missionId1 = missionRun1.MissionId;
+            string? missionId2 = missionRun2.MissionId;
+            Assert.Equal(missionId1, missionId2);
+
+            var missionDefinitionsResponse = await _client.GetAsync(missionDefinitionsUrl);
+            var missionDefinitions = await missionDefinitionsResponse.Content.ReadFromJsonAsync<List<MissionDefinition>>(_serializerOptions);
+            Assert.NotNull(missionDefinitions);
+            Assert.NotNull(missionDefinitions.Find((m) => m.Id == missionId1));
         }
     }
 }
