@@ -38,14 +38,6 @@ const ActiveFilterList = styled.div`
     min-height: 24px;
 `
 
-function isNotNullOrNotEmptyArray(value: any | any[]) {
-    if (typeof value === 'string' || typeof value === 'number') {
-        return value
-    } else if (Array.isArray(value)) {
-        return value && value.length > 0
-    }
-}
-
 function flatten(filters: IFilterState) {
     const allFilters = []
     for (const [filterName, filterValue] of Object.entries(filters)) {
@@ -129,7 +121,7 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
             }
             setIsLoading(false)
         })
-    }, [page, pageSize, filterState, switchPage])
+    }, [page, pageSize, switchPage, filterFunctions])
 
     useEffect(() => {
         if (isResettingPage) setIsResettingPage(false)
