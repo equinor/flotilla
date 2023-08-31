@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useEffect, useState } from 'react'
+import { createContext, FC, useContext, useEffect, useState, useMemo } from 'react'
 import { MissionStatus } from 'models/Mission'
 import { InspectionType } from 'models/Inspection'
 import { useLanguageContext } from './LanguageContext'
@@ -115,195 +115,179 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
         setFilterError('')
     }
 
-    const filterFunctions = {
-        switchMissionName: (newMissionName: string | undefined) => {
-            setFilterIsSet(true)
-            setFilterState({ ...filterState, missionName: newMissionName })
-        },
-        switchStatuses: (newStatuses: MissionStatus[]) => {
-            setFilterIsSet(true)
-            setFilterState({ ...filterState, statuses: newStatuses })
-        },
-        switchRobotName: (newRobotName: string | undefined) => {
-            setFilterIsSet(true)
-            setFilterState({ ...filterState, robotName: newRobotName })
-        },
-        switchTagId: (newTagId: string | undefined) => {
-            setFilterIsSet(true)
-            setFilterState({ ...filterState, tagId: newTagId })
-        },
-        switchInspectionTypes: (newInspectionTypes: InspectionType[]) => {
-            setFilterIsSet(true)
-            setFilterState({ ...filterState, inspectionTypes: newInspectionTypes })
-        },
-        switchMinStartTime: (newMinStartTime: number | undefined) => {
-            if (
-                filterState.minEndTime &&
-                newMinStartTime &&
-                filterState.maxStartTime &&
-                (newMinStartTime > filterState.minEndTime || newMinStartTime > filterState.maxStartTime)
-            )
-                setFilterError(
-                    TranslateText('minStartTime') +
-                        ' ' +
-                        TranslateText('cannot be greater than') +
-                        ' ' +
-                        TranslateText('minEndTime') +
-                        ' ' +
-                        TranslateText('or') +
-                        TranslateText('maxStartTime')
-                )
-            else {
+    const filterFunctions = useMemo(
+        () => ({
+            switchMissionName: (newMissionName: string | undefined) => {
                 setFilterIsSet(true)
-                setFilterState({ ...filterState, minStartTime: newMinStartTime })
-            }
-        },
-        switchMaxStartTime: (newMaxStartTime: number | undefined) => {
-            if (filterState.maxEndTime && newMaxStartTime && newMaxStartTime > filterState.maxEndTime)
-                setFilterError(
-                    TranslateText('maxStartTime') +
-                        ' ' +
-                        TranslateText('cannot be greater than') +
-                        ' ' +
-                        TranslateText('maxEndTime')
-                )
-            if (filterState.minEndTime && newMaxStartTime && newMaxStartTime < filterState.minEndTime)
-                setFilterError(
-                    TranslateText('maxStartTime') +
-                        ' ' +
-                        TranslateText('cannot be less than') +
-                        ' ' +
-                        TranslateText('minStartTime')
-                )
-            else {
+                setFilterState({ ...filterState, missionName: newMissionName })
+            },
+            switchStatuses: (newStatuses: MissionStatus[]) => {
                 setFilterIsSet(true)
-                setFilterState({ ...filterState, maxStartTime: newMaxStartTime })
-            }
-        },
-        switchMinEndTime: (newMinEndTime: number | undefined) => {
-            if (filterState.maxEndTime && newMinEndTime && newMinEndTime > filterState.maxEndTime)
-                setFilterError(
-                    TranslateText('minEndTime') +
-                        ' ' +
-                        TranslateText('cannot be greater than') +
-                        ' ' +
-                        TranslateText('maxEndTime')
-                )
-            if (filterState.minStartTime && newMinEndTime && newMinEndTime < filterState.minStartTime)
-                setFilterError(
-                    TranslateText('minEndTime') +
-                        ' ' +
-                        TranslateText('cannot be less than') +
-                        ' ' +
-                        TranslateText('minStartTime')
-                )
-            else {
+                setFilterState({ ...filterState, statuses: newStatuses })
+            },
+            switchRobotName: (newRobotName: string | undefined) => {
                 setFilterIsSet(true)
-                setFilterState({ ...filterState, minEndTime: newMinEndTime })
-            }
-        },
-        switchMaxEndTime: (newMaxEndTime: number | undefined) => {
-            if (
-                filterState.maxStartTime &&
-                newMaxEndTime &&
-                filterState.minEndTime &&
-                (newMaxEndTime < filterState.maxStartTime || newMaxEndTime < filterState.minEndTime)
-            )
-                setFilterError(
-                    TranslateText('maxEndTime') +
-                        ' ' +
-                        TranslateText('cannot be less than') +
-                        ' ' +
-                        TranslateText('minEndTime') +
-                        ' ' +
-                        TranslateText('or') +
-                        TranslateText('minEndTime')
-                )
-            else {
+                setFilterState({ ...filterState, robotName: newRobotName })
+            },
+            switchTagId: (newTagId: string | undefined) => {
                 setFilterIsSet(true)
-                setFilterState({ ...filterState, maxEndTime: newMaxEndTime })
-            }
-        },
-        resetFilters: () => {
-            setFilterIsSet(false)
-            setFilterState(defaultMissionFilterInterface.filterState)
-        },
-        resetFilter(filterName: string) {
-            filterName = filterName.trim()
-            const defaultState = defaultMissionFilterInterface.filterState
-            const defaultValue = defaultState[filterName as keyof typeof defaultState]
-            setFilterState({ ...filterState, [filterName]: defaultValue })
-        },
-        removeFilter(filterName: string) {
-            filterName = filterName.trim()
-            const defaultState = defaultMissionFilterInterface.filterState
-            const defaultValue = defaultState[filterName as keyof typeof defaultState]
-            const newValue = Array.isArray(defaultValue) ? [] : undefined
-            setFilterState({ ...filterState, [filterName]: newValue })
-        },
-        removeFilterElement(filterName: string, value: any) {
-            filterName = filterName.trim()
-            if (!Object.keys(filterState).includes(filterName)) return
-            const currentArray = filterState[filterName as keyof typeof filterState] as any[]
-            if (!Array.isArray(currentArray)) return
-            let newArray = currentArray.filter((val) => val !== value)
-            setFilterState({ ...filterState, [filterName]: newArray })
-        },
-        isDefault(filterName: string, value: any) {
-            filterName = filterName.trim()
-            if (!Object.keys(filterState).includes(filterName)) return false
-            const defaultState = defaultMissionFilterInterface.filterState
-            const defaultValue = defaultState[filterName as keyof typeof defaultState]
-            if (Array.isArray(defaultValue)) {
-                return defaultValue.length === value.length && [...defaultValue].every((x) => value.includes(x))
-            } else {
-                return defaultValue === value
-            }
-        },
-        dateTimeStringToInt: (dateTimeString: string | undefined) => {
-            if (dateTimeString === '' || dateTimeString === undefined) return undefined
-            return new Date(dateTimeString).getTime() / 1000
-        },
-        dateTimeIntToString: (dateTimeNumber: number | undefined) => {
-            if (dateTimeNumber === 0 || dateTimeNumber === undefined) return undefined
-            const t = new Date(dateTimeNumber * 1000)
-            const z = new Date(t.getTimezoneOffset() * 60 * 1000)
-            const tLocal = new Date(t.getTime() - z.getTime())
-            const tLocalDate = new Date(tLocal)
-            let iso = tLocalDate.toISOString()
-            iso = iso.split('.')[0]
-            return iso.slice(0, -3) // Removes :00 at the end
-        },
-        dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => {
-            if (dateTimeNumber === 0 || dateTimeNumber === undefined) return undefined
-            const t = new Date(dateTimeNumber * 1000)
-            const z = new Date(t.getTimezoneOffset() * 60 * 1000)
-            const tLocal = new Date(t.getTime() - z.getTime())
-            const tLocalDate = new Date(tLocal)
-            let iso = tLocalDate.toISOString()
-            iso = iso.split('.')[0]
-            iso = iso.replace('T', ' ')
-            return iso.slice(0, -3) // Removes :00 at the end
-        },
-        getFormattedFilter: () => {
-            return {
-                ...filterState,
-                nameSearch: filterState.missionName,
-                robotNameSearch: filterState.robotName,
-                tagSearch: filterState.tagId,
-            }
-        },
-    }
-
-    const isAllDefault = () => {
-        if (Object.keys(filterState).length !== Object.keys(defaultMissionFilterInterface.filterState).length)
-            return false
-        return Object.entries(filterState).every((entry) => filterFunctions.isDefault(entry[0], entry[1]))
-    }
+                setFilterState({ ...filterState, tagId: newTagId })
+            },
+            switchInspectionTypes: (newInspectionTypes: InspectionType[]) => {
+                setFilterIsSet(true)
+                setFilterState({ ...filterState, inspectionTypes: newInspectionTypes })
+            },
+            switchMinStartTime: (newMinStartTime: number | undefined) => {
+                if (
+                    filterState.minEndTime &&
+                    newMinStartTime &&
+                    filterState.maxStartTime &&
+                    (newMinStartTime > filterState.minEndTime || newMinStartTime > filterState.maxStartTime)
+                )
+                    setFilterError(
+                        `${TranslateText('minStartTime')} ${TranslateText('cannot be greater than')} ${TranslateText(
+                            'minEndTime'
+                        ).toLowerCase()} ${TranslateText('or')} ${TranslateText('maxStartTime').toLowerCase()}`
+                    )
+                else {
+                    setFilterIsSet(true)
+                    setFilterState({ ...filterState, minStartTime: newMinStartTime })
+                }
+            },
+            switchMaxStartTime: (newMaxStartTime: number | undefined) => {
+                if (filterState.maxEndTime && newMaxStartTime && newMaxStartTime > filterState.maxEndTime)
+                    setFilterError(
+                        `${TranslateText('maxStartTime')} ${TranslateText('cannot be greater than')} ${TranslateText(
+                            'maxEndTime'
+                        ).toLowerCase()}`
+                    )
+                if (filterState.minEndTime && newMaxStartTime && newMaxStartTime < filterState.minEndTime)
+                    setFilterError(
+                        `${TranslateText('maxStartTime')} ${TranslateText('cannot be less than')} ${TranslateText(
+                            'minStartTime'
+                        ).toLowerCase()}`
+                    )
+                else {
+                    setFilterIsSet(true)
+                    setFilterState({ ...filterState, maxStartTime: newMaxStartTime })
+                }
+            },
+            switchMinEndTime: (newMinEndTime: number | undefined) => {
+                if (filterState.maxEndTime && newMinEndTime && newMinEndTime > filterState.maxEndTime)
+                    setFilterError(
+                        `${TranslateText('minEndTime')} ${TranslateText('cannot be greater than')} ${TranslateText(
+                            'maxEndTime'
+                        ).toLowerCase()}`
+                    )
+                if (filterState.minStartTime && newMinEndTime && newMinEndTime < filterState.minStartTime)
+                    setFilterError(
+                        `${TranslateText('minEndTime')} ${TranslateText('cannot be less than')} ${TranslateText(
+                            'minStartTime'
+                        ).toLowerCase()}`
+                    )
+                else {
+                    setFilterIsSet(true)
+                    setFilterState({ ...filterState, minEndTime: newMinEndTime })
+                }
+            },
+            switchMaxEndTime: (newMaxEndTime: number | undefined) => {
+                if (
+                    filterState.maxStartTime &&
+                    newMaxEndTime &&
+                    filterState.minEndTime &&
+                    (newMaxEndTime < filterState.maxStartTime || newMaxEndTime < filterState.minEndTime)
+                )
+                    setFilterError(
+                        `${TranslateText('maxEndTime')} ${TranslateText('cannot be less than')} ${TranslateText(
+                            'minEndTime'
+                        ).toLowerCase()} ${TranslateText('or')} ${TranslateText('maxStartTime').toLowerCase()}`
+                    )
+                else {
+                    setFilterIsSet(true)
+                    setFilterState({ ...filterState, maxEndTime: newMaxEndTime })
+                }
+            },
+            resetFilters: () => {
+                setFilterIsSet(false)
+                setFilterState(defaultMissionFilterInterface.filterState)
+            },
+            resetFilter: (filterName: string) => {
+                filterName = filterName.trim()
+                const defaultState = defaultMissionFilterInterface.filterState
+                const defaultValue = defaultState[filterName as keyof typeof defaultState]
+                setFilterState({ ...filterState, [filterName]: defaultValue })
+            },
+            removeFilter: (filterName: string) => {
+                filterName = filterName.trim()
+                const defaultState = defaultMissionFilterInterface.filterState
+                const defaultValue = defaultState[filterName as keyof typeof defaultState]
+                const newValue = Array.isArray(defaultValue) ? [] : undefined
+                setFilterState({ ...filterState, [filterName]: newValue })
+            },
+            removeFilterElement: (filterName: string, value: any) => {
+                filterName = filterName.trim()
+                if (!Object.keys(filterState).includes(filterName)) return
+                const currentArray = filterState[filterName as keyof typeof filterState] as any[]
+                if (!Array.isArray(currentArray)) return
+                let newArray = currentArray.filter((val) => val !== value)
+                setFilterState({ ...filterState, [filterName]: newArray })
+            },
+            isDefault: (filterName: string, value: any) => {
+                filterName = filterName.trim()
+                if (!Object.keys(filterState).includes(filterName)) return false
+                const defaultState = defaultMissionFilterInterface.filterState
+                const defaultValue = defaultState[filterName as keyof typeof defaultState]
+                if (Array.isArray(defaultValue)) {
+                    return defaultValue.length === value.length && [...defaultValue].every((x) => value.includes(x))
+                } else {
+                    return defaultValue === value
+                }
+            },
+            dateTimeStringToInt: (dateTimeString: string | undefined) => {
+                if (dateTimeString === '' || dateTimeString === undefined) return undefined
+                return new Date(dateTimeString).getTime() / 1000
+            },
+            dateTimeIntToString: (dateTimeNumber: number | undefined) => {
+                if (dateTimeNumber === 0 || dateTimeNumber === undefined) return undefined
+                const t = new Date(dateTimeNumber * 1000)
+                const z = new Date(t.getTimezoneOffset() * 60 * 1000)
+                const tLocal = new Date(t.getTime() - z.getTime())
+                const tLocalDate = new Date(tLocal)
+                let iso = tLocalDate.toISOString()
+                iso = iso.split('.')[0]
+                return iso.slice(0, -3) // Removes :00 at the end
+            },
+            dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => {
+                if (dateTimeNumber === 0 || dateTimeNumber === undefined) return undefined
+                const t = new Date(dateTimeNumber * 1000)
+                const z = new Date(t.getTimezoneOffset() * 60 * 1000)
+                const tLocal = new Date(t.getTime() - z.getTime())
+                const tLocalDate = new Date(tLocal)
+                let iso = tLocalDate.toISOString()
+                iso = iso.split('.')[0]
+                iso = iso.replace('T', ' ')
+                return iso.slice(0, -3) // Removes :00 at the end
+            },
+            getFormattedFilter: () => {
+                return {
+                    ...filterState,
+                    nameSearch: filterState.missionName,
+                    robotNameSearch: filterState.robotName,
+                    tagSearch: filterState.tagId,
+                }
+            },
+        }),
+        [filterState, TranslateText]
+    )
 
     useEffect(() => {
+        const isAllDefault = () => {
+            if (Object.keys(filterState).length !== Object.keys(defaultMissionFilterInterface.filterState).length)
+                return false
+            return Object.entries(filterState).every((entry) => filterFunctions.isDefault(entry[0], entry[1]))
+        }
         if (isAllDefault()) setFilterIsSet(false)
-    }, [filterState])
+    }, [filterState, filterFunctions])
 
     return (
         <MissionFilterContext.Provider
