@@ -21,6 +21,16 @@ namespace Api.Test.Mocks
             {
                 PlantCode = "TestInstallationMissionsInAreaTest",
                 ProjectDescription = "TestInstallationMissionsInAreaTest"
+            },
+            new EchoPlantInfo
+            {
+                PlantCode = "testInstallationScheduleDuplicateCustomMissionDefinitions",
+                ProjectDescription = "testInstallationScheduleDuplicateCustomMissionDefinitions"
+            },
+            new EchoPlantInfo
+            {
+                PlantCode = "testInstallationScheduleDuplicateEchoMissionDefinitions",
+                ProjectDescription = "testInstallationScheduleDuplicateEchoMissionDefinitions"
             }
         };
 

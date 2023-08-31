@@ -77,13 +77,13 @@ namespace Api.Services
         public async Task<Source?> ReadById(string id)
         {
             return await GetSources()
-                .FirstOrDefaultAsync(a => a.Id.Equals(id));
+                .FirstOrDefaultAsync(s => s.Id.Equals(id));
         }
 
         public async Task<Source?> ReadBySourceId(string sourceId)
         {
             return await GetSources()
-                .FirstOrDefaultAsync(a => a.SourceId.Equals(sourceId));
+                .FirstOrDefaultAsync(s => s.SourceId.Equals(sourceId));
         }
 
         public async Task<SourceResponse?> ReadByIdAndInstallationWithTasks(string id, string installationCode)

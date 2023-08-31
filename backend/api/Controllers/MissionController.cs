@@ -332,8 +332,6 @@ public class MissionController : ControllerBase
         [FromBody] ScheduledMissionQuery scheduledMissionQuery
     )
     {
-        // TODO: once we have a good way of creating mission definitions for echo missions,
-        //       we can delete this endpoint
         var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
         if (robot is null)
             return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
@@ -395,10 +393,9 @@ public class MissionController : ControllerBase
         MissionDefinition? existingMissionDefinition = null;
         if (source == null)
         {
-            string sourceURL = _customMissionService.UploadSource(missionTasks);
             source = new Source
             {
-                SourceId = $"{echoMission.Id}",
+                SourceId = $"{scheduledMissionQuery.EchoMissionId}",
                 Type = MissionSourceType.Echo
             };
         }
@@ -437,7 +434,8 @@ public class MissionController : ControllerBase
         if (missionRun.Tasks.Any())
             missionRun.CalculateEstimatedDuration();
 
-        var newMissionDefinition = await _missionDefinitionService.Create(scheduledMissionDefinition);
+        if (existingMissionDefinition == null)
+            await _missionDefinitionService.Create(scheduledMissionDefinition);
 
         var newMissionRun = await _missionRunService.Create(missionRun);
 
@@ -532,7 +530,8 @@ public class MissionController : ControllerBase
         if (scheduledMission.Tasks.Any())
             scheduledMission.CalculateEstimatedDuration();
 
-        var newMissionDefinition = await _missionDefinitionService.Create(customMissionDefinition);
+        if (existingMissionDefinition == null)
+            await _missionDefinitionService.Create(customMissionDefinition);
 
         var newMissionRun = await _missionRunService.Create(scheduledMission);
 
