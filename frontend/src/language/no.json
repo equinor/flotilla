@@ -157,5 +157,10 @@
     "Schedule all": "Legg til alle i køen",
     "No planned inspection": "Ingen inspeksjon planlagt",
     "Hours between inspections": "Timer mellom inspeksjoner",
-    "Days between inspections": "Dager mellom inspeksjoner"
+    "Days between inspections": "Dager mellom inspeksjoner",
+    "Send robots to safe zone": "Send roboter til trygg sone",
+    "Send robots to safe zone long text": "Du er i ferd med å sende robotene til en trygg sone og dermed stoppe alle pågående oppdrag. For å kjøre oppdragene igjen må robotene starte fra begynnelsen.",
+    "Send robots to safe confirmation text": "Er du sikker på at du vil sende alle robotene til en trygg sone?",
+    "Dismiss robots from safe zone long text": "Vanlig drift kan fortsette ved å starte oppdragene i køen eller ved å slette dem.",
+    "Dismiss robots from safe zone": "Slepp robotene ut av trygg sone"
 }

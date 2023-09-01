@@ -113,10 +113,22 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var missionRun = MissionRunQueue(robot.Id).First(missionRun => missionRun.Robot.Id == robot.Id);
+            var missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id);
+
+            if (robot.MissionQueueFrozen == true)
+            {
+                missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id &&
+                        missionRun.MissionRunPriority == MissionRunPriority.Emergency);
+
+                if (missionRun == null)
+                {
+                    _logger.LogInformation("The robot was changed to available in emergy state and no Drive to Safe Position mission is scheduled");
+                    return;
+                }
+            }
 
             _scheduleMissionMutex.WaitOne();
-            MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun);
+            MissionSchedulingService.StartMissionRunIfSystemIsAvailable(missionRun!);
             _scheduleMissionMutex.ReleaseMutex();
         }
 
