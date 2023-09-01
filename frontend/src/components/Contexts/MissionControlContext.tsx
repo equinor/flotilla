@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, FC } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Mission } from 'models/Mission'
-import { MissionStatusRequest } from 'components/Pages/FrontPage/MissionOverview/StopMissionDialog'
+import { MissionStatusRequest } from 'components/Pages/FrontPage/MissionOverview/StopDialogs'
 
 interface IMissionControlState {
     isWaitingForResponse: boolean

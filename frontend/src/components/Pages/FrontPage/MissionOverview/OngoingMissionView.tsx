@@ -9,6 +9,7 @@ import { config } from 'config'
 import { Icons } from 'utils/icons'
 /* import { useOngoingMissionsContext } from 'components/Contexts/OngoingMissionsContext' */
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
+import { StopRobotDialog } from './StopDialogs'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -23,6 +24,12 @@ const OngoingMissionSection = styled.div`
 
 const ButtonStyle = styled.div`
     display: block;
+`
+
+const OngoingMissionHeader = styled.div`
+    display: grid;
+    grid-direction: column;
+    gap: 0.5rem;
 `
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
@@ -40,9 +47,12 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
 
     return (
         <StyledOngoingMissionView>
-            <Typography variant="h1" color="resting">
-                {TranslateText('Ongoing Missions')}
-            </Typography>
+            <OngoingMissionHeader>
+                <Typography variant="h1" color="resting">
+                    {TranslateText('Ongoing Missions')}
+                </Typography>
+                <StopRobotDialog />
+            </OngoingMissionHeader>
             <OngoingMissionSection>
                 {ongoingMissions.length > 0 && ongoingMissionscard}
                 {ongoingMissions.length === 0 && <NoOngoingMissionsPlaceholder />}
