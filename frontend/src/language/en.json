@@ -190,5 +190,10 @@
     "AlreadyScheduledText": "The mission is already in the queue. Are you sure you want to add the mission again?",
     "Queue unscheduled missions": "Queue unscheduled missions",
     "Queue all missions": "Queue all missions",
-    "Some missions are already in the queue": "Some missions are already in the queue"
+    "Some missions are already in the queue": "Some missions are already in the queue",
+    "Send robots to safe zone": "Send robots to safe zone",
+    "Send robots to safe zone long text": "You are about to send the robots to a safe zone and thus stop all ongoing missions. To run the missions again, the robots must start from the beginning.",
+    "Send robots to safe confirmation text": "Are you sure you want to send all the robots to one safe zone?",
+    "Dismiss robots from safe zone long text": "Normal operation can resume by continuing the missions present on the queue or remove them all.",
+    "Dismiss robots from safe zone": "Dismiss robots from safe zone"
 }
