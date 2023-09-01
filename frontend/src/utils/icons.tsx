@@ -35,6 +35,7 @@ import {
     filter_list,
     navigation,
     settings,
+    play,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -73,6 +74,7 @@ Icon.add({
     filter_list,
     navigation,
     settings,
+    play,
 })
 
 export enum Icons {
@@ -111,4 +113,5 @@ export enum Icons {
     Filter = 'filter_list',
     Navigation = 'navigation',
     Settings = 'settings',
+    PlayTriangle = 'play',
 }

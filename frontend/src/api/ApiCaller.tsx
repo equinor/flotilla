@@ -472,4 +472,26 @@ export class BackendAPICaller {
         })
         return result.content
     }
+
+    static async postSafePosition(installationCode: string) {
+        const path: string = `emergency-action/${installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone`
+        const body = {}
+
+        const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
+    static async resetRobotState(robotId: string, installationCode: string) {
+        const path: string = `robots/${robotId}/${installationCode}/clear-emergency-state`
+        const body = {}
+
+        const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
 }
