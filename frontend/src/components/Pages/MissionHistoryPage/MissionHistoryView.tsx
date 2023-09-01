@@ -123,24 +123,22 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
             <Typography variant="h1">{TranslateText('Mission History')}</Typography>
             <FilterSection />
             <Table>
-                <Table>
-                    <Table.Head sticky>
-                        <Table.Row>
-                            <Table.Cell>{TranslateText('Status')}</Table.Cell>
-                            <Table.Cell>{TranslateText('Name')}</Table.Cell>
-                            <Table.Cell>{TranslateText('Robot')}</Table.Cell>
-                            <Table.Cell>{TranslateText('Completion Time')}</Table.Cell>
-                        </Table.Row>
-                    </Table.Head>
-                    {isLoading && (
-                        <Table.Caption captionSide={'bottom'}>
-                            <StyledLoading>
-                                <CircularProgress />
-                            </StyledLoading>
-                        </Table.Caption>
-                    )}
-                    {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
-                </Table>
+                <Table.Head sticky>
+                    <Table.Row>
+                        <Table.Cell>{TranslateText('Status')}</Table.Cell>
+                        <Table.Cell>{TranslateText('Name')}</Table.Cell>
+                        <Table.Cell>{TranslateText('Robot')}</Table.Cell>
+                        <Table.Cell>{TranslateText('Completion Time')}</Table.Cell>
+                    </Table.Row>
+                </Table.Head>
+                {isLoading && (
+                    <Table.Caption captionSide={'bottom'}>
+                        <StyledLoading>
+                            <CircularProgress />
+                        </StyledLoading>
+                    </Table.Caption>
+                )}
+                {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
                 <Table.Caption captionSide={'bottom'}>
                     {paginationDetails && paginationDetails.TotalPages > 1 && !isResettingPage && PaginationComponent()}
                 </Table.Caption>
