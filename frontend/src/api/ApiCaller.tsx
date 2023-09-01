@@ -372,8 +372,6 @@ export class BackendAPICaller {
     static async reRunMission(missionId: string, failedTasksOnly: boolean = false): Promise<Mission> {
         let mission = await this.getMissionRunById(missionId)
 
-        // TODO: utilise reschedule endpoint instead of copying
-
         if (failedTasksOnly) {
             mission.tasks = mission.tasks.filter(
                 (task) => task.status !== TaskStatus.PartiallySuccessful && task.status !== TaskStatus.Successful

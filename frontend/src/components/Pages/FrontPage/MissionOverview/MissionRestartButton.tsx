@@ -1,4 +1,4 @@
-import { Mission } from 'models/Mission'
+import { Mission, MissionStatus } from 'models/Mission'
 import { Button, EdsProvider, Icon, Menu, Tooltip } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
 import { useRef, useState } from 'react'
+import { TaskStatus } from 'models/Task'
 
 const Centered = styled.div`
     display: flex;
@@ -77,9 +78,13 @@ export function MissionRestartButton({ mission }: MissionProps) {
                     <Menu.Item onClick={() => startReRun(ReRunOptions.ReRun)}>
                         {TranslateText('Re-run full mission')}
                     </Menu.Item>
-                    <Menu.Item onClick={() => startReRun(ReRunOptions.ReRunFailed)}>
-                        {TranslateText('Re-run failed and cancelled tasks in the mission')}
-                    </Menu.Item>
+                    {mission.tasks.some(
+                        (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
+                    ) && (
+                        <Menu.Item onClick={() => startReRun(ReRunOptions.ReRunFailed)}>
+                            {TranslateText('Re-run failed and cancelled tasks in the mission')}
+                        </Menu.Item>
+                    )}
                 </Menu>
             </EdsProvider>
         </Centered>

@@ -1,4 +1,5 @@
-﻿using Api.Database.Models;
+﻿using Api.Controllers.Models;
+using Api.Database.Models;
 
 namespace Api.Database.Context;
 
@@ -10,6 +11,7 @@ public static class InitDb
     private static readonly List<Deck> decks = GetDecks();
     private static readonly List<Area> areas = GetAreas();
     private static readonly List<Source> sources = GetSources();
+    private static readonly List<MissionTask> tasks = GetMissionTasks();
     private static readonly List<MissionDefinition> missionDefinitions = GetMissionDefinitions();
     private static readonly List<MissionRun> missionRuns = GetMissionRuns();
 
@@ -215,6 +217,87 @@ public static class InitDb
         return new List<MissionDefinition>(new[] { missionDefinition1, missionDefinition2, missionDefinition3 });
     }
 
+    private static List<MissionTask> GetMissionTasks()
+    {
+        var task1 = new MissionTask(
+            new EchoTag
+            {
+                Id = 2,
+                TagId = "ABCD",
+                PoseId = 2,
+                PlanOrder = 0,
+                Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                URL = new Uri(
+                    $"https://stid.equinor.com/jsv/tag?tagNo=ABCD"
+                ),
+                Inspections = new List<EchoInspection>
+                {
+                    new()
+                }
+            }, new Position(1.0f, 1.0f, 1.0f));
+        var task2 = new MissionTask(
+            new EchoTag
+            {
+                Id = 2,
+                TagId = "ABCD",
+                PoseId = 2,
+                PlanOrder = 0,
+                Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                URL = new Uri(
+                    $"https://stid.equinor.com/jsv/tag?tagNo=ABCD"
+                ),
+                Inspections = new List<EchoInspection>
+                {
+                    new()
+                }
+            }, new Position(1.0f, 1.0f, 1.0f))
+        {
+            Status = Models.TaskStatus.Failed
+        };
+
+        var task3 = new MissionTask(
+            new EchoTag
+            {
+                Id = 2,
+                TagId = "ABCD",
+                PoseId = 2,
+                PlanOrder = 0,
+                Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                URL = new Uri(
+                    $"https://stid.equinor.com/jsv/tag?tagNo=ABCD"
+                ),
+                Inspections = new List<EchoInspection>
+                {
+                    new()
+                }
+            }, new Position(1.0f, 1.0f, 1.0f))
+        {
+            Status = Models.TaskStatus.PartiallySuccessful
+        };
+
+        var task4 = new MissionTask(
+            new EchoTag
+            {
+                Id = 2,
+                TagId = "ABCD",
+                PoseId = 2,
+                PlanOrder = 0,
+                Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                URL = new Uri(
+                    $"https://stid.equinor.com/jsv/tag?tagNo=ABCD"
+                ),
+                Inspections = new List<EchoInspection>
+                {
+                    new()
+                }
+            }, new Position(1.0f, 1.0f, 1.0f))
+        {
+            Status = Models.TaskStatus.Cancelled
+        };
+
+        return new List<MissionTask> { task1, task2, task3, task4 };
+    }
+
     private static List<MissionRun> GetMissionRuns()
     {
         var missionRun1 = new MissionRun
@@ -257,9 +340,77 @@ public static class InitDb
             Map = new MapMetadata()
         };
 
+        var missionRun4 = new MissionRun
+        {
+            Name = "Placeholder Mission 4",
+            Robot = robots[2],
+            InstallationCode = areas[1].Installation.InstallationCode,
+            Area = areas[1],
+            MissionId = missionDefinitions[1].Id,
+            Status = MissionStatus.Failed,
+            DesiredStartTime = DateTimeOffset.UtcNow,
+            Tasks = new List<MissionTask>
+            {
+                tasks[0],
+                tasks[1]
+            },
+            Map = new MapMetadata()
+        };
+
+        var missionRun5 = new MissionRun
+        {
+            Name = "Placeholder Mission 5",
+            Robot = robots[2],
+            InstallationCode = areas[1].Installation.InstallationCode,
+            Area = areas[1],
+            MissionId = missionDefinitions[1].Id,
+            Status = MissionStatus.PartiallySuccessful,
+            DesiredStartTime = DateTimeOffset.UtcNow,
+            Tasks = new List<MissionTask>
+            {
+                tasks[0],
+                tasks[2]
+            },
+            Map = new MapMetadata()
+        };
+
+        var missionRun6 = new MissionRun
+        {
+            Name = "Placeholder Mission 6",
+            Robot = robots[2],
+            InstallationCode = areas[1].Installation.InstallationCode,
+            Area = areas[1],
+            MissionId = missionDefinitions[1].Id,
+            Status = MissionStatus.Cancelled,
+            DesiredStartTime = DateTimeOffset.UtcNow,
+            Tasks = new List<MissionTask>
+            {
+                tasks[0],
+                tasks[3]
+            },
+            Map = new MapMetadata()
+        };
+
+        var missionRun7 = new MissionRun
+        {
+            Name = "Says failed but all tasks succeeded",
+            Robot = robots[2],
+            InstallationCode = areas[1].Installation.InstallationCode,
+            Area = areas[1],
+            MissionId = missionDefinitions[1].Id,
+            Status = MissionStatus.Failed,
+            DesiredStartTime = DateTimeOffset.UtcNow,
+            Tasks = new List<MissionTask>
+            {
+                tasks[0],
+                tasks[0]
+            },
+            Map = new MapMetadata()
+        };
+
         missionDefinitions[1].LastRun = missionRun3;
 
-        return new List<MissionRun>(new[] { missionRun1, missionRun2, missionRun3 });
+        return new List<MissionRun>(new[] { missionRun1, missionRun2, missionRun3, missionRun4, missionRun5, missionRun6, missionRun7 });
     }
 
     public static void PopulateDb(FlotillaDbContext context)
