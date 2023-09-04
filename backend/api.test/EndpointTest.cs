@@ -813,7 +813,7 @@ namespace Api.Test
             Assert.True(robots != null);
             var robot = robots[0];
             string robotId = robot.Id;
-            int echoMissionId = 95;
+            int echoMissionId = 1; // Corresponds to mock in EchoServiceMock.cs
 
             var query = new ScheduledMissionQuery
             {

@@ -140,6 +140,7 @@ namespace Api.Services
         /// Filters by <see cref="MissionDefinitionQueryStringParameters.InstallationCode"/>
         /// and <see cref="MissionDefinitionQueryStringParameters.Area"/>
         /// and <see cref="MissionDefinitionQueryStringParameters.NameSearch" />
+        /// and <see cref="MissionDefinitionQueryStringParameters.SourceType" />
         ///
         /// <para>Uses LINQ Expression trees (see <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees"/>)</para>
         /// </summary>
