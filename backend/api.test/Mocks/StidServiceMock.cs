@@ -9,6 +9,7 @@ namespace Api.Services
 
         public async Task<Position> GetTagPosition(string tag, string installationCode)
         {
+            await Task.CompletedTask;
             return new Position(
                 x: 0,
                 y: 0,

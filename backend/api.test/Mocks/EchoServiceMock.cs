@@ -39,6 +39,7 @@ namespace Api.Test.Mocks
             {
                 Id = 1,
                 Name = "test",
+                InstallationCode = "JSV",
                 URL = new Uri("https://www.I-am-echo-stid-tag-url.com"),
                 Tags = new List<EchoTag>()
             };

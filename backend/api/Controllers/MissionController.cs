@@ -395,7 +395,7 @@ public class MissionController : ControllerBase
         {
             source = new Source
             {
-                SourceId = $"{scheduledMissionQuery.EchoMissionId}",
+                SourceId = $"{echoMission.Id}",
                 Type = MissionSourceType.Echo
             };
         }
