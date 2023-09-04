@@ -59,6 +59,7 @@ namespace Api.Test
                                 services.AddScoped<IEchoService, MockEchoService>();
                                 services.AddScoped<IMapService, MockMapService>();
                                 services.AddScoped<IBlobService, MockBlobService>();
+                                services.AddScoped<IStidService, MockStidService>();
                                 services.AddScoped<ICustomMissionService, MockCustomMissionService>();
                                 services.AddAuthorization(
                                     options =>
@@ -508,7 +509,6 @@ namespace Api.Test
             Assert.NotNull(mission);
             Assert.NotNull(mission.MissionId);
 
-            // TODO: use area code and asset code in the endpoint
             var areaMissionsResponse = await _client.GetAsync(areaUrl + $"/{areaId}/mission-definitions");
 
             // Assert
