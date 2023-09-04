@@ -39,10 +39,13 @@ namespace Api.Configurations
                 // Setting splitting behavior explicitly to avoid warning
                 services.AddDbContext<FlotillaDbContext>(
                     options =>
-                        options.UseSqlite(
-                            sqlConnectionString,
-                            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
-                        )
+                        {
+                            options.UseSqlite(
+                                sqlConnectionString,
+                                o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                            );
+                            options.EnableSensitiveDataLogging();
+                        }
                 );
             }
             else

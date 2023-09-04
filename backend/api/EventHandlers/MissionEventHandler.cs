@@ -31,7 +31,7 @@ namespace Api.EventHandlers
 
         private IAreaService AreaService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IAreaService>();
 
-        private MissionScheduling MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<MissionScheduling>();
+        private IMissionScheduling MissionSchedulingService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionScheduling>();
 
         private MqttEventHandler MqttEventHandler => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<MqttEventHandler>();
 
@@ -93,7 +93,7 @@ namespace Api.EventHandlers
             }
 
             _scheduleMissionMutex.WaitOne();
-            MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun);
+            MissionSchedulingService.StartMissionRunIfSystemIsAvailable(missionRun);
             _scheduleMissionMutex.ReleaseMutex();
         }
 
@@ -128,7 +128,7 @@ namespace Api.EventHandlers
             }
 
             _scheduleMissionMutex.WaitOne();
-            MissionSchedulingService.StartMissionRunIfSystemIsAvailable(missionRun!);
+            MissionSchedulingService.StartMissionRunIfSystemIsAvailable(missionRun);
             _scheduleMissionMutex.ReleaseMutex();
         }
 
@@ -149,11 +149,11 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await MissionScheduling.FreezeMissionRunQueueForRobot(robot);
+            await MissionSchedulingService.FreezeMissionRunQueueForRobot(e.RobotId);
 
             try
             {
-                await MissionScheduling.StopCurrentMissionRun(robot);
+                await MissionSchedulingService.StopCurrentMissionRun(e.RobotId);
             }
             catch (MissionException ex)
             {
@@ -171,7 +171,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await MissionScheduling.ScheduleMissionToReturnToSafePosition(robot, area);
+            await MissionSchedulingService.ScheduleMissionToReturnToSafePosition(e.RobotId, e.AreaId);
         }
 
         private async void OnEmergencyButtonDepressedForRobot(object? sender, EmergencyButtonPressedForRobotEventArgs e)
@@ -190,9 +190,9 @@ namespace Api.EventHandlers
                 _logger.LogError("Could not find area with ID {AreaId}", e.AreaId);
             }
 
-            await MissionScheduling.UnfreezeMissionRunQueueForRobot(robot);
+            await MissionSchedulingService.UnfreezeMissionRunQueueForRobot(e.RobotId);
 
-            if (await MissionScheduling.OngoingMission(robot.Id))
+            if (await MissionSchedulingService.OngoingMission(robot.Id))
             {
                 _logger.LogInformation("Robot {RobotName} was unfrozen but the mission to return to safe zone will be completed before further missions are started", robot.Id);
             }
