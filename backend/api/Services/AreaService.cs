@@ -93,7 +93,7 @@ namespace Api.Services
 
             return await _context.Areas.Where(a =>
                 a.Name.ToLower().Equals(areaName.ToLower()) &&
-                a.Installation != null && a.Installation.Id.Equals(installation.Id)
+                a.Installation.InstallationCode.Equals(installation.InstallationCode)
             ).Include(a => a.SafePositions).Include(a => a.Installation)
                 .Include(a => a.Plant).Include(a => a.Deck).FirstOrDefaultAsync();
         }

@@ -741,8 +741,8 @@ namespace Api.Controllers
 
             robot.Status = RobotStatus.Busy;
             robot.CurrentMissionId = missionRun.Id;
-            await _robotService.Update(robot);
             robot.CurrentArea = area;
+            await _robotService.Update(robot);
             return Ok(missionRun);
         }
 

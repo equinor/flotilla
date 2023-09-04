@@ -138,6 +138,9 @@ public static class InitDb
             MapMetadata = new MapMetadata(),
             DefaultLocalizationPose = null,
             SafePositions = new List<SafePosition>()
+            {
+                new()
+            }
         };
 
         var area4 = new Area
