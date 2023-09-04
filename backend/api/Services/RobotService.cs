@@ -80,7 +80,7 @@ namespace Api.Services
 
         private IQueryable<Robot> GetRobotsWithSubModels()
         {
-            return _context.Robots.Include(r => r.VideoStreams).Include(r => r.Model).Include(r => r.CurrentArea);
+            return _context.Robots.Include(r => r.VideoStreams).Include(r => r.Model).Include(r => r.CurrentArea).ThenInclude(r => r.SafePositions);
         }
     }
 }

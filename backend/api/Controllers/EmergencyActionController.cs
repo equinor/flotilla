@@ -86,8 +86,7 @@ namespace Api.Controllers
             [FromRoute] string installationCode)
         {
 
-            var robots = _robotService.ReadAll().Result
-                            .Where(a =>
+            var robots = _robotService.ReadAll().Result.ToList().FindAll(a =>
                             a.CurrentInstallation.ToLower(CultureInfo.CurrentCulture).Equals(installationCode.ToLower(CultureInfo.CurrentCulture), StringComparison.Ordinal) &&
                             a.CurrentArea != null);
 

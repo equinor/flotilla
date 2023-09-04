@@ -11,11 +11,20 @@ namespace Api.EventHandlers
     {
         public void StartMissionRunIfSystemIsAvailable(MissionRun missionRun);
 
-        public Task<bool> TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun);
+        public Task<bool> TheSystemIsAvailableToRunAMission(string robotId, MissionRun missionRun);
 
         public Task<bool> OngoingMission(string robotId);
 
         public void StartMissionRun(MissionRun queuedMissionRun);
+
+        public Task FreezeMissionRunQueueForRobot(string robotId);
+
+        public Task StopCurrentMissionRun(string robotId);
+
+        public Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId);
+
+        public Task UnfreezeMissionRunQueueForRobot(string robotId);
+
     }
 
     public class MissionScheduling : IMissionScheduling
@@ -23,16 +32,18 @@ namespace Api.EventHandlers
         private readonly IIsarService _isarService;
         private readonly ILogger<MissionScheduling> _logger;
         private readonly IMissionRunService _missionRunService;
+        private readonly IAreaService _areaService;
         private readonly RobotController _robotController;
         private readonly IRobotService _robotService;
 
-        public MissionScheduling(ILogger<MissionScheduling> logger, IMissionRunService missionRunService, IIsarService isarService, IRobotService robotService, RobotController robotController)
+        public MissionScheduling(ILogger<MissionScheduling> logger, IMissionRunService missionRunService, IIsarService isarService, IRobotService robotService, RobotController robotController, IAreaService areaService)
         {
             _logger = logger;
             _missionRunService = missionRunService;
             _isarService = isarService;
             _robotService = robotService;
             _robotController = robotController;
+            _areaService = areaService;
         }
 
         public void StartMissionRunIfSystemIsAvailable(MissionRun missionRun)
@@ -60,6 +71,17 @@ namespace Api.EventHandlers
                 missionRun.StatusReason = $"Failed to start: '{ex.Message}'";
                 _missionRunService.Update(missionRun);
             }
+        }
+
+        public async Task<bool> TheSystemIsAvailableToRunAMission(string robotId, MissionRun missionRun)
+        {
+            var robot = await _robotService.ReadById(robotId);
+            if (robot == null)
+            {
+                _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                return false;
+            }
+            return await TheSystemIsAvailableToRunAMission(robot, missionRun);
         }
 
         public async Task<bool> TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
@@ -130,8 +152,9 @@ namespace Api.EventHandlers
             return ongoingMissions.Any();
         }
 
-        public async Task FreezeMissionRunQueueForRobot(Robot robot)
+        public async Task FreezeMissionRunQueueForRobot(string robotId)
         {
+            var robot = (await _robotService.ReadById(robotId))!;
             robot.MissionQueueFrozen = true;
             await _robotService.Update(robot);
             _logger.LogInformation("Mission queue for robot {RobotName} with ID {RobotId} was frozen", robot.Name, robot.Id);
@@ -144,8 +167,25 @@ namespace Api.EventHandlers
             _logger.LogInformation("Mission queue for robot {RobotName} with ID {RobotId} was unfrozen", robot.Name, robot.Id);
         }
 
-        public async Task StopCurrentMissionRun(Robot robot)
+        public async Task UnfreezeMissionRunQueueForRobot(string robotId)
         {
+            var robot = await _robotService.ReadById(robotId);
+            if (robot == null)
+            {
+                _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                return;
+            }
+            await UnfreezeMissionRunQueueForRobot(robot);
+        }
+
+        public async Task StopCurrentMissionRun(string robotId)
+        {
+            var robot = await _robotService.ReadById(robotId);
+            if (robot == null)
+            {
+                _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                return;
+            }
             if (!await OngoingMission(robot.Id))
             {
                 _logger.LogWarning("Flotilla has no mission running for robot {RobotName} but an attempt to stop will be made regardless", robot.Name);
@@ -154,8 +194,6 @@ namespace Api.EventHandlers
             try
             {
                 await _isarService.StopMission(robot);
-                robot.CurrentMissionId = null;
-                await _robotService.Update(robot);
             }
             catch (HttpRequestException e)
             {
@@ -176,16 +214,34 @@ namespace Api.EventHandlers
                 _logger.LogError(e, "{Message}", message);
                 throw new MissionException(message, 0);
             }
+
+            robot.CurrentMissionId = null;
+            await _robotService.Update(robot);
         }
 
-        public async Task ScheduleMissionToReturnToSafePosition(Robot robot, Area area)
+        public async Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId)
         {
+            var area = await _areaService.ReadById(areaId);
+            if (area == null)
+            {
+                _logger.LogError("Could not find area with ID {AreaId}", areaId);
+                return;
+            }
+            var robot = await _robotService.ReadById(robotId);
+            if (robot == null)
+            {
+                _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                return;
+            }
             var closestSafePosition = ClosestSafePosition(robot.Pose, area.SafePositions);
             // Cloning to avoid tracking same object
             var clonedPose = ObjectCopier.Clone(closestSafePosition);
             var customTaskQuery = new CustomTaskQuery
             {
-                RobotPose = clonedPose, Inspections = new List<CustomInspectionQuery>(), InspectionTarget = new Position(), TaskOrder = 0
+                RobotPose = clonedPose,
+                Inspections = new List<CustomInspectionQuery>(),
+                InspectionTarget = new Position(),
+                TaskOrder = 0
             };
 
             var missionRun = new MissionRun
