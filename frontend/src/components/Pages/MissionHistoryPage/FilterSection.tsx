@@ -142,7 +142,7 @@ export function FilterSection() {
                     />
                     <TextField
                         id="datetime"
-                        value={filterFunctions.dateTimeIntToString(filterState.minStartTime)}
+                        value={filterFunctions.dateTimeIntToString(filterState.minStartTime) ?? ''}
                         label={TranslateText('Select min start time')}
                         type="datetime-local"
                         onChange={(changes: ChangeEvent<HTMLInputElement>) => {
@@ -153,7 +153,7 @@ export function FilterSection() {
                     />
                     <TextField
                         id="datetime"
-                        value={filterFunctions.dateTimeIntToString(filterState.maxStartTime)}
+                        value={filterFunctions.dateTimeIntToString(filterState.maxStartTime) ?? ''}
                         label={TranslateText('Select max start time')}
                         type="datetime-local"
                         onChange={(changes: ChangeEvent<HTMLInputElement>) => {
@@ -164,7 +164,7 @@ export function FilterSection() {
                     />
                     <TextField
                         id="datetime"
-                        value={filterFunctions.dateTimeIntToString(filterState.minEndTime)}
+                        value={filterFunctions.dateTimeIntToString(filterState.minEndTime) ?? ''}
                         label={TranslateText('Select min end time')}
                         type="datetime-local"
                         onChange={(changes: ChangeEvent<HTMLInputElement>) => {
@@ -173,7 +173,7 @@ export function FilterSection() {
                     />
                     <TextField
                         id="datetime"
-                        value={filterFunctions.dateTimeIntToString(filterState.maxEndTime)}
+                        value={filterFunctions.dateTimeIntToString(filterState.maxEndTime) ?? ''}
                         label={TranslateText('Select max end time')}
                         type="datetime-local"
                         onChange={(changes: ChangeEvent<HTMLInputElement>) => {

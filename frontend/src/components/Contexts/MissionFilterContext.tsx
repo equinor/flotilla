@@ -139,10 +139,8 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
             },
             switchMinStartTime: (newMinStartTime: number | undefined) => {
                 if (
-                    filterState.minEndTime &&
-                    newMinStartTime &&
-                    filterState.maxStartTime &&
-                    (newMinStartTime > filterState.minEndTime || newMinStartTime > filterState.maxStartTime)
+                    (newMinStartTime && filterState.minEndTime && newMinStartTime > filterState.minEndTime) ||
+                    (filterState.maxStartTime && newMinStartTime! > filterState.maxStartTime)
                 )
                     setFilterError(
                         `${TranslateText('minStartTime')} ${TranslateText('cannot be greater than')} ${TranslateText(
@@ -161,7 +159,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                             'maxEndTime'
                         ).toLowerCase()}`
                     )
-                if (filterState.minEndTime && newMaxStartTime && newMaxStartTime < filterState.minEndTime)
+                else if (filterState.minStartTime && newMaxStartTime && newMaxStartTime < filterState.minStartTime)
                     setFilterError(
                         `${TranslateText('maxStartTime')} ${TranslateText('cannot be less than')} ${TranslateText(
                             'minStartTime'
@@ -179,7 +177,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                             'maxEndTime'
                         ).toLowerCase()}`
                     )
-                if (filterState.minStartTime && newMinEndTime && newMinEndTime < filterState.minStartTime)
+                else if (filterState.minStartTime && newMinEndTime && newMinEndTime < filterState.minStartTime)
                     setFilterError(
                         `${TranslateText('minEndTime')} ${TranslateText('cannot be less than')} ${TranslateText(
                             'minStartTime'
@@ -192,10 +190,8 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
             },
             switchMaxEndTime: (newMaxEndTime: number | undefined) => {
                 if (
-                    filterState.maxStartTime &&
-                    newMaxEndTime &&
-                    filterState.minEndTime &&
-                    (newMaxEndTime < filterState.maxStartTime || newMaxEndTime < filterState.minEndTime)
+                    (newMaxEndTime && filterState.maxStartTime && newMaxEndTime < filterState.maxStartTime) ||
+                    (filterState.minEndTime && newMaxEndTime! < filterState.minEndTime)
                 )
                     setFilterError(
                         `${TranslateText('maxEndTime')} ${TranslateText('cannot be less than')} ${TranslateText(
