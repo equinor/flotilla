@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { MissionQueueCard } from './MissionQueueCard'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
-import { Mission } from 'models/Mission'
+import { Mission, dummyMission } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { Robot } from 'models/Robot'
@@ -13,6 +13,7 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { useMissionQueueContext } from 'components/Contexts/MissionQueueContext'
+import { useMissionOngoingContext } from 'components/Contexts/MissionOngoingContext'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -42,6 +43,8 @@ const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, 
 export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const { missionQueue } = useMissionQueueContext()
+    const { missionOngoing } = useMissionOngoingContext()
+    const [loadingMissionNames, setLoadingMissionNames] = useState<Set<string>>(new Set())
 
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
@@ -74,7 +77,6 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }
     const onSelectedRobot = (selectedRobot: Robot) => {
         if (robotOptions === undefined) return
-
         setSelectedRobot(selectedRobot)
     }
 
@@ -83,6 +85,11 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
 
         selectedEchoMissions.forEach((mission: EchoMissionDefinition) => {
             BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode)
+            setLoadingMissionNames((prev) => {
+                const updatedSet = new Set(prev)
+                updatedSet.add(mission.name)
+                return updatedSet
+            })
         })
 
         setSelectedEchoMissions([])
@@ -118,9 +125,21 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         }
     }, [robotOptions, installationCode])
 
+    useEffect(() => {
+        setLoadingMissionNames((currentLoadingNames) => {
+            const updatedLoadingMissionIds = new Set(currentLoadingNames)
+            missionQueue.forEach((mission) => updatedLoadingMissionIds.delete(mission.name))
+            missionOngoing.forEach((mission) => updatedLoadingMissionIds.delete(mission.name))
+            return updatedLoadingMissionIds
+        })
+    }, [missionQueue, missionOngoing])
+
     var missionQueueDisplay = missionQueue.map(function (mission, index) {
         return <MissionQueueCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
     })
+    const loadingQueueDisplay = () => {
+        return <MissionQueueCard key={'test'} mission={dummyMission} onDeleteMission={() => {}} />
+    }
 
     return (
         <StyledMissionView>
@@ -128,8 +147,9 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                 {TranslateText('Mission Queue')}
             </Typography>
             <MissionTable>
+                {loadingMissionNames.size > 0 && loadingQueueDisplay()}
                 {missionQueue.length > 0 && missionQueueDisplay}
-                {missionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
+                {loadingMissionNames.size === 0 && missionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
             </MissionTable>
             <MissionButtonView>
                 <ScheduleMissionDialog
