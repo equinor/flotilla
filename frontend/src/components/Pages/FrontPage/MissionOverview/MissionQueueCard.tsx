@@ -1,4 +1,4 @@
-import { Button, Card, Checkbox, Dialog, Icon, Typography } from '@equinor/eds-core-react'
+import { Button, Card, Checkbox, Dialog, Icon, Typography, DotProgress } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
@@ -56,9 +56,14 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
             <HorizontalContent>
                 <HorizontalNonButtonContent onClick={routeChange}>
                     <Checkbox />
-                    <Button variant="ghost" fullWidth>
-                        <Typography variant="body_short_bold">{mission.name}</Typography>
-                    </Button>
+
+                    {mission.name === 'dummyMission' ? (
+                        <DotProgress size={64} color="primary" />
+                    ) : (
+                        <Button variant="ghost" fullWidth>
+                            <Typography variant="body_short_bold">{mission.name}</Typography>
+                        </Button>
+                    )}
                     <Typography variant="caption" color="#6F6F6F">
                         {TranslateText('Robot')}: {mission.robot.name}
                     </Typography>

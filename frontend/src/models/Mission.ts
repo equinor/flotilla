@@ -1,6 +1,7 @@
 import { MapMetadata } from './MapMetadata'
-import { Robot } from './Robot'
+import { Robot , dummyRobot} from './Robot'
 import { Task } from './Task'
+
 
 export enum MissionStatus {
     Pending = 'Pending',

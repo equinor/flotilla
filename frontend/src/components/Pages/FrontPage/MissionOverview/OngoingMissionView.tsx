@@ -1,6 +1,4 @@
 import { Button, Typography, Icon } from '@equinor/eds-core-react'
-import { Mission, MissionStatus } from 'models/Mission'
-import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { RefreshProps } from '../FrontPage'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
@@ -9,7 +7,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
-import { BackendAPICaller } from 'api/ApiCaller'
+import { useMissionOngoingContext } from 'components/Contexts/MissionOngoingContext'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -28,32 +26,11 @@ const ButtonStyle = styled.div`
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
-    const missionPageSize = 100
-    const [missions, setMissions] = useState<Mission[]>([])
+    const { missionOngoing } = useMissionOngoingContext()
 
-    const updateOngoingAndPausedMissions = useCallback(() => {
-        BackendAPICaller.getMissionRuns({
-            statuses: [MissionStatus.Ongoing, MissionStatus.Paused],
-            pageSize: missionPageSize,
-            orderBy: 'StartTime desc',
-        }).then((missions) => {
-            setMissions(missions.content)
-        })
-    }, [])
-
-    useEffect(() => {
-        updateOngoingAndPausedMissions()
-    }, [updateOngoingAndPausedMissions])
-
-    useEffect(() => {
-        const id = setInterval(() => {
-            updateOngoingAndPausedMissions()
-        }, refreshInterval)
-        return () => clearInterval(id)
-    }, [refreshInterval, updateOngoingAndPausedMissions])
-
-    var missionDisplay = missions.map((mission, index) => <OngoingMissionCard key={index} mission={mission} />)
-
+    var OngoingMissions = missionOngoing.map(function (mission, index) {
+        return <OngoingMissionCard key={index} mission={mission} />
+    })
     let navigate = useNavigate()
     const routeChange = () => {
         let path = `${config.FRONTEND_BASE_ROUTE}/history`
@@ -66,8 +43,8 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
                 {TranslateText('Ongoing Missions')}
             </Typography>
             <OngoingMissionSection>
-                {missions.length > 0 && missionDisplay}
-                {missions.length === 0 && <NoOngoingMissionsPlaceholder />}
+                {missionOngoing.length > 0 && OngoingMissions}
+                {missionOngoing.length === 0 && <NoOngoingMissionsPlaceholder />}
             </OngoingMissionSection>
             <ButtonStyle>
                 <Button variant="outlined" onClick={routeChange}>
