@@ -1,7 +1,7 @@
 import { Area } from './Area'
 import { BatteryStatus } from './Battery'
 import { Pose } from './Pose'
-import { RobotModel } from './RobotModel'
+import { RobotModel, dummyRobotModel } from './RobotModel'
 import { VideoStream } from './VideoStream'
 
 export enum RobotStatus {
@@ -28,4 +28,10 @@ export interface Robot {
     videoStreams?: VideoStream[]
     isarUri?: string
     currentArea?: Area
+}
+export const dummyRobot: Robot = {
+    id: 'dummyRobotId',
+    model: dummyRobotModel,
+    currentInstallation: 'DummyInstallation',
+    status: RobotStatus.Available,
 }
