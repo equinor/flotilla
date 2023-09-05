@@ -78,6 +78,7 @@ function InstallationPicker(page: string) {
     const { installationCode, switchInstallation } = useInstallationContext()
     const [showActivePlants, setShowActivePlants] = useState<boolean>(true)
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+    const [updateListOfActivePlants, setUpdateListOfActivePlants] = useState<boolean>(false)
 
     useEffect(() => {
         const plantPromise = showActivePlants ? BackendAPICaller.getActivePlants() : BackendAPICaller.getEchoPlantInfo()
@@ -85,7 +86,7 @@ function InstallationPicker(page: string) {
             const mapping = mapInstallationCodeToName(response)
             setAllPlantsMap(mapping)
         })
-    }, [showActivePlants])
+    }, [showActivePlants, updateListOfActivePlants])
 
     const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
     return (
@@ -102,7 +103,10 @@ function InstallationPicker(page: string) {
                     else switchInstallation('')
                 }}
                 autoWidth={true}
-                onFocus={(e) => e.preventDefault()}
+                onFocus={(e) => {
+                    e.preventDefault()
+                    setUpdateListOfActivePlants(!updateListOfActivePlants)
+                }}
             />
             <Button variant="ghost_icon" onClick={() => setIsDialogOpen(true)}>
                 {' '}
