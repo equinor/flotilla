@@ -1,7 +1,6 @@
 import { MapMetadata } from './MapMetadata'
-import { Robot , dummyRobot} from './Robot'
+import { Robot, dummyRobot } from './Robot'
 import { Task } from './Task'
-
 
 export enum MissionStatus {
     Pending = 'Pending',
@@ -32,4 +31,13 @@ export interface Mission {
     estimatedDuration?: number
     tasks: Task[]
     map?: MapMetadata
+}
+export const dummyMission: Mission = {
+    id: 'dummyId',
+    name: 'dummyMission',
+    robot: dummyRobot,
+    status: MissionStatus.Pending,
+    isCompleted: false,
+    desiredStartTime: new Date(),
+    tasks: [],
 }
