@@ -404,10 +404,6 @@ namespace Api.Controllers
             if (scheduledMissionQuery.AreaName != null)
             {
                 area = await _areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
-                if (area == null)
-                {
-                    return NotFound($"Could not find area by installation '{scheduledMissionQuery.InstallationCode}' and name '{scheduledMissionQuery.AreaName}'");
-                }
             }
 
             var source = await _sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId);
