@@ -69,11 +69,13 @@ public class FlotillaDbContext : DbContext
             poseBuilder.OwnsOne(pose => pose.Position);
             poseBuilder.OwnsOne(pose => pose.Orientation);
         });
-        modelBuilder.Entity<Area>().HasOne(a => a.Deck).WithMany();
+        modelBuilder.Entity<Area>().HasOne(a => a.Deck);
         modelBuilder.Entity<Area>().HasOne(a => a.Installation).WithMany();
         modelBuilder.Entity<Area>().HasOne(a => a.Plant).WithMany();
         modelBuilder.Entity<Deck>().HasOne(d => d.Plant).WithMany();
+
         modelBuilder.Entity<Deck>().HasOne(d => d.Installation).WithMany();
+        modelBuilder.Entity<Deck>().HasOne(d => d.DefaultLocalizationArea).WithOne(a => a.Deck);
         modelBuilder.Entity<Plant>().HasOne(a => a.Installation).WithMany();
 
         modelBuilder.Entity<SafePosition>().OwnsOne(s => s.Pose, poseBuilder =>
@@ -89,11 +91,12 @@ public class FlotillaDbContext : DbContext
         modelBuilder.Entity<Installation>().HasIndex(a => new { a.InstallationCode }).IsUnique();
         modelBuilder.Entity<Plant>().HasIndex(a => new { a.PlantCode }).IsUnique();
 
-        modelBuilder.Entity<Area>().HasOne(a => a.Deck).WithMany().OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Area>().HasOne(a => a.Deck).WithOne().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Area>().HasOne(a => a.Plant).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Area>().HasOne(a => a.Installation).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Deck>().HasOne(d => d.Plant).WithMany().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Deck>().HasOne(d => d.Installation).WithMany().OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<Deck>().HasOne(d => d.DefaultLocalizationArea).WithOne().OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<Plant>().HasOne(p => p.Installation).WithMany().OnDelete(DeleteBehavior.Restrict);
     }
 

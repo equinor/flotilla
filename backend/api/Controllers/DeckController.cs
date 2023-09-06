@@ -15,12 +15,14 @@ namespace Api.Controllers
         private readonly IPlantService _plantService;
 
         private readonly IMapService _mapService;
+        private readonly IAreaService _areaService;
 
         private readonly ILogger<DeckController> _logger;
 
         public DeckController(
             ILogger<DeckController> logger,
             IMapService mapService,
+            IAreaService areaService,
             IDeckService deckService,
             IInstallationService installationService,
             IPlantService plantService
@@ -28,6 +30,7 @@ namespace Api.Controllers
         {
             _logger = logger;
             _mapService = mapService;
+            _areaService = areaService;
             _deckService = deckService;
             _installationService = installationService;
             _plantService = plantService;
@@ -138,6 +141,53 @@ namespace Api.Controllers
             {
                 _logger.LogError(e, "Error while creating new deck");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Set default localization area for a deck
+        /// </summary>
+        /// <remarks>
+        /// <para> This query sets the default localization area for a deck </para>
+        /// </remarks>
+        [HttpPost]
+        [Authorize(Roles = Role.Admin)]
+        [Route("{deckId}/{areaId}/set-default-localization-area")]
+        [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Deck>> SetDefaultLocalizationArea(
+            [FromRoute] string deckId,
+            [FromRoute] string areaId
+        )
+        {
+            _logger.LogInformation(@"Setting default localization area {AreaId} to deck {DeckId}", areaId, deckId);
+            var deck = await _deckService.ReadById(deckId);
+            if (deck == null)
+                return NotFound($"Could not find deck with id {deckId}");
+
+            var area = await _areaService.ReadById(areaId);
+            if (area == null)
+                return NotFound($"Could not find area with id {areaId}");
+
+            if (area.Deck == null)
+                return NotFound($"Area {areaId} is not linked to any deck");
+
+            if (area.Deck.Id != deckId)
+                return NotFound($"Area {areaId} is not linked to deck {deckId}");
+
+            try
+            {
+                deck.DefaultLocalizationArea = area;
+                var updatedDeck = await _deckService.Update(deck);
+                return Ok(updatedDeck);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while setting a default localization area");
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 
