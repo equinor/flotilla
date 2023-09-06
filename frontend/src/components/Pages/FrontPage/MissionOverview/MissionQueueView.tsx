@@ -12,8 +12,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
-import { useMissionQueueContext } from 'components/Contexts/MissionQueueContext'
-import { useMissionOngoingContext } from 'components/Contexts/MissionOngoingContext'
+import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -42,8 +41,7 @@ const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, 
 
 export function MissionQueueView({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
-    const { missionQueue } = useMissionQueueContext()
-    const { missionOngoing } = useMissionOngoingContext()
+    const { missionQueue, ongoingMissions } = useMissionsContext()
     const [loadingMissionNames, setLoadingMissionNames] = useState<Set<string>>(new Set())
 
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
@@ -129,10 +127,10 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         setLoadingMissionNames((currentLoadingNames) => {
             const updatedLoadingMissionIds = new Set(currentLoadingNames)
             missionQueue.forEach((mission) => updatedLoadingMissionIds.delete(mission.name))
-            missionOngoing.forEach((mission) => updatedLoadingMissionIds.delete(mission.name))
+            ongoingMissions.forEach((mission) => updatedLoadingMissionIds.delete(mission.name))
             return updatedLoadingMissionIds
         })
-    }, [missionQueue, missionOngoing])
+    }, [missionQueue, ongoingMissions])
 
     var missionQueueDisplay = missionQueue.map(function (mission, index) {
         return <MissionQueueCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
