@@ -7,7 +7,8 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
-import { useMissionOngoingContext } from 'components/Contexts/MissionOngoingContext'
+/* import { useOngoingMissionsContext } from 'components/Contexts/OngoingMissionsContext' */
+import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -26,9 +27,9 @@ const ButtonStyle = styled.div`
 
 export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
-    const { missionOngoing } = useMissionOngoingContext()
+    const { ongoingMissions } = useMissionsContext()
 
-    var OngoingMissions = missionOngoing.map(function (mission, index) {
+    var ongoingMissionscard = ongoingMissions.map(function (mission, index) {
         return <OngoingMissionCard key={index} mission={mission} />
     })
     let navigate = useNavigate()
@@ -43,8 +44,8 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
                 {TranslateText('Ongoing Missions')}
             </Typography>
             <OngoingMissionSection>
-                {missionOngoing.length > 0 && OngoingMissions}
-                {missionOngoing.length === 0 && <NoOngoingMissionsPlaceholder />}
+                {ongoingMissions.length > 0 && ongoingMissionscard}
+                {ongoingMissions.length === 0 && <NoOngoingMissionsPlaceholder />}
             </OngoingMissionSection>
             <ButtonStyle>
                 <Button variant="outlined" onClick={routeChange}>

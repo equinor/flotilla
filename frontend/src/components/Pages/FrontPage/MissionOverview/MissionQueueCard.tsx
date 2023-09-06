@@ -1,7 +1,7 @@
 import { Button, Card, Checkbox, Dialog, Icon, Typography, DotProgress } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
-import { Mission } from 'models/Mission'
+import { Mission, dummyMission } from 'models/Mission'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -57,7 +57,7 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
                 <HorizontalNonButtonContent onClick={routeChange}>
                     <Checkbox />
 
-                    {mission.name === 'dummyMission' ? (
+                    {mission === dummyMission ? (
                         <DotProgress size={64} color="primary" />
                     ) : (
                         <Button variant="ghost" fullWidth>
