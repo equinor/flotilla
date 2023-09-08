@@ -45,12 +45,13 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
 
     useEffect(() => {
         const id = setInterval(() => {
-            BackendAPICaller.getEnabledRobots().then((robots) => {
-                setRobotOptions(robots)
-            })
+        BackendAPICaller.getEnabledRobots().then((robots) => robots.filter(robots => robots.currentInstallation.toLowerCase() === installationCode.toLowerCase()))
+        .then((robots) => {
+        setRobotOptions(robots)
+        })
         }, props.refreshInterval)
         return () => clearInterval(id)
-    }, [props.refreshInterval])
+        }, [props.refreshInterval])
 
     let timer: ReturnType<typeof setTimeout>
 
@@ -91,39 +92,9 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             <StyledMissionDialog>
                 <StyledDialog open={true}>
                     <StyledAutoComplete>
-                        <StyledMissionSection>
-                            <Button
-                                onClick={() => {
-                                    props.closeDialog()
-                                }}
-                                variant="outlined"
-                                color="primary"
-                            >
-                                {' '}
-                                {TranslateText('Cancel')}{' '}
-                            </Button>
-                        </StyledMissionSection>
-                    </StyledAutoComplete>
-                </StyledDialog>
-            </StyledMissionDialog>
-
-            <StyledMissionDialog>
-                <Dialog open={true}>
-                    <StyledAutoComplete>
-                        <Typography variant="h5">{TranslateText('This installation has no missions')}</Typography>
-                    </StyledAutoComplete>
-                </Dialog>
-            </StyledMissionDialog>
-
-            <StyledMissionDialog>
-                <StyledDialog open={true}>
-                    <StyledAutoComplete>
                         <Autocomplete
                             optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
-                            options={robotOptions.filter(
-                                (r) =>
-                                    r.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
-                            )}
+                            options={robotOptions}
                             label={TranslateText('Select robot')}
                             onOptionsChange={(changes) => onSelectedRobot(changes.selectedItems[0])}
                             autoWidth={true}
