@@ -41,7 +41,7 @@ namespace Api.Controllers.Models
             InstallationCode = missionDefinition.InstallationCode;
             Comment = missionDefinition.Comment;
             InspectionFrequency = missionDefinition.InspectionFrequency;
-            Area = new AreaResponse(missionDefinition.Area);
+            Area = missionDefinition.Area != null ? new AreaResponse(missionDefinition.Area) : null;
             LastRun = missionDefinition.LastRun;
             IsDeprecated = missionDefinition.IsDeprecated;
             SourceType = missionDefinition.Source.Type;
@@ -88,7 +88,7 @@ namespace Api.Controllers.Models
             Comment = missionDefinition.Comment;
             InspectionFrequency = missionDefinition.InspectionFrequency;
             Area = missionDefinition.Area;
-            Tasks = service.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode).Result;
+            Tasks = service.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode).Result!;
             LastRun = missionDefinition.LastRun;
             IsDeprecated = missionDefinition.IsDeprecated;
             SourceType = missionDefinition.Source.Type;

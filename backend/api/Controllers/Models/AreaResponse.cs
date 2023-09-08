@@ -23,7 +23,7 @@ namespace Api.Controllers.Models
         public AreaResponse(Area area)
         {
             Id = area.Id;
-            DeckName = area.Deck.Name;
+            DeckName = area.Deck!.Name;
             PlantCode = area.Plant.PlantCode;
             InstallationCode = area.Installation.InstallationCode;
             AreaName = area.Name;

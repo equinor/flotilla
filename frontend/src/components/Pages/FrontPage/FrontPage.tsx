@@ -35,7 +35,7 @@ export const refreshInterval = 1000
 
 export function FrontPage() {
     const refreshInterval = 1000
-    
+
     return (
         <>
             <Header page={'root'} />
