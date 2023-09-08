@@ -45,13 +45,18 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
 
     useEffect(() => {
         const id = setInterval(() => {
-        BackendAPICaller.getEnabledRobots().then((robots) => robots.filter(robots => robots.currentInstallation.toLowerCase() === installationCode.toLowerCase()))
-        .then((robots) => {
-        setRobotOptions(robots)
-        })
+            BackendAPICaller.getEnabledRobots()
+                .then((robots) =>
+                    robots.filter(
+                        (robots) => robots.currentInstallation.toLowerCase() === installationCode.toLowerCase()
+                    )
+                )
+                .then((robots) => {
+                    setRobotOptions(robots)
+                })
         }, props.refreshInterval)
         return () => clearInterval(id)
-        }, [props.refreshInterval])
+    }, [props.refreshInterval])
 
     let timer: ReturnType<typeof setTimeout>
 

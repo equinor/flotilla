@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
@@ -108,33 +107,33 @@ namespace Api.Controllers
             return Ok(missionRuns);
         }
 
-    /// <summary>
-    /// List all mission definitions in the Flotilla database
-    /// </summary>
-    /// <remarks>
-    /// <para> This query gets all mission definitions </para>
-    /// </remarks>
-    [HttpGet("definitions")]
-    [Authorize(Roles = Role.Any)]
-    [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetMissionDefinitions(
-        [FromQuery] MissionDefinitionQueryStringParameters parameters
-    )
-    {
-        PagedList<MissionDefinition> missionDefinitions;
-        try
+        /// <summary>
+        /// List all mission definitions in the Flotilla database
+        /// </summary>
+        /// <remarks>
+        /// <para> This query gets all mission definitions </para>
+        /// </remarks>
+        [HttpGet("definitions")]
+        [Authorize(Roles = Role.Any)]
+        [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetMissionDefinitions(
+            [FromQuery] MissionDefinitionQueryStringParameters parameters
+        )
         {
-            missionDefinitions = await _missionDefinitionService.ReadAll(parameters);
-        }
-        catch (InvalidDataException e)
-        {
-            _logger.LogError(e.Message);
-            return BadRequest(e.Message);
-        }
+            PagedList<MissionDefinition> missionDefinitions;
+            try
+            {
+                missionDefinitions = await _missionDefinitionService.ReadAll(parameters);
+            }
+            catch (InvalidDataException e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
+            }
 
             var metadata = new
             {
@@ -151,9 +150,9 @@ namespace Api.Controllers
                 JsonSerializer.Serialize(metadata)
             );
 
-        var missionDefinitionResponses = missionDefinitions.Select(m => new MissionDefinitionResponse(_missionDefinitionService, m));
-        return Ok(missionDefinitionResponses);
-    }
+            var missionDefinitionResponses = missionDefinitions.Select(m => new MissionDefinitionResponse(_missionDefinitionService, m));
+            return Ok(missionDefinitionResponses);
+        }
 
         /// <summary>
         ///     Lookup mission run by specified id.
@@ -176,45 +175,45 @@ namespace Api.Controllers
             return Ok(missioRun);
         }
 
-    /// <summary>
-    /// Lookup mission definition by specified id.
-    /// </summary>
-    [HttpGet]
-    [Authorize(Roles = Role.Any)]
-    [Route("definitions/{id}/condensed")]
-    [ProducesResponseType(typeof(CondensedMissionDefinitionResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CondensedMissionDefinitionResponse>> GetCondensedMissionDefinitionById([FromRoute] string id)
-    {
-        var missionDefinition = await _missionDefinitionService.ReadById(id);
-        if (missionDefinition == null)
-            return NotFound($"Could not find mission definition with id {id}");
-        var missionDefinitionResponse = new CondensedMissionDefinitionResponse(missionDefinition);
-        return Ok(missionDefinitionResponse);
-    }
+        /// <summary>
+        /// Lookup mission definition by specified id.
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = Role.Any)]
+        [Route("definitions/{id}/condensed")]
+        [ProducesResponseType(typeof(CondensedMissionDefinitionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<CondensedMissionDefinitionResponse>> GetCondensedMissionDefinitionById([FromRoute] string id)
+        {
+            var missionDefinition = await _missionDefinitionService.ReadById(id);
+            if (missionDefinition == null)
+                return NotFound($"Could not find mission definition with id {id}");
+            var missionDefinitionResponse = new CondensedMissionDefinitionResponse(missionDefinition);
+            return Ok(missionDefinitionResponse);
+        }
 
-    /// <summary>
-    /// Lookup mission definition by specified id.
-    /// </summary>
-    [HttpGet]
-    [Authorize(Roles = Role.Any)]
-    [Route("definitions/{id}")]
-    [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinitionById([FromRoute] string id)
-    {
-        var missionDefinition = await _missionDefinitionService.ReadById(id);
-        if (missionDefinition == null)
-            return NotFound($"Could not find mission definition with id {id}");
-        var missionDefinitionResponse = new MissionDefinitionResponse(_missionDefinitionService, missionDefinition);
-        return Ok(missionDefinitionResponse);
-    }
+        /// <summary>
+        /// Lookup mission definition by specified id.
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = Role.Any)]
+        [Route("definitions/{id}")]
+        [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinitionById([FromRoute] string id)
+        {
+            var missionDefinition = await _missionDefinitionService.ReadById(id);
+            if (missionDefinition == null)
+                return NotFound($"Could not find mission definition with id {id}");
+            var missionDefinitionResponse = new MissionDefinitionResponse(_missionDefinitionService, missionDefinition);
+            return Ok(missionDefinitionResponse);
+        }
 
         /// <summary>
         ///     Lookup which mission run is scheduled next for the given mission definition
@@ -294,8 +293,8 @@ namespace Api.Controllers
                 return NotFound("Mission definition not found");
             }
 
-        List<MissionTask>? missionTasks;
-        missionTasks = await _missionDefinitionService.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode);
+            List<MissionTask>? missionTasks;
+            missionTasks = await _missionDefinitionService.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode);
 
             if (missionTasks == null)
             {
@@ -580,65 +579,65 @@ namespace Api.Controllers
             }, newMissionRun);
         }
 
-    /// <summary>
-    /// Updates a mission definition in the database based on id
-    /// </summary>
-    /// <response code="200"> The mission definition was successfully updated </response>
-    /// <response code="400"> The mission definition data is invalid </response>
-    /// <response code="404"> There was no mission definition with the given ID in the database </response>
-    [HttpPut]
-    [Authorize(Roles = Role.Admin)]
-    [Route("definitions/{id}")]
-    [ProducesResponseType(typeof(CondensedMissionDefinitionResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<CondensedMissionDefinitionResponse>> UpdateMissionDefinitionById(
-        [FromRoute] string id,
-        [FromBody] UpdateMissionDefinitionQuery missionDefinitionQuery
-    )
-    {
-        _logger.LogInformation("Updating mission definition with id '{id}'", id);
+        /// <summary>
+        /// Updates a mission definition in the database based on id
+        /// </summary>
+        /// <response code="200"> The mission definition was successfully updated </response>
+        /// <response code="400"> The mission definition data is invalid </response>
+        /// <response code="404"> There was no mission definition with the given ID in the database </response>
+        [HttpPut]
+        [Authorize(Roles = Role.Admin)]
+        [Route("definitions/{id}")]
+        [ProducesResponseType(typeof(CondensedMissionDefinitionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<CondensedMissionDefinitionResponse>> UpdateMissionDefinitionById(
+            [FromRoute] string id,
+            [FromBody] UpdateMissionDefinitionQuery missionDefinitionQuery
+        )
+        {
+            _logger.LogInformation("Updating mission definition with id '{id}'", id);
 
-        if (!ModelState.IsValid)
-            return BadRequest("Invalid data.");
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid data.");
 
-        var missionDefinition = await _missionDefinitionService.ReadById(id);
-        if (missionDefinition == null)
-            return NotFound($"Could not find mission definition with id '{id}'");
+            var missionDefinition = await _missionDefinitionService.ReadById(id);
+            if (missionDefinition == null)
+                return NotFound($"Could not find mission definition with id '{id}'");
 
-        if (missionDefinitionQuery.Name == null)
-            return BadRequest("Name cannot be null.");
+            if (missionDefinitionQuery.Name == null)
+                return BadRequest("Name cannot be null.");
 
-        missionDefinition.Name = missionDefinitionQuery.Name;
-        missionDefinition.Comment = missionDefinitionQuery.Comment;
-        missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
+            missionDefinition.Name = missionDefinitionQuery.Name;
+            missionDefinition.Comment = missionDefinitionQuery.Comment;
+            missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
 
-        var newMissionDefinition = await _missionDefinitionService.Update(missionDefinition);
-        return new CondensedMissionDefinitionResponse(newMissionDefinition);
-    }
+            var newMissionDefinition = await _missionDefinitionService.Update(missionDefinition);
+            return new CondensedMissionDefinitionResponse(newMissionDefinition);
+        }
 
-    /// <summary>
-    /// Deletes the mission definition with the specified id from the database.
-    /// </summary>
-    [HttpDelete]
-    [Authorize(Roles = Role.Admin)]
-    [Route("definitions/{id}")]
-    [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<MissionDefinitionResponse>> DeleteMissionDefinition([FromRoute] string id)
-    {
-        var missionDefinition = await _missionDefinitionService.Delete(id);
-        if (missionDefinition is null)
-            return NotFound($"Mission definition with id {id} not found");
-        var missionDefinitionResponse = new MissionDefinitionResponse(_missionDefinitionService, missionDefinition);
-        return Ok(missionDefinitionResponse);
-    }
+        /// <summary>
+        /// Deletes the mission definition with the specified id from the database.
+        /// </summary>
+        [HttpDelete]
+        [Authorize(Roles = Role.Admin)]
+        [Route("definitions/{id}")]
+        [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<MissionDefinitionResponse>> DeleteMissionDefinition([FromRoute] string id)
+        {
+            var missionDefinition = await _missionDefinitionService.Delete(id);
+            if (missionDefinition is null)
+                return NotFound($"Mission definition with id {id} not found");
+            var missionDefinitionResponse = new MissionDefinitionResponse(_missionDefinitionService, missionDefinition);
+            return Ok(missionDefinitionResponse);
+        }
 
         /// <summary>
         ///     Deletes the mission run with the specified id from the database.
