@@ -14,7 +14,13 @@ namespace Api.EventHandlers
     /// <summary>
     ///     A background service which listens to events and performs callback functions.
     /// </summary>
-    public class MqttEventHandler : EventHandlerBase
+    /// 
+    public interface IMqttEventHandler
+    {
+        public void TriggerRobotAvailable(RobotAvailableEventArgs e);
+    }
+
+    public class MqttEventHandler : EventHandlerBase, IMqttEventHandler
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<MqttEventHandler> _logger;
@@ -208,7 +214,9 @@ namespace Api.EventHandlers
                     stream =>
                         new VideoStream
                         {
-                            Name = stream.Name, Url = stream.Url, Type = stream.Type
+                            Name = stream.Name,
+                            Url = stream.Url,
+                            Type = stream.Type
                         }
                 )
                 .ToList();
@@ -345,7 +353,9 @@ namespace Api.EventHandlers
                 var missionRunsForEstimation = await missionRunService.ReadAll(
                     new MissionRunQueryStringParameters
                     {
-                        MinDesiredStartTime = minEpochTime, RobotModelType = robot.Model.Type, PageSize = QueryStringParameters.MaxPageSize
+                        MinDesiredStartTime = minEpochTime,
+                        RobotModelType = robot.Model.Type,
+                        PageSize = QueryStringParameters.MaxPageSize
                     }
                 );
                 var model = robot.Model;

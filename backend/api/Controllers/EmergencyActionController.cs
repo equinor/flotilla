@@ -141,7 +141,7 @@ namespace Api.Controllers
         ///     safe zone. Clearing the emergency state means that mission runs that may be in the robots queue will start."
         /// </summary>
         [HttpPost]
-        [Route("{robotId}/{installationCode}/{areaName}/clear-emergency-state")]
+        [Route("{robotId}/clear-emergency-state")]
         [Authorize(Roles = Role.User)]
         [ProducesResponseType(typeof(MissionRun), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -159,14 +159,11 @@ namespace Api.Controllers
                 _logger.LogWarning("Could not find robot with id {Id}", robotId);
                 return NotFound("Robot not found");
             }
-
-
             if (robot.CurrentInstallation == null)
             {
                 _logger.LogWarning("Could not find installation for robot with id {Id}", robotId);
                 return NotFound("Installation not found");
             }
-
             if (robot.CurrentArea == null)
             {
                 _logger.LogWarning("Could not find area for robot with id {Id}", robotId);

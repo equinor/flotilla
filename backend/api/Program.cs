@@ -64,7 +64,9 @@ builder.Services.AddScoped<IDeckService, DeckService>();
 builder.Services.AddScoped<ISourceService, SourceService>();
 builder.Services.AddScoped<IRobotModelService, RobotModelService>();
 builder.Services.AddScoped<RobotController>();
+builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
+builder.Services.AddScoped<IMqttEventHandler, MqttEventHandler>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MissionEventHandler>();
