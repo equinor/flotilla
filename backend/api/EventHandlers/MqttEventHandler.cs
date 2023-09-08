@@ -16,7 +16,13 @@ namespace Api.EventHandlers
     /// <summary>
     ///     A background service which listens to events and performs callback functions.
     /// </summary>
-    public class MqttEventHandler : EventHandlerBase
+    /// 
+    public interface IMqttEventHandler
+    {
+        public void TriggerRobotAvailable(RobotAvailableEventArgs e);
+    }
+
+    public class MqttEventHandler : EventHandlerBase, IMqttEventHandler
     {
         private readonly ILogger<MqttEventHandler> _logger;
         private readonly IServiceScopeFactory _scopeFactory;

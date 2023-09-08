@@ -81,7 +81,9 @@ else
     builder.Services.AddScoped<ITimeseriesService, TimeseriesService>();
 }
 builder.Services.AddScoped<RobotController>();
+builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
+builder.Services.AddScoped<IMqttEventHandler, MqttEventHandler>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MissionEventHandler>();

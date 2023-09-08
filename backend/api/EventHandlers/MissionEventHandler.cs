@@ -5,6 +5,7 @@ using Api.Services.Events;
 using Api.Utilities;
 namespace Api.EventHandlers
 {
+
     public class MissionEventHandler : EventHandlerBase
     {
         private readonly ILogger<MissionEventHandler> _logger;
@@ -33,7 +34,7 @@ namespace Api.EventHandlers
 
         private IMissionScheduling MissionSchedulingService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionScheduling>();
 
-        private MqttEventHandler MqttEventHandler => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<MqttEventHandler>();
+        private IMqttEventHandler MqttEventHandlerService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMqttEventHandler>();
 
         private IList<MissionRun> MissionRunQueue(string robotId)
         {
@@ -197,7 +198,7 @@ namespace Api.EventHandlers
                 _logger.LogInformation("Robot {RobotName} was unfrozen but the mission to return to safe zone will be completed before further missions are started", robot.Id);
             }
 
-            MqttEventHandler.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+            MqttEventHandlerService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
         }
     }
 }
