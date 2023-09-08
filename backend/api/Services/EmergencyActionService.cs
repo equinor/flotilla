@@ -26,7 +26,7 @@ namespace Api.Services
 
         public void TriggerEmergencyButtonDepressedForRobot(EmergencyButtonPressedForRobotEventArgs e)
         {
-            OnEmergencyButtonPressedForRobot(e);
+            OnEmergencyButtonDepressedForRobot(e);
         }
 
         public static event EventHandler<EmergencyButtonPressedForRobotEventArgs>? EmergencyButtonPressedForRobot;
