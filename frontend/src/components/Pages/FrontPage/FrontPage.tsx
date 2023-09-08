@@ -35,8 +35,7 @@ export const refreshInterval = 1000
 
 export function FrontPage() {
     const refreshInterval = 1000
-    const slowRefreshInterval = 5000
-
+    
     return (
         <>
             <Header page={'root'} />
@@ -49,7 +48,7 @@ export function FrontPage() {
                     </MissionsContent>
                 </HorizontalContent>
                 <RobotStatusSection refreshInterval={refreshInterval} />
-                <InspectionSection refreshInterval={slowRefreshInterval} />
+                <InspectionSection refreshInterval={refreshInterval} />
             </StyledFrontPage>
         </>
     )
