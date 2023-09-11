@@ -140,6 +140,9 @@ namespace Api.Mqtt
                 case Type type when type == typeof(IsarPoseMessage):
                     OnIsarTopicReceived<IsarPoseMessage>(content);
                     break;
+                case Type type when type == typeof(IsarObstacleStatusMessage):
+                    OnIsarTopicReceived<IsarObstacleStatusMessage>(content);
+                    break;
                 default:
                     _logger.LogWarning(
                         "No callback defined for MQTT message type '{type}'",
@@ -294,6 +297,7 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarBatteryMessage) => MqttIsarBatteryReceived,
                     _ when type == typeof(IsarPressureMessage) => MqttIsarPressureReceived,
                     _ when type == typeof(IsarPoseMessage) => MqttIsarPoseReceived,
+                    _ when type == typeof(IsarObstacleStatusMessage) => MqttIsarObstacleStatusReceived,
                     _
                         => throw new NotImplementedException(
                             $"No event defined for message type '{typeof(T).Name}'"
