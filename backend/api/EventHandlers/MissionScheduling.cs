@@ -215,6 +215,29 @@ namespace Api.EventHandlers
                 throw new MissionException(message, 0);
             }
 
+            if (robot.CurrentMissionId != null)
+            {
+                var missionRun = await _missionRunService.ReadById(robot.CurrentMissionId);
+
+                if (missionRun != null)
+                {
+                    var mission = new MissionRun
+                    {
+                        Name = missionRun.Name,
+                        Robot = robot,
+                        MissionRunPriority = MissionRunPriority.Normal,
+                        InstallationCode = missionRun.InstallationCode,
+                        Area = missionRun.Area,
+                        Status = MissionStatus.Pending,
+                        DesiredStartTime = DateTimeOffset.UtcNow,
+                        Tasks = missionRun.Tasks,
+                        Map = new MapMetadata()
+                    };
+
+                    await _missionRunService.Create(mission);
+                }
+            }
+
             robot.CurrentMissionId = null;
             await _robotService.Update(robot);
         }
