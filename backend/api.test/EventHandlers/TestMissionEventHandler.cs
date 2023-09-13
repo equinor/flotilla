@@ -145,7 +145,6 @@ namespace Api.Test.EventHandlers
                 RobotType = RobotType.Robot,
                 SerialNumber = "0001",
                 CurrentInstallation = "kaa",
-                CurrentArea = NewArea,
                 VideoStreams = new List<CreateVideoStreamQuery>(),
                 Host = "localhost",
                 Port = 3000,

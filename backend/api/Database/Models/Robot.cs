@@ -28,7 +28,7 @@ namespace Api.Database.Models
 
         public string CurrentInstallation { get; set; }
 
-        public Area? CurrentArea { get; set; }
+        public Deck? CurrentDeck { get; set; }
 
         public float BatteryLevel { get; set; }
 
@@ -99,7 +99,7 @@ namespace Api.Database.Models
             Name = createQuery.Name;
             SerialNumber = createQuery.SerialNumber;
             CurrentInstallation = createQuery.CurrentInstallation;
-            CurrentArea = createQuery.CurrentArea;
+            CurrentDeck = createQuery.CurrentDeck;
             VideoStreams = videoStreams;
             Host = createQuery.Host;
             Port = createQuery.Port;

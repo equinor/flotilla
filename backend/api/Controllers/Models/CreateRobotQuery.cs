@@ -14,7 +14,7 @@ namespace Api.Controllers.Models
 
         public string CurrentInstallation { get; set; }
 
-        public Area CurrentArea { get; set; }
+        public Deck CurrentDeck { get; set; }
 
         public IList<CreateVideoStreamQuery> VideoStreams { get; set; }
 

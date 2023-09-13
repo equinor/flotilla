@@ -19,6 +19,7 @@ public class RobotController : ControllerBase
     private readonly IMissionRunService _missionRunService;
     private readonly IRobotModelService _robotModelService;
     private readonly IAreaService _areaService;
+    private readonly IDeckService _deckService;
     private readonly IEchoService _echoService;
 
     public RobotController(
@@ -28,6 +29,7 @@ public class RobotController : ControllerBase
         IMissionRunService missionRunService,
         IRobotModelService robotModelService,
         IAreaService areaService,
+        IDeckService deckService,
         IEchoService echoService
     )
     {
@@ -37,6 +39,7 @@ public class RobotController : ControllerBase
         _missionRunService = missionRunService;
         _robotModelService = robotModelService;
         _areaService = areaService;
+        _deckService = deckService;
         _echoService = echoService;
     }
 
@@ -664,6 +667,16 @@ public class RobotController : ControllerBase
             return NotFound("Robot not found");
         }
 
+        if (robot.CurrentDeck is not null)
+        {
+            _logger.LogWarning(
+                "Robot '{robotId}' is already localized at deck '{deckId}'",
+                scheduleLocalizationMissionQuery.RobotId,
+                robot.CurrentDeck
+            );
+            return Conflict($"The robot is already localized at deck {robot.CurrentDeck}");
+        }
+
         if (robot.Status is not RobotStatus.Available)
         {
             _logger.LogWarning(
@@ -674,12 +687,18 @@ public class RobotController : ControllerBase
             return Conflict($"The Robot is not available ({robot.Status})");
         }
 
-        var area = await _areaService.ReadById(scheduleLocalizationMissionQuery.AreaId);
+        var deck = await _deckService.ReadById(scheduleLocalizationMissionQuery.DeckId);
 
-        if (area == null)
+        if (deck == null)
         {
-            _logger.LogWarning("Could not find area with id={id}", scheduleLocalizationMissionQuery.AreaId);
-            return NotFound("Area not found");
+            _logger.LogWarning("Could not find deck with id={id}", scheduleLocalizationMissionQuery.DeckId);
+            return NotFound("deck not found");
+        }
+
+        if (deck.DefaultLocalizationArea == null)
+        {
+            _logger.LogWarning("Deck {id} has no default localization area", scheduleLocalizationMissionQuery.DeckId);
+            return NotFound("deck does not have default localization area");
         }
 
         var missionRun = new MissionRun
@@ -687,7 +706,7 @@ public class RobotController : ControllerBase
             Name = "Localization Mission",
             Robot = robot,
             InstallationCode = "NA",
-            Area = area,
+            Area = deck.DefaultLocalizationArea,
             Status = MissionStatus.Pending,
             DesiredStartTime = DateTimeOffset.UtcNow,
             Tasks = new List<MissionTask>(),
@@ -697,7 +716,7 @@ public class RobotController : ControllerBase
         IsarMission isarMission;
         try
         {
-            isarMission = await _isarService.StartLocalizationMission(robot, scheduleLocalizationMissionQuery.LocalizationPose);
+            isarMission = await _isarService.StartLocalizationMission(robot, deck.DefaultLocalizationArea.DefaultLocalizationPose);
         }
         catch (HttpRequestException e)
         {
@@ -725,8 +744,8 @@ public class RobotController : ControllerBase
 
         robot.Status = RobotStatus.Busy;
         robot.CurrentMissionId = missionRun.Id;
+        robot.CurrentDeck = deck;
         await _robotService.Update(robot);
-        robot.CurrentArea = area;
         return Ok(missionRun);
     }
 
