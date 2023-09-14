@@ -38,6 +38,8 @@ namespace Api.Controllers.Models
 
         public string? AreaName { get; set; }
 
+        public string? DeckId { get; set; }
+
         public string Name { get; set; }
 
         public string? Description { get; set; }

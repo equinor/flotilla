@@ -29,6 +29,8 @@ namespace Api.Database.Models
 
         public Area? Area { get; set; }
 
+        public Deck? Deck { get; set; }
+
         public bool IsDeprecated { get; set; }
     }
 }

@@ -185,6 +185,7 @@ public static class InitDb
             Name = "Placeholder Mission 1",
             InstallationCode = areas[0].Installation!.InstallationCode,
             Area = areas[0],
+            Deck = null,
             Source = sources[0],
             Comment = "Interesting comment",
             InspectionFrequency = new DateTime().AddDays(12) - new DateTime(),
@@ -197,6 +198,7 @@ public static class InitDb
             Name = "Placeholder Mission 2",
             InstallationCode = areas[1].Installation!.InstallationCode,
             Area = areas[1],
+            Deck = null,
             Source = sources[1],
             InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
             LastRun = null
@@ -208,6 +210,7 @@ public static class InitDb
             Name = "Placeholder Mission 3",
             InstallationCode = areas[1].Installation!.InstallationCode,
             Area = areas[1],
+            Deck = null,
             Source = sources[1],
             LastRun = null
         };

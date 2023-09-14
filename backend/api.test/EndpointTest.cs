@@ -605,13 +605,14 @@ namespace Api.Test
             string customMissionsUrl = "/missions/custom";
             string scheduleMissionsUrl = "/missions/schedule";
 
-            string testInstallation = "testInstallationNextRun";
-            string testPlant = "testPlantNextRun";
-            string testDeck = "testDeckNextRun";
-            string testArea = "testAreaNextRun";
+            string testInstallationCode = "testInstallationNextRun";
+            string testPlantCode = "testPlantNextRun";
+            string testDeckName = "testDeckNextRun";
+            string testAreaName = "testAreaNextRun";
             string testMissionName = "testMissionNextRun";
 
-            await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+
+            (_, _, string deckId, _) = await PopulateAreaDb(testInstallationCode, testPlantCode, testDeckName, testAreaName);
 
             // Arrange - Create custom mission definition
             string robotUrl = "/robots";
@@ -625,8 +626,9 @@ namespace Api.Test
             var query = new CustomMissionQuery
             {
                 RobotId = robotId,
-                InstallationCode = testInstallation,
-                AreaName = testArea,
+                InstallationCode = testInstallationCode,
+                AreaName = testAreaName,
+                DeckId = deckId,
                 DesiredStartTime = new DateTimeOffset(new DateTime(3050, 1, 1)),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
@@ -660,6 +662,7 @@ namespace Api.Test
             var scheduleQuery1 = new ScheduleMissionQuery()
             {
                 RobotId = robotId,
+                DeckId = deckId,
                 DesiredStartTime = new DateTimeOffset(new DateTime(2050, 1, 1)),
                 MissionDefinitionId = missionRun.MissionId
             };
@@ -671,6 +674,7 @@ namespace Api.Test
             var scheduleQuery2 = new ScheduleMissionQuery()
             {
                 RobotId = robotId,
+                DeckId = deckId,
                 DesiredStartTime = DateTimeOffset.UtcNow,
                 MissionDefinitionId = missionRun.MissionId
             };
@@ -682,6 +686,7 @@ namespace Api.Test
             var scheduleQuery3 = new ScheduleMissionQuery()
             {
                 RobotId = robotId,
+                DeckId = deckId,
                 DesiredStartTime = new DateTimeOffset(new DateTime(2100, 1, 1)),
                 MissionDefinitionId = missionRun.MissionId
             };

@@ -7,6 +7,7 @@
         public DateTimeOffset DesiredStartTime { get; set; }
         public string InstallationCode { get; set; }
         public string? AreaName { get; set; }
+        public string? DeckId { get; set; }
         public TimeSpan? InspectionFrequency { get; set; }
     }
 }

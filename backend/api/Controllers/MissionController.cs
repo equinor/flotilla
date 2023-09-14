@@ -15,6 +15,7 @@ namespace Api.Controllers
     {
         private readonly IAreaService _areaService;
         private readonly ICustomMissionService _customMissionService;
+        private readonly IDeckService _deckService;
         private readonly IEchoService _echoService;
         private readonly ILogger<MissionController> _logger;
         private readonly IMapService _mapService;
@@ -28,6 +29,7 @@ namespace Api.Controllers
             IMissionDefinitionService missionDefinitionService,
             IMissionRunService missionRunService,
             IAreaService areaService,
+            IDeckService deckService,
             IRobotService robotService,
             IEchoService echoService,
             ICustomMissionService customMissionService,
@@ -40,6 +42,7 @@ namespace Api.Controllers
             _missionDefinitionService = missionDefinitionService;
             _missionRunService = missionRunService;
             _areaService = areaService;
+            _deckService = deckService;
             _robotService = robotService;
             _echoService = echoService;
             _customMissionService = customMissionService;
@@ -268,6 +271,12 @@ namespace Api.Controllers
                 return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
             }
 
+            var deck = await _deckService.ReadById(scheduledMissionQuery.DeckId);
+            if (deck is null)
+            {
+                return NotFound($"Could not find deck with id {scheduledMissionQuery.DeckId}");
+            }
+
             var missionDefinition = await _missionDefinitionService.ReadById(scheduledMissionQuery.MissionDefinitionId);
             if (missionDefinition == null)
             {
@@ -309,6 +318,7 @@ namespace Api.Controllers
                 Robot = robot,
                 MissionId = missionDefinition.Id,
                 Status = MissionStatus.Pending,
+                Deck = deck,
                 DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
                 Tasks = missionTasks,
                 InstallationCode = missionDefinition.InstallationCode,
@@ -406,6 +416,12 @@ namespace Api.Controllers
                 area = await _areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
             }
 
+            Deck? deck = null;
+            if (scheduledMissionQuery.DeckId != null)
+            {
+                deck = await _deckService.ReadById(scheduledMissionQuery.DeckId);
+            }
+
             var source = await _sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId);
             MissionDefinition? existingMissionDefinition = null;
             if (source == null)
@@ -432,7 +448,8 @@ namespace Api.Controllers
                 Name = echoMission.Name,
                 InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
                 InstallationCode = scheduledMissionQuery.InstallationCode,
-                Area = area
+                Area = area,
+                Deck = deck
             };
 
             var missionRun = new MissionRun
@@ -445,6 +462,7 @@ namespace Api.Controllers
                 Tasks = missionTasks,
                 InstallationCode = scheduledMissionQuery.InstallationCode,
                 Area = area,
+                Deck = deck,
                 Map = new MapMetadata()
             };
 
@@ -516,6 +534,12 @@ namespace Api.Controllers
                 area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName);
             }
 
+            Deck? deck = null;
+            if (customMissionQuery.DeckId != null)
+            {
+                deck = await _deckService.ReadById(customMissionQuery.DeckId);
+            }
+
             var source = await _sourceService.CheckForExistingCustomSource(missionTasks);
             MissionDefinition? existingMissionDefinition = null;
             if (source == null)
@@ -543,7 +567,8 @@ namespace Api.Controllers
                 Name = customMissionQuery.Name,
                 InspectionFrequency = customMissionQuery.InspectionFrequency,
                 InstallationCode = customMissionQuery.InstallationCode,
-                Area = area
+                Area = area,
+                Deck = deck
             };
 
             var scheduledMission = new MissionRun
@@ -558,6 +583,7 @@ namespace Api.Controllers
                 Tasks = missionTasks,
                 InstallationCode = customMissionQuery.InstallationCode,
                 Area = area,
+                Deck = deck,
                 Map = new MapMetadata()
             };
 
