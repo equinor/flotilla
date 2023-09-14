@@ -206,6 +206,11 @@ namespace Api.Test
             var area = await areaResponse.Content.ReadFromJsonAsync<Area>(_serializerOptions);
             Assert.NotNull(area);
 
+            // Set area as DefaultLocalizationArea
+            string setDefaultLocalizationAreaUrl = $"{deckUrl}/{deck.Id}/{area.Id}/set-default-localization-area";
+            var updated_deck = await _client.PostAsync(setDefaultLocalizationAreaUrl, null);
+            Assert.NotNull(updated_deck);
+
             return (installation.Id, plant.Id, deck.Id, area.Id);
         }
 
@@ -227,7 +232,7 @@ namespace Api.Test
             string testDeck = "TestDeckMissionsTest";
             string testArea = "testAreaMissionsTest";
 
-            await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+            (_, _, string deckId, _) = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
 
             int echoMissionId = 97;
 
@@ -237,6 +242,7 @@ namespace Api.Test
                 RobotId = robotId,
                 InstallationCode = testInstallation,
                 AreaName = testArea,
+                DeckId = deckId,
                 EchoMissionId = echoMissionId,
                 DesiredStartTime = DateTimeOffset.UtcNow
             };
@@ -300,7 +306,7 @@ namespace Api.Test
             string testArea = "testAreaStartMissionTest";
             int echoMissionId = 95;
 
-            await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+            (_, _, string deckId, _) = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
 
             // Act
             var query = new ScheduledMissionQuery
@@ -308,6 +314,7 @@ namespace Api.Test
                 RobotId = robotId,
                 InstallationCode = testInstallation,
                 AreaName = testArea,
+                DeckId = deckId,
                 EchoMissionId = echoMissionId,
                 DesiredStartTime = DateTimeOffset.UtcNow
             };
@@ -475,7 +482,7 @@ namespace Api.Test
             string testMissionName = "testMissionInAreaTest";
             string areaUrl = $"/areas";
             string missionUrl = $"/missions/custom";
-            (_, _, _, string areaId) = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+            (_, _, string deckId, string areaId) = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
 
             string url = "/robots";
             var robotResponse = await _client.GetAsync(url);
@@ -491,6 +498,7 @@ namespace Api.Test
                 DesiredStartTime = DateTimeOffset.UtcNow,
                 InstallationCode = testInstallation,
                 AreaName = testArea,
+                DeckId = deckId,
                 Name = testMissionName,
                 Tasks = new List<CustomTaskQuery>()
             };
@@ -732,7 +740,7 @@ namespace Api.Test
             string testArea = "testAreaScheduleDuplicateCustomMissionDefinitions";
             string testMissionName = "testMissionScheduleDuplicateCustomMissionDefinitions";
 
-            _ = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+            (_, _, string deckId, _) = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
 
             // Arrange - Create custom mission definition
             string robotUrl = "/robots";
@@ -748,6 +756,7 @@ namespace Api.Test
                 RobotId = robotId,
                 InstallationCode = testInstallation,
                 AreaName = testArea,
+                DeckId = deckId,
                 DesiredStartTime = new DateTimeOffset(new DateTime(3050, 1, 1)),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
@@ -808,7 +817,7 @@ namespace Api.Test
             string testDeck = "testDeckScheduleDuplicateEchoMissionDefinitions";
             string testArea = "testAreaScheduleDuplicateEchoMissionDefinitions";
 
-            _ = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+            (_, _, string deckId, _) = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
 
             // Arrange - Create echo mission definition
             string robotUrl = "/robots";
@@ -825,6 +834,7 @@ namespace Api.Test
                 RobotId = robotId,
                 InstallationCode = testInstallation,
                 AreaName = testArea,
+                DeckId = deckId,
                 EchoMissionId = echoMissionId,
                 DesiredStartTime = DateTimeOffset.UtcNow
             };

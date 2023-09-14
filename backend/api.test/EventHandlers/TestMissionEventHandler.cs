@@ -34,6 +34,9 @@ namespace Api.Test.EventHandlers
             Name = "test test",
             Installation = testInstallation
         };
+
+        private readonly Area testArea;
+        private readonly Deck testDeck;
         private readonly FlotillaDbContext _context;
 
         private readonly MissionEventHandler _missionEventHandler;
@@ -90,37 +93,44 @@ namespace Api.Test.EventHandlers
             // Instantiating the event handlers are required for the event subscribers to be activated
             _missionEventHandler = new MissionEventHandler(missionEventHandlerLogger, mockFactory.Object);
             _mqttEventHandler = new MqttEventHandler(mqttEventHandlerLogger, mockFactory.Object, configuration);
-        }
 
-        private static Area NewArea => new()
-        {
-            Deck = new Deck
+            // Setting up test deck and area
+            testDeck = new Deck
             {
                 Plant = testPlant,
                 Installation = testInstallation,
                 Name = "testDeck"
-            },
-            Installation = testInstallation,
-            Plant = testPlant,
-            Name = "testArea",
-            MapMetadata = new MapMetadata
-            {
-                MapName = "TestMap",
-                Boundary = new Boundary(),
-                TransformationMatrices = new TransformationMatrices()
-            },
-            DefaultLocalizationPose = new Pose(),
-            SafePositions = new List<SafePosition>()
-        };
+            };
 
-        private static MissionRun ScheduledMission =>
-            new()
+            testArea = new Area
+            {
+                Deck = testDeck,
+                Installation = testInstallation,
+                Plant = testPlant,
+                Name = "testArea",
+                MapMetadata = new MapMetadata
+                {
+                    MapName = "TestMap",
+                    Boundary = new Boundary(),
+                    TransformationMatrices = new TransformationMatrices()
+                },
+                DefaultLocalizationPose = new Pose(),
+                SafePositions = new List<SafePosition>()
+            };
+
+            testDeck.DefaultLocalizationArea = testArea;
+        }
+
+        private MissionRun GetNewScheduledMission()
+        {
+            var scheduledMission = new MissionRun
             {
                 Name = "testMission",
                 MissionId = Guid.NewGuid().ToString(),
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTimeOffset.Now,
-                Area = NewArea,
+                Area = testArea,
+                Deck = testDeck,
                 Map = new MapMetadata
                 {
                     MapName = "TestMap",
@@ -129,6 +139,8 @@ namespace Api.Test.EventHandlers
                 },
                 InstallationCode = "testInstallation"
             };
+            return scheduledMission;
+        }
 
         public void Dispose()
         {
@@ -163,7 +175,7 @@ namespace Api.Test.EventHandlers
         public async void ScheduledMissionStartedWhenSystemIsAvailable()
         {
             // Arrange
-            var missionRun = ScheduledMission;
+            var missionRun = GetNewScheduledMission();
 
             var robot = await NewRobot(RobotStatus.Available);
             await _robotService.Create(robot);
@@ -183,8 +195,8 @@ namespace Api.Test.EventHandlers
         public async void SecondScheduledMissionQueuedIfRobotIsBusy()
         {
             // Arrange
-            var missionRunOne = ScheduledMission;
-            var missionRunTwo = ScheduledMission;
+            var missionRunOne = GetNewScheduledMission();
+            var missionRunTwo = GetNewScheduledMission();
 
             var robot = await NewRobot(RobotStatus.Available);
             await _robotService.Create(robot);
@@ -209,7 +221,7 @@ namespace Api.Test.EventHandlers
         public async void NewMissionIsStartedWhenRobotBecomesAvailable()
         {
             // Arrange
-            var missionRun = ScheduledMission;
+            var missionRun = GetNewScheduledMission();
 
             var robot = await NewRobot(RobotStatus.Busy);
             await _robotService.Create(robot);
@@ -289,8 +301,8 @@ namespace Api.Test.EventHandlers
             await _robotService.Create(robotOne);
             await _robotService.Create(robotTwo);
 
-            var missionRunOne = ScheduledMission;
-            var missionRunTwo = ScheduledMission;
+            var missionRunOne = GetNewScheduledMission();
+            var missionRunTwo = GetNewScheduledMission();
 
             missionRunOne.Robot = robotOne;
             missionRunTwo.Robot = robotTwo;

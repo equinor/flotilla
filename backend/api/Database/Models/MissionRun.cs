@@ -65,7 +65,7 @@ namespace Api.Database.Models
 
         public Area? Area { get; set; }
 
-        public Deck? Deck { get; set; }
+        public Deck Deck { get; set; }
 
         private MissionStatus _status;
 

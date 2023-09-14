@@ -58,6 +58,24 @@ namespace Api.Test.Services
                 Name = "test test",
                 Installation = testInstallation
             };
+            var testDeck = new Deck
+            {
+                Plant = testPlant,
+                Installation = testInstallation,
+                Name = "testDeck"
+            };
+            var testArea = new Area
+            {
+                Deck = testDeck,
+                Installation = testInstallation,
+                Plant = testPlant,
+                Name = "testArea",
+                MapMetadata = new MapMetadata() { MapName = "testMap" },
+                DefaultLocalizationPose = new Pose(),
+                SafePositions = new List<SafePosition>()
+            };
+
+            testDeck.DefaultLocalizationArea = testArea;
 
             MissionRun missionRun =
                 new()
@@ -66,21 +84,8 @@ namespace Api.Test.Services
                     Robot = robot,
                     MissionId = Guid.NewGuid().ToString(),
                     Map = new MapMetadata() { MapName = "testMap" },
-                    Area = new Area
-                    {
-                        Deck = new Deck
-                        {
-                            Plant = testPlant,
-                            Installation = testInstallation,
-                            Name = "testDeck"
-                        },
-                        Installation = testInstallation,
-                        Plant = testPlant,
-                        Name = "testArea",
-                        MapMetadata = new MapMetadata() { MapName = "testMap" },
-                        DefaultLocalizationPose = new Pose(),
-                        SafePositions = new List<SafePosition>()
-                    },
+                    Area = testArea,
+                    Deck = testDeck,
                     InstallationCode = "testInstallation",
                     DesiredStartTime = DateTime.Now
                 };
