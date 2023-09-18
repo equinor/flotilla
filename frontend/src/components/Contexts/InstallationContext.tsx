@@ -1,8 +1,19 @@
-import { createContext, FC, useContext, useState } from 'react'
+import { createContext, FC, useContext, useState, useEffect } from 'react'
+import { BackendAPICaller } from 'api/ApiCaller'
+import { EchoPlantInfo } from 'models/EchoMission'
 
 interface IInstallationContext {
     installationCode: string
-    switchInstallation: (selectedInstallation: string) => void
+    installationName: string
+    switchInstallation: (selectedName: string) => void
+}
+
+const mapInstallationCodeToName = (echoPlantInfoArray: EchoPlantInfo[]): Map<string, string> => {
+    var mapping = new Map<string, string>()
+    echoPlantInfoArray.forEach((echoPlantInfo: EchoPlantInfo) => {
+        mapping.set(echoPlantInfo.projectDescription, echoPlantInfo.plantCode)
+    })
+    return mapping
 }
 
 interface Props {
@@ -11,24 +22,39 @@ interface Props {
 
 const defaultInstallation = {
     installationCode: '',
+    installationName: '',
     switchInstallation: (selectedInstallation: string) => {},
 }
 
 export const InstallationContext = createContext<IInstallationContext>(defaultInstallation)
 
 export const InstallationProvider: FC<Props> = ({ children }) => {
-    const previousInstallation = window.localStorage.getItem('installationString')
-    const [installationCode, setInstallation] = useState(previousInstallation || defaultInstallation.installationCode)
+    const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>(new Map())
+    const [installationName, setInstallationName] = useState<string>(
+        window.localStorage.getItem('installationName') || ''
+    )
 
-    const switchInstallation = (selectedInstallation: string) => {
-        setInstallation(selectedInstallation.toLowerCase())
-        window.localStorage.setItem('installationString', selectedInstallation.toLowerCase())
+    useEffect(() => {
+        BackendAPICaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
+            const mapping = mapInstallationCodeToName(response)
+            setAllPlantsMap(mapping)
+        })
+    }, [])
+
+    const installationCode = allPlantsMap.get(installationName) || ''
+
+    const switchInstallation = (selectedName: string) => {
+        setInstallationName(selectedName)
+        window.localStorage.setItem('installationName', selectedName)
+        const derivedCode = allPlantsMap.get(selectedName) || ''
+        window.localStorage.setItem('installationCode', derivedCode)
     }
 
     return (
         <InstallationContext.Provider
             value={{
                 installationCode,
+                installationName,
                 switchInstallation,
             }}
         >

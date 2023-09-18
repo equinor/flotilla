@@ -1,5 +1,5 @@
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
-import { SignInPage } from './components/Pages/SignInPage/SignInPage'
+import { AssetSelectionPage } from 'components/Pages/AssetSelectionPage/AssetSelectionPage'
 import { FlotillaSite } from 'components/Pages/FlotillaSite'
 import { LanguageProvider } from 'components/Contexts/LanguageContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
@@ -14,7 +14,7 @@ function App() {
                     <>
                         <UnauthenticatedTemplate>
                             <div className="sign-in-page">
-                                <SignInPage></SignInPage>
+                                <AssetSelectionPage></AssetSelectionPage>
                             </div>
                         </UnauthenticatedTemplate>
                         <AuthenticatedTemplate>

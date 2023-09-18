@@ -8,6 +8,7 @@ import { RobotPage } from './RobotPage/RobotPage'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
 import { APIUpdater } from 'components/Contexts/APIUpdater'
 import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
+import { AssetSelectionPage } from './AssetSelectionPage/AssetSelectionPage'
 
 export function FlotillaSite() {
     return (
@@ -17,7 +18,8 @@ export function FlotillaSite() {
                     <APIUpdater>
                         <BrowserRouter>
                             <Routes>
-                                <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<FrontPage />} />
+                                <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
+                                <Route path={`${config.FRONTEND_BASE_ROUTE}/FrontPage`} element={<FrontPage />} />
                                 <Route
                                     path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`}
                                     element={<MissionPage />}
