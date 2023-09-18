@@ -28,7 +28,9 @@ namespace Api.Database.Models
             {
                 var videoStream = new VideoStream
                 {
-                    Name = videoStreamQuery.Name, Url = videoStreamQuery.Url, Type = videoStreamQuery.Type
+                    Name = videoStreamQuery.Name,
+                    Url = videoStreamQuery.Url,
+                    Type = videoStreamQuery.Type
                 };
                 videoStreams.Add(videoStream);
             }

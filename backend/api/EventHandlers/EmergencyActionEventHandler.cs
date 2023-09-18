@@ -5,15 +5,8 @@ namespace Api.EventHandlers
 {
     public class EmergencyActionEventHandler : EventHandlerBase
     {
-        private readonly ILogger<EmergencyActionEventHandler> _logger;
-
-        private readonly IServiceScopeFactory _scopeFactory;
-
-        public EmergencyActionEventHandler(ILogger<EmergencyActionEventHandler> logger, IServiceScopeFactory scopeFactory)
+        public EmergencyActionEventHandler()
         {
-            _logger = logger;
-            _scopeFactory = scopeFactory;
-
             Subscribe();
         }
 
