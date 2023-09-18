@@ -10,13 +10,9 @@ namespace Api.Services
 
     public class EmergencyActionService : IEmergencyActionService
     {
-        private readonly ILogger<EmergencyActionService> _logger;
-        private readonly IRobotService _robotService;
 
-        public EmergencyActionService(ILogger<EmergencyActionService> logger, IRobotService robotService)
+        public EmergencyActionService()
         {
-            _logger = logger;
-            _robotService = robotService;
         }
 
         public void TriggerEmergencyButtonPressedForRobot(EmergencyButtonPressedForRobotEventArgs e)
