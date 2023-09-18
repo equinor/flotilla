@@ -38,8 +38,6 @@ const Square = styled.div`
     height: 12px;
 `
 
-
-
 interface MissionProps {
     mission: Mission
 }
@@ -138,34 +136,37 @@ export const StopRobotDialog = (): JSX.Element => {
     }
 
     const resetRobots = () => {
-        BackendAPICaller.getEnabledRobots().then(robots => robots.filter(robots => robots.currentInstallation.toLowerCase() == installationCode.toLowerCase())).then(async (robots: Robot[]) => {
-            console.log(robots)
-            for (var robot of robots) {
-                console.log(robot.name)
-                
-                try
-                {
-                    await BackendAPICaller.resetRobotState(robot.id)
+        BackendAPICaller.getEnabledRobots()
+            .then((robots) =>
+                robots.filter((robots) => robots.currentInstallation.toLowerCase() == installationCode.toLowerCase())
+            )
+            .then(async (robots: Robot[]) => {
+                console.log(robots)
+                for (var robot of robots) {
+                    console.log(robot.name)
+
+                    try {
+                        await BackendAPICaller.resetRobotState(robot.id)
+                    } catch (e) {
+                        console.error(`Failed to POST clear emergency state for ${robot.name}: ` + e)
+                    }
                 }
-                catch(e)
-                {
-                    console.error(`Failed to POST clear emergency state for ${robot.name}: ` + e)
-                }
-            }
-        })
+            })
         closeDialog()
         setStatusSafePosition(false)
     }
 
     return (
-        <>  
+        <>
             {!statusSafePosition && (
-            <><StyledButton>
-                    <Button color="danger" variant="outlined" onClick={openDialog}>
-                        <Square style={{ background: tokens.colors.interactive.danger__resting.hex }} />
-                        {TranslateText('Send robots to safe zone')}
-                    </Button>
-                </StyledButton><StyledDialog open={isStopRobotDialogOpen} isDismissable>
+                <>
+                    <StyledButton>
+                        <Button color="danger" variant="outlined" onClick={openDialog}>
+                            <Square style={{ background: tokens.colors.interactive.danger__resting.hex }} />
+                            {TranslateText('Send robots to safe zone')}
+                        </Button>
+                    </StyledButton>
+                    <StyledDialog open={isStopRobotDialogOpen} isDismissable>
                         <Dialog.Header>
                             <Dialog.Title>
                                 <Typography variant="h5">{TranslateText('Send robots to safe zone') + '?'}</Typography>
@@ -188,7 +189,7 @@ export const StopRobotDialog = (): JSX.Element => {
                                     color="danger"
                                     onClick={() => {
                                         setIsStopRobotDialogOpen(false)
-                                    } }
+                                    }}
                                 >
                                     {TranslateText('Cancel')}
                                 </Button>
@@ -197,21 +198,23 @@ export const StopRobotDialog = (): JSX.Element => {
                                 </Button>
                             </StyledDisplayButtons>
                         </Dialog.Actions>
-                    </StyledDialog></>
+                    </StyledDialog>
+                </>
             )}
-            {statusSafePosition==true && (
-            <><StyledButton>
-                    <Button color="danger" variant="outlined" onClick={openDialog}>
-                        <Icon
-                            name={Icons.PlayTriangle}
-                            size={24}
-                        />
-                        {TranslateText('Dismiss robots from safe zone')}
-                    </Button>
-                </StyledButton><StyledDialog open={isStopRobotDialogOpen} isDismissable>
+            {statusSafePosition == true && (
+                <>
+                    <StyledButton>
+                        <Button color="danger" variant="outlined" onClick={openDialog}>
+                            <Icon name={Icons.PlayTriangle} size={24} />
+                            {TranslateText('Dismiss robots from safe zone')}
+                        </Button>
+                    </StyledButton>
+                    <StyledDialog open={isStopRobotDialogOpen} isDismissable>
                         <Dialog.Header>
                             <Dialog.Title>
-                                <Typography variant="h5">{TranslateText('Dismiss robots from safe zone') + '?'}</Typography>
+                                <Typography variant="h5">
+                                    {TranslateText('Dismiss robots from safe zone') + '?'}
+                                </Typography>
                             </Dialog.Title>
                         </Dialog.Header>
                         <Dialog.CustomContent>
@@ -228,7 +231,7 @@ export const StopRobotDialog = (): JSX.Element => {
                                     color="danger"
                                     onClick={() => {
                                         setIsStopRobotDialogOpen(false)
-                                    } }
+                                    }}
                                 >
                                     {TranslateText('Cancel')}
                                 </Button>
@@ -237,7 +240,8 @@ export const StopRobotDialog = (): JSX.Element => {
                                 </Button>
                             </StyledDisplayButtons>
                         </Dialog.Actions>
-                    </StyledDialog></>
+                    </StyledDialog>
+                </>
             )}
         </>
     )

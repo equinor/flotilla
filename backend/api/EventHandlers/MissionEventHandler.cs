@@ -123,9 +123,15 @@ namespace Api.EventHandlers
 
                 if (missionRun == null)
                 {
-                    _logger.LogInformation("The robot was changed to available in emergy state and no Drive to Safe Position mission is scheduled");
+                    _logger.LogInformation("The robot was changed to available in emergency state and no Drive to Safe Position mission is scheduled");
                     return;
                 }
+            }
+
+            if (missionRun == null)
+            {
+                _logger.LogInformation("The robot was changed to available but no mission is scheduled");
+                return;
             }
 
             _scheduleMissionMutex.WaitOne();

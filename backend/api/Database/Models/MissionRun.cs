@@ -140,7 +140,7 @@ namespace Api.Database.Models
                     task => task.Inspections.Sum(inspection => inspection.VideoDuration ?? 0)
                 );
                 EstimatedDuration = (uint)(
-                    Robot.Model.AverageDurationPerTag * Tasks.Count + totalInspectionDuration
+                    (Robot.Model.AverageDurationPerTag * Tasks.Count) + totalInspectionDuration
                 );
             }
             else
@@ -167,8 +167,8 @@ namespace Api.Database.Models
                     prevPosition = currentPosition;
                 }
                 int estimate = (int)(
-                    distance / (RobotVelocity * EfficiencyFactor)
-                    + numberOfTags * InspectionTime
+                    (distance / (RobotVelocity * EfficiencyFactor))
+                    + (numberOfTags * InspectionTime)
                 );
                 EstimatedDuration = (uint)estimate * 60;
             }
