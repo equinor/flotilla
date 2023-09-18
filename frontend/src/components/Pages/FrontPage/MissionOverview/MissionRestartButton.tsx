@@ -38,7 +38,7 @@ export function MissionRestartButton({ mission }: MissionProps) {
 
     let navigate = useNavigate()
     const navigateToHome = () => {
-        let path = `${config.FRONTEND_BASE_ROUTE}/`
+        let path = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
         navigate(path)
     }
 

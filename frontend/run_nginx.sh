@@ -12,4 +12,3 @@ mv /app/tmp.html /app/index.html
 # Start Nginx
 echo $(date) Starting Nginx…
 nginx -g "daemon off;"
-

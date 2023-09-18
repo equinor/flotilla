@@ -128,8 +128,9 @@
     "cannot be greater than": "cannot be greater than",
     "Filter error": "Filter error",
     "or": "or",
-    "Only active installations": "Only active installations",
+    "Show only active installations": "Show only active installations",
     "Installation settings": "Installation settings",
+    "Submit": "Submit",
     "Decks": "Decks",
     "Last completed": "Last completed",
     "Deadline": "Deadline",
@@ -172,5 +173,6 @@
     "Echo": "Echo",
     "Custom": "Custom",
     "Hours between inspections": "Hours between inspections",
-    "Days between inspections": "Days between inspections"
+    "Days between inspections": "Days between inspections",
+    "Confirm plant": "Confirm plant"
 }
