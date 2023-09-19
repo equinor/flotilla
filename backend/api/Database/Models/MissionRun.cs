@@ -112,7 +112,6 @@ namespace Api.Database.Models
                     && task.IsarTaskId.Equals(isarTaskId, StringComparison.Ordinal)
             );
         }
-#nullable disable
 
         public static MissionStatus MissionStatusFromString(string status)
         {
