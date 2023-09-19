@@ -348,8 +348,6 @@ namespace Api.Controllers
             [FromBody] ScheduledMissionQuery scheduledMissionQuery
         )
         {
-            // TODO: once we have a good way of creating mission definitions for echo missions,
-            //       we can delete this endpoint
             var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
             if (robot is null)
             {
