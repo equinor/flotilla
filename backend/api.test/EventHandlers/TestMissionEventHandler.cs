@@ -47,6 +47,12 @@ namespace Api.Test.EventHandlers
         private readonly RobotControllerMock _robotControllerMock;
         private readonly IRobotModelService _robotModelService;
         private readonly IRobotService _robotService;
+        private readonly IMissionScheduling _missionSchedulingService;
+        private readonly IIsarService _isarServiceMock;
+        private readonly IInstallationService _installationService;
+        private readonly IPlantService _plantService;
+        private readonly IDeckService _deckService;
+        private readonly IAreaService _areaService;
 
         public TestMissionEventHandler(DatabaseFixture fixture)
         {
@@ -54,6 +60,7 @@ namespace Api.Test.EventHandlers
             var mqttServiceLogger = new Mock<ILogger<MqttService>>().Object;
             var mqttEventHandlerLogger = new Mock<ILogger<MqttEventHandler>>().Object;
             var missionLogger = new Mock<ILogger<MissionRunService>>().Object;
+            var missionSchedulingLogger = new Mock<ILogger<MissionScheduling>>().Object;
 
             var configuration = WebApplication.CreateBuilder().Configuration;
 
@@ -65,6 +72,12 @@ namespace Api.Test.EventHandlers
             _robotService = new RobotService(_context, _robotModelService);
             _robotModelService = new RobotModelService(_context);
             _robotControllerMock = new RobotControllerMock();
+            _isarServiceMock = new MockIsarService();
+            _installationService = new InstallationService(_context);
+            _plantService = new PlantService(_context, _installationService);
+            _deckService = new DeckService(_context, _installationService, _plantService);
+            _areaService = new AreaService(_context, _installationService, _plantService, _deckService);
+            _missionSchedulingService = new MissionScheduling(missionSchedulingLogger, _missionRunService, _isarServiceMock, _robotService, _robotControllerMock.Mock.Object, _areaService);
 
             var mockServiceProvider = new Mock<IServiceProvider>();
 
@@ -75,6 +88,9 @@ namespace Api.Test.EventHandlers
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IRobotService)))
                 .Returns(_robotService);
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(IMissionScheduling)))
+                .Returns(_missionSchedulingService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(RobotController)))
                 .Returns(_robotControllerMock.Mock.Object);
