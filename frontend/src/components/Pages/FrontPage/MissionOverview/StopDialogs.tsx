@@ -4,11 +4,12 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useState, useEffect } from 'react'
 import { tokens } from '@equinor/eds-tokens'
-import { Mission, MissionStatus } from 'models/Mission'
+import { Mission } from 'models/Mission'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { Robot, RobotStatus } from 'models/Robot'
+import { Robot } from 'models/Robot'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
 
 const StyledDisplayButtons = styled.div`
     display: flex;
@@ -116,7 +117,7 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
 
 export const StopRobotDialog = (): JSX.Element => {
     const [isStopRobotDialogOpen, setIsStopRobotDialogOpen] = useState<boolean>(false)
-    const [statusSafePosition, setStatusSafePosition] = useState<boolean>(false)
+    const { safeZoneStatus, switchSafeZoneStatus } = useSafeZoneContext()
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
 
@@ -131,7 +132,7 @@ export const StopRobotDialog = (): JSX.Element => {
     const stopAll = () => {
         BackendAPICaller.postSafePosition(installationCode)
         closeDialog()
-        setStatusSafePosition(true)
+        switchSafeZoneStatus(true)
         return
     }
 
@@ -153,12 +154,12 @@ export const StopRobotDialog = (): JSX.Element => {
                 }
             })
         closeDialog()
-        setStatusSafePosition(false)
+        switchSafeZoneStatus(false)
     }
 
     return (
         <>
-            {!statusSafePosition && (
+            {!safeZoneStatus && (
                 <>
                     <StyledButton>
                         <Button color="danger" variant="outlined" onClick={openDialog}>
@@ -201,7 +202,7 @@ export const StopRobotDialog = (): JSX.Element => {
                     </StyledDialog>
                 </>
             )}
-            {statusSafePosition == true && (
+            {safeZoneStatus == true && (
                 <>
                     <StyledButton>
                         <Button color="danger" variant="outlined" onClick={openDialog}>
