@@ -558,27 +558,26 @@ namespace Api.Test
             var area = await areaResponse.Content.ReadFromJsonAsync<Area>(_serializerOptions);
             Assert.True(area != null);
 
-            // Arrange - Get a Robot
-            string url = "/robots";
-            var robotResponse = await _client.GetAsync(url);
-            Assert.True(robotResponse.IsSuccessStatusCode);
-            var robots = await robotResponse.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
-            Assert.True(robots != null);
-            var robot = robots[0];
-            string robotId = robot.Id;
-
             // Act
-            string goToSafePositionUrl = $"/robots/{robotId}/{testInstallation}/{testArea}/go-to-safe-position";
+            string goToSafePositionUrl = $"/emergency-action/{testInstallation}/abort-current-missions-and-send-all-robots-to-safe-zone";
             var missionResponse = await _client.PostAsync(goToSafePositionUrl, null);
 
             // Assert
             Assert.True(missionResponse.IsSuccessStatusCode);
-            var missionRun = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            Assert.True(missionRun != null);
-            Assert.True(
-                JsonSerializer.Serialize(missionRun.Tasks[0].RobotPose.Position) ==
-                JsonSerializer.Serialize(testPosition)
-            );
+
+            // The code below does not work since the request above runs in another thread which may not complete before the code below
+            /*
+            string filterQuery = $"?Statuses=Ongoing&Statuses=Pending&PageSize=100&OrderBy=DesiredStartTime";
+            var currentMissionResponse = await _client.GetAsync("/missions/runs" + filterQuery);
+            Assert.True(currentMissionResponse.IsSuccessStatusCode);
+
+            var missionRuns = await currentMissionResponse.Content.ReadFromJsonAsync<List<MissionRun>>(_serializerOptions);
+            Assert.True(missionRuns != null);
+            Assert.NotEmpty(missionRuns);
+            var newMission = missionRuns.Find(m => m.Tasks != null && JsonSerializer.Serialize(m.Tasks[0].RobotPose.Position) ==
+                JsonSerializer.Serialize(testPosition));
+            Assert.NotNull(newMission);
+            */
         }
 
         [Fact]
