@@ -123,6 +123,35 @@ namespace Api.EventHandlers
                 return;
             }
 
+            if (missionRun.Robot.CurrentDeck is null)
+            {
+                _logger.LogInformation(
+                    "Adding localization task for robot {RobotId} at deck {DeckId} as part of mission run {MissionRunId}",
+                    missionRun.Robot.Id,
+                    missionRun.Deck.Id,
+                    missionRun.Id
+                );
+                var scheduleLocalizationMissionQuery = new ScheduleLocalizationMissionQuery
+                {
+                    RobotId = missionRun.Robot.Id,
+                    DeckId = missionRun.Deck.Id
+                };
+                var result = RobotController.StartLocalizationMission(
+                scheduleLocalizationMissionQuery
+                    ).Result;
+                if (result.Result is not OkObjectResult)
+                {
+                    string errorMessage = "Unknown error from robot controller";
+                    if (result.Result is ObjectResult returnObject)
+                    {
+                        errorMessage = returnObject.Value?.ToString() ?? errorMessage;
+                    }
+                    throw new MissionException(errorMessage);
+                }
+                _logger.LogInformation("Started localization mission before mission '{Id}'", missionRun.Id);
+                return;
+            }
+
             try
             {
                 StartMissionRun(missionRun);
