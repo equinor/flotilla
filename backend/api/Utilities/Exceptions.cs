@@ -1,5 +1,10 @@
 ﻿namespace Api.Utilities
 {
+    public class ConfigException : Exception
+    {
+        public ConfigException(string message) : base(message) { }
+    }
+
     public class MissionException : Exception
     {
         public int IsarStatusCode { get; set; }

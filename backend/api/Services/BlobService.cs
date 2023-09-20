@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 using Api.Options;
+using Api.Utilities;
 using Azure;
 using Azure.Identity;
 using Azure.Storage.Blobs;
@@ -14,7 +15,7 @@ namespace Api.Services
 
         public AsyncPageable<BlobItem> FetchAllBlobs(string containerName, string accountName);
 
-        public void UploadJsonToBlob(string json, string path, string containerName, string accountName, bool overwrite);
+        public Task UploadJsonToBlob(string json, string path, string containerName, string accountName, bool overwrite);
     }
 
     public class BlobService : IBlobService
@@ -54,7 +55,7 @@ namespace Api.Services
             }
         }
 
-        public async void UploadJsonToBlob(string json, string path, string containerName, string accountName, bool overwrite = false)
+        public async Task UploadJsonToBlob(string json, string path, string containerName, string accountName, bool overwrite = false)
         {
             var blobContainerClient = GetBlobContainerClient(containerName, accountName);
 
@@ -65,9 +66,17 @@ namespace Api.Services
             try { await blobClient.UploadAsync(memoryStream, overwrite); }
             catch (RequestFailedException e)
             {
-                string errorMessage = $"Failed to fetch blob items because: {e.Message}";
-                _logger.LogError(e, "{ErrorMessage}", errorMessage);
-                throw;
+                if (e.Status == 404 && e.ErrorCode == "ContainerNotFound")
+                {
+                    _logger.LogError(e, "{ErrorMessage}", $"Unable to find blob container {containerName}");
+                    throw new ConfigException($"Unable to find blob container {containerName}");
+                }
+                else
+                {
+                    string errorMessage = $"Failed to fetch blob items because: {e.Message}";
+                    _logger.LogError(e, "{ErrorMessage}", errorMessage);
+                    throw;
+                }
             }
         }
 

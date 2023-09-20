@@ -439,12 +439,20 @@ namespace Api.Controllers
             MissionDefinition? existingMissionDefinition = null;
             if (source == null)
             {
-                string sourceUrl = _customMissionService.UploadSource(missionTasks);
-                source = new Source
+                try
                 {
-                    SourceId = sourceUrl,
-                    Type = MissionSourceType.Custom
-                };
+                    string sourceURL = await _customMissionService.UploadSource(missionTasks);
+                    source = new Source
+                    {
+                        SourceId = sourceURL,
+                        Type = MissionSourceType.Custom
+                    };
+                }
+                catch (Exception)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Unable to upload source tasks");
+                }
+
             }
             else
             {
