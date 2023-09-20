@@ -137,22 +137,7 @@ export const StopRobotDialog = (): JSX.Element => {
     }
 
     const resetRobots = () => {
-        BackendAPICaller.getEnabledRobots()
-            .then((robots) =>
-                robots.filter((robots) => robots.currentInstallation.toLowerCase() == installationCode.toLowerCase())
-            )
-            .then(async (robots: Robot[]) => {
-                console.log(robots)
-                for (var robot of robots) {
-                    console.log(robot.name)
-
-                    try {
-                        await BackendAPICaller.resetRobotState(robot.id)
-                    } catch (e) {
-                        console.error(`Failed to POST clear emergency state for ${robot.name}: ` + e)
-                    }
-                }
-            })
+        BackendAPICaller.resetRobotState(installationCode)
         closeDialog()
         switchSafeZoneStatus(false)
     }
