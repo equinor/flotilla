@@ -28,6 +28,9 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("DeckId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("InstallationId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -43,11 +46,13 @@ namespace Api.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DeckId");
+
                     b.HasIndex("InstallationId");
 
                     b.HasIndex("PlantId");
 
-                    b.ToTable("Areas");
+                    b.ToTable("Areas", (string)null);
                 });
 
             modelBuilder.Entity("Api.Database.Models.Deck", b =>
@@ -56,12 +61,6 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("AreaId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("DefaultLocalizationAreaId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("InstallationId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -77,19 +76,11 @@ namespace Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AreaId")
-                        .IsUnique()
-                        .HasFilter("[AreaId] IS NOT NULL");
-
-                    b.HasIndex("DefaultLocalizationAreaId")
-                        .IsUnique()
-                        .HasFilter("[DefaultLocalizationAreaId] IS NOT NULL");
-
                     b.HasIndex("InstallationId");
 
                     b.HasIndex("PlantId");
 
-                    b.ToTable("Decks");
+                    b.ToTable("Decks", (string)null);
                 });
 
             modelBuilder.Entity("Api.Database.Models.Installation", b =>
@@ -113,7 +104,7 @@ namespace Api.Migrations
                     b.HasIndex("InstallationCode")
                         .IsUnique();
 
-                    b.ToTable("Installations");
+                    b.ToTable("Installations", (string)null);
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionDefinition", b =>
@@ -159,7 +150,7 @@ namespace Api.Migrations
 
                     b.HasIndex("SourceId");
 
-                    b.ToTable("MissionDefinitions");
+                    b.ToTable("MissionDefinitions", (string)null);
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionRun", b =>
@@ -225,7 +216,7 @@ namespace Api.Migrations
 
                     b.HasIndex("RobotId");
 
-                    b.ToTable("MissionRuns");
+                    b.ToTable("MissionRuns", (string)null);
                 });
 
             modelBuilder.Entity("Api.Database.Models.Plant", b =>
@@ -255,7 +246,7 @@ namespace Api.Migrations
                     b.HasIndex("PlantCode")
                         .IsUnique();
 
-                    b.ToTable("Plants");
+                    b.ToTable("Plants", (string)null);
                 });
 
             modelBuilder.Entity("Api.Database.Models.Robot", b =>
@@ -319,7 +310,7 @@ namespace Api.Migrations
 
                     b.HasIndex("ModelId");
 
-                    b.ToTable("Robots");
+                    b.ToTable("Robots", (string)null);
                 });
 
             modelBuilder.Entity("Api.Database.Models.RobotModel", b =>
@@ -349,7 +340,7 @@ namespace Api.Migrations
                     b.HasIndex("Type")
                         .IsUnique();
 
-                    b.ToTable("RobotModels");
+                    b.ToTable("RobotModels", (string)null);
                 });
 
             modelBuilder.Entity("Api.Database.Models.SafePosition", b =>
@@ -365,7 +356,7 @@ namespace Api.Migrations
 
                     b.HasIndex("AreaId");
 
-                    b.ToTable("SafePositions");
+                    b.ToTable("SafePositions", (string)null);
                 });
 
             modelBuilder.Entity("Api.Database.Models.Source", b =>
@@ -383,11 +374,16 @@ namespace Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sources");
+                    b.ToTable("Sources", (string)null);
                 });
 
             modelBuilder.Entity("Api.Database.Models.Area", b =>
                 {
+                    b.HasOne("Api.Database.Models.Deck", "Deck")
+                        .WithMany()
+                        .HasForeignKey("DeckId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Api.Database.Models.Installation", "Installation")
                         .WithMany()
                         .HasForeignKey("InstallationId")
@@ -400,19 +396,19 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.OwnsOne("Api.Database.Models.Pose", "DefaultLocalizationPose", b1 =>
+                    b.OwnsOne("Api.Database.Models.Area.DefaultLocalizationPose#Api.Database.Models.Pose", "DefaultLocalizationPose", b1 =>
                         {
                             b1.Property<string>("AreaId")
                                 .HasColumnType("nvarchar(450)");
 
                             b1.HasKey("AreaId");
 
-                            b1.ToTable("Areas");
+                            b1.ToTable("Areas", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("AreaId");
 
-                            b1.OwnsOne("Api.Database.Models.Orientation", "Orientation", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Area.DefaultLocalizationPose#Api.Database.Models.Pose.Orientation#Api.Database.Models.Orientation", "Orientation", b2 =>
                                 {
                                     b2.Property<string>("PoseAreaId")
                                         .HasColumnType("nvarchar(450)");
@@ -431,13 +427,13 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseAreaId");
 
-                                    b2.ToTable("Areas");
+                                    b2.ToTable("Areas", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseAreaId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.Position", "Position", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Area.DefaultLocalizationPose#Api.Database.Models.Pose.Position#Api.Database.Models.Position", "Position", b2 =>
                                 {
                                     b2.Property<string>("PoseAreaId")
                                         .HasColumnType("nvarchar(450)");
@@ -453,7 +449,7 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseAreaId");
 
-                                    b2.ToTable("Areas");
+                                    b2.ToTable("Areas", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseAreaId");
@@ -466,7 +462,7 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsOne("Api.Database.Models.MapMetadata", "MapMetadata", b1 =>
+                    b.OwnsOne("Api.Database.Models.Area.MapMetadata#Api.Database.Models.MapMetadata", "MapMetadata", b1 =>
                         {
                             b1.Property<string>("AreaId")
                                 .HasColumnType("nvarchar(450)");
@@ -478,12 +474,12 @@ namespace Api.Migrations
 
                             b1.HasKey("AreaId");
 
-                            b1.ToTable("Areas");
+                            b1.ToTable("Areas", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("AreaId");
 
-                            b1.OwnsOne("Api.Database.Models.Boundary", "Boundary", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Area.MapMetadata#Api.Database.Models.MapMetadata.Boundary#Api.Database.Models.Boundary", "Boundary", b2 =>
                                 {
                                     b2.Property<string>("MapMetadataAreaId")
                                         .HasColumnType("nvarchar(450)");
@@ -508,13 +504,13 @@ namespace Api.Migrations
 
                                     b2.HasKey("MapMetadataAreaId");
 
-                                    b2.ToTable("Areas");
+                                    b2.ToTable("Areas", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("MapMetadataAreaId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Area.MapMetadata#Api.Database.Models.MapMetadata.TransformationMatrices#Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
                                 {
                                     b2.Property<string>("MapMetadataAreaId")
                                         .HasColumnType("nvarchar(450)");
@@ -533,7 +529,7 @@ namespace Api.Migrations
 
                                     b2.HasKey("MapMetadataAreaId");
 
-                                    b2.ToTable("Areas");
+                                    b2.ToTable("Areas", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("MapMetadataAreaId");
@@ -545,6 +541,8 @@ namespace Api.Migrations
                             b1.Navigation("TransformationMatrices")
                                 .IsRequired();
                         });
+
+                    b.Navigation("Deck");
 
                     b.Navigation("DefaultLocalizationPose")
                         .IsRequired();
@@ -559,16 +557,6 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.Deck", b =>
                 {
-                    b.HasOne("Api.Database.Models.Area", null)
-                        .WithOne("Deck")
-                        .HasForeignKey("Api.Database.Models.Deck", "AreaId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Api.Database.Models.Area", "DefaultLocalizationArea")
-                        .WithOne()
-                        .HasForeignKey("Api.Database.Models.Deck", "DefaultLocalizationAreaId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("Api.Database.Models.Installation", "Installation")
                         .WithMany()
                         .HasForeignKey("InstallationId")
@@ -580,8 +568,6 @@ namespace Api.Migrations
                         .HasForeignKey("PlantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("DefaultLocalizationArea");
 
                     b.Navigation("Installation");
 
@@ -623,7 +609,7 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Api.Database.Models.MapMetadata", "Map", b1 =>
+                    b.OwnsOne("Api.Database.Models.MissionRun.Map#Api.Database.Models.MapMetadata", "Map", b1 =>
                         {
                             b1.Property<string>("MissionRunId")
                                 .HasColumnType("nvarchar(450)");
@@ -635,12 +621,12 @@ namespace Api.Migrations
 
                             b1.HasKey("MissionRunId");
 
-                            b1.ToTable("MissionRuns");
+                            b1.ToTable("MissionRuns", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("MissionRunId");
 
-                            b1.OwnsOne("Api.Database.Models.Boundary", "Boundary", b2 =>
+                            b1.OwnsOne("Api.Database.Models.MissionRun.Map#Api.Database.Models.MapMetadata.Boundary#Api.Database.Models.Boundary", "Boundary", b2 =>
                                 {
                                     b2.Property<string>("MapMetadataMissionRunId")
                                         .HasColumnType("nvarchar(450)");
@@ -665,13 +651,13 @@ namespace Api.Migrations
 
                                     b2.HasKey("MapMetadataMissionRunId");
 
-                                    b2.ToTable("MissionRuns");
+                                    b2.ToTable("MissionRuns", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("MapMetadataMissionRunId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
+                            b1.OwnsOne("Api.Database.Models.MissionRun.Map#Api.Database.Models.MapMetadata.TransformationMatrices#Api.Database.Models.TransformationMatrices", "TransformationMatrices", b2 =>
                                 {
                                     b2.Property<string>("MapMetadataMissionRunId")
                                         .HasColumnType("nvarchar(450)");
@@ -690,7 +676,7 @@ namespace Api.Migrations
 
                                     b2.HasKey("MapMetadataMissionRunId");
 
-                                    b2.ToTable("MissionRuns");
+                                    b2.ToTable("MissionRuns", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("MapMetadataMissionRunId");
@@ -703,7 +689,7 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsMany("Api.Database.Models.MissionTask", "Tasks", b1 =>
+                    b.OwnsMany("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask", "Tasks", b1 =>
                         {
                             b1.Property<string>("Id")
                                 .ValueGeneratedOnAdd()
@@ -748,12 +734,34 @@ namespace Api.Migrations
 
                             b1.HasIndex("MissionRunId");
 
-                            b1.ToTable("MissionTask");
+                            b1.ToTable("MissionTask", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("MissionRunId");
 
-                            b1.OwnsMany("Api.Database.Models.Inspection", "Inspections", b2 =>
+                            b1.OwnsOne("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask.InspectionTarget#Api.Database.Models.Position", "InspectionTarget", b2 =>
+                                {
+                                    b2.Property<string>("MissionTaskId")
+                                        .HasColumnType("nvarchar(450)");
+
+                                    b2.Property<float>("X")
+                                        .HasColumnType("real");
+
+                                    b2.Property<float>("Y")
+                                        .HasColumnType("real");
+
+                                    b2.Property<float>("Z")
+                                        .HasColumnType("real");
+
+                                    b2.HasKey("MissionTaskId");
+
+                                    b2.ToTable("MissionTask", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("MissionTaskId");
+                                });
+
+                            b1.OwnsMany("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask.Inspections#Api.Database.Models.Inspection", "Inspections", b2 =>
                                 {
                                     b2.Property<string>("Id")
                                         .ValueGeneratedOnAdd()
@@ -793,47 +801,25 @@ namespace Api.Migrations
 
                                     b2.HasIndex("MissionTaskId");
 
-                                    b2.ToTable("Inspection");
+                                    b2.ToTable("Inspection", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("MissionTaskId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.Position", "InspectionTarget", b2 =>
-                                {
-                                    b2.Property<string>("MissionTaskId")
-                                        .HasColumnType("nvarchar(450)");
-
-                                    b2.Property<float>("X")
-                                        .HasColumnType("real");
-
-                                    b2.Property<float>("Y")
-                                        .HasColumnType("real");
-
-                                    b2.Property<float>("Z")
-                                        .HasColumnType("real");
-
-                                    b2.HasKey("MissionTaskId");
-
-                                    b2.ToTable("MissionTask");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("MissionTaskId");
-                                });
-
-                            b1.OwnsOne("Api.Database.Models.Pose", "RobotPose", b2 =>
+                            b1.OwnsOne("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask.RobotPose#Api.Database.Models.Pose", "RobotPose", b2 =>
                                 {
                                     b2.Property<string>("MissionTaskId")
                                         .HasColumnType("nvarchar(450)");
 
                                     b2.HasKey("MissionTaskId");
 
-                                    b2.ToTable("MissionTask");
+                                    b2.ToTable("MissionTask", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("MissionTaskId");
 
-                                    b2.OwnsOne("Api.Database.Models.Orientation", "Orientation", b3 =>
+                                    b2.OwnsOne("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask.RobotPose#Api.Database.Models.Pose.Orientation#Api.Database.Models.Orientation", "Orientation", b3 =>
                                         {
                                             b3.Property<string>("PoseMissionTaskId")
                                                 .HasColumnType("nvarchar(450)");
@@ -852,13 +838,13 @@ namespace Api.Migrations
 
                                             b3.HasKey("PoseMissionTaskId");
 
-                                            b3.ToTable("MissionTask");
+                                            b3.ToTable("MissionTask", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("PoseMissionTaskId");
                                         });
 
-                                    b2.OwnsOne("Api.Database.Models.Position", "Position", b3 =>
+                                    b2.OwnsOne("Api.Database.Models.MissionRun.Tasks#Api.Database.Models.MissionTask.RobotPose#Api.Database.Models.Pose.Position#Api.Database.Models.Position", "Position", b3 =>
                                         {
                                             b3.Property<string>("PoseMissionTaskId")
                                                 .HasColumnType("nvarchar(450)");
@@ -874,7 +860,7 @@ namespace Api.Migrations
 
                                             b3.HasKey("PoseMissionTaskId");
 
-                                            b3.ToTable("MissionTask");
+                                            b3.ToTable("MissionTask", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("PoseMissionTaskId");
@@ -928,19 +914,19 @@ namespace Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Api.Database.Models.Pose", "Pose", b1 =>
+                    b.OwnsOne("Api.Database.Models.Robot.Pose#Api.Database.Models.Pose", "Pose", b1 =>
                         {
                             b1.Property<string>("RobotId")
                                 .HasColumnType("nvarchar(450)");
 
                             b1.HasKey("RobotId");
 
-                            b1.ToTable("Robots");
+                            b1.ToTable("Robots", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("RobotId");
 
-                            b1.OwnsOne("Api.Database.Models.Orientation", "Orientation", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Robot.Pose#Api.Database.Models.Pose.Orientation#Api.Database.Models.Orientation", "Orientation", b2 =>
                                 {
                                     b2.Property<string>("PoseRobotId")
                                         .HasColumnType("nvarchar(450)");
@@ -959,13 +945,13 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseRobotId");
 
-                                    b2.ToTable("Robots");
+                                    b2.ToTable("Robots", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseRobotId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.Position", "Position", b2 =>
+                            b1.OwnsOne("Api.Database.Models.Robot.Pose#Api.Database.Models.Pose.Position#Api.Database.Models.Position", "Position", b2 =>
                                 {
                                     b2.Property<string>("PoseRobotId")
                                         .HasColumnType("nvarchar(450)");
@@ -981,7 +967,7 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseRobotId");
 
-                                    b2.ToTable("Robots");
+                                    b2.ToTable("Robots", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseRobotId");
@@ -994,7 +980,7 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
-                    b.OwnsMany("Api.Database.Models.VideoStream", "VideoStreams", b1 =>
+                    b.OwnsMany("Api.Database.Models.Robot.VideoStreams#Api.Database.Models.VideoStream", "VideoStreams", b1 =>
                         {
                             b1.Property<string>("Id")
                                 .ValueGeneratedOnAdd()
@@ -1026,7 +1012,7 @@ namespace Api.Migrations
 
                             b1.HasIndex("RobotId");
 
-                            b1.ToTable("VideoStream");
+                            b1.ToTable("VideoStream", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("RobotId");
@@ -1048,19 +1034,19 @@ namespace Api.Migrations
                         .WithMany("SafePositions")
                         .HasForeignKey("AreaId");
 
-                    b.OwnsOne("Api.Database.Models.Pose", "Pose", b1 =>
+                    b.OwnsOne("Api.Database.Models.SafePosition.Pose#Api.Database.Models.Pose", "Pose", b1 =>
                         {
                             b1.Property<string>("SafePositionId")
                                 .HasColumnType("nvarchar(450)");
 
                             b1.HasKey("SafePositionId");
 
-                            b1.ToTable("SafePositions");
+                            b1.ToTable("SafePositions", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("SafePositionId");
 
-                            b1.OwnsOne("Api.Database.Models.Orientation", "Orientation", b2 =>
+                            b1.OwnsOne("Api.Database.Models.SafePosition.Pose#Api.Database.Models.Pose.Orientation#Api.Database.Models.Orientation", "Orientation", b2 =>
                                 {
                                     b2.Property<string>("PoseSafePositionId")
                                         .HasColumnType("nvarchar(450)");
@@ -1079,13 +1065,13 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseSafePositionId");
 
-                                    b2.ToTable("SafePositions");
+                                    b2.ToTable("SafePositions", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseSafePositionId");
                                 });
 
-                            b1.OwnsOne("Api.Database.Models.Position", "Position", b2 =>
+                            b1.OwnsOne("Api.Database.Models.SafePosition.Pose#Api.Database.Models.Pose.Position#Api.Database.Models.Position", "Position", b2 =>
                                 {
                                     b2.Property<string>("PoseSafePositionId")
                                         .HasColumnType("nvarchar(450)");
@@ -1101,7 +1087,7 @@ namespace Api.Migrations
 
                                     b2.HasKey("PoseSafePositionId");
 
-                                    b2.ToTable("SafePositions");
+                                    b2.ToTable("SafePositions", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PoseSafePositionId");
@@ -1120,8 +1106,6 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.Area", b =>
                 {
-                    b.Navigation("Deck");
-
                     b.Navigation("SafePositions");
                 });
 #pragma warning restore 612, 618
