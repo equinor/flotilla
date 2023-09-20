@@ -56,7 +56,7 @@ namespace Api.Services
 
         private IQueryable<Deck> GetDecks()
         {
-            return _context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationArea);
+            return _context.Decks.Include(p => p.Plant).Include(i => i.Installation);
         }
 
         public async Task<Deck?> ReadById(string id)
