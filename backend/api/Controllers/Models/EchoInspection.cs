@@ -37,4 +37,26 @@ namespace Api.Controllers.Models
             };
         }
     }
+
+    public class EchoInspectionComparer : IEqualityComparer<EchoInspection>
+    {
+        public bool Equals(EchoInspection? e1, EchoInspection? e2)
+        {
+            if (ReferenceEquals(e1, e2))
+                return true;
+
+            if (e2 is null || e1 is null)
+                return false;
+
+            return e1.InspectionType == e2.InspectionType
+                && e1.TimeInSeconds == e2.TimeInSeconds;
+        }
+
+        public int GetHashCode(EchoInspection e)
+        {
+            // We cannot incorporate TimeInSeconds here are SQL queries do not handle 
+            // nullables even with short circuiting logic
+            return (int)e.InspectionType;
+        }
+    }
 }
