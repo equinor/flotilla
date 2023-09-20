@@ -493,8 +493,8 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async resetRobotState(robotId: string) {
-        const path: string = `emergency-action/${robotId}/clear-emergency-state`
+    static async resetRobotState(installationCode: string) {
+        const path: string = `emergency-action/${installationCode}/clear-emergency-state`
         const body = {}
 
         const result = await this.POST<unknown, unknown>(path, body).catch((e) => {

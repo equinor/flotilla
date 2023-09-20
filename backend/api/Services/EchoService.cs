@@ -137,7 +137,8 @@ namespace Api.Services
                         $"https://stid.equinor.com/{installationCode}/tag?tagNo={planItem.Tag}"
                     ),
                     Inspections = planItem.SensorTypes
-                        .Select(sensor => new EchoInspection(sensor)).Distinct(new EchoInspectionComparer()).ToList()
+                        .Select(sensor => new EchoInspection(sensor))
+                        .ToList()
                 };
 
                 if (tag.Inspections.IsNullOrEmpty())

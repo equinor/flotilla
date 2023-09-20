@@ -141,7 +141,7 @@ namespace Api.Controllers
         ///     safe zone. Clearing the emergency state means that mission runs that may be in the robots queue will start."
         /// </summary>
         [HttpPost]
-        [Route("{robotId}/clear-emergency-state")]
+        [Route("{installationCode}/clear-emergency-state")]
         [Authorize(Roles = Role.User)]
         [ProducesResponseType(typeof(MissionRun), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -149,28 +149,17 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> ClearInstallationEmergencyState(
-            [FromRoute] string robotId)
+        public ActionResult ClearEmergencyStateForAllRobots(
+            [FromRoute] string installationCode)
         {
-            var robot = await _robotService.ReadById(robotId);
+            var robots = _robotService.ReadAll().Result.ToList().FindAll(a =>
+                            a.CurrentInstallation.ToLower(CultureInfo.CurrentCulture).Equals(installationCode.ToLower(CultureInfo.CurrentCulture), StringComparison.Ordinal) &&
+                            a.CurrentArea != null);
 
-            if (robot == null)
+            foreach (var robot in robots)
             {
-                _logger.LogWarning("Could not find robot with id {Id}", robotId);
-                return NotFound("Robot not found");
+                _emergencyActionService.TriggerEmergencyButtonDepressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id, robot.CurrentArea!.Id));
             }
-            if (robot.CurrentInstallation == null)
-            {
-                _logger.LogWarning("Could not find installation for robot with id {Id}", robotId);
-                return NotFound("Installation not found");
-            }
-            if (robot.CurrentArea == null)
-            {
-                _logger.LogWarning("Could not find area for robot with id {Id}", robotId);
-                return NotFound("Area not found");
-            }
-
-            _emergencyActionService.TriggerEmergencyButtonDepressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id, robot.CurrentArea!.Id));
 
             return Ok("Request to clear emergency state for robot was received");
         }
