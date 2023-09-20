@@ -12,11 +12,11 @@ namespace Api.Services
     {
         private static readonly Dictionary<string, List<MissionTask>> mockBlobStore = new();
 
-        public string UploadSource(List<MissionTask> tasks)
+        public Task<string> UploadSource(List<MissionTask> tasks)
         {
             string hash = CalculateHashFromTasks(tasks);
             mockBlobStore.Add(hash, tasks);
-            return hash;
+            return Task.FromResult(hash);
         }
 
         public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id)

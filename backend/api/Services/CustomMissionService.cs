@@ -10,7 +10,7 @@ namespace Api.Services
 
     public interface ICustomMissionService
     {
-        string UploadSource(List<MissionTask> tasks);
+        Task<string> UploadSource(List<MissionTask> tasks);
         Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
         string CalculateHashFromTasks(IList<MissionTask> tasks);
     }
@@ -26,11 +26,11 @@ namespace Api.Services
             _blobService = blobService;
         }
 
-        public string UploadSource(List<MissionTask> tasks)
+        public async Task<string> UploadSource(List<MissionTask> tasks)
         {
             string json = JsonSerializer.Serialize(tasks);
             string hash = CalculateHashFromTasks(tasks);
-            _blobService.UploadJsonToBlob(json, hash, _storageOptions.Value.CustomMissionContainerName, _storageOptions.Value.AccountName, false);
+            await _blobService.UploadJsonToBlob(json, hash, _storageOptions.Value.CustomMissionContainerName, _storageOptions.Value.AccountName, false);
 
             return hash;
         }
