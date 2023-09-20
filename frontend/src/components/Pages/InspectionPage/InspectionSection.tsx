@@ -1,4 +1,4 @@
-import { Card, Typography, Button, EdsProvider } from '@equinor/eds-core-react'
+import { Card, Typography, Button, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState, useEffect } from 'react'
@@ -12,40 +12,68 @@ import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { MissionStatus } from 'models/Mission'
 import { getDeadlineInDays, getInspectionDeadline } from 'utils/StringFormatting'
 import { InspectionTable } from './InspectionTable'
+import { Icons } from 'utils/icons'
 
 const StyledCard = styled(Card)`
-    width: 280px;
-    padding: 12px;
-    border-radius: 20px;
-    :hover {
-        background-color: #deedee;
-    }
+    display: flex;
+    height: 150px;
+    padding: 16px;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex: 1 0 0;
 `
 
 const StyledCardComponent = styled.div`
     display: flex;
-    flex-direction: row;
-    padding-right: 10px;
+    padding-right: 16px;
+    justify-content: flex-end;
     gap: 10px;
     width: 100%;
-`
-
-const StyledDeckCards = styled.div`
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-`
-
-const StyledPlaceholder = styled.div`
-    padding: 24px;
-    border: 1px solid #dcdcdc;
     border-radius: 4px;
 `
 
-const StyledContent = styled.div`
+const StyledDeckCards = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 400px);
+    gap: 24px;
+`
+
+const StyledDeckText = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+`
+
+const Rectangle = styled.div`
+    display: flex-start;
+    width: 24px;
+    height: 100%;
+    border-radius: 6px 0px 0px 6px;
+`
+
+const DeckCard = styled.div`
+    display: flex;
+    min-width: 400px;
+    max-width: 400px;
+    align-items: flex-start;
+    flex: 1 0 0;
+    border-radius: 6px;
+`
+
+const StyledCircle = styled.div`
+    width: 13px;
+    height: 13px;
+    border-radius: 100px;
+`
+
+const StyledMissionComponents = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
 `
 
 export interface Inspection {
@@ -152,7 +180,7 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
             case deadlineDays <= 1:
                 return 'red'
             case deadlineDays > 1 && deadlineDays <= 14:
-                return 'yellow'
+                return 'orange'
             case deadlineDays > 7:
                 return 'green'
         }
@@ -160,55 +188,66 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
 
     return (
         <>
-            <StyledContent>
-                <Typography variant="h1">{TranslateText('Deck Inspections')}</Typography>
-                <StyledDeckCards>
-                    {Object.keys(deckMissions).length > 0 ? (
-                        Object.keys(deckMissions).map((deckId) => (
+            <StyledDeckCards>
+                {Object.keys(deckMissions).length > 0 ? (
+                    Object.keys(deckMissions).map((deckId) => (
+                        <DeckCard
+                            style={{
+                                boxShadow: '0px 3px 4px 0px rgba(0, 0, 0, 0.12), 0px 2px 4px 0px rgba(0, 0, 0, 0.14)',
+                            }}
+                        >
+                            <Rectangle style={{ background: `${getCardColor(deckId)}` }} />
                             <StyledCard
                                 variant="default"
                                 key={deckId}
-                                style={{
-                                    boxShadow: tokens.elevation.raised,
-                                    borderStyle: 'solid',
-                                    borderWidth: '3px',
-                                    borderColor: `${getCardColor(deckId)}`,
-                                }}
                                 onClick={() => setSelectedDeck(deckMissions[deckId].deck)}
                             >
-                                <Typography>{deckMissions[deckId].deck.deckName.toLocaleUpperCase()}</Typography>
-                                <StyledCardComponent>
-                                    <Typography>
-                                        {deckMissions[deckId] &&
-                                            deckMissions[deckId].inspections.length > 0 &&
-                                            deckMissions[deckId].inspections.length + ' ' + TranslateText('Missions')}
+                                <StyledDeckText>
+                                    <Typography variant={'body_short_bold'}>
+                                        {deckMissions[deckId].deck.deckName.toString()}
                                     </Typography>
-                                    <EdsProvider density="compact">
-                                        <Button onClick={() => handleScheduleAll(deckMissions[deckId].inspections)}>
-                                            {TranslateText('Schedule all')}
-                                        </Button>
-                                    </EdsProvider>
+                                    <StyledMissionComponents>
+                                        <StyledCircle style={{ background: `${getCardColor(deckId)}` }} />
+                                        <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
+                                            {deckMissions[deckId] &&
+                                                deckMissions[deckId].inspections.length > 0 &&
+                                                deckMissions[deckId].inspections.length +
+                                                    ' ' +
+                                                    TranslateText('Missions')}
+                                        </Typography>
+                                    </StyledMissionComponents>
+                                </StyledDeckText>
+                                <StyledCardComponent>
+                                    <Button
+                                        variant="outlined"
+                                        onClick={() => handleScheduleAll(deckMissions[deckId].inspections)}
+                                        style={{ borderColor: '#3D3D3D' }}
+                                    >
+                                        <Icon
+                                            name={Icons.LibraryAdd}
+                                            color={tokens.colors.text.static_icons__default.rgba}
+                                        />
+                                        <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
+                                            {TranslateText('Queue the missions')}
+                                        </Typography>
+                                    </Button>
                                 </StyledCardComponent>
                             </StyledCard>
-                        ))
-                    ) : (
-                        <StyledPlaceholder>
-                            <Typography variant="h4" color="disabled">
-                                {TranslateText('No deck inspections available')}
-                            </Typography>
-                        </StyledPlaceholder>
-                    )}
-                </StyledDeckCards>
-                {selectedDeck && (
-                    <InspectionTable
-                        deck={selectedDeck}
-                        openDialog={() => setisDialogOpen(true)}
-                        setSelectedMissions={setSelectedMissions}
-                        inspections={deckMissions[selectedDeck.id].inspections}
-                        ongoingMissions={ongoingMissions}
-                    />
+                        </DeckCard>
+                    ))
+                ) : (
+                    <Typography variant="h1">{TranslateText('No Deck Inspections Available')}</Typography>
                 )}
-            </StyledContent>
+            </StyledDeckCards>
+            {selectedDeck && (
+                <InspectionTable
+                    deck={selectedDeck}
+                    openDialog={() => setisDialogOpen(true)}
+                    setSelectedMissions={setSelectedMissions}
+                    inspections={deckMissions[selectedDeck.id].inspections}
+                    ongoingMissions={ongoingMissions}
+                />
+            )}
             {isDialogOpen && (
                 <ScheduleMissionDialog
                     missions={selectedMissions!}

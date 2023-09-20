@@ -177,5 +177,8 @@
     "N": "N",
     "battery_change": "battery change",
     "lookout": "lookout",
-    "transport": "transport"
+    "transport": "transport",
+    "Queue the missions": "Queue the missions",
+    "Deck Overview": "Deck Overview",
+    "Predefined missions": "Predefined missions"
 }

@@ -177,5 +177,8 @@
     "N": "N",
     "battery_change": "batteribytte",
     "lookout": "utkikk",
-    "transport": "transport"
+    "transport": "transport",
+    "Queue the missions": "Legg oppdragene i kø",
+    "Deck Overview": "Dekkoversikt",
+    "Predefined missions": "Forhåndsdefinerte oppdrag"
 }

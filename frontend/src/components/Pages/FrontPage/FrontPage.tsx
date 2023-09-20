@@ -5,6 +5,7 @@ import { FailedMissionAlertView } from './MissionOverview/FailedMissionAlertView
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
 import { InspectionSection } from '../InspectionPage/InspectionSection'
+import { InspectionOverviewSection } from '../InspectionPage/InspectionOverview'
 
 const StyledFrontPage = styled.div`
     display: grid;
@@ -48,7 +49,7 @@ export function FrontPage() {
                     </MissionsContent>
                 </HorizontalContent>
                 <RobotStatusSection refreshInterval={refreshInterval} />
-                <InspectionSection refreshInterval={refreshInterval} />
+                <InspectionOverviewSection refreshInterval={refreshInterval} />
             </StyledFrontPage>
         </>
     )
