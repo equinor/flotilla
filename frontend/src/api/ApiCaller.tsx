@@ -194,8 +194,8 @@ export class BackendAPICaller {
 
     static async getMissionDefinitions(
         parameters: MissionDefinitionQueryParameters
-    ): Promise<PaginatedResponse<MissionDefinition>> {
-        let path: string = 'missions/definitions?'
+    ): Promise<PaginatedResponse<CondensedMissionDefinition>> {
+        let path: string = 'missions/definitions-condensed?'
 
         // Always filter by currently selected installation
         const installationCode: string | null = BackendAPICaller.installationCode
@@ -209,7 +209,7 @@ export class BackendAPICaller {
         if (parameters.nameSearch) path = path + 'NameSearch=' + parameters.nameSearch + '&'
         if (parameters.sourceType) path = path + 'SourceType=' + parameters.sourceType + '&'
 
-        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch((e) => {
+        const result = await BackendAPICaller.GET<CondensedMissionDefinition[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })

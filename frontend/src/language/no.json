@@ -180,5 +180,6 @@
     "transport": "transport",
     "Queue the missions": "Legg oppdragene i kø",
     "Deck Overview": "Dekkoversikt",
-    "Predefined missions": "Forhåndsdefinerte oppdrag"
+    "Predefined missions": "Forhåndsdefinerte oppdrag",
+    "Create a new mission in the Mission Planner": "Lag nytt oppdrag i Mission Planner"
 }
