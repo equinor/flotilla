@@ -6,28 +6,31 @@ import { MissionControlProvider } from 'components/Contexts/MissionControlContex
 import { MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { MissionsProvider } from 'components/Contexts/MissionListsContext'
 import { SafeZoneProvider } from 'components/Contexts/SafeZoneContext'
+import { AlertProvider } from 'components/Contexts/AlertContext'
 
 function App() {
     return (
         <SafeZoneProvider>
-            <MissionsProvider>
-                <LanguageProvider>
-                    <MissionControlProvider>
-                        <>
-                            <UnauthenticatedTemplate>
-                                <div className="sign-in-page">
-                                    <AssetSelectionPage></AssetSelectionPage>
-                                </div>
-                            </UnauthenticatedTemplate>
-                            <AuthenticatedTemplate>
-                                <MissionFilterProvider>
-                                    <FlotillaSite />
-                                </MissionFilterProvider>
-                            </AuthenticatedTemplate>
-                        </>
-                    </MissionControlProvider>
-                </LanguageProvider>
-            </MissionsProvider>
+            <AlertProvider>
+                <MissionsProvider>
+                    <LanguageProvider>
+                        <MissionControlProvider>
+                            <>
+                                <UnauthenticatedTemplate>
+                                    <div className="sign-in-page">
+                                        <AssetSelectionPage></AssetSelectionPage>
+                                    </div>
+                                </UnauthenticatedTemplate>
+                                <AuthenticatedTemplate>
+                                    <MissionFilterProvider>
+                                        <FlotillaSite />
+                                    </MissionFilterProvider>
+                                </AuthenticatedTemplate>
+                            </>
+                        </MissionControlProvider>
+                    </LanguageProvider>
+                </MissionsProvider>
+            </AlertProvider>
         </SafeZoneProvider>
     )
 }
