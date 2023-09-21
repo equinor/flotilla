@@ -1,7 +1,6 @@
 import { MissionQueueView } from 'components/Pages/FrontPage/MissionOverview/MissionQueueView'
 import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/OngoingMissionView'
 import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusView'
-import { FailedMissionAlertView } from './MissionOverview/FailedMissionAlertView'
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
 import { InspectionOverviewSection } from '../InspectionPage/InspectionOverview'
@@ -33,7 +32,6 @@ export function FrontPage() {
         <>
             <Header page={'root'} />
             <StyledFrontPage>
-                <FailedMissionAlertView />
                 <StopRobotDialog />
                 <HorizontalContent>
                     <MissionsContent>
