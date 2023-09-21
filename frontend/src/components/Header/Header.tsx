@@ -30,6 +30,13 @@ const SelectLanguageWrapper = styled.div`
     margin-left: 1.5rem;
 `
 
+const StyledAlertList = styled.div`
+    display: grid;
+    grid-template-rows: repeat(auto-fill);
+    align-items: center;
+    gap: 0.5rem;
+`
+
 export function Header({ page }: { page: string }) {
     const { alerts } = useAlertContext()
     const { installationName } = useInstallationContext()
@@ -71,10 +78,15 @@ export function Header({ page }: { page: string }) {
                     <SelectLanguageWrapper>{SelectLanguage()}</SelectLanguageWrapper>
                 </TopBar.Actions>
             </StyledTopBar>
-            {Object.entries(alerts).length > 0 &&
-                Object.entries(alerts).map(([key, value]) => (
-                    <AlertBanner key={key} dismissAlert={value.dismissFunction}>{value.content}</AlertBanner>
-                ))}
+            {Object.entries(alerts).length > 0 && (
+                <StyledAlertList>
+                    {Object.entries(alerts).map(([key, value]) => (
+                        <AlertBanner key={key} dismissAlert={value.dismissFunction}>
+                            {value.content}
+                        </AlertBanner>
+                    ))}
+                </StyledAlertList>
+            )}
         </>
     )
 }

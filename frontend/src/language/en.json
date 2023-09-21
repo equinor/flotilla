@@ -202,5 +202,7 @@
     "Continue missions": "Continue missions",
     "Safe Zone": "Safe Zone",
     "Edit mission definition": "Edit mission definition",
-    "Completed Tasks": "Completed Tasks"
+    "Completed Tasks": "Completed Tasks",
+    "Confirm plant": "Confirm plant",
+    "Failed to retrieve echo missions": "Failed to retrieve echo missions"
 }

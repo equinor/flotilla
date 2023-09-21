@@ -13,6 +13,8 @@ import { CreateMissionButton } from './CreateMissionButton'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -43,6 +45,7 @@ export function MissionQueueView() {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions } = useMissionsContext()
     const { installationCode } = useInstallationContext()
+    const { setAlert } = useAlertContext()
 
     const [loadingMissionNames, setLoadingMissionNames] = useState<Set<string>>(new Set())
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
@@ -57,11 +60,19 @@ export function MissionQueueView() {
 
     const fetchEchoMissions = () => {
         setIsFetchingEchoMissions(true)
-        BackendAPICaller.getAvailableEchoMission(installationCode as string).then((missions) => {
-            const echoMissionsMap: Map<string, EchoMissionDefinition> = mapEchoMissionToString(missions)
-            setEchoMissions(echoMissionsMap)
-            setIsFetchingEchoMissions(false)
-        })
+        BackendAPICaller.getAvailableEchoMissions(installationCode as string)
+            .then((missions) => {
+                const echoMissionsMap: Map<string, EchoMissionDefinition> = mapEchoMissionToString(missions)
+                setEchoMissions(echoMissionsMap)
+                setIsFetchingEchoMissions(false)
+            })
+            .catch((_) => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent message={'Failed to retrieve echo missions'} />
+                )
+                setIsFetchingEchoMissions(false)
+            })
     }
 
     const onChangeMissionSelections = (selectedEchoMissions: string[]) => {

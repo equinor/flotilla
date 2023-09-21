@@ -1,22 +1,22 @@
 import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react'
 import { addMinutes, max } from 'date-fns'
-import { MissionStatus } from 'models/Mission'
+import { Mission, MissionStatus } from 'models/Mission'
 import { FailedMissionAlertContent } from 'components/Alerts/FailedMissionAlert'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { refreshInterval } from 'components/Pages/FrontPage/FrontPage'
 
-export enum AlertSource {
+export enum AlertType {
     MissionFail,
-    RequestFail
+    RequestFail,
 }
 
-type AlertDictionaryType = { [key in AlertSource]?: {content: ReactNode | undefined, dismissFunction: () => void} }
+type AlertDictionaryType = { [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void } }
 
 interface IAlertContext {
     alerts: AlertDictionaryType
-    setAlert: (source: AlertSource, alert: ReactNode, dismissFunction: () => void) => void
-    cleartAlerts: () => void
-    clearAlert: (source: AlertSource) => void
+    setAlert: (source: AlertType, alert: ReactNode) => void
+    clearAlerts: () => void
+    clearAlert: (source: AlertType) => void
 }
 
 interface Props {
@@ -25,9 +25,9 @@ interface Props {
 
 const defaultAlertInterface = {
     alerts: {},
-    setAlert: (source: AlertSource, alert: ReactNode, dismissFunction: () => void) => {},
-    cleartAlerts: () => {},
-    clearAlert: (source: AlertSource) => {}
+    setAlert: (source: AlertType, alert: ReactNode) => {},
+    clearAlerts: () => {},
+    clearAlert: (source: AlertType) => {},
 }
 
 export const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
@@ -35,30 +35,25 @@ export const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
 export const AlertProvider: FC<Props> = ({ children }) => {
     const [alerts, setAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.alerts)
 
-    const setAlert = (source: AlertSource, alert: ReactNode, dismissFunction: () => void) => {
-        let newAlerts = { ...alerts }
-        newAlerts[source] = {content: alert, dismissFunction: dismissFunction}
-        setAlerts(newAlerts)
-    }
+    const dismissMissionFailTimeKey: string = 'lastMissionFailDismissalTime'
 
-    const cleartAlerts = () => {
-        setAlerts({})
-    }
+    const setAlert = (source: AlertType, alert: ReactNode) =>
+        setAlerts({ ...alerts, [source]: { content: alert, dismissFunction: () => clearAlert(source) } })
 
-    const clearAlert = (source: AlertSource) => {
+    const clearAlerts = () => setAlerts({})
+
+    const clearAlert = (source: AlertType) => {
+        if (source === AlertType.MissionFail)
+            sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
         let newAlerts = { ...alerts }
         delete newAlerts[source]
         setAlerts(newAlerts)
     }
 
-    // Here we update the recent failed missions
-    const dismissMissionFailTimeKey: string = 'lastMissionFailDismissalTime'
-    
-    const dismissCurrentMissions = () => {
-        sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
-        clearAlert(AlertSource.MissionFail)
-    }
+    // This variable is needed since the state in the useEffect below uses an outdated alert object
+    const [newFailedMissions, setNewFailedMissions] = useState<Mission[]>([])
 
+    // Here we update the recent failed missions
     useEffect(() => {
         const pageSize: number = 100
         // The default amount of minutes in the past for failed missions to generate an alert
@@ -78,22 +73,33 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
         const id = setInterval(() => {
             const lastDismissTime: Date = getLastDismissalTime()
-            BackendAPICaller.getMissionRuns({ statuses: [MissionStatus.Failed], pageSize: pageSize }).then((missions) => {
-                const newRecentFailedMissions = missions.content.filter((m) => new Date(m.endTime!) > lastDismissTime)
-                if (newRecentFailedMissions.length > 0)
-                    setAlert(AlertSource.MissionFail, <FailedMissionAlertContent missions={newRecentFailedMissions} />, dismissCurrentMissions)
-            })
+            BackendAPICaller.getMissionRuns({ statuses: [MissionStatus.Failed], pageSize: pageSize }).then(
+                (missions) => {
+                    const newRecentFailedMissions = missions.content.filter(
+                        (m) => new Date(m.endTime!) > lastDismissTime
+                    )
+                    if (newRecentFailedMissions.length > 0) setNewFailedMissions(newRecentFailedMissions)
+                }
+            )
         }, refreshInterval)
         return () => clearInterval(id)
     }, [])
+
+    useEffect(() => {
+        if (newFailedMissions.length > 0) {
+            setAlert(AlertType.MissionFail, <FailedMissionAlertContent missions={newFailedMissions} />)
+            setNewFailedMissions([])
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [newFailedMissions])
 
     return (
         <AlertContext.Provider
             value={{
                 alerts,
                 setAlert,
-                cleartAlerts,
-                clearAlert
+                clearAlerts,
+                clearAlert,
             }}
         >
             {children}
