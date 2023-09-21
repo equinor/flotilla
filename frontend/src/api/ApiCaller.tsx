@@ -183,7 +183,7 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    static async getAvailableEchoMission(installationCode: string = ''): Promise<EchoMissionDefinition[]> {
+    static async getAvailableEchoMissions(installationCode: string = ''): Promise<EchoMissionDefinition[]> {
         const path: string = 'echo/available-missions/' + installationCode
         const result = await BackendAPICaller.GET<EchoMissionDefinition[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
@@ -261,15 +261,6 @@ export class BackendAPICaller {
             console.error(`Failed to DELETE /${path}: ` + e)
             throw e
         })
-    }
-
-    static async getEchoMissions(installationCode: string = ''): Promise<EchoMission[]> {
-        const path: string = 'echo/missions?installationCode=' + installationCode
-        const result = await BackendAPICaller.GET<EchoMission[]>(path).catch((e) => {
-            console.error(`Failed to GET /${path}: ` + e)
-            throw e
-        })
-        return result.content
     }
 
     static async getMissionDefinitionById(missionId: string): Promise<CondensedMissionDefinition> {

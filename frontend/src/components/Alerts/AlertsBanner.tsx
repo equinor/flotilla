@@ -31,9 +31,7 @@ export function AlertBanner({ children, dismissAlert }: AlertProps) {
         <>
             <StyledCard variant="danger" style={{ boxShadow: tokens.elevation.raised }}>
                 <Horizontal>
-                    <Center>
-                        {children}
-                    </Center>
+                    <Center>{children}</Center>
                     <Button variant="ghost_icon" onClick={dismissAlert}>
                         <Icon name={Icons.Clear}></Icon>
                     </Button>
