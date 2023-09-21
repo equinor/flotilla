@@ -71,6 +71,53 @@ namespace Api.Controllers
         }
 
         /// <summary>
+        /// List all mission definitions in the Flotilla database
+        /// </summary>
+        /// <remarks>
+        /// <para> This query gets all mission definitions </para>
+        /// </remarks>
+        [HttpGet("definitions-condensed")]
+        [Authorize(Roles = Role.Any)]
+        [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IList<CondensedMissionDefinitionResponse>>> GetCondensedMissionDefinitions(
+            [FromQuery] MissionDefinitionQueryStringParameters parameters
+        )
+        {
+            PagedList<MissionDefinition> missionDefinitions;
+            try
+            {
+                missionDefinitions = await _missionDefinitionService.ReadAll(parameters);
+            }
+            catch (InvalidDataException e)
+            {
+                _logger.LogError(e.Message);
+                return BadRequest(e.Message);
+            }
+
+            var metadata = new
+            {
+                missionDefinitions.TotalCount,
+                missionDefinitions.PageSize,
+                missionDefinitions.CurrentPage,
+                missionDefinitions.TotalPages,
+                missionDefinitions.HasNext,
+                missionDefinitions.HasPrevious
+            };
+
+            Response.Headers.Add(
+                QueryStringParameters.PaginationHeader,
+                JsonSerializer.Serialize(metadata)
+            );
+
+            var missionDefinitionResponses = missionDefinitions.Select(m => new CondensedMissionDefinitionResponse(m));
+            return Ok(missionDefinitionResponses);
+        }
+
+        /// <summary>
         ///     Lookup mission definition by specified id.
         /// </summary>
         [HttpGet]
