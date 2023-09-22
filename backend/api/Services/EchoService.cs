@@ -5,17 +5,16 @@ using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
-
 namespace Api.Services
 {
     public interface IEchoService
     {
-        public abstract Task<IList<CondensedMissionDefinition>> GetAvailableMissions(string? installationCode);
+        public Task<IList<CondensedMissionDefinition>> GetAvailableMissions(string? installationCode);
 
-        public abstract Task<EchoMission> GetMissionById(int missionId);
+        public Task<EchoMission> GetMissionById(int missionId);
 
-        public abstract Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
-        public abstract Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId);
+        public Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
+        public Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId);
     }
 
     public class EchoService : IEchoService
@@ -33,8 +32,8 @@ namespace Api.Services
         public async Task<IList<CondensedMissionDefinition>> GetAvailableMissions(string? installationCode)
         {
             string relativePath = string.IsNullOrEmpty(installationCode)
-              ? $"robots/robot-plan?Status=Ready"
-              : $"robots/robot-plan?InstallationCode={installationCode}&&Status=Ready";
+                ? "robots/robot-plan?Status=Ready"
+                : $"robots/robot-plan?InstallationCode={installationCode}&&Status=Ready";
 
             var response = await _echoApi.CallWebApiForUserAsync(
                 ServiceName,
@@ -51,7 +50,9 @@ namespace Api.Services
                 List<EchoMissionResponse>
             >();
             if (echoMissions is null)
+            {
                 throw new JsonException("Failed to deserialize missions from Echo");
+            }
 
             var availableMissions = ProcessAvailableEchoMission(echoMissions);
 
@@ -76,7 +77,9 @@ namespace Api.Services
             var echoMission = await response.Content.ReadFromJsonAsync<EchoMissionResponse>();
 
             if (echoMission is null)
+            {
                 throw new JsonException("Failed to deserialize mission from Echo");
+            }
 
             var processedEchoMission = ProcessEchoMission(echoMission);
             if (processedEchoMission == null)
@@ -104,7 +107,9 @@ namespace Api.Services
                 List<EchoPlantInfoResponse>
             >();
             if (echoPlantInfoResponse is null)
+            {
                 throw new JsonException("Failed to deserialize plant information from Echo");
+            }
             var installations = ProcessEchoPlantInfos(echoPlantInfoResponse);
             return installations;
         }
@@ -142,7 +147,7 @@ namespace Api.Services
                     throw new InvalidDataException(message);
                 }
                 var robotPose = GetRobotPoseFromPoseId(planItem.PoseId.Value).Result;
-                var tag = new EchoTag()
+                var tag = new EchoTag
                 {
                     Id = planItem.Id,
                     TagId = planItem.Tag,
@@ -161,7 +166,9 @@ namespace Api.Services
                 };
 
                 if (tag.Inspections.IsNullOrEmpty())
+                {
                     tag.Inspections.Add(new EchoInspection());
+                }
 
                 tags.Add(tag);
             }
@@ -176,14 +183,16 @@ namespace Api.Services
             foreach (var echoMission in echoMissions)
             {
                 if (echoMission.PlanItems is null)
+                {
                     continue;
+                }
                 try
                 {
-                    var condensedEchoMissionDefinition = new CondensedMissionDefinition()
+                    var condensedEchoMissionDefinition = new CondensedMissionDefinition
                     {
                         EchoMissionId = echoMission.Id,
                         Name = echoMission.Name,
-                        InstallationCode = echoMission.InstallationCode,
+                        InstallationCode = echoMission.InstallationCode
                     };
                     availableMissions.Add(condensedEchoMissionDefinition);
                 }
@@ -202,10 +211,12 @@ namespace Api.Services
         private EchoMission? ProcessEchoMission(EchoMissionResponse echoMission)
         {
             if (echoMission.PlanItems is null)
+            {
                 throw new MissionNotFoundException("Mission has no tags");
+            }
             try
             {
-                var mission = new EchoMission()
+                var mission = new EchoMission
                 {
                     Id = echoMission.Id,
                     Name = echoMission.Name,
@@ -234,9 +245,11 @@ namespace Api.Services
             foreach (var plant in echoPlantInfoResponse)
             {
                 if (plant.InstallationCode is null || plant.ProjectDescription is null)
+                {
                     continue;
+                }
 
-                var echoPlantInfo = new EchoPlantInfo()
+                var echoPlantInfo = new EchoPlantInfo
                 {
                     PlantCode = plant.InstallationCode,
                     ProjectDescription = plant.ProjectDescription
