@@ -86,10 +86,9 @@ namespace Api.Configurations
                                     Scopes = new Dictionary<string, string>
                                     {
                                         {
-                                            "api://ea4c7b92-47b3-45fb-bd25-a8070f0c495c/user_impersonation",
-                                            "User Impersonation"
+                                            $"api://{configuration["AzureAd:ClientId"]}/user_impersonation", "User Impersonation"
                                         }
-                                    },
+                                    }
                                 }
                             }
                         }
