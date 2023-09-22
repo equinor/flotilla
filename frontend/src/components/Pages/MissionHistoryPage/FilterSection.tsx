@@ -19,7 +19,7 @@ import { useMissionFilterContext } from 'components/Contexts/MissionFilterContex
 
 const StyledHeader = styled.div`
     display: grid;
-    grid-template-columns: auto 100px 150px;
+    grid-template-columns: auto 100px 150px 150px;
     gap: 1rem;
 `
 
@@ -55,8 +55,12 @@ export function FilterSection() {
         setIsFilteringDialogOpen(false)
     }
 
-    const onClearFilters = () => {
+    const onResetFilters = () => {
         filterFunctions.resetFilters()
+    }
+
+    const onClearFilters = () => {
+        filterFunctions.removeFilters()
     }
 
     return (
@@ -72,6 +76,10 @@ export function FilterSection() {
                 <Button onClick={onClickFilterIcon}>
                     <Icon name={Icons.Filter} size={32} />
                     {TranslateText('Filter')}
+                </Button>
+                <Button variant="outlined" onClick={onResetFilters}>
+                    <Icon name={Icons.Replay} size={32} />
+                    {TranslateText('Reset all filters')}
                 </Button>
                 <Button variant="outlined" onClick={onClearFilters}>
                     <Icon name={Icons.Clear} size={32} />
@@ -95,13 +103,17 @@ export function FilterSection() {
                                 })
                             )
                         }}
-                        placeholder={`${filterState.statuses.length}/${
+                        placeholder={`${filterState.statuses ? filterState.statuses.length : 0}/${
                             Array.from(missionStatusTranslationMap.keys()).length
                         } ${TranslateText('selected')}`}
                         label={TranslateText('Mission status')}
-                        initialSelectedOptions={filterState.statuses.map((status) => {
-                            return TranslateText(status)
-                        })}
+                        initialSelectedOptions={
+                            filterState.statuses
+                                ? filterState.statuses.map((status) => {
+                                      return TranslateText(status)
+                                  })
+                                : []
+                        }
                         multiple
                         autoWidth={true}
                         onFocus={(e) => e.preventDefault()}
@@ -115,13 +127,17 @@ export function FilterSection() {
                                 })
                             )
                         }}
-                        placeholder={`${filterState.inspectionTypes.length}/${
+                        placeholder={`${filterState.inspectionTypes ? filterState.inspectionTypes.length : 0}/${
                             Array.from(inspectionTypeTranslationMap.keys()).length
                         } ${TranslateText('selected')}`}
                         label={TranslateText('Inspection type')}
-                        initialSelectedOptions={filterState.inspectionTypes.map((inspectionType) => {
-                            return TranslateText(inspectionType)
-                        })}
+                        initialSelectedOptions={
+                            filterState.inspectionTypes
+                                ? filterState.inspectionTypes.map((inspectionType) => {
+                                      return TranslateText(inspectionType)
+                                  })
+                                : []
+                        }
                         multiple
                         autoWidth={true}
                         onFocus={(e) => e.preventDefault()}

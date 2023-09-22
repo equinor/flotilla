@@ -163,12 +163,12 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
             {filterIsSet && (
                 <ActiveFilterList>
                     {flatten(filterState)
-                        .filter((filter) => !filterFunctions.isDefault(filter.name, filter.value))
+                        .filter((filter) => !filterFunctions.isSet(filter.name, filter.value))
                         .map((filter) => (
                             <Chip
                                 style={{ borderColor: checkBoxBorderColour, height: '2rem', paddingLeft: '6px' }}
                                 key={filter.name}
-                                onDelete={() => filterFunctions.resetFilter(filter.name)}
+                                onDelete={() => filterFunctions.removeFilter(filter.name)}
                             >
                                 {TranslateText(filter.name)}: {toDisplayValue(filter.name, filter.value!)}
                             </Chip>
