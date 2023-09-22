@@ -12,10 +12,10 @@ interface IMissionFilterContext {
     clearFilterError: () => void
     filterState: {
         missionName: string | undefined
-        statuses: MissionStatus[]
+        statuses: MissionStatus[] | undefined
         robotName: string | undefined
         tagId: string | undefined
-        inspectionTypes: InspectionType[]
+        inspectionTypes: InspectionType[] | undefined
         minStartTime: number | undefined
         maxStartTime: number | undefined
         minEndTime: number | undefined
@@ -34,7 +34,9 @@ interface IMissionFilterContext {
         resetFilters: () => void
         resetFilter: (s: string) => void
         removeFilter: (s: string) => void
+        removeFilters: () => void
         isDefault: (filterName: string, value: any) => boolean
+        isSet: (filterName: string, value: any) => boolean
         removeFilterElement: (filterName: string, value: any) => void
         dateTimeStringToInt: (dateTimeString: string | undefined) => number | undefined
         dateTimeIntToString: (dateTimeNumber: number | undefined) => string | undefined
@@ -57,10 +59,10 @@ const completedStatuses = [
     MissionStatus.Failed,
 ]
 
-const defaultMissionFilterInterface = {
+const defaultMissionFilterInterface: IMissionFilterContext = {
     page: 1,
     switchPage: (newPage: number) => {},
-    filterIsSet: false,
+    filterIsSet: true,
     filterError: '',
     clearFilterError: () => {},
     filterState: {
@@ -87,7 +89,9 @@ const defaultMissionFilterInterface = {
         resetFilters: () => {},
         resetFilter: (s: string) => {},
         removeFilter: (s: string) => {},
+        removeFilters: () => {},
         isDefault: (filterName: string, value: any) => true,
+        isSet: (filterName: string, value: any) => true,
         removeFilterElement: (filterName: string, value: any) => {},
         dateTimeStringToInt: (dateTimeString: string | undefined) => 0,
         dateTimeIntToString: (dateTimeNumber: number | undefined) => '',
@@ -204,7 +208,6 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 }
             },
             resetFilters: () => {
-                setFilterIsSet(false)
                 setFilterState(defaultMissionFilterInterface.filterState)
             },
             resetFilter: (filterName: string) => {
@@ -213,12 +216,15 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 const defaultValue = defaultState[filterName as keyof typeof defaultState]
                 setFilterState({ ...filterState, [filterName]: defaultValue })
             },
+            removeFilters: () => {
+                let localFilter: IMissionFilterContext['filterState'] = { ...filterState }
+                for (const key of Object.keys(localFilter)) localFilter[key as keyof typeof localFilter] = undefined
+
+                setFilterState(localFilter)
+            },
             removeFilter: (filterName: string) => {
                 filterName = filterName.trim()
-                const defaultState = defaultMissionFilterInterface.filterState
-                const defaultValue = defaultState[filterName as keyof typeof defaultState]
-                const newValue = Array.isArray(defaultValue) ? [] : undefined
-                setFilterState({ ...filterState, [filterName]: newValue })
+                setFilterState({ ...filterState, [filterName]: undefined })
             },
             removeFilterElement: (filterName: string, value: any) => {
                 filterName = filterName.trim()
@@ -238,6 +244,11 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 } else {
                     return defaultValue === value
                 }
+            },
+            isSet: (filterName: string, value: any) => {
+                filterName = filterName.trim()
+                if (!Object.keys(filterState).includes(filterName)) return false
+                return !value || value.length === 0
             },
             dateTimeStringToInt: (dateTimeString: string | undefined) => {
                 if (dateTimeString === '' || dateTimeString === undefined) return undefined
@@ -277,12 +288,11 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
     )
 
     useEffect(() => {
-        const isAllDefault = () => {
-            if (Object.keys(filterState).length !== Object.keys(defaultMissionFilterInterface.filterState).length)
-                return false
-            return Object.entries(filterState).every((entry) => filterFunctions.isDefault(entry[0], entry[1]))
+        const isAllNotSet = () => {
+            if (Object.keys(filterState).length === 0) return true
+            return Object.entries(filterState).every((entry) => filterFunctions.isSet(entry[0], entry[1]))
         }
-        if (isAllDefault()) setFilterIsSet(false)
+        setFilterIsSet(!isAllNotSet())
     }, [filterState, filterFunctions])
 
     return (
