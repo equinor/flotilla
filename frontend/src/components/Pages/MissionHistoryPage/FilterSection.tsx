@@ -19,7 +19,7 @@ import { useMissionFilterContext } from 'components/Contexts/MissionFilterContex
 
 const StyledHeader = styled.div`
     display: grid;
-    grid-template-columns: auto 100px 150px 150px;
+    grid-template-columns: auto 100px 150px;
     gap: 1rem;
 `
 
@@ -76,10 +76,6 @@ export function FilterSection() {
                 <Button onClick={onClickFilterIcon}>
                     <Icon name={Icons.Filter} size={32} />
                     {TranslateText('Filter')}
-                </Button>
-                <Button variant="outlined" onClick={onResetFilters}>
-                    <Icon name={Icons.Replay} size={32} />
-                    {TranslateText('Reset all filters')}
                 </Button>
                 <Button variant="outlined" onClick={onClearFilters}>
                     <Icon name={Icons.Clear} size={32} />
