@@ -13,6 +13,15 @@ export enum MissionStatus {
     Cancelled = 'Cancelled',
 }
 
+export const missionStatusFilterOptionsIterable = [
+    MissionStatus.Successful,
+    MissionStatus.PartiallySuccessful,
+    MissionStatus.Aborted,
+    MissionStatus.Failed,
+    MissionStatus.Cancelled,
+] as const
+export type MissionStatusFilterOptions = (typeof missionStatusFilterOptionsIterable)[number]
+
 export interface Mission {
     id: string
     echoMissionId?: number

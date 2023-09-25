@@ -1,5 +1,5 @@
 import { createContext, FC, useContext, useEffect, useState, useMemo } from 'react'
-import { MissionStatus } from 'models/Mission'
+import { MissionStatusFilterOptions, missionStatusFilterOptionsIterable } from 'models/Mission'
 import { InspectionType } from 'models/Inspection'
 import { useLanguageContext } from './LanguageContext'
 import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
@@ -12,7 +12,7 @@ interface IMissionFilterContext {
     clearFilterError: () => void
     filterState: {
         missionName: string | undefined
-        statuses: MissionStatus[] | undefined
+        statuses: MissionStatusFilterOptions[] | undefined
         robotName: string | undefined
         tagId: string | undefined
         inspectionTypes: InspectionType[] | undefined
@@ -23,7 +23,7 @@ interface IMissionFilterContext {
     }
     filterFunctions: {
         switchMissionName: (newMissionName: string | undefined) => void
-        switchStatuses: (newStatuses: MissionStatus[]) => void
+        switchStatuses: (newStatuses: MissionStatusFilterOptions[]) => void
         switchRobotName: (newRobotName: string | undefined) => void
         switchTagId: (newTagId: string | undefined) => void
         switchInspectionTypes: (newInspectionTypes: InspectionType[]) => void
@@ -70,7 +70,7 @@ const defaultMissionFilterInterface: IMissionFilterContext = {
     },
     filterFunctions: {
         switchMissionName: (newMissionName: string | undefined) => {},
-        switchStatuses: (newStatuses: MissionStatus[]) => {},
+        switchStatuses: (newStatuses: MissionStatusFilterOptions[]) => {},
         switchRobotName: (newRobotName: string | undefined) => {},
         switchTagId: (newTagId: string | undefined) => {},
         switchInspectionTypes: (newInspectionTypes: InspectionType[]) => {},
@@ -117,7 +117,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 setFilterIsSet(true)
                 setFilterState({ ...filterState, missionName: newMissionName })
             },
-            switchStatuses: (newStatuses: MissionStatus[]) => {
+            switchStatuses: (newStatuses: MissionStatusFilterOptions[]) => {
                 setFilterIsSet(true)
                 setFilterState({ ...filterState, statuses: newStatuses })
             },
@@ -268,11 +268,15 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 return iso.slice(0, -3) // Removes :00 at the end
             },
             getFormattedFilter: () => {
+                let localFilter = { ...filterState }
+                // This way we avoid sending an empty filter which allows ongoing missions
+                if (!localFilter.statuses || localFilter.statuses.length === 0)
+                    localFilter.statuses = Object.assign([], missionStatusFilterOptionsIterable)
                 return {
-                    ...filterState,
-                    nameSearch: filterState.missionName,
-                    robotNameSearch: filterState.robotName,
-                    tagSearch: filterState.tagId,
+                    ...localFilter,
+                    nameSearch: localFilter.missionName,
+                    robotNameSearch: localFilter.robotName,
+                    tagSearch: localFilter.tagId,
                 }
             },
         }),
