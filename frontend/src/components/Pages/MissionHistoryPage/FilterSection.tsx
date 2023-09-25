@@ -11,7 +11,7 @@ import {
 } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { MissionStatus } from 'models/Mission'
+import { MissionStatusFilterOptions, missionStatusFilterOptionsIterable } from 'models/Mission'
 import { ChangeEvent, useState } from 'react'
 import { Icons } from 'utils/icons'
 import { InspectionType } from 'models/Inspection'
@@ -35,8 +35,8 @@ export function FilterSection() {
     const [isFilteringDialogOpen, setIsFilteringDialogOpen] = useState<boolean>(false)
     const { filterFunctions, filterState } = useMissionFilterContext()
 
-    const missionStatusTranslationMap: Map<string, MissionStatus> = new Map(
-        Object.values(MissionStatus).map((missionStatus) => {
+    const missionStatusTranslationMap: Map<string, MissionStatusFilterOptions> = new Map(
+        Object.values(missionStatusFilterOptionsIterable).map((missionStatus) => {
             return [TranslateText(missionStatus), missionStatus]
         })
     )
@@ -53,10 +53,6 @@ export function FilterSection() {
 
     const onFilterClose = () => {
         setIsFilteringDialogOpen(false)
-    }
-
-    const onResetFilters = () => {
-        filterFunctions.resetFilters()
     }
 
     const onClearFilters = () => {

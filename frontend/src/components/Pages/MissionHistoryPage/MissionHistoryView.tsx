@@ -1,5 +1,5 @@
 import { CircularProgress, Pagination, Table, Typography, Chip, Button, Dialog } from '@equinor/eds-core-react'
-import { Mission } from 'models/Mission'
+import { Mission, MissionStatusFilterOptions } from 'models/Mission'
 import { useCallback, useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
 import { RefreshProps } from './MissionHistoryPage'
@@ -9,7 +9,6 @@ import { PaginationHeader } from 'models/PaginatedResponse'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionFilterContext, IFilterState } from 'components/Contexts/MissionFilterContext'
 import { FilterSection } from './FilterSection'
-import { MissionStatus } from 'models/Mission'
 import { InspectionType } from 'models/Inspection'
 import { tokens } from '@equinor/eds-tokens'
 
@@ -79,7 +78,10 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     const checkBoxBackgroundColour = tokens.colors.ui.background__info.hex
     const checkBoxBorderColour = tokens.colors.interactive.primary__resting.hex
 
-    const toDisplayValue = (filterName: string, value: string | number | MissionStatus[] | InspectionType[]) => {
+    const toDisplayValue = (
+        filterName: string,
+        value: string | number | MissionStatusFilterOptions[] | InspectionType[]
+    ) => {
         if (typeof value === 'string') {
             return value
         } else if (typeof value === 'number') {
