@@ -51,14 +51,6 @@ interface Props {
     children: React.ReactNode
 }
 
-const completedStatuses = [
-    MissionStatus.Aborted,
-    MissionStatus.Cancelled,
-    MissionStatus.Successful,
-    MissionStatus.PartiallySuccessful,
-    MissionStatus.Failed,
-]
-
 const defaultMissionFilterInterface: IMissionFilterContext = {
     page: 1,
     switchPage: (newPage: number) => {},
@@ -67,7 +59,7 @@ const defaultMissionFilterInterface: IMissionFilterContext = {
     clearFilterError: () => {},
     filterState: {
         missionName: undefined,
-        statuses: completedStatuses,
+        statuses: [],
         robotName: undefined,
         tagId: undefined,
         inspectionTypes: [],
