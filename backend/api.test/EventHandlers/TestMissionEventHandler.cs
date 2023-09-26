@@ -267,7 +267,7 @@ namespace Api.Test.EventHandlers
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarRobotStatusReceived), mqttEventArgs);
 
             // Assert
-            bool ongoingMission = _missionRunService.ReadAll(
+            var ongoingMission = await _missionRunService.ReadAll(
                 new MissionRunQueryStringParameters
                 {
                     Statuses = new List<MissionStatus>
@@ -276,9 +276,8 @@ namespace Api.Test.EventHandlers
                     },
                     OrderBy = "DesiredStartTime",
                     PageSize = 100
-                }).Result.Any();
-
-            Assert.False(ongoingMission);
+                });
+            Assert.False(ongoingMission.Any());
         }
 
         [Fact]

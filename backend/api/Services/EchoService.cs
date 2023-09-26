@@ -3,7 +3,7 @@ using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services.Models;
 using Api.Utilities;
-using Microsoft.Identity.Web;
+using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 namespace Api.Services
 {
@@ -20,10 +20,10 @@ namespace Api.Services
     public class EchoService : IEchoService
     {
         public const string ServiceName = "EchoApi";
-        private readonly IDownstreamWebApi _echoApi;
+        private readonly IDownstreamApi _echoApi;
         private readonly ILogger<EchoService> _logger;
 
-        public EchoService(IDownstreamWebApi downstreamWebApi, ILogger<EchoService> logger)
+        public EchoService(IDownstreamApi downstreamWebApi, ILogger<EchoService> logger)
         {
             _echoApi = downstreamWebApi;
             _logger = logger;
@@ -35,7 +35,7 @@ namespace Api.Services
                 ? "robots/robot-plan?Status=Ready"
                 : $"robots/robot-plan?InstallationCode={installationCode}&&Status=Ready";
 
-            var response = await _echoApi.CallWebApiForUserAsync(
+            var response = await _echoApi.CallApiForUserAsync(
                 ServiceName,
                 options =>
                 {
@@ -48,12 +48,7 @@ namespace Api.Services
 
             var echoMissions = await response.Content.ReadFromJsonAsync<
                 List<EchoMissionResponse>
-            >();
-            if (echoMissions is null)
-            {
-                throw new JsonException("Failed to deserialize missions from Echo");
-            }
-
+            >() ?? throw new JsonException("Failed to deserialize missions from Echo");
             var availableMissions = ProcessAvailableEchoMission(echoMissions);
 
             return availableMissions;
@@ -63,7 +58,7 @@ namespace Api.Services
         {
             string relativePath = $"robots/robot-plan/{missionId}";
 
-            var response = await _echoApi.CallWebApiForUserAsync(
+            var response = await _echoApi.CallApiForUserAsync(
                 ServiceName,
                 options =>
                 {
@@ -74,26 +69,15 @@ namespace Api.Services
 
             response.EnsureSuccessStatusCode();
 
-            var echoMission = await response.Content.ReadFromJsonAsync<EchoMissionResponse>();
-
-            if (echoMission is null)
-            {
-                throw new JsonException("Failed to deserialize mission from Echo");
-            }
-
-            var processedEchoMission = ProcessEchoMission(echoMission);
-            if (processedEchoMission == null)
-            {
-                throw new InvalidDataException($"EchoMission with id: {missionId} is invalid.");
-            }
-
+            var echoMission = await response.Content.ReadFromJsonAsync<EchoMissionResponse>() ?? throw new JsonException("Failed to deserialize mission from Echo");
+            var processedEchoMission = ProcessEchoMission(echoMission) ?? throw new InvalidDataException($"EchoMission with id: {missionId} is invalid.");
             return processedEchoMission;
         }
 
         public async Task<IList<EchoPlantInfo>> GetEchoPlantInfos()
         {
             string relativePath = "plantinfo";
-            var response = await _echoApi.CallWebApiForUserAsync(
+            var response = await _echoApi.CallApiForUserAsync(
                 ServiceName,
                 options =>
                 {
@@ -105,11 +89,7 @@ namespace Api.Services
             response.EnsureSuccessStatusCode();
             var echoPlantInfoResponse = await response.Content.ReadFromJsonAsync<
                 List<EchoPlantInfoResponse>
-            >();
-            if (echoPlantInfoResponse is null)
-            {
-                throw new JsonException("Failed to deserialize plant information from Echo");
-            }
+            >() ?? throw new JsonException("Failed to deserialize plant information from Echo");
             var installations = ProcessEchoPlantInfos(echoPlantInfoResponse);
             return installations;
         }
@@ -117,7 +97,7 @@ namespace Api.Services
         public async Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId)
         {
             string relativePath = $"/robots/pose/{poseId}";
-            var response = await _echoApi.CallWebApiForUserAsync(
+            var response = await _echoApi.CallApiForUserAsync(
                 ServiceName,
                 options =>
                 {
@@ -126,11 +106,7 @@ namespace Api.Services
                 }
             );
             response.EnsureSuccessStatusCode();
-            var echoPoseResponse = await response.Content.ReadFromJsonAsync<EchoPoseResponse>();
-            if (echoPoseResponse is null)
-            {
-                throw new JsonException("Failed to deserialize robot pose from Echo");
-            }
+            var echoPoseResponse = await response.Content.ReadFromJsonAsync<EchoPoseResponse>() ?? throw new JsonException("Failed to deserialize robot pose from Echo");
             return echoPoseResponse;
         }
 

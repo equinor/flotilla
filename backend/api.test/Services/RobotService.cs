@@ -58,7 +58,8 @@ namespace Api.Test.Services
         public async Task Create()
         {
             var robotService = new RobotService(_context);
-            int nRobotsBefore = robotService.ReadAll().Result.Count();
+            var robotsBefore = await robotService.ReadAll();
+            int nRobotsBefore = robotsBefore.Count();
             var videoStreamQuery = new CreateVideoStreamQuery()
             {
                 Name = "Front Camera",
@@ -84,7 +85,8 @@ namespace Api.Test.Services
             robot.Model = robotModel;
 
             await robotService.Create(robot);
-            int nRobotsAfter = robotService.ReadAll().Result.Count();
+            var robotsAfter = await robotService.ReadAll();
+            int nRobotsAfter = robotsAfter.Count();
 
             Assert.Equal(nRobotsBefore + 1, nRobotsAfter);
         }

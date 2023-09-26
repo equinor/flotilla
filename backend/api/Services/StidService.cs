@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Api.Database.Models;
 using Api.Services.Models;
-using Microsoft.Identity.Web;
+using Microsoft.Identity.Abstractions;
 
 namespace Api.Services
 {
@@ -13,9 +13,9 @@ namespace Api.Services
     public class StidService : IStidService
     {
         public const string ServiceName = "StidApi";
-        private readonly IDownstreamWebApi _stidApi;
+        private readonly IDownstreamApi _stidApi;
 
-        public StidService(IDownstreamWebApi downstreamWebApi)
+        public StidService(IDownstreamApi downstreamWebApi)
         {
             _stidApi = downstreamWebApi;
         }
@@ -24,7 +24,7 @@ namespace Api.Services
         {
             string relativePath = $"{installationCode}/tag?tagNo={tag}";
 
-            var response = await _stidApi.CallWebApiForAppAsync(
+            var response = await _stidApi.CallApiForAppAsync(
                 ServiceName,
                 options =>
                 {
@@ -35,9 +35,7 @@ namespace Api.Services
             response.EnsureSuccessStatusCode();
 
             var stidTagPositionResponse =
-                await response.Content.ReadFromJsonAsync<StidTagPositionResponse>();
-            if (stidTagPositionResponse is null)
-                throw new JsonException("Failed to deserialize tag position from STID");
+                await response.Content.ReadFromJsonAsync<StidTagPositionResponse>() ?? throw new JsonException("Failed to deserialize tag position from STID");
 
             // Convert from millimeter to meter
             return new Position(

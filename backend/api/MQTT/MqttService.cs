@@ -43,24 +43,24 @@ namespace Api.Mqtt
             ).Equals("Production", StringComparison.OrdinalIgnoreCase);*/
 
             var mqttConfig = config.GetSection("Mqtt");
-            string password = mqttConfig.GetValue<string>("Password");
-            string username = mqttConfig.GetValue<string>("Username");
-            _serverHost = mqttConfig.GetValue<string>("Host");
+            string password = mqttConfig.GetValue<string>("Password") ?? "";
+            string username = mqttConfig.GetValue<string>("Username") ?? "";
+            _serverHost = mqttConfig.GetValue<string>("Host") ?? "";
             _serverPort = mqttConfig.GetValue<int>("Port");
             _maxRetryAttempts = mqttConfig.GetValue<int>("MaxRetryAttempts");
             _shouldFailOnMaxRetries = mqttConfig.GetValue<bool>("ShouldFailOnMaxRetries");
 
+
+            var tlsOptions = new MqttClientTlsOptions
+            {
+                UseTls = true,
+                /* Currently disabled to use self-signed certificate in the internal broker communication */
+                //if (_notProduction)
+                IgnoreCertificateChainErrors = true
+            };
             var builder = new MqttClientOptionsBuilder()
                 .WithTcpServer(_serverHost, _serverPort)
-                .WithTls(
-                    o =>
-                    {
-                        o.UseTls = true;
-                        /* Currently disabled to use self-signed certificate in the internal broker communication */
-                        //if (_notProduction)
-                        o.IgnoreCertificateChainErrors = true;
-                    }
-                )
+                .WithTlsOptions(tlsOptions)
                 .WithCredentials(username, password);
 
             _options = new ManagedMqttClientOptionsBuilder()
@@ -70,7 +70,7 @@ namespace Api.Mqtt
 
             RegisterCallbacks();
 
-            var topics = mqttConfig.GetSection("Topics").Get<List<string>>();
+            var topics = mqttConfig.GetSection("Topics").Get<List<string>>() ?? new List<string>();
             SubscribeToTopics(topics);
         }
         public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotStatusReceived;
