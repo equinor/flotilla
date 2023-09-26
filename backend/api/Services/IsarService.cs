@@ -2,7 +2,7 @@
 using Api.Database.Models;
 using Api.Services.Models;
 using Api.Utilities;
-using Microsoft.Identity.Web;
+using Microsoft.Identity.Abstractions;
 
 namespace Api.Services
 {
@@ -24,10 +24,10 @@ namespace Api.Services
     public class IsarService : IIsarService
     {
         public const string ServiceName = "IsarApi";
-        private readonly IDownstreamWebApi _isarApi;
+        private readonly IDownstreamApi _isarApi;
         private readonly ILogger<IsarService> _logger;
 
-        public IsarService(ILogger<IsarService> logger, IDownstreamWebApi downstreamWebApi)
+        public IsarService(ILogger<IsarService> logger, IDownstreamApi downstreamWebApi)
         {
             _logger = logger;
             _isarApi = downstreamWebApi;
@@ -55,7 +55,7 @@ namespace Api.Services
                       null,
                       "application/json"
                   );
-            var response = await _isarApi.CallWebApiForAppAsync(
+            var response = await _isarApi.CallApiForAppAsync(
                 ServiceName,
                 options =>
                 {

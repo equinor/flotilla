@@ -41,13 +41,9 @@ namespace Api.Services
                             propertyFromQueryName,
                             StringComparison.Ordinal
                         )
-                );
-
-                if (objectProperty == null)
-                    throw new InvalidDataException(
+                ) ?? throw new InvalidDataException(
                         $"Mission has no property '{propertyFromQueryName}' for ordering"
                     );
-
                 string sortingOrder = param.EndsWith(" desc", StringComparison.OrdinalIgnoreCase)
                   ? "descending"
                   : "ascending";

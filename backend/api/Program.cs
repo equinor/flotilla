@@ -92,9 +92,9 @@ builder.Services
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
     .EnableTokenAcquisitionToCallDownstreamApi()
     .AddInMemoryTokenCaches()
-    .AddDownstreamWebApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
-    .AddDownstreamWebApi(StidService.ServiceName, builder.Configuration.GetSection("Stid"))
-    .AddDownstreamWebApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
+    .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
+    .AddDownstreamApi(StidService.ServiceName, builder.Configuration.GetSection("Stid"))
+    .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
 builder.Services.AddAuthorization(
     options =>
@@ -106,8 +106,7 @@ builder.Services.AddAuthorization(
 );
 
 var app = builder.Build();
-
-string basePath = builder.Configuration["BackendBaseRoute"];
+string basePath = builder.Configuration["BackendBaseRoute"] ?? "";
 app.UseSwagger(
     c =>
     {
@@ -138,7 +137,7 @@ app.UseSwaggerUI(
             new Dictionary<string, string>
             {
                 {
-                    "Resource", builder.Configuration["AzureAd:ClientId"]
+                    "Resource", builder.Configuration["AzureAd:ClientId"] ?? throw new ArgumentException("No Azure Ad ClientId")
                 }
             }
         );
@@ -150,10 +149,11 @@ var option = new RewriteOptions();
 option.AddRedirect("^$", "swagger");
 app.UseRewriter(option);
 
+string[] allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 app.UseCors(
     corsBuilder =>
         corsBuilder
-            .WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>())
+            .WithOrigins(allowedOrigins)
             .SetIsOriginAllowedToAllowWildcardSubdomains()
             .WithExposedHeaders(QueryStringParameters.PaginationHeader)
             .AllowAnyHeader()

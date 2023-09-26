@@ -28,7 +28,7 @@ namespace Api.Utilities
 
             internal CancellationToken _cancellationToken;
 
-            public object GetResult()
+            public readonly object GetResult()
             {
                 // this is called by compiler generated methods when the
                 // task has completed. Instead of returning a result, we
@@ -43,15 +43,15 @@ namespace Api.Utilities
 
             // called by compiler generated/.net internals to check
             // if the task has completed.
-            public bool IsCompleted => _cancellationToken.IsCancellationRequested;
+            public readonly bool IsCompleted => _cancellationToken.IsCancellationRequested;
 
             // The compiler will generate stuff that hooks in
             // here. We hook those methods directly into the
             // cancellation token.
-            public void OnCompleted(Action continuation) =>
+            public readonly void OnCompleted(Action continuation) =>
                 _cancellationToken.Register(continuation);
 
-            public void UnsafeOnCompleted(Action continuation) =>
+            public readonly void UnsafeOnCompleted(Action continuation) =>
                 _cancellationToken.Register(continuation);
         }
     }

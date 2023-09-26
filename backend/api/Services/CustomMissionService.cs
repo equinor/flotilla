@@ -66,8 +66,7 @@ namespace Api.Services
             }
 
             string json = JsonSerializer.Serialize(genericTasks);
-            var hasher = SHA256.Create();
-            byte[] hash = hasher.ComputeHash(Encoding.UTF8.GetBytes(json));
+            byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
             return BitConverter.ToString(hash).Replace("-", "", StringComparison.CurrentCulture).ToUpperInvariant();
         }
     }

@@ -515,7 +515,7 @@ namespace Api.Test
             Assert.True(areaMissionsResponse.IsSuccessStatusCode);
             var missions = await areaMissionsResponse.Content.ReadFromJsonAsync<IList<MissionRun>>(_serializerOptions);
             Assert.NotNull(missions);
-            Assert.Equal(1, missions.Count);
+            Assert.Single(missions);
             Assert.Equal(missions[0].Id, mission.MissionId);
         }
 

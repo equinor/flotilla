@@ -21,9 +21,9 @@ namespace Api.Services
 
         public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id)
         {
-            if (mockBlobStore.ContainsKey(id))
+            if (mockBlobStore.TryGetValue(id, out var value))
             {
-                var content = mockBlobStore[id];
+                var content = value;
                 foreach (var task in content)
                 {
                     task.Id = Guid.NewGuid().ToString(); // This is needed as tasks are owned by mission runs
@@ -44,8 +44,7 @@ namespace Api.Services
             }
 
             string json = JsonSerializer.Serialize(genericTasks);
-            var hasher = SHA256.Create();
-            byte[] hash = hasher.ComputeHash(Encoding.UTF8.GetBytes(json));
+            byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
             return BitConverter.ToString(hash).Replace("-", "", StringComparison.CurrentCulture).ToUpperInvariant();
         }
     }

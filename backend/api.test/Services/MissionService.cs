@@ -43,10 +43,8 @@ namespace Api.Test.Services
         public async Task Create()
         {
             var robot = _context.Robots.First();
-            int nReportsBefore = _missionRunService
-                .ReadAll(new MissionRunQueryStringParameters())
-                .Result.Count;
-
+            var reportsBefore = await _missionRunService.ReadAll(new MissionRunQueryStringParameters());
+            int nReportsBefore = reportsBefore.Count;
             var testInstallation = new Installation
             {
                 InstallationCode = "test",
@@ -86,10 +84,8 @@ namespace Api.Test.Services
                 };
 
             await _missionRunService.Create(missionRun);
-            int nReportsAfter = _missionRunService
-                .ReadAll(new MissionRunQueryStringParameters())
-                .Result.Count;
-
+            var reportsAfter = await _missionRunService.ReadAll(new MissionRunQueryStringParameters());
+            int nReportsAfter = reportsAfter.Count;
             Assert.Equal(nReportsBefore + 1, nReportsAfter);
         }
     }
