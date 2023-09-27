@@ -8,12 +8,12 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("missions")]
-    public class MissionController : ControllerBase
+    public class MissionSchedulingController : ControllerBase
     {
         private readonly IAreaService _areaService;
         private readonly ICustomMissionService _customMissionService;
         private readonly IEchoService _echoService;
-        private readonly ILogger<MissionController> _logger;
+        private readonly ILogger<MissionSchedulingController> _logger;
         private readonly IMapService _mapService;
         private readonly IMissionDefinitionService _missionDefinitionService;
         private readonly IMissionRunService _missionRunService;
@@ -21,14 +21,14 @@ namespace Api.Controllers
         private readonly ISourceService _sourceService;
         private readonly IStidService _stidService;
 
-        public MissionController(
+        public MissionSchedulingController(
             IMissionDefinitionService missionDefinitionService,
             IMissionRunService missionRunService,
             IAreaService areaService,
             IRobotService robotService,
             IEchoService echoService,
             ICustomMissionService customMissionService,
-            ILogger<MissionController> logger,
+            ILogger<MissionSchedulingController> logger,
             IMapService mapService,
             IStidService stidService,
             ISourceService sourceService
