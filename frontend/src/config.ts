@@ -20,6 +20,7 @@ function GetEnvVariable(name: string): string {
 export const config = {
     BACKEND_URL: GetEnvVariable('REACT_APP_BACKEND_URL'),
     BACKEND_API_SCOPE: GetEnvVariable('REACT_APP_BACKEND_API_SCOPE'),
+    BACKEND_API_SIGNALR_URL: GetEnvVariable('REACT_APP_BACKEND_URL') + '/hub',
     FRONTEND_URL: GetEnvVariable('REACT_APP_FRONTEND_URL'),
     FRONTEND_BASE_ROUTE: GetEnvVariable('REACT_APP_FRONTEND_BASE_ROUTE'),
     AD_CLIENT_ID: GetEnvVariable('REACT_APP_AD_CLIENT_ID'),

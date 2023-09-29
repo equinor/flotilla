@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
+using Api.SignalRHubs;
+
 var builder = WebApplication.CreateBuilder(args);
 
 Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentName}'\n");
@@ -130,6 +132,8 @@ builder.Services.AddAuthorization(
     }
 );
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 string basePath = builder.Configuration["BackendBaseRoute"] ?? "";
 app.UseSwagger(
@@ -190,6 +194,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<SignalRHub>("/hub");
 
 app.MapControllers();
 

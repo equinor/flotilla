@@ -2,6 +2,8 @@ import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { refreshInterval } from 'components/Pages/FrontPage/FrontPage'
 import { BackendAPICaller } from 'api/ApiCaller'
+import { useSignalRContext } from './SignalRContext'
+import { MissionDefinition } from 'models/MissionDefinition'
 
 interface IMissionsContext {
     ongoingMissions: Mission[]
@@ -34,6 +36,18 @@ const fetchMissions = (params: {
 export const useMissions = (refreshInterval: number): MissionsResult => {
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
+    const { registerEvent, connectionReady } = useSignalRContext()
+    const [createdMission, setCreatedMission] = useState<MissionDefinition | undefined>()
+
+    useEffect(() => {
+        console.log(createdMission)
+    }, [createdMission])
+
+    useEffect(() => {
+        if (connectionReady)
+            registerEvent("mission run created", (username: string, message: string) => 
+                setCreatedMission(JSON.parse(message)))
+    }, [registerEvent, connectionReady]);
 
     useEffect(() => {
         const fetchAndUpdateMissions = async () => {
