@@ -1,11 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Database.Models;
-using Api.Utilities;
-
 namespace Api.Services.Models
 {
     /// <summary>
-    /// The input ISAR expects as a mission description in the /schedule/start-mission endpoint
+    ///     The input ISAR expects as a mission description in the /schedule/start-mission endpoint
     /// </summary>
     public struct IsarMissionDefinition
     {
@@ -163,31 +161,6 @@ namespace Api.Services.Models
 
         [JsonPropertyName("frame_name")]
         public string FrameName { get; set; }
-
-        public IsarPose(IsarPosition position, IsarOrientation orientation, string frameName)
-        {
-            Position = position;
-            Orientation = orientation;
-            FrameName = frameName;
-        }
-
-        public IsarPose(PredefinedPose predefinedPose)
-        {
-            Position = new IsarPosition(
-                predefinedPose.Pose.Position.X,
-                predefinedPose.Pose.Position.Y,
-                predefinedPose.Pose.Position.Z,
-                "asset"
-            );
-            Orientation = new IsarOrientation(
-                predefinedPose.Pose.Orientation.X,
-                predefinedPose.Pose.Orientation.Y,
-                predefinedPose.Pose.Orientation.Z,
-                predefinedPose.Pose.Orientation.W,
-                "asset"
-            );
-            FrameName = "asset";
-        }
 
         public IsarPose(Pose pose)
         {
