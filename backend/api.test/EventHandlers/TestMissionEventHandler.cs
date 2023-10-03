@@ -109,7 +109,7 @@ namespace Api.Test.EventHandlers
                 Boundary = new Boundary(),
                 TransformationMatrices = new TransformationMatrices()
             },
-            DefaultLocalizationPose = new Pose(),
+            DefaultLocalizationPose = null,
             SafePositions = new List<SafePosition>()
         };
 

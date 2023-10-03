@@ -9,6 +9,6 @@ namespace Api.Controllers.Models
         public string DeckName { get; set; }
         public string AreaName { get; set; }
 
-        public Pose DefaultLocalizationPose { get; set; }
+        public Pose? DefaultLocalizationPose { get; set; }
     }
 }

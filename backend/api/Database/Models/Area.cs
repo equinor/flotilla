@@ -23,8 +23,8 @@ namespace Api.Database.Models
         [Required]
         public MapMetadata MapMetadata { get; set; }
 
-        [Required]
-        public Pose DefaultLocalizationPose { get; set; }
+
+        public DefaultLocalizationPose? DefaultLocalizationPose { get; set; }
 
         public IList<SafePosition> SafePositions { get; set; }
     }

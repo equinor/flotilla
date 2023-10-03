@@ -44,14 +44,16 @@ namespace Api.Services
         private readonly IInstallationService _installationService;
         private readonly IPlantService _plantService;
         private readonly IDeckService _deckService;
+        private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
 
         public AreaService(
-            FlotillaDbContext context, IInstallationService installationService, IPlantService plantService, IDeckService deckService)
+            FlotillaDbContext context, IInstallationService installationService, IPlantService plantService, IDeckService deckService, IDefaultLocalizationPoseService defaultLocalizationPoseService)
         {
             _context = context;
             _installationService = installationService;
             _plantService = plantService;
             _deckService = deckService;
+            _defaultLocalizationPoseService = defaultLocalizationPoseService;
         }
 
         public async Task<IEnumerable<Area>> ReadAll()
@@ -62,7 +64,7 @@ namespace Api.Services
         private IQueryable<Area> GetAreas()
         {
             return _context.Areas.Include(a => a.SafePositions)
-                .Include(a => a.Deck).Include(d => d.Plant).Include(i => i.Installation);
+                .Include(a => a.Deck).Include(d => d.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose);
         }
 
         public async Task<Area?> ReadById(string id)
@@ -142,10 +144,16 @@ namespace Api.Services
                 throw new AreaExistsException($"Area with name {newAreaQuery.AreaName} already exists");
             }
 
+            DefaultLocalizationPose? defaultLocalizationPose = null;
+            if (newAreaQuery.DefaultLocalizationPose != null)
+            {
+                defaultLocalizationPose = await _defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newAreaQuery.DefaultLocalizationPose));
+            }
+
             var newArea = new Area
             {
                 Name = newAreaQuery.AreaName,
-                DefaultLocalizationPose = newAreaQuery.DefaultLocalizationPose,
+                DefaultLocalizationPose = defaultLocalizationPose,
                 SafePositions = safePositions,
                 MapMetadata = new MapMetadata(),
                 Deck = deck!,
