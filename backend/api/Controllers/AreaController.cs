@@ -12,6 +12,7 @@ namespace Api.Controllers
     public class AreaController : ControllerBase
     {
         private readonly IAreaService _areaService;
+        private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
 
         private readonly IMissionDefinitionService _missionDefinitionService;
 
@@ -23,12 +24,14 @@ namespace Api.Controllers
             ILogger<AreaController> logger,
             IMapService mapService,
             IAreaService areaService,
+            IDefaultLocalizationPoseService defaultLocalizationPoseService,
             IMissionDefinitionService missionDefinitionService
         )
         {
             _logger = logger;
             _mapService = mapService;
             _areaService = areaService;
+            _defaultLocalizationPoseService = defaultLocalizationPoseService;
             _missionDefinitionService = missionDefinitionService;
         }
 
@@ -127,6 +130,54 @@ namespace Api.Controllers
                 throw;
             }
         }
+
+        /// <summary>
+        /// Updates default localization pose
+        /// </summary>
+        /// <remarks>
+        /// <para> This query updates the default localization pose for a deck </para>
+        /// </remarks>
+        [HttpPut]
+        [Authorize(Roles = Role.Admin)]
+        [Route("{areaId}/update-default-localization-pose")]
+        [ProducesResponseType(typeof(Deck), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Deck>> UpdateDefaultLocalizationPose([FromRoute] string areaId, [FromBody] Pose newDefaultLocalizationPose)
+        {
+            _logger.LogInformation("Updating default localization pose on area '{areaId}'", areaId);
+            try
+            {
+                var area = await _areaService.ReadById(areaId);
+                if (area is null)
+                {
+                    _logger.LogInformation("A area with id '{areaId}' does not exist", areaId);
+                    return NotFound("Area does not exists");
+                }
+
+                if (area.DefaultLocalizationPose != null)
+                {
+                    area.DefaultLocalizationPose.Pose = newDefaultLocalizationPose;
+                    _ = await _defaultLocalizationPoseService.Update(area.DefaultLocalizationPose);
+                }
+                else
+                {
+                    area.DefaultLocalizationPose = new DefaultLocalizationPose(newDefaultLocalizationPose);
+                    area = await _areaService.Update(area);
+                }
+
+
+                return Ok(new AreaResponse(area));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while updating the default localization pose");
+                throw;
+            }
+        }
+
 
         /// <summary>
         /// Deletes the area with the specified id from the database.
@@ -277,10 +328,17 @@ namespace Api.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
             }
 
+            if (area.DefaultLocalizationPose is null)
+            {
+                string errorMessage = $"Area with id '{area.Id}' does not have a default localization pose";
+                _logger.LogInformation("{ErrorMessage}", errorMessage);
+                return NotFound(errorMessage);
+            }
+
             MapMetadata? mapMetadata;
             var positions = new List<Position>
             {
-                area.DefaultLocalizationPose.Position
+                area.DefaultLocalizationPose.Pose.Position
             };
             try
             {

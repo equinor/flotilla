@@ -16,7 +16,7 @@ namespace Api.Controllers.Models
 
         public MapMetadata MapMetadata { get; set; }
 
-        public Pose DefaultLocalizationPose { get; set; }
+        public DefaultLocalizationPose? DefaultLocalizationPose { get; set; }
 
         public IList<SafePosition> SafePositions { get; set; }
 

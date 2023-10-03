@@ -74,11 +74,6 @@ public class FlotillaDbContext : DbContext
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
         modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
         modelBuilder.Entity<Robot>().OwnsMany(r => r.VideoStreams);
-        modelBuilder.Entity<Area>().OwnsOne(a => a.DefaultLocalizationPose, poseBuilder =>
-        {
-            poseBuilder.OwnsOne(pose => pose.Position);
-            poseBuilder.OwnsOne(pose => pose.Orientation);
-        });
         modelBuilder.Entity<Area>().HasOne(a => a.Deck).WithMany();
         modelBuilder.Entity<Area>().HasOne(a => a.Installation).WithMany();
         modelBuilder.Entity<Area>().HasOne(a => a.Plant).WithMany();

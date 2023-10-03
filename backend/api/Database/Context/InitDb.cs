@@ -112,7 +112,7 @@ public static class InitDb
             Installation = decks[0].Plant!.Installation,
             Name = "AP320",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = new Pose { },
+            DefaultLocalizationPose = null,
             SafePositions = new List<SafePosition>()
         };
 
@@ -124,7 +124,7 @@ public static class InitDb
             Installation = decks[0].Plant!.Installation,
             Name = "AP330",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = new Pose { },
+            DefaultLocalizationPose = null,
             SafePositions = new List<SafePosition>()
         };
 
@@ -136,7 +136,7 @@ public static class InitDb
             Installation = decks[0].Plant!.Installation,
             Name = "testArea",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = new Pose { },
+            DefaultLocalizationPose = null,
             SafePositions = new List<SafePosition>()
         };
 
@@ -148,7 +148,7 @@ public static class InitDb
             Installation = decks[1].Plant.Installation,
             Name = "testArea2",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = new Pose { },
+            DefaultLocalizationPose = null,
             SafePositions = new List<SafePosition>()
         };
 
@@ -160,7 +160,7 @@ public static class InitDb
             Installation = decks[2].Plant.Installation,
             Name = "testArea3",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = new Pose { },
+            DefaultLocalizationPose = null,
             SafePositions = new List<SafePosition>()
         };
 
@@ -172,7 +172,7 @@ public static class InitDb
             Installation = decks[3].Plant.Installation,
             Name = "testArea4",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = new Pose { },
+            DefaultLocalizationPose = null,
             SafePositions = new List<SafePosition>()
         };
 

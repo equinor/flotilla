@@ -76,7 +76,7 @@ namespace Api.Test.Services
                         Plant = testPlant,
                         Name = "testArea",
                         MapMetadata = new MapMetadata() { MapName = "testMap" },
-                        DefaultLocalizationPose = new Pose(),
+                        DefaultLocalizationPose = null,
                         SafePositions = new List<SafePosition>()
                     },
                     InstallationCode = "testInstallation",
