@@ -602,6 +602,44 @@ namespace Api.Test
         }
 
         [Fact]
+        public async Task UpdateDefaultLocalizationPoseOnDeck()
+        {
+            string testInstallation = "testInstallationUpdateDefaultLocalizationPoseOnDeck";
+            string testPlant = "testPlantUpdateDefaultLocalizationPoseOnDeck";
+            string testDeck = "testDeckUpdateDefaultLocalizationPoseOnDeck";
+            string testArea = "testAreaUpdateDefaultLocalizationPoseOnDeck";
+
+            (_, _, string deckId, _) = await PopulateAreaDb(testInstallation, testPlant, testDeck, testArea);
+
+            string url = $"/decks/{deckId}/update-default-localization-pose";
+            var query = new Pose
+            {
+                Position = new Position
+                {
+                    X = 1,
+                    Y = 2,
+                    Z = 3
+                },
+                Orientation = new Orientation
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0,
+                    W = 1
+                }
+            };
+            var content = new StringContent(
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
+            var response = await _client.PutAsync(url, content);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        }
+
+
+        [Fact]
         public async Task GetNextRun()
         {
             // Arrange - Initialise areas

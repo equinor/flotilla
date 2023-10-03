@@ -12,12 +12,15 @@ namespace Api.Controllers.Models
 
         public string InstallationCode { get; set; }
 
+        public DefaultLocalizationPose? DefaultLocalizationPose { get; set; }
+
         public DeckResponse(Deck deck)
         {
             Id = deck.Id;
             DeckName = deck.Name;
             PlantCode = deck.Plant.PlantCode;
             InstallationCode = deck.Installation.InstallationCode;
+            DefaultLocalizationPose = deck.DefaultLocalizationPose;
         }
     }
 }

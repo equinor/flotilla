@@ -1,4 +1,5 @@
-﻿using Api.Controllers.Models;
+﻿using System.IO.Compression;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
@@ -39,12 +40,14 @@ namespace Api.Services
     public class DeckService : IDeckService
     {
         private readonly FlotillaDbContext _context;
+        private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
         private readonly IInstallationService _installationService;
         private readonly IPlantService _plantService;
 
-        public DeckService(FlotillaDbContext context, IInstallationService installationService, IPlantService plantService)
+        public DeckService(FlotillaDbContext context, IDefaultLocalizationPoseService defaultLocalizationPoseService, IInstallationService installationService, IPlantService plantService)
         {
             _context = context;
+            _defaultLocalizationPoseService = defaultLocalizationPoseService;
             _installationService = installationService;
             _plantService = plantService;
         }
@@ -56,7 +59,7 @@ namespace Api.Services
 
         private IQueryable<Deck> GetDecks()
         {
-            return _context.Decks.Include(p => p.Plant).Include(i => i.Installation);
+            return _context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose);
         }
 
         public async Task<Deck?> ReadById(string id)
@@ -99,13 +102,21 @@ namespace Api.Services
             var plant = await _plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode) ??
                 throw new PlantNotFoundException($"No plant with name {newDeckQuery.PlantCode} could be found");
             var deck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name);
+
             if (deck == null)
             {
+                DefaultLocalizationPose? defaultLocalizationPose = null;
+                if (newDeckQuery.DefaultLocalizationPose != null)
+                {
+                    defaultLocalizationPose = await _defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newDeckQuery.DefaultLocalizationPose));
+                }
+
                 deck = new Deck
                 {
                     Name = newDeckQuery.Name,
                     Installation = installation,
-                    Plant = plant
+                    Plant = plant,
+                    DefaultLocalizationPose = defaultLocalizationPose
                 };
                 await _context.Decks.AddAsync(deck);
                 await _context.SaveChangesAsync();
