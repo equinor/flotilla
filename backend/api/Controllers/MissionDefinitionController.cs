@@ -31,12 +31,12 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet("")]
         [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<CondensedMissionDefinitionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetMissionDefinitions(
+        public async Task<ActionResult<IList<CondensedMissionDefinitionResponse>>> GetMissionDefinitions(
             [FromQuery] MissionDefinitionQueryStringParameters parameters
         )
         {
@@ -66,7 +66,7 @@ namespace Api.Controllers
                 JsonSerializer.Serialize(metadata)
             );
 
-            var missionDefinitionResponses = missionDefinitions.Select(m => new MissionDefinitionResponse(_missionDefinitionService, m));
+            var missionDefinitionResponses = missionDefinitions.Select(m => new CondensedMissionDefinitionResponse(m));
             return Ok(missionDefinitionResponses);
         }
 
