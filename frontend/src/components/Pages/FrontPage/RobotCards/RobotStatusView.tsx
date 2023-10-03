@@ -71,7 +71,7 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     return (
         <RobotView>
             <Typography color="resting" variant="h1">
-                {TranslateText('Robot status')}
+                {TranslateText('Robot Status')}
             </Typography>
             <RobotCardSection>
                 {robots.length > 0 && robotDisplay}
