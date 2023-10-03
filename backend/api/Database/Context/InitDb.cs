@@ -68,6 +68,7 @@ public static class InitDb
             Id = Guid.NewGuid().ToString(),
             Plant = plants[0],
             Installation = plants[0].Installation,
+            DefaultLocalizationPose = null,
             Name = "TestDeck"
         };
 
@@ -76,6 +77,7 @@ public static class InitDb
             Id = Guid.NewGuid().ToString(),
             Plant = plants[0],
             Installation = plants[0].Installation,
+            DefaultLocalizationPose = null,
             Name = "TestDeck2"
         };
 
@@ -84,6 +86,7 @@ public static class InitDb
             Id = Guid.NewGuid().ToString(),
             Plant = plants[0],
             Installation = plants[0].Installation,
+            DefaultLocalizationPose = null,
             Name = "TestDeck3"
         };
 
@@ -92,6 +95,7 @@ public static class InitDb
             Id = Guid.NewGuid().ToString(),
             Plant = plants[0],
             Installation = plants[0].Installation,
+            DefaultLocalizationPose = null,
             Name = "TestDeck4"
         };
 

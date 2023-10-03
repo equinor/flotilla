@@ -17,6 +17,7 @@ public class FlotillaDbContext : DbContext
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<Source> Sources => Set<Source>();
     public DbSet<SafePosition> SafePositions => Set<SafePosition>();
+    public DbSet<DefaultLocalizationPose> DefaultLocalizationPoses => Set<DefaultLocalizationPose>();
 
     // Timeseries:
     public DbSet<RobotPressureTimeseries> RobotPressureTimeseries => Set<RobotPressureTimeseries>();
@@ -86,6 +87,11 @@ public class FlotillaDbContext : DbContext
         modelBuilder.Entity<Plant>().HasOne(a => a.Installation).WithMany();
 
         modelBuilder.Entity<SafePosition>().OwnsOne(s => s.Pose, poseBuilder =>
+        {
+            poseBuilder.OwnsOne(pose => pose.Position);
+            poseBuilder.OwnsOne(pose => pose.Orientation);
+        });
+        modelBuilder.Entity<DefaultLocalizationPose>().OwnsOne(d => d.Pose, poseBuilder =>
         {
             poseBuilder.OwnsOne(pose => pose.Position);
             poseBuilder.OwnsOne(pose => pose.Orientation);

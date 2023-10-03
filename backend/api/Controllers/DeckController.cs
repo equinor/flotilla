@@ -11,6 +11,7 @@ namespace Api.Controllers
     public class DeckController : ControllerBase
     {
         private readonly IDeckService _deckService;
+        private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
         private readonly IInstallationService _installationService;
         private readonly IMissionDefinitionService _missionDefinitionService;
         private readonly IPlantService _plantService;
@@ -23,6 +24,7 @@ namespace Api.Controllers
             ILogger<DeckController> logger,
             IMapService mapService,
             IDeckService deckService,
+            IDefaultLocalizationPoseService defaultLocalizationPoseService,
             IInstallationService installationService,
             IPlantService plantService,
             IMissionDefinitionService missionDefinitionService
@@ -31,6 +33,7 @@ namespace Api.Controllers
             _logger = logger;
             _mapService = mapService;
             _deckService = deckService;
+            _defaultLocalizationPoseService = defaultLocalizationPoseService;
             _installationService = installationService;
             _plantService = plantService;
             _missionDefinitionService = missionDefinitionService;
@@ -170,6 +173,53 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while creating new deck");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Updates default localization pose
+        /// </summary>
+        /// <remarks>
+        /// <para> This query updates the default localization pose for a deck </para>
+        /// </remarks>
+        [HttpPut]
+        [Authorize(Roles = Role.Admin)]
+        [Route("{deckId}/update-default-localization-pose")]
+        [ProducesResponseType(typeof(Deck), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Deck>> UpdateDefaultLocalizationPose([FromRoute] string deckId, [FromBody] Pose newDefaultLocalizationPose)
+        {
+            _logger.LogInformation("Updating default localization pose on deck '{deckId}'", deckId);
+            try
+            {
+                var deck = await _deckService.ReadById(deckId);
+                if (deck is null)
+                {
+                    _logger.LogInformation("A deck with id '{deckId}' does not exist", deckId);
+                    return NotFound("Deck does not exists");
+                }
+
+                if (deck.DefaultLocalizationPose != null)
+                {
+                    deck.DefaultLocalizationPose.Pose = newDefaultLocalizationPose;
+                    _ = await _defaultLocalizationPoseService.Update(deck.DefaultLocalizationPose);
+                }
+                else
+                {
+                    deck.DefaultLocalizationPose = new DefaultLocalizationPose(newDefaultLocalizationPose);
+                    deck = await _deckService.Update(deck);
+                }
+
+
+                return Ok(new DeckResponse(deck));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error while updating the default localization pose");
                 throw;
             }
         }
