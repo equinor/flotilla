@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+﻿using System.Data;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -101,26 +101,29 @@ namespace Api.Services
                 throw new InstallationNotFoundException($"No installation with name {newDeckQuery.InstallationCode} could be found");
             var plant = await _plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode) ??
                 throw new PlantNotFoundException($"No plant with name {newDeckQuery.PlantCode} could be found");
-            var deck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name);
+            var existingDeck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name);
 
-            if (deck == null)
+            if (existingDeck != null)
             {
-                DefaultLocalizationPose? defaultLocalizationPose = null;
-                if (newDeckQuery.DefaultLocalizationPose != null)
-                {
-                    defaultLocalizationPose = await _defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newDeckQuery.DefaultLocalizationPose));
-                }
-
-                deck = new Deck
-                {
-                    Name = newDeckQuery.Name,
-                    Installation = installation,
-                    Plant = plant,
-                    DefaultLocalizationPose = defaultLocalizationPose
-                };
-                await _context.Decks.AddAsync(deck);
-                await _context.SaveChangesAsync();
+                throw new DeckExistsException($"Deck with name {newDeckQuery.Name} already exists");
             }
+
+
+            DefaultLocalizationPose? defaultLocalizationPose = null;
+            if (newDeckQuery.DefaultLocalizationPose != null)
+            {
+                defaultLocalizationPose = await _defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newDeckQuery.DefaultLocalizationPose));
+            }
+
+            var deck = new Deck
+            {
+                Name = newDeckQuery.Name,
+                Installation = installation,
+                Plant = plant,
+                DefaultLocalizationPose = defaultLocalizationPose
+            };
+            await _context.Decks.AddAsync(deck);
+            await _context.SaveChangesAsync();
             return deck!;
         }
 

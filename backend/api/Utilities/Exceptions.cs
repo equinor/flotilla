@@ -65,4 +65,9 @@
     {
         public AreaExistsException(string message) : base(message) { }
     }
+
+    public class DeckExistsException : Exception
+    {
+        public DeckExistsException(string message) : base(message) { }
+    }
 }
