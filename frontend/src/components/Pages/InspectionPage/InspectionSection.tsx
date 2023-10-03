@@ -36,6 +36,12 @@ const StyledDeckCards = styled.div`
     gap: 1rem;
 `
 
+const StyledPlaceholder = styled.div`
+    padding: 24px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+`
+
 const StyledContent = styled.div`
     display: flex;
     flex-direction: column;
@@ -154,8 +160,8 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
 
     return (
         <>
-            <Typography variant="h1">{TranslateText('Deck Inspections')}</Typography>
             <StyledContent>
+                <Typography variant="h1">{TranslateText('Deck Inspections')}</Typography>
                 <StyledDeckCards>
                     {Object.keys(deckMissions).length > 0 ? (
                         Object.keys(deckMissions).map((deckId) => (
@@ -186,7 +192,11 @@ export function InspectionSection({ refreshInterval }: RefreshProps) {
                             </StyledCard>
                         ))
                     ) : (
-                        <Typography variant="h1">{TranslateText('No Deck Inspections Available')}</Typography>
+                        <StyledPlaceholder>
+                            <Typography variant="h4" color="disabled">
+                                {TranslateText('No deck inspections available')}
+                            </Typography>
+                        </StyledPlaceholder>
                     )}
                 </StyledDeckCards>
                 {selectedDeck && (
