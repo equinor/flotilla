@@ -114,6 +114,7 @@ namespace Api.EventHandlers
                         Enabled = true
                     };
 
+
                     var newRobot = await robotService.CreateFromQuery(robotQuery);
                     _logger.LogInformation("Added robot '{RobotName}' with ISAR id '{IsarId}' to database", newRobot.Name, newRobot.IsarId);
 

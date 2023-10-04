@@ -8,6 +8,7 @@ export enum RobotStatus {
     Available = 'Available',
     Offline = 'Offline',
     Busy = 'Busy',
+    Stuck = 'Stuck',
 }
 
 export interface Robot {
