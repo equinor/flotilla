@@ -1,4 +1,4 @@
-import { Mission, MissionStatus } from 'models/Mission'
+import { Mission } from 'models/Mission'
 import { Button, EdsProvider, Icon, Menu, Tooltip } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
