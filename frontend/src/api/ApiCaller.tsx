@@ -195,7 +195,7 @@ export class BackendAPICaller {
     static async getMissionDefinitions(
         parameters: MissionDefinitionQueryParameters
     ): Promise<PaginatedResponse<CondensedMissionDefinition>> {
-        let path: string = 'missions/definitions-condensed?'
+        let path: string = 'missions/definitions/condensed?'
 
         // Always filter by currently selected installation
         const installationCode: string | null = BackendAPICaller.installationCode

@@ -60,7 +60,7 @@ const formatDateString = (dateStr: Date) => {
     return newStr
 }
 
-const getInspectionStatus = (deadlineDate: Date) => {
+export const getInspectionStatus = (deadlineDate: Date) => {
     const deadlineDays = getDeadlineInDays(deadlineDate)
 
     switch (true) {

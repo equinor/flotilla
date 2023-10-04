@@ -181,5 +181,8 @@
     "Queue the missions": "Legg oppdragene i kø",
     "Deck Overview": "Dekkoversikt",
     "Predefined missions": "Forhåndsdefinerte oppdrag",
-    "Create a new mission in the Mission Planner": "Lag nytt oppdrag i Mission Planner"
+    "Create a new mission in the Mission Planner": "Lag nytt oppdrag i Mission Planner",
+    "Must be inspected this week": "Må inspiseres denne uken",
+    "Must be inspected within two weeks": "Må inspiseres innen to uker",
+    "Mission": "Oppdrag"
 }

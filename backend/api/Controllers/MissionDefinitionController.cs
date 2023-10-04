@@ -76,7 +76,7 @@ namespace Api.Controllers
         /// <remarks>
         /// <para> This query gets all mission definitions </para>
         /// </remarks>
-        [HttpGet("definitions-condensed")]
+        [HttpGet("condensed")]
         [Authorize(Roles = Role.Any)]
         [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
