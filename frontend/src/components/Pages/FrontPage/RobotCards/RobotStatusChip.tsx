@@ -25,6 +25,10 @@ export function RobotStatusChip({ status }: StatusProps) {
             chipColor = StatusColors.Busy
             break
         }
+        case RobotStatus.Stuck: {
+            chipColor = StatusColors.Busy
+            break
+        }
         default: {
             chipColor = StatusColors.Offline
             status = RobotStatus.Offline

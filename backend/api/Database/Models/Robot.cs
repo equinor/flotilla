@@ -115,5 +115,6 @@ namespace Api.Database.Models
         Busy,
         Offline,
         Deprecated,
+        Stuck,
     }
 }
