@@ -181,5 +181,8 @@
     "Queue the missions": "Queue the missions",
     "Deck Overview": "Deck Overview",
     "Predefined missions": "Predefined missions",
-    "Create a new mission in the Mission Planner": "Create a new mission in the Mission Planner"
+    "Create a new mission in the Mission Planner": "Create a new mission in the Mission Planner",
+    "Must be inspected this week": "Must be inspected this week",
+    "Must be inspected within two weeks": "Must be inspected within two weeks",
+    "Mission": "Mission"
 }

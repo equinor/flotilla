@@ -33,7 +33,7 @@ const StyledCardComponent = styled.div`
 
 const StyledDeckCards = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fill, 400px);
+    grid-template-columns: repeat(auto-fill, 450px);
     gap: 24px;
 `
 
@@ -55,8 +55,7 @@ const Rectangle = styled.div`
 const DeckCard = styled.div`
     display: flex;
     min-width: 400px;
-    max-width: 400px;
-    align-items: flex-start;
+    max-width: 450px;
     flex: 1 0 0;
     border-radius: 6px;
 `
@@ -80,6 +79,18 @@ const StyledDeckOverview = styled.div`
     gap: 25px;
 `
 
+const StyledMissionInspections = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+`
+
+const StyledPlaceholder = styled.div`
+    padding: 24px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+`
+
 export interface Inspection {
     missionDefinition: CondensedMissionDefinition
     deadline: Date | undefined
@@ -89,6 +100,13 @@ export interface DeckMissionType {
     [deckId: string]: {
         inspections: Inspection[]
         deck: Deck
+    }
+}
+
+export interface DeckMissionCount {
+    [color: string]: {
+        count: number
+        message: string
     }
 }
 
@@ -158,6 +176,18 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
         return () => clearInterval(id)
     }, [deckMissions])
 
+    const getDeadlineInspection = (deadline: Date) => {
+        const deadlineDays = getDeadlineInDays(deadline)
+        switch (true) {
+            case deadlineDays <= 1:
+                return 'red'
+            case deadlineDays > 1 && deadlineDays <= 14:
+                return 'orange'
+            case deadlineDays > 7:
+                return 'green'
+        }
+    }
+
     const getCardColor = (deckId: string) => {
         const inspections = deckMissions[deckId].inspections
         if (inspections.length === 0) return 'gray'
@@ -169,15 +199,55 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
         const nextInspection = sortedInspections[0]
         if (!nextInspection.deadline) return 'green'
 
-        const deadlineDays = getDeadlineInDays(nextInspection.deadline)
-        switch (true) {
-            case deadlineDays <= 1:
-                return 'red'
-            case deadlineDays > 1 && deadlineDays <= 14:
-                return 'orange'
-            case deadlineDays > 7:
-                return 'green'
+        return getDeadlineInspection(nextInspection.deadline)
+    }
+
+    function getCardMissionInformation(deckId: string) {
+        var colorsCount: DeckMissionCount = {
+            red: { count: 0, message: 'Must be inspected this week' },
+            orange: { count: 0, message: 'Must be inspected within two weeks' },
+            green: { count: 0, message: 'Up to date' },
+            grey: { count: 0, message: '' },
         }
+        const inspections = deckMissions[deckId].inspections
+        if (inspections.length === 0) return
+
+        deckMissions[deckId].inspections.map((inspection) => {
+            if (!inspection.deadline) {
+                colorsCount['green'].count++
+                return
+            }
+            const dealineColor = getDeadlineInspection(inspection.deadline)
+            colorsCount[dealineColor!].count++
+        })
+
+        return (
+            <StyledMissionInspections>
+                {Object.keys(colorsCount).map((color) => (
+                    <>
+                        {colorsCount[color].count > 0 && (
+                            <StyledMissionComponents>
+                                <StyledCircle style={{ background: color }} />
+                                <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
+                                    {colorsCount[color].count > 1 &&
+                                        colorsCount[color].count +
+                                            ' ' +
+                                            TranslateText('Missions').toLowerCase() +
+                                            ' ' +
+                                            TranslateText(colorsCount[color].message).toLowerCase()}
+                                    {colorsCount[color].count == 1 &&
+                                        colorsCount[color].count +
+                                            ' ' +
+                                            TranslateText('Mission').toLowerCase() +
+                                            ' ' +
+                                            TranslateText(colorsCount[color].message).toLowerCase()}
+                                </Typography>
+                            </StyledMissionComponents>
+                        )}
+                    </>
+                ))}
+            </StyledMissionInspections>
+        )
     }
 
     return (
@@ -202,16 +272,7 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
                                         <Typography variant={'body_short_bold'}>
                                             {deckMissions[deckId].deck.deckName.toString()}
                                         </Typography>
-                                        <StyledMissionComponents>
-                                            <StyledCircle style={{ background: `${getCardColor(deckId)}` }} />
-                                            <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
-                                                {deckMissions[deckId] &&
-                                                    deckMissions[deckId].inspections.length > 0 &&
-                                                    deckMissions[deckId].inspections.length +
-                                                        ' ' +
-                                                        TranslateText('Missions')}
-                                            </Typography>
-                                        </StyledMissionComponents>
+                                        {getCardMissionInformation(deckId)}
                                     </StyledDeckText>
                                     <StyledCardComponent>
                                         <Button
@@ -232,7 +293,11 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
                             </DeckCard>
                         ))
                     ) : (
-                        <Typography variant="h1">{TranslateText('No Deck Inspections Available')}</Typography>
+                        <StyledPlaceholder>
+                            <Typography variant="h4" color="disabled">
+                                {TranslateText('No deck inspections available')}
+                            </Typography>
+                        </StyledPlaceholder>
                     )}
                 </StyledDeckCards>
                 {selectedDeck && (
