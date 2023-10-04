@@ -66,7 +66,7 @@ export const AssetSelectionPage = () => {
                             <StyledTopBarContent>{InstallationPicker()}</StyledTopBarContent>
 
                             <Button href={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}>
-                                {TranslateText('Confirm plant')}
+                                {TranslateText('Confirm installation')}
                             </Button>
                         </RowContainer>
                         {/* TODO! ADD image here*/}
