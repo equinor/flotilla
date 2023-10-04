@@ -1,5 +1,5 @@
 import { config } from 'config'
-import { Button, Icon, TopBar, Autocomplete, Typography, Checkbox, Dialog } from '@equinor/eds-core-react'
+import { Button, Icon, TopBar, Typography } from '@equinor/eds-core-react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import styled from 'styled-components'
 import { SelectLanguage } from './LanguageSelector'
