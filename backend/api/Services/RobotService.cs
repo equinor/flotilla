@@ -31,9 +31,15 @@ namespace Api.Services
 
         public async Task<Robot> Create(Robot newRobot)
         {
-            await _context.Robots.AddAsync(newRobot);
-            await _context.SaveChangesAsync();
-            return newRobot;
+            var existingModel = _context.RobotModels.FirstOrDefault(r => r.Id.Equals(newRobot.Model.Id));
+            if (existingModel != null)
+            {
+                newRobot.Model = existingModel;
+                await _context.Robots.AddAsync(newRobot);
+                await _context.SaveChangesAsync();
+                return newRobot;
+            }
+            throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
         }
 
         public async Task<IEnumerable<Robot>> ReadAll()

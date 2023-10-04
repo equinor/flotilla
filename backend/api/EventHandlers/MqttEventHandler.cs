@@ -8,6 +8,7 @@ using Api.Services;
 using Api.Services.Events;
 using Api.Services.Models;
 using Api.Utilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 namespace Api.EventHandlers
 {
@@ -112,86 +113,83 @@ namespace Api.EventHandlers
         {
             var provider = GetServiceProvider();
             var robotService = provider.GetRequiredService<IRobotService>();
-            var robotModelService = provider.GetRequiredService<IRobotModelService>();
 
             var isarRobotInfo = (IsarRobotInfoMessage)mqttArgs.Message;
-            var robot = await robotService.ReadByIsarId(isarRobotInfo.IsarId);
-
-            if (robot == null)
+            try
             {
-                _logger.LogInformation(
-                    "Received message from new ISAR instance '{id}' with robot name '{name}'. Adding new robot to database.",
-                    isarRobotInfo.IsarId,
-                    isarRobotInfo.RobotName
-                );
+                var robot = await robotService.ReadByIsarId(isarRobotInfo.IsarId);
 
-                var robotQuery = new CreateRobotQuery
+                if (robot == null)
                 {
-                    IsarId = isarRobotInfo.IsarId,
-                    Name = isarRobotInfo.RobotName,
-                    RobotType = isarRobotInfo.RobotType,
-                    SerialNumber = isarRobotInfo.SerialNumber,
-                    CurrentInstallation = isarRobotInfo.CurrentInstallation,
-                    VideoStreams = isarRobotInfo.VideoStreamQueries,
-                    Host = isarRobotInfo.Host,
-                    Port = isarRobotInfo.Port,
-                    Status = RobotStatus.Available,
-                    Enabled = true
-                };
-
-                var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType);
-                if (robotModel == null)
-                {
-                    _logger.LogError(
-                        "Could not create new robot for ISAR instance '{id}' because the provided robot type '{robotType}' does not exist",
+                    _logger.LogInformation(
+                        "Received message from new ISAR instance '{id}' with robot name '{name}'. Adding new robot to database.",
                         isarRobotInfo.IsarId,
-                        isarRobotInfo.RobotType
+                        isarRobotInfo.RobotName
                     );
+
+                    var robotQuery = new CreateRobotQuery
+                    {
+                        IsarId = isarRobotInfo.IsarId,
+                        Name = isarRobotInfo.RobotName,
+                        RobotType = isarRobotInfo.RobotType,
+                        SerialNumber = isarRobotInfo.SerialNumber,
+                        CurrentInstallation = isarRobotInfo.CurrentInstallation,
+                        VideoStreams = isarRobotInfo.VideoStreamQueries,
+                        Host = isarRobotInfo.Host,
+                        Port = isarRobotInfo.Port,
+                        Status = RobotStatus.Available,
+                        Enabled = true
+                    };
+
+                    var newRobot = new Robot(robotQuery);
+                    newRobot = await robotService.Create(newRobot);
+                    _logger.LogInformation(
+                        "Added robot '{robotName}' with ISAR id '{isarId}' to database",
+                        newRobot.Name,
+                        newRobot.IsarId
+                    );
+
                     return;
                 }
 
-                var newRobot = new Robot(robotQuery)
+                List<string> updatedFields = new();
+
+                if (isarRobotInfo.VideoStreamQueries is not null)
                 {
-                    Model = robotModel
-                };
-                newRobot = await robotService.Create(newRobot);
-                _logger.LogInformation(
-                    "Added robot '{robotName}' with ISAR id '{isarId}' to database",
-                    newRobot.Name,
-                    newRobot.IsarId
-                );
+                    UpdateVideoStreamsIfChanged(isarRobotInfo.VideoStreamQueries, ref robot, ref updatedFields);
+                }
 
-                return;
+                if (isarRobotInfo.Host is not null)
+                {
+                    UpdateHostIfChanged(isarRobotInfo.Host, ref robot, ref updatedFields);
+                }
+
+                UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
+
+                if (isarRobotInfo.CurrentInstallation is not null)
+                {
+                    UpdateCurrentInstallationIfChanged(isarRobotInfo.CurrentInstallation, ref robot, ref updatedFields);
+                }
+
+                if (!updatedFields.IsNullOrEmpty())
+                {
+                    robot = await robotService.Update(robot);
+                    _logger.LogInformation(
+                        "Updated robot '{id}' ('{robotName}') in database: {updates}",
+                        robot.Id,
+                        robot.Name,
+                        updatedFields
+                    );
+                }
+
             }
-
-            List<string> updatedFields = new();
-
-            if (isarRobotInfo.VideoStreamQueries is not null)
+            catch (DbUpdateException e)
             {
-                UpdateVideoStreamsIfChanged(isarRobotInfo.VideoStreamQueries, ref robot, ref updatedFields);
+                _logger.LogError("Could not add robot to db", e);
             }
-
-            if (isarRobotInfo.Host is not null)
+            catch (Exception e)
             {
-                UpdateHostIfChanged(isarRobotInfo.Host, ref robot, ref updatedFields);
-            }
-
-            UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
-
-            if (isarRobotInfo.CurrentInstallation is not null)
-            {
-                UpdateCurrentInstallationIfChanged(isarRobotInfo.CurrentInstallation, ref robot, ref updatedFields);
-            }
-
-            if (!updatedFields.IsNullOrEmpty())
-            {
-                robot = await robotService.Update(robot);
-                _logger.LogInformation(
-                    "Updated robot '{id}' ('{robotName}') in database: {updates}",
-                    robot.Id,
-                    robot.Name,
-                    updatedFields
-                );
+                _logger.LogError("Could not update robot in db", e);
             }
         }
 
