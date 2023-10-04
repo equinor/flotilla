@@ -23,6 +23,11 @@ const StyledHeader = styled.div`
     gap: 1rem;
 `
 
+const StyledDialogHeader = styled.div`
+    display: flex;
+    justify-content: space-between;
+`
+
 const StyledDialog = styled(Card)`
     display: flex;
     padding: 1rem;
@@ -80,12 +85,12 @@ export function FilterSection() {
             </StyledHeader>
             <Dialog open={isFilteringDialogOpen} isDismissable>
                 <StyledDialog>
-                    <StyledHeader>
+                    <StyledDialogHeader>
                         <Typography variant="h2">{TranslateText('Filter')}</Typography>
                         <Button variant="ghost_icon" onClick={onFilterClose}>
                             <Icon name={Icons.Clear} size={32} />
                         </Button>
-                    </StyledHeader>
+                    </StyledDialogHeader>
                     <Autocomplete
                         options={Array.from(missionStatusTranslationMap.keys())}
                         onOptionsChange={(changes: AutocompleteChanges<string>) => {
