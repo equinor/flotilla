@@ -2,6 +2,7 @@ import { Chip } from '@equinor/eds-core-react'
 import { RobotStatus } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
 
 interface StatusProps {
     status?: RobotStatus
@@ -12,11 +13,14 @@ enum StatusColors {
     Offline = '#F7F7F7',
     Busy = '#FFC67A',
     Blocked = '#FFC67A',
+    SafeZone = '#FF0000',
 }
 
 export function RobotStatusChip({ status }: StatusProps) {
     const { TranslateText } = useLanguageContext()
-    let chipColor = StatusColors.Offline
+    const { safeZoneStatus, switchSafeZoneStatus } = useSafeZoneContext()
+
+    var chipColor = StatusColors.Offline
     switch (status) {
         case RobotStatus.Available: {
             chipColor = StatusColors.Available
@@ -36,6 +40,12 @@ export function RobotStatusChip({ status }: StatusProps) {
             break
         }
     }
+
+    if (safeZoneStatus) {
+        chipColor = StatusColors.SafeZone
+        status = RobotStatus.SafeZone
+    }
+
     return (
         <Chip
             className="StatusChip"
