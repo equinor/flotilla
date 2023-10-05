@@ -33,9 +33,9 @@ const Circle = (fill: string) => (
     </svg>
 )
 
-const RedCircle = Circle('#EB0000')
-const YellowCircle = Circle('#FF9200')
-const GreenCircle = Circle('#4BB748')
+const RedCircle = Circle('red')
+const YellowCircle = Circle('orange')
+const GreenCircle = Circle('green')
 
 interface IProps {
     deck: Deck
@@ -128,7 +128,11 @@ const getInspectionRow = (
                     </>
                 )
             } else {
-                status = TranslateTextWithContext('No planned inspection')
+                status = (
+                    <>
+                        {GreenCircle} {TranslateTextWithContext('No planned inspection')}
+                    </>
+                )
             }
             lastCompleted = TranslateTextWithContext('Never')
         } else {
