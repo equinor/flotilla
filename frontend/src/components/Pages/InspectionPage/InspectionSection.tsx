@@ -14,12 +14,13 @@ import { Icons } from 'utils/icons'
 
 const StyledCard = styled(Card)`
     display: flex;
-    height: 150px;
+    min-height: 150px;
     padding: 16px;
     flex-direction: column;
     justify-content: space-between;
     align-items: flex-start;
     flex: 1 0 0;
+    cursor: pointer;
 `
 
 const StyledCardComponent = styled.div`
@@ -58,6 +59,7 @@ const DeckCard = styled.div`
     max-width: 450px;
     flex: 1 0 0;
     border-radius: 6px;
+    box-shadow: 0px 3px 4px 0px rgba(0, 0, 0, 0.12), 0px 2px 4px 0px rgba(0, 0, 0, 0.14);
 `
 
 const StyledCircle = styled.div`
@@ -123,8 +125,8 @@ interface IInspectionProps {
 export const compareInspections = (i1: Inspection, i2: Inspection) => {
     if (!i1.missionDefinition.inspectionFrequency) return 1
     if (!i2.missionDefinition.inspectionFrequency) return -1
-    if (!i1.missionDefinition.lastRun) return 1
-    if (!i2.missionDefinition.lastRun) return -1
+    if (!i1.missionDefinition.lastRun) return -1
+    if (!i2.missionDefinition.lastRun) return 1
     else return i1.deadline!.getTime() - i2.deadline!.getTime()
 }
 
@@ -183,7 +185,7 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
                 return 'red'
             case deadlineDays > 1 && deadlineDays <= 14:
                 return 'orange'
-            case deadlineDays > 7:
+            case deadlineDays > 7 && deadlineDays <= 30:
                 return 'green'
         }
     }
@@ -194,10 +196,15 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
         const isScheduled = (m: CondensedMissionDefinition) =>
             Object.keys(ongoingMissions).includes(m.id) && ongoingMissions[m.id]
         const sortedInspections = inspections.filter((i) => !isScheduled(i.missionDefinition)).sort(compareInspections)
+
         if (sortedInspections.length === 0) return 'green'
 
         const nextInspection = sortedInspections[0]
-        if (!nextInspection.deadline) return 'green'
+
+        if (!nextInspection.deadline) {
+            if (!nextInspection.missionDefinition.inspectionFrequency) return 'gray'
+            else return 'red'
+        }
 
         return getDeadlineInspection(nextInspection.deadline)
     }
@@ -214,11 +221,16 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
 
         deckMissions[deckId].inspections.map((inspection) => {
             if (!inspection.deadline) {
+                if (!inspection.missionDefinition.lastRun && inspection.missionDefinition.inspectionFrequency) {
+                    colorsCount['red'].count++
+                    return
+                }
                 colorsCount['green'].count++
                 return
             }
             const dealineColor = getDeadlineInspection(inspection.deadline)
             colorsCount[dealineColor!].count++
+            return
         })
 
         return (
@@ -235,7 +247,7 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
                                             TranslateText('Missions').toLowerCase() +
                                             ' ' +
                                             TranslateText(colorsCount[color].message).toLowerCase()}
-                                    {colorsCount[color].count == 1 &&
+                                    {colorsCount[color].count === 1 &&
                                         colorsCount[color].count +
                                             ' ' +
                                             TranslateText('Mission').toLowerCase() +
@@ -256,17 +268,17 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
                 <StyledDeckCards>
                     {Object.keys(deckMissions).length > 0 ? (
                         Object.keys(deckMissions).map((deckId) => (
-                            <DeckCard
-                                style={{
-                                    boxShadow:
-                                        '0px 3px 4px 0px rgba(0, 0, 0, 0.12), 0px 2px 4px 0px rgba(0, 0, 0, 0.14)',
-                                }}
-                            >
+                            <DeckCard>
                                 <Rectangle style={{ background: `${getCardColor(deckId)}` }} />
                                 <StyledCard
                                     variant="default"
                                     key={deckId}
                                     onClick={() => setSelectedDeck(deckMissions[deckId].deck)}
+                                    style={
+                                        selectedDeck === deckMissions[deckId].deck
+                                            ? { border: `solid ${getCardColor(deckId)} 2px ` }
+                                            : {}
+                                    }
                                 >
                                     <StyledDeckText>
                                         <Typography variant={'body_short_bold'}>

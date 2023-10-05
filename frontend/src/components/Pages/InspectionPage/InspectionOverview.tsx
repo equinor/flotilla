@@ -36,15 +36,11 @@ export function InspectionOverviewSection({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const [activeTab, setActiveTab] = useState(0)
     const [allMissions, setAllMissions] = useState<Inspection[]>()
+    const [ongoingMissions, setOngoingMissions] = useState<OngoingMissionType>({})
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const installationCode = useContext(InstallationContext).installationCode
     const echoURL = 'https://echo.equinor.com/missionplanner?instCode='
     const anchorRef = useRef<HTMLButtonElement>(null)
-    const [ongoingMissions, setOngoingMissions] = useState<OngoingMissionType>({})
-    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-
-    const handleChange = (index: number) => {
-        setActiveTab(index)
-    }
 
     const updateOngoingMissionsMap = async (areaMissions: DeckMissionType) => {
         let newOngoingMissions: OngoingMissionType = {}
@@ -80,10 +76,10 @@ export function InspectionOverviewSection({ refreshInterval }: RefreshProps) {
     }, [activeTab])
 
     return (
-        <Tabs activeTab={activeTab} onChange={handleChange}>
+        <Tabs activeTab={activeTab} onChange={setActiveTab}>
             <Tabs.List>
                 <Tabs.Tab>{TranslateText('Deck Overview')}</Tabs.Tab>
-                <Tabs.Tab>{TranslateText('Predefined missions')}</Tabs.Tab>
+                <Tabs.Tab>{TranslateText('Predefined Missions')}</Tabs.Tab>
             </Tabs.List>
             <Tabs.Panels>
                 <Tabs.Panel>

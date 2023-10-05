@@ -4,7 +4,6 @@ import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotS
 import { FailedMissionAlertView } from './MissionOverview/FailedMissionAlertView'
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
-import { InspectionSection } from '../InspectionPage/InspectionSection'
 import { InspectionOverviewSection } from '../InspectionPage/InspectionOverview'
 
 const StyledFrontPage = styled.div`
