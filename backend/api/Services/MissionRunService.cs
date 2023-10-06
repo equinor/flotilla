@@ -5,12 +5,9 @@ using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services.Events;
 using Api.Services.Models;
-using Api.SignalRHubs;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SignalR;
 using TaskStatus = Api.Database.Models.TaskStatus;
-using System.Text.Json;
 namespace Api.Services
 {
     public interface IMissionRunService
@@ -64,13 +61,13 @@ namespace Api.Services
     public class MissionRunService : IMissionRunService
     {
         private readonly FlotillaDbContext _context;
-        private readonly IHubContext<SignalRHub> _signalRContext;
+        private readonly ISignalRService _signalRService;
         private readonly ILogger<MissionRunService> _logger;
 
-        public MissionRunService(FlotillaDbContext context, IHubContext<SignalRHub> signalRContext, ILogger<MissionRunService> logger)
+        public MissionRunService(FlotillaDbContext context, ISignalRService signalRService, ILogger<MissionRunService> logger)
         {
             _context = context;
-            _signalRContext = signalRContext;
+            _signalRService = signalRService;
             _logger = logger;
         }
 
@@ -80,7 +77,7 @@ namespace Api.Services
             _context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             if (missionRun.Area is not null) { _context.Entry(missionRun.Area).State = EntityState.Unchanged; }
 
-            await _signalRContext.Clients.All.SendAsync("mission run created", "all", JsonSerializer.Serialize(missionRun));
+            await _signalRService.SendMessageAsync("mission run created", missionRun);
 
             await _context.MissionRuns.AddAsync(missionRun);
             await _context.SaveChangesAsync();
@@ -360,6 +357,7 @@ namespace Api.Services
 
             await _context.SaveChangesAsync();
 
+            await _signalRService.SendMessageAsync("mission run failed", missionRun);
             return missionRun;
         }
 

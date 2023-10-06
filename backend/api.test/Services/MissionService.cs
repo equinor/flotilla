@@ -16,13 +16,15 @@ namespace Api.Test.Services
     {
         private readonly FlotillaDbContext _context;
         private readonly ILogger<MissionRunService> _logger;
+        private readonly ISignalRService _signalRService;
         private readonly MissionRunService _missionRunService;
 
         public MissionServiceTest(DatabaseFixture fixture)
         {
             _context = fixture.NewContext;
             _logger = new Mock<ILogger<MissionRunService>>().Object;
-            _missionRunService = new MissionRunService(_context, _logger);
+            _signalRService = new MockSignalRService();
+            _missionRunService = new MissionRunService(_context, _signalRService, _logger);
         }
 
         public void Dispose()
