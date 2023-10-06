@@ -22,8 +22,14 @@ export function FlotillaSite() {
                             <APIUpdater>
                                 <BrowserRouter>
                                     <Routes>
-                                        <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
-                                        <Route path={`${config.FRONTEND_BASE_ROUTE}/FrontPage`} element={<FrontPage />} />
+                                        <Route
+                                            path={`${config.FRONTEND_BASE_ROUTE}/`}
+                                            element={<AssetSelectionPage />}
+                                        />
+                                        <Route
+                                            path={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
+                                            element={<FrontPage />}
+                                        />
                                         <Route
                                             path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`}
                                             element={<MissionPage />}
@@ -36,7 +42,10 @@ export function FlotillaSite() {
                                             path={`${config.FRONTEND_BASE_ROUTE}/history`}
                                             element={<MissionHistoryPage />}
                                         />
-                                        <Route path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`} element={<RobotPage />} />
+                                        <Route
+                                            path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`}
+                                            element={<RobotPage />}
+                                        />
                                     </Routes>
                                 </BrowserRouter>
                             </APIUpdater>

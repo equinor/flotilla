@@ -45,6 +45,7 @@ namespace Api.Test.EventHandlers
         private readonly IMissionRunService _missionRunService;
         private readonly IMissionScheduling _missionScheduling;
         private readonly IMissionSchedulingService _missionSchedulingService;
+        private readonly ISignalRService _signalRService;
 
 #pragma warning disable IDE0052
         private readonly MqttEventHandler _mqttEventHandler;
@@ -69,8 +70,9 @@ namespace Api.Test.EventHandlers
 
             _context = fixture.NewContext;
 
+            _signalRService = new MockSignalRService();
             _mqttService = new MqttService(mqttServiceLogger, configuration);
-            _missionRunService = new MissionRunService(_context, missionLogger);
+            _missionRunService = new MissionRunService(_context, _signalRService, missionLogger);
             _robotModelService = new RobotModelService(_context);
             _robotService = new RobotService(_context, _robotModelService);
             _robotModelService = new RobotModelService(_context);

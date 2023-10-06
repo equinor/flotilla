@@ -40,14 +40,15 @@ export const useMissions = (refreshInterval: number): MissionsResult => {
     const [createdMission, setCreatedMission] = useState<MissionDefinition | undefined>()
 
     useEffect(() => {
-        console.log(createdMission)
+        if (createdMission) console.log(createdMission)
     }, [createdMission])
 
     useEffect(() => {
         if (connectionReady)
-            registerEvent("mission run created", (username: string, message: string) => 
-                setCreatedMission(JSON.parse(message)))
-    }, [registerEvent, connectionReady]);
+            registerEvent('mission run created', (username: string, message: string) =>
+                setCreatedMission(JSON.parse(message))
+            )
+    }, [registerEvent, connectionReady])
 
     useEffect(() => {
         const fetchAndUpdateMissions = async () => {

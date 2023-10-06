@@ -40,7 +40,7 @@ export function FrontPage() {
         <>
             <Header page={'root'} />
             <StyledFrontPage>
-                <FailedMissionAlertView refreshInterval={refreshInterval} />
+                <FailedMissionAlertView />
                 <HorizontalContent>
                     <MissionsContent>
                         <OngoingMissionView refreshInterval={refreshInterval} />
