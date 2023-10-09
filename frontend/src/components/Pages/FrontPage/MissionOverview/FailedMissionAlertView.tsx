@@ -131,9 +131,10 @@ export function FailedMissionAlertView() {
     // Register a signalR event handler that listens for new failed missions
     useEffect(() => {
         if (connectionReady)
-            registerEvent('mission run failed', (username: string, message: string) =>
+            registerEvent('mission run failed', (username: string, message: string) => {
                 setNewFailedMission(JSON.parse(message))
-            )
+                console.log(JSON.parse(message))
+            })
     }, [registerEvent, connectionReady])
 
     // Use the failed missions from signalR messages to update the displayed list of failed missions

@@ -73,6 +73,7 @@ namespace Api.Services
 
         public async Task<MissionRun> Create(MissionRun missionRun)
         {
+            missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
             // Making sure database does not try to create new robot
             _context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             if (missionRun.Area is not null) { _context.Entry(missionRun.Area).State = EntityState.Unchanged; }
@@ -124,6 +125,7 @@ namespace Api.Services
 
         public async Task<MissionRun> Update(MissionRun missionRun)
         {
+            await _signalRService.SendMessageAsync("mission run updated", missionRun);
             var entry = _context.Update(missionRun);
             await _context.SaveChangesAsync();
             return entry.Entity;
@@ -140,7 +142,6 @@ namespace Api.Services
 
             _context.MissionRuns.Remove(missionRun);
             await _context.SaveChangesAsync();
-
 
             return missionRun;
         }
@@ -355,9 +356,10 @@ namespace Api.Services
 
             missionRun.Status = missionStatus;
 
-            await _context.SaveChangesAsync();
+            await Update(missionRun);
 
-            await _signalRService.SendMessageAsync("mission run failed", missionRun);
+            if (missionRun.Status == MissionStatus.Failed)
+                await _signalRService.SendMessageAsync("mission run failed", missionRun);
             return missionRun;
         }
 
@@ -407,7 +409,7 @@ namespace Api.Services
                 }
             }
 
-            await _context.SaveChangesAsync();
+            await Update(missionRun);
 
             return true;
         }
@@ -453,7 +455,7 @@ namespace Api.Services
 
             inspection.UpdateStatus(stepStatus);
 
-            await _context.SaveChangesAsync();
+            await Update(missionRun);
 
             return true;
         }
