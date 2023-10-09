@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.CheckoutRef }}
 
@@ -38,7 +38,7 @@ jobs:
       # We don't have the ref in the IssueComment trigger so we need to check out the pr number
       - name: Checkout Pull Request
         if: ${{ inputs.PullRequestCheckout }}
-        run: hub pr checkout ${{ github.event.issue.number }}
+        run: gh pr checkout ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
