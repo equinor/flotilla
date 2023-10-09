@@ -5,12 +5,12 @@ import { Task } from './Task'
 export enum MissionStatus {
     Pending = 'Pending',
     Ongoing = 'Ongoing',
+    Paused = 'Paused',
+    Aborted = 'Aborted',
+    Cancelled = 'Cancelled',
+    Failed = 'Failed',
     Successful = 'Successful',
     PartiallySuccessful = 'PartiallySuccessful',
-    Aborted = 'Aborted',
-    Failed = 'Failed',
-    Paused = 'Paused',
-    Cancelled = 'Cancelled',
 }
 
 export const missionStatusFilterOptionsIterable = [
