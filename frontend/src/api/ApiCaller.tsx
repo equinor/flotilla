@@ -482,7 +482,7 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async postSafePosition(installationCode: string) {
+    static async sendRobotsToSafePosition(installationCode: string) {
         const path: string = `emergency-action/${installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone`
         const body = {}
 
@@ -493,7 +493,7 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async resetRobotState(installationCode: string) {
+    static async clearEmergencyState(installationCode: string) {
         const path: string = `emergency-action/${installationCode}/clear-emergency-state`
         const body = {}
 

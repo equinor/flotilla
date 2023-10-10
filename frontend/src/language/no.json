@@ -195,5 +195,7 @@
     "Send robots to safe zone long text": "Du er i ferd med å sende robotene til en trygg sone og dermed stoppe alle pågående oppdrag. For å kjøre oppdragene igjen må robotene starte fra begynnelsen.",
     "Send robots to safe confirmation text": "Er du sikker på at du vil sende alle robotene til en trygg sone?",
     "Dismiss robots from safe zone long text": "Vanlig drift kan fortsette ved å starte oppdragene i køen eller ved å slette dem.",
-    "Dismiss robots from safe zone": "Slepp robotene ut av trygg sone"
+    "Dismiss robots from safe zone": "Slipp robotene ut av trygg sone",
+    "Continue missions": "Fortsett oppdragene",
+    "Safe Zone": "Trygg Sone"
 }
