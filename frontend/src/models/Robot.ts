@@ -6,10 +6,10 @@ import { VideoStream } from './VideoStream'
 
 export enum RobotStatus {
     Available = 'Available',
-    Offline = 'Offline',
     Busy = 'Busy',
     Blocked = 'Blocked',
     SafeZone = 'Safe Zone',
+    Offline = 'Offline',
 }
 
 export interface Robot {

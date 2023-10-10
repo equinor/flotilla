@@ -1,6 +1,5 @@
 import { Button, Typography, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { RefreshProps } from '../FrontPage'
 import { NoOngoingMissionsPlaceholder } from './NoMissionPlaceholder'
 import { OngoingMissionCard } from './OngoingMissionCard'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -32,7 +31,7 @@ const OngoingMissionHeader = styled.div`
     gap: 0.5rem;
 `
 
-export function OngoingMissionView({ refreshInterval }: RefreshProps) {
+export function OngoingMissionView() {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
 
