@@ -26,11 +26,13 @@ namespace Api.Services
     {
         private readonly FlotillaDbContext _context;
         private readonly IRobotModelService _robotModelService;
+        private readonly ISignalRService _signalRService;
 
-        public RobotService(FlotillaDbContext context, IRobotModelService robotModelService)
+        public RobotService(FlotillaDbContext context, IRobotModelService robotModelService, ISignalRService signalRService)
         {
             _context = context;
             _robotModelService = robotModelService;
+            _signalRService = signalRService;
         }
 
         public async Task<Robot> Create(Robot newRobot)
@@ -52,6 +54,7 @@ namespace Api.Services
                 _context.Entry(robotModel).State = EntityState.Unchanged;
                 await _context.Robots.AddAsync(newRobot);
                 await _context.SaveChangesAsync();
+                await _signalRService.SendMessageAsync("robot list updated", GetEnabledRobotsWithSubModels());
                 return newRobot;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
@@ -82,6 +85,7 @@ namespace Api.Services
         {
             var entry = _context.Update(robot);
             await _context.SaveChangesAsync();
+            await _signalRService.SendMessageAsync("robot list updated", GetEnabledRobotsWithSubModels());
             return entry.Entity;
         }
 
@@ -92,7 +96,7 @@ namespace Api.Services
 
             _context.Robots.Remove(robot);
             await _context.SaveChangesAsync();
-
+            await _signalRService.SendMessageAsync("robot list updated", GetEnabledRobotsWithSubModels());
             return robot;
         }
 
@@ -103,6 +107,11 @@ namespace Api.Services
                 .Include(r => r.Model)
                 .Include(r => r.CurrentArea)
                 .ThenInclude(r => r != null ? r.SafePositions : null);
+        }
+
+        private IQueryable<Robot> GetEnabledRobotsWithSubModels()
+        {
+            return GetRobotsWithSubModels().Where((r) => r.Enabled && r.Status != RobotStatus.Deprecated);
         }
     }
 }

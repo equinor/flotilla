@@ -1,13 +1,12 @@
 import { Typography } from '@equinor/eds-core-react'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { RefreshProps } from '../FrontPage'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
+import { useRobotContext } from 'components/Contexts/RobotContext'
 
 const RobotCardSection = styled.div`
     display: flex;
@@ -19,43 +18,30 @@ const RobotView = styled.div`
     grid-column: 1/ -1;
     gap: 1rem;
 `
-export function RobotStatusSection({ refreshInterval }: RefreshProps) {
+export function RobotStatusSection() {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const [robots, setRobots] = useState<Robot[]>([])
+    const { enabledRobots } = useRobotContext()
     const { safeZoneStatus, switchSafeZoneStatus } = useSafeZoneContext()
 
-    const sortRobotsByStatus = useCallback((robots: Robot[]): Robot[] => {
-        const sortedRobots = robots.sort((robot, robotToCompareWith) =>
-            robot.status! > robotToCompareWith.status! ? 1 : -1
-        )
-        return sortedRobots
-    }, [])
-
-    const updateRobots = useCallback(() => {
-        BackendAPICaller.getEnabledRobots().then((result: Robot[]) => {
-            setRobots(sortRobotsByStatus(result))
-            const missionQueueFozenStatus = result
-                .map((robot: Robot) => {
-                    return robot.missionQueueFrozen
-                })
-                .filter((status) => status === true)
-
-            if (missionQueueFozenStatus.length > 0 && !safeZoneStatus) switchSafeZoneStatus(true)
-            else switchSafeZoneStatus(false)
-        })
-    }, [sortRobotsByStatus])
-
     useEffect(() => {
-        updateRobots()
-    }, [updateRobots])
+        const sortRobotsByStatus = (robots: Robot[]): Robot[] => {
+            const sortedRobots = robots.sort((robot, robotToCompareWith) =>
+                robot.status! > robotToCompareWith.status! ? 1 : -1
+            )
+            return sortedRobots
+        }
+        setRobots(sortRobotsByStatus(enabledRobots))
+        const missionQueueFozenStatus = enabledRobots
+            .map((robot: Robot) => {
+                return robot.missionQueueFrozen
+            })
+            .filter((status) => status === true)
 
-    useEffect(() => {
-        const id = setInterval(() => {
-            updateRobots()
-        }, refreshInterval)
-        return () => clearInterval(id)
-    }, [refreshInterval, updateRobots])
+        if (missionQueueFozenStatus.length > 0 && !safeZoneStatus) switchSafeZoneStatus(true)
+        else switchSafeZoneStatus(false)
+    }, [enabledRobots])
 
     const filteredRobots = robots.filter(function (robot) {
         return (

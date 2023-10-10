@@ -43,11 +43,11 @@ export function FrontPage() {
                 <FailedMissionAlertView />
                 <HorizontalContent>
                     <MissionsContent>
-                        <OngoingMissionView refreshInterval={refreshInterval} />
-                        <MissionQueueView refreshInterval={refreshInterval} />
+                        <OngoingMissionView />
+                        <MissionQueueView />
                     </MissionsContent>
                 </HorizontalContent>
-                <RobotStatusSection refreshInterval={refreshInterval} />
+                <RobotStatusSection />
                 <InspectionOverviewSection refreshInterval={refreshInterval} />
             </StyledFrontPage>
         </>

@@ -74,7 +74,7 @@ namespace Api.Test.EventHandlers
             _mqttService = new MqttService(mqttServiceLogger, configuration);
             _missionRunService = new MissionRunService(_context, _signalRService, missionLogger);
             _robotModelService = new RobotModelService(_context);
-            _robotService = new RobotService(_context, _robotModelService);
+            _robotService = new RobotService(_context, _robotModelService, _signalRService);
             _robotModelService = new RobotModelService(_context);
             _robotControllerMock = new RobotControllerMock();
             _isarServiceMock = new MockIsarService();

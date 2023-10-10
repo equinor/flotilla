@@ -47,14 +47,14 @@ export const useMissions = (): MissionsResult => {
     useEffect(() => {
         if (connectionReady) {
             registerEvent('mission run created', (username: string, message: string) => {
-                const newMission = JSON.parse(message)
+                const newMission: Mission = JSON.parse(message)
                 if (missionQueue.find((m) => m.id === newMission.id))
                     setMissionQueue((oldQueue) => [...oldQueue, newMission])
                 else
                     setMissionQueue((oldQueue) => {
                         let missionQueueCopy = [...oldQueue]
                         missionQueueCopy = upsertList(missionQueueCopy, newMission)
-                        return [...missionQueueCopy, newMission]
+                        return [...missionQueueCopy]
                     })
             })
             registerEvent('mission run updated', (username: string, message: string) => {
