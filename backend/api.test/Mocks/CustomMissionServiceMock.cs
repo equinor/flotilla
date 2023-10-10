@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Api.Controllers.Models;
 using Api.Database.Models;
-
 namespace Api.Services
 {
     public class MockCustomMissionService : ICustomMissionService
@@ -36,16 +37,17 @@ namespace Api.Services
 
         public string CalculateHashFromTasks(IList<MissionTask> tasks)
         {
-            List<MissionTask> genericTasks = [];
-            foreach (var task in tasks)
-            {
-                var taskCopy = new MissionTask(task);
-                genericTasks.Add(taskCopy);
-            }
+            IList<MissionTask> genericTasks = tasks.Select(task => new MissionTask(task)).ToList();
 
             string json = JsonSerializer.Serialize(genericTasks);
             byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
             return BitConverter.ToString(hash).Replace("-", "", StringComparison.CurrentCulture).ToUpperInvariant();
+        }
+
+        public async Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, MissionDefinition customMissionDefinition, Robot robot, IList<MissionTask> missionTasks)
+        {
+            await Task.CompletedTask;
+            return new MissionRun();
         }
     }
 }

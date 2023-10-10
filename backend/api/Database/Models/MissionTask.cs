@@ -26,6 +26,7 @@ namespace Api.Database.Models
             EchoPoseId = echoTag.PoseId;
             TaskOrder = echoTag.PlanOrder;
             Status = TaskStatus.NotStarted;
+            Type = "inspection";
         }
 
         // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
@@ -40,6 +41,32 @@ namespace Api.Database.Models
             RobotPose = taskQuery.RobotPose;
             TaskOrder = taskQuery.TaskOrder;
             Status = TaskStatus.NotStarted;
+            Type = "inspection";
+        }
+
+        public MissionTask(Pose robotPose, string type)
+        {
+            switch (type)
+            {
+                case "localization":
+                    Type = type;
+                    Description = "Localization";
+                    RobotPose = robotPose;
+                    TaskOrder = 0;
+                    Status = TaskStatus.NotStarted;
+                    InspectionTarget = new Position();
+                    Inspections = new List<Inspection>();
+                    break;
+                case "drive_to":
+                    Type = type;
+                    Description = "Return to home";
+                    RobotPose = robotPose;
+                    TaskOrder = 0;
+                    Status = TaskStatus.NotStarted;
+                    InspectionTarget = new Position();
+                    Inspections = new List<Inspection>();
+                    break;
+            }
         }
 
         // Creates a blank deepcopy of the provided task
@@ -67,6 +94,8 @@ namespace Api.Database.Models
 
         [Required]
         public int TaskOrder { get; set; }
+
+        public string Type { get; set; }
 
         [MaxLength(200)]
         public string? TagId { get; set; }

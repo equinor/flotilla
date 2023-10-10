@@ -172,7 +172,6 @@ namespace Api.Services
         private IQueryable<Robot> GetRobotsWithSubModels()
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-#pragma warning disable CA1304
             return context.Robots
                 .Include(r => r.VideoStreams)
                 .Include(r => r.Model)
@@ -185,6 +184,10 @@ namespace Api.Services
                 .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(r => r.CurrentArea)
                 .ThenInclude(area => area != null ? area.SafePositions : null)
+                .Include(r => r.CurrentArea != null ? r.CurrentArea.Deck : null)
+                .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
+                .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null)
+#pragma warning disable CA1304
                 .Where((r) => r.CurrentInstallation == null || r.CurrentInstallation.InstallationCode == null || accessibleInstallationCodes.Result.Contains(r.CurrentInstallation.InstallationCode.ToUpper()));
 #pragma warning restore CA1304
         }

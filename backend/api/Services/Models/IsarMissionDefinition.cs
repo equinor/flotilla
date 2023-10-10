@@ -37,6 +37,9 @@ namespace Api.Services.Models
         [JsonPropertyName("id")]
         public string? Id { get; set; }
 
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
+
         [JsonPropertyName("pose")]
         public IsarPose Pose { get; set; }
 
@@ -49,6 +52,7 @@ namespace Api.Services.Models
         public IsarTaskDefinition(MissionTask missionTask, MissionRun missionRun)
         {
             Id = missionTask.IsarTaskId;
+            Type = missionTask.Type;
             Pose = new IsarPose(missionTask.RobotPose);
             Tag = missionTask.TagId;
             var isarInspections = new List<IsarInspectionDefinition>();

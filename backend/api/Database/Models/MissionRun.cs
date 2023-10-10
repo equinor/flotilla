@@ -139,7 +139,7 @@ namespace Api.Database.Models
                     task => task.Inspections.Sum(inspection => inspection.VideoDuration ?? 0)
                 );
                 EstimatedDuration = (uint)(
-                    (Robot.Model.AverageDurationPerTag * Tasks.Count) + totalInspectionDuration
+                    Robot.Model.AverageDurationPerTag * Tasks.Count + totalInspectionDuration
                 );
             }
             else
@@ -187,6 +187,24 @@ namespace Api.Database.Models
                     inspection.Status = InspectionStatus.Failed;
                 }
             }
+        }
+
+        public bool IsLocalizationMission()
+        {
+            if (Tasks.Count != 1)
+            {
+                return false;
+            }
+            return Tasks[0].Type == "localization";
+        }
+
+        public bool IsDriveToMission()
+        {
+            if (Tasks.Count != 1)
+            {
+                return false;
+            }
+            return Tasks[0].Type == "drive_to";
         }
     }
 

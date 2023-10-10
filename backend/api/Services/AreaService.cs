@@ -70,11 +70,13 @@ namespace Api.Services
             var installation = await installationService.ReadByName(installationCode);
             if (installation == null) { return null; }
 
-            return await context.Areas.Where(a =>
-                    a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
-                    a.Name.ToLower().Equals(areaName.ToLower())
-                ).Include(a => a.SafePositions).Include(a => a.Installation)
-                .Include(a => a.Plant).Include(a => a.Deck).FirstOrDefaultAsync();
+            return await context.Areas.Where(a => a.Installation.Id.Equals(installation.Id) && a.Name.ToLower().Equals(areaName.ToLower()))
+                .Include(a => a.SafePositions)
+                .Include(a => a.Installation)
+                .Include(a => a.Plant)
+                .Include(a => a.Deck)
+                .ThenInclude(d => d != null ? d.DefaultLocalizationPose : null)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Area>> ReadByInstallation(string installationCode)
@@ -83,7 +85,7 @@ namespace Api.Services
             if (installation == null) { return new List<Area>(); }
 
             return await context.Areas.Where(a =>
-                    a.Installation != null && a.Installation.Id.Equals(installation.Id)).Include(a => a.SafePositions).Include(a => a.Installation)
+                    a.Installation.Id.Equals(installation.Id)).Include(a => a.SafePositions).Include(a => a.Installation)
                 .Include(a => a.Plant).Include(a => a.Deck).ToListAsync();
         }
 
@@ -200,18 +202,18 @@ namespace Api.Services
         {
             if (installation == null) { return null; }
 
-            return await GetAreas().Where(a =>
-                    a.Name.ToLower().Equals(areaName.ToLower()) &&
-                    a.Installation.InstallationCode.Equals(installation.InstallationCode)
-                ).FirstOrDefaultAsync();
+            return await context.Areas.Where(a =>
+                    a.Name.ToLower().Equals(areaName.ToLower()) && a.Installation.Id.Equals(installation.Id)
+                ).Include(a => a.SafePositions).Include(a => a.Installation)
+                .Include(a => a.Plant).Include(a => a.Deck).FirstOrDefaultAsync();
         }
 
         public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName)
         {
             return await GetAreas().Where(a =>
                     a.Deck != null && a.Deck.Id.Equals(deck.Id) &&
-                    a.Plant != null && a.Plant.Id.Equals(plant.Id) &&
-                    a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
+                    a.Plant.Id.Equals(plant.Id) &&
+                    a.Installation.Id.Equals(installation.Id) &&
                     a.Name.ToLower().Equals(areaName.ToLower())
                 ).FirstOrDefaultAsync();
         }
