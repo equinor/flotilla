@@ -18,7 +18,7 @@ enum StatusColors {
 
 export function RobotStatusChip({ status }: StatusProps) {
     const { TranslateText } = useLanguageContext()
-    const { safeZoneStatus, switchSafeZoneStatus } = useSafeZoneContext()
+    const { safeZoneStatus } = useSafeZoneContext()
 
     var chipColor = StatusColors.Offline
     switch (status) {

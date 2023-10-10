@@ -114,7 +114,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id);
+            var missionRun = (MissionRun?)null;
 
             if (robot.MissionQueueFrozen == true)
             {
@@ -127,11 +127,15 @@ namespace Api.EventHandlers
                     return;
                 }
             }
-
-            if (missionRun == null)
+            else
             {
-                _logger.LogInformation("The robot was changed to available but no mission is scheduled");
-                return;
+                missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id);
+
+                if (missionRun == null)
+                {
+                    _logger.LogInformation("The robot was changed to available but no mission is scheduled");
+                    return;
+                }
             }
 
             _scheduleMissionMutex.WaitOne();

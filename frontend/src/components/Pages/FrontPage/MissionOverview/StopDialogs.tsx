@@ -7,7 +7,6 @@ import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { Robot } from 'models/Robot'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
 
@@ -130,14 +129,14 @@ export const StopRobotDialog = (): JSX.Element => {
     }
 
     const stopAll = () => {
-        BackendAPICaller.postSafePosition(installationCode)
+        BackendAPICaller.sendRobotsToSafePosition(installationCode)
         closeDialog()
         switchSafeZoneStatus(true)
         return
     }
 
     const resetRobots = () => {
-        BackendAPICaller.resetRobotState(installationCode)
+        BackendAPICaller.clearEmergencyState(installationCode)
         closeDialog()
         switchSafeZoneStatus(false)
     }
@@ -187,7 +186,7 @@ export const StopRobotDialog = (): JSX.Element => {
                     </StyledDialog>
                 </>
             )}
-            {safeZoneStatus == true && (
+            {safeZoneStatus && (
                 <>
                     <StyledButton>
                         <Button color="danger" variant="outlined" onClick={openDialog}>
