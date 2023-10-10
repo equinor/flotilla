@@ -82,4 +82,25 @@
     public class SafeZoneException(string message) : Exception(message)
     {
     }
+
+    public class RobotNotAvailableException(string message) : Exception(message)
+    {
+    }
+    
+
+    public class PoseNotFoundException(string message) : Exception(message)
+    {
+    }
+
+    public class RobotLocalizationException(string message) : Exception(message)
+    {
+    }
+
+    public class IsarCommunicationException(string message) : Exception(message)
+    {
+    }
+
+    public class LocalizationFailedException(string message) : Exception(message)
+    {
+    }
 }

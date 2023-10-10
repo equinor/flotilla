@@ -74,6 +74,8 @@ builder.Services.AddScoped<IDeckService, DeckService>();
 builder.Services.AddScoped<IDefaultLocalizationPoseService, DefaultLocalizationPoseService>();
 builder.Services.AddScoped<ISourceService, SourceService>();
 builder.Services.AddScoped<IRobotModelService, RobotModelService>();
+builder.Services.AddScoped<IReturnToHomeService, ReturnToHomeService>();
+builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
 builder.Services.AddScoped<ICustomMissionSchedulingService, CustomMissionSchedulingService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
@@ -85,13 +87,9 @@ bool useInMemoryDatabase = builder.Configuration
     .GetValue<bool>("UseInMemoryDatabase");
 
 if (useInMemoryDatabase)
-{
     builder.Services.AddScoped<ITimeseriesService, TimeseriesServiceSqlLite>();
-}
 else
-{
     builder.Services.AddScoped<ITimeseriesService, TimeseriesService>();
-}
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();

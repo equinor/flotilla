@@ -23,11 +23,14 @@ namespace Api.EventHandlers
 
             Subscribe();
         }
-
         private IMissionRunService MissionService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+
+        private IReturnToHomeService ReturnToHomeService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IReturnToHomeService>();
+
+        private ILocalizationService LocalizationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ILocalizationService>();
 
         private IAreaService AreaService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IAreaService>();
 
@@ -66,6 +69,12 @@ namespace Api.EventHandlers
                 return;
             }
 
+            if (!await LocalizationService.RobotIsLocalized(missionRun.Robot.Id) && !missionRun.IsLocalizationMission())
+            {
+                _logger.LogWarning("A mission run was created while the robot was not localized and it will be put on the queue awaiting localization");
+                return;
+            }
+
             if (MissionScheduling.MissionRunQueueIsEmpty(await MissionService.ReadMissionRunQueue(missionRun.Robot.Id)))
             {
                 _logger.LogInformation("Mission run {MissionRunId} was not started as there are no mission runs on the queue", e.MissionRunId);
@@ -87,9 +96,34 @@ namespace Api.EventHandlers
                 return;
             }
 
+            if (!await LocalizationService.RobotIsLocalized(robot.Id))
+            {
+                try { await LocalizationService.EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(robot.Id); }
+                catch (Exception ex) when (ex is LocalizationFailedException or RobotNotFoundException or MissionNotFoundException or MissionException or TimeoutException)
+                {
+                    _logger.LogError("Could not confirm that the robot was correctly localized and the scheduled missions for the deck will be cancelled");
+                    // Cancel missions
+                    // Raise localization mission failed event?
+                }
+            }
+
             if (MissionScheduling.MissionRunQueueIsEmpty(await MissionService.ReadMissionRunQueue(robot.Id)))
             {
                 _logger.LogInformation("The robot was changed to available but there are no mission runs in the queue to be scheduled");
+
+                var lastExecutedMissionRun = await MissionService.ReadLastExecutedMissionRunByRobot(robot.Id);
+                if (lastExecutedMissionRun is null)
+                {
+                    _logger.LogError("Could not find last executed mission run for robot");
+                    return;
+                }
+
+                if (!lastExecutedMissionRun.IsDriveToMission())
+                {
+                    try { await ReturnToHomeService.ScheduleReturnToHomeMissionRun(robot.Id); }
+                    catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException) { return; }
+                }
+                else { await RobotService.UpdateCurrentArea(robot.Id, null); }
                 return;
             }
 

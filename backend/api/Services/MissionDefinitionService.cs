@@ -24,6 +24,8 @@ namespace Api.Services
 
         public Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
 
+        public Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks);
+
         public Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
         public Task<MissionDefinition?> Delete(string id);
@@ -40,12 +42,14 @@ namespace Api.Services
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
     public class MissionDefinitionService(FlotillaDbContext context,
+            IAreaService areaService,
             IEchoService echoService,
             IStidService stidService,
             ICustomMissionService customMissionService,
             ISignalRService signalRService,
-            ILogger<IMissionDefinitionService> logger,
-            IAccessRoleService accessRoleService) : IMissionDefinitionService
+            ISourceService sourceService,
+            IAccessRoleService accessRoleService,
+            ILogger<IMissionDefinitionService> logger) : IMissionDefinitionService
     {
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
         {
@@ -164,6 +168,56 @@ namespace Api.Services
                 await context.SaveChangesAsync();
             else
                 throw new UnauthorizedAccessException($"User does not have permission to update mission definition in installation {installation.Name}");
+
+        }
+
+        public async Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks)
+        {
+            Area? area = null;
+            if (customMissionQuery.AreaName != null) { area = await areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName); }
+
+            var source = await sourceService.CheckForExistingCustomSource(missionTasks);
+
+            MissionDefinition? existingMissionDefinition = null;
+            if (source == null)
+            {
+                try
+                {
+                    string sourceUrl = await customMissionService.UploadSource(missionTasks);
+                    source = new Source
+                    {
+                        SourceId = sourceUrl,
+                        Type = MissionSourceType.Custom
+                    };
+                }
+                catch (Exception e)
+                {
+                    {
+                        string errorMessage = $"Unable to upload source for mission {customMissionQuery.Name}";
+                        logger.LogError(e, "{Message}", errorMessage);
+                        throw new SourceException(errorMessage);
+                    }
+                }
+            }
+            else
+            {
+                var missionDefinitions = await ReadBySourceId(source.SourceId);
+                if (missionDefinitions.Count > 0) { existingMissionDefinition = missionDefinitions.First(); }
+            }
+
+            var customMissionDefinition = existingMissionDefinition ?? new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Source = source,
+                Name = customMissionQuery.Name,
+                InspectionFrequency = customMissionQuery.InspectionFrequency,
+                InstallationCode = customMissionQuery.InstallationCode,
+                Area = area
+            };
+
+            if (existingMissionDefinition == null) { await Create(customMissionDefinition); }
+
+            return customMissionDefinition;
         }
 
         private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
@@ -173,20 +227,22 @@ namespace Api.Services
                 .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
+                .Include(missionDefinition => missionDefinition.Area)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
                 .ThenInclude(missionTask => missionTask.Inspections)
                 .ThenInclude(inspection => inspection.InspectionFindings)
+                .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
+                .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
+                .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null)
                 .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()));
         }
 
         private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)
         {
             if (!missionDefinitions.Any() || string.IsNullOrWhiteSpace(name))
-            {
                 return;
-            }
 
             missionDefinitions = missionDefinitions.Where(
                 missionDefinition =>

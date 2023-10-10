@@ -11,7 +11,7 @@ namespace Api.Services.ActionServices
     }
 
     public class CustomMissionSchedulingService(
-            ILogger<MissionSchedulingService> logger,
+            ILogger<CustomMissionSchedulingService> logger,
             ICustomMissionService customMissionService,
             IAreaService areaService,
             ISourceService sourceService,
