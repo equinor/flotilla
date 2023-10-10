@@ -15,11 +15,13 @@ namespace Api.Test.Services
     {
         private readonly FlotillaDbContext _context;
         private readonly RobotModelService _robotModelService;
+        private readonly ISignalRService _signalRService;
 
         public RobotServiceTest(DatabaseFixture fixture)
         {
             _context = fixture.NewContext;
             _robotModelService = new RobotModelService(_context);
+            _signalRService = new MockSignalRService();
         }
 
         public void Dispose()
@@ -31,7 +33,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadAll()
         {
-            var robotService = new RobotService(_context, _robotModelService);
+            var robotService = new RobotService(_context, _robotModelService, _signalRService);
             var robots = await robotService.ReadAll();
 
             Assert.True(robots.Any());
@@ -40,7 +42,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task Read()
         {
-            var robotService = new RobotService(_context, _robotModelService);
+            var robotService = new RobotService(_context, _robotModelService, _signalRService);
             var robots = await robotService.ReadAll();
             var firstRobot = robots.First();
             var robotById = await robotService.ReadById(firstRobot.Id);
@@ -51,7 +53,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var robotService = new RobotService(_context, _robotModelService);
+            var robotService = new RobotService(_context, _robotModelService, _signalRService);
             var robot = await robotService.ReadById("some_id_that_does_not_exist");
             Assert.Null(robot);
         }
@@ -59,7 +61,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task Create()
         {
-            var robotService = new RobotService(_context, _robotModelService);
+            var robotService = new RobotService(_context, _robotModelService, _signalRService);
             var robotsBefore = await robotService.ReadAll();
             int nRobotsBefore = robotsBefore.Count();
             var videoStreamQuery = new CreateVideoStreamQuery()

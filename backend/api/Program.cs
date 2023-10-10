@@ -90,7 +90,8 @@ builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
 builder.Services.AddScoped<IMqttEventHandler, MqttEventHandler>();
-builder.Services.AddScoped<ISignalRService, SignalRService>();
+
+builder.Services.AddTransient<ISignalRService, SignalRService>();
 
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MissionEventHandler>();

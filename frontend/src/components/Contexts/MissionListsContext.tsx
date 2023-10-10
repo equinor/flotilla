@@ -75,20 +75,33 @@ export const useMissions = (): MissionsResult => {
                 setOngoingMissions((oldQueue) => {
                     const oldQueueCopy = [...oldQueue]
                     const existingMissionIndex = oldQueue.findIndex((m) => m.id === updatedMission.id)
-                    if (existingMissionIndex !== -1) {
-                        if (
-                            updatedMission.status !== MissionStatus.Ongoing &&
-                            updatedMission.status !== MissionStatus.Paused
-                        )
+                    if (updatedMission.status === MissionStatus.Ongoing || updatedMission.status === MissionStatus.Paused) {
+                        if (existingMissionIndex !== -1) { // Mission is ongoing and in the queue
+                            oldQueueCopy[existingMissionIndex] = updatedMission
+                        } else { // Mission is ongoing and not in the queue
+                            return [...oldQueueCopy, updatedMission]
+                        }
+                    } else {
+                        if (existingMissionIndex !== -1) { // Mission is not ongoing and in the queue
                             oldQueueCopy.splice(existingMissionIndex, 1)
-                        else oldQueueCopy[existingMissionIndex] = updatedMission
-                    } else if (
-                        updatedMission.status === MissionStatus.Ongoing ||
-                        updatedMission.status === MissionStatus.Paused
-                    ) {
-                        return [...oldQueueCopy, updatedMission]
+                        }
                     }
                     return oldQueueCopy
+                })
+            })
+            registerEvent('mission run deleted', (username: string, message: string) => {
+                let deletedMission: Mission = JSON.parse(message)
+                setOngoingMissions((missions) => {
+                    const ongoingIndex = missions.findIndex((m) => m.id === deletedMission.id)
+                    if (ongoingIndex !== -1)
+                        missions.splice(ongoingIndex, 1)
+                    return missions
+                })
+                setMissionQueue((missions) => {
+                    const queueIndex = missions.findIndex((m) => m.id === deletedMission.id)
+                    if (queueIndex !== -1)
+                        missions.splice(queueIndex, 1)
+                    return missions
                 })
             })
         }
