@@ -1,7 +1,7 @@
 import { Button, Tabs, Icon } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RefreshProps } from '../FrontPage/FrontPage'
-import { DeckMissionType, InspectionSection, OngoingMissionType } from './InspectionSection'
+import { DeckMissionType, InspectionSection, ScheduledMissionType } from './InspectionSection'
 import { useEffect, useRef, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { AllInspectionsTable } from './InspectionTable'
@@ -36,14 +36,16 @@ export function InspectionOverviewSection({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const [activeTab, setActiveTab] = useState(0)
     const [allMissions, setAllMissions] = useState<Inspection[]>()
-    const [ongoingMissions, setOngoingMissions] = useState<OngoingMissionType>({})
+    const [scheduledMissions, setScheduledMissions] = useState<ScheduledMissionType>({})
+    const [ongoingMissions, setOngoingMissions] = useState<ScheduledMissionType>({})
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const installationCode = useContext(InstallationContext).installationCode
     const echoURL = 'https://echo.equinor.com/missionplanner?instCode='
     const anchorRef = useRef<HTMLButtonElement>(null)
 
-    const updateOngoingMissionsMap = async (areaMissions: DeckMissionType) => {
-        let newOngoingMissions: OngoingMissionType = {}
+    const updateScheduledMissionsMap = async (areaMissions: DeckMissionType) => {
+        let newScheduledMissions: ScheduledMissionType = {}
+        let newOngoingMissions: ScheduledMissionType = {}
         for (const areaId of Object.keys(areaMissions)) {
             for (const inspection of areaMissions[areaId].inspections) {
                 const missionDefinition = inspection.missionDefinition
@@ -51,9 +53,16 @@ export function InspectionOverviewSection({ refreshInterval }: RefreshProps) {
                     statuses: [MissionStatus.Paused, MissionStatus.Pending, MissionStatus.Ongoing],
                     missionId: missionDefinition.id,
                 })
-                newOngoingMissions[missionDefinition.id] = missionRuns.content.length > 0
+                newScheduledMissions[missionDefinition.id] = missionRuns.content.length > 0
+                if (missionRuns.content.length > 0) {
+                    missionRuns.content.map((missionRun) => {
+                        if (missionRun.status == MissionStatus.Ongoing)
+                            newOngoingMissions[missionDefinition.id] = true
+                    })
+                }
             }
         }
+        setScheduledMissions(newScheduledMissions)
         setOngoingMissions(newOngoingMissions)
     }
 
@@ -85,7 +94,8 @@ export function InspectionOverviewSection({ refreshInterval }: RefreshProps) {
                 <Tabs.Panel>
                     <InspectionSection
                         refreshInterval={refreshInterval}
-                        updateOngoingMissionsMap={updateOngoingMissionsMap}
+                        updateScheduledMissionsMap={updateScheduledMissionsMap}
+                        scheduledMissions={scheduledMissions}
                         ongoingMissions={ongoingMissions}
                     />
                 </Tabs.Panel>
@@ -106,6 +116,7 @@ export function InspectionOverviewSection({ refreshInterval }: RefreshProps) {
                             {allMissions != null && (
                                 <AllInspectionsTable
                                     inspections={allMissions}
+                                    scheduledMissions={scheduledMissions}
                                     ongoingMissions={ongoingMissions}
                                     isDialogOpen={isDialogOpen}
                                     openDialog={() => setIsDialogOpen(true)}

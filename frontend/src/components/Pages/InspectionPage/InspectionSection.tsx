@@ -18,7 +18,6 @@ const StyledCard = styled(Card)`
     padding: 16px;
     flex-direction: column;
     justify-content: space-between;
-    align-items: flex-start;
     flex: 1 0 0;
     cursor: pointer;
 `
@@ -41,9 +40,13 @@ const StyledDeckCards = styled.div`
 const StyledDeckText = styled.div`
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    gap: 6px;
     align-self: stretch;
+`
+const StyledTopDeckText = styled.div`
+    display: flex;
+    justify-content: space-between;
+    margin-right: 5px;
 `
 
 const Rectangle = styled.div`
@@ -93,6 +96,12 @@ const StyledPlaceholder = styled.div`
     border-radius: 4px;
 `
 
+const StyledContent = styled.div`
+    display: flex;
+    align-items: centre;
+    gap: 5px;
+`
+
 export interface Inspection {
     missionDefinition: CondensedMissionDefinition
     deadline: Date | undefined
@@ -112,14 +121,15 @@ export interface DeckMissionCount {
     }
 }
 
-export interface OngoingMissionType {
+export interface ScheduledMissionType {
     [missionId: string]: boolean
 }
 
 interface IInspectionProps {
     refreshInterval: number
-    updateOngoingMissionsMap: (areaMissions: DeckMissionType) => Promise<void>
-    ongoingMissions: OngoingMissionType
+    updateScheduledMissionsMap: (areaMissions: DeckMissionType) => Promise<void>
+    scheduledMissions: ScheduledMissionType
+    ongoingMissions: ScheduledMissionType
 }
 
 export const compareInspections = (i1: Inspection, i2: Inspection) => {
@@ -130,7 +140,12 @@ export const compareInspections = (i1: Inspection, i2: Inspection) => {
     else return i1.deadline!.getTime() - i2.deadline!.getTime()
 }
 
-export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, ongoingMissions }: IInspectionProps) {
+export function InspectionSection({
+    refreshInterval,
+    updateScheduledMissionsMap,
+    scheduledMissions,
+    ongoingMissions,
+}: IInspectionProps) {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const [deckMissions, setDeckMissions] = useState<DeckMissionType>({})
@@ -173,7 +188,7 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
 
     useEffect(() => {
         const id = setInterval(() => {
-            updateOngoingMissionsMap(deckMissions)
+            updateScheduledMissionsMap(deckMissions)
         }, refreshInterval)
         return () => clearInterval(id)
     }, [deckMissions])
@@ -183,19 +198,20 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
         switch (true) {
             case deadlineDays <= 1:
                 return 'red'
-            case deadlineDays > 1 && deadlineDays <= 14:
+            case deadlineDays > 1 && deadlineDays <= 7:
+                return 'orange'
+            case deadlineDays > 7 && deadlineDays <= 14:
                 return 'orange'
             case deadlineDays > 7 && deadlineDays <= 30:
                 return 'green'
         }
+        return 'green'
     }
 
     const getCardColor = (deckId: string) => {
         const inspections = deckMissions[deckId].inspections
         if (inspections.length === 0) return 'gray'
-        const isScheduled = (m: CondensedMissionDefinition) =>
-            Object.keys(ongoingMissions).includes(m.id) && ongoingMissions[m.id]
-        const sortedInspections = inspections.filter((i) => !isScheduled(i.missionDefinition)).sort(compareInspections)
+        const sortedInspections = inspections.sort(compareInspections)
 
         if (sortedInspections.length === 0) return 'green'
 
@@ -281,9 +297,22 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
                                     }
                                 >
                                     <StyledDeckText>
-                                        <Typography variant={'body_short_bold'}>
-                                            {deckMissions[deckId].deck.deckName.toString()}
-                                        </Typography>
+                                        <StyledTopDeckText>
+                                            <Typography variant={'body_short_bold'}>
+                                                {deckMissions[deckId].deck.deckName.toString()}
+                                            </Typography>
+                                            {deckMissions[deckId].inspections.map(
+                                                (inspection) =>
+                                                    Object.keys(ongoingMissions).includes(
+                                                        inspection.missionDefinition.id
+                                                    ) && (
+                                                        <StyledContent>
+                                                            <Icon name={Icons.Ongoing} size={16} />
+                                                            {TranslateText('InProgress')}
+                                                        </StyledContent>
+                                                    )
+                                            )}
+                                        </StyledTopDeckText>
                                         {getCardMissionInformation(deckId)}
                                     </StyledDeckText>
                                     <StyledCardComponent>
@@ -318,6 +347,7 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
                         openDialog={() => setisDialogOpen(true)}
                         setSelectedMissions={setSelectedMissions}
                         inspections={deckMissions[selectedDeck.id].inspections}
+                        scheduledMissions={scheduledMissions}
                         ongoingMissions={ongoingMissions}
                     />
                 )}
@@ -329,6 +359,7 @@ export function InspectionSection({ refreshInterval, updateOngoingMissionsMap, o
                     closeDialog={() => setisDialogOpen(false)}
                 />
             )}
+            
         </>
     )
 }

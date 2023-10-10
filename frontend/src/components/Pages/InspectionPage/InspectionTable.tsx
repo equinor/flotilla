@@ -7,7 +7,7 @@ import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { NavigateFunction, useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
-import { Inspection, OngoingMissionType, compareInspections } from './InspectionSection'
+import { Inspection, ScheduledMissionType, compareInspections } from './InspectionSection'
 import { getDeadlineInDays } from 'utils/StringFormatting'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { useState } from 'react'
@@ -27,27 +27,31 @@ const StyledTable = styled.div`
     align-items: flex-start;
 `
 
-const Circle = (fill: string) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="14" viewBox="0 0 13 14" fill="none">
-        <circle cx="6.5" cy="7" r="6.5" fill={fill} />
-    </svg>
-)
+const StyledContent = styled.div`
+    display: flex;
+    align-items: centre;
+    gap: 5px;
+`
 
-const RedCircle = Circle('red')
-const YellowCircle = Circle('orange')
-const GreenCircle = Circle('green')
+const StyledCircle = styled.div`
+    width: 13px;
+    height: 13px;
+    border-radius: 100px;
+`
 
 interface IProps {
     deck: Deck
     inspections: Inspection[]
     openDialog: () => void
     setSelectedMissions: (selectedMissions: CondensedMissionDefinition[]) => void
-    ongoingMissions: OngoingMissionType
+    scheduledMissions: ScheduledMissionType
+    ongoingMissions: ScheduledMissionType
 }
 
 interface ITableProps {
     inspections: Inspection[]
-    ongoingMissions: OngoingMissionType
+    scheduledMissions: ScheduledMissionType
+    ongoingMissions: ScheduledMissionType
     isDialogOpen: boolean
     openDialog: () => void
     closeDialog: () => void
@@ -66,45 +70,50 @@ export const getInspectionStatus = (deadlineDate: Date) => {
     switch (true) {
         case deadlineDays <= 0:
             return (
-                <>
-                    {RedCircle} {TranslateTextWithContext('Past deadline')}
-                </>
+                <StyledContent>
+                    <StyledCircle style={{ background: 'red' }} />
+                    {TranslateTextWithContext('Past deadline')}
+                </StyledContent>
             )
         case deadlineDays > 0 && deadlineDays <= 1:
             return (
-                <>
-                    {RedCircle} {TranslateTextWithContext('Due today')}
-                </>
+                <StyledContent>
+                    <StyledCircle style={{ background: 'red' }} /> {TranslateTextWithContext('Due today')}
+                </StyledContent>
             )
         case deadlineDays > 1 && deadlineDays <= 7:
             return (
-                <>
-                    {YellowCircle} {TranslateTextWithContext('Due this week')}
-                </>
+                <StyledContent>
+                    <StyledCircle style={{ background: 'orange' }} />
+                    {TranslateTextWithContext('Due this week')}
+                </StyledContent>
             )
         case deadlineDays > 7 && deadlineDays <= 14:
             return (
-                <>
-                    {YellowCircle} {TranslateTextWithContext('Due within two weeks')}
-                </>
+                <StyledContent>
+                    <StyledCircle style={{ background: 'orange' }} /> {TranslateTextWithContext('Due within two weeks')}
+                </StyledContent>
             )
         case deadlineDays > 7 && deadlineDays <= 30:
             return (
-                <>
-                    {GreenCircle} {TranslateTextWithContext('Due within a month')}
-                </>
+                <StyledContent>
+                    <StyledCircle style={{ background: 'green' }} />
+                    {TranslateTextWithContext('Due within a month')}
+                </StyledContent>
             )
     }
     return (
-        <>
-            {GreenCircle} {TranslateTextWithContext('Up to date')}
-        </>
+        <StyledContent>
+            <StyledCircle style={{ background: 'green' }} />
+            {TranslateTextWithContext('Up to date')}
+        </StyledContent>
     )
 }
 
 const getInspectionRow = (
     inspection: Inspection,
-    ongoingMissions: OngoingMissionType,
+    scheduledMissions: ScheduledMissionType,
+    ongoingMissions: ScheduledMissionType,
     openDialog: () => void,
     setScheduledMissions: (selectedMissions: CondensedMissionDefinition[]) => void,
     navigate: NavigateFunction
@@ -112,26 +121,39 @@ const getInspectionRow = (
     const mission = inspection.missionDefinition
     let status
     let lastCompleted: string = ''
-    const isScheduled = Object.keys(ongoingMissions).includes(mission.id) && ongoingMissions[mission.id]
+    const isScheduled = Object.keys(scheduledMissions).includes(mission.id) && scheduledMissions[mission.id]
+    const isOngoing = Object.keys(ongoingMissions).includes(mission.id) && ongoingMissions[mission.id]
+
     if (isScheduled) {
-        status = (
-            <>
-                {GreenCircle} {TranslateTextWithContext('Already scheduled')}
-            </>
-        )
+        if (isOngoing) {
+            status = (
+                <StyledContent>
+                    <Icon name={Icons.Ongoing} size={16} />
+                    {TranslateTextWithContext('InProgress')}
+                </StyledContent>
+            )
+        } else
+            status = (
+                <StyledContent>
+                    <Icon name={Icons.Pending} size={16} />
+                    {TranslateTextWithContext('Scheduled')}
+                </StyledContent>
+            )
     } else {
         if (!mission.lastRun || !mission.lastRun.endTime) {
             if (inspection.missionDefinition.inspectionFrequency) {
                 status = (
-                    <>
-                        {RedCircle} {TranslateTextWithContext('Not yet performed')}
-                    </>
+                    <StyledContent>
+                        <StyledCircle style={{ background: 'red' }} />
+                        {TranslateTextWithContext('Not yet performed')}
+                    </StyledContent>
                 )
             } else {
                 status = (
-                    <>
-                        {GreenCircle} {TranslateTextWithContext('No planned inspection')}
-                    </>
+                    <StyledContent>
+                        <StyledCircle style={{ background: 'green' }} />
+                        {TranslateTextWithContext('No planned inspection')}
+                    </StyledContent>
                 )
             }
             lastCompleted = TranslateTextWithContext('Never')
@@ -176,14 +198,23 @@ const getInspectionRow = (
 
 const columns = ['Status', 'Name', 'Description', 'Area', 'Last completed', 'Deadline', 'Add to queue']
 
-export function InspectionTable({ deck, inspections, openDialog, setSelectedMissions, ongoingMissions }: IProps) {
+export function InspectionTable({
+    deck,
+    inspections,
+    openDialog,
+    setSelectedMissions,
+    scheduledMissions,
+    ongoingMissions,
+}: IProps) {
     const { TranslateText } = useLanguageContext()
 
     let navigate = useNavigate()
 
     let cellValues = inspections
         .sort(compareInspections)
-        .map((inspection) => getInspectionRow(inspection, ongoingMissions, openDialog, setSelectedMissions, navigate))
+        .map((inspection) =>
+            getInspectionRow(inspection, scheduledMissions, ongoingMissions, openDialog, setSelectedMissions, navigate)
+        )
 
     return (
         <StyledTable>
@@ -208,17 +239,20 @@ export function InspectionTable({ deck, inspections, openDialog, setSelectedMiss
 
 export function AllInspectionsTable({
     inspections,
+    scheduledMissions,
     ongoingMissions,
     isDialogOpen,
     openDialog,
     closeDialog,
 }: ITableProps) {
     const { TranslateText } = useLanguageContext()
-    const [scheduledMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
+    const [scheduledSelectedMissions, setScheduledSelectedMissions] = useState<CondensedMissionDefinition[]>()
     let navigate = useNavigate()
     let cellValues = inspections
         .sort(compareInspections)
-        .map((inspection) => getInspectionRow(inspection, ongoingMissions, openDialog, setSelectedMissions, navigate))
+        .map((inspection) =>
+            getInspectionRow(inspection, scheduledMissions, ongoingMissions, openDialog, setScheduledSelectedMissions, navigate)
+        )
 
     return (
         <>
@@ -234,11 +268,12 @@ export function AllInspectionsTable({
             </Table>
             {isDialogOpen && (
                 <ScheduleMissionDialog
-                    missions={scheduledMissions!}
+                    missions={scheduledSelectedMissions!}
                     refreshInterval={refreshInterval}
                     closeDialog={closeDialog}
                 />
             )}
+
         </>
     )
 }
