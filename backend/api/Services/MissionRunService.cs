@@ -78,10 +78,9 @@ namespace Api.Services
             _context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             if (missionRun.Area is not null) { _context.Entry(missionRun.Area).State = EntityState.Unchanged; }
 
-            await _signalRService.SendMessageAsync("mission run created", missionRun);
-
             await _context.MissionRuns.AddAsync(missionRun);
             await _context.SaveChangesAsync();
+            _signalRService.SendMessageAsync("mission run created", missionRun);
 
             var args = new MissionRunCreatedEventArgs(missionRun.Id);
             OnMissionRunCreated(args);
@@ -125,9 +124,9 @@ namespace Api.Services
 
         public async Task<MissionRun> Update(MissionRun missionRun)
         {
-            await _signalRService.SendMessageAsync("mission run updated", missionRun);
             var entry = _context.Update(missionRun);
             await _context.SaveChangesAsync();
+            _signalRService.SendMessageAsync("mission run updated", missionRun);
             return entry.Entity;
         }
 
@@ -142,6 +141,7 @@ namespace Api.Services
 
             _context.MissionRuns.Remove(missionRun);
             await _context.SaveChangesAsync();
+            _signalRService.SendMessageAsync("mission run deleted", missionRun);
 
             return missionRun;
         }
@@ -186,9 +186,7 @@ namespace Api.Services
         private static void SearchByRobotName(ref IQueryable<MissionRun> missionRuns, string? robotName)
         {
             if (!missionRuns.Any() || string.IsNullOrWhiteSpace(robotName))
-            {
                 return;
-            }
 
             missionRuns = missionRuns.Where(
                 missionRun => missionRun.Robot.Name.ToLower().Contains(robotName.Trim().ToLower())
@@ -198,9 +196,7 @@ namespace Api.Services
         private static void SearchByTag(ref IQueryable<MissionRun> missionRuns, string? tag)
         {
             if (!missionRuns.Any() || string.IsNullOrWhiteSpace(tag))
-            {
                 return;
-            }
 
             missionRuns = missionRuns.Where(
                 missionRun =>
