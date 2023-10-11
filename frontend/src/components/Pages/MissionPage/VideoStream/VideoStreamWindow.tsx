@@ -40,7 +40,7 @@ export function VideoStreamWindow({ videoStreams }: VideoStreamWindowProps) {
         toggleFullScreenMode()
     }
 
-    var videoCards = videoStreams.map(function (videoStream, index) {
+    const videoCards = videoStreams.map(function (videoStream, index) {
         return (
             <VideoStreamCard
                 key={index}

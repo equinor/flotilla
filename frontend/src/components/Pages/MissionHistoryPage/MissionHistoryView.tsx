@@ -134,7 +134,7 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
         return () => clearInterval(id)
     }, [refreshInterval, updateFilteredMissions, page])
 
-    var missionsDisplay = filteredMissions.map(function (mission, index) {
+    const missionsDisplay = filteredMissions.map(function (mission, index) {
         return <HistoricMissionCard key={index} index={index} mission={mission} />
     })
 

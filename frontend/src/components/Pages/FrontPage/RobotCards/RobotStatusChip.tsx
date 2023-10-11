@@ -15,7 +15,7 @@ enum StatusColors {
 
 export function RobotStatusChip({ status }: StatusProps) {
     const { TranslateText } = useLanguageContext()
-    var chipColor = StatusColors.Offline
+    let chipColor = StatusColors.Offline
     switch (status) {
         case RobotStatus.Available: {
             chipColor = StatusColors.Available

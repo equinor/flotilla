@@ -132,9 +132,10 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         })
     }, [missionQueue, ongoingMissions])
 
-    var missionQueueDisplay = missionQueue.map(function (mission, index) {
+    const missionQueueDisplay = missionQueue.map(function (mission, index) {
         return <MissionQueueCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
     })
+
     const loadingQueueDisplay = () => {
         return <MissionQueueCard key={'test'} mission={dummyMission} onDeleteMission={() => {}} />
     }

@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { CondensedMissionDefinition, MissionDefinition } from 'models/MissionDefinition'
+import { CondensedMissionDefinition } from 'models/MissionDefinition'
 
 const HeaderSection = styled.div`
     display: flex;

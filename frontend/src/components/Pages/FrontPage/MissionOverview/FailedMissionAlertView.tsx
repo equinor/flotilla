@@ -45,7 +45,7 @@ function FailedMission({ mission }: MissionProps) {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const goToMission = () => {
-        let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
     }
 
@@ -61,7 +61,7 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const goToHistory = () => {
-        let path = `${config.FRONTEND_BASE_ROUTE}/history`
+        const path = `${config.FRONTEND_BASE_ROUTE}/history`
         navigate(path)
     }
 
@@ -122,8 +122,8 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
         return () => clearInterval(id)
     }, [refreshInterval, updateRecentFailedMissions])
 
-    var missionDisplay = <FailedMission mission={recentFailedMissions[0]} />
-    var severalMissions = <SeveralFailedMissions missions={recentFailedMissions} />
+    const missionDisplay = <FailedMission mission={recentFailedMissions[0]} />
+    const severalMissions = <SeveralFailedMissions missions={recentFailedMissions} />
 
     return (
         <>

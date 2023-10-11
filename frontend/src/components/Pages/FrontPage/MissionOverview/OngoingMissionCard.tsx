@@ -54,7 +54,7 @@ const VerticalContent = styled.div`
 export function OngoingMissionCard({ mission }: MissionProps) {
     let navigate = useNavigate()
     const routeChange = () => {
-        let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
     }
     return (

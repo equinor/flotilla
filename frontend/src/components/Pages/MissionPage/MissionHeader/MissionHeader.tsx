@@ -45,17 +45,13 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
     const translatedDescription = TranslateText('Description')
 
     const { startTime, startDate, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
-
-    var missionIsActive = false
-    if (mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused) {
-        missionIsActive = true
-    }
+    const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
 
     return (
         <HeaderSection>
             <TitleSection>
                 <Typography variant="h1">{mission.name}</Typography>
-                {missionIsActive && <MissionControlButtons mission={mission} />}
+                {isMissionActive && <MissionControlButtons mission={mission} />}
                 {mission.isCompleted && <MissionRestartButton mission={mission} />}
             </TitleSection>
             <Typography

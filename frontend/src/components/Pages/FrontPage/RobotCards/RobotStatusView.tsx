@@ -48,7 +48,7 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
         return () => clearInterval(id)
     }, [refreshInterval, updateRobots])
 
-    var filteredRobots = robots.filter(function (robot) {
+    const filteredRobots = robots.filter(function (robot) {
         return (
             robot.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase() ||
             (typeof robot.currentInstallation === 'string' && robot.currentInstallation.includes('default')) ||
@@ -56,15 +56,16 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
         )
     })
 
-    var robotDisplay
-    if (installationCode === '') {
-        robotDisplay = robots.map(function (robot) {
-            return <RobotStatusCard key={robot.id} robot={robot} />
-        })
-    } else {
-        robotDisplay = filteredRobots.map(function (robot) {
-            return <RobotStatusCard key={robot.id} robot={robot} />
-        })
+    const getRobotDisplay = () => {
+        if (installationCode === '') {
+            return robots.map(function (robot) {
+                return <RobotStatusCard key={robot.id} robot={robot} />
+            })
+        } else {
+            return filteredRobots.map(function (robot) {
+                return <RobotStatusCard key={robot.id} robot={robot} />
+            })
+        }
     }
 
     return (
@@ -73,7 +74,7 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
                 {TranslateText('Robot Status')}
             </Typography>
             <RobotCardSection>
-                {robots.length > 0 && robotDisplay}
+                {robots.length > 0 && getRobotDisplay()}
                 {robots.length === 0 && <RobotStatusCardPlaceholder />}
             </RobotCardSection>
         </RobotView>

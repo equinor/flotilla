@@ -44,8 +44,6 @@ interface IVideoStreamCardProps {
 }
 
 export function VideoStreamCard({ videoStream, toggleFullScreenMode, setFullScreenStream }: IVideoStreamCardProps) {
-    var videoPlayer = null
-
     const turnOnFullScreen = () => {
         setFullScreenStream(videoStream)
         toggleFullScreenMode()
@@ -57,37 +55,39 @@ export function VideoStreamCard({ videoStream, toggleFullScreenMode, setFullScre
         </FullscreenButton>
     )
 
-    if (IsValidOvenPlayerType({ videoStream })) {
-        if (videoStream.shouldRotate270Clockwise) {
-            videoPlayer = (
-                <StyledVideoSectionRotated>
-                    <Rotate>
+    const getVideoPlayer = () => {
+        if (IsValidOvenPlayerType({ videoStream })) {
+            if (videoStream.shouldRotate270Clockwise) {
+                return (
+                    <StyledVideoSectionRotated>
+                        <Rotate>
+                            <VideoPlayerOvenPlayer videoStream={videoStream} />
+                        </Rotate>
+                        {fullScreenButton}
+                    </StyledVideoSectionRotated>
+                )
+            } else {
+                return (
+                    <StyledVideoSection>
                         <VideoPlayerOvenPlayer videoStream={videoStream} />
-                    </Rotate>
-                    {fullScreenButton}
-                </StyledVideoSectionRotated>
-            )
+                        {fullScreenButton}
+                    </StyledVideoSection>
+                )
+            }
         } else {
-            videoPlayer = (
+            // Rotated stream is not supported for simpleplayer
+            return (
                 <StyledVideoSection>
-                    <VideoPlayerOvenPlayer videoStream={videoStream} />
+                    <VideoPlayerSimple videoStream={videoStream} />
                     {fullScreenButton}
                 </StyledVideoSection>
             )
         }
-    } else {
-        // Rotated stream is not supported for simpleplayer
-        videoPlayer = (
-            <StyledVideoSection>
-                <VideoPlayerSimple videoStream={videoStream} />
-                {fullScreenButton}
-            </StyledVideoSection>
-        )
     }
 
     return (
         <VideoCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
-            <div onDoubleClick={turnOnFullScreen}>{videoPlayer}</div>
+            <div onDoubleClick={turnOnFullScreen}>{getVideoPlayer()}</div>
             <Typography variant="h5">{videoStream.name}</Typography>
         </VideoCard>
     )
