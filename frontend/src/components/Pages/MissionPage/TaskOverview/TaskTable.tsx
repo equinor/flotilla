@@ -18,7 +18,7 @@ interface MissionProps {
 
 export function TaskTable({ mission }: MissionProps) {
     const { TranslateText } = useLanguageContext()
-    var rows = mission && mission.tasks.length > 0 ? renderTasks(mission.tasks) : <></>
+    const rows = mission && mission.tasks.length > 0 ? renderTasks(mission.tasks) : <></>
     return (
         <StyledTable>
             <Table.Caption>
@@ -39,7 +39,7 @@ export function TaskTable({ mission }: MissionProps) {
 }
 
 function renderTasks(tasks: Task[]) {
-    var rows = tasks.map((task) => {
+    const rows = tasks.map((task) => {
         // Workaround for current bug in echo
         const order: number = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
         const rowStyle =

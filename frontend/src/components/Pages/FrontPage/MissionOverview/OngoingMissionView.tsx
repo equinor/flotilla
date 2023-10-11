@@ -29,12 +29,12 @@ export function OngoingMissionView({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
 
-    var ongoingMissionscard = ongoingMissions.map(function (mission, index) {
+    const ongoingMissionscard = ongoingMissions.map(function (mission, index) {
         return <OngoingMissionCard key={index} mission={mission} />
     })
     let navigate = useNavigate()
     const routeChange = () => {
-        let path = `${config.FRONTEND_BASE_ROUTE}/history`
+        const path = `${config.FRONTEND_BASE_ROUTE}/history`
         navigate(path)
     }
 

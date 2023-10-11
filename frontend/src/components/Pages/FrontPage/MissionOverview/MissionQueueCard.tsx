@@ -45,11 +45,11 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const routeChange = () => {
-        let path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
     }
     const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState<boolean>(false)
-    var numberOfTasks = 0
+    let numberOfTasks = 0
     mission.tasks.forEach((task) => (numberOfTasks += task.inspections.length))
     return (
         <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }}>

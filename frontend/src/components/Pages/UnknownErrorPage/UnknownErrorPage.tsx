@@ -4,7 +4,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 export const UnknownErrorPage = () => {
     const { TranslateText } = useLanguageContext()
-    var errorMessage = 'An unknown error has occurred'
+    const errorMessage = 'An unknown error has occurred'
     return (
         <StyledCenteredPage>
             <Typography variant="h1">{TranslateText(errorMessage)}</Typography>

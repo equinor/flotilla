@@ -2,8 +2,8 @@ import { tokens } from '@equinor/eds-tokens'
 import { TaskStatus } from 'models/Task'
 
 export const GetColorsFromTaskStatus = (taskStatus: TaskStatus) => {
-    var fillColor = tokens.colors.ui.background__medium.hex
-    var textColor = 'black'
+    let fillColor = tokens.colors.ui.background__medium.hex
+    let textColor = 'black'
     if (taskStatus === TaskStatus.NotStarted) {
         fillColor = tokens.colors.ui.background__info.hex
     } else if (taskStatus === TaskStatus.InProgress || taskStatus === TaskStatus.Paused) {

@@ -75,7 +75,7 @@ function cardContent({ robot }: RobotProps) {
 export function RobotStatusCard({ robot }: RobotProps) {
     let navigate = useNavigate()
     const goToRobot = () => {
-        let path = `${config.FRONTEND_BASE_ROUTE}/robot/${robot.id}`
+        const path = `${config.FRONTEND_BASE_ROUTE}/robot/${robot.id}`
         navigate(path)
     }
     return (

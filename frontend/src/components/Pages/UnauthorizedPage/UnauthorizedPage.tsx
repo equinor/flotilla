@@ -23,7 +23,7 @@ export const GoToAccessITButton = () => {
 
 export const UnauthorizedPage = () => {
     const { TranslateText } = useLanguageContext()
-    var errorMessage = "You don't have access to this site. Apply for access in AccessIT"
+    const errorMessage = "You don't have access to this site. Apply for access in AccessIT"
     return (
         <StyledCenteredPage>
             <Typography variant="h1">{TranslateText(errorMessage)}</Typography>
