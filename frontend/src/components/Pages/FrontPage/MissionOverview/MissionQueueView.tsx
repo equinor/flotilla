@@ -44,8 +44,10 @@ const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, 
 export function MissionQueueView() {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions } = useMissionsContext()
-    const { installationCode } = useInstallationContext()
     const { setAlert } = useAlertContext()
+    const { installationCode } = useInstallationContext()
+    const [robotOptions, setRobotOptions] = useState<Robot[]>([])
+    const { enabledRobots } = useRobotContext()
 
     const [loadingMissionNames, setLoadingMissionNames] = useState<Set<string>>(new Set())
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
@@ -53,7 +55,6 @@ export function MissionQueueView() {
     const [echoMissions, setEchoMissions] = useState<Map<string, EchoMissionDefinition>>(
         new Map<string, EchoMissionDefinition>()
     )
-    const { enabledRobots } = useRobotContext()
     const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
     const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
     const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
