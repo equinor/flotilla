@@ -10,7 +10,6 @@ import { useRobotContext } from 'components/Contexts/RobotContext'
 
 interface IProps {
     missions: CondensedMissionDefinition[]
-    refreshInterval: number
     closeDialog: () => void
 }
 

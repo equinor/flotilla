@@ -39,15 +39,11 @@ export interface ScheduledMissionType {
 }
 
 interface IInspectionProps {
-    refreshInterval: number
-    updateScheduledMissionsMap: (areaMissions: DeckMissionType) => Promise<void>
     scheduledMissions: ScheduledMissionType
     ongoingMissions: ScheduledMissionType
 }
 
 export function InspectionSection({
-    refreshInterval,
-    updateScheduledMissionsMap,
     scheduledMissions,
     ongoingMissions,
 }: IInspectionProps) {
@@ -110,17 +106,10 @@ export function InspectionSection({
     }, [installationCode])
 
     const handleScheduleAll = (inspections: Inspection[]) => {
-        openDialog()
+        setIsDialogOpen(true)
         const sortedInspections = inspections.sort(compareInspections)
         setSelectedMissions(sortedInspections.map((i) => i.missionDefinition))
     }
-
-    useEffect(() => {
-        const id = setInterval(() => {
-            updateScheduledMissionsMap(deckMissions)
-        }, refreshInterval)
-        return () => clearInterval(id)
-    }, [deckMissions, refreshInterval])
 
     return (
         <>
@@ -147,7 +136,6 @@ export function InspectionSection({
             {isDialogOpen && (
                 <ScheduleMissionDialog
                     missions={selectedMissions!}
-                    refreshInterval={refreshInterval}
                     closeDialog={closeDialog}
                     setMissions={setSelectedMissions}
                     unscheduledMissions={unscheduledMissions!}

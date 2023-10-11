@@ -24,7 +24,7 @@ export type MissionStatusFilterOptions = (typeof missionStatusFilterOptionsItera
 
 export interface Mission {
     id: string
-    echoMissionId?: number
+    missionId?: string
     isarMissionId?: string
     name: string
     description?: string

@@ -27,15 +27,7 @@ const MissionsContent = styled.div`
     gap: 2rem;
 `
 
-export type RefreshProps = {
-    refreshInterval: number
-}
-
-export const refreshInterval = 1000
-
 export function FrontPage() {
-    const refreshInterval = 1000
-
     return (
         <>
             <Header page={'root'} />
@@ -48,7 +40,7 @@ export function FrontPage() {
                     </MissionsContent>
                 </HorizontalContent>
                 <RobotStatusSection />
-                <InspectionOverviewSection refreshInterval={refreshInterval} />
+                <InspectionOverviewSection />
             </StyledFrontPage>
         </>
     )

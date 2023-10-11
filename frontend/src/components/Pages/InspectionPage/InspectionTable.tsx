@@ -12,7 +12,6 @@ import { compareInspections } from './InspectionUtilities'
 import { getDeadlineInDays } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { useEffect, useState } from 'react'
-import { refreshInterval } from '../FrontPage/FrontPage'
 import { TranslateTextWithContext } from 'components/Contexts/LanguageContext'
 
 const StyledIcon = styled(Icon)`
@@ -367,7 +366,6 @@ export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMis
             {isDialogOpen && (
                 <ScheduleMissionDialog
                     missions={selectedMissions!}
-                    refreshInterval={refreshInterval}
                     closeDialog={closeDialog}
                     setMissions={setSelectedMissions}
                     unscheduledMissions={unscheduledMissions}

@@ -14,7 +14,7 @@ export interface IRobotContext {
 }
 
 const defaultRobotState = {
-    enabledRobots: []
+    enabledRobots: [],
 }
 
 export const RobotContext = createContext<IRobotContext>(defaultRobotState)
@@ -48,7 +48,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
     return (
         <RobotContext.Provider
             value={{
-                enabledRobots
+                enabledRobots,
             }}
         >
             {children}
