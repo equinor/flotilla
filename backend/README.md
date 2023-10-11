@@ -260,6 +260,18 @@ dotnet format is used to detect naming conventions and other code-related issues
 dotnet format --severity info
 ```
 
+## SignalR
+
+We use SignalR to asynchronously send event updates to the frontend. Currently we only support sending
+events and not receiving them, and all transmissions are sent using the SignalRService class. When
+doing so it is important to make sure that the event name provided corresponds with the name expected
+in the frontend.
+
+It is also crucial that we do not await sending signalR messages in our code. Instead we ignore the 
+await warning. In the current version of the SignalR library, sending a message in an
+asynchronous thread may cause the thread to silently exit without returning an exception, which is
+avoided by letting the SignalR code run asynchronously after the current thread has executed.
+
 ## Monitoring
 
 We use [Azure Application Insights](https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core)
