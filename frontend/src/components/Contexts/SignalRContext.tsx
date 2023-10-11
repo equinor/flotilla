@@ -33,7 +33,10 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         if (isAuthenticated && accessToken) {
             var newConnection = new signalR.HubConnectionBuilder()
-                .withUrl(URL, { accessTokenFactory: () => accessToken })
+                .withUrl(URL, {
+                    accessTokenFactory: () => accessToken,
+                    transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,
+                })
                 .withAutomaticReconnect()
                 .build()
 

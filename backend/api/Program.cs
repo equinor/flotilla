@@ -11,6 +11,7 @@ using Api.SignalRHubs;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
@@ -197,7 +198,10 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<SignalRHub>("/hub");
+app.MapHub<SignalRHub>("/hub", options =>
+{
+    options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
+});
 
 app.MapControllers();
 
