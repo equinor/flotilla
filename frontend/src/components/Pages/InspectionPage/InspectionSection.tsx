@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Deck } from 'models/Deck'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
@@ -8,6 +8,8 @@ import { getInspectionDeadline } from 'utils/StringFormatting'
 import { InspectionTable } from './InspectionTable'
 import { StyledDict, compareInspections } from './InspectionUtilities'
 import { DeckCards } from './DeckCards'
+import { useSignalRContext } from 'components/Contexts/SignalRContext'
+
 
 export interface Inspection {
     missionDefinition: CondensedMissionDefinition
@@ -15,7 +17,7 @@ export interface Inspection {
 }
 
 export interface DeckMissionType {
-    [deckId: string]: {
+    [deckName: string]: {
         inspections: Inspection[]
         deck: Deck
     }
@@ -54,6 +56,7 @@ export function InspectionSection({
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [unscheduledMissions, setUnscheduledMissions] = useState<CondensedMissionDefinition[]>([])
     const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
+    const { registerEvent, connectionReady } = useSignalRContext()
 
     const openDialog = () => {
         setIsDialogOpen(true)
@@ -78,8 +81,7 @@ export function InspectionSection({
         }
     }, [isDialogOpen])
 
-    useEffect(() => {
-        setSelectedDeck(undefined)
+    const updateDeckMissions = () => {
         BackendAPICaller.getDecks().then(async (decks: Deck[]) => {
             let newDeckMissions: DeckMissionType = {}
             const filteredDecks = decks.filter(
@@ -89,7 +91,7 @@ export function InspectionSection({
                 // These calls need to be made sequentially to update areaMissions safely
                 let missionDefinitions = await BackendAPICaller.getMissionDefinitionsInDeck(deck)
                 if (!missionDefinitions) missionDefinitions = []
-                newDeckMissions[deck.id] = {
+                newDeckMissions[deck.deckName] = {
                     inspections: missionDefinitions.map((m) => {
                         return {
                             missionDefinition: m,
@@ -103,7 +105,39 @@ export function InspectionSection({
             }
             setDeckMissions(newDeckMissions)
         })
+    }
+
+    useMemo(() => {
+        setSelectedDeck(undefined)
+        updateDeckMissions()
     }, [installationCode])
+
+    useEffect(() => {
+        if (connectionReady) {
+            registerEvent('mission definition updated', (username: string, message: string) => {
+                const mDef: CondensedMissionDefinition = JSON.parse(message)
+                if (!mDef.area) return
+                const relevantDeck = mDef.area.deckName
+                setDeckMissions((deckMissions) => {
+                    const inspections = deckMissions[relevantDeck].inspections
+                    const index = inspections.findIndex((i) => i.missionDefinition.id === mDef.id)
+                    if (index !== -1) {
+                        inspections[index] = {
+                            missionDefinition: mDef,
+                            deadline: mDef.lastRun
+                                ? getInspectionDeadline(mDef.inspectionFrequency, mDef.lastRun.endTime!)
+                                : undefined,
+                        }
+                        return {
+                            ...deckMissions,
+                            [relevantDeck]: { ...deckMissions[relevantDeck], inspections: inspections },
+                        }
+                    }
+                    return deckMissions
+                })
+            })
+        }
+    }, [registerEvent, connectionReady])
 
     const handleScheduleAll = (inspections: Inspection[]) => {
         setIsDialogOpen(true)

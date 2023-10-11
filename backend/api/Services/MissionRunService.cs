@@ -80,7 +80,7 @@ namespace Api.Services
 
             await _context.MissionRuns.AddAsync(missionRun);
             await _context.SaveChangesAsync();
-            _signalRService.SendMessageAsync("mission run created", missionRun);
+            _ = _signalRService.SendMessageAsync("mission run created", missionRun);
 
             var args = new MissionRunCreatedEventArgs(missionRun.Id);
             OnMissionRunCreated(args);
@@ -126,7 +126,7 @@ namespace Api.Services
         {
             var entry = _context.Update(missionRun);
             await _context.SaveChangesAsync();
-            _signalRService.SendMessageAsync("mission run updated", missionRun);
+            _ = _signalRService.SendMessageAsync("mission run updated", missionRun);
             return entry.Entity;
         }
 
@@ -141,7 +141,7 @@ namespace Api.Services
 
             _context.MissionRuns.Remove(missionRun);
             await _context.SaveChangesAsync();
-            _signalRService.SendMessageAsync("mission run deleted", missionRun);
+            _ = _signalRService.SendMessageAsync("mission run deleted", missionRun);
 
             return missionRun;
         }
@@ -355,7 +355,7 @@ namespace Api.Services
             await Update(missionRun);
 
             if (missionRun.Status == MissionStatus.Failed)
-                await _signalRService.SendMessageAsync("mission run failed", missionRun);
+                _ = _signalRService.SendMessageAsync("mission run failed", missionRun);
             return missionRun;
         }
 

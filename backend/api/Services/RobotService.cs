@@ -54,7 +54,7 @@ namespace Api.Services
                 _context.Entry(robotModel).State = EntityState.Unchanged;
                 await _context.Robots.AddAsync(newRobot);
                 await _context.SaveChangesAsync();
-                await _signalRService.SendMessageAsync("robot list updated", GetEnabledRobotsWithSubModels());
+                _ = _signalRService.SendMessageAsync("robot list updated", GetEnabledRobotsWithSubModels());
                 return newRobot;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
@@ -85,7 +85,7 @@ namespace Api.Services
         {
             var entry = _context.Update(robot);
             await _context.SaveChangesAsync();
-            await _signalRService.SendMessageAsync("robot list updated", GetEnabledRobotsWithSubModels());
+            _ = _signalRService.SendMessageAsync("robot list updated", GetEnabledRobotsWithSubModels());
             return entry.Entity;
         }
 
@@ -96,7 +96,7 @@ namespace Api.Services
 
             _context.Robots.Remove(robot);
             await _context.SaveChangesAsync();
-            await _signalRService.SendMessageAsync("robot list updated", GetEnabledRobotsWithSubModels());
+            _ = _signalRService.SendMessageAsync("robot list updated", GetEnabledRobotsWithSubModels());
             return robot;
         }
 
