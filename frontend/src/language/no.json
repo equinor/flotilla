@@ -204,5 +204,6 @@
     "Edit mission definition": "Rediger oppdragsdefinisjon",
     "Completed Tasks": "Fullførte oppgaver",
     "Confirm plant": "Bekreft anlegg",
-    "Failed to retrieve echo missions": "Kunne ikke hente ut oppdrag fra echo"
+    "Failed to retrieve echo missions": "Kunne ikke hente ut oppdrag fra echo",
+    "Request error": "Forespørselsfeil"
 }
