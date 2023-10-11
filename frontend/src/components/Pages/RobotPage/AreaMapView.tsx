@@ -2,7 +2,6 @@ import { CircularProgress, Typography } from '@equinor/eds-core-react'
 import { MouseEvent, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
-import { useErrorHandler } from 'react-error-boundary'
 import { PlaceRobotInMap, InverseCalculatePixelPosition } from '../../../utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { MapMetadata } from 'models/MapMetadata'
@@ -45,7 +44,6 @@ const StyledMapCompass = styled.div`
 `
 
 export function AreaMapView({ area, localizationPose, setLocalizationPose }: AreaProps) {
-    const handleError = useErrorHandler()
     const { TranslateText } = useLanguageContext()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))

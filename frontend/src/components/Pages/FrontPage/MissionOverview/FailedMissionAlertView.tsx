@@ -74,6 +74,8 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
 }
 
 export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
+    const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
+
     const PageSize: number = 100
     // The default amount of minutes in the past for failed missions to generate an alert
     const DefaultTimeInterval: number = 10
@@ -82,7 +84,6 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
     const MaxTimeInterval: number = 60
 
     const DismissalTimeSessionKeyName: string = 'lastDismissalTime'
-    const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
 
     const getLastDismissalTime = useCallback((): Date => {
         const sessionValue = sessionStorage.getItem(DismissalTimeSessionKeyName)

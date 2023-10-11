@@ -37,11 +37,11 @@ const StyledDialog = styled(Dialog)`
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useInstallationContext()
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [robotOptions, setRobotOptions] = useState<Robot[]>([])
     const anchorRef = useRef<HTMLButtonElement>(null)
-    const { installationCode } = useInstallationContext()
 
     useEffect(() => {
         const id = setInterval(() => {

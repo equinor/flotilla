@@ -6,8 +6,8 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 export const CreateMissionButton = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
-    const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const { installationCode } = useInstallationContext()
+    const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
     const echoURL = 'https://echo.equinor.com/missionplanner?instCode='
 

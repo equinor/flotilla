@@ -49,6 +49,7 @@ interface RobotProps {
 }
 
 export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
+    const { TranslateText } = useLanguageContext()
     const [isLocalizationDialogOpen, setIsLocalizationDialogOpen] = useState<boolean>(false)
     const [missionLocalizationStatus, setMissionLocalizationInfo] = useState<string>()
     const [selectedArea, setSelectedArea] = useState<Area>()
@@ -56,7 +57,6 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
     const [localizationPose, setLocalizationPose] = useState<Pose>()
     const [selectedDirection, setSelectedDirecion] = useState<Orientation>()
     const [localizing, setLocalizing] = useState<Boolean>(false)
-    const { TranslateText } = useLanguageContext()
 
     const colorGreen = '#A1DAA0'
     const colorGreenToken = tokens.colors.text.static_icons__default.hex

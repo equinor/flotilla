@@ -15,9 +15,10 @@ interface MissionProps {
 
 export function MissionProgressDisplay({ mission }: MissionProps) {
     const { TranslateText } = useLanguageContext()
+    const [completedTasks, setCompletedTasks] = useState<number>(0)
+
     const tasks = mission.tasks
 
-    const [completedTasks, setCompletedTasks] = useState<number>(0)
     useEffect(() => {
         setCompletedTasks(countCompletedTasks(tasks))
     }, [tasks])

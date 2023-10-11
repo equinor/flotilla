@@ -47,15 +47,15 @@ function flatten(filters: IFilterState) {
 
 export function MissionHistoryView({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
-    const pageSize: number = 10
-
+    const { page, switchPage, filterState, filterIsSet, filterFunctions, filterError, clearFilterError } =
+        useMissionFilterContext()
     const [filteredMissions, setFilteredMissions] = useState<Mission[]>([])
     const [paginationDetails, setPaginationDetails] = useState<PaginationHeader>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isResettingPage, setIsResettingPage] = useState<boolean>(false)
-
-    const { page, switchPage, filterState, filterIsSet, filterFunctions, filterError, clearFilterError } =
-        useMissionFilterContext()
+    const pageSize: number = 10
+    const checkBoxBackgroundColour = tokens.colors.ui.background__info.hex
+    const checkBoxBorderColour = tokens.colors.interactive.primary__resting.hex
 
     const FilterErrorDialog = () => {
         return (
@@ -74,9 +74,6 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
             </>
         )
     }
-
-    const checkBoxBackgroundColour = tokens.colors.ui.background__info.hex
-    const checkBoxBorderColour = tokens.colors.interactive.primary__resting.hex
 
     const toDisplayValue = (
         filterName: string,

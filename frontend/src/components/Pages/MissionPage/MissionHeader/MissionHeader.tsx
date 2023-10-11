@@ -34,11 +34,6 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
     const { TranslateText } = useLanguageContext()
     const barToMillibar = 1000
     const isMissionCompleted = mission.endTime ? true : false
-    var { startTime, startDate, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
-    var missionIsActive = false
-    if (mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused) {
-        missionIsActive = true
-    }
 
     const translatedStartDate = TranslateText('Start date')
     const translatedStartTime = TranslateText('Start time')
@@ -48,6 +43,13 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
     const translatedBatteryLevel = TranslateText('Battery level')
     const translatedPressureLevel = TranslateText('Pressure level')
     const translatedDescription = TranslateText('Description')
+
+    const { startTime, startDate, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
+
+    var missionIsActive = false
+    if (mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused) {
+        missionIsActive = true
+    }
 
     return (
         <HeaderSection>
