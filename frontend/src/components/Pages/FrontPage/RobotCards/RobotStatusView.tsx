@@ -20,6 +20,7 @@ const RobotView = styled.div`
 `
 export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useInstallationContext()
     const [robots, setRobots] = useState<Robot[]>([])
 
     const sortRobotsByStatus = useCallback((robots: Robot[]): Robot[] => {
@@ -46,8 +47,6 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
         }, refreshInterval)
         return () => clearInterval(id)
     }, [refreshInterval, updateRobots])
-
-    const { installationCode } = useInstallationContext()
 
     var filteredRobots = robots.filter(function (robot) {
         return (

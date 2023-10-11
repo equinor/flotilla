@@ -47,8 +47,8 @@ const VerticalContent = styled.div<{ $alignItems?: string }>`
 const updateSiteTimer = 1000
 export function RobotPage() {
     const { TranslateText } = useLanguageContext()
-    const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const { robotId } = useParams()
+    const [selectedRobot, setSelectedRobot] = useState<Robot>()
 
     useEffect(() => {
         fetchRobotData()

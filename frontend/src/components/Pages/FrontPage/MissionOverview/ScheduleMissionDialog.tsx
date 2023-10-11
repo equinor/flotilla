@@ -61,12 +61,12 @@ const StyledDialog = styled(Dialog)`
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useInstallationContext()
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
     const [isEmptyEchoMissionsDialogOpen, setIsEmptyEchoMissionsDialogOpen] = useState<boolean>(false)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [isScheduleMissionsPressed, setIsScheduleMissionsPressed] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
-    const { installationCode } = useInstallationContext()
 
     useEffect(() => {
         if (!props.isFetchingEchoMissions && isScheduleMissionsPressed) {

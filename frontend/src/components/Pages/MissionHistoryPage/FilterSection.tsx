@@ -37,8 +37,8 @@ const StyledDialog = styled(Card)`
 
 export function FilterSection() {
     const { TranslateText } = useLanguageContext()
-    const [isFilteringDialogOpen, setIsFilteringDialogOpen] = useState<boolean>(false)
     const { filterFunctions, filterState } = useMissionFilterContext()
+    const [isFilteringDialogOpen, setIsFilteringDialogOpen] = useState<boolean>(false)
 
     const missionStatusTranslationMap: Map<string, MissionStatusFilterOptions> = new Map(
         Object.values(missionStatusFilterOptionsIterable).map((missionStatus) => {

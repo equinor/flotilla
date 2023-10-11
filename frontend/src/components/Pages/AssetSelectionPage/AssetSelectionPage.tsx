@@ -85,9 +85,9 @@ export const AssetSelectionPage = () => {
 }
 
 function InstallationPicker() {
-    const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>(new Map())
     const { installationName, switchInstallation } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
+    const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>(new Map())
     const [showActivePlants, setShowActivePlants] = useState<boolean>(true)
     const [updateListOfActivePlants, setUpdateListOfActivePlants] = useState<boolean>(false)
 

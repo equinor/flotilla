@@ -29,6 +29,7 @@ export function MissionRestartButton({ mission }: MissionProps) {
     const { TranslateText } = useLanguageContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
+
     const openMenu = () => {
         setIsOpen(true)
     }

@@ -38,9 +38,9 @@ export enum MissionStatusRequest {
 
 export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
+    const { updateMissionState } = useMissionControlContext()
     const [isStopMissionDialogOpen, setIsStopMissionDialogOpen] = useState<boolean>(false)
     const [missionId, setMissionId] = useState<string>()
-    const { updateMissionState } = useMissionControlContext()
 
     const openDialog = () => {
         setIsStopMissionDialogOpen(true)
