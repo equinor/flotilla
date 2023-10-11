@@ -4,6 +4,36 @@ import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { AuthContext } from './AuthProvider'
 import { config } from 'config'
 
+/**
+ * SignalR provides asynchronous communication between backend and frontend. This
+ * context provides functions for establishing event listeners and for accessing
+ * the connection object, primarily to verify that a connection has been made.
+ *
+ * When registering an event handler using "registerEvent" an event name needs to be
+ * provided, which must correspond to the event name used on the backend. The event
+ * handler should receive a username and a message, though the username is typically
+ * not relevant for broadcasted messages.
+ *
+ * It is important to note that event handlers can only see the scope at which they
+ * are defined, which means that any React state will be outdated once they receive
+ * a message. It is therefore important to update React state within these handlers
+ * by passing functions in the setter functions. For instance instead of doing:
+ *
+ *   setState({...state, newEntry})
+ *
+ * we must instead do:
+ *
+ *   setState((oldState) => { return {...oldState, newEntry} })
+ *
+ * When accessing this context within another context, it is also important to make
+ * sure that the other context provider is nested within the signalR context
+ * provider.
+ *
+ * Objects are received as JSON strings. When parsing these it is important to note
+ * that enums are typically encoded as numbers on the backend, and may therefore
+ * need to be translated to string enums when making comparisons on the frontend.
+ */
+
 interface ISignalRContext {
     connection: signalR.HubConnection | undefined
     registerEvent: (eventName: string, onMessageReceived: (username: string, message: string) => void) => void
