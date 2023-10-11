@@ -48,7 +48,6 @@ const RowContainer = styled.div`
 export const AssetSelectionPage = () => {
     const isAuthenticated = useIsAuthenticated()
     const { instance } = useMsal()
-    const { TranslateText } = useLanguageContext()
 
     useEffect(() => {
         if (!isAuthenticated) {
@@ -63,11 +62,9 @@ export const AssetSelectionPage = () => {
                     <Header page={'root'} />
                     <Centered>
                         <RowContainer>
-                            <StyledTopBarContent>{InstallationPicker()}</StyledTopBarContent>
-
-                            <Button href={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}>
-                                {TranslateText('Confirm installation')}
-                            </Button>
+                            <StyledTopBarContent>
+                                <InstallationPicker />
+                            </StyledTopBarContent>
                         </RowContainer>
                         {/* TODO! ADD image here*/}
                     </Centered>
@@ -88,8 +85,14 @@ function InstallationPicker() {
     const { installationName, switchInstallation } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>(new Map())
+    const [selectedInstallation, setSelectedInstallation] = useState<string>(installationName)
     const [showActivePlants, setShowActivePlants] = useState<boolean>(true)
     const [updateListOfActivePlants, setUpdateListOfActivePlants] = useState<boolean>(false)
+
+    const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
+
+    const validateInstallation = (installationName: string) =>
+        Array.from(mappedOptions.keys()).includes(installationName)
 
     useEffect(() => {
         const plantPromise = showActivePlants ? BackendAPICaller.getActivePlants() : BackendAPICaller.getEchoPlantInfo()
@@ -98,32 +101,40 @@ function InstallationPicker() {
             setAllPlantsMap(mapping)
         })
     }, [showActivePlants, updateListOfActivePlants])
-    const mappedOptions = allPlantsMap ? allPlantsMap : new Map<string, string>()
+
     return (
         <>
             <BlockLevelContainer>
                 <Autocomplete
                     options={Array.from(mappedOptions.keys()).sort()}
                     label=""
-                    initialSelectedOptions={[installationName]}
+                    initialSelectedOptions={[selectedInstallation]}
+                    selectedOptions={[selectedInstallation]}
                     placeholder={TranslateText('Select installation')}
                     onOptionsChange={({ selectedItems }) => {
                         const selectedName = selectedItems[0]
-                        switchInstallation(selectedName)
+                        setSelectedInstallation(selectedName)
                     }}
+                    onChange={(e) => e.preventDefault()}
                     autoWidth={true}
                     onFocus={(e) => {
                         e.preventDefault()
                         setUpdateListOfActivePlants(!updateListOfActivePlants)
                     }}
                 />
-
                 <StyledCheckbox
                     label={TranslateText('Show only active installations')}
                     checked={showActivePlants}
                     onChange={(e) => setShowActivePlants(e.target.checked)}
                 />
             </BlockLevelContainer>
+            <Button
+                onClick={() => switchInstallation(selectedInstallation)}
+                disabled={!validateInstallation(selectedInstallation)}
+                href={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
+            >
+                {TranslateText('Confirm installation')}
+            </Button>
         </>
     )
 }
