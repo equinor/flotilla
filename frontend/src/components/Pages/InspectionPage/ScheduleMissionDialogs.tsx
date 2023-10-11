@@ -7,10 +7,10 @@ import { Robot } from 'models/Robot'
 import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Icons } from 'utils/icons'
+import { useRobotContext } from 'components/Contexts/RobotContext'
 
 interface IProps {
     missions: CondensedMissionDefinition[]
-    refreshInterval: number
     closeDialog: () => void
     setMissions: (selectedMissions: CondensedMissionDefinition[] | undefined) => void
     unscheduledMissions: CondensedMissionDefinition[]
@@ -63,24 +63,16 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [robotOptions, setRobotOptions] = useState<Robot[]>([])
+    const { enabledRobots } = useRobotContext()
     const anchorRef = useRef<HTMLButtonElement>(null)
 
-    useEffect(() => {
-        const id = setInterval(() => {
-            BackendAPICaller.getEnabledRobots()
-                .then((robots) =>
-                    robots.filter(
-                        (robots) => robots.currentInstallation.toLowerCase() === installationCode.toLowerCase()
-                    )
-                )
-                .then((robots) => {
-                    setRobotOptions(robots)
-                })
-        }, props.refreshInterval)
-        return () => clearInterval(id)
-    }, [props.refreshInterval])
-
     let timer: ReturnType<typeof setTimeout>
+
+    useEffect(() => {
+        let robots = [...enabledRobots]
+        robots.filter((robots) => robots.currentInstallation.toLowerCase() === installationCode.toLowerCase())
+        setRobotOptions(robots)
+    }, [enabledRobots])
 
     const onSelectedRobot = (selectedRobot: Robot) => {
         if (!robotOptions) return
