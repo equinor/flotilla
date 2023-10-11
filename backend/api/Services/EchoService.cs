@@ -9,7 +9,7 @@ namespace Api.Services
 {
     public interface IEchoService
     {
-        public Task<IList<CondensedMissionDefinition>> GetAvailableMissions(string? installationCode);
+        public Task<IList<CondensedEchoMissionDefinition>> GetAvailableMissions(string? installationCode);
 
         public Task<EchoMission> GetMissionById(int missionId);
 
@@ -29,7 +29,7 @@ namespace Api.Services
             _logger = logger;
         }
 
-        public async Task<IList<CondensedMissionDefinition>> GetAvailableMissions(string? installationCode)
+        public async Task<IList<CondensedEchoMissionDefinition>> GetAvailableMissions(string? installationCode)
         {
             string relativePath = string.IsNullOrEmpty(installationCode)
                 ? "robots/robot-plan?Status=Ready"
@@ -152,9 +152,9 @@ namespace Api.Services
             return tags;
         }
 
-        private List<CondensedMissionDefinition> ProcessAvailableEchoMission(List<EchoMissionResponse> echoMissions)
+        private List<CondensedEchoMissionDefinition> ProcessAvailableEchoMission(List<EchoMissionResponse> echoMissions)
         {
-            var availableMissions = new List<CondensedMissionDefinition>();
+            var availableMissions = new List<CondensedEchoMissionDefinition>();
 
             foreach (var echoMission in echoMissions)
             {
@@ -164,7 +164,7 @@ namespace Api.Services
                 }
                 try
                 {
-                    var condensedEchoMissionDefinition = new CondensedMissionDefinition
+                    var condensedEchoMissionDefinition = new CondensedEchoMissionDefinition
                     {
                         EchoMissionId = echoMission.Id,
                         Name = echoMission.Name,

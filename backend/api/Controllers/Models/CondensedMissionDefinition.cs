@@ -1,7 +1,7 @@
 ﻿# nullable disable
 namespace Api.Controllers.Models
 {
-    public class CondensedMissionDefinition
+    public class CondensedEchoMissionDefinition
     {
         public int EchoMissionId { get; set; }
 

@@ -44,17 +44,17 @@ namespace Api.Test.Mocks
                 Tags = new List<EchoTag>()
             };
 
-        public CondensedMissionDefinition MockMissionDefinition =
+        public CondensedEchoMissionDefinition MockMissionDefinition =
             new()
             {
                 EchoMissionId = 1,
                 Name = "test",
             };
 
-        public async Task<IList<CondensedMissionDefinition>> GetAvailableMissions(string? installationCode)
+        public async Task<IList<CondensedEchoMissionDefinition>> GetAvailableMissions(string? installationCode)
         {
             await Task.Run(() => Thread.Sleep(1));
-            return new List<CondensedMissionDefinition>(new CondensedMissionDefinition[] { MockMissionDefinition });
+            return new List<CondensedEchoMissionDefinition>(new CondensedEchoMissionDefinition[] { MockMissionDefinition });
         }
 
         public async Task<EchoMission> GetMissionById(int missionId)

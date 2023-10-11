@@ -49,6 +49,7 @@ namespace Api.Services
         private readonly FlotillaDbContext _context;
         private readonly ICustomMissionService _customMissionService;
         private readonly IEchoService _echoService;
+        private readonly ISignalRService _signalRService;
         private readonly ILogger<IMissionDefinitionService> _logger;
         private readonly IStidService _stidService;
 
@@ -57,12 +58,14 @@ namespace Api.Services
             IEchoService echoService,
             IStidService stidService,
             ICustomMissionService customMissionService,
-            ILogger<MissionDefinitionService> logger)
+            ISignalRService signalRService,
+            ILogger<IMissionDefinitionService> logger)
         {
             _context = context;
             _echoService = echoService;
             _stidService = stidService;
             _customMissionService = customMissionService;
+            _signalRService = signalRService;
             _logger = logger;
         }
 
@@ -126,6 +129,7 @@ namespace Api.Services
 
             var entry = _context.Update(missionDefinition);
             await _context.SaveChangesAsync();
+            _ = _signalRService.SendMessageAsync("mission definition updated", new CondensedMissionDefinitionResponse(missionDefinition));
             return entry.Entity;
         }
 
