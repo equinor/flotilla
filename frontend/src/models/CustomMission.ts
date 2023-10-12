@@ -25,7 +25,7 @@ export interface CustomTaskQuery {
 export interface CustomInspectionQuery {
     inspectionType: InspectionType
     videoDuration?: number
-    analysisTypes?: string
+    analysisType?: string
 }
 
 export function CreateCustomMission(mission: Mission): CustomMissionQuery {
@@ -47,7 +47,7 @@ export function CreateCustomMission(mission: Mission): CustomMissionQuery {
                     const customInspection: CustomInspectionQuery = {
                         inspectionType: inspection.inspectionType,
                         videoDuration: inspection.videoDuration,
-                        analysisTypes: inspection.analysisTypes,
+                        analysisType: inspection.analysisType,
                     }
                     return customInspection
                 }),
