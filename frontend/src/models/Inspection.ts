@@ -5,7 +5,7 @@ export interface Inspection {
     isCompleted: boolean
     inspectionType: InspectionType
     videoDuration?: number
-    analysisTypes?: string
+    analysisType?: string
     inspectionUrl?: string
     startTime?: Date
     endTime?: Date
