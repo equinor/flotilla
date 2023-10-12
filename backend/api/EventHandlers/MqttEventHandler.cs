@@ -141,8 +141,7 @@ namespace Api.EventHandlers
                         Enabled = true
                     };
 
-                    var newRobot = new Robot(robotQuery);
-                    newRobot = await robotService.Create(newRobot);
+                    var newRobot = await robotService.CreateFromQuery(robotQuery);
                     _logger.LogInformation(
                         "Added robot '{robotName}' with ISAR id '{isarId}' to database",
                         newRobot.Name,
@@ -185,11 +184,11 @@ namespace Api.EventHandlers
             }
             catch (DbUpdateException e)
             {
-                _logger.LogError("Could not add robot to db", e);
+                _logger.LogError(e, "Could not add robot to db");
             }
             catch (Exception e)
             {
-                _logger.LogError("Could not update robot in db", e);
+                _logger.LogError(e, "Could not update robot in db");
             }
         }
 

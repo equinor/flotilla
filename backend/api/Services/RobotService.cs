@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ namespace Api.Services
     public interface IRobotService
     {
         public Task<Robot> Create(Robot newRobot);
+        public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
         public Task<IEnumerable<Robot>> ReadAll();
         public Task<IEnumerable<string>> ReadAllActivePlants();
         public Task<Robot?> ReadById(string id);
@@ -23,18 +25,31 @@ namespace Api.Services
     public class RobotService : IRobotService
     {
         private readonly FlotillaDbContext _context;
+        private readonly IRobotModelService _robotModelService;
 
-        public RobotService(FlotillaDbContext context)
+        public RobotService(FlotillaDbContext context, IRobotModelService robotModelService)
         {
             _context = context;
+            _robotModelService = robotModelService;
         }
 
         public async Task<Robot> Create(Robot newRobot)
         {
-            var existingModel = _context.RobotModels.FirstOrDefault(r => r.Id.Equals(newRobot.Model.Id));
-            if (existingModel != null)
+            await _context.Robots.AddAsync(newRobot);
+            await _context.SaveChangesAsync();
+            return newRobot;
+        }
+
+        public async Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery)
+        {
+            var robotModel = await _robotModelService.ReadByRobotType(robotQuery.RobotType);
+            if (robotModel != null)
             {
-                newRobot.Model = existingModel;
+                var newRobot = new Robot(robotQuery)
+                {
+                    Model = robotModel
+                };
+                _context.Entry(robotModel).State = EntityState.Unchanged;
                 await _context.Robots.AddAsync(newRobot);
                 await _context.SaveChangesAsync();
                 return newRobot;
