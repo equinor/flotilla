@@ -110,15 +110,26 @@ export const getInspectionStatus = (deadlineDate: Date) => {
     )
 }
 
-const getInspectionRow = (
-    inspection: Inspection,
-    scheduledMissions: ScheduledMissionType,
-    ongoingMissions: ScheduledMissionType,
-    openDialog: () => void,
-    setMissions: (selectedMissions: CondensedMissionDefinition[]) => void,
-    openScheduledDialog: () => void,
+interface IInspectionRowProps {
+    inspection: Inspection
+    scheduledMissions: ScheduledMissionType
+    ongoingMissions: ScheduledMissionType
+    openDialog: () => void
+    setMissions: (selectedMissions: CondensedMissionDefinition[]) => void
+    openScheduledDialog: () => void
     navigate: NavigateFunction
-) => {
+}
+
+const InspectionRow = ({
+    inspection,
+    scheduledMissions,
+    ongoingMissions,
+    openDialog,
+    setMissions,
+    openScheduledDialog,
+    navigate,
+}: IInspectionRowProps) => {
+    const { TranslateText } = useLanguageContext()
     const mission = inspection.missionDefinition
     let status
     let lastCompleted: string = ''
@@ -130,14 +141,14 @@ const getInspectionRow = (
             status = (
                 <StyledContent>
                     <Icon name={Icons.Ongoing} size={16} />
-                    {TranslateTextWithContext('InProgress')}
+                    {TranslateText('InProgress')}
                 </StyledContent>
             )
         } else
             status = (
                 <StyledContent>
                     <Icon name={Icons.Pending} size={16} />
-                    {TranslateTextWithContext('Pending')}
+                    {TranslateText('Pending')}
                 </StyledContent>
             )
     } else {
@@ -146,22 +157,22 @@ const getInspectionRow = (
                 status = (
                     <StyledContent>
                         <StyledCircle style={{ background: 'red' }} />
-                        {TranslateTextWithContext('Not yet performed')}
+                        {TranslateText('Not yet performed')}
                     </StyledContent>
                 )
             } else {
                 status = (
                     <StyledContent>
                         <StyledCircle style={{ background: 'green' }} />
-                        {TranslateTextWithContext('No planned inspection')}
+                        {TranslateText('No planned inspection')}
                     </StyledContent>
                 )
             }
-            lastCompleted = TranslateTextWithContext('Never')
+            lastCompleted = TranslateText('Never')
         } else {
             status = inspection.missionDefinition.inspectionFrequency
                 ? getInspectionStatus(inspection.deadline!)
-                : TranslateTextWithContext('No planned inspection')
+                : TranslateText('No planned inspection')
             lastCompleted = formatDateString(mission.lastRun.endTime!)
         }
     }
@@ -225,22 +236,22 @@ export function InspectionTable({
     closeScheduleDialog,
 }: IProps) {
     const { TranslateText } = useLanguageContext()
+    const navigate = useNavigate()
 
-    let navigate = useNavigate()
-
-    let cellValues = inspections
+    const cellValues = inspections
         .sort(compareInspections)
-        .map((inspection) =>
-            getInspectionRow(
-                inspection,
-                scheduledMissions,
-                ongoingMissions,
-                openDialog,
-                setSelectedMissions,
-                openScheduleDialog,
-                navigate
-            )
-        )
+        .map((inspection) => (
+            <InspectionRow
+                key={inspection.missionDefinition.id}
+                inspection={inspection}
+                scheduledMissions={scheduledMissions}
+                ongoingMissions={ongoingMissions}
+                openDialog={openDialog}
+                setMissions={setSelectedMissions}
+                openScheduledDialog={openScheduleDialog}
+                navigate={navigate}
+            />
+        ))
 
     return (
         <>
@@ -254,7 +265,7 @@ export function InspectionTable({
                     <Table.Head sticky>
                         <Table.Row>
                             {columns.map((col) => (
-                                <Table.Cell> {TranslateText(col)}</Table.Cell>
+                                <Table.Cell key={col}>{TranslateText(col)}</Table.Cell>
                             ))}
                         </Table.Row>
                     </Table.Head>
@@ -290,20 +301,21 @@ export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMis
         setIsScheduledDialogOpen(false)
     }
 
-    let navigate = useNavigate()
-    let cellValues = inspections
+    const navigate = useNavigate()
+    const cellValues = inspections
         .sort(compareInspections)
-        .map((inspection) =>
-            getInspectionRow(
-                inspection,
-                scheduledMissions,
-                ongoingMissions,
-                openDialog,
-                setSelectedMissions,
-                openScheduleDialog,
-                navigate
-            )
-        )
+        .map((inspection) => (
+            <InspectionRow
+                key={inspection.missionDefinition.id}
+                inspection={inspection}
+                scheduledMissions={scheduledMissions}
+                ongoingMissions={ongoingMissions}
+                openDialog={openDialog}
+                setMissions={setSelectedMissions}
+                openScheduledDialog={openScheduleDialog}
+                navigate={navigate}
+            />
+        ))
 
     return (
         <>
@@ -311,7 +323,7 @@ export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMis
                 <Table.Head sticky>
                     <Table.Row>
                         {columns.map((col) => (
-                            <Table.Cell> {TranslateText(col)}</Table.Cell>
+                            <Table.Cell key={col}>{TranslateText(col)}</Table.Cell>
                         ))}
                     </Table.Row>
                 </Table.Head>
