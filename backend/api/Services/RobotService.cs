@@ -15,6 +15,7 @@ namespace Api.Services
         public Task<Robot?> ReadByIsarId(string isarId);
         public Task<Robot> Update(Robot robot);
         public Task<Robot?> Delete(string id);
+        public Task<Robot?> DisableRobotByIsarId(string isarId);
     }
 
     [SuppressMessage(
@@ -97,6 +98,18 @@ namespace Api.Services
             await _context.SaveChangesAsync();
 
             return robot;
+        }
+
+        public async Task<Robot?> DisableRobotByIsarId(string isarId)
+        {
+            var existingRobot = await ReadByIsarId(isarId);
+            if (existingRobot == null) return null;
+            existingRobot.Enabled = false;
+            existingRobot.Status = RobotStatus.Offline;
+            existingRobot.CurrentMissionId = null;
+            var entry = _context.Update(existingRobot);
+            await _context.SaveChangesAsync();
+            return entry.Entity;
         }
 
         private IQueryable<Robot> GetRobotsWithSubModels()

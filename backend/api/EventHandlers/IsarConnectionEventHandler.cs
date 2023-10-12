@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using Api.Database.Models;
 using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
@@ -15,6 +14,8 @@ namespace Api.EventHandlers
     {
 
         private readonly int _isarConnectionTimeout;
+
+        private readonly Mutex _timeoutRobotMutex = new();
 
         private readonly ConcurrentDictionary<string, Timer> _isarConnectionTimers = new();
         private readonly ILogger<IsarConnectionEventHandler> _logger;
@@ -101,6 +102,7 @@ namespace Api.EventHandlers
 
         private async void OnTimeoutEvent(IsarRobotHeartbeatMessage robotHeartbeatMessage)
         {
+            _timeoutRobotMutex.WaitOne();
             var robot = await RobotService.ReadByIsarId(robotHeartbeatMessage.IsarId);
             if (robot is null)
             {
@@ -116,8 +118,6 @@ namespace Api.EventHandlers
                     "Connection to ISAR instance '{id}' timed out - It will be disabled and active missions aborted",
                     robotHeartbeatMessage.IsarId
                 );
-                robot.Enabled = false;
-                robot.Status = RobotStatus.Offline;
                 if (robot.CurrentMissionId != null)
                 {
                     var missionRun = await MissionRunService.ReadById(robot.CurrentMissionId);
@@ -132,8 +132,7 @@ namespace Api.EventHandlers
                         await MissionRunService.Update(missionRun);
                     }
                 }
-                robot.CurrentMissionId = null;
-                await RobotService.Update(robot);
+                await RobotService.DisableRobotByIsarId(robotHeartbeatMessage.IsarId);
             }
 
             if (_isarConnectionTimers.TryGetValue(robotHeartbeatMessage.IsarId, out var timer))
@@ -141,6 +140,7 @@ namespace Api.EventHandlers
                 timer.Close();
                 _isarConnectionTimers.Remove(robotHeartbeatMessage.IsarId, out _);
             }
+            _timeoutRobotMutex.ReleaseMutex();
         }
     }
 }
