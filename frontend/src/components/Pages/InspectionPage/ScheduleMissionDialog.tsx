@@ -11,14 +11,21 @@ interface IProps {
     missions: CondensedMissionDefinition[]
     refreshInterval: number
     closeDialog: () => void
+    setMissions: (selectedMissions: CondensedMissionDefinition[] | undefined) => void
+}
+
+interface IScheduledProps {
+    openDialog: () => void
+    closeDialog: () => void
 }
 
 const StyledMissionDialog = styled.div`
     display: flex;
     justify-content: space-between;
 `
-const StyledAutoComplete = styled(Card)`
+const StyledAutoComplete = styled.div`
     display: flex;
+    flex-direction: column;
     justify-content: center;
     padding: 8px;
     gap: 25px;
@@ -31,8 +38,16 @@ const StyledMissionSection = styled.div`
 `
 const StyledDialog = styled(Dialog)`
     display: flex;
+    flex-direction: column;
     padding: 1rem;
     width: 320px;
+`
+
+const StyledDialogContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 2px;
 `
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
@@ -72,6 +87,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         props.missions.forEach((mission) => BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id))
 
         setSelectedRobot(undefined)
+        props.setMissions(undefined)
     }
 
     const closePopover = () => setIsPopoverOpen(false)
@@ -96,39 +112,81 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
 
             <StyledMissionDialog>
                 <StyledDialog open={true}>
-                    <StyledAutoComplete>
-                        <Autocomplete
-                            optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
-                            options={robotOptions}
-                            label={TranslateText('Select robot')}
-                            onOptionsChange={(changes) => onSelectedRobot(changes.selectedItems[0])}
-                            autoWidth={true}
-                            onFocus={(e) => e.preventDefault()}
-                        />
-                        <StyledMissionSection>
-                            <Button
-                                onClick={() => {
-                                    props.closeDialog()
-                                }}
-                                variant="outlined"
-                            >
-                                {' '}
-                                {TranslateText('Cancel')}{' '}
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    onScheduleButtonPress()
-                                    props.closeDialog()
-                                }}
-                                disabled={!selectedRobot}
-                            >
-                                {' '}
-                                {TranslateText('Queue mission')}
-                            </Button>
-                        </StyledMissionSection>
-                    </StyledAutoComplete>
+                    <StyledDialogContent>
+                        <Typography variant="h4">{TranslateText('Add mission')}</Typography>
+                        <StyledAutoComplete>
+                            <Autocomplete
+                                optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
+                                options={robotOptions}
+                                label={TranslateText('Select robot')}
+                                onOptionsChange={(changes) => onSelectedRobot(changes.selectedItems[0])}
+                                autoWidth={true}
+                                onFocus={(e) => e.preventDefault()}
+                            />
+                            <StyledMissionSection>
+                                <Button
+                                    onClick={() => {
+                                        props.closeDialog()
+                                    }}
+                                    variant="outlined"
+                                    color="primary"
+                                >
+                                    {' '}
+                                    {TranslateText('Cancel')}{' '}
+                                </Button>
+                                <Button
+                                    onClick={() => {
+                                        onScheduleButtonPress()
+                                        props.closeDialog()
+                                    }}
+                                    disabled={!selectedRobot}
+                                >
+                                    {' '}
+                                    {TranslateText('Queue mission')}
+                                </Button>
+                            </StyledMissionSection>
+                        </StyledAutoComplete>
+                    </StyledDialogContent>
                 </StyledDialog>
             </StyledMissionDialog>
+        </>
+    )
+}
+
+export const AlreadyScheduledMissionDialog = (props: IScheduledProps): JSX.Element => {
+    const { TranslateText } = useLanguageContext()
+
+    return (
+        <>
+            <StyledDialog open={true}>
+                <Dialog.Header>{TranslateText('The mission is already in the queue')}</Dialog.Header>
+                <Dialog.CustomContent>
+                    <Typography variant="body_short">{TranslateText('AlreadyScheduledText')}</Typography>
+                </Dialog.CustomContent>
+                <Dialog.Actions>
+                    <StyledMissionSection>
+                        <Button
+                            onClick={() => {
+                                props.closeDialog()
+                            }}
+                            variant="outlined"
+                            color="primary"
+                        >
+                            {' '}
+                            {TranslateText('Cancel')}{' '}
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                props.openDialog()
+                                props.closeDialog()
+                            }}
+                        >
+                            {' '}
+                            {TranslateText('Queue mission')}
+                        </Button>
+                    </StyledMissionSection>
+                </Dialog.Actions>
+            </StyledDialog>
         </>
     )
 }

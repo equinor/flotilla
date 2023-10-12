@@ -185,5 +185,7 @@
     "Must be inspected this week": "Must be inspected this week",
     "Must be inspected within two weeks": "Must be inspected within two weeks",
     "Mission": "Mission",
-    "Scheduled": "Scheduled"
+    "Scheduled": "Scheduled",
+    "The mission is already in the queue": "The mission is already in the queue",
+    "AlreadyScheduledText": "The mission is already in the queue. Are you sure you want to add the mission again?"
 }

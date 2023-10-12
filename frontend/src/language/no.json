@@ -185,5 +185,7 @@
     "Must be inspected this week": "Må inspiseres denne uken",
     "Must be inspected within two weeks": "Må inspiseres innen to uker",
     "Mission": "Oppdrag",
-    "Scheduled": "Planlagt"
+    "Scheduled": "Planlagt",
+    "The mission is already in the queue": "Oppdraget er allerede i kø",
+    "AlreadyScheduledText": "Oppdraget ligger allerede i kø. Er du sikker på at du vill legge til oppdraget enda en gang?"
 }

@@ -38,7 +38,6 @@ export function InspectionOverviewSection({ refreshInterval }: RefreshProps) {
     const [allMissions, setAllMissions] = useState<Inspection[]>()
     const [scheduledMissions, setScheduledMissions] = useState<ScheduledMissionType>({})
     const [ongoingMissions, setOngoingMissions] = useState<ScheduledMissionType>({})
-    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const installationCode = useContext(InstallationContext).installationCode
     const echoURL = 'https://echo.equinor.com/missionplanner?instCode='
     const anchorRef = useRef<HTMLButtonElement>(null)
@@ -56,8 +55,7 @@ export function InspectionOverviewSection({ refreshInterval }: RefreshProps) {
                 newScheduledMissions[missionDefinition.id] = missionRuns.content.length > 0
                 if (missionRuns.content.length > 0) {
                     missionRuns.content.map((missionRun) => {
-                        if (missionRun.status == MissionStatus.Ongoing)
-                            newOngoingMissions[missionDefinition.id] = true
+                        if (missionRun.status == MissionStatus.Ongoing) newOngoingMissions[missionDefinition.id] = true
                     })
                 }
             }
@@ -118,9 +116,6 @@ export function InspectionOverviewSection({ refreshInterval }: RefreshProps) {
                                     inspections={allMissions}
                                     scheduledMissions={scheduledMissions}
                                     ongoingMissions={ongoingMissions}
-                                    isDialogOpen={isDialogOpen}
-                                    openDialog={() => setIsDialogOpen(true)}
-                                    closeDialog={() => setIsDialogOpen(false)}
                                 />
                             )}
                         </StyledContent>
