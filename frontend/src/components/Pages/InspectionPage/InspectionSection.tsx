@@ -20,6 +20,7 @@ const StyledCard = styled(Card)`
     justify-content: space-between;
     flex: 1 0 0;
     cursor: pointer;
+    border-radius: 0px 4px 4px 0px;
 `
 
 const StyledCardComponent = styled.div`
@@ -28,7 +29,6 @@ const StyledCardComponent = styled.div`
     justify-content: flex-end;
     gap: 10px;
     width: 100%;
-    border-radius: 4px;
 `
 
 const StyledDeckCards = styled.div`
@@ -151,7 +151,24 @@ export function InspectionSection({
     const [deckMissions, setDeckMissions] = useState<DeckMissionType>({})
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
-    const [isDialogOpen, setisDialogOpen] = useState<boolean>(false)
+    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
+    const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
+
+    const openDialog = () => {
+        setIsDialogOpen(true)
+    }
+
+    const openScheduleDialog = () => {
+        setIsScheduledDialogOpen(true)
+    }
+
+    const closeDialog = () => {
+        setIsDialogOpen(false)
+    }
+
+    const closeScheduleDialog = () => {
+        setIsScheduledDialogOpen(false)
+    }
 
     useEffect(() => {
         setSelectedDeck(undefined)
@@ -181,7 +198,7 @@ export function InspectionSection({
     }, [installationCode])
 
     const handleScheduleAll = (inspections: Inspection[]) => {
-        setisDialogOpen(true)
+        openDialog()
         inspections.sort(compareInspections)
         setSelectedMissions(inspections.map((i) => i.missionDefinition))
     }
@@ -292,7 +309,7 @@ export function InspectionSection({
                                     onClick={() => setSelectedDeck(deckMissions[deckId].deck)}
                                     style={
                                         selectedDeck === deckMissions[deckId].deck
-                                            ? { border: `solid ${getCardColor(deckId)} 2px ` }
+                                            ? { border: `solid ${getCardColor(deckId)} 2px` }
                                             : {}
                                     }
                                 >
@@ -344,11 +361,14 @@ export function InspectionSection({
                 {selectedDeck && (
                     <InspectionTable
                         deck={selectedDeck}
-                        openDialog={() => setisDialogOpen(true)}
+                        openDialog={openDialog}
                         setSelectedMissions={setSelectedMissions}
                         inspections={deckMissions[selectedDeck.id].inspections}
                         scheduledMissions={scheduledMissions}
                         ongoingMissions={ongoingMissions}
+                        isScheduledDialogOpen={isScheduledDialogOpen}
+                        openScheduleDialog={openScheduleDialog}
+                        closeScheduleDialog={closeScheduleDialog}
                     />
                 )}
             </StyledDeckOverview>
@@ -356,10 +376,10 @@ export function InspectionSection({
                 <ScheduleMissionDialog
                     missions={selectedMissions!}
                     refreshInterval={refreshInterval}
-                    closeDialog={() => setisDialogOpen(false)}
+                    closeDialog={closeDialog}
+                    setMissions={setSelectedMissions}
                 />
             )}
-            
         </>
     )
 }
