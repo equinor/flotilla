@@ -132,6 +132,21 @@ interface IInspectionProps {
     ongoingMissions: ScheduledMissionType
 }
 
+const getDeadlineInspection = (deadline: Date) => {
+    const deadlineDays = getDeadlineInDays(deadline)
+    switch (true) {
+        case deadlineDays <= 1:
+            return 'red'
+        case deadlineDays > 1 && deadlineDays <= 7:
+            return 'orange'
+        case deadlineDays > 7 && deadlineDays <= 14:
+            return 'orange'
+        case deadlineDays > 7 && deadlineDays <= 30:
+            return 'green'
+    }
+    return 'green'
+}
+
 export const compareInspections = (i1: Inspection, i2: Inspection) => {
     if (!i1.missionDefinition.inspectionFrequency) return 1
     if (!i2.missionDefinition.inspectionFrequency) return -1
@@ -210,21 +225,6 @@ export function InspectionSection({
         return () => clearInterval(id)
     }, [deckMissions])
 
-    const getDeadlineInspection = (deadline: Date) => {
-        const deadlineDays = getDeadlineInDays(deadline)
-        switch (true) {
-            case deadlineDays <= 1:
-                return 'red'
-            case deadlineDays > 1 && deadlineDays <= 7:
-                return 'orange'
-            case deadlineDays > 7 && deadlineDays <= 14:
-                return 'orange'
-            case deadlineDays > 7 && deadlineDays <= 30:
-                return 'green'
-        }
-        return 'green'
-    }
-
     const getCardColor = (deckId: string) => {
         const inspections = deckMissions[deckId].inspections
         if (inspections.length === 0) return 'gray'
@@ -242,66 +242,13 @@ export function InspectionSection({
         return getDeadlineInspection(nextInspection.deadline)
     }
 
-    function getCardMissionInformation(deckId: string) {
-        var colorsCount: DeckMissionCount = {
-            red: { count: 0, message: 'Must be inspected this week' },
-            orange: { count: 0, message: 'Must be inspected within two weeks' },
-            green: { count: 0, message: 'Up to date' },
-            grey: { count: 0, message: '' },
-        }
-        const inspections = deckMissions[deckId].inspections
-        if (inspections.length === 0) return
-
-        deckMissions[deckId].inspections.map((inspection) => {
-            if (!inspection.deadline) {
-                if (!inspection.missionDefinition.lastRun && inspection.missionDefinition.inspectionFrequency) {
-                    colorsCount['red'].count++
-                    return
-                }
-                colorsCount['green'].count++
-                return
-            }
-            const dealineColor = getDeadlineInspection(inspection.deadline)
-            colorsCount[dealineColor!].count++
-            return
-        })
-
-        return (
-            <StyledMissionInspections>
-                {Object.keys(colorsCount).map((color) => (
-                    <>
-                        {colorsCount[color].count > 0 && (
-                            <StyledMissionComponents>
-                                <StyledCircle style={{ background: color }} />
-                                <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
-                                    {colorsCount[color].count > 1 &&
-                                        colorsCount[color].count +
-                                            ' ' +
-                                            TranslateText('Missions').toLowerCase() +
-                                            ' ' +
-                                            TranslateText(colorsCount[color].message).toLowerCase()}
-                                    {colorsCount[color].count === 1 &&
-                                        colorsCount[color].count +
-                                            ' ' +
-                                            TranslateText('Mission').toLowerCase() +
-                                            ' ' +
-                                            TranslateText(colorsCount[color].message).toLowerCase()}
-                                </Typography>
-                            </StyledMissionComponents>
-                        )}
-                    </>
-                ))}
-            </StyledMissionInspections>
-        )
-    }
-
     return (
         <>
             <StyledDeckOverview>
                 <StyledDeckCards>
                     {Object.keys(deckMissions).length > 0 ? (
                         Object.keys(deckMissions).map((deckId) => (
-                            <DeckCard>
+                            <DeckCard key={deckId}>
                                 <Rectangle style={{ background: `${getCardColor(deckId)}` }} />
                                 <StyledCard
                                     variant="default"
@@ -318,19 +265,20 @@ export function InspectionSection({
                                             <Typography variant={'body_short_bold'}>
                                                 {deckMissions[deckId].deck.deckName.toString()}
                                             </Typography>
-                                            {deckMissions[deckId].inspections.map(
-                                                (inspection) =>
-                                                    Object.keys(ongoingMissions).includes(
-                                                        inspection.missionDefinition.id
-                                                    ) && (
-                                                        <StyledContent>
-                                                            <Icon name={Icons.Ongoing} size={16} />
-                                                            {TranslateText('InProgress')}
-                                                        </StyledContent>
-                                                    )
-                                            )}
+                                            {deckMissions[deckId].inspections
+                                                .filter((i) =>
+                                                    Object.keys(ongoingMissions).includes(i.missionDefinition.id)
+                                                )
+                                                .map((inspection) => (
+                                                    <StyledContent key={inspection.missionDefinition.id}>
+                                                        <Icon name={Icons.Ongoing} size={16} />
+                                                        {TranslateText('InProgress')}
+                                                    </StyledContent>
+                                                ))}
                                         </StyledTopDeckText>
-                                        {getCardMissionInformation(deckId)}
+                                        {deckMissions[deckId].inspections && (
+                                            <CardMissionInformation deckId={deckId} deckMissions={deckMissions} />
+                                        )}
                                     </StyledDeckText>
                                     <StyledCardComponent>
                                         <Button
@@ -381,5 +329,60 @@ export function InspectionSection({
                 />
             )}
         </>
+    )
+}
+
+interface ICardMissionInformationProps {
+    deckId: string
+    deckMissions: DeckMissionType
+}
+
+function CardMissionInformation({ deckId, deckMissions }: ICardMissionInformationProps) {
+    const { TranslateText } = useLanguageContext()
+
+    var colorsCount: DeckMissionCount = {
+        red: { count: 0, message: 'Must be inspected this week' },
+        orange: { count: 0, message: 'Must be inspected within two weeks' },
+        green: { count: 0, message: 'Up to date' },
+        grey: { count: 0, message: '' },
+    }
+
+    deckMissions[deckId].inspections.forEach((inspection) => {
+        if (!inspection.deadline) {
+            if (!inspection.missionDefinition.lastRun && inspection.missionDefinition.inspectionFrequency) {
+                colorsCount['red'].count++
+            } else {
+                colorsCount['green'].count++
+            }
+        } else {
+            const dealineColor = getDeadlineInspection(inspection.deadline)
+            colorsCount[dealineColor!].count++
+        }
+    })
+
+    return (
+        <StyledMissionInspections>
+            {Object.keys(colorsCount)
+                .filter((color) => colorsCount[color].count > 0)
+                .map((color) => (
+                    <StyledMissionComponents key={color}>
+                        <StyledCircle style={{ background: color }} />
+                        <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
+                            {colorsCount[color].count > 1 &&
+                                colorsCount[color].count +
+                                    ' ' +
+                                    TranslateText('Missions').toLowerCase() +
+                                    ' ' +
+                                    TranslateText(colorsCount[color].message).toLowerCase()}
+                            {colorsCount[color].count === 1 &&
+                                colorsCount[color].count +
+                                    ' ' +
+                                    TranslateText('Mission').toLowerCase() +
+                                    ' ' +
+                                    TranslateText(colorsCount[color].message).toLowerCase()}
+                        </Typography>
+                    </StyledMissionComponents>
+                ))}
+        </StyledMissionInspections>
     )
 }
