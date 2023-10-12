@@ -12,10 +12,7 @@ namespace Api.EventHandlers
     /// </summary>
     public class IsarConnectionEventHandler : EventHandlerBase
     {
-
         private readonly int _isarConnectionTimeout;
-
-        private readonly Mutex _timeoutRobotMutex = new();
 
         private readonly ConcurrentDictionary<string, Timer> _isarConnectionTimers = new();
         private readonly ILogger<IsarConnectionEventHandler> _logger;
@@ -95,14 +92,12 @@ namespace Api.EventHandlers
 
             if (!robot.Enabled)
             {
-                robot.Enabled = true;
-                await RobotService.Update(robot);
+                await RobotService.EnableRobotByIsarId(isarRobotHeartbeat.IsarId);
             }
         }
 
         private async void OnTimeoutEvent(IsarRobotHeartbeatMessage robotHeartbeatMessage)
         {
-            _timeoutRobotMutex.WaitOne();
             var robot = await RobotService.ReadByIsarId(robotHeartbeatMessage.IsarId);
             if (robot is null)
             {
@@ -140,7 +135,6 @@ namespace Api.EventHandlers
                 timer.Close();
                 _isarConnectionTimers.Remove(robotHeartbeatMessage.IsarId, out _);
             }
-            _timeoutRobotMutex.ReleaseMutex();
         }
     }
 }

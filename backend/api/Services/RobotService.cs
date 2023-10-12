@@ -16,6 +16,7 @@ namespace Api.Services
         public Task<Robot> Update(Robot robot);
         public Task<Robot?> Delete(string id);
         public Task<Robot?> DisableRobotByIsarId(string isarId);
+        public Task<Robot?> EnableRobotByIsarId(string isarId);
     }
 
     [SuppressMessage(
@@ -107,6 +108,16 @@ namespace Api.Services
             existingRobot.Enabled = false;
             existingRobot.Status = RobotStatus.Offline;
             existingRobot.CurrentMissionId = null;
+            var entry = _context.Update(existingRobot);
+            await _context.SaveChangesAsync();
+            return entry.Entity;
+        }
+
+        public async Task<Robot?> EnableRobotByIsarId(string isarId)
+        {
+            var existingRobot = await ReadByIsarId(isarId);
+            if (existingRobot == null) return null;
+            existingRobot.Enabled = true;
             var entry = _context.Update(existingRobot);
             await _context.SaveChangesAsync();
             return entry.Entity;
