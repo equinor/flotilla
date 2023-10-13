@@ -4,8 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Services;
-using Api.Services.Models;
-
 namespace Api.Test.Mocks
 {
     public class MockEchoService : IEchoService
@@ -38,13 +36,13 @@ namespace Api.Test.Mocks
             new()
             {
                 EchoMissionId = 1,
-                Name = "test",
+                Name = "test"
             };
 
         public async Task<IList<CondensedEchoMissionDefinition>> GetAvailableMissions(string? installationCode)
         {
             await Task.Run(() => Thread.Sleep(1));
-            return new List<CondensedEchoMissionDefinition>(new CondensedEchoMissionDefinition[] { MockMissionDefinition });
+            return new List<CondensedEchoMissionDefinition>(new[] { MockMissionDefinition });
         }
 
         public async Task<EchoMission> GetMissionById(int missionId)
@@ -57,11 +55,6 @@ namespace Api.Test.Mocks
         {
             await Task.Run(() => Thread.Sleep(1));
             return _mockEchoPlantInfo;
-        }
-        public async Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId)
-        {
-            await Task.Run(() => Thread.Sleep(1));
-            return new EchoPoseResponse();
         }
 
         public Task<EchoMission> GetMissionByPath(string relativePath)
