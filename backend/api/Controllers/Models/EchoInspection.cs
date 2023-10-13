@@ -58,7 +58,7 @@ namespace Api.Controllers.Models
 
             return e1.InspectionType == e2.InspectionType
                    && e1.TimeInSeconds == e2.TimeInSeconds
-                   && e1.InspectionPoint == e2.InspectionPoint;
+                   && e1.InspectionPoint.Equals(e2.InspectionPoint);
         }
 
         public int GetHashCode(EchoInspection e)

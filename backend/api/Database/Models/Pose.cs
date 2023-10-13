@@ -76,9 +76,27 @@ namespace Api.Database.Models
             Y = y;
             Z = z;
         }
+
         public float X { get; set; }
         public float Y { get; set; }
         public float Z { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is not Position position) { return false; }
+            const float Tolerance = 1e-6F;
+
+            if (MathF.Abs(position.X - X) > Tolerance) { return false; }
+            if (MathF.Abs(position.Y - Y) > Tolerance) { return false; }
+            if (MathF.Abs(position.Z - Z) > Tolerance) { return false; }
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [Owned]
