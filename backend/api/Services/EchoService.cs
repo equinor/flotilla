@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Models;
-using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.Identity.Abstractions;
 using Microsoft.IdentityModel.Tokens;
@@ -14,7 +13,6 @@ namespace Api.Services
         public Task<EchoMission> GetMissionById(int missionId);
 
         public Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
-        public Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId);
     }
 
     public class EchoService : IEchoService
@@ -70,7 +68,7 @@ namespace Api.Services
             response.EnsureSuccessStatusCode();
 
             var echoMission = await response.Content.ReadFromJsonAsync<EchoMissionResponse>() ?? throw new JsonException("Failed to deserialize mission from Echo");
-            var processedEchoMission = ProcessEchoMission(echoMission) ?? throw new InvalidDataException($"EchoMission with id: {missionId} is invalid.");
+            var processedEchoMission = ProcessEchoMission(echoMission) ?? throw new InvalidDataException($"EchoMission with id: {missionId} is invalid");
             return processedEchoMission;
         }
 
@@ -94,23 +92,7 @@ namespace Api.Services
             return installations;
         }
 
-        public async Task<EchoPoseResponse> GetRobotPoseFromPoseId(int poseId)
-        {
-            string relativePath = $"/robots/pose/{poseId}";
-            var response = await _echoApi.CallApiForUserAsync(
-                ServiceName,
-                options =>
-                {
-                    options.HttpMethod = HttpMethod.Get;
-                    options.RelativePath = relativePath;
-                }
-            );
-            response.EnsureSuccessStatusCode();
-            var echoPoseResponse = await response.Content.ReadFromJsonAsync<EchoPoseResponse>() ?? throw new JsonException("Failed to deserialize robot pose from Echo");
-            return echoPoseResponse;
-        }
-
-        private List<EchoTag> ProcessPlanItems(List<PlanItem> planItems, string installationCode)
+        private static List<EchoTag> ProcessPlanItems(List<PlanItem> planItems, string installationCode)
         {
             var tags = new List<EchoTag>();
 
@@ -119,10 +101,10 @@ namespace Api.Services
                 if (planItem.PoseId is null)
                 {
                     string message =
-                        $"Invalid EchoMission: {planItem.Tag} has no associated pose id.";
+                        $"Invalid EchoMission: {planItem.Tag} has no associated pose id";
                     throw new InvalidDataException(message);
                 }
-                var robotPose = GetRobotPoseFromPoseId(planItem.PoseId.Value).Result;
+
                 var tag = new EchoTag
                 {
                     Id = planItem.Id,
@@ -130,8 +112,8 @@ namespace Api.Services
                     PoseId = planItem.PoseId.Value,
                     PlanOrder = planItem.SortingOrder,
                     Pose = new Pose(
-                        robotPose.Position,
-                        robotPose.RobotBodyDirectionDegrees * MathF.PI / 180
+                        planItem.EchoPose.Position,
+                        planItem.EchoPose.RobotBodyDirectionDegrees * MathF.PI / 180
                     ),
                     URL = new Uri(
                         $"https://stid.equinor.com/{installationCode}/tag?tagNo={planItem.Tag}"
@@ -165,16 +147,14 @@ namespace Api.Services
                 {
                     var condensedEchoMissionDefinition = new CondensedEchoMissionDefinition
                     {
-                        EchoMissionId = echoMission.Id,
-                        Name = echoMission.Name,
-                        InstallationCode = echoMission.InstallationCode
+                        EchoMissionId = echoMission.Id, Name = echoMission.Name, InstallationCode = echoMission.InstallationCode
                     };
                     availableMissions.Add(condensedEchoMissionDefinition);
                 }
                 catch (InvalidDataException e)
                 {
                     _logger.LogWarning(
-                        "Echo mission with ID '{id}' is invalid: '{message}'",
+                        "Echo mission with ID '{Id}' is invalid: '{Message}'",
                         echoMission.Id,
                         e.Message
                     );
@@ -204,7 +184,7 @@ namespace Api.Services
             catch (InvalidDataException e)
             {
                 _logger.LogWarning(
-                    "Echo mission with ID '{id}' is invalid: '{message}'",
+                    "Echo mission with ID '{Id}' is invalid: '{Message}'",
                     echoMission.Id,
                     e.Message
                 );
@@ -226,8 +206,7 @@ namespace Api.Services
 
                 var echoPlantInfo = new EchoPlantInfo
                 {
-                    PlantCode = plant.InstallationCode,
-                    ProjectDescription = plant.ProjectDescription
+                    PlantCode = plant.InstallationCode, ProjectDescription = plant.ProjectDescription
                 };
 
                 echoPlantInfos.Add(echoPlantInfo);

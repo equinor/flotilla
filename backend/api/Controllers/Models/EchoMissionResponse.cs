@@ -56,6 +56,10 @@ namespace Api.Controllers.Models
         [JsonPropertyName("poseId")]
         public int? PoseId { get; set; }
 
+        [JsonPropertyName("pose")]
+        public EchoPose EchoPose { get; set; }
+
+        [JsonPropertyName("inspectionPoint")]
         public InspectionPoint InspectionPoint { get; set; }
     }
 
@@ -72,6 +76,30 @@ namespace Api.Controllers.Models
 
         [JsonPropertyName("planItemId")]
         public int PlanItemId { get; set; }
+    }
+
+    public class EchoPose
+    {
+        [JsonPropertyName("poseId")]
+        public int PoseId { get; set; }
+
+        [JsonPropertyName("installationCode")]
+        public string InstallationCode { get; set; }
+
+        [JsonPropertyName("tag")]
+        public string Tag { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("position")]
+        public EnuPosition Position { get; set; }
+
+        [JsonPropertyName("robotBodyDirectionDegrees")]
+        public float RobotBodyDirectionDegrees { get; set; }
+
+        [JsonPropertyName("isDefault")]
+        public bool IsDefault { get; set; }
     }
 
     public class InspectionPoint
