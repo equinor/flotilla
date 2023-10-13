@@ -38,6 +38,7 @@ import {
     platform,
     library_add,
     play,
+    edit,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -79,6 +80,7 @@ Icon.add({
     platform,
     library_add,
     play,
+    edit,
 })
 
 export enum Icons {
@@ -120,4 +122,5 @@ export enum Icons {
     Platform = 'platform',
     LibraryAdd = 'library_add',
     PlayTriangle = 'play',
+    Edit = 'edit',
 }
