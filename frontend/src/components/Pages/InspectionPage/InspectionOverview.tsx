@@ -54,9 +54,9 @@ export function InspectionOverviewSection({ refreshInterval }: RefreshProps) {
                 })
                 newScheduledMissions[missionDefinition.id] = missionRuns.content.length > 0
                 if (missionRuns.content.length > 0) {
-                    missionRuns.content.map((missionRun) => {
-                        if (missionRun.status == MissionStatus.Ongoing) newOngoingMissions[missionDefinition.id] = true
-                    })
+                    missionRuns.content
+                        .filter((missionRun) => missionRun.status === MissionStatus.Ongoing)
+                        .forEach(() => (newOngoingMissions[missionDefinition.id] = true))
                 }
             }
         }

@@ -1,4 +1,4 @@
-import { Table, Typography, Icon } from '@equinor/eds-core-react'
+import { Table, Typography, Icon, Button } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Deck } from 'models/Deck'
@@ -28,9 +28,10 @@ const StyledTable = styled.div`
 `
 
 const StyledContent = styled.div`
-    display: flex;
-    align-items: centre;
-    gap: 5px;
+    display: grid;
+    grid-template-columns: 14px auto;
+    align-items: center;
+    gap: 4px;
 `
 
 const StyledCircle = styled.div`
@@ -84,7 +85,7 @@ export const getInspectionStatus = (deadlineDate: Date) => {
         case deadlineDays > 1 && deadlineDays <= 7:
             return (
                 <StyledContent>
-                    <StyledCircle style={{ background: 'orange' }} />
+                    <StyledCircle style={{ background: 'red' }} />
                     {TranslateTextWithContext('Due this week')}
                 </StyledContent>
             )
@@ -170,9 +171,14 @@ const InspectionRow = ({
             }
             lastCompleted = TranslateText('Never')
         } else {
-            status = inspection.missionDefinition.inspectionFrequency
-                ? getInspectionStatus(inspection.deadline!)
-                : TranslateText('No planned inspection')
+            status = inspection.missionDefinition.inspectionFrequency ? (
+                getInspectionStatus(inspection.deadline!)
+            ) : (
+                <StyledContent>
+                    <StyledCircle style={{ background: 'green' }} />
+                    {TranslateText('No planned inspection')}
+                </StyledContent>
+            )
             lastCompleted = formatDateString(mission.lastRun.endTime!)
         }
     }
@@ -194,28 +200,36 @@ const InspectionRow = ({
             <Table.Cell>{inspection.deadline ? inspection.deadline.toDateString() : ''}</Table.Cell>
             <Table.Cell>
                 {!isScheduled && (
-                    <StyledIcon
-                        color={`${tokens.colors.interactive.focus.hex}`}
-                        name={Icons.AddOutlined}
-                        size={16}
-                        title={TranslateTextWithContext('Add to queue')}
+                    <Button
+                        variant="ghost_icon"
                         onClick={() => {
                             openDialog()
                             setMissions([mission])
                         }}
-                    />
+                    >
+                        <StyledIcon
+                            color={`${tokens.colors.interactive.focus.hex}`}
+                            name={Icons.AddOutlined}
+                            size={24}
+                            title={TranslateTextWithContext('Add to queue')}
+                        />
+                    </Button>
                 )}
                 {isScheduled && (
-                    <StyledIcon
-                        color={`${tokens.colors.interactive.focus.hex}`}
-                        name={Icons.AddOutlined}
-                        size={16}
-                        title={TranslateTextWithContext('Add to queue')}
+                    <Button
+                        variant="ghost_icon"
                         onClick={() => {
                             openScheduledDialog()
                             setMissions([mission])
                         }}
-                    />
+                    >
+                        <StyledIcon
+                            color={`${tokens.colors.interactive.focus.hex}`}
+                            name={Icons.AddOutlined}
+                            size={24}
+                            title={TranslateTextWithContext('Add to queue')}
+                        />
+                    </Button>
                 )}
             </Table.Cell>
         </Table.Row>
