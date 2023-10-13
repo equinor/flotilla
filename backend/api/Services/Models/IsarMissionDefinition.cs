@@ -53,7 +53,7 @@ namespace Api.Services.Models
             var isarInspections = new List<IsarInspectionDefinition>();
             foreach (var inspection in missionTask.Inspections)
             {
-                isarInspections.Add(new IsarInspectionDefinition(inspection, missionTask, missionRun));
+                isarInspections.Add(new IsarInspectionDefinition(inspection, missionRun));
             }
             Inspections = isarInspections;
         }
@@ -76,14 +76,14 @@ namespace Api.Services.Models
         [JsonPropertyName("metadata")]
         public Dictionary<string, string?>? Metadata { get; set; }
 
-        public IsarInspectionDefinition(Inspection inspection, MissionTask task, MissionRun missionRun)
+        public IsarInspectionDefinition(Inspection inspection, MissionRun missionRun)
         {
             Id = inspection.IsarStepId;
             Type = inspection.InspectionType.ToString();
             InspectionTarget = new IsarPosition(
-                task.InspectionTarget.X,
-                task.InspectionTarget.Y,
-                task.InspectionTarget.Z,
+                inspection.InspectionTarget.X,
+                inspection.InspectionTarget.Y,
+                inspection.InspectionTarget.Z,
                 "asset"
             );
             Duration = inspection.VideoDuration;

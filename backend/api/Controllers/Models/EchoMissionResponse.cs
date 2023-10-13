@@ -1,6 +1,6 @@
 ﻿# nullable disable
 using System.Text.Json.Serialization;
-
+using Api.Services.Models;
 namespace Api.Controllers.Models
 {
     public class EchoMissionResponse
@@ -55,6 +55,8 @@ namespace Api.Controllers.Models
 
         [JsonPropertyName("poseId")]
         public int? PoseId { get; set; }
+
+        public InspectionPoint InspectionPoint { get; set; }
     }
 
     public class SensorType
@@ -70,5 +72,26 @@ namespace Api.Controllers.Models
 
         [JsonPropertyName("planItemId")]
         public int PlanItemId { get; set; }
+    }
+
+    public class InspectionPoint
+    {
+        [JsonPropertyName("inspectionPointId")]
+        public int Id { get; set; }
+
+        [JsonPropertyName("installationCode")]
+        public string InstallationCode { get; set; }
+
+        [JsonPropertyName("tag")]
+        public string Tag { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("position")]
+        public EnuPosition EnuPosition { get; set; }
+
+        [JsonPropertyName("isDefault")]
+        public bool IsDefault { get; set; }
     }
 }
