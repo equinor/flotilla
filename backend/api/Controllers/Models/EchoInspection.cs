@@ -46,15 +46,9 @@ namespace Api.Controllers.Models
     {
         public bool Equals(EchoInspection? e1, EchoInspection? e2)
         {
-            if (ReferenceEquals(e1, e2))
-            {
-                return true;
-            }
+            if (ReferenceEquals(e1, e2)) { return true; }
 
-            if (e2 is null || e1 is null)
-            {
-                return false;
-            }
+            if (e2 is null || e1 is null) { return false; }
 
             return e1.InspectionType == e2.InspectionType
                    && e1.TimeInSeconds == e2.TimeInSeconds
