@@ -111,7 +111,7 @@ namespace Api.Database.Models
             Orientation = new Orientation(x_ori, y_ori, z_ori, w);
         }
 
-        public Pose(EchoVector enuPosition, float echoAngle)
+        public Pose(EnuPosition enuPosition, float echoAngle)
         {
             Position = new Position(enuPosition.East, enuPosition.North, enuPosition.Up);
             Orientation = AxisAngleToQuaternion(echoAngle);

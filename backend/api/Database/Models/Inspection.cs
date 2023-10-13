@@ -7,13 +7,13 @@ namespace Api.Database.Models
 {
     public class Inspection
     {
-
         private InspectionStatus _status;
 
         public Inspection()
         {
             InspectionType = InspectionType.Image;
             Status = InspectionStatus.NotStarted;
+            InspectionTarget = new Position();
         }
 
         public Inspection(EchoInspection echoInspection)
@@ -21,6 +21,7 @@ namespace Api.Database.Models
             InspectionType = echoInspection.InspectionType;
             VideoDuration = echoInspection.TimeInSeconds;
             Status = InspectionStatus.NotStarted;
+            InspectionTarget = echoInspection.InspectionPoint;
         }
 
         public Inspection(CustomInspectionQuery inspectionQuery)
@@ -41,6 +42,7 @@ namespace Api.Database.Models
             VideoDuration = copy.VideoDuration;
             AnalysisType = copy.AnalysisType;
             InspectionUrl = copy.InspectionUrl;
+            InspectionTarget = copy.InspectionTarget;
         }
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -50,6 +52,8 @@ namespace Api.Database.Models
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
         public string? IsarStepId { get; private set; } = Guid.NewGuid().ToString();
 
+        public Position InspectionTarget { get; set; }
+
         [Required]
         public InspectionStatus Status
         {
@@ -57,9 +61,15 @@ namespace Api.Database.Models
             set
             {
                 _status = value;
-                if (IsCompleted && EndTime is null) { EndTime = DateTime.UtcNow; }
+                if (IsCompleted && EndTime is null)
+                {
+                    EndTime = DateTime.UtcNow;
+                }
 
-                if (_status is InspectionStatus.InProgress && StartTime is null) { StartTime = DateTime.UtcNow; }
+                if (_status is InspectionStatus.InProgress && StartTime is null)
+                {
+                    StartTime = DateTime.UtcNow;
+                }
             }
         }
 

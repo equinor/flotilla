@@ -10,7 +10,7 @@ namespace Api.Test.Services
         [Fact]
         public void TestRotationNorth()
         {
-            var mockAngleAxisParameters = new EchoVector(0, 0, 1);
+            var mockAngleAxisParameters = new EnuPosition(0, 0, 1);
             float mockAngle = 0;
 
             var expected = new Orientation()
@@ -31,7 +31,7 @@ namespace Api.Test.Services
         [Fact]
         public void TestRotationSouth()
         {
-            var mockAngleAxisParameters = new EchoVector(0, 0, 1);
+            var mockAngleAxisParameters = new EnuPosition(0, 0, 1);
             float mockAngle = MathF.PI;
 
             var expected = new Orientation()
@@ -54,7 +54,7 @@ namespace Api.Test.Services
         [Fact]
         public void TestNegativaRotation()
         {
-            var mockAngleAxisParameters = new EchoVector(0, 0, 1);
+            var mockAngleAxisParameters = new EnuPosition(0, 0, 1);
             float mockAngle = -180F * MathF.PI / 180F;
 
             var expected = new Orientation()
@@ -95,7 +95,7 @@ namespace Api.Test.Services
             Orientation orientation
         )
         {
-            var enuPosition = new EchoVector(position.X, position.Y, position.Z);
+            var enuPosition = new EnuPosition(position.X, position.Y, position.Z);
             var axisAngle = ConvertOrientation(orientation);
             return new EchoPose(enuPosition, axisAngle);
         }
@@ -114,15 +114,15 @@ namespace Api.Test.Services
 
             if (angle < 0) angle += 2F * MathF.PI;
 
-            return new AxisAngle(new EchoVector(0, 0, 1), angle);
+            return new AxisAngle(new EnuPosition(0, 0, 1), angle);
         }
 
         public class AxisAngle
         {
-            public EchoVector Axis;
+            public EnuPosition Axis;
             public float Angle;
 
-            public AxisAngle(EchoVector axis, float angle)
+            public AxisAngle(EnuPosition axis, float angle)
             {
                 Axis = axis;
                 Angle = angle;
@@ -131,10 +131,10 @@ namespace Api.Test.Services
 
         public class EchoPose
         {
-            public EchoVector Position;
+            public EnuPosition Position;
             public AxisAngle Orientation;
 
-            public EchoPose(EchoVector position, AxisAngle orientation)
+            public EchoPose(EnuPosition position, AxisAngle orientation)
             {
                 Position = position;
                 Orientation = orientation;

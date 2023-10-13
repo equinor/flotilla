@@ -1,23 +1,27 @@
 ﻿using Api.Database.Models;
-
 namespace Api.Controllers.Models
 {
     public class EchoInspection
     {
-        public InspectionType InspectionType { get; set; }
-
-        public float? TimeInSeconds { get; set; }
 
         public EchoInspection()
         {
             InspectionType = InspectionType.Image;
+            InspectionPoint = new Position();
         }
 
-        public EchoInspection(SensorType echoSensorType)
+        public EchoInspection(SensorType echoSensorType, Position inspectionPoint)
         {
             InspectionType = InspectionTypeFromEchoSensorType(echoSensorType.Key);
             TimeInSeconds = (float?)echoSensorType.TimeInSeconds;
+            InspectionPoint = inspectionPoint;
         }
+
+        public InspectionType InspectionType { get; set; }
+
+        public Position InspectionPoint { get; set; }
+
+        public float? TimeInSeconds { get; set; }
 
         private static InspectionType InspectionTypeFromEchoSensorType(string sensorType)
         {
@@ -31,9 +35,9 @@ namespace Api.Controllers.Models
                 "ThermicVideo" => InspectionType.ThermalVideo,
                 "ThermalVideo" => InspectionType.ThermalVideo,
                 _
-                  => throw new InvalidDataException(
-                      $"Echo sensor type '{sensorType}' not supported"
-                  )
+                    => throw new InvalidDataException(
+                        $"Echo sensor type '{sensorType}' not supported"
+                    )
             };
         }
     }
@@ -43,18 +47,23 @@ namespace Api.Controllers.Models
         public bool Equals(EchoInspection? e1, EchoInspection? e2)
         {
             if (ReferenceEquals(e1, e2))
+            {
                 return true;
+            }
 
             if (e2 is null || e1 is null)
+            {
                 return false;
+            }
 
             return e1.InspectionType == e2.InspectionType
-                && e1.TimeInSeconds == e2.TimeInSeconds;
+                   && e1.TimeInSeconds == e2.TimeInSeconds
+                   && e1.InspectionPoint == e2.InspectionPoint;
         }
 
         public int GetHashCode(EchoInspection e)
         {
-            // We cannot incorporate TimeInSeconds here are SQL queries do not handle 
+            // We cannot incorporate TimeInSeconds here are SQL queries do not handle
             // nullables even with short circuiting logic
             return (int)e.InspectionType;
         }
