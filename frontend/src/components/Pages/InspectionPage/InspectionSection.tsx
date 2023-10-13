@@ -1,4 +1,4 @@
-import { Card, Typography, Button, Icon } from '@equinor/eds-core-react'
+import { Card, Typography, Button, Icon, Tooltip } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState, useEffect } from 'react'
@@ -140,7 +140,7 @@ const getDeadlineInspection = (deadline: Date) => {
         case deadlineDays <= 1:
             return 'red'
         case deadlineDays > 1 && deadlineDays <= 7:
-            return 'orange'
+            return 'red'
         case deadlineDays > 7 && deadlineDays <= 14:
             return 'orange'
         case deadlineDays > 7 && deadlineDays <= 30:
@@ -216,8 +216,8 @@ export function InspectionSection({
 
     const handleScheduleAll = (inspections: Inspection[]) => {
         openDialog()
-        inspections.sort(compareInspections)
-        setSelectedMissions(inspections.map((i) => i.missionDefinition))
+        const sortedInspections = inspections.sort(compareInspections)
+        setSelectedMissions(sortedInspections.map((i) => i.missionDefinition))
     }
 
     useEffect(() => {
@@ -255,7 +255,11 @@ export function InspectionSection({
                                 <StyledCard
                                     variant="default"
                                     key={deckId}
-                                    onClick={() => setSelectedDeck(deckMissions[deckId].deck)}
+                                    onClick={
+                                        deckMissions[deckId].inspections.length > 0
+                                            ? () => setSelectedDeck(deckMissions[deckId].deck)
+                                            : undefined
+                                    }
                                     style={
                                         selectedDeck === deckMissions[deckId].deck
                                             ? { border: `solid ${getCardColor(deckId)} 2px` }
@@ -283,19 +287,33 @@ export function InspectionSection({
                                         )}
                                     </StyledDeckText>
                                     <StyledCardComponent>
-                                        <Button
-                                            variant="outlined"
-                                            onClick={() => handleScheduleAll(deckMissions[deckId].inspections)}
-                                            style={{ borderColor: '#3D3D3D' }}
+                                        <Tooltip
+                                            placement="top"
+                                            title={
+                                                deckMissions[deckId].inspections.length > 0
+                                                    ? ''
+                                                    : TranslateText('No planned inspection')
+                                            }
                                         >
-                                            <Icon
-                                                name={Icons.LibraryAdd}
-                                                color={tokens.colors.text.static_icons__default.rgba}
-                                            />
-                                            <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
-                                                {TranslateText('Queue the missions')}
-                                            </Typography>
-                                        </Button>
+                                            <Button
+                                                disabled={deckMissions[deckId].inspections.length > 0 ? false : true}
+                                                variant="outlined"
+                                                onClick={() => handleScheduleAll(deckMissions[deckId].inspections)}
+                                                style={
+                                                    deckMissions[deckId].inspections.length > 0
+                                                        ? { borderColor: '#3D3D3D' }
+                                                        : {}
+                                                }
+                                            >
+                                                <Icon
+                                                    name={Icons.LibraryAdd}
+                                                    color={deckMissions[deckId].inspections.length > 0 ? '' : 'grey'}
+                                                />
+                                                <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
+                                                    {TranslateText('Queue the missions')}
+                                                </Typography>
+                                            </Button>
+                                        </Tooltip>
                                     </StyledCardComponent>
                                 </StyledCard>
                             </DeckCard>

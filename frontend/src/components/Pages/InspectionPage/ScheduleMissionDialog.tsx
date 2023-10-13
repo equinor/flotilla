@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Card, Dialog, Typography, Popover } from '@equinor/eds-core-react'
+import { Autocomplete, Button, Dialog, Typography, Popover } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useRef, useState, useEffect } from 'react'
