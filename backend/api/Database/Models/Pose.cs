@@ -31,25 +31,13 @@ namespace Api.Database.Models
 
         public override bool Equals(object obj)
         {
-            if (obj is not Orientation) { return false; }
+            if (obj is not Orientation orientation) { return false; }
             const float Tolerance = 1e-6F;
-            var orientation = (Orientation)obj;
-            if (MathF.Abs(orientation.X - X) > Tolerance)
-            {
-                return false;
-            }
-            if (MathF.Abs(orientation.Y - Y) > Tolerance)
-            {
-                return false;
-            }
-            if (MathF.Abs(orientation.Z - Z) > Tolerance)
-            {
-                return false;
-            }
-            if (MathF.Abs(orientation.W - W) > Tolerance)
-            {
-                return false;
-            }
+            if (MathF.Abs(orientation.X - X) > Tolerance) { return false; }
+            if (MathF.Abs(orientation.Y - Y) > Tolerance) { return false; }
+            if (MathF.Abs(orientation.Z - Z) > Tolerance) { return false; }
+            if (MathF.Abs(orientation.W - W) > Tolerance) { return false; }
+
             return true;
         }
 
@@ -161,10 +149,7 @@ namespace Api.Database.Models
 
             var quaternion = new Orientation
             {
-                X = 0,
-                Y = 0,
-                Z = MathF.Sin(angle / 2),
-                W = MathF.Cos(angle / 2)
+                X = 0, Y = 0, Z = MathF.Sin(angle / 2), W = MathF.Cos(angle / 2)
             };
 
             return quaternion;
