@@ -197,5 +197,6 @@
     "Dismiss robots from safe zone long text": "Normal operation can resume by continuing the missions present on the queue or remove them all.",
     "Dismiss robots from safe zone": "Dismiss robots from safe zone",
     "Continue missions": "Continue missions",
-    "Safe Zone": "Safe Zone"
+    "Safe Zone": "Safe Zone",
+    "Edit mission definition": "Edit mission definition"
 }
