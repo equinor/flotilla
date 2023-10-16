@@ -103,12 +103,36 @@ export const getDeadlineInspection = (deadline: Date) => {
     return 'green'
 }
 
-export const compareInspections = (i1: Inspection, i2: Inspection) => {
-    if (!i1.missionDefinition.inspectionFrequency) return 1
-    if (!i2.missionDefinition.inspectionFrequency) return -1
-    if (!i1.missionDefinition.lastSuccessfulRun) return -1
-    if (!i2.missionDefinition.lastSuccessfulRun) return 1
-    else return i1.deadline!.getTime() - i2.deadline!.getTime()
+/**
+ * Compares two inspections so that they can be sorted. An inspection with
+ * an inspection frequency and/or a last run will be sorted before an inspection without.
+ * If both inspections have an inspection frequency and/or a last run, the
+ * inspection with the closest deadline will be sorted above the other.
+ * @param inspection1 Arbitrary inspection to be compared
+ * @param inspection2 Other arbitrary inspection to be compared
+ * @returns positive number if the inspections should be sorted in the order
+ *  inspection 1, inspection 2, and a negative number if the inspections should be
+ *  sorted in the order inspection 2, inspection 1.
+ */
+export const compareInspections = (inspection1: Inspection, inspection2: Inspection) => {
+    if (!inspection1.missionDefinition.inspectionFrequency && !inspection2.missionDefinition.inspectionFrequency) {
+        if (!inspection1.missionDefinition.lastSuccessfulRun && !inspection2.missionDefinition.lastSuccessfulRun) {
+            return inspection1.missionDefinition.name > inspection2.missionDefinition.name ? 1 : -1
+        }
+        if (!inspection1.missionDefinition.lastSuccessfulRun) return -1
+        if (!inspection2.missionDefinition.lastSuccessfulRun) return 1
+    } else if (!inspection1.missionDefinition.lastSuccessfulRun && !inspection2.missionDefinition.lastSuccessfulRun) {
+        if (!inspection1.missionDefinition.inspectionFrequency && !inspection2.missionDefinition.inspectionFrequency) {
+            return inspection1.missionDefinition.name > inspection2.missionDefinition.name ? 1 : -1
+        }
+        if (!inspection1.missionDefinition.inspectionFrequency) return -1
+        if (!inspection2.missionDefinition.inspectionFrequency) return 1
+    }
+    if (!inspection1.missionDefinition.inspectionFrequency) return 1
+    if (!inspection2.missionDefinition.inspectionFrequency) return -1
+    if (!inspection1.missionDefinition.lastSuccessfulRun) return -1
+    if (!inspection2.missionDefinition.lastSuccessfulRun) return 1
+    else return inspection1.deadline!.getTime() - inspection2.deadline!.getTime()
 }
 
 interface ICardMissionInformationProps {
