@@ -1,4 +1,4 @@
-import { Button, Card, Checkbox, Dialog, Icon, Typography, DotProgress } from '@equinor/eds-core-react'
+import { Button, Card, Dialog, Icon, Typography, DotProgress } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission, dummyMission } from 'models/Mission'
@@ -9,6 +9,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 
 interface MissionQueueCardProps {
+    order: number
     mission: Mission
     onDeleteMission: (mission: Mission) => void
 }
@@ -18,7 +19,7 @@ interface MissionDisplayProps {
 }
 
 const StyledMissionCard = styled(Card)`
-    width: 900px;
+    width: 880px;
     display: flex;
 `
 const HorizontalContent = styled.div`
@@ -28,8 +29,9 @@ const HorizontalContent = styled.div`
 `
 const HorizontalNonButtonContent = styled.div`
     display: grid;
-    grid-template-columns: 50px 400px auto 90px 180px;
+    grid-template-columns: 20px 400px auto 90px 180px;
     align-items: center;
+    padding-left: 10px;
 `
 
 const StyledConfirmDialog = styled.div`
@@ -41,7 +43,19 @@ const StyledButtonSection = styled.div`
     grid-template-columns: auto auto;
 `
 
-export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardProps) {
+const PaddingLeft = styled.div`
+    padding-left: 20px;
+`
+
+const CircularCard = styled(Card)`
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    justify-content: center;
+    align-items: center;
+`
+
+export function MissionQueueCard({ order, mission, onDeleteMission }: MissionQueueCardProps) {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const routeChange = () => {
@@ -49,16 +63,21 @@ export function MissionQueueCard({ mission, onDeleteMission }: MissionQueueCardP
         navigate(path)
     }
     const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState<boolean>(false)
+    const fillColor = tokens.colors.infographic.primary__energy_red_21.hex
     let numberOfTasks = 0
     mission.tasks.forEach((task) => (numberOfTasks += task.inspections.length))
     return (
         <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <HorizontalContent>
                 <HorizontalNonButtonContent onClick={routeChange}>
-                    <Checkbox />
+                    <CircularCard style={{ background: fillColor }}>
+                        <Typography variant="body_short_bold">{order}</Typography>
+                    </CircularCard>
 
                     {mission === dummyMission ? (
-                        <DotProgress size={64} color="primary" />
+                        <PaddingLeft>
+                            <DotProgress size={48} color="primary" />
+                        </PaddingLeft>
                     ) : (
                         <Button variant="ghost" fullWidth>
                             <Typography variant="body_short_bold">{mission.name}</Typography>
