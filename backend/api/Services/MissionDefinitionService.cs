@@ -186,7 +186,7 @@ namespace Api.Services
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionDefinition => missionDefinition.Source)
-                .Include(missionDefinition => missionDefinition.LastRun);
+                .Include(missionDefinition => missionDefinition.LastSuccessfulRun);
         }
 
         private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)

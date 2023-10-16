@@ -95,8 +95,8 @@ export function InspectionSection({
                     inspections: missionDefinitions.map((m) => {
                         return {
                             missionDefinition: m,
-                            deadline: m.lastRun
-                                ? getInspectionDeadline(m.inspectionFrequency, m.lastRun.endTime!)
+                            deadline: m.lastSuccessfulRun
+                                ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
                                 : undefined,
                         }
                     }),
@@ -124,8 +124,8 @@ export function InspectionSection({
                     if (index !== -1) {
                         inspections[index] = {
                             missionDefinition: mDef,
-                            deadline: mDef.lastRun
-                                ? getInspectionDeadline(mDef.inspectionFrequency, mDef.lastRun.endTime!)
+                            deadline: mDef.lastSuccessfulRun
+                                ? getInspectionDeadline(mDef.inspectionFrequency, mDef.lastSuccessfulRun.endTime!)
                                 : undefined,
                         }
                         return {

@@ -26,7 +26,7 @@ namespace Api.Database.Models
         [Column(TypeName = "bigint")]
         public TimeSpan? InspectionFrequency { get; set; }
 
-        public virtual MissionRun? LastRun { get; set; }
+        public virtual MissionRun? LastSuccessfulRun { get; set; }
 
         public Area? Area { get; set; }
 

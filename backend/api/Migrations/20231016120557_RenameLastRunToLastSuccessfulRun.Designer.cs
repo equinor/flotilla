@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231016120557_RenameLastRunToLastSuccessfulRun")]
+    partial class RenameLastRunToLastSuccessfulRun
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -191,10 +194,10 @@ namespace Api.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)");
 
-                    b.Property<DateTime>("DesiredStartTime")
+                    b.Property<DateTimeOffset>("DesiredStartTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("EndTime")
+                    b.Property<DateTimeOffset?>("EndTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<long?>("EstimatedDuration")
@@ -212,10 +215,6 @@ namespace Api.Migrations
                     b.Property<string>("MissionId")
                         .HasColumnType("text");
 
-                    b.Property<string>("MissionRunPriority")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -225,7 +224,7 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("StartTime")
+                    b.Property<DateTimeOffset?>("StartTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
@@ -307,9 +306,6 @@ namespace Api.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<bool>("MissionQueueFrozen")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("ModelId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -355,7 +351,7 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Time")
+                    b.Property<DateTimeOffset>("Time")
                         .HasColumnType("timestamp with time zone");
 
                     b.ToTable("RobotBatteryTimeseries");
@@ -421,7 +417,7 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Time")
+                    b.Property<DateTimeOffset>("Time")
                         .HasColumnType("timestamp with time zone");
 
                     b.ToTable("RobotPoseTimeseries");
@@ -439,7 +435,7 @@ namespace Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("Time")
+                    b.Property<DateTimeOffset>("Time")
                         .HasColumnType("timestamp with time zone");
 
                     b.ToTable("RobotPressureTimeseries");
@@ -824,7 +820,7 @@ namespace Api.Migrations
                                 .HasMaxLength(200)
                                 .HasColumnType("character varying(200)");
 
-                            b1.Property<DateTime?>("EndTime")
+                            b1.Property<DateTimeOffset?>("EndTime")
                                 .HasColumnType("timestamp with time zone");
 
                             b1.Property<string>("IsarTaskId")
@@ -835,7 +831,7 @@ namespace Api.Migrations
                                 .IsRequired()
                                 .HasColumnType("text");
 
-                            b1.Property<DateTime?>("StartTime")
+                            b1.Property<DateTimeOffset?>("StartTime")
                                 .HasColumnType("timestamp with time zone");
 
                             b1.Property<string>("Status")
@@ -867,7 +863,7 @@ namespace Api.Migrations
                                     b2.Property<string>("AnalysisType")
                                         .HasColumnType("text");
 
-                                    b2.Property<DateTime?>("EndTime")
+                                    b2.Property<DateTimeOffset?>("EndTime")
                                         .HasColumnType("timestamp with time zone");
 
                                     b2.Property<string>("InspectionType")
@@ -886,7 +882,7 @@ namespace Api.Migrations
                                         .IsRequired()
                                         .HasColumnType("text");
 
-                                    b2.Property<DateTime?>("StartTime")
+                                    b2.Property<DateTimeOffset?>("StartTime")
                                         .HasColumnType("timestamp with time zone");
 
                                     b2.Property<string>("Status")
@@ -904,43 +900,6 @@ namespace Api.Migrations
 
                                     b2.WithOwner()
                                         .HasForeignKey("MissionTaskId");
-
-                                    b2.OwnsMany("Api.Database.Models.InspectionFindings", "InspectionFindings", b3 =>
-                                        {
-                                            b3.Property<string>("InspectionId")
-                                                .HasColumnType("text");
-
-                                            b3.Property<int>("Id")
-                                                .ValueGeneratedOnAdd()
-                                                .HasColumnType("integer");
-
-                                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b3.Property<int>("Id"));
-
-                                            b3.Property<string>("Area")
-                                                .IsRequired()
-                                                .HasColumnType("text");
-
-                                            b3.Property<string>("FindingsTag")
-                                                .IsRequired()
-                                                .HasColumnType("text");
-
-                                            b3.Property<string>("InspectionDate")
-                                                .IsRequired()
-                                                .HasColumnType("text");
-
-                                            b3.Property<string>("RobotName")
-                                                .IsRequired()
-                                                .HasColumnType("text");
-
-                                            b3.HasKey("InspectionId", "Id");
-
-                                            b3.ToTable("InspectionFindings");
-
-                                            b3.WithOwner()
-                                                .HasForeignKey("InspectionId");
-                                        });
-
-                                    b2.Navigation("InspectionFindings");
                                 });
 
                             b1.OwnsOne("Api.Database.Models.Position", "InspectionTarget", b2 =>

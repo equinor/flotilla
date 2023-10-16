@@ -287,7 +287,7 @@ namespace Api.Database.Context
                 Source = sources[0],
                 Comment = "Interesting comment",
                 InspectionFrequency = new DateTime().AddDays(12) - new DateTime(),
-                LastRun = null
+                LastSuccessfulRun = null
             };
 
             var missionDefinition2 = new MissionDefinition
@@ -298,7 +298,7 @@ namespace Api.Database.Context
                 Area = areas[1],
                 Source = sources[1],
                 InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
-                LastRun = null
+                LastSuccessfulRun = null
             };
 
             var missionDefinition3 = new MissionDefinition
@@ -308,7 +308,7 @@ namespace Api.Database.Context
                 InstallationCode = areas[1].Installation!.InstallationCode,
                 Area = areas[1],
                 Source = sources[2],
-                LastRun = null
+                LastSuccessfulRun = null
             };
 
             var missionDefinition4 = new MissionDefinition
@@ -319,7 +319,7 @@ namespace Api.Database.Context
                 InspectionFrequency = new DateTime().AddDays(90) - new DateTime(),
                 Area = areas[2],
                 Source = sources[2],
-                LastRun = null
+                LastSuccessfulRun = null
             };
 
             var missionDefinition5 = new MissionDefinition
@@ -330,7 +330,7 @@ namespace Api.Database.Context
                 InspectionFrequency = new DateTime().AddDays(35) - new DateTime(),
                 Area = areas[2],
                 Source = sources[2],
-                LastRun = null
+                LastSuccessfulRun = null
             };
 
             var missionDefinition6 = new MissionDefinition
@@ -341,7 +341,7 @@ namespace Api.Database.Context
                 InspectionFrequency = new DateTime().AddDays(4) - new DateTime(),
                 Area = areas[3],
                 Source = sources[2],
-                LastRun = null
+                LastSuccessfulRun = null
             };
             _ = new MissionDefinition
             {
@@ -350,7 +350,7 @@ namespace Api.Database.Context
                 InstallationCode = areas[3].Installation.InstallationCode,
                 Area = areas[4],
                 Source = sources[2],
-                LastRun = null
+                LastSuccessfulRun = null
             };
 
             return new List<MissionDefinition>(new[]
@@ -473,7 +473,7 @@ namespace Api.Database.Context
                 Tasks = new List<MissionTask>(),
                 Map = new MapMetadata()
             };
-            missionDefinitions[0].LastRun = missionRun2;
+            missionDefinitions[0].LastSuccessfulRun = missionRun2;
 
             var missionRun3 = new MissionRun
             {
@@ -556,7 +556,7 @@ namespace Api.Database.Context
                 Map = new MapMetadata()
             };
 
-            missionDefinitions[1].LastRun = missionRun3;
+            missionDefinitions[1].LastSuccessfulRun = missionRun3;
 
             return new List<MissionRun>(new[]
             {

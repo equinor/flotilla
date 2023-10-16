@@ -22,8 +22,8 @@ namespace Api.Controllers.Models
         [JsonPropertyName("inspectionFrequency")]
         public TimeSpan? InspectionFrequency { get; set; }
 
-        [JsonPropertyName("lastRun")]
-        public virtual MissionRun? LastRun { get; set; }
+        [JsonPropertyName("lastSuccessfulRun")]
+        public virtual MissionRun? LastSuccessfulRun { get; set; }
 
         [JsonPropertyName("area")]
         public AreaResponse? Area { get; set; }
@@ -42,7 +42,7 @@ namespace Api.Controllers.Models
             Comment = missionDefinition.Comment;
             InspectionFrequency = missionDefinition.InspectionFrequency;
             Area = missionDefinition.Area != null ? new AreaResponse(missionDefinition.Area) : null;
-            LastRun = missionDefinition.LastRun;
+            LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
             IsDeprecated = missionDefinition.IsDeprecated;
             SourceType = missionDefinition.Source.Type;
         }
@@ -68,8 +68,8 @@ namespace Api.Controllers.Models
         [JsonPropertyName("inspectionFrequency")]
         public TimeSpan? InspectionFrequency { get; set; }
 
-        [JsonPropertyName("lastRun")]
-        public virtual MissionRun? LastRun { get; set; }
+        [JsonPropertyName("lastSuccessfulRun")]
+        public virtual MissionRun? LastSuccessfulRun { get; set; }
 
         [JsonPropertyName("area")]
         public Area? Area { get; set; }
@@ -89,7 +89,7 @@ namespace Api.Controllers.Models
             InspectionFrequency = missionDefinition.InspectionFrequency;
             Area = missionDefinition.Area;
             Tasks = service.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode).Result!;
-            LastRun = missionDefinition.LastRun;
+            LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
             IsDeprecated = missionDefinition.IsDeprecated;
             SourceType = missionDefinition.Source.Type;
         }
