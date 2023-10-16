@@ -132,13 +132,18 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         })
     }, [missionQueue, ongoingMissions])
 
-    const missionQueueDisplay = missionQueue.map(function (mission, index) {
-        return <MissionQueueCard key={index} mission={mission} onDeleteMission={onDeleteMission} />
-    })
+    const missionQueueDisplay = missionQueue.map((mission, index) => (
+        <MissionQueueCard key={index} order={index + 1} mission={mission} onDeleteMission={onDeleteMission} />
+    ))
 
-    const loadingQueueDisplay = () => {
-        return <MissionQueueCard key={'test'} mission={dummyMission} onDeleteMission={() => {}} />
-    }
+    const loadingQueueDisplay = (
+        <MissionQueueCard
+            key={'test'}
+            order={missionQueue.length + 1}
+            mission={dummyMission}
+            onDeleteMission={() => {}}
+        />
+    )
 
     return (
         <StyledMissionView>
@@ -146,8 +151,8 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
                 {TranslateText('Mission Queue')}
             </Typography>
             <MissionTable>
-                {loadingMissionNames.size > 0 && loadingQueueDisplay()}
                 {missionQueue.length > 0 && missionQueueDisplay}
+                {loadingMissionNames.size > 0 && loadingQueueDisplay}
                 {loadingMissionNames.size === 0 && missionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
             </MissionTable>
             <MissionButtonView>
