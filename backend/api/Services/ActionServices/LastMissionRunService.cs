@@ -38,7 +38,7 @@ namespace Api.Services.ActionServices
                 throw new MissionNotFoundException(errorMessage);
             }
 
-            missionDefinition.LastRun = missionRun;
+            missionDefinition.LastSuccessfulRun = missionRun;
             return await _missionDefinitionService.Update(missionDefinition);
         }
     }

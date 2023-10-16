@@ -122,11 +122,13 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
                 right={TranslateText(missionDefinition.sourceType)}
             />
             <Button
-                disabled={!missionDefinition.lastRun}
-                onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${missionDefinition.lastRun?.id}`)}
+                disabled={missionDefinition.lastSuccessfulRun === undefined || missionDefinition.lastSuccessfulRun === null}
+                onClick={() =>
+                    navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${missionDefinition.lastSuccessfulRun?.id}`)
+                }
             >
                 {TranslateText('View last run') +
-                    (missionDefinition.lastRun ? '' : ': ' + TranslateText('Not yet performed'))}
+                    (missionDefinition.lastSuccessfulRun ? '' : ': ' + TranslateText('Not yet performed'))}
             </Button>
             <MissionDefinitionEditButtons
                 missionDefinition={missionDefinition}

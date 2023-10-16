@@ -4,17 +4,17 @@ export const formatBackendDateTimeToDate = (date: Date) => {
 
 export const getInspectionDeadline = (
     inspectionFrequency: string | undefined,
-    lastRunTime: Date | null
+    lastSuccessfulRunTime: Date | null
 ): Date | undefined => {
-    if (!inspectionFrequency || !lastRunTime) return undefined
+    if (!inspectionFrequency || !lastSuccessfulRunTime) return undefined
 
     const dayHourSecondsArray = inspectionFrequency.split(':')
     const days: number = +dayHourSecondsArray[0]
     const hours: number = +dayHourSecondsArray[1]
     const minutes: number = +dayHourSecondsArray[2]
 
-    lastRunTime = formatBackendDateTimeToDate(lastRunTime)
-    let deadline = lastRunTime
+    lastSuccessfulRunTime = formatBackendDateTimeToDate(lastSuccessfulRunTime)
+    let deadline = lastSuccessfulRunTime
     deadline.setDate(deadline.getDate() + days)
     deadline.setHours(deadline.getHours() + hours)
     deadline.setMinutes(deadline.getMinutes() + minutes)
