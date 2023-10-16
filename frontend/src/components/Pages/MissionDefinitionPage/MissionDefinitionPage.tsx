@@ -48,11 +48,6 @@ const StyledFormItem = styled.div`
     word-break: break-word;
     hyphens: auto;
     min-height: 60px;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 5px;
-    border-color: ${boxBorderColour};
-    background-color: ${boxBackgroundColour};
 `
 const StyledDialog = styled(Dialog)`
     display: flex;
