@@ -62,6 +62,7 @@ const DeckCard = styled.div`
     max-width: 450px;
     flex: 1 0 0;
     border-radius: 6px;
+    min-height: 180px;
     box-shadow:
         0px 3px 4px 0px rgba(0, 0, 0, 0.12),
         0px 2px 4px 0px rgba(0, 0, 0, 0.14);

@@ -58,9 +58,9 @@ interface ITableProps {
     ongoingMissions: ScheduledMissionType
 }
 
-const formatDateString = (dateStr: Date) => {
+const formatDateString = (dateStr: Date | string) => {
     let newStr = dateStr.toString()
-    newStr = newStr.slice(0, newStr.length - 8)
+    newStr = newStr.slice(0, 19)
     newStr = newStr.replaceAll('T', ' ')
     return newStr
 }
@@ -197,7 +197,7 @@ const InspectionRow = ({
             <Table.Cell>{mission.comment}</Table.Cell>
             <Table.Cell>{mission.area.areaName}</Table.Cell>
             <Table.Cell>{lastCompleted}</Table.Cell>
-            <Table.Cell>{inspection.deadline ? inspection.deadline.toDateString() : ''}</Table.Cell>
+            <Table.Cell>{inspection.deadline ? formatDateString(inspection.deadline.toISOString()) : ''}</Table.Cell>
             <Table.Cell>
                 {!isScheduled && (
                     <Button
