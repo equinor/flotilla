@@ -349,6 +349,7 @@ export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMis
                     refreshInterval={refreshInterval}
                     closeDialog={closeDialog}
                     setMissions={setSelectedMissions}
+                    scheduledMissions={scheduledMissions}
                 />
             )}
             {isScheduledDialogOpen && (

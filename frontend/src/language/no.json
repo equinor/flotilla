@@ -187,5 +187,6 @@
     "Mission": "Oppdrag",
     "Scheduled": "Planlagt",
     "The mission is already in the queue": "Oppdraget er allerede i kø",
-    "AlreadyScheduledText": "Oppdraget ligger allerede i kø. Er du sikker på at du vill legge til oppdraget enda en gang?"
+    "AlreadyScheduledText": "Oppdraget ligger allerede i køen. Er du sikker på at du vil legge til oppdraget enda en gang?",
+    "Queue unscheduled missions": "Still uplanlagte oppdrag i kø"
 }
