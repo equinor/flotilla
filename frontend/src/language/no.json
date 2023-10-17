@@ -174,5 +174,8 @@
     "Hours between inspections": "Timer mellom inspeksjoner",
     "Days between inspections": "Dager mellom inspeksjoner",
     "Confirm installation": "Bekreft anlegg",
-    "N": "N"
+    "N": "N",
+    "battery_change": "batteri bytte",
+    "lookout": "utkikk",
+    "transport": "transport"
 }

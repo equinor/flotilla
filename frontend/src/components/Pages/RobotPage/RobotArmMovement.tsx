@@ -43,7 +43,7 @@ export function MoveRobotArm({ robot, armPosition, isRobotAvailable }: RobotProp
         BackendAPICaller.setArmPosition(robot.id, armPosition)
             .then(() => {
                 setUsable(false)
-                setFeedback(() => TranslateText('Moving arm to ') + armPosition)
+                setFeedback(() => TranslateText('Moving arm to ') + TranslateText(armPosition))
                 setTimeout(() => {
                     setFeedback('')
                     setUsable(true)
@@ -53,7 +53,7 @@ export function MoveRobotArm({ robot, armPosition, isRobotAvailable }: RobotProp
                 setFeedback(
                     () =>
                         TranslateText('Error moving robot arm to ') +
-                        armPosition +
+                        TranslateText(armPosition) +
                         TranslateText(' Error message: ') +
                         error.message
                 )
@@ -77,7 +77,7 @@ export function MoveRobotArm({ robot, armPosition, isRobotAvailable }: RobotProp
                 </Popover.Content>
             </Popover>
             <Button style={moveArmButtonStyle()} onClick={!usable ? openPopover : onClickMoveArm} ref={anchorRef}>
-                {TranslateText('Set robot arm to ') + '"' + armPosition + '"'}
+                {TranslateText('Set robot arm to ') + '"' + TranslateText(armPosition) + '"'}
             </Button>
             {feedback && <p>{feedback}</p>}
         </>
