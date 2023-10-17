@@ -51,13 +51,12 @@ export const useMissions = (refreshInterval: number): MissionsResult => {
             })
             setMissionQueue(queue)
         }
-
-        fetchAndUpdateMissions()
+        if (BackendAPICaller.accessToken) fetchAndUpdateMissions()
 
         const id = setInterval(fetchAndUpdateMissions, refreshInterval)
 
         return () => clearInterval(id)
-    }, [refreshInterval])
+    }, [refreshInterval, BackendAPICaller.accessToken])
 
     return { ongoingMissions, missionQueue }
 }
