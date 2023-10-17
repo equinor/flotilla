@@ -347,6 +347,7 @@ export function InspectionSection({
                     refreshInterval={refreshInterval}
                     closeDialog={closeDialog}
                     setMissions={setSelectedMissions}
+                    scheduledMissions={scheduledMissions}
                 />
             )}
         </>
