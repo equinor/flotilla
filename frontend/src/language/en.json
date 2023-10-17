@@ -174,5 +174,8 @@
     "Hours between inspections": "Hours between inspections",
     "Days between inspections": "Days between inspections",
     "Confirm installation": "Confirm installation",
-    "N": "N"
+    "N": "N",
+    "battery_change": "battery change",
+    "lookout": "lookout",
+    "transport": "transport"
 }
