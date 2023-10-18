@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-using Api.Controllers;
-using Api.Controllers.Models;
+﻿using Api.Controllers;
 using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.AspNetCore.Mvc;
@@ -15,21 +13,17 @@ namespace Api.Services
 
     public class MissionSchedulingService : IMissionSchedulingService
     {
-        private readonly IIsarService _isarService;
         private readonly ILogger<MissionSchedulingService> _logger;
         private readonly IMissionRunService _missionRunService;
-        private readonly IAreaService _areaService;
         private readonly RobotController _robotController;
         private readonly IRobotService _robotService;
 
-        public MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IIsarService isarService, IRobotService robotService, RobotController robotController, IAreaService areaService)
+        public MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService, RobotController robotController)
         {
             _logger = logger;
             _missionRunService = missionRunService;
-            _isarService = isarService;
             _robotService = robotService;
             _robotController = robotController;
-            _areaService = areaService;
         }
 
         public void StartMissionRun(MissionRun queuedMissionRun)
