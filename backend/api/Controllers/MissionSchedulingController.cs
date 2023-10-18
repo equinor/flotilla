@@ -19,7 +19,7 @@ namespace Api.Controllers
         private readonly IMapService _mapService;
         private readonly IMissionDefinitionService _missionDefinitionService;
         private readonly IMissionRunService _missionRunService;
-        private readonly IMissionSchedulingService _missionSchedulingService;
+        private readonly ICustomMissionSchedulingService _customMissionSchedulingService;
         private readonly IRobotService _robotService;
         private readonly ISourceService _sourceService;
         private readonly IStidService _stidService;
@@ -35,7 +35,7 @@ namespace Api.Controllers
             IMapService mapService,
             IStidService stidService,
             ISourceService sourceService,
-            IMissionSchedulingService missionSchedulingService
+            ICustomMissionSchedulingService customMissionSchedulingService
         )
         {
             _missionDefinitionService = missionDefinitionService;
@@ -48,7 +48,7 @@ namespace Api.Controllers
             _stidService = stidService;
             _sourceService = sourceService;
             _missionDefinitionService = missionDefinitionService;
-            _missionSchedulingService = missionSchedulingService;
+            _customMissionSchedulingService = customMissionSchedulingService;
             _logger = logger;
         }
 
@@ -289,11 +289,11 @@ namespace Api.Controllers
             var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 
             MissionDefinition? customMissionDefinition;
-            try { customMissionDefinition = await _missionSchedulingService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
+            try { customMissionDefinition = await _customMissionSchedulingService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
             catch (SourceException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
 
             MissionRun? newMissionRun;
-            try { newMissionRun = await _missionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
+            try { newMissionRun = await _customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
             catch (Exception e) when (e is RobotNotFoundException or MissionNotFoundException) { return NotFound(e.Message); }
 
             return CreatedAtAction(nameof(Create), new

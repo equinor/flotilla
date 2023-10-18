@@ -66,7 +66,9 @@ builder.Services.AddScoped<IDefaultLocalizationPoseService, DefaultLocalizationP
 builder.Services.AddScoped<ISourceService, SourceService>();
 builder.Services.AddScoped<IRobotModelService, RobotModelService>();
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
+builder.Services.AddScoped<ICustomMissionSchedulingService, CustomMissionSchedulingService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
+
 
 bool useInMemoryDatabase = builder.Configuration
     .GetSection("Database")
