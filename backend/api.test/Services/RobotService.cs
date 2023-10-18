@@ -6,6 +6,8 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
+using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace Api.Test.Services
@@ -31,7 +33,8 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadAll()
         {
-            var robotService = new RobotService(_context, _robotModelService);
+            var logger = new Mock<ILogger<RobotService>>().Object;
+            var robotService = new RobotService(_context, _robotModelService, logger);
             var robots = await robotService.ReadAll();
 
             Assert.True(robots.Any());
@@ -40,7 +43,8 @@ namespace Api.Test.Services
         [Fact]
         public async Task Read()
         {
-            var robotService = new RobotService(_context, _robotModelService);
+            var logger = new Mock<ILogger<RobotService>>().Object;
+            var robotService = new RobotService(_context, _robotModelService, logger);
             var robots = await robotService.ReadAll();
             var firstRobot = robots.First();
             var robotById = await robotService.ReadById(firstRobot.Id);
@@ -51,7 +55,8 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var robotService = new RobotService(_context, _robotModelService);
+            var logger = new Mock<ILogger<RobotService>>().Object;
+            var robotService = new RobotService(_context, _robotModelService, logger);
             var robot = await robotService.ReadById("some_id_that_does_not_exist");
             Assert.Null(robot);
         }
@@ -59,7 +64,8 @@ namespace Api.Test.Services
         [Fact]
         public async Task Create()
         {
-            var robotService = new RobotService(_context, _robotModelService);
+            var logger = new Mock<ILogger<RobotService>>().Object;
+            var robotService = new RobotService(_context, _robotModelService, logger);
             var robotsBefore = await robotService.ReadAll();
             int nRobotsBefore = robotsBefore.Count();
             var videoStreamQuery = new CreateVideoStreamQuery()
