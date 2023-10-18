@@ -27,6 +27,7 @@ namespace Api.Database.Models
         public Inspection(CustomInspectionQuery inspectionQuery)
         {
             InspectionType = inspectionQuery.InspectionType;
+            InspectionTarget = inspectionQuery.InspectionTarget;
             VideoDuration = inspectionQuery.VideoDuration;
             AnalysisType = inspectionQuery.AnalysisType;
             Status = InspectionStatus.NotStarted;

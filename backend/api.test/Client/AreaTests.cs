@@ -171,11 +171,23 @@ namespace Api.Test
 
             var inspections = new List<CustomInspectionQuery>
             {
-                new() { AnalysisType = AnalysisType.CarSeal, InspectionType = InspectionType.Image}
+                new()
+                {
+                    AnalysisType = AnalysisType.CarSeal,
+                    InspectionTarget = new Position(),
+                    InspectionType = InspectionType.Image
+                }
             };
             var tasks = new List<CustomTaskQuery>
             {
-                new() { Inspections = inspections, InspectionTarget = new Position(), TagId = "test", RobotPose = new Pose(), TaskOrder = 0}
+                new()
+                {
+                    Inspections = inspections,
+                    InspectionTarget = new Position(),
+                    TagId = "test",
+                    RobotPose = new Pose(),
+                    TaskOrder = 0
+                }
             };
             var missionQuery = new CustomMissionQuery
             {
