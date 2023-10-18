@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Api.Controllers;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
@@ -30,17 +29,15 @@ namespace Api.EventHandlers
         private readonly ILogger<MissionScheduling> _logger;
         private readonly IMissionRunService _missionRunService;
         private readonly IAreaService _areaService;
-        private readonly RobotController _robotController;
         private readonly IRobotService _robotService;
         private readonly IMissionSchedulingService _missionSchedulingService;
 
-        public MissionScheduling(ILogger<MissionScheduling> logger, IMissionRunService missionRunService, IIsarService isarService, IRobotService robotService, RobotController robotController, IAreaService areaService, IMissionSchedulingService missionSchedulingService)
+        public MissionScheduling(ILogger<MissionScheduling> logger, IMissionRunService missionRunService, IIsarService isarService, IRobotService robotService, IAreaService areaService, IMissionSchedulingService missionSchedulingService)
         {
             _logger = logger;
             _missionRunService = missionRunService;
             _isarService = isarService;
             _robotService = robotService;
-            _robotController = robotController;
             _areaService = areaService;
             _missionSchedulingService = missionSchedulingService;
         }

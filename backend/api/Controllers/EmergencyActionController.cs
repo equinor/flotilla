@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using Api.Controllers.Models;
-using Api.Database.Models;
 using Api.Services;
 using Api.Services.Events;
 using Microsoft.AspNetCore.Authorization;
@@ -11,16 +10,12 @@ namespace Api.Controllers
     [Route("emergency-action")]
     public class EmergencyActionController : ControllerBase
     {
-        private readonly IAreaService _areaService;
         private readonly IEmergencyActionService _emergencyActionService;
-        private readonly ILogger<EmergencyActionController> _logger;
         private readonly IRobotService _robotService;
 
-        public EmergencyActionController(ILogger<EmergencyActionController> logger, IRobotService robotService, IAreaService areaService, IEmergencyActionService emergencyActionService)
+        public EmergencyActionController(IRobotService robotService, IEmergencyActionService emergencyActionService)
         {
-            _logger = logger;
             _robotService = robotService;
-            _areaService = areaService;
             _emergencyActionService = emergencyActionService;
         }
 
