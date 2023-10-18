@@ -3,14 +3,14 @@ using Api.Database.Models;
 using Api.Utilities;
 namespace Api.Services.ActionServices
 {
-    public interface IMissionSchedulingService
+    public interface ICustomMissionSchedulingService
     {
         public Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks);
 
         public Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, string robotId, IList<MissionTask> missionTasks);
     }
 
-    public class MissionSchedulingService : IMissionSchedulingService
+    public class CustomMissionSchedulingService : ICustomMissionSchedulingService
     {
         private readonly IAreaService _areaService;
         private readonly ICustomMissionService _customMissionService;
@@ -21,7 +21,7 @@ namespace Api.Services.ActionServices
         private readonly IRobotService _robotService;
         private readonly ISourceService _sourceService;
 
-        public MissionSchedulingService(
+        public CustomMissionSchedulingService(
             ILogger<MissionSchedulingService> logger,
             ICustomMissionService customMissionService,
             IAreaService areaService,
