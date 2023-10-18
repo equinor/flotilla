@@ -22,14 +22,12 @@
 
     public class EmergencyButtonPressedForRobotEventArgs : EventArgs
     {
-        public EmergencyButtonPressedForRobotEventArgs(string robotId, string areaId)
+        public EmergencyButtonPressedForRobotEventArgs(string robotId)
         {
             RobotId = robotId;
-            AreaId = areaId;
         }
 
         public string RobotId { get; set; }
 
-        public string AreaId { get; set; }
     }
 }

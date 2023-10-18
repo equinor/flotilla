@@ -147,10 +147,10 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var area = await AreaService.ReadById(e.AreaId);
+            var area = await AreaService.ReadById(robot.CurrentArea!.Id);
             if (area == null)
             {
-                _logger.LogError("Could not find area with ID {AreaId}", e.AreaId);
+                _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
                 return;
             }
 
@@ -176,7 +176,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await MissionSchedulingService.ScheduleMissionToReturnToSafePosition(e.RobotId, e.AreaId);
+            await MissionSchedulingService.ScheduleMissionToReturnToSafePosition(e.RobotId, area.Id);
 
             MqttEventHandlerService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
 
@@ -192,10 +192,10 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var area = await AreaService.ReadById(e.AreaId);
+            var area = await AreaService.ReadById(robot.CurrentArea!.Id);
             if (area == null)
             {
-                _logger.LogError("Could not find area with ID {AreaId}", e.AreaId);
+                _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
             }
 
             await MissionSchedulingService.UnfreezeMissionRunQueueForRobot(e.RobotId);

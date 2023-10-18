@@ -51,7 +51,7 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                _emergencyActionService.TriggerEmergencyButtonPressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id, robot.CurrentArea!.Id));
+                _emergencyActionService.TriggerEmergencyButtonPressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id));
 
             }
 
@@ -81,7 +81,7 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                _emergencyActionService.TriggerEmergencyButtonDepressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id, robot.CurrentArea!.Id));
+                _emergencyActionService.TriggerEmergencyButtonDepressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id));
             }
 
             return NoContent();
