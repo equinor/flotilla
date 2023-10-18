@@ -136,7 +136,7 @@ public static class InitDb
             Installation = decks[0].Plant!.Installation,
             Name = "testArea",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = null,
+            DefaultLocalizationPose = new DefaultLocalizationPose(),
             SafePositions = new List<SafePosition>()
             {
                 new()

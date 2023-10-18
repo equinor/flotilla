@@ -120,22 +120,16 @@ namespace Api.EventHandlers
             {
                 missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id &&
                         missionRun.MissionRunPriority == MissionRunPriority.Emergency);
-
-                if (missionRun == null)
-                {
-                    _logger.LogInformation("The robot was changed to available in emergency state and no emergency mission run is scheduled");
-                    return;
-                }
             }
             else
             {
                 missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id);
+            }
 
-                if (missionRun == null)
-                {
-                    _logger.LogInformation("The robot was changed to available but no mission is scheduled");
-                    return;
-                }
+            if (missionRun == null)
+            {
+                _logger.LogInformation("The robot was changed to available but no mission is scheduled");
+                return;
             }
 
             _scheduleMissionMutex.WaitOne();
@@ -183,6 +177,9 @@ namespace Api.EventHandlers
             }
 
             await MissionSchedulingService.ScheduleMissionToReturnToSafePosition(e.RobotId, e.AreaId);
+
+            MqttEventHandlerService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+
         }
 
         private async void OnEmergencyButtonDepressedForRobot(object? sender, EmergencyButtonPressedForRobotEventArgs e)
