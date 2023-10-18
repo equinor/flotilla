@@ -57,7 +57,7 @@ namespace Api.Controllers.Models
 
         public int GetHashCode(EchoInspection e)
         {
-            // We cannot incorporate TimeInSeconds here are SQL queries do not handle
+            // We cannot incorporate TimeInSeconds here as SQL queries do not handle
             // nullables even with short circuiting logic
             return (int)e.InspectionType;
         }
