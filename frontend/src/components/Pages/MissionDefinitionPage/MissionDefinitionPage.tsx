@@ -27,19 +27,18 @@ const StyledButtonSection = styled.div`
     gap: 10px;
 `
 const StyledFormContainer = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: [c1] 1fr [c2] 1fr [c3] 1fr;
+    grid-template-rows: [r1] auto [r1] auto [r1] auto;
     align: left;
     align-items: flex-start;
     align-content: flex-start;
-    width: 50%;
-    gap: 10px 10px;
+    max-width: 1200px;
+    min-width: 600px;
+    gap: 10px 20px;
 `
 const StyledFormItem = styled.div`
-    flex: 1 0 30%;
-    width: 200px;
+    width: 100%;
     height: auto;
     padding: 5px;
     word-break: break-word;
@@ -61,34 +60,38 @@ const StyledMissionDefinitionPage = styled.div`
     margin: 2rem;
 `
 const StyledButton = styled(Button)`
-    width: 150px;
+    width: 260px;
 `
 const StyledInspectionFrequencyDiv = styled.div`
     > * {
         padding: 10px;
     }
 `
+const StyledTitleComponent = styled.div`
+    display: flex;
+    align-items: center;
+    height: 37px;
+`
+const StyledEditButton = styled(Button)`
+    padding-left: 5px;
+    padding-top: 0px;
+    margin-top: 0px;
+`
 
 function MetadataItem({ title, content, onEdit }: { title: string; content: any; onEdit?: () => void }) {
     return (
         <StyledFormItem>
-            <Typography
-                variant="body_long_bold"
-                group="paragraph"
-                color={tokens.colors.text.static_icons__secondary.hex}
-            >
-                {title}
+            <StyledTitleComponent>
+                <Typography variant="body_long_bold" color={tokens.colors.text.static_icons__secondary.rgba}>
+                    {title}
+                </Typography>
                 {onEdit && (
-                    <Button style={{ padding: '5px' }} variant="ghost" onClick={onEdit}>
+                    <StyledEditButton variant="ghost" onClick={onEdit}>
                         <Icon name={Icons.Edit} size={16} />
-                    </Button>
+                    </StyledEditButton>
                 )}
-            </Typography>
-            <Typography
-                variant="body_long_italic"
-                group="paragraph"
-                color={tokens.colors.text.static_icons__secondary.hex}
-            >
+            </StyledTitleComponent>
+            <Typography variant="body_long" group="paragraph" color={tokens.colors.text.static_icons__secondary.rgba}>
                 {content}
             </Typography>
         </StyledFormItem>
@@ -128,23 +131,35 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
         <>
             <StyledFormContainer>
                 <MetadataItem title={TranslateText('Name')} content={missionDefinition.name} onEdit={onEdit('name')} />
-                <MetadataItem title={TranslateText('Area')} content={missionDefinition.area ? missionDefinition.area.areaName : ''} />
-                <MetadataItem title={TranslateText('Deck')} content={missionDefinition.area ? missionDefinition.area.deckName : ''} />
-                <MetadataItem title={TranslateText('Plant')} content={missionDefinition.area ? missionDefinition.area.plantName : ''} />
-                <MetadataItem title={TranslateText('Installation')} content={missionDefinition.area ? missionDefinition.area.installationCode : ''} />
+                <MetadataItem
+                    title={TranslateText('Area')}
+                    content={missionDefinition.area ? missionDefinition.area.areaName : ''}
+                />
+                <MetadataItem
+                    title={TranslateText('Deck')}
+                    content={missionDefinition.area ? missionDefinition.area.deckName : ''}
+                />
+                <MetadataItem
+                    title={TranslateText('Plant')}
+                    content={missionDefinition.area ? missionDefinition.area.plantName : ''}
+                />
+                <MetadataItem
+                    title={TranslateText('Installation')}
+                    content={missionDefinition.area ? missionDefinition.area.installationCode : ''}
+                />
                 <MetadataItem
                     title={TranslateText('Mission source')}
                     content={TranslateText(missionDefinition.sourceType)}
                 />
                 <MetadataItem
-                    title={TranslateText('Comment')}
-                    content={missionDefinition.comment}
-                    onEdit={onEdit('comment')}
-                />
-                <MetadataItem
                     title={TranslateText('Inspection frequency')}
                     content={displayInspectionFrequency(missionDefinition.inspectionFrequency)}
                     onEdit={onEdit('inspectionFrequency')}
+                />
+                <MetadataItem
+                    title={TranslateText('Comment')}
+                    content={missionDefinition.comment}
+                    onEdit={onEdit('comment')}
                 />
             </StyledFormContainer>
             <StyledButton
