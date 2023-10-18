@@ -1,4 +1,4 @@
-import { Typography } from '@equinor/eds-core-react'
+import { Card, Typography } from '@equinor/eds-core-react'
 import { MissionControlButtons } from 'components/Pages/FrontPage/MissionOverview/MissionControlButtons'
 import { MissionStatusDisplay } from 'components/Pages/FrontPage/MissionOverview/MissionStatusDisplay'
 import { format, differenceInMinutes } from 'date-fns'
@@ -9,10 +9,19 @@ import { useLanguageContext, TranslateTextWithContext } from 'components/Context
 import { StatusReason } from '../StatusReason'
 import { MissionRestartButton } from 'components/Pages/FrontPage/MissionOverview/MissionRestartButton'
 
-const HeaderSection = styled.div`
+const HeaderSection = styled(Card)`
+    width: 100%;
+    min-width: 600px;
+    height: auto;
     display: flex;
+    top: 60px;
     flex-direction: column;
     gap: 0.4rem;
+    position: sticky;
+    margin-top: auto;
+    background-color: white;
+    z-index: 1;
+    border-color: white;
 `
 const TitleSection = styled.div`
     display: flex;
@@ -25,60 +34,6 @@ const InfoSection = styled.div`
     align-items: flex-end;
     gap: 1.2rem;
 `
-
-interface MissionHeaderProps {
-    mission: Mission
-}
-
-export function MissionHeader({ mission }: MissionHeaderProps) {
-    const { TranslateText } = useLanguageContext()
-    const barToMillibar = 1000
-    const isMissionCompleted = mission.endTime ? true : false
-
-    const translatedStartDate = TranslateText('Start date')
-    const translatedStartTime = TranslateText('Start time')
-    const translatedUsedTime = TranslateText('Time used')
-    const translatedEstimatedTimeRemaining = TranslateText('Estimated time remaining')
-    const translatedRobot = TranslateText('Robot')
-    const translatedBatteryLevel = TranslateText('Battery level')
-    const translatedPressureLevel = TranslateText('Pressure level')
-    const translatedDescription = TranslateText('Description')
-
-    const { startTime, startDate, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
-    const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
-
-    return (
-        <HeaderSection>
-            <TitleSection>
-                <Typography variant="h1">{mission.name}</Typography>
-                {isMissionActive && <MissionControlButtons mission={mission} />}
-                {mission.isCompleted && <MissionRestartButton mission={mission} />}
-            </TitleSection>
-            <Typography
-                variant="body_long_italic"
-                group="paragraph"
-                color={tokens.colors.text.static_icons__secondary.hex}
-            >
-                {mission.description && `${translatedDescription}: ${mission.description}`}
-            </Typography>
-            <StatusReason mission={mission}></StatusReason>
-            <InfoSection>
-                <MissionStatusDisplay status={mission.status} />
-                {HeaderText(`${translatedStartDate}: ${startDate}`)}
-                {HeaderText(`${translatedStartTime}: ${startTime}`)}
-                {HeaderText(`${translatedUsedTime}: ${usedTime}`)}
-                {!isMissionCompleted && HeaderText(`${translatedEstimatedTimeRemaining}: ${remainingTime}`)}
-                {HeaderText(`${translatedRobot}: ${mission.robot.name}`)}
-                {!isMissionCompleted && HeaderText(`${translatedBatteryLevel}: ${mission.robot.batteryLevel}%`)}
-                {!isMissionCompleted &&
-                    mission.robot.pressureLevel &&
-                    HeaderText(
-                        `${translatedPressureLevel}: ${Math.round(mission.robot.pressureLevel * barToMillibar)}mBar`
-                    )}
-            </InfoSection>
-        </HeaderSection>
-    )
-}
 
 function HeaderText(text: string) {
     return (
@@ -132,4 +87,58 @@ function StartUsedAndRemainingTime(mission: Mission): {
     }
     const usedTime: string = usedTimeInMinutes + ' ' + translatedMinutes
     return { startTime, startDate, usedTime, remainingTime }
+}
+
+interface MissionHeaderProps {
+    mission: Mission
+}
+
+export function MissionHeader({ mission }: MissionHeaderProps) {
+    const { TranslateText } = useLanguageContext()
+    const barToMillibar = 1000
+    const isMissionCompleted = mission.endTime ? true : false
+
+    const translatedStartDate = TranslateText('Start date')
+    const translatedStartTime = TranslateText('Start time')
+    const translatedUsedTime = TranslateText('Time used')
+    const translatedEstimatedTimeRemaining = TranslateText('Estimated time remaining')
+    const translatedRobot = TranslateText('Robot')
+    const translatedBatteryLevel = TranslateText('Battery level')
+    const translatedPressureLevel = TranslateText('Pressure level')
+    const translatedDescription = TranslateText('Description')
+
+    const { startTime, startDate, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
+    const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
+
+    return (
+        <HeaderSection>
+            <TitleSection>
+                <Typography variant="h1">{mission.name}</Typography>
+                {isMissionActive && <MissionControlButtons mission={mission} />}
+                {mission.isCompleted && <MissionRestartButton mission={mission} />}
+            </TitleSection>
+            <Typography
+                variant="body_long_italic"
+                group="paragraph"
+                color={tokens.colors.text.static_icons__secondary.hex}
+            >
+                {mission.description && `${translatedDescription}: ${mission.description}`}
+            </Typography>
+            <StatusReason mission={mission}></StatusReason>
+            <InfoSection>
+                <MissionStatusDisplay status={mission.status} />
+                {HeaderText(`${translatedStartDate}: ${startDate}`)}
+                {HeaderText(`${translatedStartTime}: ${startTime}`)}
+                {HeaderText(`${translatedUsedTime}: ${usedTime}`)}
+                {!isMissionCompleted && HeaderText(`${translatedEstimatedTimeRemaining}: ${remainingTime}`)}
+                {HeaderText(`${translatedRobot}: ${mission.robot.name}`)}
+                {!isMissionCompleted && HeaderText(`${translatedBatteryLevel}: ${mission.robot.batteryLevel}%`)}
+                {!isMissionCompleted &&
+                    mission.robot.pressureLevel &&
+                    HeaderText(
+                        `${translatedPressureLevel}: ${Math.round(mission.robot.pressureLevel * barToMillibar)}mBar`
+                    )}
+            </InfoSection>
+        </HeaderSection>
+    )
 }
