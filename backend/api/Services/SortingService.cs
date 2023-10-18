@@ -9,9 +9,6 @@ namespace Api.Services
     {
         public static void ApplySort<T>(ref IQueryable<T> missions, string orderByQueryString) where T : SortableRecord
         {
-            if (!missions.Any())
-                return;
-
             if (string.IsNullOrWhiteSpace(orderByQueryString))
             {
                 missions = missions.OrderBy(x => x.Name);
