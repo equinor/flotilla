@@ -69,7 +69,7 @@ const StyledInspectionFrequencyDiv = styled.div`
     }
 `
 
-function KeyValuePairDisplay({ left, right, onEdit }: { left: string; right: any; onEdit?: () => void }) {
+function MetadataItem({ title, content, onEdit }: { title: string; content: any; onEdit?: () => void }) {
     return (
         <StyledFormItem>
             <Typography
@@ -77,7 +77,7 @@ function KeyValuePairDisplay({ left, right, onEdit }: { left: string; right: any
                 group="paragraph"
                 color={tokens.colors.text.static_icons__secondary.hex}
             >
-                {left}
+                {title}
                 {onEdit && (
                     <Button style={{ padding: '5px' }} variant="ghost" onClick={onEdit}>
                         <Icon name={Icons.Edit} size={16} />
@@ -89,7 +89,7 @@ function KeyValuePairDisplay({ left, right, onEdit }: { left: string; right: any
                 group="paragraph"
                 color={tokens.colors.text.static_icons__secondary.hex}
             >
-                {right}
+                {content}
             </Typography>
         </StyledFormItem>
     )
@@ -109,13 +109,9 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
     const displayInspectionFrequency = (inspectionFrequency: string | undefined | null) => {
         if (!inspectionFrequency) return TranslateText('No inspection frequency set')
         const timeArray = inspectionFrequency.split(':')
-        const days: number = +timeArray[0]
-        const hours: number = +timeArray[1]
-        const minutes: number = +timeArray[2]
+        const days: number = +timeArray[0] // [1] is hours and [2] is minutes
         let returnStringArray: string[] = []
         if (days > 0) returnStringArray.push(days + ' ' + TranslateText('days'))
-        if (hours > 0) returnStringArray.push(hours + ' ' + TranslateText('hours'))
-        if (minutes > 0) returnStringArray.push(minutes + ' ' + TranslateText('minutes'))
         if (returnStringArray.length === 0) return TranslateText('No inspection frequency set')
 
         return TranslateText('Inspection required every') + ' ' + returnStringArray.join(', ')
@@ -131,39 +127,23 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
     return (
         <>
             <StyledFormContainer>
-                <KeyValuePairDisplay
-                    left={TranslateText('Name')}
-                    right={missionDefinition.name}
-                    onEdit={onEdit('name')}
+                <MetadataItem title={TranslateText('Name')} content={missionDefinition.name} onEdit={onEdit('name')} />
+                <MetadataItem title={TranslateText('Area')} content={missionDefinition.area ? missionDefinition.area.areaName : ''} />
+                <MetadataItem title={TranslateText('Deck')} content={missionDefinition.area ? missionDefinition.area.deckName : ''} />
+                <MetadataItem title={TranslateText('Plant')} content={missionDefinition.area ? missionDefinition.area.plantName : ''} />
+                <MetadataItem title={TranslateText('Installation')} content={missionDefinition.area ? missionDefinition.area.installationCode : ''} />
+                <MetadataItem
+                    title={TranslateText('Mission source')}
+                    content={TranslateText(missionDefinition.sourceType)}
                 />
-                <KeyValuePairDisplay
-                    left={TranslateText('Area')}
-                    right={missionDefinition.area ? missionDefinition.area.areaName : ''}
-                />
-                <KeyValuePairDisplay
-                    left={TranslateText('Deck')}
-                    right={missionDefinition.area ? missionDefinition.area.deckName : ''}
-                />
-                <KeyValuePairDisplay
-                    left={TranslateText('Plant')}
-                    right={missionDefinition.area ? missionDefinition.area.plantName : ''}
-                />
-                <KeyValuePairDisplay
-                    left={TranslateText('Installation')}
-                    right={missionDefinition.area ? missionDefinition.area.installationCode : ''}
-                />
-                <KeyValuePairDisplay
-                    left={TranslateText('Mission source')}
-                    right={TranslateText(missionDefinition.sourceType)}
-                />
-                <KeyValuePairDisplay
-                    left={TranslateText('Comment')}
-                    right={missionDefinition.comment}
+                <MetadataItem
+                    title={TranslateText('Comment')}
+                    content={missionDefinition.comment}
                     onEdit={onEdit('comment')}
                 />
-                <KeyValuePairDisplay
-                    left={TranslateText('Inspection frequency')}
-                    right={displayInspectionFrequency(missionDefinition.inspectionFrequency)}
+                <MetadataItem
+                    title={TranslateText('Inspection frequency')}
+                    content={displayInspectionFrequency(missionDefinition.inspectionFrequency)}
                     onEdit={onEdit('inspectionFrequency')}
                 />
             </StyledFormContainer>
@@ -208,7 +188,6 @@ function MissionDefinitionEditDialog({
         isDeprecated: false,
     }
     const { TranslateText } = useLanguageContext()
-
     const [form, setForm] = useState<MissionDefinitionUpdateForm>(defaultMissionDefinitionForm)
 
     const updateInspectionFrequencyFormDays = (newDay: string) => {
@@ -218,15 +197,6 @@ function MissionDefinitionEditDialog({
         const inspectionArray = form.inspectionFrequency.split(':')
         if (!inspectionArray || inspectionArray.length < 2) return newDay + '.00:00:00'
         setForm({ ...form, inspectionFrequency: newDay + '.00:' + inspectionArray[1] + ':00' })
-    }
-
-    const updateInspectionFrequencyFormHours = (newHour: string) => {
-        if (!Number(newHour) && newHour !== '') return
-        newHour = newHour === '' ? '0' : newHour
-        if (!form.inspectionFrequency) return '00:' + newHour + ':00'
-        const inspectionArray = form.inspectionFrequency.split(':')
-        if (!inspectionArray || inspectionArray.length < 2) return '00:' + newHour + ':00'
-        setForm({ ...form, inspectionFrequency: inspectionArray[0] + ':' + newHour + ':00' })
     }
 
     const getDayAndHoursFromInspectionFrequency = (inspectionFrequency: string | undefined): [number, number] => {
@@ -249,8 +219,6 @@ function MissionDefinitionEditDialog({
     const inspectionFrequency = getDayAndHoursFromInspectionFrequency(form.inspectionFrequency)
     const inspectionFrequencyDays =
         !inspectionFrequency[0] || inspectionFrequency[0] === 0 ? '' : String(inspectionFrequency[0])
-    const inspectionFrequencyHours =
-        !inspectionFrequency[1] || inspectionFrequency[1] === 0 ? '' : String(inspectionFrequency[1])
 
     const getFormItem = () => {
         switch (fieldName) {
@@ -262,18 +230,10 @@ function MissionDefinitionEditDialog({
                             label={TranslateText('Days between inspections')}
                             unit={TranslateText('days')}
                             value={inspectionFrequencyDays}
-                            onChange={(changes: ChangeEvent<HTMLInputElement>) =>
-                                updateInspectionFrequencyFormDays(changes.target.value)
-                            }
-                        />
-                        <TextField
-                            id="compact-textfield"
-                            label={TranslateText('Hours between inspections')}
-                            unit={TranslateText('hours')}
-                            value={inspectionFrequencyHours}
-                            onChange={(changes: ChangeEvent<HTMLInputElement>) =>
-                                updateInspectionFrequencyFormHours(changes.target.value)
-                            }
+                            onChange={(changes: ChangeEvent<HTMLInputElement>) => {
+                                if (!isNaN(+changes.target.value))
+                                    updateInspectionFrequencyFormDays(changes.target.value)
+                            }}
                         />
                     </StyledInspectionFrequencyDiv>
                 )
@@ -310,7 +270,7 @@ function MissionDefinitionEditDialog({
     return (
         <StyledDialog open={true}>
             <StyledFormCard>
-                <Typography variant="h2">{TranslateText('Edit mission definition')}</Typography>
+                <Typography variant="h2">{TranslateText('Edit') + ' ' + TranslateText(fieldName)}</Typography>
                 {getFormItem()}
                 <StyledButtonSection>
                     <Button onClick={() => closeEditDialog()} variant="outlined" color="primary">
@@ -319,7 +279,7 @@ function MissionDefinitionEditDialog({
                     </Button>
                     <Button onClick={handleSubmit} variant="contained" color="primary">
                         {' '}
-                        {TranslateText('Update mission definition')}{' '}
+                        {TranslateText('Update')}{' '}
                     </Button>
                 </StyledButtonSection>
             </StyledFormCard>
