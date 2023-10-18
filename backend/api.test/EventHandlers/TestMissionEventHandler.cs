@@ -54,6 +54,7 @@ namespace Api.Test.EventHandlers
             var mqttServiceLogger = new Mock<ILogger<MqttService>>().Object;
             var mqttEventHandlerLogger = new Mock<ILogger<MqttEventHandler>>().Object;
             var missionLogger = new Mock<ILogger<MissionRunService>>().Object;
+            var robotLogger = new Mock<ILogger<RobotService>>().Object;
 
             var configuration = WebApplication.CreateBuilder().Configuration;
 
@@ -62,7 +63,7 @@ namespace Api.Test.EventHandlers
             _mqttService = new MqttService(mqttServiceLogger, configuration);
             _missionRunService = new MissionRunService(_context, missionLogger);
             _robotModelService = new RobotModelService(_context);
-            _robotService = new RobotService(_context, _robotModelService);
+            _robotService = new RobotService(_context, _robotModelService, robotLogger);
             _robotModelService = new RobotModelService(_context);
             _robotControllerMock = new RobotControllerMock();
 

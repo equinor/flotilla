@@ -28,11 +28,13 @@ namespace Api.Services
     {
         private readonly FlotillaDbContext _context;
         private readonly IRobotModelService _robotModelService;
+        private readonly ILogger<RobotService> _logger;
 
-        public RobotService(FlotillaDbContext context, IRobotModelService robotModelService)
+        public RobotService(FlotillaDbContext context, IRobotModelService robotModelService, ILogger<RobotService> logger)
         {
             _context = context;
             _robotModelService = robotModelService;
+            _logger = logger;
         }
 
         public async Task<Robot> Create(Robot newRobot)
@@ -104,7 +106,11 @@ namespace Api.Services
         public async Task<Robot?> DisableRobotByIsarId(string isarId)
         {
             var existingRobot = await ReadByIsarId(isarId);
-            if (existingRobot == null) return null;
+            if (existingRobot == null)
+            {
+                _logger.LogError($"Could not disable robot, as no robot with Isar Id {isarId} could be found");
+                return null;
+            }
             existingRobot.Enabled = false;
             existingRobot.Status = RobotStatus.Offline;
             existingRobot.CurrentMissionId = null;
@@ -116,7 +122,11 @@ namespace Api.Services
         public async Task<Robot?> EnableRobotByIsarId(string isarId)
         {
             var existingRobot = await ReadByIsarId(isarId);
-            if (existingRobot == null) return null;
+            if (existingRobot == null)
+            {
+                _logger.LogError($"Could not enable robot, as no robot with Isar Id {isarId} could be found");
+                return null;
+            }
             existingRobot.Enabled = true;
             var entry = _context.Update(existingRobot);
             await _context.SaveChangesAsync();
