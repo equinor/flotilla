@@ -149,7 +149,10 @@ namespace Api.Database.Models
 
             var quaternion = new Orientation
             {
-                X = 0, Y = 0, Z = MathF.Sin(angle / 2), W = MathF.Cos(angle / 2)
+                X = 0,
+                Y = 0,
+                Z = MathF.Sin(angle / 2),
+                W = MathF.Cos(angle / 2)
             };
 
             return quaternion;

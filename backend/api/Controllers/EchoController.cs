@@ -25,38 +25,38 @@ namespace Api.Controllers
             _robotService = robotService;
         }
 
-    /// <summary>
-    ///     List all available Echo missions for the installation
-    /// </summary>
-    /// <remarks>
-    ///     These missions are created in the Echo mission planner
-    /// </remarks>
-    [HttpGet]
-    [Route("available-missions/{plantCode}")]
-    [ProducesResponseType(typeof(List<CondensedEchoMissionDefinition>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<IList<CondensedEchoMissionDefinition>>> GetAvailableEchoMissions([FromRoute] string? plantCode)
-    {
-        try
+        /// <summary>
+        ///     List all available Echo missions for the installation
+        /// </summary>
+        /// <remarks>
+        ///     These missions are created in the Echo mission planner
+        /// </remarks>
+        [HttpGet]
+        [Route("available-missions/{plantCode}")]
+        [ProducesResponseType(typeof(List<CondensedEchoMissionDefinition>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status502BadGateway)]
+        public async Task<ActionResult<IList<CondensedEchoMissionDefinition>>> GetAvailableEchoMissions([FromRoute] string? plantCode)
         {
-            var missions = await _echoService.GetAvailableMissions(plantCode);
-            return Ok(missions);
+            try
+            {
+                var missions = await _echoService.GetAvailableMissions(plantCode);
+                return Ok(missions);
+            }
+            catch (HttpRequestException e)
+            {
+                _logger.LogError(e, "Error retrieving missions from Echo");
+                return new StatusCodeResult(StatusCodes.Status502BadGateway);
+            }
+            catch (JsonException e)
+            {
+                _logger.LogError(e, "Error retrieving missions from Echo");
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
         }
-        catch (HttpRequestException e)
-        {
-            _logger.LogError(e, "Error retrieving missions from Echo");
-            return new StatusCodeResult(StatusCodes.Status502BadGateway);
-        }
-        catch (JsonException e)
-        {
-            _logger.LogError(e, "Error retrieving missions from Echo");
-            return new StatusCodeResult(StatusCodes.Status500InternalServerError);
-        }
-    }
 
         /// <summary>
         ///     Lookup Echo mission by Id
