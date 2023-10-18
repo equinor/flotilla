@@ -50,6 +50,7 @@ namespace Api.Test.EventHandlers
         private readonly IMissionScheduling _missionSchedulingService;
         private readonly IIsarService _isarServiceMock;
         private readonly IInstallationService _installationService;
+        private readonly IDefaultLocalizationPoseService _defaultLocalisationPoseService;
         private readonly IPlantService _plantService;
         private readonly IDeckService _deckService;
         private readonly IAreaService _areaService;
@@ -74,9 +75,10 @@ namespace Api.Test.EventHandlers
             _robotControllerMock = new RobotControllerMock();
             _isarServiceMock = new MockIsarService();
             _installationService = new InstallationService(_context);
+            _defaultLocalisationPoseService = new DefaultLocalizationPoseService(_context);
             _plantService = new PlantService(_context, _installationService);
-            _deckService = new DeckService(_context, _installationService, _plantService);
-            _areaService = new AreaService(_context, _installationService, _plantService, _deckService);
+            _deckService = new DeckService(_context, _defaultLocalisationPoseService, _installationService, _plantService);
+            _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalisationPoseService);
             _missionSchedulingService = new MissionScheduling(missionSchedulingLogger, _missionRunService, _isarServiceMock, _robotService, _robotControllerMock.Mock.Object, _areaService);
 
             var mockServiceProvider = new Mock<IServiceProvider>();
