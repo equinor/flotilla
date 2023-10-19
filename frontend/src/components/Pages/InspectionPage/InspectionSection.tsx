@@ -114,7 +114,7 @@ export function InspectionSection({
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent('mission definition updated', (username: string, message: string) => {
+            registerEvent('Mission definition updated', (username: string, message: string) => {
                 const mDef: CondensedMissionDefinition = JSON.parse(message)
                 if (!mDef.area) return
                 const relevantDeck = mDef.area.deckName

@@ -25,7 +25,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent('robot list updated', (username: string, message: string) => {
+            registerEvent('Robot list updated', (username: string, message: string) => {
                 let newRobotList: Robot[] = JSON.parse(message)
                 newRobotList = newRobotList.map((r) => {
                     r.status = Object.values(RobotStatus)[r.status as unknown as number]
