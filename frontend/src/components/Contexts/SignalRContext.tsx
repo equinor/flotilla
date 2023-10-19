@@ -1,5 +1,4 @@
 import * as signalR from '@microsoft/signalr'
-import { useIsAuthenticated } from '@azure/msal-react'
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { AuthContext } from './AuthProvider'
 import { config } from 'config'
@@ -57,11 +56,11 @@ export const SignalRContext = createContext<ISignalRContext>(defaultSignalRInter
 export const SignalRProvider: FC<Props> = ({ children }) => {
     const [connection, setConnection] = useState<signalR.HubConnection | undefined>(defaultSignalRInterface.connection)
     const [connectionReady, setConnectionReady] = useState<boolean>(defaultSignalRInterface.connectionReady)
-    const isAuthenticated = useIsAuthenticated()
     const accessToken = useContext(AuthContext)
 
     useEffect(() => {
-        if (isAuthenticated && accessToken) {
+        if (accessToken) {
+            console.log("Attempting to create signalR connection...")
             var newConnection = new signalR.HubConnectionBuilder()
                 .withUrl(URL, {
                     accessTokenFactory: () => accessToken,
@@ -77,16 +76,13 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
                     setConnection(newConnection)
                     setConnectionReady(true)
                 })
-                .catch((err) => document.write(err))
+                .catch(console.error)
         }
-    }, [isAuthenticated, accessToken])
+    }, [accessToken])
 
     const registerEvent = (eventName: string, onMessageReceived: (username: string, message: string) => void) => {
-        if (connection) {
-            connection.on(eventName, (username, message) => {
-                onMessageReceived(username, message)
-            })
-        }
+        if (connection)
+            connection.on(eventName, (username, message) => onMessageReceived(username, message))
     }
 
     return (

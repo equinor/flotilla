@@ -269,14 +269,6 @@ export function MissionDefinitionPage() {
     }, [missionId])
 
     useEffect(() => {
-        if (missionId) {
-            BackendAPICaller.getMissionDefinitionById(missionId).then((mission) => {
-                setSelectedMissionDefinition(mission)
-            })
-        }
-    }, [missionId])
-
-    useEffect(() => {
         if (connectionReady) {
             registerEvent('mission definition updated', (username: string, message: string) => {
                 const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
