@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, FC, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Robot, RobotStatus } from 'models/Robot'
-import { useSignalRContext } from './SignalRContext'
+import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { BatteryStatus } from 'models/Battery'
 import { RobotType } from 'models/RobotModel'
 
@@ -25,7 +25,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent('Robot list updated', (username: string, message: string) => {
+            registerEvent(SignalREventLabels.robotListUpdated, (username: string, message: string) => {
                 let newRobotList: Robot[] = JSON.parse(message)
                 newRobotList = newRobotList.map((r) => {
                     r.status = Object.values(RobotStatus)[r.status as unknown as number]

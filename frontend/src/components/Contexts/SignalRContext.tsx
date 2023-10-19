@@ -99,3 +99,12 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
 }
 
 export const useSignalRContext = () => useContext(SignalRContext)
+
+export enum SignalREventLabels {
+    missionRunUpdated = 'Mission run updated',
+    missionDefinitionUpdated = 'Mission definition updated',
+    missionRunCreated = 'Mission run created',
+    missionRunDeleted = 'Mission run deleted',
+    missionRunFailed = 'Mission run failed',
+    robotListUpdated = 'Robot list updated'
+}

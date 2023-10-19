@@ -11,7 +11,7 @@ import { Button, Typography, Card, Dialog, TextField } from '@equinor/eds-core-r
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { config } from 'config'
-import { useSignalRContext } from 'components/Contexts/SignalRContext'
+import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 
 const StyledFormDialog = styled.div`
     display: flex;
@@ -270,7 +270,7 @@ export function MissionDefinitionPage() {
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent('Mission definition updated', (username: string, message: string) => {
+            registerEvent(SignalREventLabels.missionDefinitionUpdated, (username: string, message: string) => {
                 const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
                 missionDefinition.sourceType =
                     Object.values(SourceType)[missionDefinition.sourceType as unknown as number]

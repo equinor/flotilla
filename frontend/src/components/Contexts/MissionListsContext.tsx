@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useSignalRContext } from './SignalRContext'
+import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 
 const upsertList = (list: Mission[], mission: Mission) => {
     let newList = [...list]
@@ -46,7 +46,7 @@ export const useMissions = (): MissionsResult => {
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent('Mission run created', (username: string, message: string) => {
+            registerEvent(SignalREventLabels.missionRunCreated, (username: string, message: string) => {
                 const newMission: Mission = JSON.parse(message)
                 if (missionQueue.find((m) => m.id === newMission.id))
                     setMissionQueue((oldQueue) => [...oldQueue, newMission])
@@ -57,7 +57,7 @@ export const useMissions = (): MissionsResult => {
                         return [...missionQueueCopy]
                     })
             })
-            registerEvent('Mission run updated', (username: string, message: string) => {
+            registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
                 let updatedMission: Mission = JSON.parse(message)
                 // This conversion translates from the enum as a number to an enum as a string
                 updatedMission.status = Object.values(MissionStatus)[updatedMission.status as unknown as number]
@@ -95,7 +95,7 @@ export const useMissions = (): MissionsResult => {
                     return oldQueueCopy
                 })
             })
-            registerEvent('Mission run deleted', (username: string, message: string) => {
+            registerEvent(SignalREventLabels.missionRunDeleted, (username: string, message: string) => {
                 let deletedMission: Mission = JSON.parse(message)
                 setOngoingMissions((missions) => {
                     const ongoingIndex = missions.findIndex((m) => m.id === deletedMission.id)
