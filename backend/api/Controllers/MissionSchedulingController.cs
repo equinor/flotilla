@@ -2,6 +2,7 @@
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Services.ActionServices;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ namespace Api.Controllers
         private readonly IMapService _mapService;
         private readonly IMissionDefinitionService _missionDefinitionService;
         private readonly IMissionRunService _missionRunService;
+        private readonly IMissionSchedulingService _missionSchedulingService;
         private readonly IRobotService _robotService;
         private readonly ISourceService _sourceService;
         private readonly IStidService _stidService;
@@ -32,7 +34,8 @@ namespace Api.Controllers
             ILogger<MissionSchedulingController> logger,
             IMapService mapService,
             IStidService stidService,
-            ISourceService sourceService
+            ISourceService sourceService,
+            IMissionSchedulingService missionSchedulingService
         )
         {
             _missionDefinitionService = missionDefinitionService;
@@ -44,6 +47,8 @@ namespace Api.Controllers
             _mapService = mapService;
             _stidService = stidService;
             _sourceService = sourceService;
+            _missionDefinitionService = missionDefinitionService;
+            _missionSchedulingService = missionSchedulingService;
             _logger = logger;
         }
 
@@ -194,7 +199,8 @@ namespace Api.Controllers
             {
                 source = new Source
                 {
-                    SourceId = $"{echoMission.Id}", Type = MissionSourceType.Echo
+                    SourceId = $"{echoMission.Id}",
+                    Type = MissionSourceType.Echo
                 };
             }
             else
@@ -269,31 +275,23 @@ namespace Api.Controllers
         )
         {
             var robot = await _robotService.ReadById(customMissionQuery.RobotId);
-            if (robot is null)
-            {
-                return NotFound($"Could not find robot with id {customMissionQuery.RobotId}");
-            }
+            if (robot is null) { return NotFound($"Could not find robot with id {customMissionQuery.RobotId}"); }
 
             var installationResults = await _echoService.GetEchoPlantInfos();
-            if (installationResults == null)
-            {
-                return NotFound("Unable to retrieve plant information from Echo");
-            }
+            if (installationResults == null) { return NotFound("Unable to retrieve plant information from Echo"); }
 
-            var installationResult = installationResults.FirstOrDefault(installation => installation.PlantCode.ToUpperInvariant() == customMissionQuery.InstallationCode.ToUpperInvariant());
-            if (installationResult == null)
-            {
-                return NotFound($"Could not find installation with id {customMissionQuery.InstallationCode}");
-            }
+            var installationResult =
+                installationResults.FirstOrDefault(installation => installation.PlantCode.ToUpperInvariant() == customMissionQuery.InstallationCode.ToUpperInvariant());
+            if (installationResult == null) { return NotFound($"Could not find installation with id {customMissionQuery.InstallationCode}"); }
 
             var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 
             MissionDefinition? customMissionDefinition;
-            try { customMissionDefinition = await _missionDefinitionService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
+            try { customMissionDefinition = await _missionSchedulingService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
             catch (SourceException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
 
             MissionRun? newMissionRun;
-            try { newMissionRun = await _customMissionService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
+            try { newMissionRun = await _missionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
             catch (Exception e) when (e is RobotNotFoundException or MissionNotFoundException) { return NotFound(e.Message); }
 
             return CreatedAtAction(nameof(Create), new

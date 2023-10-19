@@ -6,6 +6,7 @@ using Api.EventHandlers;
 using Api.Mqtt;
 using Api.Options;
 using Api.Services;
+using Api.Services.ActionServices;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -37,7 +38,7 @@ if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
     }
     else
     {
-        Console.WriteLine($"NO KEYVAULT IN CONFIG");
+        Console.WriteLine("NO KEYVAULT IN CONFIG");
     }
 }
 
@@ -62,15 +63,20 @@ builder.Services.AddScoped<IDeckService, DeckService>();
 builder.Services.AddScoped<IDefaultLocalizationPoseService, DefaultLocalizationPoseService>();
 builder.Services.AddScoped<ISourceService, SourceService>();
 builder.Services.AddScoped<IRobotModelService, RobotModelService>();
+builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
 
 bool useInMemoryDatabase = builder.Configuration
     .GetSection("Database")
     .GetValue<bool>("UseInMemoryDatabase");
 
 if (useInMemoryDatabase)
+{
     builder.Services.AddScoped<ITimeseriesService, TimeseriesServiceSqlLite>();
+}
 else
+{
     builder.Services.AddScoped<ITimeseriesService, TimeseriesService>();
+}
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
 
