@@ -8,8 +8,7 @@ import { getInspectionDeadline } from 'utils/StringFormatting'
 import { InspectionTable } from './InspectionTable'
 import { StyledDict, compareInspections } from './InspectionUtilities'
 import { DeckCards } from './DeckCards'
-import { useSignalRContext } from 'components/Contexts/SignalRContext'
-
+import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 
 export interface Inspection {
     missionDefinition: CondensedMissionDefinition
@@ -114,7 +113,7 @@ export function InspectionSection({
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent('Mission definition updated', (username: string, message: string) => {
+            registerEvent(SignalREventLabels.missionDefinitionUpdated, (username: string, message: string) => {
                 const mDef: CondensedMissionDefinition = JSON.parse(message)
                 if (!mDef.area) return
                 const relevantDeck = mDef.area.deckName

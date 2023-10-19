@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom'
 import { addMinutes, max } from 'date-fns'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
-import { useSignalRContext } from 'components/Contexts/SignalRContext'
+import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledCard = styled(Card)`
@@ -131,7 +131,7 @@ export function FailedMissionAlertView() {
     // Register a signalR event handler that listens for new failed missions
     useEffect(() => {
         if (connectionReady)
-            registerEvent('Mission run failed', (username: string, message: string) => {
+            registerEvent(SignalREventLabels.missionRunFailed, (username: string, message: string) => {
                 setNewFailedMission(JSON.parse(message))
                 console.log(JSON.parse(message))
             })
