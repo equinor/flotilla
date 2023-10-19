@@ -292,29 +292,9 @@ namespace Api.Controllers
             try { customMissionDefinition = await _missionDefinitionService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
             catch (SourceException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
 
-            var scheduledMission = new MissionRun
-            {
-                Name = customMissionQuery.Name,
-                Description = customMissionQuery.Description,
-                MissionId = customMissionDefinition.Id,
-                Comment = customMissionQuery.Comment,
-                Robot = robot,
-                Status = MissionStatus.Pending,
-                DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTimeOffset.UtcNow,
-                Tasks = missionTasks,
-                InstallationCode = customMissionQuery.InstallationCode,
-                Area = customMissionDefinition.Area,
-                Map = new MapMetadata()
-            };
-
-            await _mapService.AssignMapToMission(scheduledMission);
-
-            if (scheduledMission.Tasks.Any())
-            {
-                scheduledMission.CalculateEstimatedDuration();
-            }
-
-            var newMissionRun = await _missionRunService.Create(scheduledMission);
+            MissionRun? newMissionRun;
+            try { newMissionRun = await _customMissionService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
+            catch (Exception e) when (e is RobotNotFoundException or MissionNotFoundException) { return NotFound(e.Message); }
 
             return CreatedAtAction(nameof(Create), new
             {

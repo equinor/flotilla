@@ -56,6 +56,11 @@
         public RobotPositionNotFoundException(string message) : base(message) { }
     }
 
+    public class RobotNotFoundException : Exception
+    {
+        public RobotNotFoundException(string message) : base(message) { }
+    }
+
     public class RobotInformationNotAvailableException : Exception
     {
         public RobotInformationNotAvailableException(string message) : base(message) { }
