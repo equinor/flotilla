@@ -270,7 +270,7 @@ export function MissionDefinitionPage() {
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent('mission definition updated', (username: string, message: string) => {
+            registerEvent('Mission definition updated', (username: string, message: string) => {
                 const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
                 missionDefinition.sourceType =
                     Object.values(SourceType)[missionDefinition.sourceType as unknown as number]

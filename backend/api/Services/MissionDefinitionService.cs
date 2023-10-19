@@ -129,7 +129,7 @@ namespace Api.Services
 
             var entry = _context.Update(missionDefinition);
             await _context.SaveChangesAsync();
-            _ = _signalRService.SendMessageAsync("mission definition updated", new CondensedMissionDefinitionResponse(missionDefinition));
+            _ = _signalRService.SendMessageAsync("Mission definition updated", new CondensedMissionDefinitionResponse(missionDefinition));
             return entry.Entity;
         }
 

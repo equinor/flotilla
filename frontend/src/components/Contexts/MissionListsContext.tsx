@@ -46,7 +46,7 @@ export const useMissions = (): MissionsResult => {
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent('mission run created', (username: string, message: string) => {
+            registerEvent('Mission run created', (username: string, message: string) => {
                 const newMission: Mission = JSON.parse(message)
                 if (missionQueue.find((m) => m.id === newMission.id))
                     setMissionQueue((oldQueue) => [...oldQueue, newMission])
@@ -57,7 +57,7 @@ export const useMissions = (): MissionsResult => {
                         return [...missionQueueCopy]
                     })
             })
-            registerEvent('mission run updated', (username: string, message: string) => {
+            registerEvent('Mission run updated', (username: string, message: string) => {
                 let updatedMission: Mission = JSON.parse(message)
                 // This conversion translates from the enum as a number to an enum as a string
                 updatedMission.status = Object.values(MissionStatus)[updatedMission.status as unknown as number]
@@ -95,7 +95,7 @@ export const useMissions = (): MissionsResult => {
                     return oldQueueCopy
                 })
             })
-            registerEvent('mission run deleted', (username: string, message: string) => {
+            registerEvent('Mission run deleted', (username: string, message: string) => {
                 let deletedMission: Mission = JSON.parse(message)
                 setOngoingMissions((missions) => {
                     const ongoingIndex = missions.findIndex((m) => m.id === deletedMission.id)
