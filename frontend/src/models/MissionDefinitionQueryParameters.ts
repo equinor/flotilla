@@ -1,7 +1,4 @@
-export enum SourceType {
-    Echo,
-    Custom,
-}
+import { SourceType } from './MissionDefinition'
 
 export interface MissionDefinitionQueryParameters {
     nameSearch?: string
