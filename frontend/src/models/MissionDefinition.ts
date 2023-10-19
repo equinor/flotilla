@@ -7,6 +7,11 @@ export interface EchoMissionDefinition {
     name: string
 }
 
+export enum SourceType {
+    Echo = 'Echo',
+    Custom = 'Custom',
+}
+
 export interface CondensedMissionDefinition {
     id: string
     name: string
@@ -16,7 +21,7 @@ export interface CondensedMissionDefinition {
     lastSuccessfulRun?: Mission
     area?: Area
     isDeprecated: boolean
-    sourceType: string
+    sourceType: SourceType
 }
 
 export interface MissionDefinition {

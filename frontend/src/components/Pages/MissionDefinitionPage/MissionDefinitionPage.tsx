@@ -6,11 +6,12 @@ import { BackButton } from '../../../utils/BackButton'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { tokens } from '@equinor/eds-tokens'
 import { Header } from 'components/Header/Header'
-import { CondensedMissionDefinition } from 'models/MissionDefinition'
+import { CondensedMissionDefinition, SourceType } from 'models/MissionDefinition'
 import { Button, Typography, Card, Dialog, TextField } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { config } from 'config'
+import { useSignalRContext } from 'components/Contexts/SignalRContext'
 
 const StyledFormDialog = styled.div`
     display: flex;
@@ -256,6 +257,7 @@ function MissionDefinitionEditButtons({ missionDefinition, updateMissionDefiniti
 
 export function MissionDefinitionPage() {
     const { missionId } = useParams()
+    const { registerEvent, connectionReady } = useSignalRContext()
     const [selectedMissionDefinition, setSelectedMissionDefinition] = useState<CondensedMissionDefinition>()
 
     useEffect(() => {
@@ -267,16 +269,25 @@ export function MissionDefinitionPage() {
     }, [missionId])
 
     useEffect(() => {
-        const timeDelay = 1000
-        const id = setInterval(() => {
-            if (missionId) {
-                BackendAPICaller.getMissionDefinitionById(missionId).then((mission) => {
-                    setSelectedMissionDefinition(mission)
-                })
-            }
-        }, timeDelay)
-        return () => clearInterval(id)
+        if (missionId) {
+            BackendAPICaller.getMissionDefinitionById(missionId).then((mission) => {
+                setSelectedMissionDefinition(mission)
+            })
+        }
     }, [missionId])
+
+    useEffect(() => {
+        if (connectionReady) {
+            registerEvent('mission definition updated', (username: string, message: string) => {
+                const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
+                missionDefinition.sourceType =
+                    Object.values(SourceType)[missionDefinition.sourceType as unknown as number]
+                if (missionDefinition.id === missionId) {
+                    setSelectedMissionDefinition(missionDefinition)
+                }
+            })
+        }
+    }, [registerEvent, connectionReady])
 
     return (
         <>
