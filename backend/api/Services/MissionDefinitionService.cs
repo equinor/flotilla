@@ -27,8 +27,6 @@ namespace Api.Services
         public Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
         public Task<MissionDefinition?> Delete(string id);
-
-        public Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks);
     }
 
     [SuppressMessage(
@@ -48,12 +46,10 @@ namespace Api.Services
     )]
     public class MissionDefinitionService : IMissionDefinitionService
     {
-        private readonly IAreaService _areaService;
         private readonly FlotillaDbContext _context;
         private readonly ICustomMissionService _customMissionService;
         private readonly IEchoService _echoService;
         private readonly ILogger<IMissionDefinitionService> _logger;
-        private readonly ISourceService _sourceService;
         private readonly IStidService _stidService;
 
         public MissionDefinitionService(
@@ -61,16 +57,12 @@ namespace Api.Services
             IEchoService echoService,
             IStidService stidService,
             ICustomMissionService customMissionService,
-            IAreaService areaService,
-            ISourceService sourceService,
             ILogger<MissionDefinitionService> logger)
         {
             _context = context;
             _echoService = echoService;
             _stidService = stidService;
             _customMissionService = customMissionService;
-            _areaService = areaService;
-            _sourceService = sourceService;
             _logger = logger;
         }
 
@@ -173,59 +165,11 @@ namespace Api.Services
                         throw new MissionSourceTypeException($"Mission type {source.Type} is not accounted for")
                 };
             }
-            catch (FormatException e)
+            catch (FormatException)
             {
                 _logger.LogError("Echo source ID was not formatted correctly");
                 throw new FormatException("Echo source ID was not formatted correctly");
             }
-        }
-
-        public async Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks)
-        {
-            Area? area = null;
-            if (customMissionQuery.AreaName != null) { area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName); }
-
-            var source = await _sourceService.CheckForExistingCustomSource(missionTasks);
-
-            MissionDefinition? existingMissionDefinition = null;
-            if (source == null)
-            {
-                try
-                {
-                    string sourceUrl = await _customMissionService.UploadSource(missionTasks);
-                    source = new Source
-                    {
-                        SourceId = sourceUrl, Type = MissionSourceType.Custom
-                    };
-                }
-                catch (Exception e)
-                {
-                    {
-                        string errorMessage = $"Unable to upload source for mission {customMissionQuery.Name}";
-                        _logger.LogError(e, "{Message}", errorMessage);
-                        throw new SourceException(errorMessage);
-                    }
-                }
-            }
-            else
-            {
-                var missionDefinitions = await ReadBySourceId(source.SourceId);
-                if (missionDefinitions.Count > 0) { existingMissionDefinition = missionDefinitions.First(); }
-            }
-
-            var customMissionDefinition = existingMissionDefinition ?? new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Source = source,
-                Name = customMissionQuery.Name,
-                InspectionFrequency = customMissionQuery.InspectionFrequency,
-                InstallationCode = customMissionQuery.InstallationCode,
-                Area = area
-            };
-
-            if (existingMissionDefinition == null) { await Create(customMissionDefinition); }
-
-            return customMissionDefinition;
         }
 
         private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
