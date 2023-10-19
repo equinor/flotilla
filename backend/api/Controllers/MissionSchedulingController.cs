@@ -2,6 +2,7 @@
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers
@@ -193,8 +194,7 @@ namespace Api.Controllers
             {
                 source = new Source
                 {
-                    SourceId = $"{echoMission.Id}",
-                    Type = MissionSourceType.Echo
+                    SourceId = $"{echoMission.Id}", Type = MissionSourceType.Echo
                 };
             }
             else
@@ -288,49 +288,9 @@ namespace Api.Controllers
 
             var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 
-            Area? area = null;
-            if (customMissionQuery.AreaName != null)
-            {
-                area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName);
-            }
-
-            var source = await _sourceService.CheckForExistingCustomSource(missionTasks);
-            MissionDefinition? existingMissionDefinition = null;
-            if (source == null)
-            {
-                try
-                {
-                    string sourceURL = await _customMissionService.UploadSource(missionTasks);
-                    source = new Source
-                    {
-                        SourceId = sourceURL,
-                        Type = MissionSourceType.Custom
-                    };
-                }
-                catch (Exception)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError, "Unable to upload source tasks");
-                }
-
-            }
-            else
-            {
-                var missionDefinitions = await _missionDefinitionService.ReadBySourceId(source.SourceId);
-                if (missionDefinitions.Count > 0)
-                {
-                    existingMissionDefinition = missionDefinitions.First();
-                }
-            }
-
-            var customMissionDefinition = existingMissionDefinition ?? new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Source = source,
-                Name = customMissionQuery.Name,
-                InspectionFrequency = customMissionQuery.InspectionFrequency,
-                InstallationCode = customMissionQuery.InstallationCode,
-                Area = area
-            };
+            MissionDefinition? customMissionDefinition;
+            try { customMissionDefinition = await _missionDefinitionService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
+            catch (SourceException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
 
             var scheduledMission = new MissionRun
             {
@@ -343,7 +303,7 @@ namespace Api.Controllers
                 DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTimeOffset.UtcNow,
                 Tasks = missionTasks,
                 InstallationCode = customMissionQuery.InstallationCode,
-                Area = area,
+                Area = customMissionDefinition.Area,
                 Map = new MapMetadata()
             };
 
@@ -352,11 +312,6 @@ namespace Api.Controllers
             if (scheduledMission.Tasks.Any())
             {
                 scheduledMission.CalculateEstimatedDuration();
-            }
-
-            if (existingMissionDefinition == null)
-            {
-                await _missionDefinitionService.Create(customMissionDefinition);
             }
 
             var newMissionRun = await _missionRunService.Create(scheduledMission);
