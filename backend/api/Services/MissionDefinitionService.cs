@@ -1,69 +1,76 @@
-﻿using System.Globalization;
-using System.Linq.Dynamic.Core;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
-
 namespace Api.Services
 {
     public interface IMissionDefinitionService
     {
-        public abstract Task<MissionDefinition> Create(MissionDefinition missionDefinition);
+        public Task<MissionDefinition> Create(MissionDefinition missionDefinition);
 
-        public abstract Task<MissionDefinition?> ReadById(string id);
+        public Task<MissionDefinition?> ReadById(string id);
 
-        public abstract Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters);
+        public Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters);
 
-        public abstract Task<List<MissionDefinition>> ReadByAreaId(string areaId);
+        public Task<List<MissionDefinition>> ReadByAreaId(string areaId);
 
-        public abstract Task<List<MissionDefinition>> ReadByDeckId(string deckId);
+        public Task<List<MissionDefinition>> ReadByDeckId(string deckId);
 
-        public abstract Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCodes);
+        public Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCodes);
 
-        public abstract Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
+        public Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
 
-        public abstract Task<MissionDefinition> Update(MissionDefinition missionDefinition);
+        public Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
-        public abstract Task<MissionDefinition?> Delete(string id);
+        public Task<MissionDefinition?> Delete(string id);
+
+        public Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Globalization",
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Globalization",
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Globalization",
         "CA1307:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
     public class MissionDefinitionService : IMissionDefinitionService
     {
+        private readonly IAreaService _areaService;
         private readonly FlotillaDbContext _context;
-        private readonly IEchoService _echoService;
-        private readonly IStidService _stidService;
         private readonly ICustomMissionService _customMissionService;
+        private readonly IEchoService _echoService;
         private readonly ILogger<IMissionDefinitionService> _logger;
+        private readonly ISourceService _sourceService;
+        private readonly IStidService _stidService;
 
         public MissionDefinitionService(
             FlotillaDbContext context,
             IEchoService echoService,
             IStidService stidService,
             ICustomMissionService customMissionService,
-            ILogger<IMissionDefinitionService> logger)
+            IAreaService areaService,
+            ISourceService sourceService,
+            ILogger<MissionDefinitionService> logger)
         {
             _context = context;
             _echoService = echoService;
             _stidService = stidService;
             _customMissionService = customMissionService;
+            _areaService = areaService;
+            _sourceService = sourceService;
             _logger = logger;
         }
 
@@ -73,16 +80,6 @@ namespace Api.Services
             await _context.SaveChangesAsync();
 
             return missionDefinition;
-        }
-
-        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
-        {
-            return _context.MissionDefinitions
-                .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
-                .ThenInclude(deck => deck != null ? deck.Plant : null)
-                .ThenInclude(plant => plant != null ? plant.Installation : null)
-                .Include(missionDefinition => missionDefinition.Source)
-                .Include(missionDefinition => missionDefinition.LastRun);
         }
 
         public async Task<MissionDefinition?> ReadById(string id)
@@ -178,15 +175,75 @@ namespace Api.Services
             }
             catch (FormatException e)
             {
-                _logger.LogError("Echo source ID was not formatted correctly.", e);
+                _logger.LogError("Echo source ID was not formatted correctly");
                 throw new FormatException("Echo source ID was not formatted correctly");
             }
+        }
+
+        public async Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks)
+        {
+            Area? area = null;
+            if (customMissionQuery.AreaName != null) { area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName); }
+
+            var source = await _sourceService.CheckForExistingCustomSource(missionTasks);
+
+            MissionDefinition? existingMissionDefinition = null;
+            if (source == null)
+            {
+                try
+                {
+                    string sourceUrl = await _customMissionService.UploadSource(missionTasks);
+                    source = new Source
+                    {
+                        SourceId = sourceUrl, Type = MissionSourceType.Custom
+                    };
+                }
+                catch (Exception e)
+                {
+                    {
+                        string errorMessage = $"Unable to upload source for mission {customMissionQuery.Name}";
+                        _logger.LogError(e, "{Message}", errorMessage);
+                        throw new SourceException(errorMessage);
+                    }
+                }
+            }
+            else
+            {
+                var missionDefinitions = await ReadBySourceId(source.SourceId);
+                if (missionDefinitions.Count > 0) { existingMissionDefinition = missionDefinitions.First(); }
+            }
+
+            var customMissionDefinition = existingMissionDefinition ?? new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Source = source,
+                Name = customMissionQuery.Name,
+                InspectionFrequency = customMissionQuery.InspectionFrequency,
+                InstallationCode = customMissionQuery.InstallationCode,
+                Area = area
+            };
+
+            if (existingMissionDefinition == null) { await Create(customMissionDefinition); }
+
+            return customMissionDefinition;
+        }
+
+        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
+        {
+            return _context.MissionDefinitions
+                .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
+                .ThenInclude(deck => deck != null ? deck.Plant : null)
+                .ThenInclude(plant => plant != null ? plant.Installation : null)
+                .Include(missionDefinition => missionDefinition.Source)
+                .Include(missionDefinition => missionDefinition.LastRun);
         }
 
         private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)
         {
             if (!missionDefinitions.Any() || string.IsNullOrWhiteSpace(name))
+            {
                 return;
+            }
 
             missionDefinitions = missionDefinitions.Where(
                 missionDefinition =>
@@ -195,12 +252,14 @@ namespace Api.Services
         }
 
         /// <summary>
-        /// Filters by <see cref="MissionDefinitionQueryStringParameters.InstallationCode"/>
-        /// and <see cref="MissionDefinitionQueryStringParameters.Area"/>
-        /// and <see cref="MissionDefinitionQueryStringParameters.NameSearch" />
-        /// and <see cref="MissionDefinitionQueryStringParameters.SourceType" />
-        ///
-        /// <para>Uses LINQ Expression trees (see <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees"/>)</para>
+        ///     Filters by <see cref="MissionDefinitionQueryStringParameters.InstallationCode" />
+        ///     and <see cref="MissionDefinitionQueryStringParameters.Area" />
+        ///     and <see cref="MissionDefinitionQueryStringParameters.NameSearch" />
+        ///     and <see cref="MissionDefinitionQueryStringParameters.SourceType" />
+        ///     <para>
+        ///         Uses LINQ Expression trees (see
+        ///         <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees" />)
+        ///     </para>
         /// </summary>
         /// <param name="parameters"> The variable containing the filter params </param>
         private static Expression<Func<MissionDefinition, bool>> ConstructFilter(
@@ -215,12 +274,12 @@ namespace Api.Services
             Expression<Func<MissionDefinition, bool>> installationFilter = parameters.InstallationCode is null
                 ? missionDefinition => true
                 : missionDefinition =>
-                      missionDefinition.InstallationCode.ToLower().Equals(parameters.InstallationCode.Trim().ToLower());
+                    missionDefinition.InstallationCode.ToLower().Equals(parameters.InstallationCode.Trim().ToLower());
 
             Expression<Func<MissionDefinition, bool>> missionTypeFilter = parameters.SourceType is null
                 ? missionDefinition => true
                 : missionDefinition =>
-                      missionDefinition.Source.Type.Equals(parameters.SourceType);
+                    missionDefinition.Source.Type.Equals(parameters.SourceType);
 
             // The parameter of the filter expression
             var missionDefinitionExpression = Expression.Parameter(typeof(MissionDefinition));
@@ -231,8 +290,8 @@ namespace Api.Services
                 Expression.AndAlso(
                     Expression.Invoke(areaFilter, missionDefinitionExpression),
                     Expression.Invoke(missionTypeFilter, missionDefinitionExpression)
-                    )
-                );
+                )
+            );
 
             // Constructing the resulting lambda expression by combining parameter and body
             return Expression.Lambda<Func<MissionDefinition, bool>>(body, missionDefinitionExpression);
