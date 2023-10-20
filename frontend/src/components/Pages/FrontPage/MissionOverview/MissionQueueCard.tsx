@@ -34,13 +34,23 @@ const HorizontalNonButtonContent = styled.div`
     padding-left: 10px;
 `
 
-const StyledConfirmDialog = styled.div`
-    padding: 8px;
+const StyledDialogContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 `
 
 const StyledButtonSection = styled.div`
-    display: grid;
-    grid-template-columns: auto auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    padding: 8px;
+    gap: 8px;
+`
+
+const StyledDialog = styled(Dialog)`
+    width: 320px;
+    padding: 10px;
 `
 
 const PaddingLeft = styled.div`
@@ -99,35 +109,39 @@ export function MissionQueueCard({ order, mission, onDeleteMission }: MissionQue
                 >
                     <Icon name={Icons.Remove} size={24} title="more action" />
                 </Button>
-                <Dialog open={confirmDeleteDialogOpen} isDismissable>
-                    <StyledConfirmDialog>
-                        <Typography variant="h5">
-                            {TranslateText('Please confirm that you want to remove the mission from the queue:')}
-                        </Typography>
-                        <Typography bold>{mission.name}</Typography>
-                        <StyledButtonSection>
-                            <Button
-                                onClick={() => {
-                                    setConfirmDeleteDialogOpen(false)
-                                }}
-                                variant="outlined"
-                                color="secondary"
-                            >
-                                {' '}
-                                {TranslateText('Cancel')}{' '}
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    onDeleteMission(mission)
-                                    setConfirmDeleteDialogOpen(false)
-                                }}
-                            >
-                                {' '}
-                                {TranslateText('Remove mission')}
-                            </Button>
-                        </StyledButtonSection>
-                    </StyledConfirmDialog>
-                </Dialog>
+                <StyledDialog open={confirmDeleteDialogOpen} isDismissable>
+                    <Dialog.Header>
+                        <Typography variant="h3">{TranslateText('Remove mission')}</Typography>
+                    </Dialog.Header>
+                    <Dialog.Content>
+                        <StyledDialogContent>
+                            <Typography variant="body_long">
+                                {TranslateText('Please confirm that you want to remove the mission from the queue:')}
+                            </Typography>
+                            <Typography bold>{mission.name}</Typography>
+                        </StyledDialogContent>
+                    </Dialog.Content>
+                    <StyledButtonSection>
+                        <Button
+                            onClick={() => {
+                                setConfirmDeleteDialogOpen(false)
+                            }}
+                            variant="outlined"
+                        >
+                            {' '}
+                            {TranslateText('Cancel')}{' '}
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                onDeleteMission(mission)
+                                setConfirmDeleteDialogOpen(false)
+                            }}
+                        >
+                            {' '}
+                            {TranslateText('Remove mission')}
+                        </Button>
+                    </StyledButtonSection>
+                </StyledDialog>
             </HorizontalContent>
         </StyledMissionCard>
     )

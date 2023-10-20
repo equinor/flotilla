@@ -1,5 +1,5 @@
 import { RobotType } from 'models/RobotModel'
-import taurobInspector from 'mediaAssets/taurob_inspector.jpg'
+import taurobInspector from 'mediaAssets/taurob_inspector_no_background.png'
 import anymalX from 'mediaAssets/anymal_x.png'
 import anymalD from 'mediaAssets/anymal_d.png'
 import exRobotics from 'mediaAssets/ExRobotics.webp'
