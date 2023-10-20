@@ -10,7 +10,7 @@ import { Icons } from 'utils/icons'
 import { Inspection, ScheduledMissionType, compareInspections } from './InspectionSection'
 import { getDeadlineInDays } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialog'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { refreshInterval } from '../FrontPage/FrontPage'
 import { TranslateTextWithContext } from 'components/Contexts/LanguageContext'
 
@@ -47,9 +47,6 @@ interface IProps {
     setSelectedMissions: (selectedMissions: CondensedMissionDefinition[]) => void
     scheduledMissions: ScheduledMissionType
     ongoingMissions: ScheduledMissionType
-    isScheduledDialogOpen: boolean
-    openScheduleDialog: () => void
-    closeScheduleDialog: () => void
 }
 
 interface ITableProps {
@@ -245,12 +242,18 @@ export function InspectionTable({
     setSelectedMissions,
     scheduledMissions,
     ongoingMissions,
-    isScheduledDialogOpen,
-    openScheduleDialog,
-    closeScheduleDialog,
 }: IProps) {
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
+    const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
+
+    const openScheduleDialog = () => {
+        setIsScheduledDialogOpen(true)
+    }
+
+    const closeScheduleDialog = () => {
+        setIsScheduledDialogOpen(false)
+    }
 
     const cellValues = inspections
         .sort(compareInspections)
@@ -298,6 +301,8 @@ export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMis
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
+    const [unscheduledMissions, setUnscheduledMissions] = useState<CondensedMissionDefinition[]>([])
+    const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
 
     const openDialog = () => {
         setIsDialogOpen(true)
@@ -308,12 +313,27 @@ export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMis
     }
 
     const closeDialog = () => {
+        setIsAlreadyScheduled(false)
+        setSelectedMissions([])
+        setUnscheduledMissions([])
         setIsDialogOpen(false)
     }
 
     const closeScheduleDialog = () => {
         setIsScheduledDialogOpen(false)
     }
+
+    useEffect(() => {
+        let unscheduledMissions: CondensedMissionDefinition[] = []
+        if (selectedMissions) {
+            selectedMissions.forEach((mission) => {
+                if (Object.keys(scheduledMissions).includes(mission.id) && scheduledMissions[mission.id])
+                    setIsAlreadyScheduled(true)
+                else unscheduledMissions = unscheduledMissions.concat([mission])
+            })
+            setUnscheduledMissions(unscheduledMissions)
+        }
+    }, [isDialogOpen])
 
     const navigate = useNavigate()
     const cellValues = inspections
@@ -349,7 +369,8 @@ export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMis
                     refreshInterval={refreshInterval}
                     closeDialog={closeDialog}
                     setMissions={setSelectedMissions}
-                    scheduledMissions={scheduledMissions}
+                    unscheduledMissions={unscheduledMissions}
+                    isAlreadyScheduled={isAlreadyScheduled}
                 />
             )}
             {isScheduledDialogOpen && (
