@@ -42,6 +42,7 @@ const VerticalContent = styled.div<{ $alignItems?: string }>`
     flex-direction: column;
     align-items: ${(props) => props.$alignItems};
     justify-content: flex-end;
+    gap: 4px;
 `
 
 function cardContent({ robot }: RobotProps) {

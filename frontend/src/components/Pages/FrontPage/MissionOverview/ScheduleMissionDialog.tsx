@@ -39,6 +39,7 @@ const StyledAutoComplete = styled(Card)`
     justify-content: center;
     padding: 8px;
     gap: 25px;
+    box-shadow: none;
 `
 const StyledMissionSection = styled.div`
     display: flex;

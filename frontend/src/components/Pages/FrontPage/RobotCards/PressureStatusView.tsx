@@ -8,6 +8,7 @@ import { RobotStatus } from 'models/Robot'
 const PressureAlignment = styled.div`
     display: flex;
     align-items: center;
+    gap: 7px;
 `
 
 const StyledTopography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`

@@ -22,10 +22,11 @@ const StyledMissionCard = styled(Card)`
 const StyledTitle = styled(Card)`
     width: 70%;
     height: 80%;
-    padding: 5px;
+    padding: 10px;
     :hover {
         background-color: #deedee;
     }
+    box-shadow: none;
 `
 const HorizontalContent = styled.div`
     display: grid;
