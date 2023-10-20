@@ -170,23 +170,31 @@ export function InspectionSection({
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-    const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
+    const [unscheduledMissions, setUnscheduledMissions] = useState<CondensedMissionDefinition[]>([])
+    const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
 
     const openDialog = () => {
         setIsDialogOpen(true)
     }
 
-    const openScheduleDialog = () => {
-        setIsScheduledDialogOpen(true)
-    }
-
     const closeDialog = () => {
+        setIsAlreadyScheduled(false)
+        setSelectedMissions([])
+        setUnscheduledMissions([])
         setIsDialogOpen(false)
     }
 
-    const closeScheduleDialog = () => {
-        setIsScheduledDialogOpen(false)
-    }
+    useEffect(() => {
+        if (selectedMissions) {
+            let unscheduledMissions: CondensedMissionDefinition[] = []
+            selectedMissions!.forEach((mission) => {
+                if (Object.keys(scheduledMissions).includes(mission.id) && scheduledMissions[mission.id])
+                    setIsAlreadyScheduled(true)
+                else unscheduledMissions = unscheduledMissions.concat([mission])
+            })
+            setUnscheduledMissions(unscheduledMissions)
+        }
+    }, [isDialogOpen])
 
     useEffect(() => {
         setSelectedDeck(undefined)
@@ -335,9 +343,6 @@ export function InspectionSection({
                         inspections={deckMissions[selectedDeck.id].inspections}
                         scheduledMissions={scheduledMissions}
                         ongoingMissions={ongoingMissions}
-                        isScheduledDialogOpen={isScheduledDialogOpen}
-                        openScheduleDialog={openScheduleDialog}
-                        closeScheduleDialog={closeScheduleDialog}
                     />
                 )}
             </StyledDeckOverview>
@@ -347,7 +352,8 @@ export function InspectionSection({
                     refreshInterval={refreshInterval}
                     closeDialog={closeDialog}
                     setMissions={setSelectedMissions}
-                    scheduledMissions={scheduledMissions}
+                    unscheduledMissions={unscheduledMissions!}
+                    isAlreadyScheduled={isAlreadyScheduled}
                 />
             )}
         </>

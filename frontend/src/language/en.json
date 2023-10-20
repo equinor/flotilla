@@ -188,5 +188,7 @@
     "Scheduled": "Scheduled",
     "The mission is already in the queue": "The mission is already in the queue",
     "AlreadyScheduledText": "The mission is already in the queue. Are you sure you want to add the mission again?",
-    "Queue unscheduled missions": "Queue unscheduled missions"
+    "Queue unscheduled missions": "Queue unscheduled missions",
+    "Queue all missions": "Queue all missions",
+    "Some missions are already in the queue": "Some missions are already in the queue"
 }
