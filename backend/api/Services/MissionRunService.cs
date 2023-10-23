@@ -88,6 +88,8 @@ namespace Api.Services
 
         public async Task<MissionRun> Create(MissionRun missionRun)
         {
+            // Making sure database does not try to create new robot
+            _context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             await _context.MissionRuns.AddAsync(missionRun);
             await _context.SaveChangesAsync();
 
