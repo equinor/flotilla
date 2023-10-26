@@ -229,6 +229,7 @@ public class RobotController : ControllerBase
     )
     {
         _logger.LogInformation("Updating robot status with id={id}", id);
+
         if (!ModelState.IsValid)
             return BadRequest("Invalid data.");
 
@@ -350,16 +351,6 @@ public class RobotController : ControllerBase
         {
             _logger.LogWarning("Could not find robot with id={id}", robotId);
             return NotFound("Robot not found");
-        }
-
-        if (robot.Status is RobotStatus.Stuck)
-        {
-            _logger.LogWarning(
-                "Robot '{id}' is stuck ({status})",
-                robotId,
-                robot.Status.ToString()
-            );
-            return Conflict($"The Robot is stuck ({robot.Status})");
         }
 
         if (robot.Status is not RobotStatus.Available)
@@ -613,22 +604,13 @@ public class RobotController : ControllerBase
             _logger.LogWarning(errorMessage);
             return NotFound(errorMessage);
         }
-        if (robot.Status is RobotStatus.Stuck)
-        {
-            _logger.LogWarning(
-                "Robot '{id}' is stuck ({status})",
-                robotId,
-                robot.Status.ToString()
-            );
-            return Conflict($"The Robot is stuck ({robot.Status})");
-        }
+
         if (robot.Status is not RobotStatus.Available)
         {
             string errorMessage = $"Robot {robotId} has status ({robot.Status}) and is not available";
             _logger.LogWarning(errorMessage);
             return Conflict(errorMessage);
         }
-
         try
         {
             await _isarService.StartMoveArm(robot, armPosition);
@@ -681,15 +663,7 @@ public class RobotController : ControllerBase
             _logger.LogWarning("Could not find robot with id={id}", scheduleLocalizationMissionQuery.RobotId);
             return NotFound("Robot not found");
         }
-        if (robot.Status is RobotStatus.Stuck)
-        {
-            _logger.LogWarning(
-                "Robot '{id}' is stuck ({status})",
-                scheduleLocalizationMissionQuery.RobotId,
-                robot.Status.ToString()
-            );
-            return Conflict($"The Robot is stuck ({robot.Status})");
-        }
+
         if (robot.Status is not RobotStatus.Available)
         {
             _logger.LogWarning(
