@@ -11,6 +11,7 @@ enum StatusColors {
     Available = '#A1DAA0',
     Offline = '#F7F7F7',
     Busy = '#FFC67A',
+    Blocked = '#FFC67A',
 }
 
 export function RobotStatusChip({ status }: StatusProps) {
@@ -25,8 +26,8 @@ export function RobotStatusChip({ status }: StatusProps) {
             chipColor = StatusColors.Busy
             break
         }
-        case RobotStatus.Stuck: {
-            chipColor = StatusColors.Busy
+        case RobotStatus.Blocked: {
+            chipColor = StatusColors.Blocked
             break
         }
         default: {
