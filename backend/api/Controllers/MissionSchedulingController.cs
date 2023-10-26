@@ -2,6 +2,8 @@
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Services.ActionServices;
+using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers
@@ -17,6 +19,7 @@ namespace Api.Controllers
         private readonly IMapService _mapService;
         private readonly IMissionDefinitionService _missionDefinitionService;
         private readonly IMissionRunService _missionRunService;
+        private readonly IMissionSchedulingService _missionSchedulingService;
         private readonly IRobotService _robotService;
         private readonly ISourceService _sourceService;
         private readonly IStidService _stidService;
@@ -31,7 +34,8 @@ namespace Api.Controllers
             ILogger<MissionSchedulingController> logger,
             IMapService mapService,
             IStidService stidService,
-            ISourceService sourceService
+            ISourceService sourceService,
+            IMissionSchedulingService missionSchedulingService
         )
         {
             _missionDefinitionService = missionDefinitionService;
@@ -43,6 +47,8 @@ namespace Api.Controllers
             _mapService = mapService;
             _stidService = stidService;
             _sourceService = sourceService;
+            _missionDefinitionService = missionDefinitionService;
+            _missionSchedulingService = missionSchedulingService;
             _logger = logger;
         }
 
@@ -269,97 +275,24 @@ namespace Api.Controllers
         )
         {
             var robot = await _robotService.ReadById(customMissionQuery.RobotId);
-            if (robot is null)
-            {
-                return NotFound($"Could not find robot with id {customMissionQuery.RobotId}");
-            }
+            if (robot is null) { return NotFound($"Could not find robot with id {customMissionQuery.RobotId}"); }
 
             var installationResults = await _echoService.GetEchoPlantInfos();
-            if (installationResults == null)
-            {
-                return NotFound("Unable to retrieve plant information from Echo");
-            }
+            if (installationResults == null) { return NotFound("Unable to retrieve plant information from Echo"); }
 
-            var installationResult = installationResults.FirstOrDefault(installation => installation.PlantCode.ToUpperInvariant() == customMissionQuery.InstallationCode.ToUpperInvariant());
-            if (installationResult == null)
-            {
-                return NotFound($"Could not find installation with id {customMissionQuery.InstallationCode}");
-            }
+            var installationResult =
+                installationResults.FirstOrDefault(installation => installation.PlantCode.ToUpperInvariant() == customMissionQuery.InstallationCode.ToUpperInvariant());
+            if (installationResult == null) { return NotFound($"Could not find installation with id {customMissionQuery.InstallationCode}"); }
 
             var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 
-            Area? area = null;
-            if (customMissionQuery.AreaName != null)
-            {
-                area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName);
-            }
+            MissionDefinition? customMissionDefinition;
+            try { customMissionDefinition = await _missionSchedulingService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
+            catch (SourceException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
 
-            var source = await _sourceService.CheckForExistingCustomSource(missionTasks);
-            MissionDefinition? existingMissionDefinition = null;
-            if (source == null)
-            {
-                try
-                {
-                    string sourceURL = await _customMissionService.UploadSource(missionTasks);
-                    source = new Source
-                    {
-                        SourceId = sourceURL,
-                        Type = MissionSourceType.Custom
-                    };
-                }
-                catch (Exception)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError, "Unable to upload source tasks");
-                }
-
-            }
-            else
-            {
-                var missionDefinitions = await _missionDefinitionService.ReadBySourceId(source.SourceId);
-                if (missionDefinitions.Count > 0)
-                {
-                    existingMissionDefinition = missionDefinitions.First();
-                }
-            }
-
-            var customMissionDefinition = existingMissionDefinition ?? new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Source = source,
-                Name = customMissionQuery.Name,
-                InspectionFrequency = customMissionQuery.InspectionFrequency,
-                InstallationCode = customMissionQuery.InstallationCode,
-                Area = area
-            };
-
-            var scheduledMission = new MissionRun
-            {
-                Name = customMissionQuery.Name,
-                Description = customMissionQuery.Description,
-                MissionId = customMissionDefinition.Id,
-                Comment = customMissionQuery.Comment,
-                Robot = robot,
-                Status = MissionStatus.Pending,
-                DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTimeOffset.UtcNow,
-                Tasks = missionTasks,
-                InstallationCode = customMissionQuery.InstallationCode,
-                Area = area,
-                Map = new MapMetadata()
-            };
-
-            await _mapService.AssignMapToMission(scheduledMission);
-
-            if (scheduledMission.Tasks.Any())
-            {
-                scheduledMission.CalculateEstimatedDuration();
-            }
-
-            if (existingMissionDefinition == null)
-            {
-                await _missionDefinitionService.Create(customMissionDefinition);
-            }
-
-            var newMissionRun = await _missionRunService.Create(scheduledMission);
+            MissionRun? newMissionRun;
+            try { newMissionRun = await _missionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
+            catch (Exception e) when (e is RobotNotFoundException or MissionNotFoundException) { return NotFound(e.Message); }
 
             return CreatedAtAction(nameof(Create), new
             {

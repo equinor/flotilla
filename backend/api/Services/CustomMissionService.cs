@@ -4,21 +4,22 @@ using System.Text.Json;
 using Api.Database.Models;
 using Api.Options;
 using Microsoft.Extensions.Options;
-
 namespace Api.Services
 {
 
     public interface ICustomMissionService
     {
         Task<string> UploadSource(List<MissionTask> tasks);
+
         Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
+
         string CalculateHashFromTasks(IList<MissionTask> tasks);
     }
 
     public class CustomMissionService : ICustomMissionService
     {
-        private readonly IOptions<StorageOptions> _storageOptions;
         private readonly IBlobService _blobService;
+        private readonly IOptions<StorageOptions> _storageOptions;
 
         public CustomMissionService(IOptions<StorageOptions> storageOptions, IBlobService blobService)
         {

@@ -7,18 +7,23 @@
 
     public class MissionException : Exception
     {
-        public int IsarStatusCode { get; set; }
         public MissionException(string message) : base(message) { }
 
         public MissionException(string message, int isarStatusCode) : base(message)
         {
             IsarStatusCode = isarStatusCode;
         }
+        public int IsarStatusCode { get; set; }
     }
 
     public class MissionSourceTypeException : Exception
     {
         public MissionSourceTypeException(string message) : base(message) { }
+    }
+
+    public class SourceException : Exception
+    {
+        public SourceException(string message) : base(message) { }
     }
 
     public class InstallationNotFoundException : Exception
@@ -49,6 +54,11 @@
     public class RobotPositionNotFoundException : Exception
     {
         public RobotPositionNotFoundException(string message) : base(message) { }
+    }
+
+    public class RobotNotFoundException : Exception
+    {
+        public RobotNotFoundException(string message) : base(message) { }
     }
 
     public class RobotInformationNotAvailableException : Exception
