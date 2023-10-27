@@ -5,6 +5,7 @@ using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
+using Api.Services.ActionServices;
 using Api.Services.Events;
 using Api.Services.Models;
 using Api.Utilities;
@@ -17,18 +18,12 @@ namespace Api.EventHandlers
     /// </summary>
     public class MqttEventHandler : EventHandlerBase
     {
-        private readonly IConfiguration _configuration;
         private readonly ILogger<MqttEventHandler> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        public MqttEventHandler(
-            ILogger<MqttEventHandler> logger,
-            IServiceScopeFactory scopeFactory,
-            IConfiguration config
-        )
+        public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory scopeFactory)
         {
             _logger = logger;
-            _configuration = config;
             // Reason for using factory: https://www.thecodebuzz.com/using-dbcontext-instance-in-ihostedservice/
             _scopeFactory = scopeFactory;
 
@@ -195,7 +190,7 @@ namespace Api.EventHandlers
             var provider = GetServiceProvider();
             var missionRunService = provider.GetRequiredService<IMissionRunService>();
             var robotService = provider.GetRequiredService<IRobotService>();
-            var robotModelService = provider.GetRequiredService<IRobotModelService>();
+            var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
             var missionDefinitionService = provider.GetRequiredService<IMissionDefinitionService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
@@ -234,33 +229,15 @@ namespace Api.EventHandlers
 
             if (!flotillaMissionRun.IsCompleted) { return; }
 
-            int timeRangeInDays = _configuration.GetValue<int>("TimeRangeForMissionDurationEstimationInDays");
-            long minEpochTime = DateTimeOffset.Now
-                .AddDays(-timeRangeInDays)
-                .ToUnixTimeSeconds();
-            var missionRunsForEstimation = await missionRunService.ReadAll(
-                new MissionRunQueryStringParameters
-                {
-                    MinDesiredStartTime = minEpochTime, RobotModelType = robot.Model.Type, PageSize = QueryStringParameters.MaxPageSize
-                }
-            );
+            await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
 
-            var model = robot.Model;
-            model.UpdateAverageDurationPerTag(missionRunsForEstimation);
+            if (flotillaMissionRun.MissionId == null) { return; }
 
-            await robotModelService.Update(model);
+            var missionDefinition = await missionDefinitionService.ReadById(flotillaMissionRun.MissionId);
+            if (missionDefinition == null) { return; }
 
-            if (flotillaMissionRun.MissionId != null)
-            {
-                var missionDefinition = await missionDefinitionService.ReadById(flotillaMissionRun.MissionId);
-                if (missionDefinition != null)
-                {
-                    missionDefinition.LastRun = flotillaMissionRun;
-                    await missionDefinitionService.Update(missionDefinition);
-                }
-            }
-
-            _logger.LogInformation("Robot model '{ModelType}' - Updated average time spent per tag to {AverageTimeSpent}s", model.Type, model.AverageDurationPerTag);
+            missionDefinition.LastRun = flotillaMissionRun;
+            await missionDefinitionService.Update(missionDefinition);
         }
 
         private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
