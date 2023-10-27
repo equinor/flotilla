@@ -272,6 +272,35 @@ namespace Api.Controllers
         }
 
         /// <summary>
+        /// Lookup area by specified id.
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = Role.Any)]
+        [Route("deck/{deckId}")]
+        [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IList<AreaResponse>>> GetAreaByDeckId([FromRoute] string deckId)
+        {
+            try
+            {
+                var areas = await _areaService.ReadByDeckId(deckId);
+                if (!areas.Any())
+                    return NotFound($"Could not find area for deck with id {deckId}");
+
+                var response = areas.Select(area => new AreaResponse(area!));
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error during GET of areas from database");
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Lookup all the mission definitions related to an area
         /// </summary>
         [HttpGet]

@@ -38,9 +38,8 @@ const StyledDeckCards = styled.div`
 `
 
 const StyledDeckText = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    display: grid;
+    grid-template-rows: 25px 35px;
     align-self: stretch;
 `
 const StyledTopDeckText = styled.div`
@@ -71,7 +70,7 @@ const DeckCard = styled.div`
 const StyledCircle = styled.div`
     width: 13px;
     height: 13px;
-    border-radius: 100px;
+    border-radius: 50px;
 `
 
 const StyledMissionComponents = styled.div`
@@ -124,6 +123,12 @@ export interface DeckMissionCount {
     }
 }
 
+export interface DeckAreas {
+    [deckId: string]: {
+        areaString: string
+    }
+}
+
 export interface ScheduledMissionType {
     [missionId: string]: boolean
 }
@@ -168,6 +173,7 @@ export function InspectionSection({
     const { installationCode } = useInstallationContext()
     const [deckMissions, setDeckMissions] = useState<DeckMissionType>({})
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
+    const [areas, setAreas] = useState<DeckAreas>({})
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [unscheduledMissions, setUnscheduledMissions] = useState<CondensedMissionDefinition[]>([])
@@ -187,7 +193,7 @@ export function InspectionSection({
     useEffect(() => {
         if (selectedMissions) {
             let unscheduledMissions: CondensedMissionDefinition[] = []
-            selectedMissions!.forEach((mission) => {
+            selectedMissions.forEach((mission) => {
                 if (Object.keys(scheduledMissions).includes(mission.id) && scheduledMissions[mission.id])
                     setIsAlreadyScheduled(true)
                 else unscheduledMissions = unscheduledMissions.concat([mission])
@@ -253,6 +259,37 @@ export function InspectionSection({
         return getDeadlineInspection(nextInspection.deadline)
     }
 
+    useEffect(() => {
+        const newAreas: DeckAreas = {}
+
+        Object.keys(deckMissions).map((deckId) => {
+            let string: string = ''
+            let areaNames: String[] = []
+            BackendAPICaller.getAreadByDeckID(deckMissions[deckId].deck.id).then((areas) => {
+                areaNames = []
+                string = ''
+                if (areas != null) {
+                    areas.forEach((area) => {
+                        if (!areaNames.includes(area.areaName))
+                            areaNames = areaNames.concat(area.areaName.toLocaleUpperCase())
+                    })
+                    areaNames = areaNames.sort()
+                    console.log(areaNames)
+                    areaNames.forEach((areaName) => {
+                        console.log(areaName)
+                        if (areaNames[areaNames.length - 1] == areaName) string = string + ' ' + areaName
+                        else string = string + ' ' + areaName + ' |'
+                    })
+
+                    newAreas[deckMissions[deckId].deck.id] = {
+                        areaString: string,
+                    }
+                    setAreas(newAreas)
+                }
+            })
+        })
+    }, [deckMissions])
+
     return (
         <>
             <StyledDeckOverview>
@@ -291,6 +328,9 @@ export function InspectionSection({
                                                     </StyledContent>
                                                 ))}
                                         </StyledTopDeckText>
+                                        {Object.keys(areas).includes(deckId) && (
+                                            <Typography variant={'body_short'}>{areas[deckId].areaString}</Typography>
+                                        )}
                                         {deckMissions[deckId].inspections && (
                                             <CardMissionInformation deckId={deckId} deckMissions={deckMissions} />
                                         )}
@@ -305,14 +345,10 @@ export function InspectionSection({
                                             }
                                         >
                                             <Button
-                                                disabled={deckMissions[deckId].inspections.length > 0 ? false : true}
+                                                disabled={deckMissions[deckId].inspections.length === 0}
                                                 variant="outlined"
                                                 onClick={() => handleScheduleAll(deckMissions[deckId].inspections)}
-                                                style={
-                                                    deckMissions[deckId].inspections.length > 0
-                                                        ? { borderColor: '#3D3D3D' }
-                                                        : {}
-                                                }
+                                                color="secondary"
                                             >
                                                 <Icon
                                                     name={Icons.LibraryAdd}

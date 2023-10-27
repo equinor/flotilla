@@ -12,6 +12,8 @@ namespace Api.Services
 
         public abstract Task<Area?> ReadById(string id);
 
+        public abstract Task<IEnumerable<Area?>> ReadByDeckId(string deckId);
+
         public abstract Task<IEnumerable<Area>> ReadByInstallation(string installationCode);
 
         public abstract Task<Area?> ReadByInstallationAndName(string installationCode, string areaName);
@@ -71,6 +73,17 @@ namespace Api.Services
         {
             return await GetAreas()
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
+        }
+
+        public async Task<IEnumerable<Area?>> ReadByDeckId(string deckId)
+        {
+            if (deckId == null)
+                return new List<Area>();
+
+            return await _context.Areas.Where(a =>
+                a.Deck != null && a.Deck.Id.Equals(deckId)
+            ).Include(a => a.SafePositions).Include(a => a.Installation)
+                .Include(a => a.Plant).Include(a => a.Deck).ToListAsync();
         }
 
         public async Task<Area?> ReadByInstallationAndName(Installation? installation, string areaName)

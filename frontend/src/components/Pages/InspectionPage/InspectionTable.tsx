@@ -37,7 +37,7 @@ const StyledContent = styled.div`
 const StyledCircle = styled.div`
     width: 13px;
     height: 13px;
-    border-radius: 100px;
+    border-radius: 50px;
 `
 
 interface IProps {
@@ -205,7 +205,7 @@ const InspectionRow = ({
                         }}
                     >
                         <StyledIcon
-                            color={`${tokens.colors.interactive.focus.hex}`}
+                            color={`${tokens.colors.interactive.focus.rgba}`}
                             name={Icons.AddOutlined}
                             size={24}
                             title={TranslateTextWithContext('Add to queue')}
