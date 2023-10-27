@@ -156,7 +156,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                         props.closeDialog()
                                     }}
                                     variant="outlined"
-                                    color="primary"
                                 >
                                     {' '}
                                     {TranslateText('Cancel')}{' '}
@@ -211,7 +210,6 @@ export const AlreadyScheduledMissionDialog = (props: IScheduledProps): JSX.Eleme
                                 props.closeDialog()
                             }}
                             variant="outlined"
-                            color="primary"
                         >
                             {' '}
                             {TranslateText('Cancel')}{' '}
