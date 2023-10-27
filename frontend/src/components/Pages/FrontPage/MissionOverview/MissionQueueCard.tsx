@@ -77,7 +77,7 @@ export function MissionQueueCard({ order, mission, onDeleteMission }: MissionQue
     let numberOfTasks = 0
     mission.tasks.forEach((task) => (numberOfTasks += task.inspections.length))
     return (
-        <StyledMissionCard key={mission.id} variant="default" style={{ boxShadow: tokens.elevation.raised }}>
+        <StyledMissionCard key={mission.id} style={{ boxShadow: tokens.elevation.raised }}>
             <HorizontalContent>
                 <HorizontalNonButtonContent onClick={routeChange}>
                     <CircularCard style={{ background: fillColor }}>

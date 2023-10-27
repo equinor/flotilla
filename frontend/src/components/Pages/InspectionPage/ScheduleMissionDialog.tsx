@@ -111,7 +111,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     props.closeDialog()
                                 }}
                                 variant="outlined"
-                                color="primary"
                             >
                                 {' '}
                                 {TranslateText('Cancel')}{' '}
