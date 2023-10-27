@@ -74,7 +74,7 @@ namespace Api.EventHandlers
 
             if (!_isarConnectionTimers.ContainsKey(robot.IsarId)) { AddTimerForRobot(isarRobotHeartbeat, robot); }
 
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "Reset connection timer for ISAR '{IsarId}' ('{RobotName}')",
                 robot.IsarId,
                 robot.Name
