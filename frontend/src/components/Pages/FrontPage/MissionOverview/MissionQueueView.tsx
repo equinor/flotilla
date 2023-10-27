@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { MissionQueueCard } from './MissionQueueCard'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useEffect, useState } from 'react'
-import { Mission, dummyMission } from 'models/Mission'
+import { Mission, placeholderMission } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
 import { Robot } from 'models/Robot'
@@ -138,9 +138,9 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
 
     const loadingQueueDisplay = (
         <MissionQueueCard
-            key={'test'}
+            key={'placeholder'}
             order={missionQueue.length + 1}
-            mission={dummyMission}
+            mission={placeholderMission}
             onDeleteMission={() => {}}
         />
     )
