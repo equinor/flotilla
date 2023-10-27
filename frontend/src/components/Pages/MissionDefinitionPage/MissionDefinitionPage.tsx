@@ -223,11 +223,11 @@ function MissionDefinitionEditButtons({ missionDefinition, updateMissionDefiniti
                                 </div>
                             </StyledFormSection>
                             <StyledButtonSection>
-                                <Button onClick={handleSubmit} variant="outlined" color="primary">
+                                <Button onClick={handleSubmit} variant="outlined">
                                     {' '}
                                     {TranslateText('Update mission definition')}{' '}
                                 </Button>
-                                <Button onClick={() => setIsEditDialogOpen(false)} variant="outlined" color="primary">
+                                <Button onClick={() => setIsEditDialogOpen(false)} variant="outlined">
                                     {' '}
                                     {TranslateText('Cancel')}{' '}
                                 </Button>

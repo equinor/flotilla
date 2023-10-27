@@ -74,7 +74,7 @@ export const AssetSelectionPage = () => {
                     <Typography variant="body_long_bold" color="primary">
                         Authentication
                     </Typography>
-                    <CircularProgress size={48} color="primary" />
+                    <CircularProgress size={48} />
                 </Centered>
             )}
         </>

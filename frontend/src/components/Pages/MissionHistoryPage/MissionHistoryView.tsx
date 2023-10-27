@@ -59,19 +59,17 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
 
     const FilterErrorDialog = () => {
         return (
-            <>
-                <Dialog open={filterError !== ''} isDismissable onClose={() => clearFilterError()}>
-                    <Dialog.Header>
-                        <Dialog.Title>{TranslateText('Filter error')}</Dialog.Title>
-                    </Dialog.Header>
-                    <Dialog.CustomContent>
-                        <Typography variant="body_short">{filterError}</Typography>
-                    </Dialog.CustomContent>
-                    <Dialog.Actions>
-                        <Button onClick={() => clearFilterError()}>{TranslateText('Close')}</Button>
-                    </Dialog.Actions>
-                </Dialog>
-            </>
+            <Dialog open={filterError !== ''} isDismissable onClose={() => clearFilterError()}>
+                <Dialog.Header>
+                    <Dialog.Title>{TranslateText('Filter error')}</Dialog.Title>
+                </Dialog.Header>
+                <Dialog.CustomContent>
+                    <Typography variant="body_short">{filterError}</Typography>
+                </Dialog.CustomContent>
+                <Dialog.Actions>
+                    <Button onClick={() => clearFilterError()}>{TranslateText('Close')}</Button>
+                </Dialog.Actions>
+            </Dialog>
         )
     }
 

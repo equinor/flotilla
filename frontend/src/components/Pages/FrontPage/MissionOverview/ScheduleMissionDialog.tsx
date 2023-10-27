@@ -147,7 +147,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     setIsScheduleMissionsPressed(false)
                                 }}
                                 variant="outlined"
-                                color="primary"
                             >
                                 {' '}
                                 {TranslateText('Cancel')}{' '}
@@ -170,7 +169,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     setIsEmptyEchoMissionsDialogOpen(false)
                                 }}
                                 variant="outlined"
-                                color="primary"
                             >
                                 {' '}
                                 {TranslateText('Cancel')}{' '}
@@ -212,7 +210,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     setIsScheduleMissionDialogOpen(false)
                                 }}
                                 variant="outlined"
-                                color="primary"
                             >
                                 {' '}
                                 {TranslateText('Cancel')}{' '}
