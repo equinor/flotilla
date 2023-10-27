@@ -25,7 +25,8 @@ namespace Api.Test.EventHandlers
     {
         private static readonly Installation testInstallation = new()
         {
-            InstallationCode = "test", Name = "test test"
+            InstallationCode = "test",
+            Name = "test test"
         };
         private static readonly Plant testPlant = new()
         {
@@ -326,7 +327,8 @@ namespace Api.Test.EventHandlers
                         new IsarMission(
                             new IsarStartMissionResponse
                             {
-                                MissionId = "test", Tasks = new List<IsarTaskResponse>()
+                                MissionId = "test",
+                                Tasks = new List<IsarTaskResponse>()
                             }
                         )
                 );

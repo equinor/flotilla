@@ -145,7 +145,9 @@ namespace Api.EventHandlers
                     stream =>
                         new VideoStream
                         {
-                            Name = stream.Name, Url = stream.Url, Type = stream.Type
+                            Name = stream.Name,
+                            Url = stream.Url,
+                            Type = stream.Type
                         }
                 )
                 .ToList();
@@ -310,7 +312,10 @@ namespace Api.EventHandlers
                 await timeseriesService.Create(
                     new RobotBatteryTimeseries
                     {
-                        MissionId = robot.CurrentMissionId, BatteryLevel = batteryStatus.BatteryLevel, RobotId = robot.Id, Time = DateTimeOffset.UtcNow
+                        MissionId = robot.CurrentMissionId,
+                        BatteryLevel = batteryStatus.BatteryLevel,
+                        RobotId = robot.Id,
+                        Time = DateTimeOffset.UtcNow
                     }
                 );
                 _logger.LogDebug("Updated battery on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
@@ -338,7 +343,10 @@ namespace Api.EventHandlers
                 await timeseriesService.Create(
                     new RobotPressureTimeseries
                     {
-                        MissionId = robot.CurrentMissionId, Pressure = pressureStatus.PressureLevel, RobotId = robot.Id, Time = DateTimeOffset.UtcNow
+                        MissionId = robot.CurrentMissionId,
+                        Pressure = pressureStatus.PressureLevel,
+                        RobotId = robot.Id,
+                        Time = DateTimeOffset.UtcNow
                     }
                 );
                 _logger.LogDebug("Updated pressure on '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
@@ -372,7 +380,9 @@ namespace Api.EventHandlers
                 await timeseriesService.Create(
                     new RobotPoseTimeseries(robot.Pose)
                     {
-                        MissionId = robot.CurrentMissionId, RobotId = robot.Id, Time = DateTimeOffset.UtcNow
+                        MissionId = robot.CurrentMissionId,
+                        RobotId = robot.Id,
+                        Time = DateTimeOffset.UtcNow
                     }
                 );
                 _logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
