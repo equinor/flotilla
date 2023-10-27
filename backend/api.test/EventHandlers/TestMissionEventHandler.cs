@@ -25,8 +25,7 @@ namespace Api.Test.EventHandlers
     {
         private static readonly Installation testInstallation = new()
         {
-            InstallationCode = "test",
-            Name = "test test"
+            InstallationCode = "test", Name = "test test"
         };
         private static readonly Plant testPlant = new()
         {
@@ -90,7 +89,7 @@ namespace Api.Test.EventHandlers
 
             // Instantiating the event handlers are required for the event subscribers to be activated
             _missionEventHandler = new MissionEventHandler(missionEventHandlerLogger, mockFactory.Object);
-            _mqttEventHandler = new MqttEventHandler(mqttEventHandlerLogger, mockFactory.Object, configuration);
+            _mqttEventHandler = new MqttEventHandler(mqttEventHandlerLogger, mockFactory.Object);
         }
 
         private static Area NewArea => new()
@@ -327,8 +326,7 @@ namespace Api.Test.EventHandlers
                         new IsarMission(
                             new IsarStartMissionResponse
                             {
-                                MissionId = "test",
-                                Tasks = new List<IsarTaskResponse>()
+                                MissionId = "test", Tasks = new List<IsarTaskResponse>()
                             }
                         )
                 );
