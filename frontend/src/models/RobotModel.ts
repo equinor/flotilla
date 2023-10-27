@@ -16,8 +16,8 @@ export interface RobotModel {
     upperPressureWarningThreshold: number
     lowerPressureWarningThreshold: number
 }
-export const dummyRobotModel: RobotModel = {
-    id: 'dummyModelId',
+export const placeholderRobotModel: RobotModel = {
+    id: 'placeholderModelId',
     type: RobotType.Robot,
     upperPressureWarningThreshold: 100,
     lowerPressureWarningThreshold: 10,

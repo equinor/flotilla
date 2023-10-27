@@ -1,7 +1,7 @@
 import { Button, Card, Dialog, Icon, Typography, DotProgress } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
-import { Mission, dummyMission } from 'models/Mission'
+import { Mission, placeholderMission } from 'models/Mission'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -74,7 +74,7 @@ export function MissionQueueCard({ order, mission, onDeleteMission }: MissionQue
                         <Typography variant="body_short_bold">{order}</Typography>
                     </CircularCard>
 
-                    {mission === dummyMission ? (
+                    {mission === placeholderMission ? (
                         <PaddingLeft>
                             <DotProgress size={48} color="primary" />
                         </PaddingLeft>
