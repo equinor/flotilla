@@ -94,7 +94,11 @@ namespace Api.EventHandlers
             timer.Start();
 
             if (_isarConnectionTimers.TryAdd(robot.IsarId, timer)) { _logger.LogInformation("Added new timer for ISAR '{IsarId}' ('{RobotName}')", robot.IsarId, robot.Name); }
-            else { _logger.LogWarning("Failed to add new timer for ISAR '{IsarId}' ('{RobotName})'", robot.IsarId, robot.Name); }
+            else
+            {
+                _logger.LogWarning("Failed to add new timer for ISAR '{IsarId}' ('{RobotName})'", robot.IsarId, robot.Name);
+                timer.Close();
+            }
         }
 
         private async void OnTimeoutEvent(IsarRobotHeartbeatMessage robotHeartbeatMessage)
