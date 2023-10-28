@@ -16,7 +16,7 @@ namespace Api.EventHandlers
     /// <summary>
     ///     A background service which listens to events and performs callback functions.
     /// </summary>
-    /// 
+    ///
     public interface IMqttEventHandler
     {
         public void TriggerRobotAvailable(RobotAvailableEventArgs e);
@@ -238,12 +238,13 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (flotillaMissionRun.IsCompleted) { robot.CurrentMissionId = null; }
+            if (!flotillaMissionRun.IsCompleted) { return; }
+
+            robot.CurrentMissionId = null;
 
             await robotService.Update(robot);
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, flotillaMissionRun.Id);
 
-            if (!flotillaMissionRun.IsCompleted) return;
             await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
 
             if (flotillaMissionRun.MissionId == null) return;
