@@ -227,7 +227,7 @@ namespace Api.EventHandlers
             if (flotillaMissionRun.IsCompleted) { robot.CurrentMissionId = null; }
 
             await robotService.Update(robot);
-            _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission {MissionId}", robot.IsarId, robot.Name, flotillaMissionRun.MissionId);
+            _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, flotillaMissionRun.Id);
 
             if (!flotillaMissionRun.IsCompleted) { return; }
 
@@ -308,6 +308,7 @@ namespace Api.EventHandlers
             else
             {
                 robot.BatteryLevel = batteryStatus.BatteryLevel;
+                _logger.LogInformation("Calling from OnBatteryUpdate with intended status {Status}", robot.Status);
                 await robotService.Update(robot);
                 await timeseriesService.Create(
                     new RobotBatteryTimeseries
