@@ -1,17 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿#nullable disable
+using System.ComponentModel.DataAnnotations;
 using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
-
-#nullable disable
+using IsarPose = Api.Mqtt.MessageModels.IsarPose;
 namespace Api.Database.Models
 {
     [Owned]
     public class Orientation
     {
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
-        public float W { get; set; }
 
         public Orientation()
         {
@@ -28,11 +24,14 @@ namespace Api.Database.Models
             Z = z;
             W = w;
         }
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+        public float W { get; set; }
 
         public override bool Equals(object obj)
         {
-            if (obj is not Orientation)
-                return false;
+            if (obj is not Orientation) { return false; }
             const float Tolerance = 1e-6F;
             var orientation = (Orientation)obj;
             if (MathF.Abs(orientation.X - X) > Tolerance)
@@ -63,9 +62,6 @@ namespace Api.Database.Models
     [Owned]
     public class Position
     {
-        public float X { get; set; }
-        public float Y { get; set; }
-        public float Z { get; set; }
 
         public Position()
         {
@@ -80,45 +76,25 @@ namespace Api.Database.Models
             Y = y;
             Z = z;
         }
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
     }
 
     [Owned]
     public class Pose
     {
-        [Required]
-        public Position Position { get; set; }
-
-        [Required]
-        public Orientation Orientation { get; set; }
-
-        // Since this is a ground robot the only quaternion vector
-        // that makes sense is up (0, 0, 1)
-        // Echo representes North at 0deg and increases this value clockwise
-        // Our representation has East at 0deg with rotations anti-clockwise
-        public Orientation AxisAngleToQuaternion(float echoAngle)
-        {
-            float angle;
-            echoAngle %= 2F * MathF.PI;
-
-            if (echoAngle < 0) echoAngle += 2F * MathF.PI;
-
-            angle = (450 * MathF.PI / 180) - echoAngle;
-
-            var quaternion = new Orientation()
-            {
-                X = 0,
-                Y = 0,
-                Z = MathF.Sin(angle / 2),
-                W = MathF.Cos(angle / 2)
-            };
-
-            return quaternion;
-        }
 
         public Pose()
         {
             Position = new Position();
             Orientation = new Orientation();
+        }
+
+        public Pose(IsarPose isarPose)
+        {
+            Position = new Position(isarPose.Position.X, isarPose.Position.Y, isarPose.Position.Z);
+            Orientation = new Orientation(isarPose.Orientation.X, isarPose.Orientation.Y, isarPose.Orientation.Z, isarPose.Orientation.W);
         }
 
         public Pose(
@@ -145,6 +121,35 @@ namespace Api.Database.Models
         {
             Position = position;
             Orientation = orientation;
+        }
+        [Required]
+        public Position Position { get; set; }
+
+        [Required]
+        public Orientation Orientation { get; set; }
+
+        // Since this is a ground robot the only quaternion vector
+        // that makes sense is up (0, 0, 1)
+        // Echo representes North at 0deg and increases this value clockwise
+        // Our representation has East at 0deg with rotations anti-clockwise
+        public Orientation AxisAngleToQuaternion(float echoAngle)
+        {
+            float angle;
+            echoAngle %= 2F * MathF.PI;
+
+            if (echoAngle < 0) { echoAngle += 2F * MathF.PI; }
+
+            angle = 450 * MathF.PI / (180 - echoAngle);
+
+            var quaternion = new Orientation
+            {
+                X = 0,
+                Y = 0,
+                Z = MathF.Sin(angle / 2),
+                W = MathF.Cos(angle / 2)
+            };
+
+            return quaternion;
         }
     }
 }

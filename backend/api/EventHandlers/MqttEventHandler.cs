@@ -370,37 +370,12 @@ namespace Api.EventHandlers
         private async void OnPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var robotService = provider.GetRequiredService<IRobotService>();
-            var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
+            var poseTimeseriesService = provider.GetRequiredService<IPoseTimeseriesService>();
 
             var poseStatus = (IsarPoseMessage)mqttArgs.Message;
+            var pose = new Pose(poseStatus.Pose);
 
-            var robot = await robotService.ReadByIsarId(poseStatus.IsarId);
-            if (robot == null)
-            {
-                _logger.LogWarning(
-                    "Could not find corresponding robot for pose update on robot '{RobotName}' with ISAR id '{IsarId}'", poseStatus.RobotName, poseStatus.IsarId);
-            }
-            else
-            {
-                try { poseStatus.Pose.CopyIsarPoseToRobotPose(robot.Pose); }
-                catch (NullReferenceException e)
-                {
-                    _logger.LogWarning(
-                        "NullReferenceException while updating pose on robot '{RobotName}' with ISAR id '{IsarId}': {Message}", robot.Name, robot.IsarId, e.Message);
-                }
-
-                await robotService.Update(robot);
-                await timeseriesService.Create(
-                    new RobotPoseTimeseries(robot.Pose)
-                    {
-                        MissionId = robot.CurrentMissionId,
-                        RobotId = robot.Id,
-                        Time = DateTimeOffset.UtcNow
-                    }
-                );
-                _logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
-            }
+            await poseTimeseriesService.AddPoseEntry(pose, poseStatus.IsarId);
         }
     }
 }
