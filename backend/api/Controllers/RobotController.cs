@@ -422,16 +422,6 @@ namespace Api.Controllers
 
             await _missionRunService.Update(missionRun);
 
-            if (robot.CurrentMissionId != null)
-            {
-                var orphanedMissionRun = await _missionRunService.ReadById(robot.CurrentMissionId);
-                if (orphanedMissionRun != null)
-                {
-                    orphanedMissionRun.SetToFailed();
-                    await _missionRunService.Update(orphanedMissionRun);
-                }
-            }
-
             robot.Status = RobotStatus.Busy;
             robot.CurrentMissionId = missionRun.Id;
             await _robotService.Update(robot);
