@@ -21,12 +21,12 @@ export const MapCompass = (): JSX.Element => {
                 </Typography>
                 <Icon
                     name={Icons.Navigation}
-                    style={{ color: tokens.colors.infographic.primary__energy_red_100.rgba }}
+                    style={{ color: tokens.colors.infographic.primary__energy_red_100.hex }}
                     size={32}
                 />
                 <Icon
                     name={Icons.Navigation}
-                    style={{ color: tokens.colors.text.static_icons__default.rgba }}
+                    style={{ color: tokens.colors.text.static_icons__default.hex }}
                     size={32}
                     rotation={180}
                 />

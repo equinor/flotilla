@@ -60,7 +60,7 @@ const BatteryStatusView = ({
     return (
         <BatteryAlignment>
             <Icon name={battery_icon} color={icon_color} size={itemSize} />
-            <StyledTopography $fontSize={itemSize} style={{ color: tokens.colors.text.static_icons__tertiary.rgba }}>
+            <StyledTopography $fontSize={itemSize} style={{ color: tokens.colors.text.static_icons__tertiary.hex }}>
                 {battery_value}
             </StyledTopography>
         </BatteryAlignment>

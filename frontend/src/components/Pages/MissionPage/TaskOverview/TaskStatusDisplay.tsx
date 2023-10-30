@@ -18,22 +18,22 @@ const StyledStatusDisplay = styled.div`
 function displayIcon(status: TaskStatus) {
     switch (status) {
         case TaskStatus.NotStarted: {
-            return <Icon name={Icons.Pending} style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
+            return <Icon name={Icons.Pending} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
         }
         case TaskStatus.InProgress: {
-            return <Icon name={Icons.Ongoing} style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
+            return <Icon name={Icons.Ongoing} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
         }
         case TaskStatus.PartiallySuccessful: {
-            return <Icon name={Icons.Warning} style={{ color: tokens.colors.interactive.warning__resting.rgba }} />
+            return <Icon name={Icons.Warning} style={{ color: tokens.colors.interactive.warning__resting.hex }} />
         }
         case TaskStatus.Paused: {
-            return <Icon name={Icons.Pause} style={{ color: tokens.colors.text.static_icons__secondary.rgba }} />
+            return <Icon name={Icons.Pause} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
         }
         case TaskStatus.Successful: {
-            return <Icon name={Icons.Successful} style={{ color: tokens.colors.interactive.success__resting.rgba }} />
+            return <Icon name={Icons.Successful} style={{ color: tokens.colors.interactive.success__resting.hex }} />
         }
     }
-    return <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
+    return <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
 }
 
 export function TaskStatusDisplay({ status }: StatusProps) {

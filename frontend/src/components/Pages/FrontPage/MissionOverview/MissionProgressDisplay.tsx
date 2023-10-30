@@ -29,7 +29,7 @@ export function MissionProgressDisplay({ mission }: MissionProps) {
 
     return (
         <StyledTagCount>
-            <Typography style={{ color: tokens.colors.text.static_icons__tertiary.rgba }}>
+            <Typography style={{ color: tokens.colors.text.static_icons__tertiary.hex }}>
                 {TranslateText('Task')} {completedTasks}/{tasks.length}
             </Typography>
         </StyledTagCount>
