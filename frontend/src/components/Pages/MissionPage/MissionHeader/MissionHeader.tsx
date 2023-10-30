@@ -57,7 +57,7 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
             <Typography
                 variant="body_long_italic"
                 group="paragraph"
-                color={tokens.colors.text.static_icons__secondary.rgba}
+                color={tokens.colors.text.static_icons__secondary.hex}
             >
                 {mission.description && `${translatedDescription}: ${mission.description}`}
             </Typography>
@@ -82,7 +82,7 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
 
 function HeaderText(text: string) {
     return (
-        <Typography variant="body_short" group="paragraph" color={tokens.colors.text.static_icons__secondary.rgba}>
+        <Typography variant="body_short" group="paragraph" color={tokens.colors.text.static_icons__secondary.hex}>
             {text}
         </Typography>
     )

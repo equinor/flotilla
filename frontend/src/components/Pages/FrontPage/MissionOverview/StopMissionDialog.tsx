@@ -56,7 +56,7 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
             <Button variant="ghost_icon" onClick={openDialog}>
                 <Icon
                     name={Icons.StopButton}
-                    style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                    style={{ color: tokens.colors.interactive.secondary__resting.hex }}
                     size={40}
                 />
             </Button>

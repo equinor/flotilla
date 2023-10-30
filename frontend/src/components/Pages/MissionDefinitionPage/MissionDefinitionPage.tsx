@@ -60,14 +60,14 @@ function KeyValuePairDisplay({ left, right }: { left: string; right: any }) {
             <Typography
                 variant="body_long_bold"
                 group="paragraph"
-                color={tokens.colors.text.static_icons__secondary.rgba}
+                color={tokens.colors.text.static_icons__secondary.hex}
             >
                 {left}
             </Typography>
             <Typography
                 variant="body_long_italic"
                 group="paragraph"
-                color={tokens.colors.text.static_icons__secondary.rgba}
+                color={tokens.colors.text.static_icons__secondary.hex}
             >
                 {right}
             </Typography>

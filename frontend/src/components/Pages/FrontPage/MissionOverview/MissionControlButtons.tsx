@@ -45,7 +45,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
                         >
                             <Icon
                                 name={Icons.PauseButton}
-                                style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                                style={{ color: tokens.colors.interactive.secondary__resting.hex }}
                                 size={40}
                             />
                         </Button>
@@ -67,7 +67,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
                         >
                             <Icon
                                 name={Icons.PlayButton}
-                                style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                                style={{ color: tokens.colors.interactive.secondary__resting.hex }}
                                 size={40}
                             />
                         </Button>

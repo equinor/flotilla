@@ -63,7 +63,7 @@ export function MissionRestartButton({ mission }: MissionProps) {
                 >
                     <Icon
                         name={Icons.Replay}
-                        style={{ color: tokens.colors.interactive.primary__resting.rgba }}
+                        style={{ color: tokens.colors.interactive.primary__resting.hex }}
                         size={24}
                     />
                 </Button>
