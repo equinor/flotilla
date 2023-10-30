@@ -10,6 +10,7 @@ import ReactDOM from 'react-dom/client'
 const msalInstance = new PublicClientApplication(msalConfig)
 
 // Error handling for redirect login
+await msalInstance.initialize()
 msalInstance.handleRedirectPromise().catch((error) => {
     console.error(error)
 })
