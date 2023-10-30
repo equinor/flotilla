@@ -26,10 +26,9 @@ export async function fetchAccessToken(context: IMsalContext): Promise<string> {
             const accessToken: string = response.accessToken ?? ''
             return accessToken
         })
-        .catch((e) => {
+        .catch(async (e) => {
             console.error(e)
-            return context.instance.acquireTokenRedirect(loginRequest).then(() => {
-                return 'The page should be refreshed automatically.'
-            })
+            await context.instance.acquireTokenRedirect(loginRequest)
+            return 'The page should be refreshed automatically.'
         })
 }
