@@ -272,7 +272,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// Lookup area by specified id.
+        /// Lookup area by specified deck id.
         /// </summary>
         [HttpGet]
         [Authorize(Roles = Role.Any)]

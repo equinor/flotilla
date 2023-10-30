@@ -71,10 +71,10 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// List all mission definitions in the Flotilla database
+        /// List all consended mission definitions in the Flotilla database
         /// </summary>
         /// <remarks>
-        /// <para> This query gets all mission definitions </para>
+        /// <para> This query gets all consended mission definitions </para>
         /// </remarks>
         [HttpGet("condensed")]
         [Authorize(Roles = Role.Any)]

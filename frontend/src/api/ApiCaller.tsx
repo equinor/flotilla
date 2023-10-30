@@ -431,7 +431,7 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getAreadByDeckID(deckId: string): Promise<Area[]> {
+    static async getAreasByDeckId(deckId: string): Promise<Area[]> {
         const path: string = 'areas/deck/' + deckId
         const result = await this.GET<Area[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)

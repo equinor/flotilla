@@ -1,108 +1,13 @@
-import { Card, Typography, Button, Icon, Tooltip } from '@equinor/eds-core-react'
-import styled from 'styled-components'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Deck } from 'models/Deck'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { tokens } from '@equinor/eds-tokens'
 import { CondensedMissionDefinition } from 'models/MissionDefinition'
-import { ScheduleMissionDialog } from './ScheduleMissionDialog'
-import { getDeadlineInDays, getInspectionDeadline } from 'utils/StringFormatting'
+import { ScheduleMissionDialog } from './ScheduleMissionDialogs'
+import { getInspectionDeadline } from 'utils/StringFormatting'
 import { InspectionTable } from './InspectionTable'
-import { Icons } from 'utils/icons'
-
-const StyledCard = styled(Card)`
-    display: flex;
-    min-height: 150px;
-    padding: 16px;
-    flex-direction: column;
-    justify-content: space-between;
-    flex: 1 0 0;
-    cursor: pointer;
-    border-radius: 0px 4px 4px 0px;
-`
-
-const StyledCardComponent = styled.div`
-    display: flex;
-    padding-right: 16px;
-    justify-content: flex-end;
-    gap: 10px;
-    width: 100%;
-`
-
-const StyledDeckCards = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 450px);
-    gap: 24px;
-`
-
-const StyledDeckText = styled.div`
-    display: grid;
-    grid-template-rows: 25px 35px;
-    align-self: stretch;
-`
-const StyledTopDeckText = styled.div`
-    display: flex;
-    justify-content: space-between;
-    margin-right: 5px;
-`
-
-const Rectangle = styled.div`
-    display: flex-start;
-    width: 24px;
-    height: 100%;
-    border-radius: 6px 0px 0px 6px;
-`
-
-const DeckCard = styled.div`
-    display: flex;
-    min-width: 400px;
-    max-width: 450px;
-    flex: 1 0 0;
-    border-radius: 6px;
-    min-height: 180px;
-    box-shadow:
-        0px 3px 4px 0px rgba(0, 0, 0, 0.12),
-        0px 2px 4px 0px rgba(0, 0, 0, 0.14);
-`
-
-const StyledCircle = styled.div`
-    width: 13px;
-    height: 13px;
-    border-radius: 50px;
-`
-
-const StyledMissionComponents = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 4px;
-`
-
-const StyledDeckOverview = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-`
-
-const StyledMissionInspections = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-`
-
-const StyledPlaceholder = styled.div`
-    padding: 24px;
-    border: 1px solid #dcdcdc;
-    border-radius: 4px;
-`
-
-const StyledContent = styled.div`
-    display: flex;
-    align-items: centre;
-    gap: 5px;
-`
+import { StyledDict, compareInspections } from './InspectionUtilities'
+import { DeckCards } from './DeckCards'
 
 export interface Inspection {
     missionDefinition: CondensedMissionDefinition
@@ -140,40 +45,15 @@ interface IInspectionProps {
     ongoingMissions: ScheduledMissionType
 }
 
-const getDeadlineInspection = (deadline: Date) => {
-    const deadlineDays = getDeadlineInDays(deadline)
-    switch (true) {
-        case deadlineDays <= 1:
-            return 'red'
-        case deadlineDays > 1 && deadlineDays <= 7:
-            return 'red'
-        case deadlineDays > 7 && deadlineDays <= 14:
-            return 'orange'
-        case deadlineDays > 7 && deadlineDays <= 30:
-            return 'green'
-    }
-    return 'green'
-}
-
-export const compareInspections = (i1: Inspection, i2: Inspection) => {
-    if (!i1.missionDefinition.inspectionFrequency) return 1
-    if (!i2.missionDefinition.inspectionFrequency) return -1
-    if (!i1.missionDefinition.lastRun) return -1
-    if (!i2.missionDefinition.lastRun) return 1
-    else return i1.deadline!.getTime() - i2.deadline!.getTime()
-}
-
 export function InspectionSection({
     refreshInterval,
     updateScheduledMissionsMap,
     scheduledMissions,
     ongoingMissions,
 }: IInspectionProps) {
-    const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const [deckMissions, setDeckMissions] = useState<DeckMissionType>({})
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
-    const [areas, setAreas] = useState<DeckAreas>({})
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [unscheduledMissions, setUnscheduledMissions] = useState<CondensedMissionDefinition[]>([])
@@ -242,135 +122,17 @@ export function InspectionSection({
         return () => clearInterval(id)
     }, [deckMissions])
 
-    const getCardColor = (deckId: string) => {
-        const inspections = deckMissions[deckId].inspections
-        if (inspections.length === 0) return 'gray'
-        const sortedInspections = inspections.sort(compareInspections)
-
-        if (sortedInspections.length === 0) return 'green'
-
-        const nextInspection = sortedInspections[0]
-
-        if (!nextInspection.deadline) {
-            if (!nextInspection.missionDefinition.inspectionFrequency) return 'gray'
-            else return 'red'
-        }
-
-        return getDeadlineInspection(nextInspection.deadline)
-    }
-
-    useEffect(() => {
-        const newAreas: DeckAreas = {}
-
-        Object.keys(deckMissions).map((deckId) => {
-            let string: string = ''
-            let areaNames: String[] = []
-            BackendAPICaller.getAreadByDeckID(deckMissions[deckId].deck.id).then((areas) => {
-                areaNames = []
-                string = ''
-                if (areas != null) {
-                    areas.forEach((area) => {
-                        if (!areaNames.includes(area.areaName))
-                            areaNames = areaNames.concat(area.areaName.toLocaleUpperCase())
-                    })
-                    areaNames = areaNames.sort()
-                    console.log(areaNames)
-                    areaNames.forEach((areaName) => {
-                        console.log(areaName)
-                        if (areaNames[areaNames.length - 1] == areaName) string = string + ' ' + areaName
-                        else string = string + ' ' + areaName + ' |'
-                    })
-
-                    newAreas[deckMissions[deckId].deck.id] = {
-                        areaString: string,
-                    }
-                    setAreas(newAreas)
-                }
-            })
-        })
-    }, [deckMissions])
-
     return (
         <>
-            <StyledDeckOverview>
-                <StyledDeckCards>
-                    {Object.keys(deckMissions).length > 0 ? (
-                        Object.keys(deckMissions).map((deckId) => (
-                            <DeckCard key={deckId}>
-                                <Rectangle style={{ background: `${getCardColor(deckId)}` }} />
-                                <StyledCard
-                                    variant="default"
-                                    key={deckId}
-                                    onClick={
-                                        deckMissions[deckId].inspections.length > 0
-                                            ? () => setSelectedDeck(deckMissions[deckId].deck)
-                                            : undefined
-                                    }
-                                    style={
-                                        selectedDeck === deckMissions[deckId].deck
-                                            ? { border: `solid ${getCardColor(deckId)} 2px` }
-                                            : {}
-                                    }
-                                >
-                                    <StyledDeckText>
-                                        <StyledTopDeckText>
-                                            <Typography variant={'body_short_bold'}>
-                                                {deckMissions[deckId].deck.deckName.toString()}
-                                            </Typography>
-                                            {deckMissions[deckId].inspections
-                                                .filter((i) =>
-                                                    Object.keys(ongoingMissions).includes(i.missionDefinition.id)
-                                                )
-                                                .map((inspection) => (
-                                                    <StyledContent key={inspection.missionDefinition.id}>
-                                                        <Icon name={Icons.Ongoing} size={16} />
-                                                        {TranslateText('InProgress')}
-                                                    </StyledContent>
-                                                ))}
-                                        </StyledTopDeckText>
-                                        {Object.keys(areas).includes(deckId) && (
-                                            <Typography variant={'body_short'}>{areas[deckId].areaString}</Typography>
-                                        )}
-                                        {deckMissions[deckId].inspections && (
-                                            <CardMissionInformation deckId={deckId} deckMissions={deckMissions} />
-                                        )}
-                                    </StyledDeckText>
-                                    <StyledCardComponent>
-                                        <Tooltip
-                                            placement="top"
-                                            title={
-                                                deckMissions[deckId].inspections.length > 0
-                                                    ? ''
-                                                    : TranslateText('No planned inspection')
-                                            }
-                                        >
-                                            <Button
-                                                disabled={deckMissions[deckId].inspections.length === 0}
-                                                variant="outlined"
-                                                onClick={() => handleScheduleAll(deckMissions[deckId].inspections)}
-                                                color="secondary"
-                                            >
-                                                <Icon
-                                                    name={Icons.LibraryAdd}
-                                                    color={deckMissions[deckId].inspections.length > 0 ? '' : 'grey'}
-                                                />
-                                                <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
-                                                    {TranslateText('Queue the missions')}
-                                                </Typography>
-                                            </Button>
-                                        </Tooltip>
-                                    </StyledCardComponent>
-                                </StyledCard>
-                            </DeckCard>
-                        ))
-                    ) : (
-                        <StyledPlaceholder>
-                            <Typography variant="h4" color="disabled">
-                                {TranslateText('No deck inspections available')}
-                            </Typography>
-                        </StyledPlaceholder>
-                    )}
-                </StyledDeckCards>
+            <StyledDict.DeckOverview>
+                <DeckCards
+                    deckMissions={deckMissions}
+                    setSelectedDeck={setSelectedDeck}
+                    selectedDeck={selectedDeck}
+                    ongoingMissions={ongoingMissions}
+                    handleScheduleAll={handleScheduleAll}
+                />
+
                 {selectedDeck && (
                     <InspectionTable
                         deck={selectedDeck}
@@ -381,7 +143,7 @@ export function InspectionSection({
                         ongoingMissions={ongoingMissions}
                     />
                 )}
-            </StyledDeckOverview>
+            </StyledDict.DeckOverview>
             {isDialogOpen && (
                 <ScheduleMissionDialog
                     missions={selectedMissions!}
@@ -393,60 +155,5 @@ export function InspectionSection({
                 />
             )}
         </>
-    )
-}
-
-interface ICardMissionInformationProps {
-    deckId: string
-    deckMissions: DeckMissionType
-}
-
-function CardMissionInformation({ deckId, deckMissions }: ICardMissionInformationProps) {
-    const { TranslateText } = useLanguageContext()
-
-    var colorsCount: DeckMissionCount = {
-        red: { count: 0, message: 'Must be inspected this week' },
-        orange: { count: 0, message: 'Must be inspected within two weeks' },
-        green: { count: 0, message: 'Up to date' },
-        grey: { count: 0, message: '' },
-    }
-
-    deckMissions[deckId].inspections.forEach((inspection) => {
-        if (!inspection.deadline) {
-            if (!inspection.missionDefinition.lastRun && inspection.missionDefinition.inspectionFrequency) {
-                colorsCount['red'].count++
-            } else {
-                colorsCount['green'].count++
-            }
-        } else {
-            const dealineColor = getDeadlineInspection(inspection.deadline)
-            colorsCount[dealineColor!].count++
-        }
-    })
-
-    return (
-        <StyledMissionInspections>
-            {Object.keys(colorsCount)
-                .filter((color) => colorsCount[color].count > 0)
-                .map((color) => (
-                    <StyledMissionComponents key={color}>
-                        <StyledCircle style={{ background: color }} />
-                        <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
-                            {colorsCount[color].count > 1 &&
-                                colorsCount[color].count +
-                                    ' ' +
-                                    TranslateText('Missions').toLowerCase() +
-                                    ' ' +
-                                    TranslateText(colorsCount[color].message).toLowerCase()}
-                            {colorsCount[color].count === 1 &&
-                                colorsCount[color].count +
-                                    ' ' +
-                                    TranslateText('Mission').toLowerCase() +
-                                    ' ' +
-                                    TranslateText(colorsCount[color].message).toLowerCase()}
-                        </Typography>
-                    </StyledMissionComponents>
-                ))}
-        </StyledMissionInspections>
     )
 }
