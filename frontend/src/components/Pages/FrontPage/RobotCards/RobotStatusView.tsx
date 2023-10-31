@@ -7,6 +7,7 @@ import { RefreshProps } from '../FrontPage'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
 
 const RobotCardSection = styled.div`
     display: flex;
@@ -22,18 +23,26 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const [robots, setRobots] = useState<Robot[]>([])
+    const { safeZoneStatus, switchSafeZoneStatus } = useSafeZoneContext()
 
     const sortRobotsByStatus = useCallback((robots: Robot[]): Robot[] => {
         const sortedRobots = robots.sort((robot, robotToCompareWith) =>
             robot.status! > robotToCompareWith.status! ? 1 : -1
         )
-
         return sortedRobots
     }, [])
 
     const updateRobots = useCallback(() => {
         BackendAPICaller.getEnabledRobots().then((result: Robot[]) => {
             setRobots(sortRobotsByStatus(result))
+            const missionQueueFozenStatus = result
+                .map((robot: Robot) => {
+                    return robot.missionQueueFrozen
+                })
+                .filter((status) => status === true)
+
+            if (missionQueueFozenStatus.length > 0 && !safeZoneStatus) switchSafeZoneStatus(true)
+            else switchSafeZoneStatus(false)
         })
     }, [sortRobotsByStatus])
 

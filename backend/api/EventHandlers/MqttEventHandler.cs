@@ -243,18 +243,16 @@ namespace Api.EventHandlers
             await robotService.Update(robot);
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission {MissionId}", robot.IsarId, robot.Name, flotillaMissionRun.MissionId);
 
-            if (flotillaMissionRun.IsCompleted)
-            {
-                await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
+            if (!flotillaMissionRun.IsCompleted) return;
+            await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
 
-                if (flotillaMissionRun.MissionId == null) { return; }
+            if (flotillaMissionRun.MissionId == null) return;
 
-                var missionDefinition = await missionDefinitionService.ReadById(flotillaMissionRun.MissionId);
-                if (missionDefinition == null) { return; }
+            var missionDefinition = await missionDefinitionService.ReadById(flotillaMissionRun.MissionId);
+            if (missionDefinition == null) return;
 
-                missionDefinition.LastRun = flotillaMissionRun;
-                await missionDefinitionService.Update(missionDefinition);
-            }
+            missionDefinition.LastRun = flotillaMissionRun;
+            await missionDefinitionService.Update(missionDefinition);
         }
 
         private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)

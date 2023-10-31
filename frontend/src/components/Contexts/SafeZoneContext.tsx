@@ -1,4 +1,5 @@
-import { createContext, FC, useContext, useState } from 'react'
+import { BackendAPICaller } from 'api/ApiCaller'
+import { createContext, FC, useContext, useEffect, useState } from 'react'
 
 interface ISafeZoneContext {
     safeZoneStatus: boolean

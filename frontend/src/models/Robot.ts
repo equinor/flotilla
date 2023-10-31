@@ -30,6 +30,7 @@ export interface Robot {
     videoStreams?: VideoStream[]
     isarUri?: string
     currentArea?: Area
+    missionQueueFrozen?: boolean
 }
 export const placeholderRobot: Robot = {
     id: 'placeholderRobotId',
