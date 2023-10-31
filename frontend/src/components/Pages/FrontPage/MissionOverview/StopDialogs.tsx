@@ -116,7 +116,7 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
 
 export const StopRobotDialog = (): JSX.Element => {
     const [isStopRobotDialogOpen, setIsStopRobotDialogOpen] = useState<boolean>(false)
-    const { safeZoneStatus, switchSafeZoneStatus } = useSafeZoneContext()
+    const { safeZoneStatus } = useSafeZoneContext()
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
 
@@ -131,14 +131,12 @@ export const StopRobotDialog = (): JSX.Element => {
     const stopAll = () => {
         BackendAPICaller.sendRobotsToSafePosition(installationCode)
         closeDialog()
-        switchSafeZoneStatus(true)
         return
     }
 
     const resetRobots = () => {
         BackendAPICaller.clearEmergencyState(installationCode)
         closeDialog()
-        switchSafeZoneStatus(false)
     }
 
     return (

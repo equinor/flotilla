@@ -68,7 +68,7 @@ public static class InitDb
             Id = Guid.NewGuid().ToString(),
             Plant = plants[0],
             Installation = plants[0].Installation,
-            DefaultLocalizationPose = null,
+            DefaultLocalizationPose = new DefaultLocalizationPose(),
             Name = "TestDeck"
         };
 
@@ -77,7 +77,7 @@ public static class InitDb
             Id = Guid.NewGuid().ToString(),
             Plant = plants[0],
             Installation = plants[0].Installation,
-            DefaultLocalizationPose = null,
+            DefaultLocalizationPose = new DefaultLocalizationPose(),
             Name = "TestDeck2"
         };
 
@@ -86,7 +86,7 @@ public static class InitDb
             Id = Guid.NewGuid().ToString(),
             Plant = plants[0],
             Installation = plants[0].Installation,
-            DefaultLocalizationPose = null,
+            DefaultLocalizationPose = new DefaultLocalizationPose(),
             Name = "TestDeck3"
         };
 
@@ -95,7 +95,7 @@ public static class InitDb
             Id = Guid.NewGuid().ToString(),
             Plant = plants[0],
             Installation = plants[0].Installation,
-            DefaultLocalizationPose = null,
+            DefaultLocalizationPose = new DefaultLocalizationPose(),
             Name = "TestDeck4"
         };
 
@@ -112,7 +112,7 @@ public static class InitDb
             Installation = decks[0].Plant!.Installation,
             Name = "AP320",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = null,
+            DefaultLocalizationPose = new DefaultLocalizationPose(),
             SafePositions = new List<SafePosition>()
         };
 
@@ -124,7 +124,7 @@ public static class InitDb
             Installation = decks[0].Plant!.Installation,
             Name = "AP330",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = null,
+            DefaultLocalizationPose = new DefaultLocalizationPose(),
             SafePositions = new List<SafePosition>()
         };
 
@@ -151,7 +151,7 @@ public static class InitDb
             Installation = decks[1].Plant.Installation,
             Name = "testArea2",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = null,
+            DefaultLocalizationPose = new DefaultLocalizationPose(),
             SafePositions = new List<SafePosition>()
         };
 
@@ -163,7 +163,7 @@ public static class InitDb
             Installation = decks[2].Plant.Installation,
             Name = "testArea3",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = null,
+            DefaultLocalizationPose = new DefaultLocalizationPose(),
             SafePositions = new List<SafePosition>()
         };
 
@@ -175,7 +175,7 @@ public static class InitDb
             Installation = decks[3].Plant.Installation,
             Name = "testArea4",
             MapMetadata = new MapMetadata(),
-            DefaultLocalizationPose = null,
+            DefaultLocalizationPose = new DefaultLocalizationPose(),
             SafePositions = new List<SafePosition>()
         };
 
