@@ -13,6 +13,8 @@ namespace Api.EventHandlers
 
         public Task<bool> OngoingMission(string robotId);
 
+        public Task<PagedList<MissionRun>?> GetOngoingMission(string robotId);
+
         public Task FreezeMissionRunQueueForRobot(string robotId);
 
         public Task StopCurrentMissionRun(string robotId);
@@ -130,6 +132,24 @@ namespace Api.EventHandlers
             return ongoingMissions.Any();
         }
 
+        public async Task<PagedList<MissionRun>?> GetOngoingMission(string robotId)
+        {
+            var ongoingMissions = await _missionRunService.ReadAll(
+                new MissionRunQueryStringParameters
+                {
+                    Statuses = new List<MissionStatus>
+                    {
+                        MissionStatus.Ongoing
+                    },
+                    RobotId = robotId,
+                    OrderBy = "DesiredStartTime",
+                    PageSize = 100
+                });
+
+            return ongoingMissions;
+        }
+
+
         public async Task FreezeMissionRunQueueForRobot(string robotId)
         {
             var robot = await _robotService.ReadById(robotId);
@@ -164,9 +184,33 @@ namespace Api.EventHandlers
                 _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
                 return;
             }
-            if (!await OngoingMission(robot.Id))
+
+
+            var ongoingMissions = await GetOngoingMission(robot.Id);
+
+            if (ongoingMissions == null)
             {
                 _logger.LogWarning("Flotilla has no mission running for robot {RobotName} but an attempt to stop will be made regardless", robot.Name);
+            }
+            else
+            {
+                foreach (var mission in ongoingMissions)
+                {
+                    var newMission = new MissionRun
+                    {
+                        Name = mission.Name,
+                        Robot = robot,
+                        MissionRunPriority = MissionRunPriority.Normal,
+                        InstallationCode = mission.InstallationCode,
+                        Area = mission.Area,
+                        Status = MissionStatus.Pending,
+                        DesiredStartTime = DateTimeOffset.UtcNow,
+                        Tasks = mission.Tasks,
+                        Map = new MapMetadata()
+                    };
+
+                    await _missionRunService.Create(newMission);
+                }
             }
 
             try
@@ -191,29 +235,6 @@ namespace Api.EventHandlers
                 string message = "Error while processing the response from ISAR";
                 _logger.LogError(e, "{Message}", message);
                 throw new MissionException(message, 0);
-            }
-
-            if (robot.CurrentMissionId != null)
-            {
-                var missionRun = await _missionRunService.ReadById(robot.CurrentMissionId);
-
-                if (missionRun != null)
-                {
-                    var mission = new MissionRun
-                    {
-                        Name = missionRun.Name,
-                        Robot = robot,
-                        MissionRunPriority = MissionRunPriority.Normal,
-                        InstallationCode = missionRun.InstallationCode,
-                        Area = missionRun.Area,
-                        Status = MissionStatus.Pending,
-                        DesiredStartTime = DateTimeOffset.UtcNow,
-                        Tasks = missionRun.Tasks,
-                        Map = new MapMetadata()
-                    };
-
-                    await _missionRunService.Create(mission);
-                }
             }
 
             robot.CurrentMissionId = null;
