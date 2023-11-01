@@ -3,7 +3,7 @@ export const formatBackendDateTimeToDate = (date: Date) => {
 }
 
 export const getInspectionDeadline = (
-    inspectionFrequency: string | null,
+    inspectionFrequency: string | undefined,
     lastRunTime: Date | null
 ): Date | undefined => {
     if (!inspectionFrequency || !lastRunTime) return undefined

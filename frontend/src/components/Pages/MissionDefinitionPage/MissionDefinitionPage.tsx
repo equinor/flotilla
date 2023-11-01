@@ -79,8 +79,8 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
 
-    const displayInspectionFrequency = (inspectionFrequency: string) => {
-        if (inspectionFrequency === null) return TranslateText('No inspection frequency set')
+    const displayInspectionFrequency = (inspectionFrequency: string | undefined) => {
+        if (inspectionFrequency === undefined) return TranslateText('No inspection frequency set')
         const timeArray = inspectionFrequency.split(':')
         const days: number = +timeArray[0]
         const hours: number = +timeArray[1]
@@ -101,10 +101,22 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
                 left={TranslateText('Inspection frequency')}
                 right={displayInspectionFrequency(missionDefinition.inspectionFrequency)}
             />
-            <KeyValuePairDisplay left={TranslateText('Area')} right={missionDefinition.area.areaName} />
-            <KeyValuePairDisplay left={TranslateText('Deck')} right={missionDefinition.area.deckName} />
-            <KeyValuePairDisplay left={TranslateText('Plant')} right={missionDefinition.area.plantCode} />
-            <KeyValuePairDisplay left={TranslateText('Installation')} right={missionDefinition.area.installationCode} />
+            <KeyValuePairDisplay
+                left={TranslateText('Area')}
+                right={missionDefinition.area ? missionDefinition.area.areaName : '-'}
+            />
+            <KeyValuePairDisplay
+                left={TranslateText('Deck')}
+                right={missionDefinition.area ? missionDefinition.area.deckName : '-'}
+            />
+            <KeyValuePairDisplay
+                left={TranslateText('Plant')}
+                right={missionDefinition.area ? missionDefinition.area.plantCode : '-'}
+            />
+            <KeyValuePairDisplay
+                left={TranslateText('Installation')}
+                right={missionDefinition.area ? missionDefinition.area.installationCode : '-'}
+            />
             <KeyValuePairDisplay
                 left={TranslateText('Mission source')}
                 right={TranslateText(missionDefinition.sourceType)}

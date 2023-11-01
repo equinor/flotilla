@@ -193,7 +193,7 @@ const InspectionRow = ({
                 </Typography>
             </Table.Cell>
             <Table.Cell>{mission.comment}</Table.Cell>
-            <Table.Cell>{mission.area.areaName}</Table.Cell>
+            <Table.Cell>{mission.area ? mission.area.areaName : '-'}</Table.Cell>
             <Table.Cell>{lastCompleted}</Table.Cell>
             <Table.Cell>{inspection.deadline ? formatDateString(inspection.deadline.toISOString()) : ''}</Table.Cell>
             <Table.Cell>
