@@ -11,10 +11,10 @@ export interface CondensedMissionDefinition {
     id: string
     name: string
     installationCode: string
-    comment: string
-    inspectionFrequency: string
+    comment?: string
+    inspectionFrequency: string | undefined
     lastRun: Mission
-    area: Area
+    area?: Area
     isDeprecated: boolean
     sourceType: string
 }
@@ -24,10 +24,10 @@ export interface MissionDefinition {
     tasks: Task[]
     name: string
     installationCode: string
-    comment: string
-    inspectionFrequency: string
+    comment?: string
+    inspectionFrequency: string | undefined
     lastRun: Mission
-    area: Area
+    area?: Area
     isDeprecated: boolean
     sourceType: string
 }
