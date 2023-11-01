@@ -80,4 +80,9 @@
     {
         public DeckExistsException(string message) : base(message) { }
     }
+
+    public class SafeZoneException : Exception
+    {
+        public SafeZoneException(string message) : base(message) { }
+    }
 }
