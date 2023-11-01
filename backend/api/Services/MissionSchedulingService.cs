@@ -76,7 +76,8 @@ namespace Api.Services
         {
             if (safePositions == null || !safePositions.Any())
             {
-                throw new ArgumentException("List of safe positions cannot be null or empty.");
+                string message = "No safe position for area the robot is localized in";
+                throw new SafeZoneException(message);
             }
 
             var closestPose = safePositions[0].Pose;

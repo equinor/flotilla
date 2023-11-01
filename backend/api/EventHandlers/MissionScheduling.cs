@@ -185,7 +185,6 @@ namespace Api.EventHandlers
                 return;
             }
 
-
             var ongoingMissions = await GetOngoingMission(robot.Id);
 
             if (ongoingMissions == null)
@@ -196,6 +195,8 @@ namespace Api.EventHandlers
             {
                 foreach (var mission in ongoingMissions)
                 {
+                    if (mission.MissionRunPriority == MissionRunPriority.Emergency) continue;
+
                     var newMission = new MissionRun
                     {
                         Name = mission.Name,

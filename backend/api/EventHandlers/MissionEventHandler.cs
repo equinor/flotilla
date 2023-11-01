@@ -176,7 +176,15 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await MissionSchedulingService.ScheduleMissionToReturnToSafePosition(e.RobotId, area.Id);
+            try
+            {
+                await MissionSchedulingService.ScheduleMissionToReturnToSafePosition(e.RobotId, area.Id);
+            }
+            catch (SafeZoneException ex)
+            {
+                _logger.LogError(ex, "Failed to schedule return to safe zone mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
+                await MissionSchedulingService.UnfreezeMissionRunQueueForRobot(e.RobotId);
+            }
 
             MqttEventHandlerService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
 
