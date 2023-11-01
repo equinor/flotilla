@@ -120,7 +120,7 @@ export function InspectionSection({
             updateScheduledMissionsMap(deckMissions)
         }, refreshInterval)
         return () => clearInterval(id)
-    }, [deckMissions])
+    }, [deckMissions, refreshInterval])
 
     return (
         <>
