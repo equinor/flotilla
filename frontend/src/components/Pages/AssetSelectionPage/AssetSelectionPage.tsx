@@ -95,11 +95,15 @@ function InstallationPicker() {
         Array.from(mappedOptions.keys()).includes(installationName)
 
     useEffect(() => {
-        const plantPromise = showActivePlants ? BackendAPICaller.getActivePlants() : BackendAPICaller.getEchoPlantInfo()
-        plantPromise.then(async (response: EchoPlantInfo[]) => {
-            const mapping = mapInstallationCodeToName(response)
-            setAllPlantsMap(mapping)
-        })
+        if (BackendAPICaller.accessToken) {
+            const plantPromise = showActivePlants
+                ? BackendAPICaller.getActivePlants()
+                : BackendAPICaller.getEchoPlantInfo()
+            plantPromise.then(async (response: EchoPlantInfo[]) => {
+                const mapping = mapInstallationCodeToName(response)
+                setAllPlantsMap(mapping)
+            })
+        }
     }, [showActivePlants, updateListOfActivePlants])
 
     return (
