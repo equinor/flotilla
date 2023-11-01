@@ -1,5 +1,5 @@
 import { CircularProgress, Typography } from '@equinor/eds-core-react'
-import { MouseEvent, useEffect, useState } from 'react'
+import { MouseEvent, useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
 import { PlaceRobotInMap, InverseCalculatePixelPosition } from '../../../utils/MapMarkers'
@@ -52,7 +52,7 @@ export function AreaMapView({ area, localizationPose, setLocalizationPose }: Are
     const [imageObjectURL, setImageObjectURL] = useState<string>()
     const [isLoading, setIsLoading] = useState<boolean>()
 
-    const updateMap = () => {
+    const updateMap = useCallback(() => {
         let context = mapCanvas.getContext('2d')
         if (context === null) {
             return
@@ -62,7 +62,7 @@ export function AreaMapView({ area, localizationPose, setLocalizationPose }: Are
         if (mapMetadata) {
             PlaceRobotInMap(mapMetadata, mapCanvas, localizationPose)
         }
-    }
+    }, [mapCanvas, mapImage, mapMetadata, localizationPose])
 
     const getMeta = async (url: string) => {
         const image = new Image()

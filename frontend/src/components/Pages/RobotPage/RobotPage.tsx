@@ -1,7 +1,7 @@
 import { Typography } from '@equinor/eds-core-react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { BackButton } from '../../../utils/BackButton'
@@ -50,24 +50,25 @@ export function RobotPage() {
     const { robotId } = useParams()
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
 
+    const fetchRobotData = useCallback(() => {
+        if (robotId) {
+            BackendAPICaller.getRobotById(robotId).then((robot) => {
+                setSelectedRobot(robot)
+            })
+        }
+    }, [robotId])
+
     useEffect(() => {
         fetchRobotData()
-    }, [robotId])
+    }, [fetchRobotData])
 
     useEffect(() => {
         const intervalId = setInterval(fetchRobotData, updateSiteTimer)
         return () => {
             clearInterval(intervalId)
         }
-    }, [])
+    }, [fetchRobotData])
 
-    const fetchRobotData = () => {
-        if (robotId) {
-            BackendAPICaller.getRobotById(robotId).then((robot) => {
-                setSelectedRobot(robot)
-            })
-        }
-    }
     return (
         <>
             <Header page={'robot'} />
