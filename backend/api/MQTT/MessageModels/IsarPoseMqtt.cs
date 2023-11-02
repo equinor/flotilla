@@ -8,7 +8,7 @@ namespace Api.Mqtt.MessageModels
     public class IsarPoseMessage : MqttMessage
     {
         [JsonPropertyName("pose")]
-        public IsarPose Pose { get; set; }
+        public IsarPoseMqtt Pose { get; set; }
 
         [JsonPropertyName("robot_name")]
         public string RobotName { get; set; }
@@ -20,7 +20,7 @@ namespace Api.Mqtt.MessageModels
         public DateTime Timestamp { get; set; }
     }
 
-    public class IsarPose
+    public class IsarPoseMqtt
     {
         [JsonPropertyName("position")]
         public IsarPosition Position { get; set; }

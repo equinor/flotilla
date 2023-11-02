@@ -88,10 +88,7 @@ namespace Api.Services
         public async Task<Robot?> Delete(string id)
         {
             var robot = await GetRobotsWithSubModels().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
-            if (robot is null)
-            {
-                return null;
-            }
+            if (robot is null) { return null; }
 
             _context.Robots.Remove(robot);
             await _context.SaveChangesAsync();

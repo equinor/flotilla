@@ -1,8 +1,8 @@
 ﻿#nullable disable
 using System.ComponentModel.DataAnnotations;
+using Api.Mqtt.MessageModels;
 using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
-using IsarPose = Api.Mqtt.MessageModels.IsarPose;
 namespace Api.Database.Models
 {
     [Owned]
@@ -91,7 +91,7 @@ namespace Api.Database.Models
             Orientation = new Orientation();
         }
 
-        public Pose(IsarPose isarPose)
+        public Pose(IsarPoseMqtt isarPose)
         {
             Position = new Position(isarPose.Position.X, isarPose.Position.Y, isarPose.Position.Z);
             Orientation = new Orientation(isarPose.Orientation.X, isarPose.Orientation.Y, isarPose.Orientation.Z, isarPose.Orientation.W);
@@ -139,7 +139,7 @@ namespace Api.Database.Models
 
             if (echoAngle < 0) { echoAngle += 2F * MathF.PI; }
 
-            angle = 450 * MathF.PI / (180 - echoAngle);
+            angle = (450 * MathF.PI / 180) - echoAngle;
 
             var quaternion = new Orientation
             {
