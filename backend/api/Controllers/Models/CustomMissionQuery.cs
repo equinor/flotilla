@@ -1,5 +1,4 @@
 ﻿using Api.Database.Models;
-
 namespace Api.Controllers.Models
 {
     public struct CustomInspectionQuery
@@ -30,7 +29,7 @@ namespace Api.Controllers.Models
     {
         public string RobotId { get; set; }
 
-        public DateTimeOffset? DesiredStartTime { get; set; }
+        public DateTime? DesiredStartTime { get; set; }
 
         public string InstallationCode { get; set; }
 

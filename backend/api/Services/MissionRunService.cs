@@ -269,29 +269,25 @@ namespace Api.Services
                         )
                 );
 
-            var minStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinStartTime);
-            var maxStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxStartTime);
+            var minStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinStartTime);
+            var maxStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxStartTime);
             Expression<Func<MissionRun, bool>> startTimeFilter = missionRun =>
                 missionRun.StartTime == null
-                || DateTimeOffset.Compare(missionRun.StartTime.Value, minStartTime) >= 0
-                && DateTimeOffset.Compare(missionRun.StartTime.Value, maxStartTime) <= 0;
+                || (DateTime.Compare(missionRun.StartTime.Value, minStartTime) >= 0
+                && DateTime.Compare(missionRun.StartTime.Value, maxStartTime) <= 0);
 
-            var minEndTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinEndTime);
-            var maxEndTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxEndTime);
+            var minEndTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinEndTime);
+            var maxEndTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxEndTime);
             Expression<Func<MissionRun, bool>> endTimeFilter = missionRun =>
                 missionRun.EndTime == null
-                || DateTimeOffset.Compare(missionRun.EndTime.Value, minEndTime) >= 0
-                && DateTimeOffset.Compare(missionRun.EndTime.Value, maxEndTime) <= 0;
+                || (DateTime.Compare(missionRun.EndTime.Value, minEndTime) >= 0
+                && DateTime.Compare(missionRun.EndTime.Value, maxEndTime) <= 0);
 
-            var minDesiredStartTime = DateTimeOffset.FromUnixTimeSeconds(
-                parameters.MinDesiredStartTime
-            );
-            var maxDesiredStartTime = DateTimeOffset.FromUnixTimeSeconds(
-                parameters.MaxDesiredStartTime
-            );
+            var minDesiredStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinDesiredStartTime);
+            var maxDesiredStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxDesiredStartTime);
             Expression<Func<MissionRun, bool>> desiredStartTimeFilter = missionRun =>
-                DateTimeOffset.Compare(missionRun.DesiredStartTime, minDesiredStartTime) >= 0
-                && DateTimeOffset.Compare(missionRun.DesiredStartTime, maxDesiredStartTime) <= 0;
+                DateTime.Compare(missionRun.DesiredStartTime, minDesiredStartTime) >= 0
+                && DateTime.Compare(missionRun.DesiredStartTime, maxDesiredStartTime) <= 0;
 
             // The parameter of the filter expression
             var missionRun = Expression.Parameter(typeof(MissionRun));

@@ -37,7 +37,7 @@ namespace Api.Services.ActionServices
                 {
                     MissionId = robot.CurrentMissionId,
                     RobotId = robot.Id,
-                    Time = DateTimeOffset.UtcNow
+                    Time = DateTime.UtcNow
                 }
             );
             _logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);

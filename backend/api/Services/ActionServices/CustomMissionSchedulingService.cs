@@ -118,7 +118,7 @@ namespace Api.Services.ActionServices
                 Robot = robot,
                 Status = MissionStatus.Pending,
                 MissionRunPriority = MissionRunPriority.Normal,
-                DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTimeOffset.UtcNow,
+                DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
                 Tasks = missionTasks,
                 InstallationCode = customMissionQuery.InstallationCode,
                 Area = missionDefinition.Area,

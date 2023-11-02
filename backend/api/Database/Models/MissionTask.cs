@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Api.Controllers.Models;
 using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
-
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
@@ -43,28 +42,26 @@ namespace Api.Database.Models
         [Required]
         public TaskStatus Status
         {
-            get { return _status; }
+            get => _status;
             set
             {
                 _status = value;
-                if (IsCompleted && EndTime is null)
-                    EndTime = DateTimeOffset.UtcNow;
+                if (IsCompleted && EndTime is null) { EndTime = DateTime.UtcNow; }
 
-                if (_status is TaskStatus.InProgress && StartTime is null)
-                    StartTime = DateTimeOffset.UtcNow;
+                if (_status is TaskStatus.InProgress && StartTime is null) { StartTime = DateTime.UtcNow; }
             }
         }
 
         public bool IsCompleted =>
             _status
                 is TaskStatus.Cancelled
-                    or TaskStatus.Successful
-                    or TaskStatus.Failed
-                    or TaskStatus.PartiallySuccessful;
+                or TaskStatus.Successful
+                or TaskStatus.Failed
+                or TaskStatus.PartiallySuccessful;
 
-        public DateTimeOffset? StartTime { get; private set; }
+        public DateTime? StartTime { get; private set; }
 
-        public DateTimeOffset? EndTime { get; private set; }
+        public DateTime? EndTime { get; private set; }
 
         public IList<Inspection> Inspections { get; set; }
 
@@ -143,7 +140,6 @@ namespace Api.Database.Models
             };
         }
 
-#nullable enable
         public Inspection? GetInspectionByIsarStepId(string isarStepId)
         {
             return Inspections.FirstOrDefault(
@@ -152,8 +148,6 @@ namespace Api.Database.Models
                     && inspection.IsarStepId.Equals(isarStepId, StringComparison.Ordinal)
             );
         }
-
-#nullable disable
     }
 
     public enum TaskStatus
@@ -164,6 +158,6 @@ namespace Api.Database.Models
         InProgress,
         Failed,
         Cancelled,
-        Paused,
+        Paused
     }
 }

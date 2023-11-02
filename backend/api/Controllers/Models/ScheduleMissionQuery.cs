@@ -4,6 +4,6 @@
     {
         public string MissionDefinitionId { get; set; } = string.Empty;
         public string RobotId { get; set; } = string.Empty;
-        public DateTimeOffset DesiredStartTime { get; set; }
+        public DateTime DesiredStartTime { get; set; }
     }
 }

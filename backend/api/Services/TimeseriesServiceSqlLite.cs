@@ -1,16 +1,16 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
-
 namespace Api.Services
 {
     /// <summary>
-    /// Uses only dotnet ef core, instead of the Npgsql package needed for the PostgreSql database
-    /// Cannot insert because it is a keyless entity
+    ///     Uses only dotnet ef core, instead of the Npgsql package needed for the PostgreSql database
+    ///     Cannot insert because it is a keyless entity
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Globalization",
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
@@ -60,14 +60,14 @@ namespace Api.Services
             Expression<Func<T, bool>> missionIdFilter = parameters.MissionId is null
                 ? timeseries => true
                 : timeseries =>
-                      timeseries.MissionId == null
-                      || timeseries.MissionId.Equals(parameters.MissionId);
+                    timeseries.MissionId == null
+                    || timeseries.MissionId.Equals(parameters.MissionId);
 
-            var minStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinTime);
-            var maxStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxTime);
+            var minStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinTime);
+            var maxStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxTime);
             Expression<Func<T, bool>> timeFilter = timeseries =>
-                DateTimeOffset.Compare(timeseries.Time, minStartTime) >= 0
-                && DateTimeOffset.Compare(timeseries.Time, maxStartTime) <= 0;
+                DateTime.Compare(timeseries.Time, minStartTime) >= 0
+                && DateTime.Compare(timeseries.Time, maxStartTime) <= 0;
 
             // The parameter of the filter expression
             var timeseries = Expression.Parameter(typeof(T));
