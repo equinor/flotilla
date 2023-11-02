@@ -24,7 +24,6 @@ const StyledCard = styled(Card)`
 `
 const HoverableStyledCard = styled(Card)`
     width: 220px;
-    padding: 8px;
     :hover {
         background-color: #deedee;
     }
@@ -47,7 +46,7 @@ const VerticalContent = styled.div<{ $alignItems?: string }>`
 
 function cardContent({ robot }: RobotProps) {
     return (
-        <div>
+        <div style={{ padding: '8px' }}>
             <RobotImage robotType={robot.model.type} height="200px" />
             <HorizontalContent>
                 <VerticalContent $alignItems="start">
@@ -80,7 +79,7 @@ export function RobotStatusCard({ robot }: RobotProps) {
         navigate(path)
     }
     return (
-        <HoverableStyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
+        <HoverableStyledCard style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
             {cardContent({ robot })}
         </HoverableStyledCard>
     )
@@ -89,7 +88,7 @@ export function RobotStatusCard({ robot }: RobotProps) {
 export function RobotStatusCardPlaceholder() {
     const { TranslateText } = useLanguageContext()
     return (
-        <StyledCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
+        <StyledCard style={{ boxShadow: tokens.elevation.raised }}>
             <div>
                 <RobotImage robotType={RobotType.NoneType} />
                 <Typography variant="h5" color="disabled">
