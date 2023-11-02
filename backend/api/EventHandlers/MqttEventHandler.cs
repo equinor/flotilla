@@ -321,7 +321,6 @@ namespace Api.EventHandlers
             else
             {
                 robot.BatteryLevel = batteryStatus.BatteryLevel;
-                _logger.LogInformation("Calling from OnBatteryUpdate with intended status {Status}", robot.Status);
                 await robotService.Update(robot);
                 await timeseriesService.Create(
                     new RobotBatteryTimeseries
