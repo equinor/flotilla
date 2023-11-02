@@ -36,7 +36,7 @@ export function DeckCards({
         const nextInspection = sortedInspections[0]
 
         if (!nextInspection.deadline) {
-            if (!nextInspection.missionDefinition.inspectionFrequency) return 'gray'
+            if (!nextInspection.missionDefinition.inspectionFrequency) return 'green'
             else return 'red'
         }
 
