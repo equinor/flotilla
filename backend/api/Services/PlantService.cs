@@ -1,37 +1,36 @@
-﻿using Api.Controllers.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
-
 namespace Api.Services
 {
     public interface IPlantService
     {
-        public abstract Task<IEnumerable<Plant>> ReadAll();
+        public Task<IEnumerable<Plant>> ReadAll();
 
-        public abstract Task<Plant?> ReadById(string id);
+        public Task<Plant?> ReadById(string id);
 
-        public abstract Task<IEnumerable<Plant>> ReadByInstallation(string installationCode);
+        public Task<IEnumerable<Plant>> ReadByInstallation(string installationCode);
 
-        public abstract Task<Plant?> ReadByInstallationAndName(Installation installation, string plantCode);
+        public Task<Plant?> ReadByInstallationAndName(Installation installation, string plantCode);
 
-        public abstract Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode);
+        public Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode);
 
-        public abstract Task<Plant> Create(CreatePlantQuery newPlant);
+        public Task<Plant> Create(CreatePlantQuery newPlant);
 
-        public abstract Task<Plant> Update(Plant plant);
+        public Task<Plant> Update(Plant plant);
 
-        public abstract Task<Plant?> Delete(string id);
-
+        public Task<Plant?> Delete(string id);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Globalization",
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Globalization",
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
@@ -52,11 +51,6 @@ namespace Api.Services
             return await GetPlants().ToListAsync();
         }
 
-        private IQueryable<Plant> GetPlants()
-        {
-            return _context.Plants.Include(i => i.Installation);
-        }
-
         public async Task<Plant?> ReadById(string id)
         {
             return await GetPlants()
@@ -66,8 +60,7 @@ namespace Api.Services
         public async Task<IEnumerable<Plant>> ReadByInstallation(string installationCode)
         {
             var installation = await _installationService.ReadByName(installationCode);
-            if (installation == null)
-                return new List<Plant>();
+            if (installation == null) { return new List<Plant>(); }
             return await _context.Plants.Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
@@ -82,8 +75,7 @@ namespace Api.Services
         public async Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode)
         {
             var installation = await _installationService.ReadByName(installationCode);
-            if (installation == null)
-                return null;
+            if (installation == null) { return null; }
             return await _context.Plants.Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                 a.PlantCode.ToLower().Equals(plantCode.ToLower())
@@ -93,7 +85,7 @@ namespace Api.Services
         public async Task<Plant> Create(CreatePlantQuery newPlantQuery)
         {
             var installation = await _installationService.ReadByName(newPlantQuery.InstallationCode) ??
-                throw new InstallationNotFoundException($"No installation with name {newPlantQuery.InstallationCode} could be found");
+                               throw new InstallationNotFoundException($"No installation with name {newPlantQuery.InstallationCode} could be found");
 
             var plant = await ReadByInstallationAndName(installation, newPlantQuery.PlantCode);
             if (plant == null)
@@ -102,8 +94,9 @@ namespace Api.Services
                 {
                     Name = newPlantQuery.Name,
                     PlantCode = newPlantQuery.PlantCode,
-                    Installation = installation,
+                    Installation = installation
                 };
+                _context.Entry(plant.Installation).State = EntityState.Unchanged;
                 await _context.Plants.AddAsync(plant);
                 await _context.SaveChangesAsync();
             }
@@ -130,6 +123,11 @@ namespace Api.Services
             await _context.SaveChangesAsync();
 
             return plant;
+        }
+
+        private IQueryable<Plant> GetPlants()
+        {
+            return _context.Plants.Include(i => i.Installation);
         }
     }
 }
