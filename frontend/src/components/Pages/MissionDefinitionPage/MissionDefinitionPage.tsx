@@ -79,8 +79,8 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
 
-    const displayInspectionFrequency = (inspectionFrequency: string | undefined) => {
-        if (inspectionFrequency === undefined) return TranslateText('No inspection frequency set')
+    const displayInspectionFrequency = (inspectionFrequency: string | undefined | null) => {
+        if (!inspectionFrequency) return TranslateText('No inspection frequency set')
         const timeArray = inspectionFrequency.split(':')
         const days: number = +timeArray[0]
         const hours: number = +timeArray[1]
