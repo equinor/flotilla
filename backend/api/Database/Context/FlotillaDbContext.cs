@@ -15,6 +15,7 @@ public class FlotillaDbContext : DbContext
     public DbSet<Installation> Installations => Set<Installation>();
     public DbSet<Deck> Decks => Set<Deck>();
     public DbSet<Area> Areas => Set<Area>();
+
     public DbSet<Source> Sources => Set<Source>();
     public DbSet<SafePosition> SafePositions => Set<SafePosition>();
     public DbSet<DefaultLocalizationPose> DefaultLocalizationPoses => Set<DefaultLocalizationPose>();
@@ -49,7 +50,11 @@ public class FlotillaDbContext : DbContext
                             {
                                 if (isSqlLite)
                                     AddConverterForDateTimeOffsets(ref inspectionEntity);
+
+                                inspectionEntity.OwnsMany(i => i.InspectionFindings);
+
                             }
+
                         );
                         taskEntity.OwnsOne(task => task.InspectionTarget);
                         taskEntity.OwnsOne(
