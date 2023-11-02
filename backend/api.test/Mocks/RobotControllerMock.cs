@@ -2,17 +2,16 @@
 using Api.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
-
 namespace Api.Test.Mocks
 {
     internal class RobotControllerMock
     {
-        public Mock<IIsarService> IsarServiceMock;
-        public Mock<IRobotService> RobotServiceMock;
-        public Mock<IRobotModelService> RobotModelServiceMock;
-        public Mock<IMissionRunService> MissionServiceMock;
-        public Mock<RobotController> Mock;
-        public Mock<IAreaService> AreaServiceMock;
+        public readonly Mock<IAreaService> AreaServiceMock;
+        public readonly Mock<IIsarService> IsarServiceMock;
+        public readonly Mock<IMissionRunService> MissionServiceMock;
+        public readonly Mock<RobotController> Mock;
+        public readonly Mock<IRobotModelService> RobotModelServiceMock;
+        public readonly Mock<IRobotService> RobotServiceMock;
 
         public RobotControllerMock()
         {
