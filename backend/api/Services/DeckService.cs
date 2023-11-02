@@ -122,6 +122,11 @@ namespace Api.Services
                 Plant = plant,
                 DefaultLocalizationPose = defaultLocalizationPose
             };
+
+            // Making sure database does not try to create new installation and plant
+            _context.Entry(deck.Installation).State = EntityState.Unchanged;
+            _context.Entry(deck.Plant).State = EntityState.Unchanged;
+
             await _context.Decks.AddAsync(deck);
             await _context.SaveChangesAsync();
             return deck!;

@@ -104,6 +104,8 @@ namespace Api.Services
                     PlantCode = newPlantQuery.PlantCode,
                     Installation = installation,
                 };
+                // Making sure database does not try to create new installation
+                _context.Entry(plant.Installation).State = EntityState.Unchanged;
                 await _context.Plants.AddAsync(plant);
                 await _context.SaveChangesAsync();
             }

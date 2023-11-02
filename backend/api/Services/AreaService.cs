@@ -174,6 +174,11 @@ namespace Api.Services
                 Installation = installation!
             };
 
+            // Making sure database does not try to create new installation, plant and deck
+            _context.Entry(newArea.Installation).State = EntityState.Unchanged;
+            _context.Entry(newArea.Plant).State = EntityState.Unchanged;
+            _context.Entry(newArea.Deck).State = EntityState.Unchanged;
+
             await _context.Areas.AddAsync(newArea);
             await _context.SaveChangesAsync();
             return newArea;
