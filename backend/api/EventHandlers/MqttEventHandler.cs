@@ -206,7 +206,7 @@ namespace Api.EventHandlers
             var missionRunService = provider.GetRequiredService<IMissionRunService>();
             var robotService = provider.GetRequiredService<IRobotService>();
             var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
-            var missionDefinitionService = provider.GetRequiredService<IMissionDefinitionService>();
+            var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
 
@@ -230,15 +230,14 @@ namespace Api.EventHandlers
                 flotillaMissionRun.Id, isarMission.MissionId, isarMission.Status, isarMission.RobotName, isarMission.IsarId
             );
 
+            if (!flotillaMissionRun.IsCompleted) { return; }
+
             var robot = await robotService.ReadByIsarId(isarMission.IsarId);
             if (robot is null)
             {
                 _logger.LogError("Could not find robot '{RobotName}' with ISAR id '{IsarId}'", isarMission.RobotName, isarMission.IsarId);
                 return;
             }
-
-            if (!flotillaMissionRun.IsCompleted) { return; }
-
             robot.CurrentMissionId = null;
 
             await robotService.Update(robot);
@@ -246,11 +245,8 @@ namespace Api.EventHandlers
 
             if (flotillaMissionRun.MissionId == null) { return; }
 
-            var missionDefinition = await missionDefinitionService.ReadById(flotillaMissionRun.MissionId);
-            if (missionDefinition == null) { return; }
-
-            missionDefinition.LastRun = flotillaMissionRun;
-            await missionDefinitionService.Update(missionDefinition);
+            try { await lastMissionRunService.SetLastMissionRun(flotillaMissionRun.Id, flotillaMissionRun.MissionId); }
+            catch (MissionNotFoundException) { return; }
 
             await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
         }
