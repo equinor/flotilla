@@ -16,7 +16,6 @@ namespace Api.EventHandlers
     /// <summary>
     ///     A background service which listens to events and performs callback functions.
     /// </summary>
-    ///
     public interface IMqttEventHandler
     {
         public void TriggerRobotAvailable(RobotAvailableEventArgs e);
@@ -34,6 +33,11 @@ namespace Api.EventHandlers
             _scopeFactory = scopeFactory;
 
             Subscribe();
+        }
+
+        public void TriggerRobotAvailable(RobotAvailableEventArgs e)
+        {
+            OnRobotAvailable(e);
         }
 
         private IServiceProvider GetServiceProvider() { return _scopeFactory.CreateScope().ServiceProvider; }
@@ -63,11 +67,6 @@ namespace Api.EventHandlers
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken) { await stoppingToken; }
-
-        public void TriggerRobotAvailable(RobotAvailableEventArgs e)
-        {
-            OnRobotAvailable(e);
-        }
 
         protected virtual void OnRobotAvailable(RobotAvailableEventArgs e)
         {
@@ -245,15 +244,15 @@ namespace Api.EventHandlers
             await robotService.Update(robot);
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, flotillaMissionRun.Id);
 
-            await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
-
-            if (flotillaMissionRun.MissionId == null) return;
+            if (flotillaMissionRun.MissionId == null) { return; }
 
             var missionDefinition = await missionDefinitionService.ReadById(flotillaMissionRun.MissionId);
-            if (missionDefinition == null) return;
+            if (missionDefinition == null) { return; }
 
             missionDefinition.LastRun = flotillaMissionRun;
             await missionDefinitionService.Update(missionDefinition);
+
+            await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
         }
 
         private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
