@@ -13,7 +13,7 @@ export interface CondensedMissionDefinition {
     installationCode: string
     comment?: string
     inspectionFrequency?: string
-    lastRun: Mission
+    lastRun?: Mission
     area?: Area
     isDeprecated: boolean
     sourceType: string
@@ -26,7 +26,7 @@ export interface MissionDefinition {
     installationCode: string
     comment?: string
     inspectionFrequency?: string
-    lastRun: Mission
+    lastRun?: Mission
     area?: Area
     isDeprecated: boolean
     sourceType: string
