@@ -1,23 +1,23 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-
 namespace Api.Services
 {
     public interface ITimeseriesService
     {
-        public abstract Task<IEnumerable<T>> ReadAll<T>(
+        public Task<IEnumerable<T>> ReadAll<T>(
             TimeseriesQueryStringParameters queryStringParameters
         ) where T : TimeseriesBase;
 
-        public abstract Task<T> Create<T>(T newTimeseries) where T : TimeseriesBase;
+        public Task<T> Create<T>(T newTimeseries) where T : TimeseriesBase;
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Globalization",
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
@@ -30,8 +30,8 @@ namespace Api.Services
         public TimeseriesService(FlotillaDbContext context)
         {
             string? connectionString = context.Database.GetConnectionString() ?? throw new NotSupportedException(
-                    "Could not get connection string from EF core Database context - Cannot connect to Timeseries"
-                );
+                "Could not get connection string from EF core Database context - Cannot connect to Timeseries"
+            );
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
             _dataSource = dataSourceBuilder.Build();
             _context = context;
@@ -124,14 +124,14 @@ namespace Api.Services
             Expression<Func<T, bool>> missionIdFilter = parameters.MissionId is null
                 ? timeseries => true
                 : timeseries =>
-                      timeseries.MissionId == null
-                      || timeseries.MissionId.Equals(parameters.MissionId);
+                    timeseries.MissionId == null
+                    || timeseries.MissionId.Equals(parameters.MissionId);
 
-            var minStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinTime);
-            var maxStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxTime);
+            var minStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinTime);
+            var maxStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxTime);
             Expression<Func<T, bool>> timeFilter = timeseries =>
-                DateTimeOffset.Compare(timeseries.Time, minStartTime) >= 0
-                && DateTimeOffset.Compare(timeseries.Time, maxStartTime) <= 0;
+                DateTime.Compare(timeseries.Time, minStartTime) >= 0
+                && DateTime.Compare(timeseries.Time, maxStartTime) <= 0;
 
             // The parameter of the filter expression
             var timeseries = Expression.Parameter(typeof(T));
@@ -200,9 +200,11 @@ namespace Api.Services
                 );
             }
             else
+            {
                 throw new NotImplementedException(
                     $"No parameter values defined for timeseries type '{nameof(T)}'"
                 );
+            }
         }
 
         private static string GetColumnNames<T>(T entity) where T : TimeseriesBase
@@ -233,7 +235,8 @@ namespace Api.Services
 
             if (entity is RobotPoseTimeseries robotPoseTimeseries)
             {
-                return $"{namePrefix}{nameof(robotPoseTimeseries.PositionX)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.PositionY)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.PositionZ)}{namePostfix},"
+                return
+                    $"{namePrefix}{nameof(robotPoseTimeseries.PositionX)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.PositionY)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.PositionZ)}{namePostfix},"
                     + $"{namePrefix}{nameof(robotPoseTimeseries.OrientationX)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.OrientationY)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.OrientationZ)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.OrientationW)}{namePostfix},";
             }
 

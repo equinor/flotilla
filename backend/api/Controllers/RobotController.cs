@@ -695,7 +695,7 @@ namespace Api.Controllers
                 InstallationCode = "NA",
                 Area = area,
                 Status = MissionStatus.Pending,
-                DesiredStartTime = DateTimeOffset.UtcNow,
+                DesiredStartTime = DateTime.UtcNow,
                 Tasks = new List<MissionTask>(),
                 Map = new MapMetadata()
             };

@@ -22,19 +22,19 @@ namespace Api.EventHandlers
         public Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId);
 
         public Task UnfreezeMissionRunQueueForRobot(string robotId);
-
     }
 
     public class MissionScheduling : IMissionScheduling
     {
+        private readonly IAreaService _areaService;
         private readonly IIsarService _isarService;
         private readonly ILogger<MissionScheduling> _logger;
         private readonly IMissionRunService _missionRunService;
-        private readonly IAreaService _areaService;
-        private readonly IRobotService _robotService;
         private readonly IMissionSchedulingService _missionSchedulingService;
+        private readonly IRobotService _robotService;
 
-        public MissionScheduling(ILogger<MissionScheduling> logger, IMissionRunService missionRunService, IIsarService isarService, IRobotService robotService, IAreaService areaService, IMissionSchedulingService missionSchedulingService)
+        public MissionScheduling(ILogger<MissionScheduling> logger, IMissionRunService missionRunService, IIsarService isarService, IRobotService robotService, IAreaService areaService,
+            IMissionSchedulingService missionSchedulingService)
         {
             _logger = logger;
             _missionRunService = missionRunService;
@@ -80,39 +80,6 @@ namespace Api.EventHandlers
                 return false;
             }
             return await TheSystemIsAvailableToRunAMission(robot, missionRun);
-        }
-
-        public async Task<bool> TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
-        {
-            bool ongoingMission = await OngoingMission(robot.Id);
-
-            if (robot.MissionQueueFrozen && missionRun.MissionRunPriority != MissionRunPriority.Emergency)
-            {
-                _logger.LogInformation("Mission run {MissionRunId} was not started as the mission run queue for robot {RobotName} is frozen", missionRun.Id, robot.Name);
-                return false;
-            }
-
-            if (ongoingMission)
-            {
-                _logger.LogInformation("Mission run {MissionRunId} was not started as there is already an ongoing mission", missionRun.Id);
-                return false;
-            }
-            if (robot.Status is not RobotStatus.Available)
-            {
-                _logger.LogInformation("Mission run {MissionRunId} was not started as the robot is not available", missionRun.Id);
-                return false;
-            }
-            if (!robot.Enabled)
-            {
-                _logger.LogWarning("Mission run {MissionRunId} was not started as the robot {RobotId} is not enabled", missionRun.Id, robot.Id);
-                return false;
-            }
-            if (missionRun.DesiredStartTime > DateTimeOffset.UtcNow)
-            {
-                _logger.LogInformation("Mission run {MissionRunId} was not started as the start time is in the future", missionRun.Id);
-                return false;
-            }
-            return true;
         }
 
         public async Task<bool> OngoingMission(string robotId)
@@ -195,7 +162,7 @@ namespace Api.EventHandlers
             {
                 foreach (var mission in ongoingMissions)
                 {
-                    if (mission.MissionRunPriority == MissionRunPriority.Emergency) continue;
+                    if (mission.MissionRunPriority == MissionRunPriority.Emergency) { continue; }
 
                     var newMission = new MissionRun
                     {
@@ -205,7 +172,7 @@ namespace Api.EventHandlers
                         InstallationCode = mission.InstallationCode,
                         Area = mission.Area,
                         Status = MissionStatus.Pending,
-                        DesiredStartTime = DateTimeOffset.UtcNow,
+                        DesiredStartTime = DateTime.UtcNow,
                         Tasks = mission.Tasks,
                         Map = new MapMetadata()
                     };
@@ -275,7 +242,7 @@ namespace Api.EventHandlers
                 InstallationCode = area.Installation!.InstallationCode,
                 Area = area,
                 Status = MissionStatus.Pending,
-                DesiredStartTime = DateTimeOffset.UtcNow,
+                DesiredStartTime = DateTime.UtcNow,
                 Tasks = new List<MissionTask>(new[]
                 {
                     new MissionTask(customTaskQuery)
@@ -286,10 +253,42 @@ namespace Api.EventHandlers
             await _missionRunService.Create(missionRun);
         }
 
+        public async Task<bool> TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
+        {
+            bool ongoingMission = await OngoingMission(robot.Id);
+
+            if (robot.MissionQueueFrozen && missionRun.MissionRunPriority != MissionRunPriority.Emergency)
+            {
+                _logger.LogInformation("Mission run {MissionRunId} was not started as the mission run queue for robot {RobotName} is frozen", missionRun.Id, robot.Name);
+                return false;
+            }
+
+            if (ongoingMission)
+            {
+                _logger.LogInformation("Mission run {MissionRunId} was not started as there is already an ongoing mission", missionRun.Id);
+                return false;
+            }
+            if (robot.Status is not RobotStatus.Available)
+            {
+                _logger.LogInformation("Mission run {MissionRunId} was not started as the robot is not available", missionRun.Id);
+                return false;
+            }
+            if (!robot.Enabled)
+            {
+                _logger.LogWarning("Mission run {MissionRunId} was not started as the robot {RobotId} is not enabled", missionRun.Id, robot.Id);
+                return false;
+            }
+            if (missionRun.DesiredStartTime > DateTime.UtcNow)
+            {
+                _logger.LogInformation("Mission run {MissionRunId} was not started as the start time is in the future", missionRun.Id);
+                return false;
+            }
+            return true;
+        }
+
         public static bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue)
         {
             return !missionRunQueue.Any();
         }
-
     }
 }

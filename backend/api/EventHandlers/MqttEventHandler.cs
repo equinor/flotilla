@@ -328,7 +328,7 @@ namespace Api.EventHandlers
                         MissionId = robot.CurrentMissionId,
                         BatteryLevel = batteryStatus.BatteryLevel,
                         RobotId = robot.Id,
-                        Time = DateTimeOffset.UtcNow
+                        Time = DateTime.UtcNow
                     }
                 );
                 _logger.LogDebug("Updated battery on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
@@ -359,7 +359,7 @@ namespace Api.EventHandlers
                         MissionId = robot.CurrentMissionId,
                         Pressure = pressureStatus.PressureLevel,
                         RobotId = robot.Id,
-                        Time = DateTimeOffset.UtcNow
+                        Time = DateTime.UtcNow
                     }
                 );
                 _logger.LogDebug("Updated pressure on '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);

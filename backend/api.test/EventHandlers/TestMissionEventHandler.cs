@@ -34,27 +34,27 @@ namespace Api.Test.EventHandlers
             Name = "test test",
             Installation = testInstallation
         };
+        private readonly IAreaService _areaService;
         private readonly FlotillaDbContext _context;
+        private readonly IDeckService _deckService;
+        private readonly IDefaultLocalizationPoseService _defaultLocalisationPoseService;
+        private readonly IInstallationService _installationService;
+        private readonly IIsarService _isarServiceMock;
 
         private readonly MissionEventHandler _missionEventHandler;
         private readonly IMissionRunService _missionRunService;
+        private readonly IMissionScheduling _missionScheduling;
+        private readonly IMissionSchedulingService _missionSchedulingService;
 
 #pragma warning disable IDE0052
         private readonly MqttEventHandler _mqttEventHandler;
 #pragma warning restore IDE0052
 
         private readonly MqttService _mqttService;
+        private readonly IPlantService _plantService;
         private readonly RobotControllerMock _robotControllerMock;
         private readonly IRobotModelService _robotModelService;
         private readonly IRobotService _robotService;
-        private readonly IMissionScheduling _missionScheduling;
-        private readonly IIsarService _isarServiceMock;
-        private readonly IInstallationService _installationService;
-        private readonly IDefaultLocalizationPoseService _defaultLocalisationPoseService;
-        private readonly IPlantService _plantService;
-        private readonly IDeckService _deckService;
-        private readonly IAreaService _areaService;
-        private readonly IMissionSchedulingService _missionSchedulingService;
 
         public TestMissionEventHandler(DatabaseFixture fixture)
         {
@@ -142,7 +142,7 @@ namespace Api.Test.EventHandlers
                 MissionId = Guid.NewGuid().ToString(),
                 MissionRunPriority = MissionRunPriority.Normal,
                 Status = MissionStatus.Pending,
-                DesiredStartTime = DateTimeOffset.Now,
+                DesiredStartTime = DateTime.Now,
                 Area = NewArea,
                 Map = new MapMetadata
                 {

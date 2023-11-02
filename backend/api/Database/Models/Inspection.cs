@@ -3,57 +3,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Api.Controllers.Models;
 using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
-
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
     [Owned]
     public class Inspection
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
-
-        [MaxLength(200)]
-        // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-        public string? IsarStepId { get; private set; } = Guid.NewGuid().ToString();
 
         private InspectionStatus _status;
-
-        [Required]
-        public InspectionStatus Status
-        {
-            get { return _status; }
-            set
-            {
-                _status = value;
-                if (IsCompleted && EndTime is null)
-                    EndTime = DateTimeOffset.UtcNow;
-
-                if (_status is InspectionStatus.InProgress && StartTime is null)
-                    StartTime = DateTimeOffset.UtcNow;
-            }
-        }
-
-        public bool IsCompleted =>
-            _status
-                is InspectionStatus.Cancelled
-                    or InspectionStatus.Successful
-                    or InspectionStatus.Failed;
-
-        [Required]
-        public InspectionType InspectionType { get; set; }
-
-        public float? VideoDuration { get; set; }
-
-        public AnalysisType? AnalysisType { get; set; }
-
-        [MaxLength(250)]
-        public string? InspectionUrl { get; set; }
-
-        public DateTimeOffset? StartTime { get; private set; }
-
-        public DateTimeOffset? EndTime { get; private set; }
 
         public Inspection()
         {
@@ -87,6 +44,46 @@ namespace Api.Database.Models
             AnalysisType = copy.AnalysisType;
             InspectionUrl = copy.InspectionUrl;
         }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public string Id { get; set; }
+
+        [MaxLength(200)]
+        // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
+        public string? IsarStepId { get; private set; } = Guid.NewGuid().ToString();
+
+        [Required]
+        public InspectionStatus Status
+        {
+            get => _status;
+            set
+            {
+                _status = value;
+                if (IsCompleted && EndTime is null) { EndTime = DateTime.UtcNow; }
+
+                if (_status is InspectionStatus.InProgress && StartTime is null) { StartTime = DateTime.UtcNow; }
+            }
+        }
+
+        public bool IsCompleted =>
+            _status
+                is InspectionStatus.Cancelled
+                or InspectionStatus.Successful
+                or InspectionStatus.Failed;
+
+        [Required]
+        public InspectionType InspectionType { get; set; }
+
+        public float? VideoDuration { get; set; }
+
+        public AnalysisType? AnalysisType { get; set; }
+
+        [MaxLength(250)]
+        public string? InspectionUrl { get; set; }
+
+        public DateTime? StartTime { get; private set; }
+
+        public DateTime? EndTime { get; private set; }
 
         public void UpdateWithIsarInfo(IsarStep isarStep)
         {
@@ -99,9 +96,9 @@ namespace Api.Database.Models
                 IsarStepType.TakeVideo => InspectionType.Video,
                 IsarStepType.TakeThermalVideo => InspectionType.ThermalVideo,
                 _
-                  => throw new ArgumentException(
-                      $"ISAR step type '{isarStep.StepType}' not supported for inspections"
-                  )
+                    => throw new ArgumentException(
+                        $"ISAR step type '{isarStep.StepType}' not supported for inspections"
+                    )
             };
         }
 
@@ -115,9 +112,9 @@ namespace Api.Database.Models
                 IsarStepStatus.Cancelled => InspectionStatus.Cancelled,
                 IsarStepStatus.Failed => InspectionStatus.Failed,
                 _
-                  => throw new ArgumentException(
-                      $"ISAR step status '{isarStatus}' not supported for inspection status"
-                  )
+                    => throw new ArgumentException(
+                        $"ISAR step status '{isarStatus}' not supported for inspection status"
+                    )
             };
         }
     }
@@ -143,6 +140,6 @@ namespace Api.Database.Models
     public enum AnalysisType
     {
         CarSeal,
-        RtjFlange,
+        RtjFlange
     }
 }

@@ -26,12 +26,12 @@ namespace Api.Database.Models
                 _status = value;
                 if (IsCompleted && EndTime is null)
                 {
-                    EndTime = DateTimeOffset.UtcNow;
+                    EndTime = DateTime.UtcNow;
                 }
 
                 if (_status is MissionStatus.Ongoing && StartTime is null)
                 {
-                    StartTime = DateTimeOffset.UtcNow;
+                    StartTime = DateTime.UtcNow;
                 }
             }
         }
@@ -41,7 +41,7 @@ namespace Api.Database.Models
         public string InstallationCode { get; set; }
 
         [Required]
-        public DateTimeOffset DesiredStartTime { get; set; }
+        public DateTime DesiredStartTime { get; set; }
 
         [Required]
         public virtual Robot Robot { get; set; }
@@ -81,9 +81,9 @@ namespace Api.Database.Models
 
         public MapMetadata? Map { get; set; }
 
-        public DateTimeOffset? StartTime { get; private set; }
+        public DateTime? StartTime { get; private set; }
 
-        public DateTimeOffset? EndTime { get; private set; }
+        public DateTime? EndTime { get; private set; }
 
         /// <summary>
         ///     The estimated duration of the mission in seconds
@@ -139,7 +139,7 @@ namespace Api.Database.Models
                     task => task.Inspections.Sum(inspection => inspection.VideoDuration ?? 0)
                 );
                 EstimatedDuration = (uint)(
-                    (Robot.Model.AverageDurationPerTag * Tasks.Count) + totalInspectionDuration
+                    Robot.Model.AverageDurationPerTag * Tasks.Count + totalInspectionDuration
                 );
             }
             else
@@ -166,8 +166,8 @@ namespace Api.Database.Models
                     prevPosition = currentPosition;
                 }
                 int estimate = (int)(
-                    (distance / (RobotVelocity * EfficiencyFactor))
-                    + (numberOfTags * InspectionTime)
+                    distance / (RobotVelocity * EfficiencyFactor)
+                    + numberOfTags * InspectionTime
                 );
                 EstimatedDuration = (uint)estimate * 60;
             }
