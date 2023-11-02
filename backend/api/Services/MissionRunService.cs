@@ -69,27 +69,12 @@ namespace Api.Services
             _logger = logger;
         }
 
-        private IQueryable<MissionRun> GetMissionRunsWithSubModels()
-        {
-            return _context.MissionRuns
-                .Include(missionRun => missionRun.Area)
-                .ThenInclude(area => area != null ? area.Deck : null)
-                .ThenInclude(deck => deck != null ? deck.Plant : null)
-                .ThenInclude(plant => plant != null ? plant.Installation : null)
-                .Include(missionRun => missionRun.Robot)
-                .ThenInclude(robot => robot.VideoStreams)
-                .Include(missionRun => missionRun.Robot)
-                .ThenInclude(robot => robot.Model)
-                .Include(missionRun => missionRun.Tasks)
-                .ThenInclude(planTask => planTask.Inspections)
-                .Include(missionRun => missionRun.Tasks)
-                .ThenInclude(task => task.Inspections);
-        }
-
         public async Task<MissionRun> Create(MissionRun missionRun)
         {
             // Making sure database does not try to create new robot
             _context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+            if (missionRun.Area is not null) { _context.Entry(missionRun.Area).State = EntityState.Unchanged; }
+
             await _context.MissionRuns.AddAsync(missionRun);
             await _context.SaveChangesAsync();
 
@@ -154,6 +139,23 @@ namespace Api.Services
 
 
             return missionRun;
+        }
+
+        private IQueryable<MissionRun> GetMissionRunsWithSubModels()
+        {
+            return _context.MissionRuns
+                .Include(missionRun => missionRun.Area)
+                .ThenInclude(area => area != null ? area.Deck : null)
+                .ThenInclude(deck => deck != null ? deck.Plant : null)
+                .ThenInclude(plant => plant != null ? plant.Installation : null)
+                .Include(missionRun => missionRun.Robot)
+                .ThenInclude(robot => robot.VideoStreams)
+                .Include(missionRun => missionRun.Robot)
+                .ThenInclude(robot => robot.Model)
+                .Include(missionRun => missionRun.Tasks)
+                .ThenInclude(planTask => planTask.Inspections)
+                .Include(missionRun => missionRun.Tasks)
+                .ThenInclude(task => task.Inspections);
         }
 
         protected virtual void OnMissionRunCreated(MissionRunCreatedEventArgs e)
@@ -271,15 +273,15 @@ namespace Api.Services
             var maxStartTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxStartTime);
             Expression<Func<MissionRun, bool>> startTimeFilter = missionRun =>
                 missionRun.StartTime == null
-                || (DateTimeOffset.Compare(missionRun.StartTime.Value, minStartTime) >= 0
-                && DateTimeOffset.Compare(missionRun.StartTime.Value, maxStartTime) <= 0);
+                || DateTimeOffset.Compare(missionRun.StartTime.Value, minStartTime) >= 0
+                && DateTimeOffset.Compare(missionRun.StartTime.Value, maxStartTime) <= 0;
 
             var minEndTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MinEndTime);
             var maxEndTime = DateTimeOffset.FromUnixTimeSeconds(parameters.MaxEndTime);
             Expression<Func<MissionRun, bool>> endTimeFilter = missionRun =>
                 missionRun.EndTime == null
-                || (DateTimeOffset.Compare(missionRun.EndTime.Value, minEndTime) >= 0
-                && DateTimeOffset.Compare(missionRun.EndTime.Value, maxEndTime) <= 0);
+                || DateTimeOffset.Compare(missionRun.EndTime.Value, minEndTime) >= 0
+                && DateTimeOffset.Compare(missionRun.EndTime.Value, maxEndTime) <= 0;
 
             var minDesiredStartTime = DateTimeOffset.FromUnixTimeSeconds(
                 parameters.MinDesiredStartTime

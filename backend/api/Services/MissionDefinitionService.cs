@@ -68,6 +68,9 @@ namespace Api.Services
 
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
         {
+            if (missionDefinition.LastRun is not null) { _context.Entry(missionDefinition.LastRun).State = EntityState.Unchanged; }
+            if (missionDefinition.Area is not null) { _context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
+
             await _context.MissionDefinitions.AddAsync(missionDefinition);
             await _context.SaveChangesAsync();
 
@@ -119,6 +122,7 @@ namespace Api.Services
         public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)
         {
             if (missionDefinition.LastRun is not null) { _context.Entry(missionDefinition.LastRun.Robot).State = EntityState.Unchanged; }
+            if (missionDefinition.Area is not null) { _context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
 
             var entry = _context.Update(missionDefinition);
             await _context.SaveChangesAsync();
@@ -129,10 +133,7 @@ namespace Api.Services
         {
             // We do not delete the source here as more than one mission definition may be using it
             var missionDefinition = await ReadById(id);
-            if (missionDefinition is null)
-            {
-                return null;
-            }
+            if (missionDefinition is null) { return null; }
 
             missionDefinition.IsDeprecated = true;
             await _context.SaveChangesAsync();

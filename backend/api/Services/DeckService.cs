@@ -1,38 +1,36 @@
-﻿using System.Data;
+﻿using System.Diagnostics.CodeAnalysis;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
-
 namespace Api.Services
 {
     public interface IDeckService
     {
-        public abstract Task<IEnumerable<Deck>> ReadAll();
+        public Task<IEnumerable<Deck>> ReadAll();
 
-        public abstract Task<Deck?> ReadById(string id);
+        public Task<Deck?> ReadById(string id);
 
-        public abstract Task<IEnumerable<Deck>> ReadByInstallation(string installationCode);
+        public Task<IEnumerable<Deck>> ReadByInstallation(string installationCode);
 
-        public abstract Task<Deck?> ReadByName(string deckName);
+        public Task<Deck?> ReadByName(string deckName);
 
-        public abstract Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string deckName);
+        public Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string deckName);
 
-        public abstract Task<Deck> Create(CreateDeckQuery newDeck);
+        public Task<Deck> Create(CreateDeckQuery newDeck);
 
-        public abstract Task<Deck> Update(Deck deck);
+        public Task<Deck> Update(Deck deck);
 
-        public abstract Task<Deck?> Delete(string id);
-
+        public Task<Deck?> Delete(string id);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Globalization",
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+    [SuppressMessage(
         "Globalization",
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
@@ -57,11 +55,6 @@ namespace Api.Services
             return await GetDecks().ToListAsync();
         }
 
-        private IQueryable<Deck> GetDecks()
-        {
-            return _context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose);
-        }
-
         public async Task<Deck?> ReadById(string id)
         {
             return await GetDecks()
@@ -71,16 +64,14 @@ namespace Api.Services
         public async Task<IEnumerable<Deck>> ReadByInstallation(string installationCode)
         {
             var installation = await _installationService.ReadByName(installationCode);
-            if (installation == null)
-                return new List<Deck>();
+            if (installation == null) { return new List<Deck>(); }
             return await _context.Decks.Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
         public async Task<Deck?> ReadByName(string deckName)
         {
-            if (deckName == null)
-                return null;
+            if (deckName == null) { return null; }
             return await _context.Decks.Where(a =>
                 a.Name.ToLower().Equals(deckName.ToLower())
             ).FirstOrDefaultAsync();
@@ -98,9 +89,9 @@ namespace Api.Services
         public async Task<Deck> Create(CreateDeckQuery newDeckQuery)
         {
             var installation = await _installationService.ReadByName(newDeckQuery.InstallationCode) ??
-                throw new InstallationNotFoundException($"No installation with name {newDeckQuery.InstallationCode} could be found");
+                               throw new InstallationNotFoundException($"No installation with name {newDeckQuery.InstallationCode} could be found");
             var plant = await _plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode) ??
-                throw new PlantNotFoundException($"No plant with name {newDeckQuery.PlantCode} could be found");
+                        throw new PlantNotFoundException($"No plant with name {newDeckQuery.PlantCode} could be found");
             var existingDeck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name);
 
             if (existingDeck != null)
@@ -122,6 +113,11 @@ namespace Api.Services
                 Plant = plant,
                 DefaultLocalizationPose = defaultLocalizationPose
             };
+
+            _context.Entry(deck.Installation).State = EntityState.Unchanged;
+            _context.Entry(deck.Plant).State = EntityState.Unchanged;
+            if (deck.DefaultLocalizationPose is not null) { _context.Entry(deck.DefaultLocalizationPose).State = EntityState.Modified; }
+
             await _context.Decks.AddAsync(deck);
             await _context.SaveChangesAsync();
             return deck!;
@@ -147,6 +143,11 @@ namespace Api.Services
             await _context.SaveChangesAsync();
 
             return deck;
+        }
+
+        private IQueryable<Deck> GetDecks()
+        {
+            return _context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose);
         }
     }
 }
