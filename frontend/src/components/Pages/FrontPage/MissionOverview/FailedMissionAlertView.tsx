@@ -89,7 +89,7 @@ export function FailedMissionAlertView({ refreshInterval }: RefreshProps) {
         const sessionValue = sessionStorage.getItem(DismissalTimeSessionKeyName)
 
         var lastTime: Date
-        if (sessionValue === null || sessionValue === '') {
+        if (!sessionValue || sessionValue === '') {
             lastTime = addMinutes(Date.now(), -DefaultTimeInterval)
         } else {
             lastTime = JSON.parse(sessionValue)

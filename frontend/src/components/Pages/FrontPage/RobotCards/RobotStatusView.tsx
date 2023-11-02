@@ -61,7 +61,7 @@ export function RobotStatusSection({ refreshInterval }: RefreshProps) {
         return (
             robot.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase() ||
             (typeof robot.currentInstallation === 'string' && robot.currentInstallation.includes('default')) ||
-            robot.currentInstallation === undefined
+            !robot.currentInstallation
         )
     })
 

@@ -26,7 +26,7 @@ export class BackendAPICaller {
 
     /**  API is not ready until access token has been set for the first time */
     private static async ApiReady() {
-        while (this.accessToken === null || this.accessToken === '') {
+        while (!this.accessToken || this.accessToken === '') {
             await timeout(500)
         }
     }
