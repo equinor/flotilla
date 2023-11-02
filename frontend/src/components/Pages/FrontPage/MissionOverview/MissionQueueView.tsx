@@ -74,12 +74,12 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
         setSelectedEchoMissions(echoMissionsToSchedule)
     }
     const onSelectedRobot = (selectedRobot: Robot) => {
-        if (robotOptions === undefined) return
+        if (!robotOptions) return
         setSelectedRobot(selectedRobot)
     }
 
     const onScheduleButtonPress = () => {
-        if (selectedRobot === undefined) return
+        if (!selectedRobot) return
 
         selectedEchoMissions.forEach((mission: EchoMissionDefinition) => {
             BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode)
@@ -108,7 +108,7 @@ export function MissionQueueView({ refreshInterval }: RefreshProps) {
     }, [refreshInterval])
 
     useEffect(() => {
-        if (selectedRobot === undefined || selectedEchoMissions.length === 0) {
+        if (!selectedRobot || selectedEchoMissions.length === 0) {
             setScheduleButtonDisabled(true)
         } else {
             setScheduleButtonDisabled(false)

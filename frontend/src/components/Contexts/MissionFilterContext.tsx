@@ -243,11 +243,11 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 return !value || value.length === 0
             },
             dateTimeStringToInt: (dateTimeString: string | undefined) => {
-                if (dateTimeString === '' || dateTimeString === undefined) return undefined
+                if (dateTimeString === '' || !dateTimeString) return undefined
                 return new Date(dateTimeString).getTime() / 1000
             },
             dateTimeIntToString: (dateTimeNumber: number | undefined) => {
-                if (dateTimeNumber === 0 || dateTimeNumber === undefined) return undefined
+                if (dateTimeNumber === 0 || !dateTimeNumber) return undefined
                 const t = new Date(dateTimeNumber * 1000)
                 const z = new Date(t.getTimezoneOffset() * 60 * 1000)
                 const tLocal = new Date(t.getTime() - z.getTime())
@@ -257,7 +257,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 return iso.slice(0, -3) // Removes :00 at the end
             },
             dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => {
-                if (dateTimeNumber === 0 || dateTimeNumber === undefined) return undefined
+                if (dateTimeNumber === 0 || !dateTimeNumber) return undefined
                 const t = new Date(dateTimeNumber * 1000)
                 const z = new Date(t.getTimezoneOffset() * 60 * 1000)
                 const tLocal = new Date(t.getTime() - z.getTime())

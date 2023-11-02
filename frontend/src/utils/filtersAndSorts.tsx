@@ -7,8 +7,5 @@ export const filterRobots = (robots: Robot[], id: string): Robot[] => {
 }
 
 export const compareByDate = (timeA?: Date, timeB?: Date): number => {
-    return compareDesc(
-        timeA === undefined ? new Date(0) : new Date(timeA),
-        timeB === undefined ? new Date(0) : new Date(timeB)
-    )
+    return compareDesc(!timeA ? new Date(0) : new Date(timeA), !timeB ? new Date(0) : new Date(timeB))
 }

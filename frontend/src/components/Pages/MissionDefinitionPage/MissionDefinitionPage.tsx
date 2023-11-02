@@ -183,9 +183,9 @@ function MissionDefinitionEditButtons({ missionDefinition, updateMissionDefiniti
 
     const inspectionFrequency = getDayAndHoursFromInspectionFrequency(form.inspectionFrequency)
     const inspectionFrequencyDays =
-        inspectionFrequency[0] === null || inspectionFrequency[0] === 0 ? '' : String(inspectionFrequency[0])
+        !inspectionFrequency[0] || inspectionFrequency[0] === 0 ? '' : String(inspectionFrequency[0])
     const inspectionFrequencyHours =
-        inspectionFrequency[1] === null || inspectionFrequency[1] === 0 ? '' : String(inspectionFrequency[1])
+        !inspectionFrequency[1] || inspectionFrequency[1] === 0 ? '' : String(inspectionFrequency[1])
 
     return (
         <>

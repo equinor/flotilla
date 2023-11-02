@@ -83,13 +83,13 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     let timer: ReturnType<typeof setTimeout>
 
     const onSelectedRobot = (selectedRobot: Robot) => {
-        if (robotOptions === undefined) return
+        if (!robotOptions) return
 
         setSelectedRobot(selectedRobot)
     }
 
     const onScheduleButtonPress = () => {
-        if (selectedRobot === undefined) return
+        if (!selectedRobot) return
 
         props.missions.forEach((mission) => BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id))
 
@@ -104,7 +104,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     }
 
     const onScheduleOnlyButtonPress = () => {
-        if (selectedRobot === undefined) return
+        if (!selectedRobot) return
 
         props.unscheduledMissions.forEach((mission) =>
             BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id)

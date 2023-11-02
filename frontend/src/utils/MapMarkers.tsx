@@ -16,7 +16,7 @@ export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
             return task.taskOrder
         })
     )
-    if (currentTaskOrder === undefined) {
+    if (!currentTaskOrder) {
         currentTaskOrder = mission.isCompleted ? maxTaskOrder + 1 : 0
     }
 

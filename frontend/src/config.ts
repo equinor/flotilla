@@ -9,7 +9,7 @@ function GetEnvVariable(name: string): string {
         // If global value equals its placeholder value 'placeholderValue', it is considered undefined
         const placeholderValue: string = '${' + name + '}'
 
-        if (globalValue === placeholderValue || globalValue === undefined)
+        if (globalValue === placeholderValue || !globalValue)
             throw new Error(
                 `Global variable "${name}" is not set. Verify that your .env file is up to date with .env.example`
             )

@@ -14,7 +14,7 @@ interface MissionProps {
 }
 
 export function StatusReason({ mission }: MissionProps) {
-    if (mission.statusReason === null) return <></>
+    if (!mission.statusReason) return <></>
 
     var warningLevel: 'default' | 'info' | 'warning' | 'danger' = 'info'
     switch (mission.status) {
