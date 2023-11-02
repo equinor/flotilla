@@ -29,9 +29,10 @@ const HorizontalContent = styled.div`
 `
 const HorizontalNonButtonContent = styled.div`
     display: grid;
-    grid-template-columns: 20px 400px auto 90px 180px;
+    grid-template-columns: 20px 380px auto auto 180px;
     align-items: center;
-    padding-left: 10px;
+    padding: 4px 0px 4px 10px;
+    gap: 10px;
 `
 
 const StyledDialogContent = styled.div`
