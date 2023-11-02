@@ -118,6 +118,8 @@ namespace Api.Services
 
         public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)
         {
+            if (missionDefinition.LastRun is not null) { _context.Entry(missionDefinition.LastRun.Robot).State = EntityState.Unchanged; }
+
             var entry = _context.Update(missionDefinition);
             await _context.SaveChangesAsync();
             return entry.Entity;
