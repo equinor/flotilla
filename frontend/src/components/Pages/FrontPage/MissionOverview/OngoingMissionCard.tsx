@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import { MissionControlButtons } from './MissionControlButtons'
 import BatteryStatusView from '../RobotCards/BatteryStatusView'
 import { BatteryStatus } from 'models/Battery'
+import { MissionRobotDisplay } from './MissionRobotDisplay'
 
 interface MissionProps {
     mission: Mission
@@ -18,44 +19,24 @@ const StyledMissionCard = styled(Card)`
     width: 432px;
     padding: 10px;
 `
-
 const StyledTitle = styled(Card)`
     width: 70%;
     height: 80%;
+    justify-content: center;
+    padding-left: 12px;
     :hover {
         background-color: #deedee;
     }
     box-shadow: none;
 `
-const HorizontalContent = styled.div`
-    display: grid;
-    grid-template-columns: auto auto auto;
-    align-items: end;
-    gap: 1rem;
-`
 const TopContent = styled.div`
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
 `
 const BottomContent = styled.div`
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: end;
-    padding-right: 25px;
-`
-const VerticalContent = styled.div`
-    display: grid;
-    grid-template-rows: auto auto;
     justify-content: space-between;
 `
-
-const StyledPadding = styled.div`
-    padding: 10px;
-    border-radius: 3px;
-`
-
 export function OngoingMissionCard({ mission }: MissionProps) {
     let navigate = useNavigate()
     const routeChange = () => {
@@ -63,41 +44,24 @@ export function OngoingMissionCard({ mission }: MissionProps) {
         navigate(path)
     }
     return (
-        <StyledMissionCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
+        <StyledMissionCard style={{ boxShadow: tokens.elevation.raised }}>
             <TopContent>
-                <StyledTitle variant="default" onClick={routeChange}>
-                    <StyledPadding>
-                        <Typography variant="h6" color="primary">
-                            {mission.name}
-                        </Typography>
-                    </StyledPadding>
+                <StyledTitle onClick={routeChange}>
+                    <Typography variant="h6" color="primary">
+                        {mission.name}
+                    </Typography>
                 </StyledTitle>
                 <MissionControlButtons mission={mission} />
             </TopContent>
             <BottomContent>
-                <VerticalContent>
-                    <Typography variant="meta" color="#6F6F6F">
-                        {'Status'}
-                    </Typography>
-                    <HorizontalContent>
-                        <MissionStatusDisplay status={mission.status} />
-                        <MissionProgressDisplay mission={mission} />
-                        <BatteryStatusView
-                            battery={mission.robot.batteryLevel}
-                            batteryStatus={BatteryStatus.Normal}
-                            robotStatus={mission.robot.status}
-                        />
-                    </HorizontalContent>
-                </VerticalContent>
-                <div>
-                    <Typography variant="meta" color="#6F6F6F">
-                        {'Robot'}
-                    </Typography>
-                    <Typography variant="body_short" color="#3D3D3D">
-                        {' '}
-                        {mission.robot.name}
-                    </Typography>
-                </div>
+                <MissionStatusDisplay status={mission.status} />
+                <MissionProgressDisplay mission={mission} />
+                <MissionRobotDisplay mission={mission} />
+                <BatteryStatusView
+                    battery={mission.robot.batteryLevel}
+                    batteryStatus={BatteryStatus.Normal}
+                    robotStatus={mission.robot.status}
+                />
             </BottomContent>
         </StyledMissionCard>
     )

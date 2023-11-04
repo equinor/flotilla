@@ -7,7 +7,7 @@ import { RobotStatus } from 'models/Robot'
 
 const BatteryAlignment = styled.div`
     display: flex;
-    align-items: center;
+    align-items: end;
 `
 
 const StyledTopography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
