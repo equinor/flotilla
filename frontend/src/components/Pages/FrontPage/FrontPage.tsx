@@ -5,6 +5,7 @@ import { FailedMissionAlertView } from './MissionOverview/FailedMissionAlertView
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
 import { InspectionOverviewSection } from '../InspectionPage/InspectionOverview'
+import { StopRobotDialog } from './MissionOverview/StopDialogs'
 
 const StyledFrontPage = styled.div`
     display: grid;
@@ -33,6 +34,7 @@ export function FrontPage() {
             <Header page={'root'} />
             <StyledFrontPage>
                 <FailedMissionAlertView />
+                <StopRobotDialog />
                 <HorizontalContent>
                     <MissionsContent>
                         <OngoingMissionView />

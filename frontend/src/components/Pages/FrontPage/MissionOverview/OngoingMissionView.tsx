@@ -8,7 +8,6 @@ import { config } from 'config'
 import { Icons } from 'utils/icons'
 /* import { useOngoingMissionsContext } from 'components/Contexts/OngoingMissionsContext' */
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
-import { StopRobotDialog } from './StopDialogs'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -50,7 +49,6 @@ export function OngoingMissionView() {
                 <Typography variant="h1" color="resting">
                     {TranslateText('Ongoing Missions')}
                 </Typography>
-                <StopRobotDialog />
             </OngoingMissionHeader>
             <OngoingMissionSection>
                 {ongoingMissions.length > 0 && ongoingMissionscard}
