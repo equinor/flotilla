@@ -2,7 +2,7 @@
 
 ## Setup
 
-The app uses TypeScript and React. For development, Node v17.x needs to be installed. Installation instructions can be found
+The app uses TypeScript and React. For development, Node v20.x needs to be installed. Installation instructions can be found
 [here](https://github.com/nodesource/distributions/blob/master/README.md).
 
 The application reads environment variables from the `.env` file in the `frontend` folder.
