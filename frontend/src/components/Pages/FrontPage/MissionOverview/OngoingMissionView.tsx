@@ -6,7 +6,6 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
-/* import { useOngoingMissionsContext } from 'components/Contexts/OngoingMissionsContext' */
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 const StyledOngoingMissionView = styled.div`
