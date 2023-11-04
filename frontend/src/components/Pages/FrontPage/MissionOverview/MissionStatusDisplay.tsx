@@ -11,7 +11,12 @@ interface StatusProps {
 
 const StyledStatusDisplay = styled.div`
     display: flex;
-    gap: 0.3em;
+    flex-direction: column;
+    justify-content: space-between;
+`
+const StyledStatusIcon = styled.div`
+    display: flex;
+    gap: 4px;
     align-items: flex-end;
 `
 
@@ -40,8 +45,13 @@ export function MissionStatusDisplay({ status }: StatusProps) {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledStatusDisplay>
-            {displayIcon(status)}
-            <Typography>{TranslateText(status)}</Typography>
+            <Typography variant="meta" color={tokens.colors.text.static_icons__tertiary.hex}>
+                {TranslateText('Status')}
+            </Typography>
+            <StyledStatusIcon>
+                {displayIcon(status)}
+                <Typography>{TranslateText(status)}</Typography>
+            </StyledStatusIcon>
         </StyledStatusDisplay>
     )
 }

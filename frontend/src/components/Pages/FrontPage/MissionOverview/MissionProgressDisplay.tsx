@@ -8,6 +8,8 @@ import { tokens } from '@equinor/eds-tokens'
 
 const StyledTagCount = styled.div`
     display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 `
 interface MissionProps {
     mission: Mission
@@ -29,8 +31,11 @@ export function MissionProgressDisplay({ mission }: MissionProps) {
 
     return (
         <StyledTagCount>
-            <Typography style={{ color: tokens.colors.text.static_icons__tertiary.hex }}>
-                {TranslateText('Task')} {completedTasks}/{tasks.length}
+            <Typography variant="meta" color={tokens.colors.text.static_icons__tertiary.hex}>
+                {TranslateText('Completed Tasks')}
+            </Typography>
+            <Typography>
+                {completedTasks}/{tasks.length}
             </Typography>
         </StyledTagCount>
     )
