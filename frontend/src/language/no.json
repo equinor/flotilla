@@ -183,8 +183,8 @@
     "transport": "transport",
     "Queue the missions": "Legg oppdragene i kø",
     "Deck Overview": "Dekkoversikt",
-    "Predefined Missions": "Forhåndsdefinerte Oppdrag",
-    "Create a new mission in the Mission Planner": "Lag nytt oppdrag i Oppdragsplanlegger",
+    "Predefined Missions": "Forhåndsdefinerte oppdrag",
+    "Create a new mission in the Mission Planner": "Lag nytt oppdrag i oppdragsplanlegger",
     "Must be inspected this week": "Må inspiseres denne uken",
     "Must be inspected within two weeks": "Må inspiseres innen to uker",
     "Mission": "Oppdrag",
@@ -200,6 +200,6 @@
     "Dismiss robots from safe zone long text": "Vanlig drift kan fortsette ved å starte oppdragene i køen eller ved å slette dem.",
     "Dismiss robots from safe zone": "Slipp robotene ut av trygg sone",
     "Continue missions": "Fortsett oppdragene",
-    "Safe Zone": "Trygg Sone",
+    "Safe Zone": "Trygg sone",
     "Edit mission definition": "Rediger oppdragsdefinisjon"
 }
