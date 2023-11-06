@@ -278,11 +278,6 @@ namespace Api.EventHandlers
                 _logger.LogWarning("Mission run {MissionRunId} was not started as the robot {RobotId} is not enabled", missionRun.Id, robot.Id);
                 return false;
             }
-            if (missionRun.DesiredStartTime > DateTime.UtcNow)
-            {
-                _logger.LogInformation("Mission run {MissionRunId} was not started as the start time is in the future", missionRun.Id);
-                return false;
-            }
             return true;
         }
 
