@@ -4,6 +4,7 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { tokens } from '@equinor/eds-tokens'
+import styled from 'styled-components'
 
 interface RobotProps {
     robot: Robot
@@ -11,6 +12,12 @@ interface RobotProps {
     isRobotAvailable: boolean
 }
 const feedbackTimer = 10000 // Clear feedback after 10 seconds
+
+const StyledButton = styled.div`
+    display: flex;
+    justifycontent: center;
+    margintop: auto;
+`
 
 export function MoveRobotArm({ robot, armPosition, isRobotAvailable }: RobotProps) {
     const { TranslateText } = useLanguageContext()
@@ -71,9 +78,9 @@ export function MoveRobotArm({ robot, armPosition, isRobotAvailable }: RobotProp
                             'This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.'
                         )}
                     </Typography>
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'auto' }}>
+                    <StyledButton>
                         <Button onClick={closePopover}>{TranslateText('Close')}</Button>
-                    </div>
+                    </StyledButton>
                 </Popover.Content>
             </Popover>
             <Button style={moveArmButtonStyle()} onClick={!usable ? openPopover : onClickMoveArm} ref={anchorRef}>

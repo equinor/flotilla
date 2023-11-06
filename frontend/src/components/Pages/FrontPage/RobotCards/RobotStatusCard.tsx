@@ -44,9 +44,13 @@ const VerticalContent = styled.div<{ $alignItems?: string }>`
     gap: 4px;
 `
 
+const StyledPadding = styled.div`
+    padding: 8px;
+`
+
 function cardContent({ robot }: RobotProps) {
     return (
-        <div style={{ padding: '8px' }}>
+        <StyledPadding>
             <RobotImage robotType={robot.model.type} height="200px" />
             <HorizontalContent>
                 <VerticalContent $alignItems="start">
@@ -68,7 +72,7 @@ function cardContent({ robot }: RobotProps) {
                     />
                 </VerticalContent>
             </HorizontalContent>
-        </div>
+        </StyledPadding>
     )
 }
 
@@ -89,18 +93,16 @@ export function RobotStatusCardPlaceholder() {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledCard style={{ boxShadow: tokens.elevation.raised }}>
-            <div>
-                <RobotImage robotType={RobotType.NoneType} />
-                <Typography variant="h5" color="disabled">
-                    {TranslateText('No robot connected')}
-                </Typography>
-                <Typography variant="body_short" color="disabled">
-                    ----
-                </Typography>
-                <HorizontalContent>
-                    <RobotStatusChip />
-                </HorizontalContent>
-            </div>
+            <RobotImage robotType={RobotType.NoneType} />
+            <Typography variant="h5" color="disabled">
+                {TranslateText('No robot connected')}
+            </Typography>
+            <Typography variant="body_short" color="disabled">
+                ----
+            </Typography>
+            <HorizontalContent>
+                <RobotStatusChip />
+            </HorizontalContent>
         </StyledCard>
     )
 }
