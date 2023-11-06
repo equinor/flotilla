@@ -14,23 +14,13 @@ namespace Api.Test.Mocks
         {
             new EchoPlantInfo
             {
-                PlantCode = "testInstallationNextRun",
-                ProjectDescription = "testInstallationNextRun"
+                PlantCode = "testInstallation",
+                ProjectDescription = "testInstallation"
             },
             new EchoPlantInfo
             {
-                PlantCode = "TestInstallationMissionsInAreaTest",
-                ProjectDescription = "TestInstallationMissionsInAreaTest"
-            },
-            new EchoPlantInfo
-            {
-                PlantCode = "testInstallationScheduleDuplicateCustomMissionDefinitions",
-                ProjectDescription = "testInstallationScheduleDuplicateCustomMissionDefinitions"
-            },
-            new EchoPlantInfo
-            {
-                PlantCode = "testInstallationScheduleDuplicateEchoMissionDefinitions",
-                ProjectDescription = "testInstallationScheduleDuplicateEchoMissionDefinitions"
+                PlantCode = "JSV",
+                ProjectDescription = "JSVtestInstallation"
             }
         };
 
@@ -39,7 +29,7 @@ namespace Api.Test.Mocks
             {
                 Id = 1,
                 Name = "test",
-                InstallationCode = "JSV",
+                InstallationCode = "testInstallation",
                 URL = new Uri("https://www.I-am-echo-stid-tag-url.com"),
                 Tags = new List<EchoTag>()
             };

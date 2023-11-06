@@ -8,13 +8,13 @@ namespace Api.Controllers.Models
     public class CondensedMissionDefinitionResponse
     {
         [JsonPropertyName("id")]
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [JsonPropertyName("installationCode")]
-        public string InstallationCode { get; set; }
+        public string InstallationCode { get; set; } = string.Empty;
 
         [JsonPropertyName("comment")]
         public string? Comment { get; set; }
@@ -33,6 +33,9 @@ namespace Api.Controllers.Models
 
         [JsonPropertyName("sourceType")]
         public MissionSourceType SourceType { get; set; }
+
+        [JsonConstructor]
+        public CondensedMissionDefinitionResponse() { }
 
         public CondensedMissionDefinitionResponse(MissionDefinition missionDefinition)
         {
