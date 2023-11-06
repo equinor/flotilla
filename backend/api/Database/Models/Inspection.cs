@@ -12,43 +12,6 @@ namespace Api.Database.Models
 
         private InspectionStatus _status;
 
-        [Required]
-        public InspectionStatus Status
-        {
-            get { return _status; }
-            set
-            {
-                _status = value;
-                if (IsCompleted && EndTime is null)
-                    EndTime = DateTimeOffset.UtcNow;
-
-                if (_status is InspectionStatus.InProgress && StartTime is null)
-                    StartTime = DateTimeOffset.UtcNow;
-            }
-        }
-
-        public bool IsCompleted =>
-            _status
-                is InspectionStatus.Cancelled
-                    or InspectionStatus.Successful
-                    or InspectionStatus.Failed;
-
-        [Required]
-        public InspectionType InspectionType { get; set; }
-
-        public float? VideoDuration { get; set; }
-
-        public AnalysisType? AnalysisType { get; set; }
-
-        [MaxLength(250)]
-        public string? InspectionUrl { get; set; }
-
-        public DateTimeOffset? StartTime { get; private set; }
-
-        public DateTimeOffset? EndTime { get; private set; }
-
-        public List<InspectionFindings> InspectionFindings { get; set; }
-
         public Inspection()
         {
             InspectionType = InspectionType.Image;
@@ -121,6 +84,8 @@ namespace Api.Database.Models
         public DateTime? StartTime { get; private set; }
 
         public DateTime? EndTime { get; private set; }
+
+        public List<InspectionFindings> InspectionFindings { get; set; }
 
         public void UpdateWithIsarInfo(IsarStep isarStep)
         {
