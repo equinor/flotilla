@@ -13,6 +13,7 @@ namespace Api.Controllers
     public class MissionSchedulingController : ControllerBase
     {
         private readonly IAreaService _areaService;
+        private readonly IInstallationService _installationService;
         private readonly ICustomMissionService _customMissionService;
         private readonly IEchoService _echoService;
         private readonly ILogger<MissionSchedulingController> _logger;
@@ -28,6 +29,7 @@ namespace Api.Controllers
             IMissionDefinitionService missionDefinitionService,
             IMissionRunService missionRunService,
             IAreaService areaService,
+            IInstallationService installationService,
             IRobotService robotService,
             IEchoService echoService,
             ICustomMissionService customMissionService,
@@ -41,6 +43,7 @@ namespace Api.Controllers
             _missionDefinitionService = missionDefinitionService;
             _missionRunService = missionRunService;
             _areaService = areaService;
+            _installationService = installationService;
             _robotService = robotService;
             _echoService = echoService;
             _customMissionService = customMissionService;
@@ -279,12 +282,8 @@ namespace Api.Controllers
             var robot = await _robotService.ReadById(customMissionQuery.RobotId);
             if (robot is null) { return NotFound($"Could not find robot with id {customMissionQuery.RobotId}"); }
 
-            var installationResults = await _echoService.GetEchoPlantInfos();
-            if (installationResults == null) { return NotFound("Unable to retrieve plant information from Echo"); }
-
-            var installationResult =
-                installationResults.FirstOrDefault(installation => installation.PlantCode.ToUpperInvariant() == customMissionQuery.InstallationCode.ToUpperInvariant());
-            if (installationResult == null) { return NotFound($"Could not find installation with id {customMissionQuery.InstallationCode}"); }
+            var installation = await _installationService.ReadByName(customMissionQuery.InstallationCode);
+            if (installation == null) { return NotFound($"Could not find installation with name {customMissionQuery.InstallationCode}"); }
 
             var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 

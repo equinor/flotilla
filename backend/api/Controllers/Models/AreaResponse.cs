@@ -1,10 +1,11 @@
-﻿using Api.Database.Models;
+﻿using System.Text.Json.Serialization;
+using Api.Database.Models;
 
 namespace Api.Controllers.Models
 {
     public class AreaResponse
     {
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         public string DeckName { get; set; }
 
@@ -21,6 +22,11 @@ namespace Api.Controllers.Models
         public Pose? DefaultLocalizationPose { get; set; }
 
         public IList<SafePosition> SafePositions { get; set; }
+
+        [JsonConstructor]
+#nullable disable
+        public AreaResponse() { }
+#nullable enable
 
         public AreaResponse(Area area)
         {

@@ -1,4 +1,5 @@
-﻿using Api.Database.Models;
+﻿using System.Text.Json.Serialization;
+using Api.Database.Models;
 
 namespace Api.Controllers.Models
 {
@@ -13,6 +14,11 @@ namespace Api.Controllers.Models
         public string InstallationCode { get; set; }
 
         public DefaultLocalizationPose? DefaultLocalizationPose { get; set; }
+
+        [JsonConstructor]
+#nullable disable
+        public DeckResponse() { }
+#nullable enable
 
         public DeckResponse(Deck deck)
         {
