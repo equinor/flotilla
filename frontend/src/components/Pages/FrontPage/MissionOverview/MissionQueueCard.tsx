@@ -29,7 +29,7 @@ const HorizontalContent = styled.div`
 `
 const HorizontalNonButtonContent = styled.div`
     display: grid;
-    grid-template-columns: 20px 380px auto auto 180px;
+    grid-template-columns: 20px 350px auto 100px 180px;
     align-items: center;
     padding: 4px 0px 4px 10px;
     gap: 10px;

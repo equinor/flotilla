@@ -51,6 +51,11 @@ const VerticalContent = styled.div`
     justify-content: space-between;
 `
 
+const StyledPadding = styled.div`
+    padding: 10px;
+    border-radius: 3px;
+`
+
 export function OngoingMissionCard({ mission }: MissionProps) {
     let navigate = useNavigate()
     const routeChange = () => {
@@ -61,15 +66,13 @@ export function OngoingMissionCard({ mission }: MissionProps) {
         <StyledMissionCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
             <TopContent>
                 <StyledTitle variant="default" onClick={routeChange}>
-                    <div style={{ padding: '10px', borderRadius: '3px' }}>
+                    <StyledPadding>
                         <Typography variant="h6" color="primary">
                             {mission.name}
                         </Typography>
-                    </div>
+                    </StyledPadding>
                 </StyledTitle>
-                <div>
-                    <MissionControlButtons mission={mission} />
-                </div>
+                <MissionControlButtons mission={mission} />
             </TopContent>
             <BottomContent>
                 <VerticalContent>
