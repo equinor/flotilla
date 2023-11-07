@@ -131,7 +131,9 @@ function InstallationPicker() {
                 <StyledCheckbox
                     label={TranslateText('Show only active installations')}
                     checked={showActivePlants}
-                    onChange={(e) => setShowActivePlants(e.target.checked)} crossOrigin={undefined}                />
+                    onChange={(e) => setShowActivePlants(e.target.checked)}
+                    crossOrigin={undefined}
+                />
             </BlockLevelContainer>
             <Button
                 onClick={() => switchInstallation(selectedInstallation)}

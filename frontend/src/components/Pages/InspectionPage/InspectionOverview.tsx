@@ -45,9 +45,7 @@ export function InspectionOverviewSection() {
     useEffect(() => {
         setOngoingMissions(() => {
             const newOngoingMissionsMap: ScheduledMissionType = {}
-            ongoingMissions.forEach((m) =>
-                newOngoingMissionsMap[m.missionId!] = true
-            )
+            ongoingMissions.forEach((m) => (newOngoingMissionsMap[m.missionId!] = true))
             return newOngoingMissionsMap
         })
     }, [ongoingMissions])
@@ -55,12 +53,9 @@ export function InspectionOverviewSection() {
     useEffect(() => {
         setScheduledMissions(() => {
             const newScheduledMissions: ScheduledMissionType = {}
-            missionQueue.forEach((m) =>
-                newScheduledMissions[m.missionId!] = true
-            )
+            missionQueue.forEach((m) => (newScheduledMissions[m.missionId!] = true))
             return newScheduledMissions
         })
-        
     }, [missionQueue])
 
     useEffect(() => {
@@ -72,7 +67,9 @@ export function InspectionOverviewSection() {
             let newInspection: Inspection[] = missionDefinitions.map((m) => {
                 return {
                     missionDefinition: m,
-                    deadline: m.lastSuccessfulRun ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!) : undefined,
+                    deadline: m.lastSuccessfulRun
+                        ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
+                        : undefined,
                 }
             })
 
@@ -89,10 +86,7 @@ export function InspectionOverviewSection() {
             </Tabs.List>
             <Tabs.Panels>
                 <Tabs.Panel>
-                    <InspectionSection
-                        scheduledMissions={scheduledMissions}
-                        ongoingMissions={ongoingMissionsMap}
-                    />
+                    <InspectionSection scheduledMissions={scheduledMissions} ongoingMissions={ongoingMissionsMap} />
                 </Tabs.Panel>
                 <Tabs.Panel>
                     <StyledView>
