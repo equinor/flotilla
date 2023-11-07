@@ -72,18 +72,7 @@ namespace Api.EventHandlers
 
         public async Task<bool> OngoingMission(string robotId)
         {
-            var ongoingMissions = await _missionRunService.ReadAll(
-                new MissionRunQueryStringParameters
-                {
-                    Statuses = new List<MissionStatus>
-                    {
-                        MissionStatus.Ongoing
-                    },
-                    RobotId = robotId,
-                    OrderBy = "DesiredStartTime",
-                    PageSize = 100
-                });
-
+            var ongoingMissions = await GetOngoingMissions(robotId);
             return ongoingMissions.Any();
         }
 
