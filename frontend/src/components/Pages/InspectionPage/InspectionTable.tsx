@@ -134,7 +134,7 @@ const InspectionRow = ({
     const isScheduled = Object.keys(scheduledMissions).includes(mission.id) && scheduledMissions[mission.id]
     const isOngoing = Object.keys(ongoingMissions).includes(mission.id) && ongoingMissions[mission.id]
 
-    if (isScheduled) {
+    if (isScheduled || isOngoing) {
         if (isOngoing) {
             status = (
                 <StyledContent>
@@ -150,7 +150,7 @@ const InspectionRow = ({
                 </StyledContent>
             )
     } else {
-        if (!mission.lastRun || !mission.lastRun.endTime) {
+        if (!mission.lastSuccessfulRun || !mission.lastSuccessfulRun.endTime) {
             if (inspection.missionDefinition.inspectionFrequency) {
                 status = (
                     <StyledContent>
@@ -176,7 +176,7 @@ const InspectionRow = ({
                     {TranslateText('No planned inspection')}
                 </StyledContent>
             )
-            lastCompleted = formatDateString(mission.lastRun.endTime!)
+            lastCompleted = formatDateString(mission.lastSuccessfulRun.endTime!)
         }
     }
 
@@ -333,7 +333,7 @@ export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMis
             })
             setUnscheduledMissions(unscheduledMissions)
         }
-    }, [isDialogOpen])
+    }, [isDialogOpen, scheduledMissions, selectedMissions])
 
     const navigate = useNavigate()
     const cellValues = inspections

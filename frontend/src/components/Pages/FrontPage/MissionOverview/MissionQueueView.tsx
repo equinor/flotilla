@@ -99,7 +99,7 @@ export function MissionQueueView() {
     }
 
     useEffect(() => {
-        if (selectedRobot || selectedEchoMissions.length === 0) {
+        if (!selectedRobot || selectedEchoMissions.length === 0) {
             setScheduleButtonDisabled(true)
         } else {
             setScheduleButtonDisabled(false)

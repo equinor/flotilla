@@ -72,7 +72,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         let robots = [...enabledRobots]
         robots.filter((robots) => robots.currentInstallation.toLowerCase() === installationCode.toLowerCase())
         setRobotOptions(robots)
-    }, [enabledRobots])
+    }, [enabledRobots, installationCode])
 
     const onSelectedRobot = (selectedRobot: Robot) => {
         if (!robotOptions) return

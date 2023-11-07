@@ -71,7 +71,7 @@ namespace Api.Services
 
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
         {
-            if (missionDefinition.LastRun is not null) { _context.Entry(missionDefinition.LastRun).State = EntityState.Unchanged; }
+            if (missionDefinition.LastSuccessfulRun is not null) { _context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged; }
             if (missionDefinition.Area is not null) { _context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
 
             await _context.MissionDefinitions.AddAsync(missionDefinition);
@@ -124,7 +124,7 @@ namespace Api.Services
 
         public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)
         {
-            if (missionDefinition.LastRun is not null) { _context.Entry(missionDefinition.LastRun).State = EntityState.Unchanged; }
+            if (missionDefinition.LastSuccessfulRun is not null) { _context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged; }
             if (missionDefinition.Area is not null) { _context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
 
             var entry = _context.Update(missionDefinition);

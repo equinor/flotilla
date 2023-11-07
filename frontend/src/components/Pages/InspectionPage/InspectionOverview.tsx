@@ -1,6 +1,6 @@
 import { Button, Tabs, Icon } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { DeckMissionType, InspectionSection, ScheduledMissionType } from './InspectionSection'
+import { InspectionSection, ScheduledMissionType } from './InspectionSection'
 import { useEffect, useRef, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { AllInspectionsTable } from './InspectionTable'
@@ -10,7 +10,6 @@ import styled from 'styled-components'
 import { useContext } from 'react'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { Icons } from 'utils/icons'
-import { Mission, MissionStatus } from 'models/Mission'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 const StyledButton = styled(Button)`
@@ -73,7 +72,7 @@ export function InspectionOverviewSection() {
             let newInspection: Inspection[] = missionDefinitions.map((m) => {
                 return {
                     missionDefinition: m,
-                    deadline: m.lastRun ? getInspectionDeadline(m.inspectionFrequency, m.lastRun.endTime!) : undefined,
+                    deadline: m.lastSuccessfulRun ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!) : undefined,
                 }
             })
 
