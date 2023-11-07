@@ -37,6 +37,8 @@ namespace Api.Services
 
         public async Task<Robot> Create(Robot newRobot)
         {
+            if (newRobot.CurrentArea is not null) { _context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged; }
+
             await _context.Robots.AddAsync(newRobot);
             await _context.SaveChangesAsync();
             return newRobot;
@@ -83,6 +85,8 @@ namespace Api.Services
 
         public async Task<Robot> Update(Robot robot)
         {
+            if (robot.CurrentArea is not null) { _context.Entry(robot.CurrentArea).State = EntityState.Unchanged; }
+
             var entry = _context.Update(robot);
             await _context.SaveChangesAsync();
             _ = _signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels());
