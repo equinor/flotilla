@@ -279,7 +279,7 @@ export function MissionDefinitionPage() {
                 }
             })
         }
-    }, [registerEvent, connectionReady])
+    }, [registerEvent, connectionReady, missionId])
 
     return (
         <>

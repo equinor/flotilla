@@ -60,7 +60,7 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (accessToken) {
-            console.log("Attempting to create signalR connection...")
+            console.log('Attempting to create signalR connection...')
             var newConnection = new signalR.HubConnectionBuilder()
                 .withUrl(URL, {
                     accessTokenFactory: () => accessToken,
@@ -81,8 +81,7 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
     }, [accessToken])
 
     const registerEvent = (eventName: string, onMessageReceived: (username: string, message: string) => void) => {
-        if (connection)
-            connection.on(eventName, (username, message) => onMessageReceived(username, message))
+        if (connection) connection.on(eventName, (username, message) => onMessageReceived(username, message))
     }
 
     return (
@@ -106,5 +105,5 @@ export enum SignalREventLabels {
     missionRunCreated = 'Mission run created',
     missionRunDeleted = 'Mission run deleted',
     missionRunFailed = 'Mission run failed',
-    robotListUpdated = 'Robot list updated'
+    robotListUpdated = 'Robot list updated',
 }

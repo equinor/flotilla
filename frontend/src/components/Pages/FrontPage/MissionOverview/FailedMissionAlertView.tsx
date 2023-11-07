@@ -76,7 +76,6 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
 
 export function FailedMissionAlertView() {
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
-    const [newFailedMission, setNewFailedMission] = useState<Mission | undefined>(undefined)
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installationCode } = useInstallationContext()
 
@@ -132,27 +131,25 @@ export function FailedMissionAlertView() {
     useEffect(() => {
         if (connectionReady)
             registerEvent(SignalREventLabels.missionRunFailed, (username: string, message: string) => {
-                setNewFailedMission(JSON.parse(message))
-                console.log(JSON.parse(message))
+                const newFailedMission: Mission = JSON.parse(message)
+                const lastDismissTime: Date = getLastDismissalTime()
+
+                setRecentFailedMissions((failedMissions) => {
+                    if (
+                        installationCode &&
+                        (!newFailedMission.installationCode ||
+                            newFailedMission.installationCode.toLocaleLowerCase() !==
+                                installationCode.toLocaleLowerCase())
+                    )
+                        return failedMissions // Ignore missions for other installations
+                    // Ignore missions shortly after the user dismissed the last one
+                    if (new Date(newFailedMission.endTime!) <= lastDismissTime) return failedMissions
+                    let isDuplicate = failedMissions.filter((m) => m.id === newFailedMission.id).length > 0
+                    if (isDuplicate) return failedMissions // Ignore duplicate failed missions
+                    return [...failedMissions, newFailedMission]
+                })
             })
     }, [registerEvent, connectionReady])
-
-    // Use the failed missions from signalR messages to update the displayed list of failed missions
-    useEffect(() => {
-        if (newFailedMission) {
-            const lastDismissTime: Date = getLastDismissalTime()
-            if (
-                installationCode &&
-                (!newFailedMission.installationCode ||
-                    newFailedMission.installationCode.toLocaleLowerCase() !== installationCode.toLocaleLowerCase())
-            )
-                return
-            if (new Date(newFailedMission.endTime!) <= lastDismissTime) return
-            let isDuplicate = recentFailedMissions.filter((m) => m.id === newFailedMission.id).length > 0
-            if (isDuplicate) return
-            setRecentFailedMissions([...recentFailedMissions, newFailedMission])
-        }
-    }, [newFailedMission])
 
     const missionDisplay = <FailedMission mission={recentFailedMissions[0]} />
     const severalMissions = <SeveralFailedMissions missions={recentFailedMissions} />

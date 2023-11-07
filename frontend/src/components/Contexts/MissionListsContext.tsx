@@ -32,6 +32,35 @@ interface MissionsResult {
     missionQueue: Mission[]
 }
 
+const updateQueueIfMissionAlreadyQueued = (oldQueue: Mission[], updatedMission: Mission) => {
+    const existingMissionIndex = oldQueue.findIndex((m) => m.id === updatedMission.id)
+    if (existingMissionIndex !== -1) {
+        // If the mission is already in the queue
+        if (updatedMission.status !== MissionStatus.Pending) oldQueue.splice(existingMissionIndex, 1)
+        else oldQueue[existingMissionIndex] = updatedMission
+    }
+    return oldQueue
+}
+
+const updateOngoingMissionsWithUpdatedMission = (oldMissionList: Mission[], updatedMission: Mission) => {
+    const existingMissionIndex = oldMissionList.findIndex((m) => m.id === updatedMission.id)
+    if (updatedMission.status === MissionStatus.Ongoing || updatedMission.status === MissionStatus.Paused) {
+        if (existingMissionIndex !== -1) {
+            // Mission is ongoing and in the queue
+            oldMissionList[existingMissionIndex] = updatedMission
+        } else {
+            // Mission is ongoing and not in the queue
+            return [...oldMissionList, updatedMission]
+        }
+    } else {
+        if (existingMissionIndex !== -1) {
+            // Mission is not ongoing and in the queue
+            oldMissionList.splice(existingMissionIndex, 1)
+        }
+    }
+    return oldMissionList
+}
+
 const fetchMissions = (params: {
     statuses: MissionStatus[]
     pageSize: number
@@ -48,7 +77,7 @@ export const useMissions = (): MissionsResult => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.missionRunCreated, (username: string, message: string) => {
                 const newMission: Mission = JSON.parse(message)
-                if (missionQueue.find((m) => m.id === newMission.id))
+                if (!missionQueue.find((m) => m.id === newMission.id))
                     setMissionQueue((oldQueue) => [...oldQueue, newMission])
                 else
                     setMissionQueue((oldQueue) => {
@@ -64,47 +93,23 @@ export const useMissions = (): MissionsResult => {
 
                 setMissionQueue((oldQueue) => {
                     const oldQueueCopy = [...oldQueue]
-                    const existingMissionIndex = oldQueue.findIndex((m) => m.id === updatedMission.id)
-                    if (existingMissionIndex !== -1) {
-                        if (updatedMission.status !== MissionStatus.Pending)
-                            oldQueueCopy.splice(existingMissionIndex, 1)
-                        else oldQueueCopy[existingMissionIndex] = updatedMission
-                    }
-                    return oldQueueCopy
+                    return updateQueueIfMissionAlreadyQueued(oldQueueCopy, updatedMission)
                 })
-                setOngoingMissions((oldQueue) => {
-                    const oldQueueCopy = [...oldQueue]
-                    const existingMissionIndex = oldQueue.findIndex((m) => m.id === updatedMission.id)
-                    if (
-                        updatedMission.status === MissionStatus.Ongoing ||
-                        updatedMission.status === MissionStatus.Paused
-                    ) {
-                        if (existingMissionIndex !== -1) {
-                            // Mission is ongoing and in the queue
-                            oldQueueCopy[existingMissionIndex] = updatedMission
-                        } else {
-                            // Mission is ongoing and not in the queue
-                            return [...oldQueueCopy, updatedMission]
-                        }
-                    } else {
-                        if (existingMissionIndex !== -1) {
-                            // Mission is not ongoing and in the queue
-                            oldQueueCopy.splice(existingMissionIndex, 1)
-                        }
-                    }
-                    return oldQueueCopy
+                setOngoingMissions((oldMissionList) => {
+                    const oldMissionListCopy = [...oldMissionList]
+                    return updateOngoingMissionsWithUpdatedMission(oldMissionListCopy, updatedMission)
                 })
             })
             registerEvent(SignalREventLabels.missionRunDeleted, (username: string, message: string) => {
                 let deletedMission: Mission = JSON.parse(message)
                 setOngoingMissions((missions) => {
                     const ongoingIndex = missions.findIndex((m) => m.id === deletedMission.id)
-                    if (ongoingIndex !== -1) missions.splice(ongoingIndex, 1)
+                    if (ongoingIndex !== -1) missions.splice(ongoingIndex, 1) // Remove deleted mission
                     return missions
                 })
                 setMissionQueue((missions) => {
                     const queueIndex = missions.findIndex((m) => m.id === deletedMission.id)
-                    if (queueIndex !== -1) missions.splice(queueIndex, 1)
+                    if (queueIndex !== -1) missions.splice(queueIndex, 1) // Remove deleted mission
                     return missions
                 })
             })

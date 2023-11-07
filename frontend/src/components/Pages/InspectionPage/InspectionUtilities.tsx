@@ -106,8 +106,8 @@ export const getDeadlineInspection = (deadline: Date) => {
 export const compareInspections = (i1: Inspection, i2: Inspection) => {
     if (!i1.missionDefinition.inspectionFrequency) return 1
     if (!i2.missionDefinition.inspectionFrequency) return -1
-    if (!i1.missionDefinition.lastRun) return -1
-    if (!i2.missionDefinition.lastRun) return 1
+    if (!i1.missionDefinition.lastSuccessfulRun) return -1
+    if (!i2.missionDefinition.lastSuccessfulRun) return 1
     else return i1.deadline!.getTime() - i2.deadline!.getTime()
 }
 
@@ -128,7 +128,7 @@ export function CardMissionInformation({ deckId, deckMissions }: ICardMissionInf
 
     deckMissions[deckId].inspections.forEach((inspection) => {
         if (!inspection.deadline) {
-            if (!inspection.missionDefinition.lastRun && inspection.missionDefinition.inspectionFrequency) {
+            if (!inspection.missionDefinition.lastSuccessfulRun && inspection.missionDefinition.inspectionFrequency) {
                 colorsCount['red'].count++
             } else {
                 colorsCount['green'].count++
