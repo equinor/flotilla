@@ -210,7 +210,7 @@ namespace Api.EventHandlers
                 Name = "Drive to Safe Position",
                 Robot = robot,
                 MissionRunPriority = MissionRunPriority.Emergency,
-                InstallationCode = area.Installation!.InstallationCode,
+                InstallationCode = area.Installation.InstallationCode,
                 Area = area,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.UtcNow,
