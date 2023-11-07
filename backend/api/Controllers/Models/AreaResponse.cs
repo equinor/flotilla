@@ -16,7 +16,7 @@ namespace Api.Controllers.Models
 
         public MapMetadata MapMetadata { get; set; }
 
-        public DefaultLocalizationPose? DefaultLocalizationPose { get; set; }
+        public Pose? DefaultLocalizationPose { get; set; }
 
         public IList<SafePosition> SafePositions { get; set; }
 
@@ -28,7 +28,7 @@ namespace Api.Controllers.Models
             InstallationCode = area.Installation.InstallationCode;
             AreaName = area.Name;
             MapMetadata = area.MapMetadata;
-            DefaultLocalizationPose = area.DefaultLocalizationPose;
+            DefaultLocalizationPose = area.DefaultLocalizationPose?.Pose;
             SafePositions = area.SafePositions;
         }
     }
