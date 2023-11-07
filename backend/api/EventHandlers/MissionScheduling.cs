@@ -70,7 +70,7 @@ namespace Api.EventHandlers
         public async Task<bool> OngoingMission(string robotId)
         {
             var ongoingMissions = await GetOngoingMissions(robotId);
-            return ongoingMissions.Any();
+            return ongoingMissions is not null && ongoingMissions.Any();
         }
 
 
