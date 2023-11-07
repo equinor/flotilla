@@ -123,7 +123,9 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
                 right={TranslateText(missionDefinition.sourceType)}
             />
             <Button
-                disabled={missionDefinition.lastSuccessfulRun === undefined || missionDefinition.lastSuccessfulRun === null}
+                disabled={
+                    missionDefinition.lastSuccessfulRun === undefined || missionDefinition.lastSuccessfulRun === null
+                }
                 onClick={() =>
                     navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${missionDefinition.lastSuccessfulRun?.id}`)
                 }

@@ -46,10 +46,7 @@ interface IInspectionProps {
     ongoingMissions: ScheduledMissionType
 }
 
-export function InspectionSection({
-    scheduledMissions,
-    ongoingMissions,
-}: IInspectionProps) {
+export function InspectionSection({ scheduledMissions, ongoingMissions }: IInspectionProps) {
     const { installationCode } = useInstallationContext()
     const [deckMissions, setDeckMissions] = useState<DeckMissionType>({})
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
