@@ -169,8 +169,8 @@ namespace Api.EventHandlers
             }
             catch (Exception ex)
             {
-                string message = "Error in ISAR while stopping current mission, cannot drive to safe position";
-                _logger.LogError(ex, "{Message}", message);
+                const string Message = "Error in ISAR while stopping current mission, cannot drive to safe position";
+                _logger.LogError(ex, "{Message}", Message);
                 return;
             }
 

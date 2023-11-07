@@ -158,22 +158,22 @@ namespace Api.EventHandlers
             }
             catch (HttpRequestException e)
             {
-                string message = "Error connecting to ISAR while stopping mission";
-                _logger.LogError(e, "{Message}", message);
+                const string Message = "Error connecting to ISAR while stopping mission";
+                _logger.LogError(e, "{Message}", Message);
                 _missionSchedulingService.OnIsarUnavailable(robot.Id);
-                throw new MissionException(message, (int)e.StatusCode!);
+                throw new MissionException(Message, (int)e.StatusCode!);
             }
             catch (MissionException e)
             {
-                string message = "Error while stopping ISAR mission";
-                _logger.LogError(e, "{Message}", message);
+                const string Message = "Error while stopping ISAR mission";
+                _logger.LogError(e, "{Message}", Message);
                 throw;
             }
             catch (JsonException e)
             {
-                string message = "Error while processing the response from ISAR";
-                _logger.LogError(e, "{Message}", message);
-                throw new MissionException(message, 0);
+                const string Message = "Error while processing the response from ISAR";
+                _logger.LogError(e, "{Message}", Message);
+                throw new MissionException(Message, 0);
             }
 
             robot.CurrentMissionId = null;
