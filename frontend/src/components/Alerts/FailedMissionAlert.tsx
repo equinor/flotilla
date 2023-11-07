@@ -49,12 +49,10 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
 
 export function FailedMissionAlertContent({ missions }: MissionsProps) {
     return (
-        <>
+        <Indent>
             <MissionStatusDisplay status={MissionStatus.Failed} />
-            <Indent>
-                {missions.length === 1 && <FailedMission missions={missions} />}
-                {missions.length > 1 && <SeveralFailedMissions missions={missions} />}
-            </Indent>
-        </>
+            {missions.length === 1 && <FailedMission missions={missions} />}
+            {missions.length > 1 && <SeveralFailedMissions missions={missions} />}
+        </Indent>
     )
 }
