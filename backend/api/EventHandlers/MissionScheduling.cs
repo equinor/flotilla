@@ -123,7 +123,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var ongoingMissions = await GetOngoingMission(robot.Id);
+            var ongoingMissions = await GetOngoingMissions(robot.Id);
 
             if (ongoingMissions == null)
             {
@@ -240,7 +240,7 @@ namespace Api.EventHandlers
             return await TheSystemIsAvailableToRunAMission(robot, missionRun);
         }
 
-        private async Task<PagedList<MissionRun>?> GetOngoingMission(string robotId)
+        private async Task<PagedList<MissionRun>?> GetOngoingMissions(string robotId)
         {
             var ongoingMissions = await _missionRunService.ReadAll(
                 new MissionRunQueryStringParameters
