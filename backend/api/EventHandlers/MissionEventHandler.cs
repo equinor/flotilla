@@ -119,10 +119,7 @@ namespace Api.EventHandlers
                 missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id &&
                                                                                     missionRun.MissionRunPriority == MissionRunPriority.Emergency);
             }
-            else
-            {
-                missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id);
-            }
+            else { missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id); }
 
             if (missionRun == null)
             {
@@ -152,12 +149,11 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await MissionSchedulingService.FreezeMissionRunQueueForRobot(e.RobotId);
+            try { await MissionSchedulingService.FreezeMissionRunQueueForRobot(e.RobotId); }
+            catch (RobotNotFoundException) { return; }
 
-            try
-            {
-                await MissionSchedulingService.StopCurrentMissionRun(e.RobotId);
-            }
+            try { await MissionSchedulingService.StopCurrentMissionRun(e.RobotId); }
+            catch (RobotNotFoundException) { return; }
             catch (MissionException ex)
             {
                 // We want to continue driving to a safe position if the isar state is idle
@@ -181,7 +177,9 @@ namespace Api.EventHandlers
             catch (SafeZoneException ex)
             {
                 _logger.LogError(ex, "Failed to schedule return to safe zone mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
-                await MissionSchedulingService.UnfreezeMissionRunQueueForRobot(e.RobotId);
+                try { await MissionSchedulingService.UnfreezeMissionRunQueueForRobot(e.RobotId); }
+                catch (RobotNotFoundException) { return; }
+
             }
 
             MissionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
@@ -198,12 +196,10 @@ namespace Api.EventHandlers
             }
 
             var area = await AreaService.ReadById(robot.CurrentArea!.Id);
-            if (area == null)
-            {
-                _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
-            }
+            if (area == null) { _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id); }
 
-            await MissionSchedulingService.UnfreezeMissionRunQueueForRobot(e.RobotId);
+            try { await MissionSchedulingService.UnfreezeMissionRunQueueForRobot(e.RobotId); }
+            catch (RobotNotFoundException) { return; }
 
             if (await MissionSchedulingService.OngoingMission(robot.Id))
             {

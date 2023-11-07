@@ -51,10 +51,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            try
-            {
-                _missionSchedulingService.StartMissionRun(missionRun);
-            }
+            try { _missionSchedulingService.StartMissionRun(missionRun); }
             catch (MissionException ex)
             {
                 const MissionStatus NewStatus = MissionStatus.Failed;
@@ -82,9 +79,11 @@ namespace Api.EventHandlers
             var robot = await _robotService.ReadById(robotId);
             if (robot == null)
             {
-                _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-                return;
+                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
+                _logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
             }
+
             robot.MissionQueueFrozen = true;
             await _robotService.Update(robot);
             _logger.LogInformation("Mission queue for robot {RobotName} with ID {RobotId} was frozen", robot.Name, robot.Id);
@@ -95,9 +94,11 @@ namespace Api.EventHandlers
             var robot = await _robotService.ReadById(robotId);
             if (robot == null)
             {
-                _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-                return;
+                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
+                _logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
             }
+
             robot.MissionQueueFrozen = false;
             await _robotService.Update(robot);
             _logger.LogInformation("Mission queue for robot {RobotName} with ID {RobotId} was unfrozen", robot.Name, robot.Id);
@@ -108,16 +109,14 @@ namespace Api.EventHandlers
             var robot = await _robotService.ReadById(robotId);
             if (robot == null)
             {
-                _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-                return;
+                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
+                _logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
             }
 
             var ongoingMissions = await GetOngoingMissions(robot.Id);
 
-            if (ongoingMissions == null)
-            {
-                _logger.LogWarning("Flotilla has no mission running for robot {RobotName} but an attempt to stop will be made regardless", robot.Name);
-            }
+            if (ongoingMissions == null) { _logger.LogWarning("Flotilla has no mission running for robot {RobotName} but an attempt to stop will be made regardless", robot.Name); }
             else
             {
                 foreach (var mission in ongoingMissions)
@@ -141,10 +140,7 @@ namespace Api.EventHandlers
                 }
             }
 
-            try
-            {
-                await _isarService.StopMission(robot);
-            }
+            try { await _isarService.StopMission(robot); }
             catch (HttpRequestException e)
             {
                 const string Message = "Error connecting to ISAR while stopping mission";
