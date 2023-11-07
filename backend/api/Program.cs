@@ -52,7 +52,6 @@ builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.AddScoped<IRobotService, RobotService>();
 builder.Services.AddScoped<IMissionRunService, MissionRunService>();
-builder.Services.AddScoped<IMissionScheduling, MissionScheduling>();
 builder.Services.AddScoped<IEmergencyActionService, EmergencyActionService>();
 builder.Services.AddScoped<IMissionDefinitionService, MissionDefinitionService>();
 builder.Services.AddScoped<IIsarService, IsarService>();

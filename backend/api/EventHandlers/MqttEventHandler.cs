@@ -64,7 +64,7 @@ namespace Api.EventHandlers
         {
             var provider = GetServiceProvider();
             var robotService = provider.GetRequiredService<IRobotService>();
-            var missionScheduling = provider.GetRequiredService<IMissionScheduling>();
+            var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
 
             var isarRobotStatus = (IsarRobotStatusMessage)mqttArgs.Message;
 
@@ -82,7 +82,7 @@ namespace Api.EventHandlers
             robot = await robotService.Update(robot);
             _logger.LogInformation("Updated status for robot {Name} to {Status}", robot.Name, robot.Status);
 
-            if (robot.Status == RobotStatus.Available) { missionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id)); }
+            if (robot.Status == RobotStatus.Available) { missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id)); }
         }
 
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
