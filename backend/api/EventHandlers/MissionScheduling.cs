@@ -10,11 +10,7 @@ namespace Api.EventHandlers
     {
         public void StartMissionRunIfSystemIsAvailable(MissionRun missionRun);
 
-        public Task<bool> TheSystemIsAvailableToRunAMission(string robotId, MissionRun missionRun);
-
         public Task<bool> OngoingMission(string robotId);
-
-        public Task<PagedList<MissionRun>?> GetOngoingMission(string robotId);
 
         public Task FreezeMissionRunQueueForRobot(string robotId);
 
@@ -74,17 +70,6 @@ namespace Api.EventHandlers
             }
         }
 
-        public async Task<bool> TheSystemIsAvailableToRunAMission(string robotId, MissionRun missionRun)
-        {
-            var robot = await _robotService.ReadById(robotId);
-            if (robot == null)
-            {
-                _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-                return false;
-            }
-            return await TheSystemIsAvailableToRunAMission(robot, missionRun);
-        }
-
         public async Task<bool> OngoingMission(string robotId)
         {
             var ongoingMissions = await _missionRunService.ReadAll(
@@ -100,23 +85,6 @@ namespace Api.EventHandlers
                 });
 
             return ongoingMissions.Any();
-        }
-
-        public async Task<PagedList<MissionRun>?> GetOngoingMission(string robotId)
-        {
-            var ongoingMissions = await _missionRunService.ReadAll(
-                new MissionRunQueryStringParameters
-                {
-                    Statuses = new List<MissionStatus>
-                    {
-                        MissionStatus.Ongoing
-                    },
-                    RobotId = robotId,
-                    OrderBy = "DesiredStartTime",
-                    PageSize = 100
-                });
-
-            return ongoingMissions;
         }
 
 
@@ -183,7 +151,6 @@ namespace Api.EventHandlers
                     await _missionRunService.Create(newMission);
                 }
             }
-
 
             try
             {
@@ -262,7 +229,35 @@ namespace Api.EventHandlers
             OnRobotAvailable(e);
         }
 
-        public async Task<bool> TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
+        public async Task<bool> TheSystemIsAvailableToRunAMission(string robotId, MissionRun missionRun)
+        {
+            var robot = await _robotService.ReadById(robotId);
+            if (robot == null)
+            {
+                _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                return false;
+            }
+            return await TheSystemIsAvailableToRunAMission(robot, missionRun);
+        }
+
+        private async Task<PagedList<MissionRun>?> GetOngoingMission(string robotId)
+        {
+            var ongoingMissions = await _missionRunService.ReadAll(
+                new MissionRunQueryStringParameters
+                {
+                    Statuses = new List<MissionStatus>
+                    {
+                        MissionStatus.Ongoing
+                    },
+                    RobotId = robotId,
+                    OrderBy = "DesiredStartTime",
+                    PageSize = 100
+                });
+
+            return ongoingMissions;
+        }
+
+        private async Task<bool> TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
         {
             bool ongoingMission = await OngoingMission(robot.Id);
 
@@ -294,6 +289,7 @@ namespace Api.EventHandlers
         {
             return !missionRunQueue.Any();
         }
+
         protected virtual void OnRobotAvailable(RobotAvailableEventArgs e) { RobotAvailable?.Invoke(this, e); }
         public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
     }
