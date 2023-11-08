@@ -122,11 +122,8 @@ export const compareInspections = (inspection1: Inspection, inspection2: Inspect
         if (!inspection1.missionDefinition.lastSuccessfulRun) return -1
         if (!inspection2.missionDefinition.lastSuccessfulRun) return 1
     } else if (!inspection1.missionDefinition.lastSuccessfulRun && !inspection2.missionDefinition.lastSuccessfulRun) {
-        if (!inspection1.missionDefinition.inspectionFrequency && !inspection2.missionDefinition.inspectionFrequency) {
-            return inspection1.missionDefinition.name > inspection2.missionDefinition.name ? 1 : -1
-        }
-        if (!inspection1.missionDefinition.inspectionFrequency) return -1
-        if (!inspection2.missionDefinition.inspectionFrequency) return 1
+        if (!inspection1.missionDefinition.inspectionFrequency) return 1
+        if (!inspection2.missionDefinition.inspectionFrequency) return -1
     }
     if (!inspection1.missionDefinition.inspectionFrequency) return 1
     if (!inspection2.missionDefinition.inspectionFrequency) return -1
