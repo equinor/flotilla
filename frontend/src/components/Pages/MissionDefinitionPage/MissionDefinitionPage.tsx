@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefinitionHeader'
 import { BackButton } from '../../../utils/BackButton'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { tokens } from '@equinor/eds-tokens'
 import { Header } from 'components/Header/Header'
 import { CondensedMissionDefinition, SourceType } from 'models/MissionDefinition'
 import { Button, Typography, Card, Dialog, TextField, Icon } from '@equinor/eds-core-react'
@@ -13,6 +12,7 @@ import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { config } from 'config'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { Icons } from 'utils/icons'
+import { tokens } from '@equinor/eds-tokens'
 
 const StyledFormCard = styled(Card)`
     display: flex;
