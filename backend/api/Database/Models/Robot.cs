@@ -118,7 +118,7 @@ namespace Api.Database.Models
         Available,
         Busy,
         Offline,
-        Deprecated,
         Blocked,
+        Deprecated
     }
 }
