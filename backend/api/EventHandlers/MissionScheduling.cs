@@ -2,6 +2,7 @@
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Services.Events;
 using Api.Utilities;
 namespace Api.EventHandlers
 {
@@ -22,6 +23,8 @@ namespace Api.EventHandlers
         public Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId);
 
         public Task UnfreezeMissionRunQueueForRobot(string robotId);
+
+        public void TriggerRobotAvailable(RobotAvailableEventArgs e);
     }
 
     public class MissionScheduling : IMissionScheduling
@@ -181,6 +184,7 @@ namespace Api.EventHandlers
                 }
             }
 
+
             try
             {
                 await _isarService.StopMission(robot);
@@ -253,6 +257,11 @@ namespace Api.EventHandlers
             await _missionRunService.Create(missionRun);
         }
 
+        public void TriggerRobotAvailable(RobotAvailableEventArgs e)
+        {
+            OnRobotAvailable(e);
+        }
+
         public async Task<bool> TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
         {
             bool ongoingMission = await OngoingMission(robot.Id);
@@ -285,5 +294,7 @@ namespace Api.EventHandlers
         {
             return !missionRunQueue.Any();
         }
+        protected virtual void OnRobotAvailable(RobotAvailableEventArgs e) { RobotAvailable?.Invoke(this, e); }
+        public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
     }
 }

@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
-
 var builder = WebApplication.CreateBuilder(args);
 
 Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentName}'\n");
@@ -90,7 +89,6 @@ else
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
-builder.Services.AddScoped<IMqttEventHandler, MqttEventHandler>();
 
 builder.Services.AddTransient<ISignalRService, SignalRService>();
 

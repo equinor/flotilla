@@ -101,6 +101,5 @@ namespace Api.Services
             var pos2 = pose2.Position;
             return (float)Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2) + Math.Pow(pos1.Z - pos2.Z, 2));
         }
-
     }
 }

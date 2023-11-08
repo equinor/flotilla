@@ -34,8 +34,6 @@ namespace Api.EventHandlers
 
         private IMissionScheduling MissionSchedulingService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionScheduling>();
 
-        private IMqttEventHandler MqttEventHandlerService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMqttEventHandler>();
-
         private IList<MissionRun> MissionRunQueue(string robotId)
         {
             return MissionService
@@ -57,7 +55,7 @@ namespace Api.EventHandlers
         public override void Subscribe()
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
-            MqttEventHandler.RobotAvailable += OnRobotAvailable;
+            MissionScheduling.RobotAvailable += OnRobotAvailable;
             EmergencyActionService.EmergencyButtonPressedForRobot += OnEmergencyButtonPressedForRobot;
             EmergencyActionService.EmergencyButtonDepressedForRobot += OnEmergencyButtonDepressedForRobot;
         }
@@ -65,7 +63,7 @@ namespace Api.EventHandlers
         public override void Unsubscribe()
         {
             MissionRunService.MissionRunCreated -= OnMissionRunCreated;
-            MqttEventHandler.RobotAvailable -= OnRobotAvailable;
+            MissionScheduling.RobotAvailable -= OnRobotAvailable;
             EmergencyActionService.EmergencyButtonPressedForRobot -= OnEmergencyButtonPressedForRobot;
             EmergencyActionService.EmergencyButtonDepressedForRobot -= OnEmergencyButtonDepressedForRobot;
         }
@@ -116,10 +114,10 @@ namespace Api.EventHandlers
 
             var missionRun = (MissionRun?)null;
 
-            if (robot.MissionQueueFrozen == true)
+            if (robot.MissionQueueFrozen)
             {
                 missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id &&
-                        missionRun.MissionRunPriority == MissionRunPriority.Emergency);
+                                                                                    missionRun.MissionRunPriority == MissionRunPriority.Emergency);
             }
             else
             {
@@ -186,8 +184,7 @@ namespace Api.EventHandlers
                 await MissionSchedulingService.UnfreezeMissionRunQueueForRobot(e.RobotId);
             }
 
-            MqttEventHandlerService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
-
+            MissionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
         }
 
         private async void OnEmergencyButtonDepressedForRobot(object? sender, EmergencyButtonPressedForRobotEventArgs e)
@@ -213,7 +210,7 @@ namespace Api.EventHandlers
                 _logger.LogInformation("Robot {RobotName} was unfrozen but the mission to return to safe zone will be completed before further missions are started", robot.Id);
             }
 
-            MqttEventHandlerService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+            MissionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
         }
     }
 }
