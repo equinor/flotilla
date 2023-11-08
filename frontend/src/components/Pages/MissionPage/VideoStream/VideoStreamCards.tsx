@@ -86,7 +86,7 @@ export function VideoStreamCard({ videoStream, toggleFullScreenMode, setFullScre
     }
 
     return (
-        <VideoCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
+        <VideoCard style={{ boxShadow: tokens.elevation.raised }}>
             <div onDoubleClick={turnOnFullScreen}>{getVideoPlayer()}</div>
             <Typography variant="h5">{videoStream.name}</Typography>
         </VideoCard>

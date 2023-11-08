@@ -15,7 +15,7 @@ interface MissionProps {
 const ButtonStyle = styled.div`
     display: grid;
     grid-template-columns: 45px 45px;
-    align-items: end;
+    margin-end: 20px;
 `
 
 const ButtonText = styled.div`
@@ -25,58 +25,76 @@ const ButtonText = styled.div`
 `
 
 export function MissionControlButtons({ mission }: MissionProps) {
-    const { TranslateText } = useLanguageContext()
-    const { missionControlState, updateMissionState } = useMissionControlContext()
+    const { missionControlState } = useMissionControlContext()
 
-    const renderControlIcon = (missionStatus: MissionStatus) => {
-        if (missionControlState.isWaitingForResponse) {
-            return <CircularProgress size={32} />
-        } else if (missionStatus === MissionStatus.Ongoing) {
-            return (
-                <ButtonStyle>
-                    <ButtonText>
-                        <StopMissionDialog mission={mission} />
-                        <Typography variant="caption">{TranslateText('Stop')}</Typography>
-                    </ButtonText>
-                    <ButtonText>
-                        <Button
-                            variant="ghost_icon"
-                            onClick={() => updateMissionState(MissionStatusRequest.Pause, mission)}
-                        >
-                            <Icon
-                                name={Icons.PauseButton}
-                                style={{ color: tokens.colors.interactive.secondary__resting.hex }}
-                                size={40}
-                            />
-                        </Button>
-                        <Typography variant="caption">{TranslateText('Pause')}</Typography>
-                    </ButtonText>
-                </ButtonStyle>
-            )
-        } else if (missionStatus === MissionStatus.Paused) {
-            return (
-                <ButtonStyle>
-                    <ButtonText>
-                        <StopMissionDialog mission={mission} />
-                        <Typography variant="caption">{TranslateText('Stop')}</Typography>
-                    </ButtonText>
-                    <ButtonText>
-                        <Button
-                            variant="ghost_icon"
-                            onClick={() => updateMissionState(MissionStatusRequest.Resume, mission)}
-                        >
-                            <Icon
-                                name={Icons.PlayButton}
-                                style={{ color: tokens.colors.interactive.secondary__resting.hex }}
-                                size={40}
-                            />
-                        </Button>
-                        <Typography variant="caption">{TranslateText('Start')}</Typography>
-                    </ButtonText>
-                </ButtonStyle>
-            )
-        }
-        return <></>
-    }
-    return <>{renderControlIcon(mission.status)}</>
+    return (
+        <>
+            {missionControlState.isWaitingForResponse ? (
+                <CircularProgress size={32} />
+            ) : (
+                <>
+                    {mission.status === MissionStatus.Ongoing && <OngoingMissionButton mission={mission} />}
+                    {mission.status === MissionStatus.Paused && <PausedMissionButton mission={mission} />}
+                </>
+            )}
+        </>
+    )
+}
+
+function OngoingMissionButton({ mission }: MissionProps) {
+    const { TranslateText } = useLanguageContext()
+    const { updateMissionState } = useMissionControlContext()
+
+    return (
+        <>
+            <ButtonStyle>
+                <ButtonText>
+                    <StopMissionDialog mission={mission} />
+                    <Typography variant="caption">{TranslateText('Stop')}</Typography>
+                </ButtonText>
+                <ButtonText>
+                    <Button
+                        variant="ghost_icon"
+                        onClick={() => updateMissionState(MissionStatusRequest.Pause, mission)}
+                    >
+                        <Icon
+                            name={Icons.PauseButton}
+                            style={{ color: tokens.colors.interactive.secondary__resting.hex }}
+                            size={40}
+                        />
+                    </Button>
+                    <Typography variant="caption">{TranslateText('Pause')}</Typography>
+                </ButtonText>
+            </ButtonStyle>
+        </>
+    )
+}
+
+function PausedMissionButton({ mission }: MissionProps) {
+    const { TranslateText } = useLanguageContext()
+    const { updateMissionState } = useMissionControlContext()
+
+    return (
+        <>
+            <ButtonStyle>
+                <ButtonText>
+                    <StopMissionDialog mission={mission} />
+                    <Typography variant="caption">{TranslateText('Stop')}</Typography>
+                </ButtonText>
+                <ButtonText>
+                    <Button
+                        variant="ghost_icon"
+                        onClick={() => updateMissionState(MissionStatusRequest.Resume, mission)}
+                    >
+                        <Icon
+                            name={Icons.PlayButton}
+                            style={{ color: tokens.colors.interactive.secondary__resting.hex }}
+                            size={40}
+                        />
+                    </Button>
+                    <Typography variant="caption">{TranslateText('Start')}</Typography>
+                </ButtonText>
+            </ButtonStyle>
+        </>
+    )
 }

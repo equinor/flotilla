@@ -1,102 +1,33 @@
 import { ChangeEvent, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import styled from 'styled-components'
 import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefinitionHeader'
 import { BackButton } from '../../../utils/BackButton'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Header } from 'components/Header/Header'
 import { CondensedMissionDefinition, SourceType } from 'models/MissionDefinition'
-import { Button, Typography, Card, Dialog, TextField, Icon } from '@equinor/eds-core-react'
+import { Button, Typography, TextField, Icon } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { config } from 'config'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-
-const StyledFormCard = styled(Card)`
-    display: flex;
-    justify-content: center;
-    padding: 8px;
-    gap: 25px;
-`
-const StyledButtonSection = styled.div`
-    display: flex;
-    margin-left: auto;
-    margin-right: 0;
-    gap: 10px;
-`
-const StyledFormContainer = styled.div`
-    display: grid;
-    grid-template-columns: [c1] 1fr [c2] 1fr [c3] 1fr;
-    grid-template-rows: [r1] auto [r1] auto [r1] auto;
-    align: left;
-    align-items: flex-start;
-    align-content: flex-start;
-    max-width: 1200px;
-    min-width: 600px;
-    gap: 10px 20px;
-`
-const StyledFormItem = styled.div`
-    width: 100%;
-    height: auto;
-    padding: 5px;
-    word-break: break-word;
-    hyphens: auto;
-    min-height: 60px;
-`
-const StyledDialog = styled(Dialog)`
-    display: flex;
-    justify-content: space-between;
-    padding: 1rem;
-    width: 620px;
-`
-const StyledMissionDefinitionPage = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: start;
-    flex-direction: column;
-    gap: 1rem;
-    margin: 2rem;
-`
-const StyledButton = styled(Button)`
-    width: 260px;
-`
-const StyledInspectionFrequencyDiv = styled.div`
-    > * {
-        padding: 10px;
-    }
-`
-const StyledTitleComponent = styled.div`
-    display: flex;
-    align-items: center;
-    height: 37px;
-`
-const StyledEditButton = styled(Button)`
-    padding-left: 5px;
-    padding-top: 0px;
-    margin-top: 0px;
-`
-const StyledCard = styled(Card)`
-    display: flex;
-    padding: 8px;
-    height: 110px;
-`
+import { StyledDict } from './MissionDefinitionStyledComponents'
 
 function MetadataItem({ title, content, onEdit }: { title: string; content: any; onEdit?: () => void }) {
     return (
-        <StyledFormItem>
-            <StyledCard style={{ boxShadow: tokens.elevation.raised }}>
-                <StyledTitleComponent>
+        <StyledDict.FormItem>
+            <StyledDict.Card style={{ boxShadow: tokens.elevation.raised }}>
+                <StyledDict.TitleComponent>
                     <Typography variant="body_long_bold" color={tokens.colors.text.static_icons__secondary.rgba}>
                         {title}
                     </Typography>
                     {onEdit && (
-                        <StyledEditButton variant="ghost" onClick={onEdit}>
+                        <StyledDict.EditButton variant="ghost" onClick={onEdit}>
                             <Icon name={Icons.Edit} size={16} />
-                        </StyledEditButton>
+                        </StyledDict.EditButton>
                     )}
-                </StyledTitleComponent>
+                </StyledDict.TitleComponent>
                 <Typography
                     variant="body_long"
                     group="paragraph"
@@ -104,8 +35,8 @@ function MetadataItem({ title, content, onEdit }: { title: string; content: any;
                 >
                     {content}
                 </Typography>
-            </StyledCard>
-        </StyledFormItem>
+            </StyledDict.Card>
+        </StyledDict.FormItem>
     )
 }
 
@@ -140,7 +71,7 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
 
     return (
         <>
-            <StyledFormContainer>
+            <StyledDict.FormContainer>
                 <MetadataItem title={TranslateText('Name')} content={missionDefinition.name} onEdit={onEdit('name')} />
                 <MetadataItem
                     title={TranslateText('Area')}
@@ -172,8 +103,8 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
                     content={missionDefinition.comment}
                     onEdit={onEdit('comment')}
                 />
-            </StyledFormContainer>
-            <StyledButton
+            </StyledDict.FormContainer>
+            <StyledDict.Button
                 disabled={!missionDefinition.lastSuccessfulRun}
                 onClick={() =>
                     navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${missionDefinition.lastSuccessfulRun!.id}`)
@@ -181,7 +112,7 @@ function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition 
             >
                 {TranslateText('View last run') +
                     (missionDefinition.lastSuccessfulRun ? '' : ': ' + TranslateText('Not yet performed'))}
-            </StyledButton>
+            </StyledDict.Button>
             {isEditDialogOpen && (
                 <MissionDefinitionEditDialog
                     fieldName={selectedField}
@@ -257,7 +188,7 @@ function MissionDefinitionEditDialog({
         switch (fieldName) {
             case 'inspectionFrequency':
                 return (
-                    <StyledInspectionFrequencyDiv>
+                    <StyledDict.InspectionFrequencyDiv>
                         <TextField
                             id="compact-textfield"
                             label={TranslateText('Days between inspections')}
@@ -268,7 +199,7 @@ function MissionDefinitionEditDialog({
                                     updateInspectionFrequencyFormDays(changes.target.value)
                             }}
                         />
-                    </StyledInspectionFrequencyDiv>
+                    </StyledDict.InspectionFrequencyDiv>
                 )
             case 'comment':
                 return (
@@ -301,11 +232,11 @@ function MissionDefinitionEditDialog({
     }
 
     return (
-        <StyledDialog open={true}>
-            <StyledFormCard>
+        <StyledDict.Dialog open={true}>
+            <StyledDict.FormCard>
                 <Typography variant="h2">{TranslateText('Edit') + ' ' + TranslateText(fieldName)}</Typography>
                 {getFormItem()}
-                <StyledButtonSection>
+                <StyledDict.ButtonSection>
                     <Button onClick={() => closeEditDialog()} variant="outlined" color="primary">
                         {' '}
                         {TranslateText('Cancel')}{' '}
@@ -314,9 +245,9 @@ function MissionDefinitionEditDialog({
                         {' '}
                         {TranslateText('Update')}{' '}
                     </Button>
-                </StyledButtonSection>
-            </StyledFormCard>
-        </StyledDialog>
+                </StyledDict.ButtonSection>
+            </StyledDict.FormCard>
+        </StyledDict.Dialog>
     )
 }
 
@@ -350,14 +281,14 @@ export function MissionDefinitionPage() {
         <>
             <Header page={'mission'} />
             {selectedMissionDefinition !== undefined && (
-                <StyledMissionDefinitionPage>
+                <StyledDict.MissionDefinitionPage>
                     <BackButton />
                     <MissionDefinitionHeader missionDefinition={selectedMissionDefinition} />
                     <MissionDefinitionPageBody
                         missionDefinition={selectedMissionDefinition}
                         updateMissionDefinition={setSelectedMissionDefinition}
                     />
-                </StyledMissionDefinitionPage>
+                </StyledDict.MissionDefinitionPage>
             )}
         </>
     )
