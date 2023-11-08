@@ -77,23 +77,34 @@ const StyledEditButton = styled(Button)`
     padding-top: 0px;
     margin-top: 0px;
 `
+const StyledCard = styled(Card)`
+    display: flex;
+    padding: 8px;
+    height: 110px;
+`
 
 function MetadataItem({ title, content, onEdit }: { title: string; content: any; onEdit?: () => void }) {
     return (
         <StyledFormItem>
-            <StyledTitleComponent>
-                <Typography variant="body_long_bold" color={tokens.colors.text.static_icons__secondary.rgba}>
-                    {title}
+            <StyledCard style={{ boxShadow: tokens.elevation.raised }}>
+                <StyledTitleComponent>
+                    <Typography variant="body_long_bold" color={tokens.colors.text.static_icons__secondary.rgba}>
+                        {title}
+                    </Typography>
+                    {onEdit && (
+                        <StyledEditButton variant="ghost" onClick={onEdit}>
+                            <Icon name={Icons.Edit} size={16} />
+                        </StyledEditButton>
+                    )}
+                </StyledTitleComponent>
+                <Typography
+                    variant="body_long"
+                    group="paragraph"
+                    color={tokens.colors.text.static_icons__secondary.rgba}
+                >
+                    {content}
                 </Typography>
-                {onEdit && (
-                    <StyledEditButton variant="ghost" onClick={onEdit}>
-                        <Icon name={Icons.Edit} size={16} />
-                    </StyledEditButton>
-                )}
-            </StyledTitleComponent>
-            <Typography variant="body_long" group="paragraph" color={tokens.colors.text.static_icons__secondary.rgba}>
-                {content}
-            </Typography>
+            </StyledCard>
         </StyledFormItem>
     )
 }
