@@ -16,6 +16,7 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
 import { Robot } from 'models/Robot'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
+import { StyledAutoComplete, StyledDialog } from 'components/StyledComponents'
 
 interface IProps {
     robotOptions: Array<Robot>
@@ -34,13 +35,7 @@ const StyledMissionDialog = styled.div`
     display: flex;
     justify-content: space-between;
 `
-const StyledAutoComplete = styled(Card)`
-    display: flex;
-    justify-content: center;
-    padding: 8px;
-    gap: 25px;
-    box-shadow: none;
-`
+
 const StyledMissionSection = styled.div`
     display: flex;
     margin-left: auto;
@@ -53,11 +48,6 @@ const StyledLoading = styled.div`
     align-items: center;
     padding-top: 3rem;
     gap: 1rem;
-`
-const StyledDialog = styled(Dialog)`
-    display: flex;
-    padding: 1rem;
-    width: 320px;
 `
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {

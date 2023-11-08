@@ -1,12 +1,13 @@
 import { Button, Card, Dialog, Icon, Typography, DotProgress } from '@equinor/eds-core-react'
 import { config } from 'config'
-import { tokens } from '@equinor/eds-tokens'
 import { Mission, placeholderMission } from 'models/Mission'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
+import { StyledDialog } from 'components/StyledComponents'
+import { tokens } from '@equinor/eds-tokens'
 
 interface MissionQueueCardProps {
     order: number
@@ -47,11 +48,6 @@ const StyledButtonSection = styled.div`
     justify-content: end;
     padding: 8px;
     gap: 8px;
-`
-
-const StyledDialog = styled(Dialog)`
-    width: 320px;
-    padding: 10px;
 `
 
 const PaddingLeft = styled.div`

@@ -3,8 +3,8 @@ import { useState, useEffect, useRef } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
+import { tokens } from '@equinor/eds-tokens'
 
 interface RobotProps {
     robot: Robot

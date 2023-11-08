@@ -8,6 +8,7 @@ import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Icons } from 'utils/icons'
 import { useRobotContext } from 'components/Contexts/RobotContext'
+import { StyledAutoComplete, StyledDialog } from 'components/StyledComponents'
 
 interface IProps {
     missions: CondensedMissionDefinition[]
@@ -26,26 +27,12 @@ const StyledMissionDialog = styled.div`
     display: flex;
     justify-content: space-between;
 `
-const StyledAutoComplete = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 8px;
-    gap: 25px;
-`
 const StyledMissionSection = styled.div`
     display: flex;
     margin-left: auto;
     margin-right: 0;
     gap: 10px;
 `
-const StyledDialog = styled(Dialog)`
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    width: 420px;
-`
-
 const StyledDialogContent = styled.div`
     display: flex;
     flex-direction: column;
