@@ -1,13 +1,4 @@
-import {
-    Autocomplete,
-    Button,
-    Card,
-    Dialog,
-    Typography,
-    Popover,
-    Icon,
-    CircularProgress,
-} from '@equinor/eds-core-react'
+import { Autocomplete, Button, Dialog, Typography, Popover, Icon, CircularProgress } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
@@ -138,8 +129,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 }}
                                 variant="outlined"
                             >
-                                {' '}
-                                {TranslateText('Cancel')}{' '}
+                                {TranslateText('Cancel')}
                             </Button>
                         </StyledMissionSection>
                     </StyledAutoComplete>
@@ -160,8 +150,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 }}
                                 variant="outlined"
                             >
-                                {' '}
-                                {TranslateText('Cancel')}{' '}
+                                {TranslateText('Cancel')}
                             </Button>
                         </StyledMissionSection>
                     </StyledAutoComplete>
@@ -201,8 +190,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 }}
                                 variant="outlined"
                             >
-                                {' '}
-                                {TranslateText('Cancel')}{' '}
+                                {TranslateText('Cancel')}
                             </Button>
                             <Button
                                 onClick={() => {
@@ -211,7 +199,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                 }}
                                 disabled={props.scheduleButtonDisabled}
                             >
-                                {' '}
                                 {TranslateText('Add mission')}
                             </Button>
                         </StyledMissionSection>

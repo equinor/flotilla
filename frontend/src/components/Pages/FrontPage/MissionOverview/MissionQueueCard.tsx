@@ -19,6 +19,13 @@ interface MissionDisplayProps {
     mission: Mission
 }
 
+interface RemoveMissionDialogProps {
+    confirmDeleteDialogOpen: boolean
+    mission: Mission
+    setConfirmDeleteDialogOpen: React.Dispatch<React.SetStateAction<boolean>>
+    onDeleteMission: (mission: Mission) => void
+}
+
 const StyledMissionCard = styled(Card)`
     width: 880px;
     display: flex;
@@ -106,41 +113,57 @@ export function MissionQueueCard({ order, mission, onDeleteMission }: MissionQue
                 >
                     <Icon name={Icons.Remove} size={24} title="more action" />
                 </Button>
-                <StyledDialog open={confirmDeleteDialogOpen} isDismissable>
-                    <Dialog.Header>
-                        <Typography variant="h3">{TranslateText('Remove mission')}</Typography>
-                    </Dialog.Header>
-                    <Dialog.Content>
-                        <StyledDialogContent>
-                            <Typography variant="body_long">
-                                {TranslateText('Please confirm that you want to remove the mission from the queue:')}
-                            </Typography>
-                            <Typography bold>{mission.name}</Typography>
-                        </StyledDialogContent>
-                    </Dialog.Content>
-                    <StyledButtonSection>
-                        <Button
-                            onClick={() => {
-                                setConfirmDeleteDialogOpen(false)
-                            }}
-                            variant="outlined"
-                        >
-                            {' '}
-                            {TranslateText('Cancel')}{' '}
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                onDeleteMission(mission)
-                                setConfirmDeleteDialogOpen(false)
-                            }}
-                        >
-                            {' '}
-                            {TranslateText('Remove mission')}
-                        </Button>
-                    </StyledButtonSection>
-                </StyledDialog>
             </HorizontalContent>
+            <RemoveMissionDialog
+                confirmDeleteDialogOpen={confirmDeleteDialogOpen}
+                mission={mission}
+                setConfirmDeleteDialogOpen={setConfirmDeleteDialogOpen}
+                onDeleteMission={onDeleteMission}
+            />
         </StyledMissionCard>
+    )
+}
+
+function RemoveMissionDialog({
+    confirmDeleteDialogOpen,
+    mission,
+    setConfirmDeleteDialogOpen,
+    onDeleteMission,
+}: RemoveMissionDialogProps) {
+    const { TranslateText } = useLanguageContext()
+
+    return (
+        <StyledDialog open={confirmDeleteDialogOpen} isDismissable>
+            <Dialog.Header>
+                <Typography variant="h3">{TranslateText('Remove mission')}</Typography>
+            </Dialog.Header>
+            <Dialog.Content>
+                <StyledDialogContent>
+                    <Typography variant="body_long">
+                        {TranslateText('Please confirm that you want to remove the mission from the queue:')}
+                    </Typography>
+                    <Typography bold>{mission.name}</Typography>
+                </StyledDialogContent>
+            </Dialog.Content>
+            <StyledButtonSection>
+                <Button
+                    onClick={() => {
+                        setConfirmDeleteDialogOpen(false)
+                    }}
+                    variant="outlined"
+                >
+                    {TranslateText('Cancel')}
+                </Button>
+                <Button
+                    onClick={() => {
+                        onDeleteMission(mission)
+                        setConfirmDeleteDialogOpen(false)
+                    }}
+                >
+                    {TranslateText('Remove mission')}
+                </Button>
+            </StyledButtonSection>
+        </StyledDialog>
     )
 }
 

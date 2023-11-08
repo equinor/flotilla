@@ -16,12 +16,14 @@ interface MissionProps {
 }
 
 const StyledMissionCard = styled(Card)`
-    width: 372px;
-    padding: 12px;
+    width: 400px;
+    height: 140px;
+    padding: 10px;
+    justify-content: space-between;
 `
 const StyledTitle = styled(Card)`
     width: 70%;
-    height: 80%;
+    height: 50px;
     justify-content: center;
     padding-left: 12px;
     :hover {

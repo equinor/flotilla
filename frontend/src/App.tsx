@@ -8,31 +8,25 @@ import { MissionsProvider } from 'components/Contexts/MissionListsContext'
 import { SafeZoneProvider } from 'components/Contexts/SafeZoneContext'
 import { AlertProvider } from 'components/Contexts/AlertContext'
 
-function App() {
-    return (
-        <SafeZoneProvider>
-            <AlertProvider>
-                <MissionsProvider>
-                    <LanguageProvider>
-                        <MissionControlProvider>
-                            <>
-                                <UnauthenticatedTemplate>
-                                    <div className="sign-in-page">
-                                        <AssetSelectionPage></AssetSelectionPage>
-                                    </div>
-                                </UnauthenticatedTemplate>
-                                <AuthenticatedTemplate>
-                                    <MissionFilterProvider>
-                                        <FlotillaSite />
-                                    </MissionFilterProvider>
-                                </AuthenticatedTemplate>
-                            </>
-                        </MissionControlProvider>
-                    </LanguageProvider>
-                </MissionsProvider>
-            </AlertProvider>
-        </SafeZoneProvider>
-    )
-}
+const App = () => (
+    <SafeZoneProvider>
+        <MissionsProvider>
+            <LanguageProvider>
+                <MissionControlProvider>
+                    <UnauthenticatedTemplate>
+                        <div className="sign-in-page">
+                            <AssetSelectionPage></AssetSelectionPage>
+                        </div>
+                    </UnauthenticatedTemplate>
+                    <AuthenticatedTemplate>
+                        <MissionFilterProvider>
+                            <FlotillaSite />
+                        </MissionFilterProvider>
+                    </AuthenticatedTemplate>
+                </MissionControlProvider>
+            </LanguageProvider>
+        </MissionsProvider>
+    </SafeZoneProvider>
+)
 
 export default App

@@ -121,7 +121,7 @@ export function MissionMapView({ mission }: MissionProps) {
     }, [updateMap, mapContext])
 
     return (
-        <MapCard variant="default" style={{ boxShadow: tokens.elevation.raised }}>
+        <MapCard style={{ boxShadow: tokens.elevation.raised }}>
             <SyledContainer>
                 <StyledElements>
                     <StyledMap id="mapCanvas" />
