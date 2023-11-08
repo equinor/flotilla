@@ -16,8 +16,8 @@ interface MissionProps {
 }
 
 const StyledMissionCard = styled(Card)`
-    width: 432px;
-    padding: 10px;
+    width: 372px;
+    padding: 12px;
 `
 const StyledTitle = styled(Card)`
     width: 70%;
