@@ -26,8 +26,8 @@ export function DeckCards({
     const { TranslateText } = useLanguageContext()
     const [areas, setAreas] = useState<DeckAreas>({})
 
-    const getCardColor = (deckId: string) => {
-        const inspections = deckMissions[deckId].inspections
+    const getCardColor = (deckName: string) => {
+        const inspections = deckMissions[deckName].inspections
         if (inspections.length === 0) return 'gray'
         const sortedInspections = inspections.sort(compareInspections)
 
@@ -46,15 +46,15 @@ export function DeckCards({
     useEffect(() => {
         const newAreas: DeckAreas = {}
 
-        Object.keys(deckMissions).forEach((deckId) => {
-            BackendAPICaller.getAreasByDeckId(deckMissions[deckId].deck.id).then((areas) => {
+        Object.keys(deckMissions).forEach((deckName) => {
+            BackendAPICaller.getAreasByDeckId(deckMissions[deckName].deck.id).then((areas) => {
                 const formattedAreaNames = areas
                     .map((area) => {
                         return area.areaName.toLocaleUpperCase()
                     })
                     .sort()
                     .join(' | ')
-                newAreas[deckMissions[deckId].deck.id] = {
+                newAreas[deckName] = {
                     areaString: formattedAreaNames,
                 }
             })
@@ -66,28 +66,26 @@ export function DeckCards({
         <>
             <StyledDict.DeckCards>
                 {Object.keys(deckMissions).length > 0 ? (
-                    Object.keys(deckMissions).map((deckId) => (
-                        <StyledDict.DeckCard key={deckId}>
-                            <StyledDict.Rectangle style={{ background: `${getCardColor(deckId)}` }} />
+                    Object.keys(deckMissions).map((deckName) => (
+                        <StyledDict.DeckCard key={deckName}>
+                            <StyledDict.Rectangle style={{ background: `${getCardColor(deckName)}` }} />
                             <StyledDict.Card
-                                key={deckId}
+                                key={deckName}
                                 onClick={
-                                    deckMissions[deckId].inspections.length > 0
-                                        ? () => setSelectedDeck(deckMissions[deckId].deck)
+                                    deckMissions[deckName].inspections.length > 0
+                                        ? () => setSelectedDeck(deckMissions[deckName].deck)
                                         : undefined
                                 }
                                 style={
-                                    selectedDeck === deckMissions[deckId].deck
-                                        ? { border: `solid ${getCardColor(deckId)} 2px` }
+                                    selectedDeck === deckMissions[deckName].deck
+                                        ? { border: `solid ${getCardColor(deckName)} 2px` }
                                         : {}
                                 }
                             >
                                 <StyledDict.DeckText>
                                     <StyledDict.TopDeckText>
-                                        <Typography variant={'body_short_bold'}>
-                                            {deckMissions[deckId].deck.deckName.toString()}
-                                        </Typography>
-                                        {deckMissions[deckId].inspections
+                                        <Typography variant={'body_short_bold'}>{deckName.toString()}</Typography>
+                                        {deckMissions[deckName].inspections
                                             .filter((i) =>
                                                 Object.keys(ongoingMissions).includes(i.missionDefinition.id)
                                             )
@@ -98,31 +96,31 @@ export function DeckCards({
                                                 </StyledDict.Content>
                                             ))}
                                     </StyledDict.TopDeckText>
-                                    {Object.keys(areas).includes(deckId) && (
-                                        <Typography variant={'body_short'}>{areas[deckId].areaString}</Typography>
+                                    {Object.keys(areas).includes(deckName) && (
+                                        <Typography variant={'body_short'}>{areas[deckName].areaString}</Typography>
                                     )}
-                                    {deckMissions[deckId].inspections && (
-                                        <CardMissionInformation deckId={deckId} deckMissions={deckMissions} />
+                                    {deckMissions[deckName].inspections && (
+                                        <CardMissionInformation deckName={deckName} deckMissions={deckMissions} />
                                     )}
                                 </StyledDict.DeckText>
                                 <StyledDict.CardComponent>
                                     <Tooltip
                                         placement="top"
                                         title={
-                                            deckMissions[deckId].inspections.length > 0
+                                            deckMissions[deckName].inspections.length > 0
                                                 ? ''
                                                 : TranslateText('No planned inspection')
                                         }
                                     >
                                         <Button
-                                            disabled={deckMissions[deckId].inspections.length === 0}
+                                            disabled={deckMissions[deckName].inspections.length === 0}
                                             variant="outlined"
-                                            onClick={() => handleScheduleAll(deckMissions[deckId].inspections)}
+                                            onClick={() => handleScheduleAll(deckMissions[deckName].inspections)}
                                             color="secondary"
                                         >
                                             <Icon
                                                 name={Icons.LibraryAdd}
-                                                color={deckMissions[deckId].inspections.length > 0 ? '' : 'grey'}
+                                                color={deckMissions[deckName].inspections.length > 0 ? '' : 'grey'}
                                             />
                                             <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
                                                 {TranslateText('Queue the missions')}
