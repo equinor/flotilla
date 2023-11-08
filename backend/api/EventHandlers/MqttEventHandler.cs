@@ -16,12 +16,7 @@ namespace Api.EventHandlers
     /// <summary>
     ///     A background service which listens to events and performs callback functions.
     /// </summary>
-    public interface IMqttEventHandler
-    {
-        public void TriggerRobotAvailable(RobotAvailableEventArgs e);
-    }
-
-    public class MqttEventHandler : EventHandlerBase, IMqttEventHandler
+    public class MqttEventHandler : EventHandlerBase
     {
         private readonly ILogger<MqttEventHandler> _logger;
         private readonly IServiceScopeFactory _scopeFactory;
@@ -35,10 +30,6 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
-        public void TriggerRobotAvailable(RobotAvailableEventArgs e)
-        {
-            OnRobotAvailable(e);
-        }
 
         private IServiceProvider GetServiceProvider() { return _scopeFactory.CreateScope().ServiceProvider; }
 
@@ -68,18 +59,15 @@ namespace Api.EventHandlers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken) { await stoppingToken; }
 
-        protected virtual void OnRobotAvailable(RobotAvailableEventArgs e)
-        {
-            RobotAvailable?.Invoke(this, e);
-        }
-
-        public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
 
         private async void OnIsarRobotStatus(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
             var robotService = provider.GetRequiredService<IRobotService>();
+            var missionScheduling = provider.GetRequiredService<IMissionScheduling>();
+
             var isarRobotStatus = (IsarRobotStatusMessage)mqttArgs.Message;
+
             var robot = await robotService.ReadByIsarId(isarRobotStatus.IsarId);
 
             if (robot == null)
@@ -94,7 +82,7 @@ namespace Api.EventHandlers
             robot = await robotService.Update(robot);
             _logger.LogInformation("Updated status for robot {Name} to {Status}", robot.Name, robot.Status);
 
-            if (robot.Status == RobotStatus.Available) { OnRobotAvailable(new RobotAvailableEventArgs(robot.Id)); }
+            if (robot.Status == RobotStatus.Available) { missionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id)); }
         }
 
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
