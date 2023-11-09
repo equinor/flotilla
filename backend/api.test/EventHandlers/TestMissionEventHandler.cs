@@ -23,17 +23,6 @@ namespace Api.Test.EventHandlers
     [Collection("Database collection")]
     public class TestMissionEventHandler : IDisposable
     {
-        private static readonly Installation testInstallation = new()
-        {
-            InstallationCode = "test",
-            Name = "test test"
-        };
-        private static readonly Plant testPlant = new()
-        {
-            PlantCode = "test",
-            Name = "test test",
-            Installation = testInstallation
-        };
         private readonly IAreaService _areaService;
         private readonly FlotillaDbContext _context;
         private readonly IDeckService _deckService;
@@ -43,6 +32,7 @@ namespace Api.Test.EventHandlers
 
         private readonly MissionEventHandler _missionEventHandler;
         private readonly IMissionRunService _missionRunService;
+        private readonly IMissionSchedulingService _missionSchedulingService;
 
 #pragma warning disable IDE0052
         private readonly MqttEventHandler _mqttEventHandler;
@@ -80,6 +70,8 @@ namespace Api.Test.EventHandlers
             _plantService = new PlantService(_context, _installationService);
             _deckService = new DeckService(_context, _defaultLocalisationPoseService, _installationService, _plantService);
             _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalisationPoseService);
+            _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, _robotControllerMock.Mock.Object, _areaService,
+                _isarServiceMock);
 
             var mockServiceProvider = new Mock<IServiceProvider>();
 
@@ -90,6 +82,9 @@ namespace Api.Test.EventHandlers
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IRobotService)))
                 .Returns(_robotService);
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(IMissionSchedulingService)))
+                .Returns(_missionSchedulingService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(RobotController)))
                 .Returns(_robotControllerMock.Mock.Object);
@@ -108,52 +103,80 @@ namespace Api.Test.EventHandlers
             _mqttEventHandler = new MqttEventHandler(mqttEventHandlerLogger, mockFactory.Object);
         }
 
-        private static Area NewArea => new()
-        {
-            Deck = new Deck
-            {
-                Plant = testPlant,
-                Installation = testInstallation,
-                Name = "testDeck"
-            },
-            Installation = testInstallation,
-            Plant = testPlant,
-            Name = "testArea",
-            MapMetadata = new MapMetadata
-            {
-                MapName = "TestMap",
-                Boundary = new Boundary(),
-                TransformationMatrices = new TransformationMatrices()
-            },
-            DefaultLocalizationPose = null,
-            SafePositions = new List<SafePosition>()
-        };
-
-        private static MissionRun ScheduledMission =>
-            new()
-            {
-                Name = "testMission",
-                MissionId = Guid.NewGuid().ToString(),
-                MissionRunPriority = MissionRunPriority.Normal,
-                Status = MissionStatus.Pending,
-                DesiredStartTime = DateTime.Now,
-                Area = NewArea,
-                Map = new MapMetadata
-                {
-                    MapName = "TestMap",
-                    Boundary = new Boundary(),
-                    TransformationMatrices = new TransformationMatrices()
-                },
-                InstallationCode = "testInstallation"
-            };
-
         public void Dispose()
         {
             _missionEventHandler.Dispose();
             GC.SuppressFinalize(this);
         }
 
-        private async Task<Robot> NewRobot(RobotStatus status)
+        private async Task<MissionRun> NewMissionRun(string installationCode, Robot robot, Area? area, bool writeToDatabase = true)
+        {
+            var missionRun = new MissionRun
+            {
+                Name = "testMission",
+                Robot = robot,
+                MissionId = null,
+                MissionRunPriority = MissionRunPriority.Normal,
+                Status = MissionStatus.Pending,
+                DesiredStartTime = DateTime.Now,
+                Area = area,
+                Map = new MapMetadata(),
+                InstallationCode = installationCode
+            };
+            if (writeToDatabase) { return await _missionRunService.Create(missionRun); }
+            return missionRun;
+        }
+
+        private async Task<Installation> NewInstallation()
+        {
+            var createInstallationQuery = new CreateInstallationQuery
+            {
+                InstallationCode = "testInstallationCode",
+                Name = "testInstallation"
+            };
+
+            return await _installationService.Create(createInstallationQuery);
+        }
+
+        private async Task<Plant> NewPlant(string installationCode)
+        {
+            var createPlantQuery = new CreatePlantQuery
+            {
+                InstallationCode = installationCode,
+                PlantCode = "testPlantCode",
+                Name = "testPlant"
+            };
+
+            return await _plantService.Create(createPlantQuery);
+        }
+
+        private async Task<Deck> NewDeck(string installationCode, string plantCode)
+        {
+            var createDeckQuery = new CreateDeckQuery
+            {
+                InstallationCode = installationCode,
+                PlantCode = plantCode,
+                Name = "testDeck"
+            };
+
+            return await _deckService.Create(createDeckQuery);
+        }
+
+        private async Task<Area> NewArea(string installationCode, string plantCode, string deckName)
+        {
+            var createAreaQuery = new CreateAreaQuery
+            {
+                InstallationCode = installationCode,
+                PlantCode = plantCode,
+                DeckName = deckName,
+                AreaName = "testArea",
+                DefaultLocalizationPose = new Pose()
+            };
+
+            return await _areaService.Create(createAreaQuery);
+        }
+
+        private async Task<Robot> NewRobot(RobotStatus status, Area area)
         {
             var createRobotQuery = new CreateRobotQuery
             {
@@ -162,7 +185,7 @@ namespace Api.Test.EventHandlers
                 RobotType = RobotType.Robot,
                 SerialNumber = "0001",
                 CurrentInstallation = "kaa",
-                CurrentArea = NewArea,
+                CurrentArea = area,
                 VideoStreams = new List<CreateVideoStreamQuery>(),
                 Host = "localhost",
                 Port = 3000,
@@ -171,23 +194,23 @@ namespace Api.Test.EventHandlers
             };
 
             var robotModel = await _robotModelService.ReadByRobotType(createRobotQuery.RobotType);
-            return new Robot(createRobotQuery)
+            var robot = new Robot(createRobotQuery)
             {
                 Model = robotModel!
             };
+            return await _robotService.Create(robot);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Awaiting fix for testing with database")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async void ScheduledMissionStartedWhenSystemIsAvailable()
         {
             // Arrange
-            var missionRun = ScheduledMission;
-
-            var robot = await NewRobot(RobotStatus.Available);
-            await _robotService.Create(robot);
-            missionRun.Robot = robot;
+            var installation = await NewInstallation();
+            var plant = await NewPlant(installation.InstallationCode);
+            var deck = await NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await NewRobot(RobotStatus.Available, area);
+            var missionRun = await NewMissionRun(installation.InstallationCode, robot, area, false);
 
             SetupMocksForRobotController(robot, missionRun);
 
@@ -199,20 +222,17 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Awaiting fix for testing with database")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async void SecondScheduledMissionQueuedIfRobotIsBusy()
         {
             // Arrange
-            var missionRunOne = ScheduledMission;
-            var missionRunTwo = ScheduledMission;
-
-            var robot = await NewRobot(RobotStatus.Available);
-            await _robotService.Create(robot);
-
-            missionRunOne.Robot = robot;
-            missionRunTwo.Robot = robot;
+            var installation = await NewInstallation();
+            var plant = await NewPlant(installation.InstallationCode);
+            var deck = await NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await NewRobot(RobotStatus.Available, area);
+            var missionRunOne = await NewMissionRun(installation.InstallationCode, robot, area, false);
+            var missionRunTwo = await NewMissionRun(installation.InstallationCode, robot, area, false);
 
             SetupMocksForRobotController(robot, missionRunOne);
 
@@ -227,17 +247,16 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Pending, postTestMissionRunTwo!.Status);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Awaiting fix for testing with database")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async void NewMissionIsStartedWhenRobotBecomesAvailable()
         {
             // Arrange
-            var missionRun = ScheduledMission;
-
-            var robot = await NewRobot(RobotStatus.Busy);
-            await _robotService.Create(robot);
-            missionRun.Robot = robot;
+            var installation = await NewInstallation();
+            var plant = await NewPlant(installation.InstallationCode);
+            var deck = await NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await NewRobot(RobotStatus.Busy, area);
+            var missionRun = await NewMissionRun(installation.InstallationCode, robot, area, false);
 
             SetupMocksForRobotController(robot, missionRun);
 
@@ -265,14 +284,15 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Awaiting fix for testing with database")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async void NoMissionIsStartedIfQueueIsEmptyWhenRobotBecomesAvailable()
         {
             // Arrange
-            var robot = await NewRobot(RobotStatus.Busy);
-            await _robotService.Create(robot);
+            var installation = await NewInstallation();
+            var plant = await NewPlant(installation.InstallationCode);
+            var deck = await NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await NewRobot(RobotStatus.Busy, area);
 
             var mqttEventArgs = new MqttReceivedArgs(
                 new IsarRobotStatusMessage
@@ -305,22 +325,18 @@ namespace Api.Test.EventHandlers
             Assert.False(ongoingMission.Any());
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Awaiting fix for testing with database")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async void MissionRunIsStartedForOtherAvailableRobotIfOneRobotHasAnOngoingMissionRun()
         {
             // Arrange
-            var robotOne = await NewRobot(RobotStatus.Available);
-            var robotTwo = await NewRobot(RobotStatus.Available);
-            await _robotService.Create(robotOne);
-            await _robotService.Create(robotTwo);
-
-            var missionRunOne = ScheduledMission;
-            var missionRunTwo = ScheduledMission;
-
-            missionRunOne.Robot = robotOne;
-            missionRunTwo.Robot = robotTwo;
+            var installation = await NewInstallation();
+            var plant = await NewPlant(installation.InstallationCode);
+            var deck = await NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robotOne = await NewRobot(RobotStatus.Available, area);
+            var robotTwo = await NewRobot(RobotStatus.Available, area);
+            var missionRunOne = await NewMissionRun(installation.InstallationCode, robotOne, area, false);
+            var missionRunTwo = await NewMissionRun(installation.InstallationCode, robotTwo, area, false);
 
             SetupMocksForRobotController(robotOne, missionRunOne);
 
