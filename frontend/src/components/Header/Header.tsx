@@ -8,6 +8,7 @@ import { Icons } from 'utils/icons'
 const StyledTopBar = styled(TopBar)`
     margin-bottom: 2rem;
     align-items: center;
+    box-shadow: none;
 `
 
 const IconStyle = styled.div`
@@ -42,7 +43,7 @@ export function Header({ page }: { page: string }) {
                     </Typography>
                 </TopBar.Header>
             </HandPointer>
-            <Typography> {installationName}</Typography>
+            <Typography>{installationName}</Typography>
             <TopBar.Actions>
                 <IconStyle>
                     <Button variant="ghost_icon" onClick={() => console.log('Clicked account icon')}>
