@@ -218,11 +218,18 @@ function MissionDefinitionEditDialog({
 
     const updateInspectionFrequencyFormDays = (newDay: string) => {
         if (!Number(newDay) && newDay !== '') return
-        newDay = newDay === '' ? '0' : newDay
-        if (!form.inspectionFrequency) return newDay + '.00:00:00'
-        const inspectionArray = form.inspectionFrequency.split(':')
-        if (!inspectionArray || inspectionArray.length < 2) return newDay + '.00:00:00'
-        setForm({ ...form, inspectionFrequency: newDay + '.00:' + inspectionArray[1] + ':00' })
+
+        const formatInspectionFrequency = (dayStr: string) => {
+            dayStr = dayStr === '' ? '0' : dayStr
+            if (!form.inspectionFrequency) return dayStr + '.00:00:00'
+
+            const inspectionArray = form.inspectionFrequency.split(':')
+            if (!inspectionArray || inspectionArray.length < 2) return dayStr + '.00:00:00'
+
+            return dayStr + '.00:' + inspectionArray[1] + ':00'
+        }
+
+        setForm({ ...form, inspectionFrequency: formatInspectionFrequency(newDay) })
     }
 
     const getDayAndHoursFromInspectionFrequency = (inspectionFrequency: string | undefined): [number, number] => {
