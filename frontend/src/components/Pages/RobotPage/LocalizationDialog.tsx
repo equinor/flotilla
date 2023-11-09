@@ -77,7 +77,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
             )
             setAreas(relevantAreas)
         })
-    }, [])
+    }, [installationCode])
 
     const localizeRobot = () => {
         if (selectedArea && localizationPose) {
