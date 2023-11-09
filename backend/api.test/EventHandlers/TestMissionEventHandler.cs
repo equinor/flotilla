@@ -43,8 +43,6 @@ namespace Api.Test.EventHandlers
 
         private readonly MissionEventHandler _missionEventHandler;
         private readonly IMissionRunService _missionRunService;
-        private readonly IMissionSchedulingService _missionSchedulingService;
-        private readonly ISignalRService _signalRService;
 
 #pragma warning disable IDE0052
         private readonly MqttEventHandler _mqttEventHandler;
@@ -55,6 +53,7 @@ namespace Api.Test.EventHandlers
         private readonly RobotControllerMock _robotControllerMock;
         private readonly IRobotModelService _robotModelService;
         private readonly IRobotService _robotService;
+        private readonly ISignalRService _signalRService;
 
         public TestMissionEventHandler(DatabaseFixture fixture)
         {
@@ -81,8 +80,6 @@ namespace Api.Test.EventHandlers
             _plantService = new PlantService(_context, _installationService);
             _deckService = new DeckService(_context, _defaultLocalisationPoseService, _installationService, _plantService);
             _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalisationPoseService);
-            _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, _robotControllerMock.Mock.Object, _areaService,
-                _isarServiceMock);
 
             var mockServiceProvider = new Mock<IServiceProvider>();
 
@@ -268,7 +265,9 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
-        [Fact]
+#pragma warning disable xUnit1004
+        [Fact(Skip = "Awaiting fix for testing with database")]
+#pragma warning restore xUnit1004
         public async void NoMissionIsStartedIfQueueIsEmptyWhenRobotBecomesAvailable()
         {
             // Arrange
