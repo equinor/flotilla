@@ -78,22 +78,22 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Robot>> GetRobotById([FromRoute] string id)
         {
-            _logger.LogInformation("Getting robot with id={id}", id);
+            _logger.LogInformation("Getting robot with id={Id}", id);
             try
             {
                 var robot = await _robotService.ReadById(id);
                 if (robot == null)
                 {
-                    _logger.LogWarning("Could not find robot with id={id}", id);
+                    _logger.LogWarning("Could not find robot with id={Id}", id);
                     return NotFound();
                 }
 
-                _logger.LogInformation("Successful GET of robot with id={id}", id);
+                _logger.LogInformation("Successful GET of robot with id={Id}", id);
                 return Ok(robot);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of robot with id={id}", id);
+                _logger.LogError(e, "Error during GET of robot with id={Id}", id);
                 throw;
             }
         }
@@ -130,7 +130,7 @@ namespace Api.Controllers
                 };
 
                 var newRobot = await _robotService.Create(robot);
-                _logger.LogInformation("Succesfully created new robot");
+                _logger.LogInformation("Successfully created new robot");
                 return CreatedAtAction(nameof(GetRobotById), new
                 {
                     id = newRobot.Id
@@ -165,16 +165,16 @@ namespace Api.Controllers
             [FromBody] Robot robot
         )
         {
-            _logger.LogInformation("Updating robot with id={id}", id);
+            _logger.LogInformation("Updating robot with id={Id}", id);
 
             if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid data.");
+                return BadRequest("Invalid data");
             }
 
             if (id != robot.Id)
             {
-                _logger.LogWarning("Id: {id} not corresponding to updated robot", id);
+                _logger.LogWarning("Id: {Id} not corresponding to updated robot", id);
                 return BadRequest("Inconsistent Id");
             }
 
@@ -188,13 +188,13 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while updating robot with id={id}", id);
+                _logger.LogError(e, "Error while updating robot with id={Id}", id);
                 throw;
             }
         }
 
         /// <summary>
-        ///     Deletes the robot with the specified id from the database.
+        ///     Deletes the robot with the specified id from the database
         /// </summary>
         [HttpDelete]
         [Authorize(Roles = Role.Admin)]
@@ -219,7 +219,7 @@ namespace Api.Controllers
         /// </summary>
         /// <remarks>
         /// </remarks>
-        /// <response code="200"> The robot status was succesfully updated </response>
+        /// <response code="200"> The robot status was successfully updated </response>
         /// <response code="400"> The robot data is invalid </response>
         /// <response code="404"> There was no robot with the given ID in the database </response>
         [HttpPut]
@@ -236,17 +236,19 @@ namespace Api.Controllers
             [FromBody] RobotStatus robotStatus
         )
         {
-            _logger.LogInformation("Updating robot status with id={id}", id);
+            _logger.LogInformation("Updating robot status with id={Id}", id);
 
             if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid data.");
+                return BadRequest("Invalid data");
             }
 
             var robot = await _robotService.ReadById(id);
             if (robot == null)
             {
-                return NotFound($"No robot with id: {id} could be found");
+                string errorMessage = $"No robot with id: {id} could be found";
+                _logger.LogError("{Message}", errorMessage);
+                return NotFound(errorMessage);
             }
 
             robot.Status = robotStatus;
@@ -260,7 +262,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while updating status for robot with id={id}", id);
+                _logger.LogError(e, "Error while updating status for robot with id={Id}", id);
                 throw;
             }
         }
@@ -285,7 +287,7 @@ namespace Api.Controllers
             var robot = await _robotService.ReadById(robotId);
             if (robot == null)
             {
-                _logger.LogWarning("Could not find robot with id={id}", robotId);
+                _logger.LogWarning("Could not find robot with id={Id}", robotId);
                 return NotFound();
             }
 
@@ -315,7 +317,7 @@ namespace Api.Controllers
             var robot = await _robotService.ReadById(robotId);
             if (robot == null)
             {
-                _logger.LogWarning("Could not find robot with id={id}", robotId);
+                _logger.LogWarning("Could not find robot with id={Id}", robotId);
                 return NotFound();
             }
 
@@ -364,14 +366,14 @@ namespace Api.Controllers
             var robot = await _robotService.ReadById(robotId);
             if (robot == null)
             {
-                _logger.LogWarning("Could not find robot with id={id}", robotId);
+                _logger.LogWarning("Could not find robot with id={Id}", robotId);
                 return NotFound("Robot not found");
             }
 
             if (robot.Status is not RobotStatus.Available)
             {
                 _logger.LogWarning(
-                    "Robot '{id}' is not available ({status})",
+                    "Robot '{Id}' is not available ({Status})",
                     robotId,
                     robot.Status.ToString()
                 );
@@ -382,7 +384,7 @@ namespace Api.Controllers
 
             if (missionRun == null)
             {
-                _logger.LogWarning("Could not find mission with id={id}", missionRunId);
+                _logger.LogWarning("Could not find mission with id={Id}", missionRunId);
                 return NotFound("Mission not found");
             }
 
@@ -393,10 +395,10 @@ namespace Api.Controllers
             }
             catch (HttpRequestException e)
             {
-                string message = $"Could not reach ISAR at {robot.IsarUri}";
-                _logger.LogError(e, "{message}", message);
+                string errorMessage = $"Could not reach ISAR at {robot.IsarUri}";
+                _logger.LogError(e, "{Message}", errorMessage);
                 OnIsarUnavailable(robot);
-                return StatusCode(StatusCodes.Status502BadGateway, message);
+                return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
             }
             catch (MissionException e)
             {
@@ -405,16 +407,15 @@ namespace Api.Controllers
             }
             catch (JsonException e)
             {
-                string message = "Error while processing of the response from ISAR";
-                _logger.LogError(e, "{message}", message);
-                return StatusCode(StatusCodes.Status500InternalServerError, message);
+                const string Message = "Error while processing of the response from ISAR";
+                _logger.LogError(e, "{Message}", Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, Message);
             }
             catch (RobotPositionNotFoundException e)
             {
-                string message =
-                    "A suitable robot position could not be found for one or more of the desired tags";
-                _logger.LogError(e, "{message}", message);
-                return StatusCode(StatusCodes.Status500InternalServerError, message);
+                const string Message = "A suitable robot position could not be found for one or more of the desired tags";
+                _logger.LogError(e, "{Message}", Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, Message);
             }
 
             missionRun.UpdateWithIsarInfo(isarMission);
@@ -449,17 +450,17 @@ namespace Api.Controllers
             var robot = await _robotService.ReadById(robotId);
             if (robot == null)
             {
-                _logger.LogWarning("Could not find robot with id={id}", robotId);
+                _logger.LogWarning("Could not find robot with id={Id}", robotId);
                 return NotFound();
             }
 
             try { await _isarService.StopMission(robot); }
             catch (HttpRequestException e)
             {
-                string message = "Error connecting to ISAR while stopping mission";
-                _logger.LogError(e, "{message}", message);
+                const string Message = "Error connecting to ISAR while stopping mission";
+                _logger.LogError(e, "{Message}", Message);
                 OnIsarUnavailable(robot);
-                return StatusCode(StatusCodes.Status502BadGateway, message);
+                return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
             catch (MissionException e)
             {
@@ -468,9 +469,9 @@ namespace Api.Controllers
             }
             catch (JsonException e)
             {
-                string message = "Error while processing the response from ISAR";
-                _logger.LogError(e, "{message}", message);
-                return StatusCode(StatusCodes.Status500InternalServerError, message);
+                const string Message = "Error while processing the response from ISAR";
+                _logger.LogError(e, "{Message}", Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, Message);
             }
 
             try { await _robotService.SetCurrentMissionId(robotId, null); }
@@ -499,7 +500,7 @@ namespace Api.Controllers
             var robot = await _robotService.ReadById(robotId);
             if (robot == null)
             {
-                _logger.LogWarning("Could not find robot with id={id}", robotId);
+                _logger.LogWarning("Could not find robot with id={Id}", robotId);
                 return NotFound();
             }
 
@@ -509,10 +510,10 @@ namespace Api.Controllers
             }
             catch (HttpRequestException e)
             {
-                string message = "Error connecting to ISAR while pausing mission";
-                _logger.LogError(e, "{message}", message);
+                const string Message = "Error connecting to ISAR while pausing mission";
+                _logger.LogError(e, "{Message}", Message);
                 OnIsarUnavailable(robot);
-                return StatusCode(StatusCodes.Status502BadGateway, message);
+                return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
             catch (MissionException e)
             {
@@ -521,9 +522,9 @@ namespace Api.Controllers
             }
             catch (JsonException e)
             {
-                string message = "Error while processing of the response from ISAR";
-                _logger.LogError(e, "{message}", message);
-                return StatusCode(StatusCodes.Status500InternalServerError, message);
+                const string Message = "Error while processing of the response from ISAR";
+                _logger.LogError(e, "{Message}", Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, Message);
             }
 
             return NoContent();
@@ -549,7 +550,7 @@ namespace Api.Controllers
             var robot = await _robotService.ReadById(robotId);
             if (robot == null)
             {
-                _logger.LogWarning("Could not find robot with id={id}", robotId);
+                _logger.LogWarning("Could not find robot with id={Id}", robotId);
                 return NotFound();
             }
 
@@ -559,10 +560,10 @@ namespace Api.Controllers
             }
             catch (HttpRequestException e)
             {
-                string message = "Error connecting to ISAR while resuming mission";
-                _logger.LogError(e, "{message}", message);
+                const string Message = "Error connecting to ISAR while resuming mission";
+                _logger.LogError(e, "{Message}", Message);
                 OnIsarUnavailable(robot);
-                return StatusCode(StatusCodes.Status502BadGateway, message);
+                return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
             catch (MissionException e)
             {
@@ -571,9 +572,9 @@ namespace Api.Controllers
             }
             catch (JsonException e)
             {
-                string message = "Error while processing of the response from ISAR";
-                _logger.LogError(e, "{message}", message);
-                return StatusCode(StatusCodes.Status500InternalServerError, message);
+                const string Message = "Error while processing of the response from ISAR";
+                _logger.LogError(e, "{Message}", Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, Message);
             }
 
             return NoContent();
@@ -604,20 +605,17 @@ namespace Api.Controllers
             if (robot == null)
             {
                 string errorMessage = $"Could not find robot with id {robotId}";
-                _logger.LogWarning(errorMessage);
+                _logger.LogWarning("{Message}", errorMessage);
                 return NotFound(errorMessage);
             }
 
             if (robot.Status is not RobotStatus.Available)
             {
                 string errorMessage = $"Robot {robotId} has status ({robot.Status}) and is not available";
-                _logger.LogWarning(errorMessage);
+                _logger.LogWarning("{Message}", errorMessage);
                 return Conflict(errorMessage);
             }
-            try
-            {
-                await _isarService.StartMoveArm(robot, armPosition);
-            }
+            try { await _isarService.StartMoveArm(robot, armPosition); }
             catch (HttpRequestException e)
             {
                 string errorMessage = $"Error connecting to ISAR at {robot.IsarUri}";
@@ -627,15 +625,15 @@ namespace Api.Controllers
             }
             catch (MissionException e)
             {
-                string errorMessage = "An error occurred while setting the arm position mission";
-                _logger.LogError(e, "{Message}", errorMessage);
-                return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
+                const string ErrorMessage = "An error occurred while setting the arm position mission";
+                _logger.LogError(e, "{Message}", ErrorMessage);
+                return StatusCode(StatusCodes.Status502BadGateway, ErrorMessage);
             }
             catch (JsonException e)
             {
-                string errorMessage = "Error while processing of the response from ISAR";
-                _logger.LogError(e, "{Message}", errorMessage);
-                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+                const string ErrorMessage = "Error while processing of the response from ISAR";
+                _logger.LogError(e, "{Message}", ErrorMessage);
+                return StatusCode(StatusCodes.Status500InternalServerError, ErrorMessage);
             }
 
             return NoContent();
@@ -663,14 +661,14 @@ namespace Api.Controllers
             var robot = await _robotService.ReadById(scheduleLocalizationMissionQuery.RobotId);
             if (robot == null)
             {
-                _logger.LogWarning("Could not find robot with id={id}", scheduleLocalizationMissionQuery.RobotId);
+                _logger.LogWarning("Could not find robot with id={Id}", scheduleLocalizationMissionQuery.RobotId);
                 return NotFound("Robot not found");
             }
 
             if (robot.Status is not RobotStatus.Available)
             {
                 _logger.LogWarning(
-                    "Robot '{id}' is not available ({status})",
+                    "Robot '{Id}' is not available ({Status})",
                     scheduleLocalizationMissionQuery.RobotId,
                     robot.Status.ToString()
                 );
@@ -681,7 +679,7 @@ namespace Api.Controllers
 
             if (area == null)
             {
-                _logger.LogWarning("Could not find area with id={id}", scheduleLocalizationMissionQuery.AreaId);
+                _logger.LogWarning("Could not find area with id={Id}", scheduleLocalizationMissionQuery.AreaId);
                 return NotFound("Area not found");
             }
 
@@ -717,9 +715,9 @@ namespace Api.Controllers
             }
             catch (JsonException e)
             {
-                string message = "Error while processing of the response from ISAR";
-                _logger.LogError(e, "{Message}", message);
-                return StatusCode(StatusCodes.Status500InternalServerError, message);
+                const string Message = "Error while processing of the response from ISAR";
+                _logger.LogError(e, "{Message}", Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, Message);
             }
 
             missionRun.UpdateWithIsarInfo(isarMission);
@@ -746,7 +744,7 @@ namespace Api.Controllers
                     missionRun.SetToFailed();
                     await _missionRunService.Update(missionRun);
                     _logger.LogWarning(
-                        "Mission '{id}' failed because ISAR could not be reached",
+                        "Mission '{Id}' failed because ISAR could not be reached",
                         missionRun.Id
                     );
                 }
