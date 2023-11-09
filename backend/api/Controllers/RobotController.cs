@@ -453,12 +453,7 @@ namespace Api.Controllers
                 return NotFound();
             }
 
-            try
-            {
-                await _isarService.StopMission(robot);
-                robot.CurrentMissionId = null;
-                await _robotService.Update(robot);
-            }
+            try { await _isarService.StopMission(robot); }
             catch (HttpRequestException e)
             {
                 string message = "Error connecting to ISAR while stopping mission";
@@ -477,6 +472,9 @@ namespace Api.Controllers
                 _logger.LogError(e, "{message}", message);
                 return StatusCode(StatusCodes.Status500InternalServerError, message);
             }
+
+            try { await _robotService.SetCurrentMissionId(robotId, null); }
+            catch (RobotNotFoundException e) { return NotFound(e.Message); }
 
             return NoContent();
         }
