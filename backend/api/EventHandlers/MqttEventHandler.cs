@@ -242,7 +242,7 @@ namespace Api.EventHandlers
         private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var missionRunService = provider.GetRequiredService<IMissionRunService>();
+            var missionTaskService = provider.GetRequiredService<IMissionTaskService>();
             var task = (IsarTaskMessage)mqttArgs.Message;
 
             IsarTaskStatus status;
@@ -253,12 +253,11 @@ namespace Api.EventHandlers
                 return;
             }
 
-            bool success = await missionRunService.UpdateTaskStatusByIsarTaskId(task.MissionId, task.TaskId, status);
-            if (success)
-            {
-                _logger.LogInformation(
-                    "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", task.TaskId, task.Status, task.RobotName, task.IsarId);
-            }
+            try { await missionTaskService.UpdateMissionTaskStatus(task.TaskId, status); }
+            catch (MissionTaskNotFoundException) { return; }
+
+            _logger.LogInformation(
+                "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", task.TaskId, task.Status, task.RobotName, task.IsarId);
         }
 
         private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)

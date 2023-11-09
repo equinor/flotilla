@@ -49,8 +49,8 @@ namespace Api.Services
         private readonly FlotillaDbContext _context;
         private readonly ICustomMissionService _customMissionService;
         private readonly IEchoService _echoService;
-        private readonly ISignalRService _signalRService;
         private readonly ILogger<IMissionDefinitionService> _logger;
+        private readonly ISignalRService _signalRService;
         private readonly IStidService _stidService;
 
         public MissionDefinitionService(
@@ -181,12 +181,16 @@ namespace Api.Services
 
         private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
         {
+            // TODO: Discuss warning here
             return _context.MissionDefinitions
                 .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionDefinition => missionDefinition.Source)
-                .Include(missionDefinition => missionDefinition.LastSuccessfulRun);
+                .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
+                .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)
+                .ThenInclude(missionTask => missionTask.Inspections)
+                .ThenInclude(inspection => inspection.InspectionFindings);
         }
 
         private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)

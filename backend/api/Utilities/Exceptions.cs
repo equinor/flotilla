@@ -56,6 +56,11 @@
         public InspectionNotFoundException(string message) : base(message) { }
     }
 
+    public class MissionTaskNotFoundException : Exception
+    {
+        public MissionTaskNotFoundException(string message) : base(message) { }
+    }
+
     public class RobotPositionNotFoundException : Exception
     {
         public RobotPositionNotFoundException(string message) : base(message) { }
