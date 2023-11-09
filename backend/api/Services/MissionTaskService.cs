@@ -37,7 +37,7 @@ namespace Api.Services
 
         private async Task<MissionTask> Update(MissionTask missionTask)
         {
-            _context.Entry(missionTask.Inspections).State = EntityState.Unchanged;
+            foreach (var inspection in missionTask.Inspections) { _context.Entry(inspection).State = EntityState.Unchanged; }
 
             var entry = _context.Update(missionTask);
             await _context.SaveChangesAsync();
@@ -47,7 +47,7 @@ namespace Api.Services
         private async Task<MissionTask?> ReadByIsarTaskId(string id)
         {
             // TODO: Discuss nullable with someone
-            return await GetMissionTasks().FirstOrDefaultAsync(missionTask => missionTask.IsarTaskId!.Equals(id, StringComparison.Ordinal));
+            return await GetMissionTasks().FirstOrDefaultAsync(missionTask => missionTask.IsarTaskId!.Equals(id));
         }
 
         private IQueryable<MissionTask> GetMissionTasks()

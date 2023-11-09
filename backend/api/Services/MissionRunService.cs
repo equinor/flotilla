@@ -27,19 +27,6 @@ namespace Api.Services
             MissionStatus missionStatus
         );
 
-        public Task<bool> UpdateTaskStatusByIsarTaskId(
-            string isarMissionId,
-            string isarTaskId,
-            IsarTaskStatus taskStatus
-        );
-
-        public Task<bool> UpdateStepStatusByIsarStepId(
-            string isarMissionId,
-            string isarTaskId,
-            string isarStepId,
-            IsarStepStatus stepStatus
-        );
-
         public Task<MissionRun?> Delete(string id);
     }
 
@@ -61,8 +48,8 @@ namespace Api.Services
     public class MissionRunService : IMissionRunService
     {
         private readonly FlotillaDbContext _context;
-        private readonly ISignalRService _signalRService;
         private readonly ILogger<MissionRunService> _logger;
+        private readonly ISignalRService _signalRService;
 
         public MissionRunService(FlotillaDbContext context, ISignalRService signalRService, ILogger<MissionRunService> logger)
         {
@@ -161,8 +148,6 @@ namespace Api.Services
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)
-                .ThenInclude(planTask => planTask.Inspections)
-                .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspections);
         }
 
@@ -188,8 +173,7 @@ namespace Api.Services
 
         private static void SearchByRobotName(ref IQueryable<MissionRun> missionRuns, string? robotName)
         {
-            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(robotName))
-                return;
+            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(robotName)) { return; }
 
             missionRuns = missionRuns.Where(
                 missionRun => missionRun.Robot.Name.ToLower().Contains(robotName.Trim().ToLower())
@@ -198,8 +182,7 @@ namespace Api.Services
 
         private static void SearchByTag(ref IQueryable<MissionRun> missionRuns, string? tag)
         {
-            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(tag))
-                return;
+            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(tag)) { return; }
 
             missionRuns = missionRuns.Where(
                 missionRun =>
@@ -357,106 +340,8 @@ namespace Api.Services
 
             await Update(missionRun);
 
-            if (missionRun.Status == MissionStatus.Failed)
-                _ = _signalRService.SendMessageAsync("Mission run failed", missionRun);
+            if (missionRun.Status == MissionStatus.Failed) { _ = _signalRService.SendMessageAsync("Mission run failed", missionRun); }
             return missionRun;
-        }
-
-        public async Task<bool> UpdateTaskStatusByIsarTaskId(
-            string isarMissionId,
-            string isarTaskId,
-            IsarTaskStatus taskStatus
-        )
-        {
-            var missionRun = await ReadByIsarMissionId(isarMissionId);
-            if (missionRun is null)
-            {
-                _logger.LogWarning(
-                    "Could not update task status for ISAR task with id: {id} in mission run with id: {missionId} as the mission was not found",
-                    isarTaskId,
-                    isarMissionId
-                );
-                return false;
-            }
-
-            var task = missionRun.GetTaskByIsarId(isarTaskId);
-            if (task is null)
-            {
-                _logger.LogWarning(
-                    "Could not update task status for ISAR task with id: {id} as the task was not found",
-                    isarTaskId
-                );
-                return false;
-            }
-
-            task.UpdateStatus(taskStatus);
-            if (taskStatus == IsarTaskStatus.InProgress && missionRun.Status != MissionStatus.Ongoing)
-            {
-                // If mission was set to failed and then ISAR recovered connection, we need to reset the coming tasks
-                missionRun.Status = MissionStatus.Ongoing;
-                foreach (
-                    var taskItem in missionRun.Tasks.Where(
-                        taskItem => taskItem.TaskOrder > task.TaskOrder
-                    )
-                )
-                {
-                    taskItem.Status = TaskStatus.NotStarted;
-                    foreach (var inspection in taskItem.Inspections)
-                    {
-                        inspection.Status = InspectionStatus.NotStarted;
-                    }
-                }
-            }
-
-            await Update(missionRun);
-
-            return true;
-        }
-
-        public async Task<bool> UpdateStepStatusByIsarStepId(
-            string isarMissionId,
-            string isarTaskId,
-            string isarStepId,
-            IsarStepStatus stepStatus
-        )
-        {
-            var missionRun = await ReadByIsarMissionId(isarMissionId);
-            if (missionRun is null)
-            {
-                _logger.LogWarning(
-                    "Could not update step status for ISAR inspection with id: {id} in mission with id: {missionId} as the mission was not found",
-                    isarStepId,
-                    isarMissionId
-                );
-                return false;
-            }
-
-            var task = missionRun.GetTaskByIsarId(isarTaskId);
-            if (task is null)
-            {
-                _logger.LogWarning(
-                    "Could not update step status for ISAR inspection with id: {id} as the task with id: {taskId} was not found",
-                    isarStepId,
-                    isarTaskId
-                );
-                return false;
-            }
-
-            var inspection = task.GetInspectionByIsarStepId(isarStepId);
-            if (inspection is null)
-            {
-                _logger.LogWarning(
-                    "Could not update step status for ISAR inspection with id: {id} as the step was not found",
-                    isarStepId
-                );
-                return false;
-            }
-
-            inspection.UpdateStatus(stepStatus);
-
-            await Update(missionRun);
-
-            return true;
         }
 
         #endregion ISAR Specific methods

@@ -6,18 +6,17 @@ namespace Api.Database.Context
 {
     public class FlotillaDbContext : DbContext
     {
-
         public FlotillaDbContext(DbContextOptions options) : base(options) { }
         public DbSet<Robot> Robots => Set<Robot>();
         public DbSet<RobotModel> RobotModels => Set<RobotModel>();
         public DbSet<MissionRun> MissionRuns => Set<MissionRun>();
+        public DbSet<MissionTask> MissionTasks => Set<MissionTask>();
         public DbSet<Inspection> Inspections => Set<Inspection>();
         public DbSet<MissionDefinition> MissionDefinitions => Set<MissionDefinition>();
         public DbSet<Plant> Plants => Set<Plant>();
         public DbSet<Installation> Installations => Set<Installation>();
         public DbSet<Deck> Decks => Set<Deck>();
         public DbSet<Area> Areas => Set<Area>();
-
         public DbSet<Source> Sources => Set<Source>();
         public DbSet<SafePosition> SafePositions => Set<SafePosition>();
         public DbSet<DefaultLocalizationPose> DefaultLocalizationPoses => Set<DefaultLocalizationPose>();
@@ -33,38 +32,28 @@ namespace Api.Database.Context
 
             // https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities
             // https://docs.microsoft.com/en-us/ef/core/modeling/owned-entities#collections-of-owned-types
-            modelBuilder.Entity<MissionRun>(
-                missionRunEntity =>
-                {
-                    if (isSqlLite) { AddConverterForDateTimeOffsets(ref missionRunEntity); }
-                    missionRunEntity.OwnsMany(
-                        missionRun => missionRun.Tasks,
-                        taskEntity =>
-                        {
-                            if (isSqlLite) { AddConverterForDateTimeOffsets(ref taskEntity); }
-                            taskEntity.OwnsMany(
-                                task => task.Inspections,
-                                inspectionEntity =>
-                                {
-                                    if (isSqlLite) { AddConverterForDateTimeOffsets(ref inspectionEntity); }
-
-                                    inspectionEntity.OwnsMany(i => i.InspectionFindings);
-
-                                }
-                            );
-                            taskEntity.OwnsOne(task => task.InspectionTarget);
-                            taskEntity.OwnsOne(
-                                task => task.RobotPose,
-                                poseEntity =>
-                                {
-                                    poseEntity.OwnsOne(pose => pose.Position);
-                                    poseEntity.OwnsOne(pose => pose.Orientation);
-                                }
-                            );
-                        }
-                    );
-                }
-            );
+            modelBuilder.Entity<MissionRun>(missionRunEntity =>
+            {
+                if (isSqlLite) { AddConverterForDateTimeOffsets(ref missionRunEntity); }
+            });
+            modelBuilder.Entity<MissionTask>(missionTaskEntity =>
+            {
+                if (isSqlLite) { AddConverterForDateTimeOffsets(ref missionTaskEntity); }
+                missionTaskEntity.OwnsOne(task => task.InspectionTarget);
+                missionTaskEntity.OwnsOne(
+                    task => task.RobotPose,
+                    poseEntity =>
+                    {
+                        poseEntity.OwnsOne(pose => pose.Position);
+                        poseEntity.OwnsOne(pose => pose.Orientation);
+                    }
+                );
+            });
+            modelBuilder.Entity<Inspection>(inspectionEntity =>
+            {
+                if (isSqlLite) { AddConverterForDateTimeOffsets(ref inspectionEntity); }
+                inspectionEntity.OwnsMany(i => i.InspectionFindings);
+            });
 
             modelBuilder.Entity<MissionDefinition>()
                 .Property(m => m.InspectionFrequency)
