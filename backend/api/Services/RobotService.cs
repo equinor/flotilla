@@ -2,6 +2,7 @@
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 namespace Api.Services
 {
@@ -9,6 +10,7 @@ namespace Api.Services
     {
         public Task<Robot> Create(Robot newRobot);
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
+        public Task<Robot> SetCurrentMissionId(string robotId, string? missionId);
         public Task<IEnumerable<Robot>> ReadAll();
         public Task<IEnumerable<string>> ReadAllActivePlants();
         public Task<Robot?> ReadById(string id);
@@ -25,12 +27,14 @@ namespace Api.Services
     public class RobotService : IRobotService
     {
         private readonly FlotillaDbContext _context;
+        private readonly ILogger<RobotService> _logger;
         private readonly IRobotModelService _robotModelService;
         private readonly ISignalRService _signalRService;
 
-        public RobotService(FlotillaDbContext context, IRobotModelService robotModelService, ISignalRService signalRService)
+        public RobotService(FlotillaDbContext context, ILogger<RobotService> logger, IRobotModelService robotModelService, ISignalRService signalRService)
         {
             _context = context;
+            _logger = logger;
             _robotModelService = robotModelService;
             _signalRService = signalRService;
         }
@@ -60,6 +64,20 @@ namespace Api.Services
                 return newRobot;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
+        }
+
+        public async Task<Robot> SetCurrentMissionId(string robotId, string? missionId)
+        {
+            var robot = await ReadById(robotId);
+            if (robot is null)
+            {
+                string errorMessage = $"Robot with ID {robotId} was not found in the database";
+                _logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
+            }
+
+            robot.CurrentMissionId = missionId;
+            return await Update(robot);
         }
 
         public async Task<IEnumerable<Robot>> ReadAll()
@@ -115,7 +133,7 @@ namespace Api.Services
 
         private IQueryable<Robot> GetEnabledRobotsWithSubModels()
         {
-            return GetRobotsWithSubModels().Where((r) => r.Enabled && r.Status != RobotStatus.Deprecated);
+            return GetRobotsWithSubModels().Where(r => r.Enabled && r.Status != RobotStatus.Deprecated);
         }
     }
 }
