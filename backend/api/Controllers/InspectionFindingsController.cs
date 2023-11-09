@@ -1,7 +1,6 @@
-using Api.Controllers.Models;
+﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
-using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

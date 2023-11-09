@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Api.Controllers.Models;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+using Api.Controllers.Models;
+using Microsoft.EntityFrameworkCore;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
