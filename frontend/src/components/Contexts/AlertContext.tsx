@@ -3,7 +3,8 @@ import { addMinutes, max } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
 import { FailedMissionAlertContent } from 'components/Alerts/FailedMissionAlert'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { refreshInterval } from 'components/Pages/FrontPage/FrontPage'
+import { SignalREventLabels, useSignalRContext } from './SignalRContext'
+import { useInstallationContext } from './InstallationContext'
 
 export enum AlertType {
     MissionFail,
@@ -34,7 +35,15 @@ export const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
 
 export const AlertProvider: FC<Props> = ({ children }) => {
     const [alerts, setAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.alerts)
+    const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
+    const { registerEvent, connectionReady } = useSignalRContext()
+    const { installationCode } = useInstallationContext()
 
+    const pageSize: number = 100
+    // The default amount of minutes in the past for failed missions to generate an alert
+    const defaultTimeInterval: number = 10
+    // The maximum amount of minutes in the past for failed missions to generate an alert
+    const maxTimeInterval: number = 60
     const dismissMissionFailTimeKey: string = 'lastMissionFailDismissalTime'
 
     const setAlert = (source: AlertType, alert: ReactNode) =>
@@ -50,40 +59,62 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         setAlerts(newAlerts)
     }
 
+    const getLastDismissalTime = (): Date => {
+        const sessionValue = sessionStorage.getItem(dismissMissionFailTimeKey)
+        if (sessionValue === null || sessionValue === '') {
+            return addMinutes(Date.now(), -defaultTimeInterval)
+        } else {
+            // If last dismissal time was more than {MaxTimeInterval} minutes ago, use the limit value instead
+            return max([addMinutes(Date.now(), -maxTimeInterval), JSON.parse(sessionValue)])
+        }
+    }
+
     // This variable is needed since the state in the useEffect below uses an outdated alert object
     const [newFailedMissions, setNewFailedMissions] = useState<Mission[]>([])
 
-    // Here we update the recent failed missions
+    // Set the initial failed missions when loading the page or changing installations
     useEffect(() => {
-        const pageSize: number = 100
-        // The default amount of minutes in the past for failed missions to generate an alert
-        const defaultTimeInterval: number = 10
-        // The maximum amount of minutes in the past for failed missions to generate an alert
-        const maxTimeInterval: number = 60
-
-        const getLastDismissalTime = (): Date => {
-            const sessionValue = sessionStorage.getItem(dismissMissionFailTimeKey)
-            if (sessionValue === null || sessionValue === '') {
-                return addMinutes(Date.now(), -defaultTimeInterval)
-            } else {
-                // If last dismissal time was more than {MaxTimeInterval} minutes ago, use the limit value instead
-                return max([addMinutes(Date.now(), -maxTimeInterval), JSON.parse(sessionValue)])
-            }
-        }
-
-        const id = setInterval(() => {
+        const updateRecentFailedMissions = () => {
             const lastDismissTime: Date = getLastDismissalTime()
             BackendAPICaller.getMissionRuns({ statuses: [MissionStatus.Failed], pageSize: pageSize }).then(
                 (missions) => {
                     const newRecentFailedMissions = missions.content.filter(
-                        (m) => new Date(m.endTime!) > lastDismissTime
+                        (m) =>
+                            new Date(m.endTime!) > lastDismissTime &&
+                            (!installationCode ||
+                                m.installationCode!.toLocaleLowerCase() !== installationCode.toLocaleLowerCase())
                     )
                     if (newRecentFailedMissions.length > 0) setNewFailedMissions(newRecentFailedMissions)
+                    setRecentFailedMissions(newRecentFailedMissions)
                 }
             )
-        }, refreshInterval)
-        return () => clearInterval(id)
-    }, [])
+        }
+        if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
+    }, [installationCode])
+
+    // Register a signalR event handler that listens for new failed missions
+    useEffect(() => {
+        if (connectionReady)
+            registerEvent(SignalREventLabels.missionRunFailed, (username: string, message: string) => {
+                const newFailedMission: Mission = JSON.parse(message)
+                const lastDismissTime: Date = getLastDismissalTime()
+
+                setRecentFailedMissions((failedMissions) => {
+                    if (
+                        installationCode &&
+                        (!newFailedMission.installationCode ||
+                            newFailedMission.installationCode.toLocaleLowerCase() !==
+                                installationCode.toLocaleLowerCase())
+                    )
+                        return failedMissions // Ignore missions for other installations
+                    // Ignore missions shortly after the user dismissed the last one
+                    if (new Date(newFailedMission.endTime!) <= lastDismissTime) return failedMissions
+                    let isDuplicate = failedMissions.filter((m) => m.id === newFailedMission.id).length > 0
+                    if (isDuplicate) return failedMissions // Ignore duplicate failed missions
+                    return [...failedMissions, newFailedMission]
+                })
+            })
+    }, [registerEvent, connectionReady])
 
     useEffect(() => {
         if (newFailedMissions.length > 0) {
