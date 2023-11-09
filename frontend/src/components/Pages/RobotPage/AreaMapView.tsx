@@ -138,6 +138,9 @@ export function AreaMapView({ area, localizationPose, setLocalizationPose }: Are
             return
         }
         const assetPosition = InverseCalculatePixelPosition(mapMetadata, pixelPosition)
+        if (!area.defaultLocalizationPose) {
+            return
+        }
         let newPose: Pose = area.defaultLocalizationPose
         newPose.position.x = assetPosition[0]
         newPose.position.y = assetPosition[1]

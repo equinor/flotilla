@@ -7,5 +7,5 @@ export interface Area {
     plantName: string
     installationCode: string
     deckName: string
-    defaultLocalizationPose: Pose
+    defaultLocalizationPose?: Pose
 }
