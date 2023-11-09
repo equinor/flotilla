@@ -69,9 +69,10 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     let timer: ReturnType<typeof setTimeout>
 
     useEffect(() => {
-        let robots = [...enabledRobots]
-        robots.filter((robots) => robots.currentInstallation.toLowerCase() === installationCode.toLowerCase())
-        setRobotOptions(robots)
+        const relevantRobots = [...enabledRobots].filter(
+            (robot) => robot.currentInstallation.toLowerCase() === installationCode.toLowerCase()
+        )
+        setRobotOptions(relevantRobots)
     }, [enabledRobots, installationCode])
 
     const onSelectedRobot = (selectedRobot: Robot) => {
