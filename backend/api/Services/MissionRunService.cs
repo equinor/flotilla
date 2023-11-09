@@ -4,10 +4,8 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services.Events;
-using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
-using TaskStatus = Api.Database.Models.TaskStatus;
 namespace Api.Services
 {
     public interface IMissionRunService
@@ -321,19 +319,14 @@ namespace Api.Services
                 );
         }
 
-        public async Task<MissionRun?> UpdateMissionRunStatusByIsarMissionId(
-            string isarMissionId,
-            MissionStatus missionStatus
-        )
+        public async Task<MissionRun?> UpdateMissionRunStatusByIsarMissionId(string isarMissionId, MissionStatus missionStatus)
         {
             var missionRun = await ReadByIsarMissionId(isarMissionId);
             if (missionRun is null)
             {
-                _logger.LogWarning(
-                    "Could not update mission status for ISAR mission with id: {id} as the mission was not found",
-                    isarMissionId
-                );
-                return null;
+                string errorMessage = $"Mission with isar mission Id {isarMissionId} was not found";
+                _logger.LogError("{Message}", errorMessage);
+                throw new MissionRunNotFoundException(errorMessage);
             }
 
             missionRun.Status = missionStatus;

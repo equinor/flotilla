@@ -206,7 +206,10 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var flotillaMissionRun = await missionRunService.UpdateMissionRunStatusByIsarMissionId(isarMission.MissionId, status);
+            MissionRun? flotillaMissionRun;
+            try { flotillaMissionRun = await missionRunService.UpdateMissionRunStatusByIsarMissionId(isarMission.MissionId, status); }
+            catch (MissionRunNotFoundException) { return; }
+
             if (flotillaMissionRun is null)
             {
                 _logger.LogError("No mission found with ISARMissionId '{IsarMissionId}'. Could not update status to '{Status}'", isarMission.MissionId, status);

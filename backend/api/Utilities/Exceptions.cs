@@ -61,6 +61,11 @@
         public MissionTaskNotFoundException(string message) : base(message) { }
     }
 
+    public class MissionRunNotFoundException : Exception
+    {
+        public MissionRunNotFoundException(string message) : base(message) { }
+    }
+
     public class RobotPositionNotFoundException : Exception
     {
         public RobotPositionNotFoundException(string message) : base(message) { }
