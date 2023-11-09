@@ -94,10 +94,10 @@ export function MissionQueueCard({ order, mission, onDeleteMission }: MissionQue
                             <Typography variant="body_short_bold">{mission.name}</Typography>
                         </Button>
                     )}
-                    <Typography variant="caption" color="#6F6F6F">
+                    <Typography variant="caption" color={tokens.colors.text.static_icons__tertiary.hex}>
                         {TranslateText('Robot')}: {mission.robot.name}
                     </Typography>
-                    <Typography variant="caption" color="#6F6F6F">
+                    <Typography variant="caption" color={tokens.colors.text.static_icons__tertiary.hex}>
                         {TranslateText('Tasks')}: {numberOfTasks}
                     </Typography>
                     <MissionDurationDisplay mission={mission} />
@@ -161,7 +161,7 @@ function MissionDurationDisplay({ mission }: MissionDisplayProps) {
         const minutes = Math.ceil(remainingSeconds / 60)
 
         return (
-            <Typography variant="caption" color="#6F6F6F">
+            <Typography variant="caption" color={tokens.colors.text.static_icons__tertiary.hex}>
                 {translateEstimatedDuration}: {hours}
                 {translateH} {minutes}
                 {translateMin}
@@ -170,7 +170,7 @@ function MissionDurationDisplay({ mission }: MissionDisplayProps) {
     }
 
     return (
-        <Typography variant="caption" color="#6F6F6F">
+        <Typography variant="caption" color={tokens.colors.text.static_icons__tertiary.hex}>
             {translateNotAvailable}
         </Typography>
     )
