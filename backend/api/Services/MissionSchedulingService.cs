@@ -165,6 +165,8 @@ namespace Api.Services
                 throw new MissionException(Message, 0);
             }
 
+            catch (MissionNotFoundException) { _logger.LogWarning($"No mission was running for robot {robot.Id}"); }
+
             robot.CurrentMissionId = null;
             await _robotService.Update(robot);
         }

@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
 using Api.Database.Models;
 using Api.Services.Models;
 using Api.Utilities;
@@ -88,6 +89,12 @@ namespace Api.Services
             {
                 (string message, int statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
                 string errorResponse = await response.Content.ReadAsStringAsync();
+                if (response.StatusCode == HttpStatusCode.Conflict && errorResponse.Contains("idle", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    _logger.LogError("No mission was running for robot '{Id}", robot.Id);
+                    throw new MissionNotFoundException($"No mission was running for robot {robot.Id}");
+                }
+
                 _logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new MissionException(message, statusCode);
             }
