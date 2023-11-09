@@ -264,7 +264,7 @@ namespace Api.Services
             await _robotService.Update(robot);
         }
 
-        private Pose ClosestSafePosition(Pose robotPose, IList<SafePosition> safePositions)
+        private static Pose ClosestSafePosition(Pose robotPose, IList<SafePosition> safePositions)
         {
             if (safePositions == null || !safePositions.Any())
             {
