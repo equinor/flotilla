@@ -1,4 +1,5 @@
-﻿using Api.Database.Context;
+﻿using System.Diagnostics.CodeAnalysis;
+using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services.Models;
 using Api.Utilities;
@@ -10,6 +11,11 @@ namespace Api.Services
         public Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus);
     }
 
+    [SuppressMessage(
+        "Globalization",
+        "CA1309:Use ordinal StringComparison",
+        Justification = "EF Core refrains from translating string comparison overloads to SQL"
+    )]
     public class InspectionService : IInspectionService
     {
         private readonly FlotillaDbContext _context;

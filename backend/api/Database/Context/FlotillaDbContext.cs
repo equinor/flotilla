@@ -102,31 +102,6 @@ namespace Api.Database.Context
             configurationBuilder.Properties(typeof(Enum)).HaveConversion<string>();
         }
 
-        // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations
-        // here: https://docs.microsoft.com/en-us/ef/core/providers/sqlite/limitations#query-limitations
-        // To work around this, when the Sqlite database provider is used, all model properties of type DateTimeOffset
-        // use the DateTimeOffsetToBinaryConverter
-        // Based on: https://github.com/aspnet/EntityFrameworkCore/issues/10784#issuecomment-415769754
-        // This only supports millisecond precision, but should be sufficient for most use cases.
-        private static void AddConverterForDateTimeOffsets<TOwnerEntity, TDependentEntity>(
-            ref OwnedNavigationBuilder<TOwnerEntity, TDependentEntity> entity
-        )
-            where TOwnerEntity : class
-            where TDependentEntity : class
-        {
-            var properties = entity.OwnedEntityType.ClrType
-                .GetProperties()
-                .Where(
-                    p =>
-                        p.PropertyType == typeof(DateTimeOffset)
-                        || p.PropertyType == typeof(DateTimeOffset?)
-                );
-            foreach (var property in properties)
-            {
-                entity.Property(property.Name).HasConversion(new DateTimeOffsetToBinaryConverter());
-            }
-        }
-
         private static void AddConverterForDateTimeOffsets<T>(ref EntityTypeBuilder<T> entity)
             where T : class
         {
