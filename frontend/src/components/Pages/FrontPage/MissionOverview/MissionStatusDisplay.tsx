@@ -14,6 +14,7 @@ const StyledStatusDisplay = styled.div`
     flex-direction: column;
     justify-content: space-between;
 `
+
 const StyledStatusIcon = styled.div`
     display: flex;
     gap: 4px;
@@ -44,14 +45,21 @@ export function displayIcon(status: MissionStatus) {
 export function MissionStatusDisplay({ status }: StatusProps) {
     const { TranslateText } = useLanguageContext()
     return (
+        <StyledStatusIcon>
+            {displayIcon(status)}
+            <Typography>{TranslateText(status)}</Typography>
+        </StyledStatusIcon>
+    )
+}
+
+export function MissionStatusDisplayWithHeader({ status }: StatusProps) {
+    const { TranslateText } = useLanguageContext()
+    return (
         <StyledStatusDisplay>
             <Typography variant="meta" color={tokens.colors.text.static_icons__tertiary.hex}>
                 {TranslateText('Status')}
             </Typography>
-            <StyledStatusIcon>
-                {displayIcon(status)}
-                <Typography>{TranslateText(status)}</Typography>
-            </StyledStatusIcon>
+            <MissionStatusDisplay status={status} />
         </StyledStatusDisplay>
     )
 }

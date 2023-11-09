@@ -4,7 +4,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { MissionProgressDisplay } from './MissionProgressDisplay'
-import { MissionStatusDisplay } from './MissionStatusDisplay'
+import { MissionStatusDisplayWithHeader } from './MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { MissionControlButtons } from './MissionControlButtons'
 import BatteryStatusView from '../RobotCards/BatteryStatusView'
@@ -54,7 +54,7 @@ export function OngoingMissionCard({ mission }: MissionProps) {
                 <MissionControlButtons mission={mission} />
             </TopContent>
             <BottomContent>
-                <MissionStatusDisplay status={mission.status} />
+                <MissionStatusDisplayWithHeader status={mission.status} />
                 <MissionProgressDisplay mission={mission} />
                 <MissionRobotDisplay mission={mission} />
                 <BatteryStatusView
