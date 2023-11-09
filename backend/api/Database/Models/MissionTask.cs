@@ -9,61 +9,8 @@ namespace Api.Database.Models
     [Owned]
     public class MissionTask
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
-
-        [MaxLength(200)]
-        // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-        public string? IsarTaskId { get; private set; } = Guid.NewGuid().ToString();
-
-        [Required]
-        public int TaskOrder { get; set; }
-
-        [MaxLength(200)]
-        public string? TagId { get; set; }
-
-        [MaxLength(500)]
-        public string? Description { get; set; }
-
-        [MaxLength(200)]
-        public Uri? EchoTagLink { get; set; }
-
-        [Required]
-        public Position InspectionTarget { get; set; }
-
-        [Required]
-        public Pose RobotPose { get; set; }
-
-        public int? EchoPoseId { get; set; }
 
         private TaskStatus _status;
-
-        [Required]
-        public TaskStatus Status
-        {
-            get => _status;
-            set
-            {
-                _status = value;
-                if (IsCompleted && EndTime is null) { EndTime = DateTime.UtcNow; }
-
-                if (_status is TaskStatus.InProgress && StartTime is null) { StartTime = DateTime.UtcNow; }
-            }
-        }
-
-        public bool IsCompleted =>
-            _status
-                is TaskStatus.Cancelled
-                or TaskStatus.Successful
-                or TaskStatus.Failed
-                or TaskStatus.PartiallySuccessful;
-
-        public DateTime? StartTime { get; private set; }
-
-        public DateTime? EndTime { get; private set; }
-
-        public IList<Inspection> Inspections { get; set; }
 
         // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
         public MissionTask() { }
@@ -112,6 +59,59 @@ namespace Api.Database.Models
             Status = copy.Status;
             Inspections = copy.Inspections.Select(i => new Inspection(i)).ToList();
         }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public string Id { get; set; }
+
+        [MaxLength(200)]
+        // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
+        public string? IsarTaskId { get; private set; } = Guid.NewGuid().ToString();
+
+        [Required]
+        public int TaskOrder { get; set; }
+
+        [MaxLength(200)]
+        public string? TagId { get; set; }
+
+        [MaxLength(500)]
+        public string? Description { get; set; }
+
+        [MaxLength(200)]
+        public Uri? EchoTagLink { get; set; }
+
+        [Required]
+        public Position InspectionTarget { get; set; }
+
+        [Required]
+        public Pose RobotPose { get; set; }
+
+        public int? EchoPoseId { get; set; }
+
+        [Required]
+        public TaskStatus Status
+        {
+            get => _status;
+            set
+            {
+                _status = value;
+                if (IsCompleted && EndTime is null) { EndTime = DateTime.UtcNow; }
+
+                if (_status is TaskStatus.InProgress && StartTime is null) { StartTime = DateTime.UtcNow; }
+            }
+        }
+
+        public bool IsCompleted =>
+            _status
+                is TaskStatus.Cancelled
+                or TaskStatus.Successful
+                or TaskStatus.Failed
+                or TaskStatus.PartiallySuccessful;
+
+        public DateTime? StartTime { get; private set; }
+
+        public DateTime? EndTime { get; private set; }
+
+        public IList<Inspection> Inspections { get; set; }
 
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
