@@ -473,6 +473,13 @@ namespace Api.Controllers
                 _logger.LogError(e, "{Message}", Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, Message);
             }
+            catch (MissionNotFoundException)
+            {
+                _logger.LogWarning($"No mission was runnning for robot {robot.Id}");
+                robot.CurrentMissionId = null;
+                await _robotService.Update(robot);
+
+            }
 
             try { await _robotService.SetCurrentMissionId(robotId, null); }
             catch (RobotNotFoundException e) { return NotFound(e.Message); }
