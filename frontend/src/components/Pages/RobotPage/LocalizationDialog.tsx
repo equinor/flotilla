@@ -11,6 +11,7 @@ import { Pose } from 'models/Pose'
 import { Orientation } from 'models/Orientation'
 import { Mission, MissionStatus } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledDialog = styled(Card)`
     display: flex;
@@ -50,6 +51,7 @@ interface RobotProps {
 
 export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useInstallationContext()
     const [isLocalizationDialogOpen, setIsLocalizationDialogOpen] = useState<boolean>(false)
     const [missionLocalizationStatus, setMissionLocalizationInfo] = useState<string>()
     const [selectedArea, setSelectedArea] = useState<Area>()
@@ -70,7 +72,10 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
 
     useEffect(() => {
         BackendAPICaller.getAreas().then((response: Area[]) => {
-            setAreas(response)
+            const relevantAreas = response.filter(
+                (area) => area.installationCode.toLowerCase() === installationCode.toLowerCase()
+            )
+            setAreas(relevantAreas)
         })
     }, [])
 
