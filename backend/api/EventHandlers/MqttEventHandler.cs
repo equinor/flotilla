@@ -264,7 +264,7 @@ namespace Api.EventHandlers
         private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var missionRunService = provider.GetRequiredService<IMissionRunService>();
+            var inspectionService = provider.GetRequiredService<IInspectionService>();
 
             var step = (IsarStepMessage)mqttArgs.Message;
 
@@ -280,12 +280,11 @@ namespace Api.EventHandlers
                 return;
             }
 
-            bool success = await missionRunService.UpdateStepStatusByIsarStepId(step.MissionId, step.TaskId, step.StepId, status);
-            if (success)
-            {
-                _logger.LogInformation(
-                    "Inspection '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", step.StepId, step.Status, step.RobotName, step.IsarId);
-            }
+            try { await inspectionService.UpdateInspectionStatus(step.StepId, status); }
+            catch (InspectionNotFoundException) { return; }
+
+            _logger.LogInformation(
+                "Inspection '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", step.StepId, step.Status, step.RobotName, step.IsarId);
         }
 
         private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)

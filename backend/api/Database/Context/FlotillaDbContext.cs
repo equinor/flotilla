@@ -11,6 +11,7 @@ namespace Api.Database.Context
         public DbSet<Robot> Robots => Set<Robot>();
         public DbSet<RobotModel> RobotModels => Set<RobotModel>();
         public DbSet<MissionRun> MissionRuns => Set<MissionRun>();
+        public DbSet<Inspection> Inspections => Set<Inspection>();
         public DbSet<MissionDefinition> MissionDefinitions => Set<MissionDefinition>();
         public DbSet<Plant> Plants => Set<Plant>();
         public DbSet<Installation> Installations => Set<Installation>();
