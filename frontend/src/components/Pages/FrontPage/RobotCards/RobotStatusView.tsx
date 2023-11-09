@@ -18,12 +18,13 @@ const RobotView = styled.div`
     grid-column: 1/ -1;
     gap: 1rem;
 `
+
 export function RobotStatusSection() {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
-    const [robots, setRobots] = useState<Robot[]>([])
     const { enabledRobots } = useRobotContext()
     const { safeZoneStatus, switchSafeZoneStatus } = useSafeZoneContext()
+    const [robots, setRobots] = useState<Robot[]>([])
 
     useEffect(() => {
         const sortRobotsByStatus = (robots: Robot[]): Robot[] => {
@@ -32,7 +33,13 @@ export function RobotStatusSection() {
             )
             return sortedRobots
         }
-        setRobots(sortRobotsByStatus(enabledRobots))
+        const relevantRobots = sortRobotsByStatus(
+            enabledRobots.filter(function (robot) {
+                return robot.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+            })
+        )
+        setRobots(relevantRobots)
+
         const missionQueueFozenStatus = enabledRobots
             .map((robot: Robot) => {
                 return robot.missionQueueFrozen
@@ -41,26 +48,12 @@ export function RobotStatusSection() {
 
         if (missionQueueFozenStatus.length > 0 && !safeZoneStatus) switchSafeZoneStatus(true)
         else switchSafeZoneStatus(false)
-    }, [enabledRobots])
-
-    const filteredRobots = robots.filter(function (robot) {
-        return (
-            robot.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase() ||
-            (typeof robot.currentInstallation === 'string' && robot.currentInstallation.includes('default')) ||
-            !robot.currentInstallation
-        )
-    })
+    }, [enabledRobots, installationCode])
 
     const getRobotDisplay = () => {
-        if (installationCode === '') {
-            return robots.map(function (robot) {
-                return <RobotStatusCard key={robot.id} robot={robot} />
-            })
-        } else {
-            return filteredRobots.map(function (robot) {
-                return <RobotStatusCard key={robot.id} robot={robot} />
-            })
-        }
+        return robots.map(function (robot) {
+            return <RobotStatusCard key={robot.id} robot={robot} />
+        })
     }
 
     return (
