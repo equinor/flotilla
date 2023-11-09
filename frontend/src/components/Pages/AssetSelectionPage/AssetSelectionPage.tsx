@@ -117,10 +117,14 @@ function InstallationPicker() {
                     placeholder={TranslateText('Select installation')}
                     onOptionsChange={({ selectedItems }) => {
                         const selectedName = selectedItems[0]
-                        setSelectedInstallation(selectedName)
+                        validateInstallation(selectedName)
+                            ? setSelectedInstallation(selectedName)
+                            : setSelectedInstallation('')
                     }}
                     onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        setSelectedInstallation(e.target.value ?? '')
+                        validateInstallation(e.target.value)
+                            ? setSelectedInstallation(e.target.value)
+                            : setSelectedInstallation('')
                     }}
                     autoWidth={true}
                     onFocus={(e) => {
@@ -137,7 +141,7 @@ function InstallationPicker() {
             </BlockLevelContainer>
             <Button
                 onClick={() => switchInstallation(selectedInstallation)}
-                disabled={!validateInstallation(selectedInstallation)}
+                disabled={!selectedInstallation}
                 href={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
             >
                 {TranslateText('Confirm installation')}
