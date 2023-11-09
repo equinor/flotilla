@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services.Models;
