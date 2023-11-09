@@ -124,6 +124,9 @@ namespace Api.Services
 
         public async Task<MissionRun> Update(MissionRun missionRun)
         {
+            _context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+            if (missionRun.Area is not null) { _context.Entry(missionRun.Area).State = EntityState.Unchanged; }
+
             var entry = _context.Update(missionRun);
             await _context.SaveChangesAsync();
             _ = _signalRService.SendMessageAsync("Mission run updated", missionRun);
