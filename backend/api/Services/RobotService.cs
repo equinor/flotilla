@@ -76,7 +76,7 @@ namespace Api.Services
                 _context.Entry(robotModel).State = EntityState.Unchanged;
                 await _context.Robots.AddAsync(newRobot);
                 await _context.SaveChangesAsync();
-                _ = _signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels());
+                _ = _signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
                 return newRobot;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
@@ -119,7 +119,7 @@ namespace Api.Services
 
             var entry = _context.Update(robot);
             await _context.SaveChangesAsync();
-            _ = _signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels());
+            _ = _signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
             return entry.Entity;
         }
 
@@ -130,7 +130,7 @@ namespace Api.Services
 
             _context.Robots.Remove(robot);
             await _context.SaveChangesAsync();
-            _ = _signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels());
+            _ = _signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
             return robot;
         }
 
@@ -173,7 +173,13 @@ namespace Api.Services
                 .Include(r => r.VideoStreams)
                 .Include(r => r.Model)
                 .Include(r => r.CurrentArea)
-                .ThenInclude(r => r != null ? r.SafePositions : null);
+                .ThenInclude(area => area != null ? area.Deck : null)
+                .Include(r => r.CurrentArea)
+                .ThenInclude(area => area != null ? area.Plant : null)
+                .Include(r => r.CurrentArea)
+                .ThenInclude(area => area != null ? area.Installation : null)
+                .Include(r => r.CurrentArea)
+                .ThenInclude(area => area != null ? area.SafePositions : null);
         }
 
         private IQueryable<Robot> GetEnabledRobotsWithSubModels()

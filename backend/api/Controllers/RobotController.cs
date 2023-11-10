@@ -44,16 +44,17 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(IList<Robot>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<RobotResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<Robot>>> GetRobots()
+        public async Task<ActionResult<IList<RobotResponse>>> GetRobots()
         {
             try
             {
                 var robots = await _robotService.ReadAll();
-                return Ok(robots);
+                var robotResponses = robots.Select(robot => new RobotResponse(robot));
+                return Ok(robotResponses);
             }
             catch (Exception e)
             {
@@ -71,12 +72,12 @@ namespace Api.Controllers
         [HttpGet]
         [Authorize(Roles = Role.Any)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(Robot), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Robot>> GetRobotById([FromRoute] string id)
+        public async Task<ActionResult<RobotResponse>> GetRobotById([FromRoute] string id)
         {
             _logger.LogInformation("Getting robot with id={Id}", id);
             try
@@ -88,8 +89,9 @@ namespace Api.Controllers
                     return NotFound();
                 }
 
-                _logger.LogInformation("Successful GET of robot with id={Id}", id);
-                return Ok(robot);
+                var robotResponse = new RobotResponse(robot);
+                _logger.LogInformation("Successful GET of robot with id={id}", id);
+                return Ok(robotResponse);
             }
             catch (Exception e)
             {
@@ -106,12 +108,12 @@ namespace Api.Controllers
         /// </remarks>
         [HttpPost]
         [Authorize(Roles = Role.Admin)]
-        [ProducesResponseType(typeof(Robot), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Robot>> CreateRobot([FromBody] CreateRobotQuery robotQuery)
+        public async Task<ActionResult<RobotResponse>> CreateRobot([FromBody] CreateRobotQuery robotQuery)
         {
             _logger.LogInformation("Creating new robot");
             try
@@ -130,11 +132,13 @@ namespace Api.Controllers
                 };
 
                 var newRobot = await _robotService.Create(robot);
-                _logger.LogInformation("Successfully created new robot");
+                var robotResponses = new RobotResponse(newRobot);
+
+                _logger.LogInformation("Succesfully created new robot");
                 return CreatedAtAction(nameof(GetRobotById), new
                 {
                     id = newRobot.Id
-                }, newRobot);
+                }, robotResponses);
             }
             catch (Exception e)
             {
@@ -154,13 +158,13 @@ namespace Api.Controllers
         [HttpPut]
         [Authorize(Roles = Role.Admin)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(Robot), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Robot>> UpdateRobot(
+        public async Task<ActionResult<RobotResponse>> UpdateRobot(
             [FromRoute] string id,
             [FromBody] Robot robot
         )
@@ -181,10 +185,10 @@ namespace Api.Controllers
             try
             {
                 var updatedRobot = await _robotService.Update(robot);
-
+                var robotResponse = new RobotResponse(updatedRobot);
                 _logger.LogInformation("Successful PUT of robot to database");
 
-                return Ok(updatedRobot);
+                return Ok(robotResponse);
             }
             catch (Exception e)
             {
@@ -204,14 +208,15 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Robot>> DeleteRobot([FromRoute] string id)
+        public async Task<ActionResult<RobotResponse>> DeleteRobot([FromRoute] string id)
         {
             var robot = await _robotService.Delete(id);
             if (robot is null)
             {
                 return NotFound($"Robot with id {id} not found");
             }
-            return Ok(robot);
+            var robotResponse = new RobotResponse(robot);
+            return Ok(robotResponse);
         }
 
         /// <summary>
@@ -225,13 +230,13 @@ namespace Api.Controllers
         [HttpPut]
         [Authorize(Roles = Role.Admin)]
         [Route("{id}/status")]
-        [ProducesResponseType(typeof(Robot), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Robot>> UpdateRobotStatus(
+        public async Task<ActionResult<RobotResponse>> UpdateRobotStatus(
             [FromRoute] string id,
             [FromBody] RobotStatus robotStatus
         )
@@ -252,13 +257,15 @@ namespace Api.Controllers
             }
 
             robot.Status = robotStatus;
+
             try
             {
                 var updatedRobot = await _robotService.Update(robot);
+                var robotResponse = new RobotResponse(updatedRobot);
 
                 _logger.LogInformation("Successful PUT of robot to database");
 
-                return Ok(updatedRobot);
+                return Ok(robotResponse);
             }
             catch (Exception e)
             {
@@ -303,13 +310,13 @@ namespace Api.Controllers
         [HttpPost]
         [Authorize(Roles = Role.Admin)]
         [Route("{robotId}/video-streams/")]
-        [ProducesResponseType(typeof(Robot), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Robot>> CreateVideoStream(
+        public async Task<ActionResult<RobotResponse>> CreateVideoStream(
             [FromRoute] string robotId,
             [FromBody] VideoStream videoStream
         )
@@ -326,6 +333,7 @@ namespace Api.Controllers
             try
             {
                 var updatedRobot = await _robotService.Update(robot);
+                var robotResponse = new RobotResponse(updatedRobot);
 
                 return CreatedAtAction(
                     nameof(GetVideoStreams),
@@ -333,7 +341,7 @@ namespace Api.Controllers
                     {
                         robotId = updatedRobot.Id
                     },
-                    updatedRobot
+                    robotResponse
                 );
             }
             catch (Exception ex)
@@ -364,6 +372,7 @@ namespace Api.Controllers
         )
         {
             var robot = await _robotService.ReadById(robotId);
+
             if (robot == null)
             {
                 _logger.LogWarning("Could not find robot with id={Id}", robotId);
