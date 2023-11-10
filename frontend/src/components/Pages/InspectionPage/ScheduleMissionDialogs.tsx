@@ -43,7 +43,7 @@ const StyledDialog = styled(Dialog)`
     display: flex;
     flex-direction: column;
     padding: 1rem;
-    width: 400px;
+    width: 420px;
 `
 
 const StyledDialogContent = styled.div`
