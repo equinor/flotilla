@@ -20,11 +20,13 @@ namespace Api.Services
     {
         private readonly FlotillaDbContext _context;
         private readonly ILogger<InspectionService> _logger;
+        private readonly ISignalRService _signalRService;
 
-        public InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger)
+        public InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, ISignalRService signalRService)
         {
             _context = context;
             _logger = logger;
+            _signalRService = signalRService;
         }
 
         public async Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus)
@@ -38,7 +40,9 @@ namespace Api.Services
             }
 
             inspection.UpdateStatus(isarStepStatus);
-            return await Update(inspection);
+            inspection = await Update(inspection);
+            _ = _signalRService.SendMessageAsync("Inspection updated", inspection);
+            return inspection;
         }
 
         private async Task<Inspection> Update(Inspection inspection)
@@ -50,8 +54,7 @@ namespace Api.Services
 
         private async Task<Inspection?> ReadByIsarStepId(string id)
         {
-            // TODO: Discuss nullable with someone
-            return await GetInspections().FirstOrDefaultAsync(inspection => inspection.IsarStepId!.Equals(id));
+            return await GetInspections().FirstOrDefaultAsync(inspection => inspection.IsarStepId != null && inspection.IsarStepId.Equals(id));
         }
 
         private IQueryable<Inspection> GetInspections()

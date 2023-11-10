@@ -52,8 +52,7 @@ namespace Api.Services
 
         private async Task<MissionTask?> ReadByIsarTaskId(string id)
         {
-            // TODO: Discuss nullable with someone
-            return await GetMissionTasks().FirstOrDefaultAsync(missionTask => missionTask.IsarTaskId!.Equals(id));
+            return await GetMissionTasks().FirstOrDefaultAsync(missionTask => missionTask.IsarTaskId != null && missionTask.IsarTaskId.Equals(id));
         }
 
         private IQueryable<MissionTask> GetMissionTasks()

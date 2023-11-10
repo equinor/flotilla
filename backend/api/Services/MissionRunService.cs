@@ -16,11 +16,13 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadById(string id);
 
+        public Task<MissionRun?> ReadByIsarMissionId(string isarMissionId);
+
         public Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId);
 
         public Task<MissionRun> Update(MissionRun mission);
 
-        public Task<MissionRun?> UpdateMissionRunStatusByIsarMissionId(
+        public Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
             string isarMissionId,
             MissionStatus missionStatus
         );
@@ -310,7 +312,7 @@ namespace Api.Services
 
         #region ISAR Specific methods
 
-        private async Task<MissionRun?> ReadByIsarMissionId(string isarMissionId)
+        public async Task<MissionRun?> ReadByIsarMissionId(string isarMissionId)
         {
             return await GetMissionRunsWithSubModels()
                 .FirstOrDefaultAsync(
@@ -319,7 +321,7 @@ namespace Api.Services
                 );
         }
 
-        public async Task<MissionRun?> UpdateMissionRunStatusByIsarMissionId(string isarMissionId, MissionStatus missionStatus)
+        public async Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(string isarMissionId, MissionStatus missionStatus)
         {
             var missionRun = await ReadByIsarMissionId(isarMissionId);
             if (missionRun is null)
@@ -331,7 +333,7 @@ namespace Api.Services
 
             missionRun.Status = missionStatus;
 
-            await Update(missionRun);
+            missionRun = await Update(missionRun);
 
             if (missionRun.Status == MissionStatus.Failed) { _ = _signalRService.SendMessageAsync("Mission run failed", missionRun); }
             return missionRun;
