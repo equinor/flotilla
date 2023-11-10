@@ -10,6 +10,12 @@ const Indent = styled.div`
     padding: 0px 9px;
 `
 
+const StyledButton = styled(Button)`
+    :hover {
+        background-color: #ff9797;
+    }
+`
+
 interface MissionsProps {
     missions: Mission[]
 }
@@ -24,10 +30,10 @@ function FailedMission({ missions }: MissionsProps) {
     }
 
     return (
-        <Button as={Typography} onClick={goToMission} variant="ghost" color="secondary">
+        <StyledButton onClick={goToMission} variant="ghost" color="secondary">
             <strong>'{mission.name}'</strong> {TranslateText('failed on robot')}{' '}
             <strong>'{mission.robot.name}':</strong> {mission.statusReason}
-        </Button>
+        </StyledButton>
     )
 }
 
@@ -40,10 +46,10 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
     }
 
     return (
-        <Button as={Typography} onClick={goToHistory} variant="ghost" color="secondary">
+        <StyledButton onClick={goToHistory} variant="ghost" color="secondary">
             <strong>{missions.length}</strong>{' '}
             {' ' + TranslateText("missions failed recently. See 'Mission History' for more information.")}
-        </Button>
+        </StyledButton>
     )
 }
 
