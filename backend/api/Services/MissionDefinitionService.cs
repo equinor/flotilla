@@ -181,14 +181,13 @@ namespace Api.Services
 
         private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
         {
-            // TODO: Discuss warning here
             return _context.MissionDefinitions
                 .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
-                .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)
+                .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
                 .ThenInclude(missionTask => missionTask.Inspections)
                 .ThenInclude(inspection => inspection.InspectionFindings);
         }
