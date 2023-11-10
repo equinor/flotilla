@@ -7,7 +7,7 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CreateMissionButton } from './CreateMissionButton'
 import { Robot } from 'models/Robot'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
-import { StyledAutoComplete, StyledDialog } from 'components/StyledComponents'
+import { StyledAutoComplete, StyledDialog } from 'components/Styles/StyledComponents'
 
 interface IProps {
     robotOptions: Array<Robot>
