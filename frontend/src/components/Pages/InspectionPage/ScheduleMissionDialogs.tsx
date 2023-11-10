@@ -8,7 +8,7 @@ import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Icons } from 'utils/icons'
 import { useRobotContext } from 'components/Contexts/RobotContext'
-import { StyledAutoComplete, StyledDialog } from 'components/StyledComponents'
+import { StyledAutoComplete, StyledDialog } from 'components/Styles/StyledComponents'
 
 interface IProps {
     missions: CondensedMissionDefinition[]

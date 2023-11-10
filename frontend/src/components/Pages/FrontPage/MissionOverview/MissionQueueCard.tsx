@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
-import { StyledDialog } from 'components/StyledComponents'
+import { StyledDialog } from 'components/Styles/StyledComponents'
 import { tokens } from '@equinor/eds-tokens'
 
 interface MissionQueueCardProps {

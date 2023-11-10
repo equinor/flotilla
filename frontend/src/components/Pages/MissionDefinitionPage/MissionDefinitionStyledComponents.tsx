@@ -12,7 +12,6 @@ export const StyledDict = {
     ButtonSection: styled.div`
         display: flex;
         margin-left: auto;
-        margin-right: 0;
         gap: 10px;
     `,
 
@@ -58,21 +57,17 @@ export const StyledDict = {
     `,
 
     InspectionFrequencyDiv: styled.div`
-        > * {
-            padding: 10px;
-        }
+        padding: 10px;
     `,
 
     TitleComponent: styled.div`
         display: flex;
         align-items: center;
-        height: 37px;
+        height: 36px;
     `,
 
     EditButton: styled(Button)`
         padding-left: 5px;
-        padding-top: 0px;
-        margin-top: 0px;
     `,
 
     Card: styled(Card)`

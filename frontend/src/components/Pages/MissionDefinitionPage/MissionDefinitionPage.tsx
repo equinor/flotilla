@@ -238,12 +238,10 @@ function MissionDefinitionEditDialog({
                 {getFormItem()}
                 <StyledDict.ButtonSection>
                     <Button onClick={() => closeEditDialog()} variant="outlined" color="primary">
-                        {' '}
-                        {TranslateText('Cancel')}{' '}
+                        {TranslateText('Cancel')}
                     </Button>
                     <Button onClick={handleSubmit} variant="contained" color="primary">
-                        {' '}
-                        {TranslateText('Update')}{' '}
+                        {TranslateText('Update')}
                     </Button>
                 </StyledDict.ButtonSection>
             </StyledDict.FormCard>
