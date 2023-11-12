@@ -424,8 +424,13 @@ namespace Api.Controllers
             await _missionRunService.Update(missionRun);
 
             robot.Status = RobotStatus.Busy;
-            robot.CurrentMissionId = missionRun.Id;
-            await _robotService.Update(robot);
+
+            try
+            {
+                await _robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
+                await _robotService.UpdateCurrentMissionId(robot.Id, missionRun.Id);
+            }
+            catch (RobotNotFoundException e) { return NotFound(e.Message); }
 
             return Ok(missionRun);
         }
@@ -476,12 +481,11 @@ namespace Api.Controllers
             catch (MissionNotFoundException)
             {
                 _logger.LogWarning($"No mission was runnning for robot {robot.Id}");
-                robot.CurrentMissionId = null;
-                await _robotService.Update(robot);
+                try { await _robotService.UpdateCurrentMissionId(robotId, null); }
+                catch (RobotNotFoundException e) { return NotFound(e.Message); }
 
             }
-
-            try { await _robotService.SetCurrentMissionId(robotId, null); }
+            try { await _robotService.UpdateCurrentMissionId(robotId, null); }
             catch (RobotNotFoundException e) { return NotFound(e.Message); }
 
             return NoContent();
@@ -732,10 +736,14 @@ namespace Api.Controllers
 
             await _missionRunService.Create(missionRun);
 
-            robot.Status = RobotStatus.Busy;
-            robot.CurrentMissionId = missionRun.Id;
-            robot.CurrentArea = area;
-            await _robotService.Update(robot);
+            try
+            {
+                await _robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
+                await _robotService.UpdateCurrentMissionId(robot.Id, missionRun.Id);
+                await _robotService.UpdateCurrentArea(robot.Id, area);
+            }
+            catch (RobotNotFoundException e) { return NotFound(e.Message); }
+
             return Ok(missionRun);
         }
 
@@ -756,8 +764,8 @@ namespace Api.Controllers
                     );
                 }
             }
-            robot.CurrentMissionId = null;
-            await _robotService.Update(robot);
+
+            await _robotService.UpdateCurrentMissionId(robot.Id, null);
         }
     }
 }

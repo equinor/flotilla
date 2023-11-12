@@ -78,8 +78,7 @@ namespace Api.EventHandlers
 
             if (robot.Status == isarRobotStatus.RobotStatus) { return; }
 
-            robot.Status = isarRobotStatus.RobotStatus;
-            robot = await robotService.Update(robot);
+            robot = await robotService.UpdateRobotStatus(robot.Id, isarRobotStatus.RobotStatus);
             _logger.LogInformation("Updated status for robot {Name} to {Status}", robot.Name, robot.Status);
 
             if (robot.Status == RobotStatus.Available) { missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id)); }
@@ -223,7 +222,9 @@ namespace Api.EventHandlers
                 _logger.LogError("Could not find robot '{RobotName}' with ISAR id '{IsarId}'", isarMission.RobotName, isarMission.IsarId);
                 return;
             }
-            await robotService.SetCurrentMissionId(robot.Id, null);
+
+            try { await robotService.UpdateCurrentMissionId(robot.Id, null); }
+            catch (RobotNotFoundException) { return; }
 
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, flotillaMissionRun.Id);
 
@@ -312,8 +313,7 @@ namespace Api.EventHandlers
             }
             else
             {
-                robot.BatteryLevel = batteryStatus.BatteryLevel;
-                await robotService.Update(robot);
+                await robotService.UpdateRobotBatteryLevel(robot.Id, batteryStatus.BatteryLevel);
                 await timeseriesService.Create(
                     new RobotBatteryTimeseries
                     {
@@ -343,8 +343,7 @@ namespace Api.EventHandlers
             }
             else
             {
-                robot.PressureLevel = pressureStatus.PressureLevel;
-                await robotService.Update(robot);
+                await robotService.UpdateRobotPressureLevel(robot.Id, pressureStatus.PressureLevel);
                 await timeseriesService.Create(
                     new RobotPressureTimeseries
                     {

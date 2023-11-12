@@ -10,12 +10,19 @@ namespace Api.Services
     {
         public Task<Robot> Create(Robot newRobot);
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
-        public Task<Robot> SetCurrentMissionId(string robotId, string? missionId);
         public Task<IEnumerable<Robot>> ReadAll();
         public Task<IEnumerable<string>> ReadAllActivePlants();
         public Task<Robot?> ReadById(string id);
         public Task<Robot?> ReadByIsarId(string isarId);
         public Task<Robot> Update(Robot robot);
+        public Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status);
+        public Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel);
+        public Task<Robot> UpdateRobotPressureLevel(string robotId, float? pressureLevel);
+        public Task<Robot> UpdateRobotPose(string robotId, Pose pose);
+        public Task<Robot> UpdateRobotEnabled(string robotId, bool enabled);
+        public Task<Robot> UpdateCurrentMissionId(string robotId, string? missionId);
+        public Task<Robot> UpdateCurrentArea(string robotId, Area? area);
+        public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
         public Task<Robot?> Delete(string id);
     }
 
@@ -24,11 +31,13 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class RobotService : IRobotService
+    public class RobotService : IRobotService, IDisposable
     {
         private readonly FlotillaDbContext _context;
         private readonly ILogger<RobotService> _logger;
         private readonly IRobotModelService _robotModelService;
+
+        private readonly Semaphore _robotSemaphore = new(1, 1);
         private readonly ISignalRService _signalRService;
 
         public RobotService(FlotillaDbContext context, ILogger<RobotService> logger, IRobotModelService robotModelService, ISignalRService signalRService)
@@ -66,19 +75,15 @@ namespace Api.Services
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
         }
 
-        public async Task<Robot> SetCurrentMissionId(string robotId, string? missionId)
-        {
-            var robot = await ReadById(robotId);
-            if (robot is null)
-            {
-                string errorMessage = $"Robot with ID {robotId} was not found in the database";
-                _logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
+        public async Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status) { return await UpdateRobotProperty(robotId, "Status", status); }
+        public async Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel) { return await UpdateRobotProperty(robotId, "BatteryLevel", batteryLevel); }
+        public async Task<Robot> UpdateRobotPressureLevel(string robotId, float? pressureLevel) { return await UpdateRobotProperty(robotId, "PressureLevel", pressureLevel); }
+        public async Task<Robot> UpdateRobotPose(string robotId, Pose pose) { return await UpdateRobotProperty(robotId, "Pose", pose); }
+        public async Task<Robot> UpdateRobotEnabled(string robotId, bool enabled) { return await UpdateRobotProperty(robotId, "Enabled", enabled); }
+        public async Task<Robot> UpdateCurrentMissionId(string robotId, string? currentMissionId) { return await UpdateRobotProperty(robotId, "CurrentMissionId", currentMissionId); }
+        public async Task<Robot> UpdateCurrentArea(string robotId, Area? area) { return await UpdateRobotProperty(robotId, "CurrentArea", area); }
+        public async Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen) { return await UpdateRobotProperty(robotId, "MissionQueueFrozen", missionQueueFrozen); }
 
-            robot.CurrentMissionId = missionId;
-            return await Update(robot);
-        }
 
         public async Task<IEnumerable<Robot>> ReadAll()
         {
@@ -122,6 +127,28 @@ namespace Api.Services
             return robot;
         }
 
+        private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)
+        {
+            _robotSemaphore.WaitOne();
+            var robot = await ReadById(robotId);
+            if (robot is null)
+            {
+                string errorMessage = $"Robot with ID {robotId} was not found in the database";
+                _logger.LogError("{Message}", errorMessage);
+                _robotSemaphore.Release();
+                throw new RobotNotFoundException(errorMessage);
+            }
+
+            foreach (var property in typeof(Robot).GetProperties())
+            {
+                if (property.Name == propertyName) { property.SetValue(robot, value); }
+            }
+
+            robot = await Update(robot);
+            _robotSemaphore.Release();
+            return robot;
+        }
+
         private IQueryable<Robot> GetRobotsWithSubModels()
         {
             return _context.Robots
@@ -134,6 +161,11 @@ namespace Api.Services
         private IQueryable<Robot> GetEnabledRobotsWithSubModels()
         {
             return GetRobotsWithSubModels().Where(r => r.Enabled && r.Status != RobotStatus.Deprecated);
+        }
+
+        public void Dispose()
+        {
+            _robotSemaphore.Dispose();
         }
     }
 }
