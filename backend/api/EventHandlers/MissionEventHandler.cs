@@ -1,5 +1,4 @@
-﻿using Api.Controllers.Models;
-using Api.Database.Models;
+﻿using Api.Database.Models;
 using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
@@ -11,7 +10,7 @@ namespace Api.EventHandlers
         private readonly ILogger<MissionEventHandler> _logger;
 
         // The mutex is used to ensure multiple missions aren't attempted scheduled simultaneously whenever multiple mission runs are created
-        private readonly Mutex _scheduleMissionMutex = new();
+        private readonly Semaphore _scheduleMissionSemaphore = new(1, 1);
         private readonly IServiceScopeFactory _scopeFactory;
 
         public MissionEventHandler(
@@ -34,24 +33,6 @@ namespace Api.EventHandlers
 
         private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
-        private IList<MissionRun> MissionRunQueue(string robotId)
-        {
-            return MissionService
-                .ReadAll(
-                    new MissionRunQueryStringParameters
-                    {
-                        Statuses = new List<MissionStatus>
-                        {
-                            MissionStatus.Pending
-                        },
-                        RobotId = robotId,
-                        OrderBy = "DesiredStartTime",
-                        PageSize = 100
-                    }
-                )
-                .Result;
-        }
-
         public override void Subscribe()
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
@@ -73,11 +54,11 @@ namespace Api.EventHandlers
             await stoppingToken;
         }
 
-        private void OnMissionRunCreated(object? sender, MissionRunCreatedEventArgs e)
+        private async void OnMissionRunCreated(object? sender, MissionRunCreatedEventArgs e)
         {
             _logger.LogInformation("Triggered MissionRunCreated event for mission run ID: {MissionRunId}", e.MissionRunId);
 
-            var missionRun = MissionService.ReadById(e.MissionRunId).Result;
+            var missionRun = await MissionService.ReadById(e.MissionRunId);
 
             if (missionRun == null)
             {
@@ -85,15 +66,15 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (MissionScheduling.MissionRunQueueIsEmpty(MissionRunQueue(missionRun.Robot.Id)))
+            if (MissionScheduling.MissionRunQueueIsEmpty(await MissionService.ReadMissionRunQueue(missionRun.Robot.Id)))
             {
                 _logger.LogInformation("Mission run {MissionRunId} was not started as there are no mission runs on the queue", e.MissionRunId);
                 return;
             }
 
-            _scheduleMissionMutex.WaitOne();
-            MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun);
-            _scheduleMissionMutex.ReleaseMutex();
+            _scheduleMissionSemaphore.WaitOne();
+            await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun.Id);
+            _scheduleMissionSemaphore.Release();
         }
 
         private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
@@ -106,20 +87,15 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (MissionScheduling.MissionRunQueueIsEmpty(MissionRunQueue(robot.Id)))
+            if (MissionScheduling.MissionRunQueueIsEmpty(await MissionService.ReadMissionRunQueue(robot.Id)))
             {
                 _logger.LogInformation("The robot was changed to available but there are no mission runs in the queue to be scheduled");
                 return;
             }
 
-            var missionRun = (MissionRun?)null;
-
-            if (robot.MissionQueueFrozen)
-            {
-                missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id &&
-                                                                                    missionRun.MissionRunPriority == MissionRunPriority.Emergency);
-            }
-            else { missionRun = MissionRunQueue(robot.Id).FirstOrDefault(missionRun => missionRun.Robot.Id == robot.Id); }
+            MissionRun? missionRun;
+            if (robot.MissionQueueFrozen) { missionRun = await MissionService.ReadNextScheduledEmergencyMissionRun(robot.Id); }
+            else { missionRun = await MissionService.ReadNextScheduledMissionRun(robot.Id); }
 
             if (missionRun == null)
             {
@@ -127,9 +103,9 @@ namespace Api.EventHandlers
                 return;
             }
 
-            _scheduleMissionMutex.WaitOne();
-            MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun);
-            _scheduleMissionMutex.ReleaseMutex();
+            _scheduleMissionSemaphore.WaitOne();
+            await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun.Id);
+            _scheduleMissionSemaphore.Release();
         }
 
         private async void OnEmergencyButtonPressedForRobot(object? sender, EmergencyButtonPressedForRobotEventArgs e)

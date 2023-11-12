@@ -18,7 +18,13 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadByIsarMissionId(string isarMissionId);
 
+        public Task<IList<MissionRun>> ReadMissionRunQueue(string robotId);
+
         public Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId);
+
+        public Task<MissionRun?> ReadNextScheduledMissionRun(string robotId);
+
+        public Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(string robotId);
 
         public Task<MissionRun> Update(MissionRun mission);
 
@@ -99,6 +105,29 @@ namespace Api.Services
         {
             return await GetMissionRunsWithSubModels()
                 .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
+        }
+
+        public async Task<IList<MissionRun>> ReadMissionRunQueue(string robotId)
+        {
+            return await GetMissionRunsWithSubModels()
+                .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending)
+                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .ToListAsync();
+        }
+
+        public async Task<MissionRun?> ReadNextScheduledMissionRun(string robotId)
+        {
+            return await GetMissionRunsWithSubModels()
+                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending);
+        }
+
+        public async Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(string robotId)
+        {
+            return await GetMissionRunsWithSubModels()
+                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .FirstOrDefaultAsync(missionRun =>
+                    missionRun.Robot.Id == robotId && missionRun.MissionRunPriority == MissionRunPriority.Emergency && missionRun.Status == MissionStatus.Pending);
         }
 
         public async Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId)

@@ -9,7 +9,7 @@ namespace Api.Services
 {
     public interface IMissionSchedulingService
     {
-        public void StartMissionRunIfSystemIsAvailable(MissionRun missionRun);
+        public Task StartMissionRunIfSystemIsAvailable(string missionRunId);
 
         public Task<bool> OngoingMission(string robotId);
 
@@ -47,15 +47,23 @@ namespace Api.Services
             _isarService = isarService;
         }
 
-        public void StartMissionRunIfSystemIsAvailable(MissionRun missionRun)
+        public async Task StartMissionRunIfSystemIsAvailable(string missionRunId)
         {
-            if (!TheSystemIsAvailableToRunAMission(missionRun.Robot, missionRun).Result)
+            var missionRun = await _missionRunService.ReadById(missionRunId);
+            if (missionRun is null)
+            {
+                string errorMessage = $"Mission run with Id {missionRunId} was not found";
+                _logger.LogError("{Message}", errorMessage);
+                throw new MissionRunNotFoundException(errorMessage);
+            }
+
+            if (!await TheSystemIsAvailableToRunAMission(missionRun.Robot.Id, missionRun.Id))
             {
                 _logger.LogInformation("Mission {MissionRunId} was put on the queue as the system may not start a mission now", missionRun.Id);
                 return;
             }
 
-            try { StartMissionRun(missionRun); }
+            try { await StartMissionRun(missionRun); }
             catch (MissionException ex)
             {
                 const MissionStatus NewStatus = MissionStatus.Failed;
@@ -67,7 +75,7 @@ namespace Api.Services
                 );
                 missionRun.Status = NewStatus;
                 missionRun.StatusReason = $"Failed to start: '{ex.Message}'";
-                _missionRunService.Update(missionRun);
+                await _missionRunService.Update(missionRun);
             }
         }
 
@@ -115,7 +123,7 @@ namespace Api.Services
             {
                 const string Message = "Error connecting to ISAR while stopping mission";
                 _logger.LogError(e, "{Message}", Message);
-                OnIsarUnavailable(robot.Id);
+                await OnIsarUnavailable(robot.Id);
                 throw new MissionException(Message, (int)e.StatusCode!);
             }
             catch (MissionException e)
@@ -219,12 +227,12 @@ namespace Api.Services
             }
         }
 
-        private void StartMissionRun(MissionRun queuedMissionRun)
+        private async Task StartMissionRun(MissionRun queuedMissionRun)
         {
-            var result = _robotController.StartMission(
+            var result = await _robotController.StartMission(
                 queuedMissionRun.Robot.Id,
                 queuedMissionRun.Id
-            ).Result;
+            );
             if (result.Result is not OkObjectResult)
             {
                 string errorMessage = "Unknown error from robot controller";
@@ -237,7 +245,7 @@ namespace Api.Services
             _logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
         }
 
-        private async void OnIsarUnavailable(string robotId)
+        private async Task OnIsarUnavailable(string robotId)
         {
             var robot = await _robotService.ReadById(robotId);
             if (robot == null)
@@ -292,15 +300,6 @@ namespace Api.Services
             return closestPose;
         }
 
-        public async Task<bool> TheSystemIsAvailableToRunAMission(string robotId, MissionRun missionRun)
-        {
-            var robot = await _robotService.ReadById(robotId);
-            if (robot != null) { return await TheSystemIsAvailableToRunAMission(robot, missionRun); }
-
-            _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-            return false;
-        }
-
         private async Task<PagedList<MissionRun>?> GetOngoingMissions(string robotId)
         {
             var ongoingMissions = await _missionRunService.ReadAll(
@@ -318,9 +317,25 @@ namespace Api.Services
             return ongoingMissions;
         }
 
-        private async Task<bool> TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
+        private async Task<bool> TheSystemIsAvailableToRunAMission(string robotId, string missionRunId)
         {
-            bool ongoingMission = await OngoingMission(robot.Id);
+            bool ongoingMission = await OngoingMission(robotId);
+
+            var robot = await _robotService.ReadById(robotId);
+            if (robot is null)
+            {
+                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
+                _logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
+            }
+
+            var missionRun = await _missionRunService.ReadById(missionRunId);
+            if (missionRun is null)
+            {
+                string errorMessage = $"Mission run with Id {missionRunId} was not found in the database";
+                _logger.LogError("{Message}", errorMessage);
+                throw new MissionRunNotFoundException(errorMessage);
+            }
 
             if (robot.MissionQueueFrozen && missionRun.MissionRunPriority != MissionRunPriority.Emergency)
             {
