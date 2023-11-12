@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Api.Controllers.Models;
+﻿using Api.Controllers.Models;
 using Api.Services;
 using Api.Services.Events;
 using Microsoft.AspNetCore.Authorization;
@@ -36,13 +35,11 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<string> AbortCurrentMissionAndSendAllRobotsToSafeZone(
+        public async Task<ActionResult<string>> AbortCurrentMissionAndSendAllRobotsToSafeZone(
             [FromRoute] string installationCode)
         {
 
-            var robots = _robotService.ReadAll().Result.ToList().FindAll(a =>
-                            a.CurrentInstallation.ToLower(CultureInfo.CurrentCulture).Equals(installationCode.ToLower(CultureInfo.CurrentCulture), StringComparison.Ordinal) &&
-                            a.CurrentArea != null);
+            var robots = await _robotService.ReadLocalizedRobotsForInstallation(installationCode);
 
             foreach (var robot in robots)
             {
@@ -67,12 +64,10 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<string> ClearEmergencyStateForAllRobots(
+        public async Task<ActionResult<string>> ClearEmergencyStateForAllRobots(
             [FromRoute] string installationCode)
         {
-            var robots = _robotService.ReadAll().Result.ToList().FindAll(a =>
-                            a.CurrentInstallation.ToLower(CultureInfo.CurrentCulture).Equals(installationCode.ToLower(CultureInfo.CurrentCulture), StringComparison.Ordinal) &&
-                            a.CurrentArea != null);
+            var robots = await _robotService.ReadLocalizedRobotsForInstallation(installationCode);
 
             foreach (var robot in robots)
             {
