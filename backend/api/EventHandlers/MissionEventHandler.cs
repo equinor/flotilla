@@ -152,9 +152,20 @@ namespace Api.EventHandlers
             try { await MissionScheduling.FreezeMissionRunQueueForRobot(e.RobotId); }
             catch (RobotNotFoundException) { return; }
 
+            try { await MissionScheduling.ScheduleMissionToReturnToSafePosition(e.RobotId, area.Id); }
+            catch (SafeZoneException ex)
+            {
+                _logger.LogError(ex, "Failed to schedule return to safe zone mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
+                try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
+                catch (RobotNotFoundException) { return; }
+            }
+
             try { await MissionScheduling.StopCurrentMissionRun(e.RobotId); }
             catch (RobotNotFoundException) { return; }
-            catch (MissionRunNotFoundException) { /* Allow robot to return to safe position if there is no ongoing mission */ }
+            catch (MissionRunNotFoundException)
+            {
+                /* Allow robot to return to safe position if there is no ongoing mission */
+            }
             catch (MissionException ex)
             {
                 // We want to continue driving to a safe position if the isar state is idle
@@ -169,14 +180,6 @@ namespace Api.EventHandlers
                 const string Message = "Error in ISAR while stopping current mission, cannot drive to safe position";
                 _logger.LogError(ex, "{Message}", Message);
                 return;
-            }
-
-            try { await MissionScheduling.ScheduleMissionToReturnToSafePosition(e.RobotId, area.Id); }
-            catch (SafeZoneException ex)
-            {
-                _logger.LogError(ex, "Failed to schedule return to safe zone mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
-                try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
-                catch (RobotNotFoundException) { return; }
             }
 
             MissionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
