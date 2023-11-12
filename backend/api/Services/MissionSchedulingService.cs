@@ -123,24 +123,10 @@ namespace Api.Services
             if (ongoingMissions == null) { _logger.LogWarning("Flotilla has no mission running for robot {RobotName} but an attempt to stop will be made regardless", robot.Name); }
             else
             {
-                foreach (var mission in ongoingMissions)
+                foreach (var missionRun in ongoingMissions.Where(missionRun => missionRun.MissionRunPriority != MissionRunPriority.Emergency))
                 {
-                    if (mission.MissionRunPriority == MissionRunPriority.Emergency) { continue; }
-
-                    var newMission = new MissionRun
-                    {
-                        Name = mission.Name,
-                        Robot = robot,
-                        MissionRunPriority = MissionRunPriority.Normal,
-                        InstallationCode = mission.InstallationCode,
-                        Area = mission.Area,
-                        Status = MissionStatus.Pending,
-                        DesiredStartTime = DateTime.UtcNow,
-                        Tasks = mission.Tasks,
-                        Map = new MapMetadata()
-                    };
-
-                    await _missionRunService.Create(newMission);
+                    missionRun.Status = MissionStatus.Pending;
+                    await _missionRunService.Update(missionRun);
                 }
             }
 
