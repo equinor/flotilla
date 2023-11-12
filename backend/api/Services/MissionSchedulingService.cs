@@ -221,8 +221,20 @@ namespace Api.Services
                     continue;
                 }
 
-                missionRun.Status = MissionStatus.Pending;
-                await _missionRunService.Update(missionRun);
+                var newMissionRun = new MissionRun
+                {
+                    Name = missionRun.Name,
+                    Robot = missionRun.Robot,
+                    MissionRunPriority = missionRun.MissionRunPriority,
+                    InstallationCode = missionRun.Area!.Installation.InstallationCode,
+                    Area = missionRun.Area,
+                    Status = MissionStatus.Pending,
+                    DesiredStartTime = DateTime.UtcNow,
+                    Tasks = missionRun.Tasks,
+                    Map = new MapMetadata()
+                };
+
+                await _missionRunService.Create(newMissionRun);
             }
         }
 
