@@ -154,6 +154,7 @@ namespace Api.EventHandlers
 
             try { await MissionScheduling.StopCurrentMissionRun(e.RobotId); }
             catch (RobotNotFoundException) { return; }
+            catch (MissionRunNotFoundException) { /* Allow robot to return to safe position if there is no ongoing mission */ }
             catch (MissionException ex)
             {
                 // We want to continue driving to a safe position if the isar state is idle
