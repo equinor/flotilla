@@ -223,9 +223,8 @@ namespace Api.EventHandlers
                 _logger.LogError("Could not find robot '{RobotName}' with ISAR id '{IsarId}'", isarMission.RobotName, isarMission.IsarId);
                 return;
             }
-            robot.CurrentMissionId = null;
+            await robotService.SetCurrentMissionId(robot.Id, null);
 
-            await robotService.Update(robot);
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, flotillaMissionRun.Id);
 
             if (flotillaMissionRun.MissionId == null) { return; }
