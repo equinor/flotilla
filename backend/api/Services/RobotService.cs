@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -14,6 +15,7 @@ namespace Api.Services
         public Task<IEnumerable<string>> ReadAllActivePlants();
         public Task<Robot?> ReadById(string id);
         public Task<Robot?> ReadByIsarId(string isarId);
+        public Task<IList<Robot>> ReadLocalizedRobotsForInstallation(string installationCode);
         public Task<Robot> Update(Robot robot);
         public Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status);
         public Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel);
@@ -46,6 +48,11 @@ namespace Api.Services
             _logger = logger;
             _robotModelService = robotModelService;
             _signalRService = signalRService;
+        }
+
+        public void Dispose()
+        {
+            _robotSemaphore.Dispose();
         }
 
         public async Task<Robot> Create(Robot newRobot)
@@ -127,6 +134,15 @@ namespace Api.Services
             return robot;
         }
 
+        public async Task<IList<Robot>> ReadLocalizedRobotsForInstallation(string installationCode)
+        {
+            return await GetRobotsWithSubModels()
+                .Where(robot =>
+                    robot.CurrentInstallation.Equals(installationCode)
+                    && robot.CurrentArea != null)
+                .ToListAsync();
+        }
+
         private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)
         {
             _robotSemaphore.WaitOne();
@@ -161,11 +177,6 @@ namespace Api.Services
         private IQueryable<Robot> GetEnabledRobotsWithSubModels()
         {
             return GetRobotsWithSubModels().Where(r => r.Enabled && r.Status != RobotStatus.Deprecated);
-        }
-
-        public void Dispose()
-        {
-            _robotSemaphore.Dispose();
         }
     }
 }
