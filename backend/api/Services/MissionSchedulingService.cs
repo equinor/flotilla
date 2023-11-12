@@ -118,17 +118,15 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            var ongoingMissions = await GetOngoingMissions(robot.Id);
-
-            if (ongoingMissions == null) { _logger.LogWarning("Flotilla has no mission running for robot {RobotName} but an attempt to stop will be made regardless", robot.Name); }
-            else
+            var ongoingMissionRuns = await GetOngoingMissions(robotId);
+            if (ongoingMissionRuns is null)
             {
-                foreach (var missionRun in ongoingMissions.Where(missionRun => missionRun.MissionRunPriority != MissionRunPriority.Emergency))
-                {
-                    missionRun.Status = MissionStatus.Pending;
-                    await _missionRunService.Update(missionRun);
-                }
+                string errorMessage = $"There were no ongoing mission runs to stop for robot {robotId}";
+                _logger.LogWarning("{Message}", errorMessage);
+                throw new MissionRunNotFoundException(errorMessage);
             }
+
+            IList<string> ongoingMissionRunIds = ongoingMissionRuns.Select(missionRun => missionRun.Id).ToList();
 
             try { await _isarService.StopMission(robot); }
             catch (HttpRequestException e)
@@ -151,10 +149,12 @@ namespace Api.Services
                 throw new MissionException(Message, 0);
             }
 
-            catch (MissionNotFoundException) { _logger.LogWarning($"No mission was running for robot {robot.Id}"); }
+            catch (MissionNotFoundException) { _logger.LogWarning("{Message}", $"No mission was running for robot {robot.Id}"); }
 
-            robot.CurrentMissionId = null;
-            await _robotService.Update(robot);
+            await MoveInterruptedMissionsToQueue(ongoingMissionRunIds);
+
+            try { await _robotService.SetCurrentMissionId(robotId, null); }
+            catch (RobotNotFoundException) { }
         }
 
         public async Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId)
@@ -209,6 +209,21 @@ namespace Api.Services
         public void TriggerRobotAvailable(RobotAvailableEventArgs e)
         {
             OnRobotAvailable(e);
+        }
+        private async Task MoveInterruptedMissionsToQueue(IEnumerable<string> interruptedMissionRunIds)
+        {
+            foreach (string missionRunId in interruptedMissionRunIds)
+            {
+                var missionRun = await _missionRunService.ReadById(missionRunId);
+                if (missionRun is null)
+                {
+                    _logger.LogWarning("{Message}", $"Interrupted mission run with Id {missionRunId} could not be found");
+                    continue;
+                }
+
+                missionRun.Status = MissionStatus.Pending;
+                await _missionRunService.Update(missionRun);
+            }
         }
 
         private void StartMissionRun(MissionRun queuedMissionRun)
