@@ -83,8 +83,7 @@ namespace Api.EventHandlers
             _isarConnectionTimers[robot.IsarId].Reset();
 
             if (robot.Enabled) { return; }
-            robot.Enabled = true;
-            await RobotService.Update(robot);
+            await RobotService.UpdateRobotEnabled(robot.Id, true);
         }
 
         private void AddTimerForRobot(IsarRobotHeartbeatMessage isarRobotHeartbeat, Robot robot)
@@ -118,8 +117,7 @@ namespace Api.EventHandlers
                     "Connection to ISAR instance '{Id}' timed out - It will be disabled and active missions aborted",
                     robotHeartbeatMessage.IsarId
                 );
-                robot.Enabled = false;
-                robot.Status = RobotStatus.Offline;
+
                 if (robot.CurrentMissionId != null)
                 {
                     var missionRun = await MissionRunService.ReadById(robot.CurrentMissionId);
@@ -134,8 +132,14 @@ namespace Api.EventHandlers
                         await MissionRunService.Update(missionRun);
                     }
                 }
-                robot.CurrentMissionId = null;
-                await RobotService.Update(robot);
+
+                try
+                {
+                    await RobotService.UpdateRobotStatus(robot.Id, RobotStatus.Offline);
+                    await RobotService.UpdateRobotEnabled(robot.Id, false);
+                    await RobotService.UpdateCurrentMissionId(robot.Id, null);
+                }
+                catch (RobotNotFoundException) { return; }
             }
 
             if (!_isarConnectionTimers.TryGetValue(robotHeartbeatMessage.IsarId, out var timer)) { return; }

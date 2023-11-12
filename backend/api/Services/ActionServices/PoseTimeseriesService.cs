@@ -29,9 +29,7 @@ namespace Api.Services.ActionServices
                 return;
             }
 
-            robot.Pose = pose;
-
-            await _robotService.Update(robot);
+            await _robotService.UpdateRobotPose(robot.Id, pose);
             await _timeseriesService.Create(
                 new RobotPoseTimeseries(robot.Pose)
                 {

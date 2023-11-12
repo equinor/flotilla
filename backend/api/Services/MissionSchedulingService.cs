@@ -80,32 +80,14 @@ namespace Api.Services
 
         public async Task FreezeMissionRunQueueForRobot(string robotId)
         {
-            var robot = await _robotService.ReadById(robotId);
-            if (robot == null)
-            {
-                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
-                _logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            robot.MissionQueueFrozen = true;
-            await _robotService.Update(robot);
-            _logger.LogInformation("Mission queue for robot {RobotName} with ID {RobotId} was frozen", robot.Name, robot.Id);
+            await _robotService.UpdateMissionQueueFrozen(robotId, true);
+            _logger.LogInformation("Mission queue was frozen for robot with Id {RobotId}", robotId);
         }
 
         public async Task UnfreezeMissionRunQueueForRobot(string robotId)
         {
-            var robot = await _robotService.ReadById(robotId);
-            if (robot == null)
-            {
-                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
-                _logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            robot.MissionQueueFrozen = false;
-            await _robotService.Update(robot);
-            _logger.LogInformation("Mission queue for robot {RobotName} with ID {RobotId} was unfrozen", robot.Name, robot.Id);
+            await _robotService.UpdateMissionQueueFrozen(robotId, false);
+            _logger.LogInformation("Mission queue for robot with ID {RobotId} was unfrozen", robotId);
         }
 
         public async Task StopCurrentMissionRun(string robotId)
@@ -148,12 +130,11 @@ namespace Api.Services
                 _logger.LogError(e, "{Message}", Message);
                 throw new MissionException(Message, 0);
             }
-
             catch (MissionNotFoundException) { _logger.LogWarning("{Message}", $"No mission was running for robot {robot.Id}"); }
 
             await MoveInterruptedMissionsToQueue(ongoingMissionRunIds);
 
-            try { await _robotService.SetCurrentMissionId(robotId, null); }
+            try { await _robotService.UpdateCurrentMissionId(robotId, null); }
             catch (RobotNotFoundException) { }
         }
 
@@ -265,8 +246,6 @@ namespace Api.Services
                 return;
             }
 
-            robot.Enabled = false;
-            robot.Status = RobotStatus.Offline;
             if (robot.CurrentMissionId != null)
             {
                 var missionRun = await _missionRunService.ReadById(robot.CurrentMissionId);
@@ -280,8 +259,14 @@ namespace Api.Services
                     );
                 }
             }
-            robot.CurrentMissionId = null;
-            await _robotService.Update(robot);
+
+            try
+            {
+                await _robotService.UpdateRobotStatus(robot.Id, RobotStatus.Offline);
+                await _robotService.UpdateCurrentMissionId(robot.Id, null);
+                await _robotService.UpdateRobotEnabled(robot.Id, false);
+            }
+            catch (RobotNotFoundException) { }
         }
 
         private static Pose ClosestSafePosition(Pose robotPose, IList<SafePosition> safePositions)
