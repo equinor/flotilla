@@ -206,6 +206,11 @@ namespace Api.Services
             return !missionRunQueue.Any();
         }
 
+        public void TriggerRobotAvailable(RobotAvailableEventArgs e)
+        {
+            OnRobotAvailable(e);
+        }
+
         private void StartMissionRun(MissionRun queuedMissionRun)
         {
             var result = _robotController.StartMission(
@@ -334,11 +339,6 @@ namespace Api.Services
             var pos1 = pose1.Position;
             var pos2 = pose2.Position;
             return (float)Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2) + Math.Pow(pos1.Z - pos2.Z, 2));
-        }
-
-        public void TriggerRobotAvailable(RobotAvailableEventArgs e)
-        {
-            OnRobotAvailable(e);
         }
         protected virtual void OnRobotAvailable(RobotAvailableEventArgs e) { RobotAvailable?.Invoke(this, e); }
         public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
