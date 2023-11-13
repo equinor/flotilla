@@ -4,22 +4,17 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState, useEffect } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { CreateMissionButton } from 'components/Displays/MissionButtons/CreateMissionButton'
+import { MissionButton } from './MissionButton'
 import { Robot } from 'models/Robot'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { StyledAutoComplete, StyledDialog } from 'components/Styles/StyledComponents'
+import { useRobotContext } from 'components/Contexts/RobotContext'
+import { BackendAPICaller } from 'api/ApiCaller'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 
 interface IProps {
-    robotOptions: Array<Robot>
-    echoMissionsOptions: Array<string>
-    onChangeMissionSelections: (missions: string[]) => void
-    onSelectedRobot: (robot: Robot) => void
-    onScheduleButtonPress: () => void
-    fetchEchoMissions: () => void
-    scheduleButtonDisabled: boolean
-    frontPageScheduleButtonDisabled: boolean
-    selectedMissions: EchoMissionDefinition[]
-    isFetchingEchoMissions: boolean
+    setLoadingMissionSet: (foo: (missionIds: Set<string>) => Set<string>) => void
 }
 
 const StyledMissionDialog = styled.div`
@@ -41,26 +36,110 @@ const StyledLoading = styled.div`
     gap: 1rem;
 `
 
+const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, EchoMissionDefinition> => {
+    var missionMap = new Map<string, EchoMissionDefinition>()
+    missions.forEach((mission: EchoMissionDefinition) => {
+        missionMap.set(mission.echoMissionId + ': ' + mission.name, mission)
+    })
+    return missionMap
+}
+
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
+    const { enabledRobots } = useRobotContext()
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
     const [isEmptyEchoMissionsDialogOpen, setIsEmptyEchoMissionsDialogOpen] = useState<boolean>(false)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [isScheduleMissionsPressed, setIsScheduleMissionsPressed] = useState<boolean>(false)
+    const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
+    const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
+    const { setAlert } = useAlertContext()
+    const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
+    const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
+    const [selectedRobot, setSelectedRobot] = useState<Robot>()
+    const [echoMissions, setEchoMissions] = useState<Map<string, EchoMissionDefinition>>(
+        new Map<string, EchoMissionDefinition>()
+    )
     const anchorRef = useRef<HTMLButtonElement>(null)
 
+    const echoMissionsOptions = Array.from(echoMissions.keys())
+
     useEffect(() => {
-        if (!props.isFetchingEchoMissions && isScheduleMissionsPressed) {
-            if (props.echoMissionsOptions.length === 0) setIsEmptyEchoMissionsDialogOpen(true)
+        if (enabledRobots.length === 0 || installationCode === '') {
+            setFrontPageScheduleButtonDisabled(true)
+        } else {
+            setFrontPageScheduleButtonDisabled(false)
+        }
+    }, [enabledRobots, installationCode])
+
+    const fetchEchoMissions = () => {
+        setIsFetchingEchoMissions(true)
+        BackendAPICaller.getAvailableEchoMissions(installationCode as string)
+            .then((missions) => {
+                const echoMissionsMap: Map<string, EchoMissionDefinition> = mapEchoMissionToString(missions)
+                setEchoMissions(echoMissionsMap)
+                setIsFetchingEchoMissions(false)
+            })
+            .catch((_) => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent message={'Failed to retrieve echo missions'} />
+                )
+                setIsFetchingEchoMissions(false)
+            })
+    }
+
+    useEffect(() => {
+        if (!selectedRobot || selectedEchoMissions.length === 0) {
+            setScheduleButtonDisabled(true)
+        } else {
+            setScheduleButtonDisabled(false)
+        }
+    }, [selectedRobot, selectedEchoMissions])
+
+    useEffect(() => {
+        if (!isFetchingEchoMissions && isScheduleMissionsPressed) {
+            if (echoMissionsOptions.length === 0) setIsEmptyEchoMissionsDialogOpen(true)
             else setIsScheduleMissionDialogOpen(true)
             setIsScheduleMissionsPressed(false)
         }
-    }, [isScheduleMissionsPressed, props.echoMissionsOptions.length, props.isFetchingEchoMissions])
+    }, [isScheduleMissionsPressed, echoMissions, isFetchingEchoMissions])
 
     let timer: ReturnType<typeof setTimeout>
     const openPopover = () => {
-        if (props.frontPageScheduleButtonDisabled) setIsPopoverOpen(true)
+        if (frontPageScheduleButtonDisabled) setIsPopoverOpen(true)
+    }
+
+    const onChangeMissionSelections = (selectedEchoMissions: string[]) => {
+        var echoMissionsToSchedule: EchoMissionDefinition[] = []
+        if (echoMissions) {
+            selectedEchoMissions.forEach((selectedEchoMission: string) => {
+                echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as EchoMissionDefinition)
+            })
+        }
+        setSelectedEchoMissions(echoMissionsToSchedule)
+    }
+
+    const onSelectedRobot = (selectedRobot: Robot) => {
+        if (!enabledRobots) return
+        setSelectedRobot(selectedRobot)
+    }
+
+    const onScheduleButtonPress = () => {
+        if (!selectedRobot) return
+
+        selectedEchoMissions.forEach((mission: EchoMissionDefinition) => {
+            BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode)
+            props.setLoadingMissionSet((currentSet: Set<string>) => {
+                const updatedSet: Set<string> = new Set(currentSet)
+                updatedSet.add(String(mission.name))
+                return updatedSet
+            })
+        })
+
+        setSelectedEchoMissions([])
+        setSelectedRobot(undefined)
     }
 
     const closePopover = () => setIsPopoverOpen(false)
@@ -78,8 +157,10 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
 
     const onClickScheduleMission = () => {
         setIsScheduleMissionsPressed(true)
-        props.fetchEchoMissions()
+        fetchEchoMissions()
     }
+
+    // TODO: divide up each dialog into a different object
 
     return (
         <>
@@ -94,7 +175,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     onClick={() => {
                         onClickScheduleMission()
                     }}
-                    disabled={props.frontPageScheduleButtonDisabled}
+                    disabled={frontPageScheduleButtonDisabled}
                     ref={anchorRef}
                 >
                     <>
@@ -116,7 +197,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             </Popover>
 
             <StyledMissionDialog>
-                <StyledDialog open={props.isFetchingEchoMissions && isScheduleMissionsPressed} isDismissable>
+                <StyledDialog open={isFetchingEchoMissions && isScheduleMissionsPressed} isDismissable>
                     <StyledAutoComplete>
                         <StyledLoading>
                             <CircularProgress />
@@ -143,7 +224,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             {TranslateText('This installation has no missions - Please create mission')}
                         </Typography>
                         <StyledMissionSection>
-                            {CreateMissionButton()}
+                            <MissionButton />
                             <Button
                                 onClick={() => {
                                     setIsEmptyEchoMissionsDialogOpen(false)
@@ -162,24 +243,24 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     <StyledAutoComplete>
                         <Typography variant="h3">{TranslateText('Add mission')}</Typography>
                         <Autocomplete
-                            options={props.echoMissionsOptions}
-                            onOptionsChange={(changes) => props.onChangeMissionSelections(changes.selectedItems)}
+                            options={echoMissionsOptions}
+                            onOptionsChange={(changes) => onChangeMissionSelections(changes.selectedItems)}
                             label={TranslateText('Select missions')}
                             multiple
-                            placeholder={`${props.selectedMissions.length}/${
-                                Array.from(props.echoMissionsOptions.keys()).length
+                            placeholder={`${selectedEchoMissions.length}/${
+                                Array.from(echoMissionsOptions.keys()).length
                             } ${TranslateText('selected')}`}
                             autoWidth={true}
                             onFocus={(e) => e.preventDefault()}
                         />
                         <Autocomplete
                             optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
-                            options={props.robotOptions.filter(
+                            options={enabledRobots.filter(
                                 (r) =>
                                     r.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
                             )}
                             label={TranslateText('Select robot')}
-                            onOptionsChange={(changes) => props.onSelectedRobot(changes.selectedItems[0])}
+                            onOptionsChange={(changes) => onSelectedRobot(changes.selectedItems[0])}
                             autoWidth={true}
                             onFocus={(e) => e.preventDefault()}
                         />
@@ -194,10 +275,10 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             </Button>
                             <Button
                                 onClick={() => {
-                                    props.onScheduleButtonPress()
+                                    onScheduleButtonPress()
                                     setIsScheduleMissionDialogOpen(false)
                                 }}
-                                disabled={props.scheduleButtonDisabled}
+                                disabled={scheduleButtonDisabled}
                             >
                                 {TranslateText('Add mission')}
                             </Button>

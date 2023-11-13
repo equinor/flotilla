@@ -6,15 +6,10 @@ import { useEffect, useState } from 'react'
 import { Mission, placeholderMission } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog'
-import { Robot } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { CreateMissionButton } from 'components/Displays/MissionButtons/CreateMissionButton'
-import { EchoMissionDefinition } from 'models/MissionDefinition'
+import { MissionButton } from './MissionButton'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
-import { useRobotContext } from 'components/Contexts/RobotContext'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -33,115 +28,29 @@ const MissionButtonView = styled.div`
     display: flex;
     gap: 1rem;
 `
-const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, EchoMissionDefinition> => {
-    var missionMap = new Map<string, EchoMissionDefinition>()
-    missions.forEach((mission: EchoMissionDefinition) => {
-        missionMap.set(mission.echoMissionId + ': ' + mission.name, mission)
-    })
-    return missionMap
-}
 
 export function MissionQueueView() {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions } = useMissionsContext()
-    const { setAlert } = useAlertContext()
+    const [loadingMissionSet, setLoadingMissionSet] = useState<Set<string>>(new Set())
     const { installationCode } = useInstallationContext()
-    const { enabledRobots } = useRobotContext()
 
-    const [queuedMissionsToDisplay, setQueuedMissionsToDisplay] = useState<Mission[]>([])
-    const [loadingMissionNames, setLoadingMissionNames] = useState<Set<string>>(new Set())
-    const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
-    const [selectedRobot, setSelectedRobot] = useState<Robot>()
-    const [echoMissions, setEchoMissions] = useState<Map<string, EchoMissionDefinition>>(
-        new Map<string, EchoMissionDefinition>()
+    const onDeleteMission = (mission: Mission) => BackendAPICaller.deleteMission(mission.id)
+
+    const localMissionQueue = missionQueue.filter(
+        (m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
     )
-    const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
-    const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
-    const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
-
-    const fetchEchoMissions = () => {
-        setIsFetchingEchoMissions(true)
-        BackendAPICaller.getAvailableEchoMissions(installationCode as string)
-            .then((missions) => {
-                const echoMissionsMap: Map<string, EchoMissionDefinition> = mapEchoMissionToString(missions)
-                setEchoMissions(echoMissionsMap)
-                setIsFetchingEchoMissions(false)
-            })
-            .catch((_) => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent message={'Failed to retrieve echo missions'} />
-                )
-                setIsFetchingEchoMissions(false)
-            })
-    }
-
-    const onChangeMissionSelections = (selectedEchoMissions: string[]) => {
-        var echoMissionsToSchedule: EchoMissionDefinition[] = []
-        if (echoMissions) {
-            selectedEchoMissions.forEach((selectedEchoMission: string) => {
-                echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as EchoMissionDefinition)
-            })
-        }
-        setSelectedEchoMissions(echoMissionsToSchedule)
-    }
-    const onSelectedRobot = (selectedRobot: Robot) => {
-        if (!enabledRobots) return
-        setSelectedRobot(selectedRobot)
-    }
-
-    const onScheduleButtonPress = () => {
-        if (!selectedRobot) return
-
-        selectedEchoMissions.forEach((mission: EchoMissionDefinition) => {
-            BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode)
-            setLoadingMissionNames((prev) => {
-                const updatedSet = new Set(prev)
-                updatedSet.add(mission.name)
-                return updatedSet
-            })
-        })
-
-        setSelectedEchoMissions([])
-        setSelectedRobot(undefined)
-    }
-
-    const onDeleteMission = (mission: Mission) => {
-        BackendAPICaller.deleteMission(mission.id)
-    }
 
     useEffect(() => {
-        if (!selectedRobot || selectedEchoMissions.length === 0) {
-            setScheduleButtonDisabled(true)
-        } else {
-            setScheduleButtonDisabled(false)
-        }
-    }, [selectedRobot, selectedEchoMissions])
-
-    useEffect(() => {
-        if (enabledRobots.length === 0 || installationCode === '') {
-            setFrontPageScheduleButtonDisabled(true)
-        } else {
-            setFrontPageScheduleButtonDisabled(false)
-        }
-    }, [enabledRobots, installationCode])
-
-    useEffect(() => {
-        setLoadingMissionNames((currentLoadingNames) => {
-            const updatedLoadingMissionIds = new Set(currentLoadingNames)
-            missionQueue.forEach((mission) => updatedLoadingMissionIds.delete(mission.name))
-            ongoingMissions.forEach((mission) => updatedLoadingMissionIds.delete(mission.name))
-            return updatedLoadingMissionIds
+        setLoadingMissionSet((currentLoadingNames) => {
+            const updatedLoadingMissionNames = new Set(currentLoadingNames)
+            missionQueue.forEach((mission) => updatedLoadingMissionNames.delete(mission.name))
+            ongoingMissions.forEach((mission) => updatedLoadingMissionNames.delete(mission.name))
+            return updatedLoadingMissionNames
         })
     }, [missionQueue, ongoingMissions])
 
-    useEffect(() => {
-        setQueuedMissionsToDisplay(
-            missionQueue.filter((m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase())
-        )
-    }, [missionQueue, installationCode])
-
-    const missionQueueDisplay = queuedMissionsToDisplay.map((mission, index) => (
+    const missionQueueDisplay = localMissionQueue.map((mission, index) => (
         <MissionQueueCard key={index} order={index + 1} mission={mission} onDeleteMission={onDeleteMission} />
     ))
 
@@ -160,26 +69,13 @@ export function MissionQueueView() {
                 {TranslateText('Mission Queue')}
             </Typography>
             <MissionTable>
-                {queuedMissionsToDisplay.length > 0 && missionQueueDisplay}
-                {loadingMissionNames.size > 0 && loadingQueueDisplay}
-                {loadingMissionNames.size === 0 && queuedMissionsToDisplay.length === 0 && (
-                    <EmptyMissionQueuePlaceholder />
-                )}
+                {localMissionQueue.length > 0 && missionQueueDisplay}
+                {loadingMissionSet.size > 0 && loadingQueueDisplay}
+                {loadingMissionSet.size === 0 && localMissionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
             </MissionTable>
             <MissionButtonView>
-                <ScheduleMissionDialog
-                    robotOptions={enabledRobots}
-                    echoMissionsOptions={Array.from(echoMissions.keys())}
-                    onChangeMissionSelections={onChangeMissionSelections}
-                    selectedMissions={selectedEchoMissions}
-                    onSelectedRobot={onSelectedRobot}
-                    onScheduleButtonPress={onScheduleButtonPress}
-                    fetchEchoMissions={fetchEchoMissions}
-                    scheduleButtonDisabled={scheduleButtonDisabled}
-                    frontPageScheduleButtonDisabled={frontPageScheduleButtonDisabled}
-                    isFetchingEchoMissions={isFetchingEchoMissions}
-                ></ScheduleMissionDialog>
-                {CreateMissionButton()}
+                <ScheduleMissionDialog setLoadingMissionSet={setLoadingMissionSet}></ScheduleMissionDialog>
+                <MissionButton />
             </MissionButtonView>
         </StyledMissionView>
     )
