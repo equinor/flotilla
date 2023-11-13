@@ -2,7 +2,7 @@ import { Button } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { Mission, MissionStatus } from 'models/Mission'
 import styled from 'styled-components'
-import { MissionStatusDisplay } from '../Displays/MissionDisplays/MissionStatusDisplay'
+import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 

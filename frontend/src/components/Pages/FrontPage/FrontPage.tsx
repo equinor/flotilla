@@ -3,7 +3,7 @@ import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/O
 import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusSection'
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
-import { InspectionOverviewSection } from '../InspectionPage/InspectionOverview'
+import { InspectionOverviewSection } from 'components/Pages/InspectionPage/InspectionOverview'
 import { StopRobotDialog } from './MissionOverview/StopDialogs'
 
 const StyledFrontPage = styled.div`

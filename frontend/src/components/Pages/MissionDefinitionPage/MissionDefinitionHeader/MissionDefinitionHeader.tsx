@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { CondensedMissionDefinition } from 'models/MissionDefinition'
-import { StyledDict } from '../MissionDefinitionStyledComponents'
+import { StyledDict } from 'components/Pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
 interface MissionDefinitionHeaderProps {
     missionDefinition: CondensedMissionDefinition
 }

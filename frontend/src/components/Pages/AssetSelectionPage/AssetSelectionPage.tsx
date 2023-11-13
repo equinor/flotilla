@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useIsAuthenticated } from '@azure/msal-react'
 import { useMsal } from '@azure/msal-react'
-import { loginRequest } from '../../../api/AuthConfig'
+import { loginRequest } from 'api/AuthConfig'
 import { Autocomplete, Button, TopBar, CircularProgress, Typography, Checkbox } from '@equinor/eds-core-react'
 import { IPublicClientApplication } from '@azure/msal-browser'
 import styled from 'styled-components'
