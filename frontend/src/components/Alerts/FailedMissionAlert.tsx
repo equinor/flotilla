@@ -1,4 +1,4 @@
-import { Button, Typography } from '@equinor/eds-core-react'
+import { Button } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { Mission, MissionStatus } from 'models/Mission'
 import styled from 'styled-components'

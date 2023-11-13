@@ -23,7 +23,7 @@ export function RobotStatusSection() {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
-    const { safeZoneStatus, switchSafeZoneStatus } = useSafeZoneContext()
+    const { switchSafeZoneStatus } = useSafeZoneContext()
     const [robots, setRobots] = useState<Robot[]>([])
 
     useEffect(() => {

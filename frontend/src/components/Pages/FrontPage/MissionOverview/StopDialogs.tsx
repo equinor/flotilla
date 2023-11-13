@@ -61,7 +61,7 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
 
     useEffect(() => {
         if (missionId !== mission.id) setIsStopMissionDialogOpen(false)
-    }, [mission.id])
+    }, [mission.id, missionId])
 
     return (
         <>
