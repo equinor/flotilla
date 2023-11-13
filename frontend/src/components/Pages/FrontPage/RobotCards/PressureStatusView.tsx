@@ -11,7 +11,7 @@ const PressureAlignment = styled.div`
     gap: 7px;
 `
 
-const StyledTopography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
+const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
     font-size: ${(props) => props.$fontSize};
 `
 export interface PressureStatusViewProps {
@@ -72,7 +72,7 @@ const PressureStatusView = ({
     return (
         <PressureAlignment>
             <Icon name={Icons.Pressure} color={icon_color} size={itemSize} />
-            <StyledTopography $fontSize={itemSize}>{pressureInMilliBar}</StyledTopography>
+            <StyledTypography $fontSize={itemSize}>{pressureInMilliBar}</StyledTypography>
         </PressureAlignment>
     )
 }
