@@ -10,7 +10,7 @@ const BatteryAlignment = styled.div`
     align-items: end;
 `
 
-const StyledTopography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
+const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
     font-size: ${(props) => props.$fontSize};
 `
 export interface BatteryStatusViewProps {
@@ -60,9 +60,7 @@ const BatteryStatusView = ({
     return (
         <BatteryAlignment>
             <Icon name={battery_icon} color={icon_color} size={itemSize} />
-            <StyledTopography $fontSize={itemSize} style={{ color: tokens.colors.text.static_icons__tertiary.hex }}>
-                {battery_value}
-            </StyledTopography>
+            <StyledTypography $fontSize={itemSize}>{battery_value}</StyledTypography>
         </BatteryAlignment>
     )
 }
