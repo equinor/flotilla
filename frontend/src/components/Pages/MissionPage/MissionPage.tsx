@@ -19,7 +19,6 @@ const StyledMissionPage = styled.div`
     flex-direction: column;
     gap: 1rem;
     margin: 2rem;
-    margin-right: 0;
 `
 const TaskAndMapSection = styled.div`
     display: flex;

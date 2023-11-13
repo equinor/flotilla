@@ -16,17 +16,19 @@ const HeaderSection = styled(Card)`
     display: flex;
     top: 60px;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 10px;
     position: sticky;
-    margin-top: auto;
+    padding: 15px 0px 15px 0px;
     background-color: white;
     z-index: 1;
-    border-color: white;
+    box-shadow: none;
+    border-bottom: 1px solid ${tokens.colors.interactive.disabled__border.hex};
+    border-radius: 0px;
 `
 const TitleSection = styled.div`
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 20px;
 `
 const InfoSection = styled.div`
     display: flex;
@@ -117,11 +119,7 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
                 {isMissionActive && <MissionControlButtons mission={mission} />}
                 {mission.isCompleted && <MissionRestartButton mission={mission} />}
             </TitleSection>
-            <Typography
-                variant="body_long_italic"
-                group="paragraph"
-                color={tokens.colors.text.static_icons__secondary.hex}
-            >
+            <Typography variant="body_long" group="paragraph" color={tokens.colors.text.static_icons__secondary.hex}>
                 {mission.description && `${translatedDescription}: ${mission.description}`}
             </Typography>
             <StatusReason mission={mission}></StatusReason>
