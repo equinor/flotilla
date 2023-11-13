@@ -1,14 +1,14 @@
 import { Card, Typography } from '@equinor/eds-core-react'
 import { Robot } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
-import { RobotStatusChip } from './RobotStatusChip'
-import BatteryStatusView from './BatteryStatusView'
+import { RobotStatusChip } from '../../../Displays/RobotDisplays/RobotStatusChip'
+import BatteryStatusDisplay from '../../../Displays/RobotDisplays/BatteryStatusDisplay'
 import styled from 'styled-components'
-import { RobotImage } from './RobotImage'
+import { RobotImage } from '../../../Displays/RobotDisplays/RobotImage'
 import { useNavigate } from 'react-router-dom'
 import { BatteryStatus } from 'models/Battery'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import PressureStatusView from './PressureStatusView'
+import PressureStatusDisplay from '../../../Displays/RobotDisplays/PressureStatusDisplay'
 import { config } from 'config'
 import { RobotType } from 'models/RobotModel'
 
@@ -59,13 +59,13 @@ function cardContent({ robot }: RobotProps) {
                     <RobotStatusChip status={robot.status} />
                 </VerticalContent>
                 <VerticalContent $alignItems="end">
-                    <PressureStatusView
+                    <PressureStatusDisplay
                         pressureInBar={robot.pressureLevel}
                         upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
                         lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
                         robotStatus={robot.status}
                     />
-                    <BatteryStatusView
+                    <BatteryStatusDisplay
                         battery={robot.batteryLevel}
                         batteryStatus={BatteryStatus.Normal}
                         robotStatus={robot.status}

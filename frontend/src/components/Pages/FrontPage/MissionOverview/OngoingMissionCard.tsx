@@ -3,13 +3,13 @@ import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
-import { MissionProgressDisplay } from './MissionProgressDisplay'
-import { MissionStatusDisplayWithHeader } from './MissionStatusDisplay'
+import { MissionProgressDisplay } from '../../../Displays/MissionDisplays/MissionProgressDisplay'
+import { MissionStatusDisplayWithHeader } from '../../../Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { MissionControlButtons } from './MissionControlButtons'
-import BatteryStatusView from '../RobotCards/BatteryStatusView'
+import BatteryStatusDisplay from '../../../Displays/RobotDisplays/BatteryStatusDisplay'
 import { BatteryStatus } from 'models/Battery'
-import { MissionRobotDisplay } from './MissionRobotDisplay'
+import { MissionRobotDisplay } from '../../../Displays/MissionDisplays/MissionRobotDisplay'
 
 interface MissionProps {
     mission: Mission
@@ -59,7 +59,7 @@ export function OngoingMissionCard({ mission }: MissionProps) {
                 <MissionStatusDisplayWithHeader status={mission.status} />
                 <MissionProgressDisplay mission={mission} />
                 <MissionRobotDisplay mission={mission} />
-                <BatteryStatusView
+                <BatteryStatusDisplay
                     battery={mission.robot.batteryLevel}
                     batteryStatus={BatteryStatus.Normal}
                     robotStatus={mission.robot.status}

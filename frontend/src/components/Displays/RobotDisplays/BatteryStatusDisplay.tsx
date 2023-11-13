@@ -13,19 +13,19 @@ const BatteryAlignment = styled.div`
 const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
     font-size: ${(props) => props.$fontSize};
 `
-export interface BatteryStatusViewProps {
+export interface BatteryStatusDisplayProps {
     battery?: number
     batteryStatus?: BatteryStatus
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
     robotStatus: RobotStatus
 }
 
-const BatteryStatusView = ({
+const BatteryStatusDisplay = ({
     robotStatus,
     battery,
     batteryStatus,
     itemSize = 24,
-}: BatteryStatusViewProps): JSX.Element => {
+}: BatteryStatusDisplayProps): JSX.Element => {
     let battery_icon
     let icon_color: string = tokens.colors.interactive.primary__resting.hex
     let battery_value: string
@@ -65,4 +65,4 @@ const BatteryStatusView = ({
     )
 }
 
-export default BatteryStatusView
+export default BatteryStatusDisplay

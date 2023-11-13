@@ -7,12 +7,12 @@ import styled from 'styled-components'
 import { BackButton } from '../../../utils/BackButton'
 import { LocalizationSection } from './LocalizationSection'
 import { Header } from 'components/Header/Header'
-import { RobotImage } from '../FrontPage/RobotCards/RobotImage'
+import { RobotImage } from '../../Displays/RobotDisplays/RobotImage'
 import { MoveRobotArm } from './RobotArmMovement'
-import PressureStatusView from '../FrontPage/RobotCards/PressureStatusView'
-import BatteryStatusView from '../FrontPage/RobotCards/BatteryStatusView'
+import PressureStatusDisplay from '../../Displays/RobotDisplays/PressureStatusDisplay'
+import BatteryStatusDisplay from '../../Displays/RobotDisplays/BatteryStatusDisplay'
 import { BatteryStatus } from 'models/Battery'
-import { RobotStatusChip } from '../FrontPage/RobotCards/RobotStatusChip'
+import { RobotStatusChip } from '../../Displays/RobotDisplays/RobotStatusChip'
 import { RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotType } from 'models/RobotModel'
@@ -84,14 +84,14 @@ export function RobotPage() {
                             <VerticalContent $alignItems="start">
                                 {selectedRobot.status !== RobotStatus.Offline && (
                                     <>
-                                        <BatteryStatusView
+                                        <BatteryStatusDisplay
                                             itemSize={48}
                                             battery={selectedRobot.batteryLevel}
                                             batteryStatus={BatteryStatus.Normal}
                                             robotStatus={selectedRobot.status}
                                         />
                                         {selectedRobot.model.upperPressureWarningThreshold && (
-                                            <PressureStatusView
+                                            <PressureStatusDisplay
                                                 itemSize={48}
                                                 pressureInBar={selectedRobot.pressureLevel}
                                                 upperPressureWarningThreshold={
