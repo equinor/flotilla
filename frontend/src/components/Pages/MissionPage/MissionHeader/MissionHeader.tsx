@@ -1,6 +1,6 @@
 import { Card, Typography } from '@equinor/eds-core-react'
 import { MissionControlButtons } from 'components/Pages/FrontPage/MissionOverview/MissionControlButtons'
-import { MissionStatusDisplay } from 'components/Pages/FrontPage/MissionOverview/MissionStatusDisplay'
+import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { format, differenceInMinutes } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'

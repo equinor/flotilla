@@ -1,6 +1,6 @@
 import { MissionQueueView } from 'components/Pages/FrontPage/MissionOverview/MissionQueueView'
 import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/OngoingMissionView'
-import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusView'
+import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusSection'
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
 import { InspectionOverviewSection } from '../InspectionPage/InspectionOverview'

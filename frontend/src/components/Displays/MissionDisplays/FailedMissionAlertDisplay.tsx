@@ -74,7 +74,7 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
     )
 }
 
-export function FailedMissionAlertView() {
+export function FailedMissionAlertDisplay() {
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installationCode } = useInstallationContext()

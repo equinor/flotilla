@@ -14,7 +14,7 @@ const PressureAlignment = styled.div`
 const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
     font-size: ${(props) => props.$fontSize};
 `
-export interface PressureStatusViewProps {
+export interface PressureStatusDisplayProps {
     pressureInBar?: number
     pressureInMilliBar?: number
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
@@ -23,13 +23,13 @@ export interface PressureStatusViewProps {
     robotStatus: RobotStatus
 }
 
-const PressureStatusView = ({
+const PressureStatusDisplay = ({
     robotStatus,
     pressureInBar,
     itemSize,
     upperPressureWarningThreshold,
     lowerPressureWarningThreshold,
-}: PressureStatusViewProps): JSX.Element => {
+}: PressureStatusDisplayProps): JSX.Element => {
     const barToMillibar = 1000
     let icon_color: string = tokens.colors.interactive.primary__resting.hex
     let pressureStatus: PressureStatus
@@ -77,4 +77,4 @@ const PressureStatusView = ({
     )
 }
 
-export default PressureStatusView
+export default PressureStatusDisplay

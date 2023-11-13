@@ -1,7 +1,7 @@
 import { Button, Table, Typography } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { Mission } from 'models/Mission'
-import { MissionStatusDisplay } from '../FrontPage/MissionOverview/MissionStatusDisplay'
+import { MissionStatusDisplay } from '../../Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 
