@@ -40,13 +40,13 @@ export function RobotStatusSection() {
         )
         setRobots(relevantRobots)
 
-        const missionQueueFozenStatus = enabledRobots
+        const missionQueueFozenStatus = relevantRobots
             .map((robot: Robot) => {
                 return robot.missionQueueFrozen
             })
             .filter((status) => status === true)
 
-        if (missionQueueFozenStatus.length > 0 && !safeZoneStatus) switchSafeZoneStatus(true)
+        if (missionQueueFozenStatus.length > 0) switchSafeZoneStatus(true)
         else switchSafeZoneStatus(false)
     }, [enabledRobots, installationCode])
 
