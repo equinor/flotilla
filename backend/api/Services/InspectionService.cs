@@ -78,7 +78,6 @@ namespace Api.Services
 
             var inspectionFindings = new InspectionFindings
             {
-                RobotName = inspectionFindingsQuery.RobotName,
                 InspectionDate = inspectionFindingsQuery.InspectionDate,
                 Area = inspectionFindingsQuery.Area,
                 IsarStepId = inspectionFindingsQuery.IsarStepId,

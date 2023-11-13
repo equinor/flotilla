@@ -29,31 +29,31 @@ namespace Api.Controllers
         /// </remarks>
         [HttpPost("add-findings")]
         [Authorize(Roles = Role.Admin)]
-        [ProducesResponseType(typeof(InspectionFindingsResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(InspectionFindings), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionFindingsResponse>> AddFindings([FromBody] InspectionFindingsQuery inspectionFinding)
+        public async Task<ActionResult<InspectionFindings>> AddFindings([FromBody] InspectionFindingsQuery inspectionFinding)
         {
             _logger.LogInformation("Updating inspection findings for inspection with isarStepId '{Id}'", inspectionFinding.IsarStepId);
             try
             {
-                var inspection = await _inspectionService.ReadByIsarStepId(inspectionFinding.IsarStepId);
+                var inspection = await _inspectionService.AddFindings(inspectionFinding);
+
                 if (inspection != null)
                 {
-                    inspection = await _inspectionService.AddFindings(inspectionFinding);
-                    return Ok(inspection);
+                    return Ok(inspection.InspectionFindings);
                 }
 
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while adding findings to inspection with IsarStepId '{inspectionFinding.IsarStepId}'", inspectionFinding.IsarStepId);
-                throw;
+                _logger.LogError(e, "Error while adding findings to inspection with IsarStepId '{Id}'", inspectionFinding.IsarStepId);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            return NotFound();
+            return NotFound($"Could not find any inspection with the provided '{inspectionFinding.IsarStepId}'");
         }
 
         /// <summary>
@@ -64,15 +64,15 @@ namespace Api.Controllers
         [HttpGet]
         [Authorize(Roles = Role.Admin)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Inspection), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionFindings>> GetInspections([FromRoute] string id)
+        public async Task<ActionResult<Inspection>> GetInspections([FromRoute] string id)
         {
-            _logger.LogInformation("Get inspection by ID '{inspectionFinding.InspectionId}'", id);
+            _logger.LogInformation("Get inspection by ID '{id}'", id);
             try
             {
                 var inspection = await _inspectionService.ReadByIsarStepId(id);
@@ -85,9 +85,9 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e, "Error while finding an inspection with inspection id '{id}'", id);
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            return NotFound();
+            return NotFound("Could not find any inspection with the provided '{id}'");
         }
 
     }
