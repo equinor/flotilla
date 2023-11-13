@@ -58,11 +58,9 @@ export function VideoStreamWindow({ videoStreams }: VideoStreamWindowProps) {
             <VideoStreamContent>
                 {fullScreenMode === false && videoCards}
                 {videoStream && (
-                    <>
-                        <VideoFullScreen isOpen={fullScreenMode} onRequestClose={toggleFullScreenMode}>
-                            {FullScreenVideoStreamCard({ videoStream, toggleFullScreenMode })}
-                        </VideoFullScreen>
-                    </>
+                    <VideoFullScreen isOpen={fullScreenMode} onRequestClose={toggleFullScreenMode}>
+                        {FullScreenVideoStreamCard({ videoStream, toggleFullScreenMode })}
+                    </VideoFullScreen>
                 )}
             </VideoStreamContent>
         </>
