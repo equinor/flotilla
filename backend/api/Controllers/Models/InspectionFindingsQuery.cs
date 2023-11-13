@@ -3,9 +3,7 @@
     public struct InspectionFindingsQuery
     {
 
-        public string RobotName { get; set; }
-
-        public string InspectionDate { get; set; }
+        public DateTime InspectionDate { get; set; }
 
         public string Area { get; set; }
 

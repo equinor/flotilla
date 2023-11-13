@@ -10,9 +10,7 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        public string RobotName { get; set; }
-
-        public string InspectionDate { get; set; }
+        public DateTime InspectionDate { get; set; }
 
         public string Area { get; set; }
 
@@ -22,7 +20,6 @@ namespace Api.Database.Models
 
         public InspectionFindings(InspectionFindingsQuery createInspectionFindingQuery)
         {
-            RobotName = createInspectionFindingQuery.RobotName;
             InspectionDate = createInspectionFindingQuery.InspectionDate;
             Area = createInspectionFindingQuery.Area;
             IsarStepId = createInspectionFindingQuery.IsarStepId;
@@ -31,8 +28,7 @@ namespace Api.Database.Models
 
         public InspectionFindings()
         {
-            RobotName = "string";
-            InspectionDate = "string";
+            InspectionDate = DateTime.UtcNow;
             Area = "string";
             IsarStepId = "string";
             Findings = "string";
