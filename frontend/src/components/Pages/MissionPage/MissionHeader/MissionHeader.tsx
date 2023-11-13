@@ -1,5 +1,5 @@
 import { Card, Typography } from '@equinor/eds-core-react'
-import { MissionControlButtons } from 'components/Pages/FrontPage/MissionOverview/MissionControlButtons'
+import { MissionControlButtons } from 'components/Displays/MissionButtons/MissionControlButtons'
 import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { format, differenceInMinutes } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
@@ -7,7 +7,7 @@ import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 import { useLanguageContext, TranslateTextWithContext } from 'components/Contexts/LanguageContext'
 import { StatusReason } from '../StatusReason'
-import { MissionRestartButton } from 'components/Pages/FrontPage/MissionOverview/MissionRestartButton'
+import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
 
 const HeaderSection = styled(Card)`
     width: 100%;
