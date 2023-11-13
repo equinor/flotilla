@@ -125,7 +125,7 @@ export function FailedMissionAlertView() {
             )
         }
         if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
-    }, [installationCode])
+    }, [installationCode, recentFailedMissions])
 
     // Register a signalR event handler that listens for new failed missions
     useEffect(() => {
@@ -149,7 +149,7 @@ export function FailedMissionAlertView() {
                     return [...failedMissions, newFailedMission]
                 })
             })
-    }, [registerEvent, connectionReady])
+    }, [registerEvent, connectionReady, installationCode])
 
     const missionDisplay = <FailedMission mission={recentFailedMissions[0]} />
     const severalMissions = <SeveralFailedMissions missions={recentFailedMissions} />

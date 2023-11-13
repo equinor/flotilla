@@ -90,7 +90,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             )
         }
         if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
-    }, [installationCode])
+    }, [installationCode, recentFailedMissions])
 
     // Register a signalR event handler that listens for new failed missions
     useEffect(() => {
@@ -114,7 +114,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     return [...failedMissions, newFailedMission]
                 })
             })
-    }, [registerEvent, connectionReady])
+    }, [registerEvent, connectionReady, installationCode])
 
     useEffect(() => {
         if (newFailedMissions.length > 0) {

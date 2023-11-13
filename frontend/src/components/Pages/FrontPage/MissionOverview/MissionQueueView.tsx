@@ -46,7 +46,6 @@ export function MissionQueueView() {
     const { missionQueue, ongoingMissions } = useMissionsContext()
     const { setAlert } = useAlertContext()
     const { installationCode } = useInstallationContext()
-    const [robotOptions, setRobotOptions] = useState<Robot[]>([])
     const { enabledRobots } = useRobotContext()
 
     const [loadingMissionNames, setLoadingMissionNames] = useState<Set<string>>(new Set())
