@@ -6,3 +6,6 @@ topic readwrite isar/#
 
 user flotilla
 topic read isar/#
+
+user analytics
+topic read isar/+/inspection_result
