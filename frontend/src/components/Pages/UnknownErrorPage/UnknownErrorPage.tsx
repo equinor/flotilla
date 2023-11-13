@@ -1,5 +1,5 @@
 import { Typography } from '@equinor/eds-core-react'
-import { StyledCenteredPage } from '../UnauthorizedPage/UnauthorizedPage'
+import { StyledCenteredPage } from 'components/Pages/UnauthorizedPage/UnauthorizedPage'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 export const UnknownErrorPage = () => {

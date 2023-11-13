@@ -1,5 +1,5 @@
 import { createContext, FC, useContext, useState } from 'react'
-import { defaultLanguage, allLanguageDictionaries, languageOptions } from '../../language'
+import { defaultLanguage, allLanguageDictionaries, languageOptions } from 'language'
 
 interface ILanguageContext {
     language: string
