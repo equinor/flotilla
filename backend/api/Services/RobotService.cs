@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -53,6 +52,7 @@ namespace Api.Services
         public void Dispose()
         {
             _robotSemaphore.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public async Task<Robot> Create(Robot newRobot)
