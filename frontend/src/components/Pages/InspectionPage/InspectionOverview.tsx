@@ -1,6 +1,6 @@
 import { Button, Tabs, Icon } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { InspectionSection, ScheduledMissionType } from './InspectionSection'
+import { InspectionSection } from './InspectionSection'
 import { useEffect, useRef, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { AllInspectionsTable } from './InspectionTable'
@@ -35,28 +35,9 @@ export function InspectionOverviewSection() {
     const { TranslateText } = useLanguageContext()
     const [activeTab, setActiveTab] = useState(0)
     const [allMissions, setAllMissions] = useState<Inspection[]>()
-    const [ongoingMissionsMap, setOngoingMissions] = useState<ScheduledMissionType>({})
-    const [scheduledMissions, setScheduledMissions] = useState<ScheduledMissionType>({})
-    const { ongoingMissions, missionQueue } = useMissionsContext()
     const installationCode = useContext(InstallationContext).installationCode
     const echoURL = 'https://echo.equinor.com/missionplanner?instCode='
     const anchorRef = useRef<HTMLButtonElement>(null)
-
-    useEffect(() => {
-        setOngoingMissions(() => {
-            const newOngoingMissionsMap: ScheduledMissionType = {}
-            ongoingMissions.forEach((m) => (newOngoingMissionsMap[m.missionId!] = true))
-            return newOngoingMissionsMap
-        })
-    }, [ongoingMissions])
-
-    useEffect(() => {
-        setScheduledMissions(() => {
-            const newScheduledMissions: ScheduledMissionType = {}
-            missionQueue.forEach((m) => (newScheduledMissions[m.missionId!] = true))
-            return newScheduledMissions
-        })
-    }, [missionQueue])
 
     useEffect(() => {
         const fetchMissionDefinitions = async () => {
@@ -86,7 +67,7 @@ export function InspectionOverviewSection() {
             </Tabs.List>
             <Tabs.Panels>
                 <Tabs.Panel>
-                    <InspectionSection scheduledMissions={scheduledMissions} ongoingMissions={ongoingMissionsMap} />
+                    <InspectionSection />
                 </Tabs.Panel>
                 <Tabs.Panel>
                     <StyledView>
@@ -102,13 +83,7 @@ export function InspectionOverviewSection() {
                                 <Icon name={Icons.ExternalLink} size={16}></Icon>
                                 {TranslateText('Create a new mission in the Mission Planner')}
                             </StyledButton>
-                            {allMissions && (
-                                <AllInspectionsTable
-                                    inspections={allMissions}
-                                    scheduledMissions={scheduledMissions}
-                                    ongoingMissions={ongoingMissionsMap}
-                                />
-                            )}
+                            {allMissions && <AllInspectionsTable inspections={allMissions} />}
                         </StyledContent>
                     </StyledView>
                 </Tabs.Panel>

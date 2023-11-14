@@ -7,12 +7,13 @@ import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { NavigateFunction, useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
-import { Inspection, ScheduledMissionType } from './InspectionSection'
+import { Inspection } from './InspectionSection'
 import { compareInspections } from './InspectionUtilities'
 import { getDeadlineInDays } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { useEffect, useState } from 'react'
 import { TranslateTextWithContext } from 'components/Contexts/LanguageContext'
+import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -45,14 +46,10 @@ interface IProps {
     inspections: Inspection[]
     openDialog: () => void
     setSelectedMissions: (selectedMissions: CondensedMissionDefinition[]) => void
-    scheduledMissions: ScheduledMissionType
-    ongoingMissions: ScheduledMissionType
 }
 
 interface ITableProps {
     inspections: Inspection[]
-    scheduledMissions: ScheduledMissionType
-    ongoingMissions: ScheduledMissionType
 }
 
 const formatDateString = (dateStr: Date | string) => {
@@ -110,29 +107,20 @@ export const getInspectionStatus = (deadlineDate: Date) => {
 
 interface IInspectionRowProps {
     inspection: Inspection
-    scheduledMissions: ScheduledMissionType
-    ongoingMissions: ScheduledMissionType
     openDialog: () => void
     setMissions: (selectedMissions: CondensedMissionDefinition[]) => void
     openScheduledDialog: () => void
     navigate: NavigateFunction
 }
 
-const InspectionRow = ({
-    inspection,
-    scheduledMissions,
-    ongoingMissions,
-    openDialog,
-    setMissions,
-    openScheduledDialog,
-    navigate,
-}: IInspectionRowProps) => {
+const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialog, navigate }: IInspectionRowProps) => {
     const { TranslateText } = useLanguageContext()
+    const { ongoingMissions, missionQueue } = useMissionsContext()
     const mission = inspection.missionDefinition
     let status
     let lastCompleted: string = ''
-    const isScheduled = Object.keys(scheduledMissions).includes(mission.id) && scheduledMissions[mission.id]
-    const isOngoing = Object.keys(ongoingMissions).includes(mission.id) && ongoingMissions[mission.id]
+    const isScheduled = missionQueue.map((m) => m.missionId).includes(mission.id)
+    const isOngoing = ongoingMissions.map((m) => m.missionId).includes(mission.id)
 
     if (isScheduled || isOngoing) {
         if (isOngoing) {
@@ -235,14 +223,7 @@ const InspectionRow = ({
 
 const columns = ['Status', 'Name', 'Description', 'Area', 'Last completed', 'Deadline', 'Add to queue']
 
-export function InspectionTable({
-    deck,
-    inspections,
-    openDialog,
-    setSelectedMissions,
-    scheduledMissions,
-    ongoingMissions,
-}: IProps) {
+export function InspectionTable({ deck, inspections, openDialog, setSelectedMissions }: IProps) {
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
@@ -261,8 +242,6 @@ export function InspectionTable({
             <InspectionRow
                 key={inspection.missionDefinition.id}
                 inspection={inspection}
-                scheduledMissions={scheduledMissions}
-                ongoingMissions={ongoingMissions}
                 openDialog={openDialog}
                 setMissions={setSelectedMissions}
                 openScheduledDialog={openScheduleDialog}
@@ -296,8 +275,9 @@ export function InspectionTable({
     )
 }
 
-export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMissions }: ITableProps) {
+export function AllInspectionsTable({ inspections }: ITableProps) {
     const { TranslateText } = useLanguageContext()
+    const { ongoingMissions, missionQueue } = useMissionsContext()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
@@ -324,16 +304,19 @@ export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMis
     }
 
     useEffect(() => {
+        const isScheduled = (mission: CondensedMissionDefinition) =>
+            missionQueue.map((m) => m.missionId).includes(mission.id)
+        const isOngoing = (mission: CondensedMissionDefinition) =>
+            ongoingMissions.map((m) => m.missionId).includes(mission.id)
         let unscheduledMissions: CondensedMissionDefinition[] = []
         if (selectedMissions) {
             selectedMissions.forEach((mission) => {
-                if (Object.keys(scheduledMissions).includes(mission.id) && scheduledMissions[mission.id])
-                    setIsAlreadyScheduled(true)
+                if (isOngoing(mission) || isScheduled(mission)) setIsAlreadyScheduled(true)
                 else unscheduledMissions = unscheduledMissions.concat([mission])
             })
             setUnscheduledMissions(unscheduledMissions)
         }
-    }, [isDialogOpen, scheduledMissions, selectedMissions])
+    }, [isDialogOpen, ongoingMissions, missionQueue, selectedMissions])
 
     const navigate = useNavigate()
     const cellValues = inspections
@@ -342,8 +325,6 @@ export function AllInspectionsTable({ inspections, scheduledMissions, ongoingMis
             <InspectionRow
                 key={inspection.missionDefinition.id}
                 inspection={inspection}
-                scheduledMissions={scheduledMissions}
-                ongoingMissions={ongoingMissions}
                 openDialog={openDialog}
                 setMissions={setSelectedMissions}
                 openScheduledDialog={openScheduleDialog}
