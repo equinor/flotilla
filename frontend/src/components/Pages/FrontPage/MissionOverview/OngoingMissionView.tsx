@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -32,10 +33,13 @@ const OngoingMissionHeader = styled.div`
 export function OngoingMissionView() {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
+    const { installationCode } = useInstallationContext()
 
-    const ongoingMissionscard = ongoingMissions.map(function (mission, index) {
-        return <OngoingMissionCard key={index} mission={mission} />
-    })
+    const ongoingMissionscard = ongoingMissions
+        .filter((m) => m.installationCode === installationCode)
+        .map(function (mission, index) {
+            return <OngoingMissionCard key={index} mission={mission} />
+        })
     let navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/history`
