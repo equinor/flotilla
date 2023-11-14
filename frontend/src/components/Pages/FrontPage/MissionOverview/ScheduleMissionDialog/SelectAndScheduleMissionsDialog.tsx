@@ -46,14 +46,10 @@ export const SelectAndScheduleMissionsDialog = ({
     const { enabledRobots } = useRobotContext()
     const { installationCode } = useInstallationContext()
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
-    const [scheduleButtonDisabled, setScheduleButtonDisabled] = useState<boolean>(true)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
 
     const echoMissionsOptions = Array.from(echoMissions.keys())
-
-    useEffect(() => {
-        setScheduleButtonDisabled(!selectedRobot || selectedEchoMissions.length === 0)
-    }, [selectedRobot, selectedEchoMissions])
+    const scheduleButtonDisabled = !selectedRobot || selectedEchoMissions.length === 0
 
     const onChangeMissionSelections = (selectedEchoMissions: string[]) => {
         var echoMissionsToSchedule: EchoMissionDefinition[] = []
