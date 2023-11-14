@@ -12,6 +12,7 @@ import { StyledAutoComplete, StyledDialog } from 'components/Styles/StyledCompon
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { ScheduleMissionWithLocalizationVerificationDialog } from 'components/Displays/LocalizationVerification/ScheduleMissionWithLocalizationVerification'
 
 interface IProps {
     missions: CondensedMissionDefinition[]
@@ -49,13 +50,15 @@ const StyledDangerContent = styled.div`
 `
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
+    const { enabledRobots } = useRobotContext()
     const { installationCode } = useInstallationContext()
     const { setLoadingMissionSet } = useMissionsContext()
     const { setAlert } = useAlertContext()
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
+    const [isLocalizationVerificationDialogOpen, setIsLocalizationVerificationDialog] = useState<boolean>(false)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
+    const [missionsToSchedule, setMissionsToSchedule] = useState<CondensedMissionDefinition[]>()
     const [robotOptions, setRobotOptions] = useState<Robot[]>([])
-    const { enabledRobots } = useRobotContext()
     const anchorRef = useRef<HTMLButtonElement>(null)
 
     let timer: ReturnType<typeof setTimeout>
@@ -76,26 +79,8 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const onScheduleButtonPress = () => {
         if (!selectedRobot) return
 
-        props.missions.forEach((mission) => {
-            BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id).catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent message={`Failed to schedule mission ${mission.name}`} />
-                )
-                setLoadingMissionSet((currentSet: Set<string>) => {
-                    const updatedSet: Set<string> = new Set(currentSet)
-                    updatedSet.delete(String(mission.name))
-                    return updatedSet
-                })
-            })
-            setLoadingMissionSet((currentSet: Set<string>) => {
-                const updatedSet: Set<string> = new Set(currentSet)
-                updatedSet.add(String(mission.name))
-                return updatedSet
-            })
-        })
-
-        setSelectedRobot(undefined)
+        setMissionsToSchedule(props.missions)
+        setIsLocalizationVerificationDialog(true)
     }
 
     const closePopover = () => setIsPopoverOpen(false)
@@ -108,7 +93,16 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const onScheduleOnlyButtonPress = () => {
         if (!selectedRobot) return
 
-        props.unscheduledMissions.forEach((mission) => {
+        setMissionsToSchedule(props.unscheduledMissions)
+        setIsLocalizationVerificationDialog(true)
+    }
+
+    const scheduleMissions = () => {
+        setIsLocalizationVerificationDialog(false)
+
+        if (!selectedRobot || !missionsToSchedule) return
+
+        missionsToSchedule.forEach((mission) => {
             BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id).catch(() => {
                 setAlert(
                     AlertType.RequestFail,
@@ -127,7 +121,14 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             })
         })
 
+        setMissionsToSchedule(undefined)
         setSelectedRobot(undefined)
+        props.closeDialog()
+    }
+
+    const closeScheduleDialogs = () => {
+        setIsLocalizationVerificationDialog(false)
+        props.closeDialog()
     }
 
     return (
@@ -144,7 +145,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             </Popover>
 
             <StyledMissionDialog>
-                <StyledDialog open={true}>
+                <StyledDialog open={!isLocalizationVerificationDialogOpen}>
                     <StyledDialogContent>
                         <Typography variant="h4">{TranslateText('Add mission to the queue')}</Typography>
                         {props.isAlreadyScheduled && (
@@ -174,17 +175,14 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     }}
                                     variant="outlined"
                                 >
-                                    {' '}
-                                    {TranslateText('Cancel')}{' '}
+                                    {TranslateText('Cancel')}
                                 </Button>
                                 <Button
                                     onClick={() => {
                                         onScheduleButtonPress()
-                                        props.closeDialog()
                                     }}
                                     disabled={!selectedRobot}
                                 >
-                                    {' '}
                                     {props.missions.length > 1
                                         ? TranslateText('Queue all missions')
                                         : TranslateText('Queue mission')}
@@ -193,11 +191,9 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     <Button
                                         onClick={() => {
                                             onScheduleOnlyButtonPress()
-                                            props.closeDialog()
                                         }}
                                         disabled={!selectedRobot}
                                     >
-                                        {' '}
                                         {TranslateText('Queue unscheduled missions')}
                                     </Button>
                                 )}
@@ -206,6 +202,16 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     </StyledDialogContent>
                 </StyledDialog>
             </StyledMissionDialog>
+            {isLocalizationVerificationDialogOpen && (
+                <ScheduleMissionWithLocalizationVerificationDialog
+                    scheduleMissions={scheduleMissions}
+                    closeDialog={closeScheduleDialogs}
+                    robotId={selectedRobot!.id}
+                    missionDeckNames={props.missions.map((mission) => {
+                        return mission.area?.deckName ?? ''
+                    })}
+                />
+            )}
         </>
     )
 }
