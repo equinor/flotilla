@@ -48,7 +48,7 @@ export function RobotStatusSection() {
 
         if (missionQueueFozenStatus.length > 0) switchSafeZoneStatus(true)
         else switchSafeZoneStatus(false)
-    }, [enabledRobots, installationCode])
+    }, [enabledRobots, installationCode, switchSafeZoneStatus])
 
     const getRobotDisplay = () => {
         return robots.map(function (robot) {

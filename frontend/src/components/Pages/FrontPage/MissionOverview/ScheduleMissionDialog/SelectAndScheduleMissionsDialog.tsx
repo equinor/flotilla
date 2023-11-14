@@ -1,7 +1,7 @@
 import { Autocomplete, Button, Card, Dialog, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Robot } from 'models/Robot'
 import { EchoMissionDefinition } from 'models/MissionDefinition'

@@ -32,8 +32,8 @@ const MissionButtonView = styled.div`
 export function MissionQueueView() {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions } = useMissionsContext()
-    const [loadingMissionSet, setLoadingMissionSet] = useState<Set<string>>(new Set())
     const { installationCode } = useInstallationContext()
+    const [loadingMissionSet, setLoadingMissionSet] = useState<Set<string>>(new Set())
 
     const onDeleteMission = (mission: Mission) => BackendAPICaller.deleteMission(mission.id)
 
