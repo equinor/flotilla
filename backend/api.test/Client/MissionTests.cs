@@ -422,7 +422,7 @@ namespace Api.Test
             string? missionId2 = missionRun2.MissionId;
             Assert.Equal(missionId1, missionId2);
 
-            string missionDefinitionsUrl = "/missions/definitions";
+            string missionDefinitionsUrl = "/missions/definitions?pageSize=50";
             var missionDefinitionsResponse = await _client.GetAsync(missionDefinitionsUrl);
             var missionDefinitions = await missionDefinitionsResponse.Content.ReadFromJsonAsync<List<MissionDefinition>>(_serializerOptions);
             Assert.NotNull(missionDefinitions);
