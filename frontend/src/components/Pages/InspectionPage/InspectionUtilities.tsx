@@ -134,10 +134,10 @@ export const compareInspections = (inspection1: Inspection, inspection2: Inspect
 
 interface ICardMissionInformationProps {
     deckName: string
-    deckMissions: DeckMissionType
+    inspections: Inspection[]
 }
 
-export function CardMissionInformation({ deckName, deckMissions }: ICardMissionInformationProps) {
+export function CardMissionInformation({ deckName, inspections }: ICardMissionInformationProps) {
     const { TranslateText } = useLanguageContext()
 
     var colorsCount: DeckMissionCount = {
@@ -147,7 +147,7 @@ export function CardMissionInformation({ deckName, deckMissions }: ICardMissionI
         grey: { count: 0, message: '' },
     }
 
-    deckMissions[deckName].inspections.forEach((inspection) => {
+    inspections.forEach((inspection) => {
         if (!inspection.deadline) {
             if (!inspection.missionDefinition.lastSuccessfulRun && inspection.missionDefinition.inspectionFrequency) {
                 colorsCount['red'].count++
