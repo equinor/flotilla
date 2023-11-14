@@ -13,7 +13,7 @@ namespace Api.Controllers.Models
 
         public string InstallationCode { get; set; }
 
-        public DefaultLocalizationPose? DefaultLocalizationPose { get; set; }
+        public Pose? DefaultLocalizationPose { get; set; }
 
         [JsonConstructor]
 #nullable disable
@@ -26,7 +26,7 @@ namespace Api.Controllers.Models
             DeckName = deck.Name;
             PlantCode = deck.Plant.PlantCode;
             InstallationCode = deck.Installation.InstallationCode;
-            DefaultLocalizationPose = deck.DefaultLocalizationPose;
+            DefaultLocalizationPose = deck.DefaultLocalizationPose?.Pose;
         }
     }
 }
