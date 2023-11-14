@@ -135,7 +135,7 @@ export function MissionQueueView() {
     }, [missionQueue, ongoingMissions])
 
     const missionQueueDisplay = missionQueue
-        .filter((m) => m.installationCode === installationCode)
+        .filter((m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase())
         .map((mission, index) => (
             <MissionQueueCard key={index} order={index + 1} mission={mission} onDeleteMission={onDeleteMission} />
         ))

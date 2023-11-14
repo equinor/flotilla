@@ -36,7 +36,7 @@ export function OngoingMissionView() {
     const { installationCode } = useInstallationContext()
 
     const ongoingMissionscard = ongoingMissions
-        .filter((m) => m.installationCode === installationCode)
+        .filter((m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase())
         .map(function (mission, index) {
             return <OngoingMissionCard key={index} mission={mission} />
         })
