@@ -134,9 +134,11 @@ export function MissionQueueView() {
         })
     }, [missionQueue, ongoingMissions])
 
-    const missionQueueDisplay = missionQueue.map((mission, index) => (
-        <MissionQueueCard key={index} order={index + 1} mission={mission} onDeleteMission={onDeleteMission} />
-    ))
+    const missionQueueDisplay = missionQueue
+        .filter((m) => m.installationCode === installationCode)
+        .map((mission, index) => (
+            <MissionQueueCard key={index} order={index + 1} mission={mission} onDeleteMission={onDeleteMission} />
+        ))
 
     const loadingQueueDisplay = (
         <MissionQueueCard
