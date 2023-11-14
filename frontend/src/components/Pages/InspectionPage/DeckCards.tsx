@@ -24,7 +24,6 @@ export function DeckCards({
     handleScheduleAll,
 }: IDeckCardProps) {
     const { TranslateText } = useLanguageContext()
-    const [areas, setAreas] = useState<DeckAreas>({})
 
     const getCardColor = (deckName: string) => {
         const inspections = deckMissions[deckName].inspections
@@ -42,25 +41,6 @@ export function DeckCards({
 
         return getDeadlineInspection(nextInspection.deadline)
     }
-
-    useEffect(() => {
-        const newAreas: DeckAreas = {}
-
-        Object.keys(deckMissions).forEach((deckName) => {
-            BackendAPICaller.getAreasByDeckId(deckMissions[deckName].deck.id).then((areas) => {
-                const formattedAreaNames = areas
-                    .map((area) => {
-                        return area.areaName.toLocaleUpperCase()
-                    })
-                    .sort()
-                    .join(' | ')
-                newAreas[deckName] = {
-                    areaString: formattedAreaNames,
-                }
-            })
-        })
-        setAreas(newAreas)
-    }, [deckMissions])
 
     return (
         <StyledDict.DeckCards>
@@ -93,8 +73,15 @@ export function DeckCards({
                                             </StyledDict.Content>
                                         ))}
                                 </StyledDict.TopDeckText>
-                                {Object.keys(areas).includes(deckName) && (
-                                    <Typography variant={'body_short'}>{areas[deckName].areaString}</Typography>
+                                {deckMissions[deckName].areas && (
+                                    <Typography variant={'body_short'}>
+                                        {deckMissions[deckName].areas
+                                            .map((area) => {
+                                                return area.areaName.toLocaleUpperCase()
+                                            })
+                                            .sort()
+                                            .join(' | ')}
+                                    </Typography>
                                 )}
                                 {deckMissions[deckName].inspections && (
                                     <CardMissionInformation deckName={deckName} deckMissions={deckMissions} />

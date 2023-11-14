@@ -9,6 +9,7 @@ import { InspectionTable } from './InspectionTable'
 import { StyledDict, compareInspections } from './InspectionUtilities'
 import { DeckCards } from './DeckCards'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
+import { Area } from 'models/Area'
 
 export interface Inspection {
     missionDefinition: CondensedMissionDefinition
@@ -16,6 +17,7 @@ export interface Inspection {
 }
 
 interface DeckInspectionTuple {
+    areas: Area[]
     inspections: Inspection[]
     deck: Deck
 }
@@ -87,6 +89,9 @@ export function InspectionSection({ scheduledMissions, ongoingMissions }: IInspe
                     (deck) => deck.installationCode.toLowerCase() === installationCode.toLowerCase()
                 )
                 for (const deck of filteredDecks) {
+                    let areasInDeck = await BackendAPICaller.getAreasByDeckId(deck.id)
+                    console.log(areasInDeck)
+
                     // These calls need to be made sequentially to update areaMissions safely
                     let missionDefinitions = await BackendAPICaller.getMissionDefinitionsInDeck(deck)
                     if (!missionDefinitions) missionDefinitions = []
@@ -99,6 +104,7 @@ export function InspectionSection({ scheduledMissions, ongoingMissions }: IInspe
                                     : undefined,
                             }
                         }),
+                        areas: areasInDeck,
                         deck: deck,
                     }
                 }
