@@ -333,11 +333,11 @@ namespace Api.Test
             );
             var putResponse = await _client.PutAsync(url, content);
             Assert.True(putResponse.IsSuccessStatusCode);
-            var putDeck = await putResponse.Content.ReadFromJsonAsync<Deck>(_serializerOptions);
+            var putDeck = await putResponse.Content.ReadFromJsonAsync<DeckResponse>(_serializerOptions);
             Assert.True(putDeck != null);
             Assert.True(putDeck.DefaultLocalizationPose != null);
-            Assert.True(putDeck.DefaultLocalizationPose.Pose.Position.Z.Equals(query.Position.Z));
-            Assert.True(putDeck.DefaultLocalizationPose.Pose.Orientation.W.Equals(query.Orientation.W));
+            Assert.True(putDeck.DefaultLocalizationPose.Position.Z.Equals(query.Position.Z));
+            Assert.True(putDeck.DefaultLocalizationPose.Orientation.W.Equals(query.Orientation.W));
         }
     }
 }

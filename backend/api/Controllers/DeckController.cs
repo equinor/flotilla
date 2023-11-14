@@ -47,7 +47,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(IList<Deck>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<DeckResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -73,12 +73,12 @@ namespace Api.Controllers
         [HttpGet]
         [Authorize(Roles = Role.Any)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(Deck), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(DeckResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Deck>> GetDeckById([FromRoute] string id)
+        public async Task<ActionResult<DeckResponse>> GetDeckById([FromRoute] string id)
         {
             try
             {
@@ -132,12 +132,12 @@ namespace Api.Controllers
         /// </remarks>
         [HttpPost]
         [Authorize(Roles = Role.Admin)]
-        [ProducesResponseType(typeof(Deck), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(DeckResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Deck>> Create([FromBody] CreateDeckQuery deck)
+        public async Task<ActionResult<DeckResponse>> Create([FromBody] CreateDeckQuery deck)
         {
             _logger.LogInformation("Creating new deck");
             try
@@ -167,7 +167,7 @@ namespace Api.Controllers
                 return CreatedAtAction(
                     nameof(GetDeckById),
                     new { id = newDeck.Id },
-                    newDeck
+                    new DeckResponse(newDeck)
                 );
             }
             catch (Exception e)
@@ -186,12 +186,12 @@ namespace Api.Controllers
         [HttpPut]
         [Authorize(Roles = Role.Admin)]
         [Route("{deckId}/update-default-localization-pose")]
-        [ProducesResponseType(typeof(Deck), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(DeckResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Deck>> UpdateDefaultLocalizationPose([FromRoute] string deckId, [FromBody] Pose newDefaultLocalizationPose)
+        public async Task<ActionResult<DeckResponse>> UpdateDefaultLocalizationPose([FromRoute] string deckId, [FromBody] Pose newDefaultLocalizationPose)
         {
             _logger.LogInformation("Updating default localization pose on deck '{deckId}'", deckId);
             try
@@ -230,17 +230,17 @@ namespace Api.Controllers
         [HttpDelete]
         [Authorize(Roles = Role.Admin)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(Deck), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(DeckResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Deck>> DeleteDeck([FromRoute] string id)
+        public async Task<ActionResult<DeckResponse>> DeleteDeck([FromRoute] string id)
         {
             var deck = await _deckService.Delete(id);
             if (deck is null)
                 return NotFound($"Deck with id {id} not found");
-            return Ok(deck);
+            return Ok(new DeckResponse(deck));
         }
     }
 }
