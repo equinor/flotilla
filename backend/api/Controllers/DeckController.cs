@@ -1,6 +1,7 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace Api.Controllers
     [Route("decks")]
     public class DeckController(
             ILogger<DeckController> logger,
+            IMapService mapService,
             IDeckService deckService,
             IDefaultLocalizationPoseService defaultLocalizationPoseService,
             IInstallationService installationService,
@@ -219,6 +221,69 @@ namespace Api.Controllers
             if (deck is null)
                 return NotFound($"Deck with id {id} not found");
             return Ok(new DeckResponse(deck));
+        }
+
+        /// <summary>
+        /// Gets map metadata for localization poses belonging to deck with specified id
+        /// </summary>
+        [HttpGet]
+        [Authorize(Roles = Role.Any)]
+        [Route("{id}/map-metadata")]
+        [ProducesResponseType(typeof(MapMetadata), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<MapMetadata>> GetMapMetadata([FromRoute] string id)
+        {
+            var deck = await deckService.ReadById(id);
+            if (deck is null)
+            {
+                string errorMessage = $"Deck not found for deck with ID {id}";
+                logger.LogError("{ErrorMessage}", errorMessage);
+                return NotFound(errorMessage);
+            }
+            if (deck.Installation == null)
+            {
+                string errorMessage = "Installation missing from deck";
+                logger.LogWarning(errorMessage);
+                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+            }
+
+            if (deck.DefaultLocalizationPose is null)
+            {
+                string errorMessage = $"Deck with id '{deck.Id}' does not have a default localization pose";
+                logger.LogInformation("{ErrorMessage}", errorMessage);
+                return NotFound(errorMessage);
+            }
+
+            MapMetadata? mapMetadata;
+            var positions = new List<Position>
+            {
+                deck.DefaultLocalizationPose.Pose.Position
+            };
+            try
+            {
+                mapMetadata = await mapService.ChooseMapFromPositions(positions, deck.Installation.InstallationCode);
+            }
+            catch (RequestFailedException e)
+            {
+                string errorMessage = $"An error occurred while retrieving the map for deck {deck.Id}";
+                logger.LogError(e, "{ErrorMessage}", errorMessage);
+                return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                string errorMessage = $"Could not find a suitable map for deck {deck.Id}";
+                logger.LogError(e, "{ErrorMessage}", errorMessage);
+                return NotFound(errorMessage);
+            }
+
+            if (mapMetadata == null)
+            {
+                return NotFound("A map which contained at least half of the points in this mission could not be found");
+            }
+            return Ok(mapMetadata);
         }
     }
 }

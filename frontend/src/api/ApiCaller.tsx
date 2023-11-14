@@ -453,6 +453,15 @@ export class BackendAPICaller {
         return result.content
     }
 
+    static async getDeckMapMetadata(id: string): Promise<MapMetadata> {
+        const path: string = 'decks/' + id + '/map-metadata'
+        const result = await this.GET<MapMetadata>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
     static async reRunMission(missionId: string, failedTasksOnly: boolean = false): Promise<Mission> {
         let mission = await this.getMissionRunById(missionId)
 
