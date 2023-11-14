@@ -65,7 +65,7 @@ export const SelectAndScheduleMissionsDialog = ({
         if (!selectedRobot) return
 
         selectedEchoMissions.forEach((mission: EchoMissionDefinition) => {
-            BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode)
+            BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode).catch(console.error)
             setLoadingMissionSet((currentSet: Set<string>) => {
                 const updatedSet: Set<string> = new Set(currentSet)
                 updatedSet.add(String(mission.name))
