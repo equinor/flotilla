@@ -138,7 +138,9 @@ namespace Api.Services
         {
             return await GetRobotsWithSubModels()
                 .Where(robot =>
-                    robot.CurrentInstallation.Equals(installationCode)
+#pragma warning disable CA1304
+                    robot.CurrentInstallation.ToLower().Equals(installationCode.ToLower())
+#pragma warning restore CA1304
                     && robot.CurrentArea != null)
                 .ToListAsync();
         }
