@@ -17,6 +17,7 @@ import { StyledDict } from './InspectionUtilities'
 import { Icons } from 'utils/icons'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const StyledContent = styled.div`
     display: flex;
@@ -80,7 +81,8 @@ export const InspectionOverviewSection = () => {
             .catch((_) => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve Echo missions')} />
+                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve Echo missions')} />,
+                    AlertCategory.ERROR
                 )
                 setIsFetchingEchoMissions(false)
             })

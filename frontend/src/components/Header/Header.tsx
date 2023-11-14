@@ -9,7 +9,6 @@ import { AlertBanner } from 'components/Alerts/AlertsBanner'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 
 const StyledTopBar = styled(TopBar)`
-    margin-bottom: 2rem;
     align-items: center;
     box-shadow: none;
 `
@@ -35,6 +34,7 @@ const StyledAlertList = styled.div`
 export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
     const { installationName } = useInstallationContext()
+
     return (
         <>
             <StyledTopBar id={FrontPageSectionId.TopBar}>
@@ -67,7 +67,7 @@ export const Header = ({ page }: { page: string }) => {
             {Object.entries(alerts).length > 0 && installationName && page !== 'root' && (
                 <StyledAlertList>
                     {Object.entries(alerts).map(([key, value]) => (
-                        <AlertBanner key={key} dismissAlert={value.dismissFunction}>
+                        <AlertBanner key={key} dismissAlert={value.dismissFunction} alertCategory={value.alertCategory}>
                             {value.content}
                         </AlertBanner>
                     ))}

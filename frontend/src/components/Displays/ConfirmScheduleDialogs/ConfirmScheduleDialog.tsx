@@ -1,11 +1,11 @@
 import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
-import { ScheduleMissionWithLocalizationVerificationDialog } from 'components/Displays/ConfirmScheduleDialogs/LocalizationVerification/ScheduleMissionWithLocalizationVerification'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import {
     InsufficientBatteryDialog,
     InsufficientPressureDialog,
 } from 'components/Displays/ConfirmScheduleDialogs/InsufficientValueDialogs'
+import { ScheduleMissionWithLocalizationVerificationDialog } from './LocalizationVerification/ScheduleMissionWithLocalizationVerification'
 
 interface ConfirmScheduleDialogProps {
     scheduleMissions: () => void

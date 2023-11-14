@@ -11,6 +11,7 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -39,7 +40,8 @@ export const MissionQueueView = (): JSX.Element => {
         BackendAPICaller.deleteMission(mission.id).catch((_) =>
             setAlert(
                 AlertType.RequestFail,
-                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to delete mission from queue')} />
+                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to delete mission from queue')} />,
+                AlertCategory.ERROR
             )
         )
 

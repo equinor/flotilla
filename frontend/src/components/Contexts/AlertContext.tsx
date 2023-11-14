@@ -11,14 +11,15 @@ import { BlockedRobotAlertContent } from 'components/Alerts/BlockedRobotAlert'
 import { RobotStatus } from 'models/Robot'
 import { FailedAlertContent } from 'components/Alerts/FailedAlertContent'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
-
-type AlertDictionaryType = { [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void } }
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 export enum AlertType {
     MissionFail,
     RequestFail,
     SafeZoneFail,
     BlockedRobot,
+    RequestSafeZone,
+    DismissSafeZone,
 }
 
 const alertTypeEnumMap: { [key: string]: AlertType } = {
@@ -26,9 +27,13 @@ const alertTypeEnumMap: { [key: string]: AlertType } = {
     scheduleFailure: AlertType.RequestFail,
 }
 
+type AlertDictionaryType = {
+    [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void; alertCategory: AlertCategory }
+}
+
 interface IAlertContext {
     alerts: AlertDictionaryType
-    setAlert: (source: AlertType, alert: ReactNode) => void
+    setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => void
     clearAlerts: () => void
     clearAlert: (source: AlertType) => void
 }
@@ -39,7 +44,7 @@ interface Props {
 
 const defaultAlertInterface = {
     alerts: {},
-    setAlert: (source: AlertType, alert: ReactNode) => {},
+    setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => {},
     clearAlerts: () => {},
     clearAlert: (source: AlertType) => {},
 }
@@ -61,17 +66,26 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const maxTimeInterval: number = 60
     const dismissMissionFailTimeKey: string = 'lastMissionFailDismissalTime'
 
-    const setAlert = (source: AlertType, alert: ReactNode) =>
-        setAlerts({ ...alerts, [source]: { content: alert, dismissFunction: () => clearAlert(source) } })
+    const setAlert = (source: AlertType, alert: ReactNode, category: AlertCategory) => {
+        setAlerts((oldAlerts) => {
+            return {
+                ...oldAlerts,
+                [source]: { content: alert, dismissFunction: () => clearAlert(source), alertCategory: category },
+            }
+        })
+    }
 
     const clearAlerts = () => setAlerts({})
 
     const clearAlert = (source: AlertType) => {
         if (source === AlertType.MissionFail)
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
-        let newAlerts = { ...alerts }
-        delete newAlerts[source]
-        setAlerts(newAlerts)
+
+        setAlerts((oldAlerts) => {
+            let newAlerts = { ...oldAlerts }
+            delete newAlerts[source]
+            return newAlerts
+        })
     }
 
     const getLastDismissalTime = (): Date => {
@@ -151,7 +165,8 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 }
                 setAlert(
                     alertType,
-                    <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />
+                    <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                    AlertCategory.ERROR
                 )
             })
         }
@@ -160,7 +175,11 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (newFailedMissions.length > 0) {
-            setAlert(AlertType.MissionFail, <FailedMissionAlertContent missions={newFailedMissions} />)
+            setAlert(
+                AlertType.MissionFail,
+                <FailedMissionAlertContent missions={newFailedMissions} />,
+                AlertCategory.ERROR
+            )
             setNewFailedMissions([])
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,7 +200,11 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
         if (isBlockedRobotNamesModifyed) {
             if (newBlockedRobotNames.length > 0) {
-                setAlert(AlertType.BlockedRobot, <BlockedRobotAlertContent robotNames={newBlockedRobotNames} />)
+                setAlert(
+                    AlertType.BlockedRobot,
+                    <BlockedRobotAlertContent robotNames={newBlockedRobotNames} />,
+                    AlertCategory.WARNING
+                )
             } else {
                 clearAlert(AlertType.BlockedRobot)
             }

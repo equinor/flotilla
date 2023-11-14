@@ -15,21 +15,34 @@ const Horizontal = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
 `
 
 const Center = styled.div`
     align-items: center;
 `
 
+export enum AlertCategory {
+    ERROR,
+    WARNING,
+    SUCCESS,
+}
+
 interface AlertProps {
     children: ReactNode
     dismissAlert: () => void
+    alertCategory: AlertCategory
 }
 
-export const AlertBanner = ({ children, dismissAlert }: AlertProps) => {
+export const AlertBanner = ({ children, dismissAlert, alertCategory }: AlertProps) => {
+    let bannerColor = tokens.colors.ui.background__danger.hex
+
+    if (alertCategory === AlertCategory.WARNING) bannerColor = tokens.colors.interactive.warning__resting.hex
+    if (alertCategory === AlertCategory.SUCCESS) bannerColor = tokens.colors.interactive.success__resting.hex
+
     return (
         <>
-            <StyledCard variant="danger" style={{ boxShadow: tokens.elevation.raised }}>
+            <StyledCard style={{ boxShadow: tokens.elevation.raised, backgroundColor: bannerColor }}>
                 <Horizontal>
                     <Center>{children}</Center>
                     <Button variant="ghost_icon" onClick={dismissAlert}>

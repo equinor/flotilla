@@ -11,6 +11,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { Mission } from 'models/Mission'
 import { ScheduleMissionWithConfirmDialogs } from '../ConfirmScheduleDialogs/ConfirmScheduleDialog'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const Centered = styled.div`
     display: flex;
@@ -48,7 +49,8 @@ export const MissionRestartButton = ({ mission, hasFailedTasks }: MissionProps) 
             .catch(() =>
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to rerun mission')} />
+                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to rerun mission')} />,
+                    AlertCategory.ERROR
                 )
             )
         setIsLocationVerificationOpen(false)
