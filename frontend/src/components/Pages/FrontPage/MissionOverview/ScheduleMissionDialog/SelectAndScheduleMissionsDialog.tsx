@@ -52,11 +52,7 @@ export const SelectAndScheduleMissionsDialog = ({
     const echoMissionsOptions = Array.from(echoMissions.keys())
 
     useEffect(() => {
-        if (!selectedRobot || selectedEchoMissions.length === 0) {
-            setScheduleButtonDisabled(true)
-        } else {
-            setScheduleButtonDisabled(false)
-        }
+        setScheduleButtonDisabled(!selectedRobot || selectedEchoMissions.length === 0)
     }, [selectedRobot, selectedEchoMissions])
 
     const onChangeMissionSelections = (selectedEchoMissions: string[]) => {
@@ -100,10 +96,10 @@ export const SelectAndScheduleMissionsDialog = ({
                         onOptionsChange={(changes) => onChangeMissionSelections(changes.selectedItems)}
                         label={TranslateText('Select missions')}
                         multiple
-                        placeholder={`${selectedEchoMissions.length}/${
-                            Array.from(echoMissionsOptions.keys()).length
-                        } ${TranslateText('selected')}`}
-                        autoWidth={true}
+                        placeholder={`${selectedEchoMissions.length}/${echoMissionsOptions.length} ${TranslateText(
+                            'selected'
+                        )}`}
+                        autoWidth
                         onFocus={(e) => e.preventDefault()}
                     />
                     <Autocomplete
@@ -113,7 +109,7 @@ export const SelectAndScheduleMissionsDialog = ({
                         )}
                         label={TranslateText('Select robot')}
                         onOptionsChange={(changes) => onSelectedRobot(changes.selectedItems[0])}
-                        autoWidth={true}
+                        autoWidth
                         onFocus={(e) => e.preventDefault()}
                     />
                     <StyledMissionSection>
