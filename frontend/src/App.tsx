@@ -9,24 +9,26 @@ import { SafeZoneProvider } from 'components/Contexts/SafeZoneContext'
 import { AlertProvider } from 'components/Contexts/AlertContext'
 
 const App = () => (
-    <SafeZoneProvider>
-        <MissionsProvider>
-            <LanguageProvider>
-                <MissionControlProvider>
-                    <UnauthenticatedTemplate>
-                        <div className="sign-in-page">
-                            <AssetSelectionPage></AssetSelectionPage>
-                        </div>
-                    </UnauthenticatedTemplate>
-                    <AuthenticatedTemplate>
-                        <MissionFilterProvider>
-                            <FlotillaSite />
-                        </MissionFilterProvider>
-                    </AuthenticatedTemplate>
-                </MissionControlProvider>
-            </LanguageProvider>
-        </MissionsProvider>
-    </SafeZoneProvider>
+    <AlertProvider>
+        <SafeZoneProvider>
+            <MissionsProvider>
+                <LanguageProvider>
+                    <MissionControlProvider>
+                        <UnauthenticatedTemplate>
+                            <div className="sign-in-page">
+                                <AssetSelectionPage></AssetSelectionPage>
+                            </div>
+                        </UnauthenticatedTemplate>
+                        <AuthenticatedTemplate>
+                            <MissionFilterProvider>
+                                <FlotillaSite />
+                            </MissionFilterProvider>
+                        </AuthenticatedTemplate>
+                    </MissionControlProvider>
+                </LanguageProvider>
+            </MissionsProvider>
+        </SafeZoneProvider>
+    </AlertProvider>
 )
 
 export default App

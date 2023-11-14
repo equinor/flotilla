@@ -73,7 +73,7 @@ export const ScheduleMissionDialog = ({ setLoadingMissionSet }: IProps): JSX.Ele
             else setIsScheduleMissionDialogOpen(true)
             setIsScheduleMissionsPressed(false)
         }
-    }, [isScheduleMissionsPressed, echoMissions, isFetchingEchoMissions])
+    }, [isScheduleMissionsPressed, echoMissions, isFetchingEchoMissions, echoMissionsOptions.length])
 
     let timer: ReturnType<typeof setTimeout>
     const openPopover = () => {
