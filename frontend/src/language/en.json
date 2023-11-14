@@ -209,5 +209,20 @@
     "Request error": "Request error",
     "No missions available": "No missions available",
     "Failed to delete mission from queue": "Failed to delete mission from queue",
-    "Failed to rerun mission": "Failed to rerun mission"
+    "Failed to rerun mission": "Failed to rerun mission",
+    "needs to be placed on marked position on": "needs to be placed on marked position on",
+    "before": "before",
+    "clicking confirm": "clicking confirm",
+    "Confirm": "Confirm",
+    "I confirm that": "I confirm that",
+    "has been placed on marked position on": "has been placed on marked position on",
+    "Confirm placement of robot": "Confirm placement of robot",
+    "Conflicting decks": "Conflicting decks",
+    "The missions you are trying to add are on": "The missions you are trying to add are on",
+    "but the robot is currently running missions on": "but the robot is currently running missions on",
+    "Will not be added dialog text": "These missions won't be added. If you want to add these missions you first have to empty the queue and stop ongoing missions.",
+    "The missions you are trying to add are on these decks:": "The missions you are trying to add are on these decks:",
+    "You can only add missions from one deck.": "You can only add missions from one deck.",
+    "Unknown deck": "Unknown deck",
+    "Cannot start selected mission as it has unknown deck.": "Cannot start selected mission as it has unknown deck."
 }
