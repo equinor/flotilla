@@ -1,20 +1,17 @@
-import { CircularProgress, Typography } from '@equinor/eds-core-react'
-import { MouseEvent, useCallback, useEffect, useState } from 'react'
+import { CircularProgress } from '@equinor/eds-core-react'
+import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
-import { placeRobotInMap, inverseCalculatePixelPosition } from 'utils/MapMarkers'
+import { placeRobotInMap } from 'utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { MapMetadata } from 'models/MapMetadata'
-import { Area } from 'models/Area'
-import { Position } from 'models/Position'
 import { Pose } from 'models/Pose'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MapCompass } from 'utils/MapCompass'
+import { Deck } from 'models/Deck'
 
-interface AreaProps {
-    area: Area
-    localizationPose: Pose
-    setLocalizationPose: (newPose: Pose) => void
+interface DeckProps {
+    deck: Deck
+    markedRobotPosition: Pose
 }
 
 const StyledMap = styled.canvas`
@@ -43,8 +40,7 @@ const StyledMapCompass = styled.div`
     align-items: end;
 `
 
-export const AreaMapView = ({ area, localizationPose, setLocalizationPose }: AreaProps) => {
-    const { TranslateText } = useLanguageContext()
+export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
@@ -60,9 +56,9 @@ export const AreaMapView = ({ area, localizationPose, setLocalizationPose }: Are
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
         if (mapMetadata) {
-            placeRobotInMap(mapMetadata, mapCanvas, localizationPose)
+            placeRobotInMap(mapMetadata, mapCanvas, markedRobotPosition)
         }
-    }, [mapCanvas, mapImage, mapMetadata, localizationPose])
+    }, [mapCanvas, mapImage, mapMetadata, markedRobotPosition])
 
     const getMeta = async (url: string) => {
         const image = new Image()
@@ -74,10 +70,10 @@ export const AreaMapView = ({ area, localizationPose, setLocalizationPose }: Are
     useEffect(() => {
         setIsLoading(true)
         setImageObjectURL(undefined)
-        BackendAPICaller.getAreasMapMetadata(area.id)
+        BackendAPICaller.getDeckMapMetadata(deck.id)
             .then((mapMetadata) => {
                 setMapMetadata(mapMetadata)
-                BackendAPICaller.getMap(area.installationCode, mapMetadata.mapName)
+                BackendAPICaller.getMap(deck.installationCode, mapMetadata.mapName)
                     .then((imageBlob) => {
                         setImageObjectURL(URL.createObjectURL(imageBlob))
                     })
@@ -89,15 +85,14 @@ export const AreaMapView = ({ area, localizationPose, setLocalizationPose }: Are
                 setMapMetadata(undefined)
                 setImageObjectURL(NoMap)
             })
-        //.catch((e) => handleError(e))
-    }, [area])
+    }, [deck.id, deck.installationCode])
 
     useEffect(() => {
         if (!imageObjectURL) {
             return
         }
         getMeta(imageObjectURL).then((img) => {
-            const mapCanvas = document.getElementById('areaMapCanvas') as HTMLCanvasElement
+            const mapCanvas = document.getElementById('deckMapCanvas') as HTMLCanvasElement
             mapCanvas.width = img.width
             mapCanvas.height = img.height
             let context = mapCanvas?.getContext('2d')
@@ -125,28 +120,6 @@ export const AreaMapView = ({ area, localizationPose, setLocalizationPose }: Are
         }
     }, [updateMap, mapContext])
 
-    const onClickMap = (event: MouseEvent): void => {
-        var rect = mapCanvas.getBoundingClientRect(),
-            scaleX = mapCanvas.width / rect.width,
-            scaleY = mapCanvas.height / rect.height
-        const pixelPosition: Position = {
-            x: (event.clientX - rect.left) * scaleX,
-            y: (rect.bottom - event.clientY) * scaleY,
-            z: 0,
-        }
-        if (!mapMetadata) {
-            return
-        }
-        const assetPosition = inverseCalculatePixelPosition(mapMetadata, pixelPosition)
-        if (!area.defaultLocalizationPose) {
-            return
-        }
-        let newPose: Pose = area.defaultLocalizationPose
-        newPose.position.x = assetPosition[0]
-        newPose.position.y = assetPosition[1]
-        setLocalizationPose(newPose)
-    }
-
     return (
         <>
             {isLoading && (
@@ -155,19 +128,12 @@ export const AreaMapView = ({ area, localizationPose, setLocalizationPose }: Are
                 </StyledLoading>
             )}
             {!isLoading && (
-                <>
-                    {mapMetadata && (
-                        <Typography variant="body_short_italic">
-                            {TranslateText('Click on the map to move the localization position')}
-                        </Typography>
-                    )}
-                    <StyledMapLimits>
-                        <StyledMapCompass>
-                            <StyledMap id="areaMapCanvas" onClick={onClickMap} />
-                            {mapMetadata && <MapCompass />}
-                        </StyledMapCompass>
-                    </StyledMapLimits>
-                </>
+                <StyledMapLimits>
+                    <StyledMapCompass>
+                        <StyledMap id="deckMapCanvas" />
+                        {mapMetadata && <MapCompass />}
+                    </StyledMapCompass>
+                </StyledMapLimits>
             )}
         </>
     )
