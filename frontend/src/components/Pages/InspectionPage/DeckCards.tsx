@@ -1,5 +1,5 @@
 import { Deck } from 'models/Deck'
-import { DeckInspectionTuple, DeckMissionType, Inspection, ScheduledMissionType } from './InspectionSection'
+import { DeckInspectionTuple, DeckMissionType, Inspection } from './InspectionSection'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { CardMissionInformation, StyledDict, compareInspections, getDeadlineInspection } from './InspectionUtilities'
 import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
@@ -25,9 +25,6 @@ interface DeckCardProps {
 const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleScheduleAll }: DeckCardProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
-
-    const newOngoingMissionsMap: ScheduledMissionType = {}
-    ongoingMissions.forEach((m) => (newOngoingMissionsMap[m.missionId!] = true))
 
     const getCardColor = (deckName: string) => {
         const inspections = deckData.inspections
@@ -65,7 +62,7 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
                     <StyledDict.TopDeckText>
                         <Typography variant={'body_short_bold'}>{deckName.toString()}</Typography>
                         {deckData.inspections
-                            .filter((i) => Object.keys(ongoingMissions).includes(i.missionDefinition.id))
+                            .filter((i) => ongoingMissions.find((m) => m.missionId === i.missionDefinition.id))
                             .map((inspection) => (
                                 <StyledDict.Content key={inspection.missionDefinition.id}>
                                     <Icon name={Icons.Ongoing} size={16} />

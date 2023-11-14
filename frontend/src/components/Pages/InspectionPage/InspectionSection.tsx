@@ -10,6 +10,7 @@ import { StyledDict, compareInspections } from './InspectionUtilities'
 import { DeckCards } from './DeckCards'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { Area } from 'models/Area'
+import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 export interface Inspection {
     missionDefinition: CondensedMissionDefinition
@@ -33,16 +34,7 @@ export interface DeckMissionCount {
     }
 }
 
-export interface ScheduledMissionType {
-    [missionId: string]: boolean
-}
-
-interface IInspectionProps {
-    scheduledMissions: ScheduledMissionType
-    ongoingMissions: ScheduledMissionType
-}
-
-export function InspectionSection({ scheduledMissions, ongoingMissions }: IInspectionProps) {
+export function InspectionSection() {
     const { installationCode } = useInstallationContext()
     const [deckMissions, setDeckMissions] = useState<DeckMissionType>({})
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
@@ -51,10 +43,10 @@ export function InspectionSection({ scheduledMissions, ongoingMissions }: IInspe
     const [unscheduledMissions, setUnscheduledMissions] = useState<CondensedMissionDefinition[]>([])
     const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
     const { registerEvent, connectionReady } = useSignalRContext()
+    const { ongoingMissions, missionQueue } = useMissionsContext()
 
-    const openDialog = () => {
-        setIsDialogOpen(true)
-    }
+    const isScheduled = (mission: CondensedMissionDefinition) => missionQueue.map((m) => m.id).includes(mission.id)
+    const isOngoing = (mission: CondensedMissionDefinition) => ongoingMissions.map((m) => m.id).includes(mission.id)
 
     const closeDialog = () => {
         setIsAlreadyScheduled(false)
@@ -67,13 +59,12 @@ export function InspectionSection({ scheduledMissions, ongoingMissions }: IInspe
         if (selectedMissions) {
             let unscheduledMissions: CondensedMissionDefinition[] = []
             selectedMissions.forEach((mission) => {
-                if (Object.keys(scheduledMissions).includes(mission.id) && scheduledMissions[mission.id])
-                    setIsAlreadyScheduled(true)
+                if (isOngoing(mission) || isScheduled(mission)) setIsAlreadyScheduled(true)
                 else unscheduledMissions = unscheduledMissions.concat([mission])
             })
             setUnscheduledMissions(unscheduledMissions)
         }
-    }, [isDialogOpen, scheduledMissions, selectedMissions])
+    }, [isDialogOpen, ongoingMissions, missionQueue, selectedMissions])
 
     useMemo(() => {
         const updateDeckMissions = () => {
@@ -164,11 +155,9 @@ export function InspectionSection({ scheduledMissions, ongoingMissions }: IInspe
                 {selectedDeck && (
                     <InspectionTable
                         deck={selectedDeck}
-                        openDialog={openDialog}
+                        openDialog={() => setIsDialogOpen(true)}
                         setSelectedMissions={setSelectedMissions}
                         inspections={deckMissions[selectedDeck.deckName].inspections}
-                        scheduledMissions={scheduledMissions}
-                        ongoingMissions={ongoingMissions}
                     />
                 )}
             </StyledDict.DeckOverview>
