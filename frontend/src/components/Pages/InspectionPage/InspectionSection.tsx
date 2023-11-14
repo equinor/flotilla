@@ -16,7 +16,7 @@ export interface Inspection {
     deadline: Date | undefined
 }
 
-interface DeckInspectionTuple {
+export interface DeckInspectionTuple {
     areas: Area[]
     inspections: Inspection[]
     deck: Deck
@@ -30,12 +30,6 @@ export interface DeckMissionCount {
     [color: string]: {
         count: number
         message: string
-    }
-}
-
-export interface DeckAreas {
-    [deckId: string]: {
-        areaString: string
     }
 }
 
@@ -90,7 +84,6 @@ export function InspectionSection({ scheduledMissions, ongoingMissions }: IInspe
                 )
                 for (const deck of filteredDecks) {
                     let areasInDeck = await BackendAPICaller.getAreasByDeckId(deck.id)
-                    console.log(areasInDeck)
 
                     // These calls need to be made sequentially to update areaMissions safely
                     let missionDefinitions = await BackendAPICaller.getMissionDefinitionsInDeck(deck)
@@ -166,7 +159,6 @@ export function InspectionSection({ scheduledMissions, ongoingMissions }: IInspe
                     deckMissions={deckMissions}
                     setSelectedDeck={setSelectedDeck}
                     selectedDeck={selectedDeck}
-                    ongoingMissions={ongoingMissions}
                     handleScheduleAll={handleScheduleAll}
                 />
                 {selectedDeck && (
