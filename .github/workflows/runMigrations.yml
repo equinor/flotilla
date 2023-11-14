@@ -51,7 +51,7 @@ jobs:
         run: dotnet build
 
       - name: Install dotnet ef tool
-        run: dotnet tool install -g dotnet-ef
+        run: dotnet tool install -g dotnet-ef --version 7.0.13
 
       - name: Update database
         run: dotnet ef database update --no-build --verbose
