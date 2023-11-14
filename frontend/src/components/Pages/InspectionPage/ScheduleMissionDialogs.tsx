@@ -14,6 +14,7 @@ import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { ScheduleMissionWithConfirmDialogs } from 'components/Displays/ConfirmScheduleDialogs/ConfirmScheduleDialog'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 interface IProps {
     selectedMissions: CondensedMissionDefinition[]
@@ -92,7 +93,8 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                         translatedMessage={
                             TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`
                         }
-                    />
+                    />,
+                    AlertCategory.ERROR
                 )
                 setLoadingMissionSet((currentSet: Set<string>) => {
                     const updatedSet: Set<string> = new Set(currentSet)

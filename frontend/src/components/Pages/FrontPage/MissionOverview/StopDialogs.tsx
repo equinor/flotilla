@@ -145,7 +145,11 @@ export const StopRobotDialog = (): JSX.Element => {
             <StyledDialog open={isStopRobotDialogOpen} isDismissable>
                 <Dialog.Header>
                     <Dialog.Title>
-                        <Typography variant="h5">{TranslateText('Send robots to safe zone') + '?'}</Typography>
+                        <Typography variant="h5">
+                            {!safeZoneStatus
+                                ? TranslateText('Send robots to safe zone') + '?'
+                                : TranslateText('Dismiss robots from safe zone') + '?'}
+                        </Typography>
                     </Dialog.Title>
                 </Dialog.Header>
                 <Dialog.CustomContent>
@@ -153,12 +157,12 @@ export const StopRobotDialog = (): JSX.Element => {
                         <Typography variant="body_long">
                             {!safeZoneStatus
                                 ? TranslateText('Send robots to safe zone long text')
-                                : TranslateText('Dismiss robots from safe zone') + '?'}
+                                : TranslateText('Dismiss robots from safe zone long text')}
                         </Typography>
                         <Typography variant="body_long">
                             {!safeZoneStatus
                                 ? TranslateText('Send robots to safe confirmation text')
-                                : TranslateText('Dismiss robots from safe zone long text')}
+                                : TranslateText('Dismiss robots from safe confirmation text')}
                         </Typography>
                     </StyledText>
                 </Dialog.CustomContent>

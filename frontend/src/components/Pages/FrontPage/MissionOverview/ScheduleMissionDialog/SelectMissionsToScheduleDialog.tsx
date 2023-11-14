@@ -10,6 +10,7 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const StyledMissionDialog = styled.div`
     display: flex;
@@ -58,7 +59,8 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
                         translatedMessage={
                             TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`
                         }
-                    />
+                    />,
+                    AlertCategory.ERROR
                 )
                 setLoadingMissionSet((currentSet: Set<string>) => {
                     const updatedSet: Set<string> = new Set(currentSet)
