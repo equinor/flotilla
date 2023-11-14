@@ -46,7 +46,7 @@ export const SelectAndScheduleMissionsDialog = ({
     const { enabledRobots } = useRobotContext()
     const { installationCode } = useInstallationContext()
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
-    const [selectedRobot, setSelectedRobot] = useState<Robot>()
+    const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(undefined)
 
     const echoMissionsOptions = Array.from(echoMissions.keys())
     const scheduleButtonDisabled = !selectedRobot || selectedEchoMissions.length === 0
@@ -59,11 +59,6 @@ export const SelectAndScheduleMissionsDialog = ({
             })
         }
         setSelectedEchoMissions(echoMissionsToSchedule)
-    }
-
-    const onSelectedRobot = (selectedRobot: Robot) => {
-        if (!enabledRobots) return
-        setSelectedRobot(selectedRobot)
     }
 
     const onScheduleButtonPress = () => {
@@ -92,6 +87,7 @@ export const SelectAndScheduleMissionsDialog = ({
                         onOptionsChange={(changes) => onChangeMissionSelections(changes.selectedItems)}
                         label={TranslateText('Select missions')}
                         multiple
+                        // selectedOptions={selectedEchoMissions.map((m) => m.echoMissionId + ': ' + m.name)}
                         placeholder={`${selectedEchoMissions.length}/${echoMissionsOptions.length} ${TranslateText(
                             'selected'
                         )}`}
@@ -103,8 +99,10 @@ export const SelectAndScheduleMissionsDialog = ({
                         options={enabledRobots.filter(
                             (r) => r.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
                         )}
+                        disabled={!enabledRobots}
+                        selectedOptions={[selectedRobot]}
                         label={TranslateText('Select robot')}
-                        onOptionsChange={(changes) => onSelectedRobot(changes.selectedItems[0])}
+                        onOptionsChange={(changes) => setSelectedRobot(changes.selectedItems[0])}
                         autoWidth
                         onFocus={(e) => e.preventDefault()}
                     />
