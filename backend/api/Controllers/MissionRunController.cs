@@ -108,6 +108,4 @@ namespace Api.Controllers
                 return NotFound($"Mission run with id {id} not found");
             }
             return Ok(missionRun);
-        }
-    }
-}
+            turn Ok(missionRunResponse);

@@ -1,4 +1,5 @@
 import { MapMetadata } from './MapMetadata'
+import { Area } from './Area'
 import { Robot, placeholderRobot } from './Robot'
 import { Task } from './Task'
 
@@ -31,6 +32,7 @@ export interface Mission {
     statusReason?: string
     comment?: string
     installationCode?: string
+    area?: Area
     robot: Robot
     status: MissionStatus
     isCompleted: boolean
