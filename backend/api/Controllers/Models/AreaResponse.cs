@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Database.Models;
-
 namespace Api.Controllers.Models
 {
     public class AreaResponse

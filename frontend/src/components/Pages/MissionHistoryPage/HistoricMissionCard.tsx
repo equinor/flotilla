@@ -43,6 +43,9 @@ export function HistoricMissionCard({ index, mission }: IndexedMissionProps) {
                 </Button>
             </Table.Cell>
             <Table.Cell>
+                <Typography>{mission.area?.areaName}</Typography>
+            </Table.Cell>
+            <Table.Cell>
                 <Typography>{mission.robot.name}</Typography>
             </Table.Cell>
             <Table.Cell>

@@ -178,6 +178,7 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
                     <Table.Row>
                         <Table.Cell>{TranslateText('Status')}</Table.Cell>
                         <Table.Cell>{TranslateText('Name')}</Table.Cell>
+                        <Table.Cell>{TranslateText('Area')}</Table.Cell>
                         <Table.Cell>{TranslateText('Robot')}</Table.Cell>
                         <Table.Cell>{TranslateText('Completion Time')}</Table.Cell>
                     </Table.Row>
