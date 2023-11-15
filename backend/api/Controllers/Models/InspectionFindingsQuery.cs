@@ -13,9 +13,8 @@
 
         public string Findings { get; set; }
 
-        public string MissionRunId { get; set; }
-
 
     }
+
 }
 

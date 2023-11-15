@@ -1,4 +1,4 @@
-using Api.Database.Models;
+﻿using Api.Database.Models;
 
 namespace Api.Controllers.Models
 {
@@ -15,8 +15,6 @@ namespace Api.Controllers.Models
 
         public string Findings { get; set; }
 
-        public string MissionRunId { get; set; }
-
         public InspectionFindingsResponse(InspectionFindings inspectionFindings)
         {
             RobotName = inspectionFindings.RobotName;
@@ -24,7 +22,6 @@ namespace Api.Controllers.Models
             Area = inspectionFindings.Area;
             IsarStepId = inspectionFindings.IsarStepId;
             Findings = inspectionFindings.Findings;
-            MissionRunId = inspectionFindings.MissionRunId;
         }
     }
 }

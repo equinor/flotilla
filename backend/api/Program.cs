@@ -73,7 +73,6 @@ builder.Services.AddScoped<ICustomMissionSchedulingService, CustomMissionSchedul
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
 builder.Services.AddScoped<IPoseTimeseriesService, PoseTimeseriesService>();
 builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
-builder.Services.AddScoped<IInspectionService, InspectionService>();
 
 bool useInMemoryDatabase = builder.Configuration
     .GetSection("Database")

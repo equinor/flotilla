@@ -23,25 +23,24 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// Add a new inspection finding - need isarStepId to run this
+        /// Associate a new inspection finding with the inspection corresponding to isarStepId
         /// </summary>
         /// <remarks>
-        /// <para> This query adds a new area to the database </para>
         /// </remarks>
         [HttpPost("add-findings")]
         [Authorize(Roles = Role.Admin)]
-        [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(InspectionFindingsResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionFindings>> AddFindings([FromBody] InspectionFindingsQuery inspectionFinding)
+        public async Task<ActionResult<InspectionFindingsResponse>> AddFindings([FromBody] InspectionFindingsQuery inspectionFinding)
         {
-            _logger.LogInformation("Updating inspection findings for inspection with isarStepId '{inspectionFinding.IsarStepId}'", inspectionFinding.IsarStepId);
+            _logger.LogInformation("Updating inspection findings for inspection with isarStepId '{Id}'", inspectionFinding.IsarStepId);
             try
             {
-                var inspection = await _inspectionService.ReadById(inspectionFinding.IsarStepId);
+                var inspection = await _inspectionService.ReadByIsarStepId(inspectionFinding.IsarStepId);
                 if (inspection != null)
                 {
                     inspection = await _inspectionService.AddFindings(inspectionFinding);
@@ -61,12 +60,11 @@ namespace Api.Controllers
         /// Get the full inspection against an isarStepId
         /// </summary>
         /// <remarks>
-        /// <para> This query adds a new area to the database </para>
         /// </remarks>
         [HttpGet]
         [Authorize(Roles = Role.Admin)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -77,7 +75,7 @@ namespace Api.Controllers
             _logger.LogInformation("Get inspection by ID '{inspectionFinding.InspectionId}'", id);
             try
             {
-                var inspection = await _inspectionService.ReadById(id);
+                var inspection = await _inspectionService.ReadByIsarStepId(id);
                 if (inspection != null)
                 {
                     return Ok(inspection);

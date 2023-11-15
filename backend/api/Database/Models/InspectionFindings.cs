@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Api.Controllers.Models;
-using Microsoft.EntityFrameworkCore;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
-    [Owned]
     public class InspectionFindings
     {
         [Key]
@@ -22,8 +20,6 @@ namespace Api.Database.Models
 
         public string Findings { get; set; }
 
-        public string MissionRunId { get; set; }
-
         public InspectionFindings(InspectionFindingsQuery createInspectionFindingQuery)
         {
             RobotName = createInspectionFindingQuery.RobotName;
@@ -31,7 +27,6 @@ namespace Api.Database.Models
             Area = createInspectionFindingQuery.Area;
             IsarStepId = createInspectionFindingQuery.IsarStepId;
             Findings = createInspectionFindingQuery.Findings;
-            MissionRunId = createInspectionFindingQuery.MissionRunId;
         }
 
         public InspectionFindings()
@@ -41,7 +36,6 @@ namespace Api.Database.Models
             Area = "string";
             IsarStepId = "string";
             Findings = "string";
-            MissionRunId = "string";
         }
     }
 
