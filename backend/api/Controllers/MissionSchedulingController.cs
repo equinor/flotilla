@@ -12,6 +12,7 @@ namespace Api.Controllers
     [Route("missions")]
     public class MissionSchedulingController(
             IMissionDefinitionService missionDefinitionService,
+            ICustomMissionSchedulingService customMissionSchedulingService,
             IMissionRunService missionRunService,
             IInstallationService installationService,
             IRobotService robotService,
@@ -20,8 +21,7 @@ namespace Api.Controllers
             IMapService mapService,
             IStidService stidService,
             ILocalizationService localizationService,
-            ISourceService sourceService,
-            ICustomMissionSchedulingService customMissionSchedulingService
+            ISourceService sourceService
         ) : ControllerBase
     {
         
