@@ -10,7 +10,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { FetchingMissionsDialog } from './FetchingMissionsDialog'
 import { NoMissionsDialog } from './NoMissionsDialog'
-import { SelectAndScheduleMissionsDialog } from './SelectAndScheduleMissionsDialog'
+import { SelectMissionsToScheduleDialog } from './SelectMissionsToScheduleDialog'
 
 interface IProps {
     setLoadingMissionSet: (foo: (missionIds: Set<string>) => Set<string>) => void
@@ -141,7 +141,7 @@ export const ScheduleMissionDialog = ({ setLoadingMissionSet }: IProps): JSX.Ele
             )}
 
             {isScheduleMissionDialogOpen && (
-                <SelectAndScheduleMissionsDialog
+                <SelectMissionsToScheduleDialog
                     echoMissions={echoMissions}
                     closeDialog={() => setIsScheduleMissionDialogOpen(false)}
                     setLoadingMissionSet={setLoadingMissionSet}
