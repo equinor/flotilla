@@ -48,6 +48,7 @@ export function MissionQueueView() {
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
 
+    const [queuedMissionsToDisplay, setQueuedMissionsToDisplay] = useState<Mission[]>([])
     const [loadingMissionNames, setLoadingMissionNames] = useState<Set<string>>(new Set())
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
@@ -134,11 +135,15 @@ export function MissionQueueView() {
         })
     }, [missionQueue, ongoingMissions])
 
-    const missionQueueDisplay = missionQueue
-        .filter((m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase())
-        .map((mission, index) => (
-            <MissionQueueCard key={index} order={index + 1} mission={mission} onDeleteMission={onDeleteMission} />
-        ))
+    useEffect(() => {
+        setQueuedMissionsToDisplay(
+            missionQueue.filter((m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase())
+        )
+    }, [missionQueue, installationCode])
+
+    const missionQueueDisplay = queuedMissionsToDisplay.map((mission, index) => (
+        <MissionQueueCard key={index} order={index + 1} mission={mission} onDeleteMission={onDeleteMission} />
+    ))
 
     const loadingQueueDisplay = (
         <MissionQueueCard
@@ -155,9 +160,11 @@ export function MissionQueueView() {
                 {TranslateText('Mission Queue')}
             </Typography>
             <MissionTable>
-                {missionQueue.length > 0 && missionQueueDisplay}
+                {queuedMissionsToDisplay.length > 0 && missionQueueDisplay}
                 {loadingMissionNames.size > 0 && loadingQueueDisplay}
-                {loadingMissionNames.size === 0 && missionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
+                {loadingMissionNames.size === 0 && queuedMissionsToDisplay.length === 0 && (
+                    <EmptyMissionQueuePlaceholder />
+                )}
             </MissionTable>
             <MissionButtonView>
                 <ScheduleMissionDialog

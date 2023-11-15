@@ -8,6 +8,8 @@ import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { useEffect, useState } from 'react'
+import { Mission } from 'models/Mission'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -34,17 +36,25 @@ export function OngoingMissionView() {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
     const { installationCode } = useInstallationContext()
+    const [ongingMissionsToDisplay, setOngoingMissionsToDisplay] = useState<Mission[]>([])
 
-    const ongoingMissionscard = ongoingMissions
-        .filter((m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase())
-        .map(function (mission, index) {
-            return <OngoingMissionCard key={index} mission={mission} />
-        })
     let navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/history`
         navigate(path)
     }
+
+    useEffect(() => {
+        setOngoingMissionsToDisplay(
+            ongoingMissions.filter(
+                (m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+            )
+        )
+    }, [ongoingMissions, installationCode])
+
+    const ongoingMissionCards = ongingMissionsToDisplay.map(function (mission, index) {
+        return <OngoingMissionCard key={index} mission={mission} />
+    })
 
     return (
         <StyledOngoingMissionView>
@@ -54,8 +64,8 @@ export function OngoingMissionView() {
                 </Typography>
             </OngoingMissionHeader>
             <OngoingMissionSection>
-                {ongoingMissions.length > 0 && ongoingMissionscard}
-                {ongoingMissions.length === 0 && <NoOngoingMissionsPlaceholder />}
+                {ongingMissionsToDisplay.length > 0 && ongoingMissionCards}
+                {ongingMissionsToDisplay.length === 0 && <NoOngoingMissionsPlaceholder />}
             </OngoingMissionSection>
             <ButtonStyle>
                 <Button variant="outlined" onClick={routeChange}>
