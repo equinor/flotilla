@@ -11,8 +11,7 @@ namespace Api.Services
     {
         public Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus);
         public Task<Inspection?> ReadByIsarStepId(string id);
-
-        //public Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery);
+        public Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery);
 
     }
 
@@ -64,31 +63,31 @@ namespace Api.Services
 
         private IQueryable<Inspection> GetInspections()
         {
-            return _context.Inspections.Include(inspection => inspection);
+            return _context.Inspections.Include(inspection => inspection.InspectionFindings);
         }
 
-        /*        public async Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery)
-                {
+        public async Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery)
+        {
 
-                    var inspection = await ReadByIsarStepId(inspectionFindingsQuery.IsarStepId);
+            var inspection = await ReadByIsarStepId(inspectionFindingsQuery.IsarStepId);
 
-                    if (inspection is null)
-                    {
-                        return null;
-                    }
+            if (inspection is null)
+            {
+                return null;
+            }
 
-                    var inspectionFindings = new InspectionFindings
-                    {
-                        InspectionDate = inspectionFindingsQuery.InspectionDate,
-                        Area = inspectionFindingsQuery.Area,
-                        IsarStepId = inspectionFindingsQuery.IsarStepId,
-                        Findings = inspectionFindingsQuery.Findings
-                    };
+            var inspectionFindings = new InspectionFinding
+            {
+                InspectionDate = inspectionFindingsQuery.InspectionDate,
+                Area = inspectionFindingsQuery.Area,
+                IsarStepId = inspectionFindingsQuery.IsarStepId,
+                Findings = inspectionFindingsQuery.Findings
+            };
 
-                    inspection.InspectionFindings.Add(inspectionFindings);
-                    inspection = await Update(inspection);
-                    _ = _signalRService.SendMessageAsync("Inspection findings added", inspection);
-                    return inspection;
-                } */
+            inspection.InspectionFindings.Add(inspectionFindings);
+            inspection = await Update(inspection);
+            _ = _signalRService.SendMessageAsync("Inspection findings added", inspection);
+            return inspection;
+        }
     }
 }

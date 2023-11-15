@@ -94,7 +94,7 @@ namespace Api.Database.Models
 
         public DateTime? EndTime { get; private set; }
 
-        //public List<InspectionFindings> InspectionFindings { get; set; }
+        public List<InspectionFinding> InspectionFindings { get; set; }
 
         public void UpdateWithIsarInfo(IsarStep isarStep)
         {

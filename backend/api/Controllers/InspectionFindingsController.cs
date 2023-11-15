@@ -27,15 +27,15 @@ namespace Api.Controllers
         /// </summary>
         /// <remarks>
         /// </remarks>
-       /* [HttpPost("add-findings")]
+        [HttpPost("add-findings")]
         [Authorize(Roles = Role.Admin)]
-        [ProducesResponseType(typeof(InspectionFindings), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(InspectionFinding), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionFindings>> AddFindings([FromBody] InspectionFindingsQuery inspectionFinding)
+        public async Task<ActionResult<InspectionFinding>> AddFindings([FromBody] InspectionFindingsQuery inspectionFinding)
         {
             _logger.LogInformation("Updating inspection findings for inspection with isarStepId '{Id}'", inspectionFinding.IsarStepId);
             try
@@ -89,7 +89,7 @@ namespace Api.Controllers
             }
             return NotFound("Could not find any inspection with the provided '{id}'");
         }
-*/
+
     }
 
 
