@@ -1,4 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services.Models;
@@ -9,6 +10,9 @@ namespace Api.Services
     public interface IInspectionService
     {
         public Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus);
+        public Task<Inspection?> ReadByIsarStepId(string id);
+        public Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery);
+
     }
 
     [SuppressMessage(
@@ -52,7 +56,7 @@ namespace Api.Services
             return entry.Entity;
         }
 
-        private async Task<Inspection?> ReadByIsarStepId(string id)
+        public async Task<Inspection?> ReadByIsarStepId(string id)
         {
             return await GetInspections().FirstOrDefaultAsync(inspection => inspection.IsarStepId != null && inspection.IsarStepId.Equals(id));
         }
@@ -60,6 +64,31 @@ namespace Api.Services
         private IQueryable<Inspection> GetInspections()
         {
             return _context.Inspections.Include(inspection => inspection.InspectionFindings);
+        }
+
+        public async Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery)
+        {
+
+            var inspection = await ReadByIsarStepId(inspectionFindingsQuery.IsarStepId);
+
+            if (inspection is null)
+            {
+                return null;
+            }
+
+            var inspectionFindings = new InspectionFindings
+            {
+                RobotName = inspectionFindingsQuery.RobotName,
+                InspectionDate = inspectionFindingsQuery.InspectionDate,
+                Area = inspectionFindingsQuery.Area,
+                IsarStepId = inspectionFindingsQuery.IsarStepId,
+                Findings = inspectionFindingsQuery.Findings
+            };
+
+            inspection.InspectionFindings.Add(inspectionFindings);
+            inspection = await Update(inspection);
+            _ = _signalRService.SendMessageAsync("Inspection findings added", inspection);
+            return inspection;
         }
     }
 }
