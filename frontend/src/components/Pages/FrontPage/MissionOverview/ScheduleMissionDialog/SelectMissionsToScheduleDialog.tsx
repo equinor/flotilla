@@ -37,7 +37,7 @@ interface ScheduleDialogProps {
     setLoadingMissionSet: (foo: (missionIds: Set<string>) => Set<string>) => void
 }
 
-export const SelectAndScheduleMissionsDialog = ({
+export const SelectMissionsToScheduleDialog = ({
     echoMissions,
     closeDialog,
     setLoadingMissionSet,
