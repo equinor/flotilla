@@ -27,7 +27,7 @@ namespace Api.Controllers
         /// </summary>
         /// <remarks>
         /// </remarks>
-        [HttpPost("add-findings")]
+       /* [HttpPost("add-findings")]
         [Authorize(Roles = Role.Admin)]
         [ProducesResponseType(typeof(InspectionFindings), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -89,7 +89,8 @@ namespace Api.Controllers
             }
             return NotFound("Could not find any inspection with the provided '{id}'");
         }
-
+*/
     }
+
 
 }
