@@ -57,7 +57,7 @@ namespace Api.Services
 
         private IQueryable<MissionTask> GetMissionTasks()
         {
-            return _context.MissionTasks.Include(missionTask => missionTask.Inspections).ThenInclude(inspection => inspection.InspectionFindings);
+            return _context.MissionTasks.Include(missionTask => missionTask.Inspections).ThenInclude(inspection => inspection);
         }
     }
 }

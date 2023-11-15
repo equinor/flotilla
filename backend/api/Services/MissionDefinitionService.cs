@@ -189,7 +189,7 @@ namespace Api.Services
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
                 .ThenInclude(missionTask => missionTask.Inspections)
-                .ThenInclude(inspection => inspection.InspectionFindings);
+                .ThenInclude(inspection => inspection);
         }
 
         private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)
