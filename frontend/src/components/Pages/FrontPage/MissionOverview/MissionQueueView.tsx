@@ -7,9 +7,9 @@ import { Mission, placeholderMission } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog/ScheduleMissionDialog'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { MissionButton } from './MissionButton'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { MissionButton } from 'components/Displays/MissionButtons/MissionButton'
 
 const StyledMissionView = styled.div`
     display: grid;

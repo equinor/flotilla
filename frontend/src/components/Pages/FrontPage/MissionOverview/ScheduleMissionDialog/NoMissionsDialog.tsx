@@ -1,7 +1,7 @@
 import { Button, Card, Dialog, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { MissionButton } from '../MissionButton'
+import { MissionButton } from 'components/Displays/MissionButtons/MissionButton'
 
 const StyledMissionDialog = styled.div`
     display: flex;
