@@ -36,7 +36,7 @@ namespace Api.Services
 
             if (missionInstallation is null || robotInstallation is null)
             {
-                string errorMessage = $"Could not find installation for installation code {missionDefinition.InstallationCode}";
+                string errorMessage = $"Could not find installation for installation code {missionDefinition.InstallationCode} or the robot has no current installation";
                 _logger.LogError("{Message}", errorMessage);
                 throw new InstallationNotFoundException(errorMessage);
             }
@@ -71,14 +71,14 @@ namespace Api.Services
         public async Task<bool> RobotIsLocalized(string robotId)
         {
             var robot = await _robotService.ReadById(robotId);
-            if (robot != null)
+            if (robot is null)
             {
-                return robot.CurrentArea is not null;
+                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
+                _logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
             }
 
-            string errorMessage = $"Robot with ID: {robotId} was not found in the database";
-            _logger.LogError("{Message}", errorMessage);
-            throw new RobotNotFoundException(errorMessage);
+            return robot.CurrentArea is not null;
         }
 
         public async Task EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(string robotId)
@@ -91,10 +91,7 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            if (await _missionRunService.OngoingMission(robot.Id))
-            {
-                await WaitForLocalizationMissionStatusToBeUpdated(robot);
-            }
+            if (await _missionRunService.OngoingMission(robot.Id)) { await WaitForLocalizationMissionStatusToBeUpdated(robot); }
 
             var lastExecutedMissionRun = await _missionRunService.ReadLastExecutedMissionRunByRobot(robot.Id);
             if (lastExecutedMissionRun is null)
@@ -112,7 +109,7 @@ namespace Api.Services
                 throw new LocalizationFailedException(errorMessage);
             }
 
-            await _robotService.SetCurrentArea(lastExecutedMissionRun.Area, robot.Id);
+            await _robotService.UpdateCurrentArea(robot.Id, lastExecutedMissionRun.Area);
         }
 
         private async Task WaitForLocalizationMissionStatusToBeUpdated(Robot robot)
@@ -151,7 +148,7 @@ namespace Api.Services
             while (timer.Elapsed.TotalSeconds < Timeout)
             {
                 if (ongoingMissionRun is null) { continue; }
-                if (ongoingMissionRun.Status == MissionStatus.Successful) { break; }
+                if (ongoingMissionRun.Status == MissionStatus.Successful) { return; }
 
                 ongoingMissionRun = await _missionRunService.ReadById(ongoingMissionRunId);
             }
@@ -192,9 +189,7 @@ namespace Api.Services
             };
 
             await _missionRunService.Create(localizationMissionRun);
-
-            robot.CurrentArea = localizationMissionRun.Area;
-            await _robotService.Update(robot);
+            await _robotService.UpdateCurrentArea(robot.Id, localizationMissionRun.Area);
         }
 
         private bool RobotIsOnSameDeckAsMission(Area? currentRobotArea, Area? missionArea)
