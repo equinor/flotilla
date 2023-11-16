@@ -11,7 +11,7 @@ namespace Api.Services
     {
         public Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus);
         public Task<Inspection?> ReadByIsarStepId(string id);
-        public Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery);
+        public Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery, string isarStepId);
 
     }
 
@@ -66,10 +66,10 @@ namespace Api.Services
             return _context.Inspections.Include(inspection => inspection.InspectionFindings);
         }
 
-        public async Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery)
+        public async Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery, string isarStepId)
         {
 
-            var inspection = await ReadByIsarStepId(inspectionFindingsQuery.IsarStepId);
+            var inspection = await ReadByIsarStepId(isarStepId);
 
             if (inspection is null)
             {
@@ -79,8 +79,6 @@ namespace Api.Services
             var inspectionFindings = new InspectionFinding
             {
                 InspectionDate = inspectionFindingsQuery.InspectionDate,
-                Area = inspectionFindingsQuery.Area,
-                IsarStepId = inspectionFindingsQuery.IsarStepId,
                 Findings = inspectionFindingsQuery.Findings
             };
 
