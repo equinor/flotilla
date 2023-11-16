@@ -10,7 +10,6 @@ import styled from 'styled-components'
 import { useContext } from 'react'
 import { InstallationContext } from 'components/Contexts/InstallationContext'
 import { Icons } from 'utils/icons'
-import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 const StyledButton = styled(Button)`
     display: flex;

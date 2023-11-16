@@ -43,6 +43,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
             BackendAPICaller.getEnabledRobots().then((robots) => {
                 setEnabledRobots(robots)
             })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     return (

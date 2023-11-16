@@ -1,6 +1,6 @@
 import { Card, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { DeckMissionCount, DeckMissionType, Inspection } from './InspectionSection'
+import { DeckMissionCount, Inspection } from './InspectionSection'
 import { getDeadlineInDays } from 'utils/StringFormatting'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
