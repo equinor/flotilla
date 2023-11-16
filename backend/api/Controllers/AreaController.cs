@@ -140,12 +140,12 @@ namespace Api.Controllers
         [HttpPut]
         [Authorize(Roles = Role.Admin)]
         [Route("{areaId}/update-default-localization-pose")]
-        [ProducesResponseType(typeof(Deck), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Deck>> UpdateDefaultLocalizationPose([FromRoute] string areaId, [FromBody] Pose newDefaultLocalizationPose)
+        public async Task<ActionResult<AreaResponse>> UpdateDefaultLocalizationPose([FromRoute] string areaId, [FromBody] Pose newDefaultLocalizationPose)
         {
             _logger.LogInformation("Updating default localization pose on area '{areaId}'", areaId);
             try
