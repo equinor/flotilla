@@ -90,7 +90,8 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             )
         }
         if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
-    }, [installationCode, recentFailedMissions])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [installationCode])
 
     // Register a signalR event handler that listens for new failed missions
     useEffect(() => {
