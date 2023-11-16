@@ -133,7 +133,7 @@ namespace Api.Test
             Assert.True(plantResponse.IsSuccessStatusCode);
             Assert.True(deckResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
-            var area = await areaResponse.Content.ReadFromJsonAsync<Area>(_serializerOptions);
+            var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
             Assert.True(area != null);
         }
 
@@ -262,7 +262,7 @@ namespace Api.Test
 
             areaResponse = await _client.PostAsync(addSafePositionUrl, content);
             Assert.True(areaResponse.IsSuccessStatusCode);
-            var areaContent = await areaResponse.Content.ReadFromJsonAsync<Area>(_serializerOptions);
+            var areaContent = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
             Assert.True(areaContent != null);
 
             // Act
