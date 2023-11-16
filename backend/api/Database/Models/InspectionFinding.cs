@@ -12,8 +12,6 @@ namespace Api.Database.Models
 
         public DateTime InspectionDate { get; set; }
 
-        public string Area { get; set; }
-
         public string IsarStepId { get; set; }
 
         public string Findings { get; set; }
@@ -21,15 +19,12 @@ namespace Api.Database.Models
         public InspectionFinding(InspectionFindingsQuery createInspectionFindingQuery)
         {
             InspectionDate = createInspectionFindingQuery.InspectionDate;
-            Area = createInspectionFindingQuery.Area;
-            IsarStepId = createInspectionFindingQuery.IsarStepId;
             Findings = createInspectionFindingQuery.Findings;
         }
 
         public InspectionFinding()
         {
             InspectionDate = DateTime.UtcNow;
-            Area = "string";
             IsarStepId = "string";
             Findings = "string";
         }
