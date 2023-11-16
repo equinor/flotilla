@@ -27,20 +27,21 @@ namespace Api.Controllers
         /// </summary>
         /// <remarks>
         /// </remarks>
-        [HttpPost("add-findings")]
+        [HttpPost]
         [Authorize(Roles = Role.Admin)]
+        [Route("{isarStepId}")]
         [ProducesResponseType(typeof(InspectionFinding), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionFinding>> AddFindings([FromBody] InspectionFindingsQuery inspectionFinding)
+        public async Task<ActionResult<InspectionFinding>> AddFindings([FromBody] InspectionFindingsQuery inspectionFinding, [FromRoute] string isarStepId)
         {
-            _logger.LogInformation("Updating inspection findings for inspection with isarStepId '{Id}'", inspectionFinding.IsarStepId);
+            _logger.LogInformation("Updating inspection findings for inspection with isarStepId '{Id}'", isarStepId);
             try
             {
-                var inspection = await _inspectionService.AddFindings(inspectionFinding);
+                var inspection = await _inspectionService.AddFindings(inspectionFinding, isarStepId);
 
                 if (inspection != null)
                 {
@@ -50,10 +51,10 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while adding findings to inspection with IsarStepId '{Id}'", inspectionFinding.IsarStepId);
+                _logger.LogError(e, "Error while adding findings to inspection with IsarStepId '{Id}'", isarStepId);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            return NotFound($"Could not find any inspection with the provided '{inspectionFinding.IsarStepId}'");
+            return NotFound($"Could not find any inspection with the provided '{isarStepId}'");
         }
 
         /// <summary>
