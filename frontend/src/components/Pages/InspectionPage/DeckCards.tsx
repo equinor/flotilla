@@ -43,7 +43,7 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
         return getDeadlineInspection(nextInspection.deadline)
     }
 
-    const areasString = deckData.areas
+    const formattedAreaNames = deckData.areas
         .map((area) => {
             return area.areaName.toLocaleUpperCase()
         })
@@ -70,7 +70,7 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
                                 </StyledDict.Content>
                             ))}
                     </StyledDict.TopDeckText>
-                    {deckData.areas && <Typography variant={'body_short'}>{areasString}</Typography>}
+                    {deckData.areas && <Typography variant={'body_short'}>{formattedAreaNames}</Typography>}
                     {deckData.inspections && (
                         <CardMissionInformation deckName={deckName} inspections={deckData.inspections} />
                     )}

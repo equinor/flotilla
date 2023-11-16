@@ -45,9 +45,6 @@ export function InspectionSection() {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
 
-    const isScheduled = (mission: CondensedMissionDefinition) => missionQueue.map((m) => m.id).includes(mission.id)
-    const isOngoing = (mission: CondensedMissionDefinition) => ongoingMissions.map((m) => m.id).includes(mission.id)
-
     const closeDialog = () => {
         setIsAlreadyScheduled(false)
         setSelectedMissions([])
@@ -56,6 +53,9 @@ export function InspectionSection() {
     }
 
     useEffect(() => {
+        const isScheduled = (mission: CondensedMissionDefinition) => missionQueue.map((m) => m.id).includes(mission.id)
+        const isOngoing = (mission: CondensedMissionDefinition) => ongoingMissions.map((m) => m.id).includes(mission.id)
+
         if (selectedMissions) {
             let unscheduledMissions: CondensedMissionDefinition[] = []
             selectedMissions.forEach((mission) => {
