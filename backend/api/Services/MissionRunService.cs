@@ -134,7 +134,7 @@ namespace Api.Services
 
             var entry = context.Update(missionRun);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Mission run updated", missionRun);
+            _ = signalRService.SendMessageAsync("Mission run updated", new MissionRunResponse(missionRun));
             return entry.Entity;
         }
 
@@ -149,7 +149,7 @@ namespace Api.Services
 
             context.MissionRuns.Remove(missionRun);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Mission run deleted", missionRun);
+            _ = signalRService.SendMessageAsync("Mission run deleted", new MissionRunResponse(missionRun));
 
             return missionRun;
         }
@@ -159,8 +159,10 @@ namespace Api.Services
             return context.MissionRuns
                 .Include(missionRun => missionRun.Area)
                 .ThenInclude(area => area != null ? area.Deck : null)
-                .ThenInclude(deck => deck != null ? deck.Plant : null)
-                .ThenInclude(plant => plant != null ? plant.Installation : null)
+                .Include(missionRun => missionRun.Area)
+                .ThenInclude(area => area != null ? area.Plant : null)
+                .Include(missionRun => missionRun.Area)
+                .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.VideoStreams)
                 .Include(missionRun => missionRun.Robot)
@@ -353,7 +355,7 @@ namespace Api.Services
 
             missionRun = await Update(missionRun);
 
-            if (missionRun.Status == MissionStatus.Failed) { _ = signalRService.SendMessageAsync("Mission run failed", missionRun); }
+            if (missionRun.Status == MissionStatus.Failed) { _ = signalRService.SendMessageAsync("Mission run failed", new MissionRunResponse(missionRun)); }
             return missionRun;
         }
 
