@@ -53,8 +53,10 @@ export function InspectionSection() {
     }
 
     useEffect(() => {
-        const isScheduled = (mission: CondensedMissionDefinition) => missionQueue.map((m) => m.id).includes(mission.id)
-        const isOngoing = (mission: CondensedMissionDefinition) => ongoingMissions.map((m) => m.id).includes(mission.id)
+        const isScheduled = (mission: CondensedMissionDefinition) =>
+            missionQueue.map((m) => m.missionId).includes(mission.id)
+        const isOngoing = (mission: CondensedMissionDefinition) =>
+            ongoingMissions.map((m) => m.missionId).includes(mission.id)
 
         if (selectedMissions) {
             let unscheduledMissions: CondensedMissionDefinition[] = []
