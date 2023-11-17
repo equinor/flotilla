@@ -83,7 +83,7 @@ namespace Api.Test
             // Increasing pageSize to 50 to ensure the missions we are looking for is included
             string urlMissionRuns = "/missions/runs?pageSize=50";
             var response = await _client.GetAsync(urlMissionRuns);
-            var missionRuns = await response.Content.ReadFromJsonAsync<List<MissionRun>>(
+            var missionRuns = await response.Content.ReadFromJsonAsync<List<MissionRunResponse>>(
                 _serializerOptions
             );
             Assert.True(response.IsSuccessStatusCode);
@@ -95,7 +95,7 @@ namespace Api.Test
             await _client.PostAsync(missionsUrl, content);
 
             response = await _client.GetAsync(urlMissionRuns);
-            missionRuns = await response.Content.ReadFromJsonAsync<List<MissionRun>>(
+            missionRuns = await response.Content.ReadFromJsonAsync<List<MissionRunResponse>>(
                 _serializerOptions
             );
 
