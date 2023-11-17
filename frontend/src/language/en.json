@@ -11,7 +11,7 @@
     "Name": "Name",
     "Completion Time": "Completion Time",
     "Please select installation": "Please select installation",
-    "This installation has no missions - Please create mission": "This installation has no missions - Please create mission",
+    "This installation does not have missions. Please create mission.": "This installation does not have missions. Please create mission.",
     "Cancel": "Cancel",
     "Add mission": "Add mission",
     "Select missions": "Select missions",
@@ -205,5 +205,6 @@
     "Completed Tasks": "Completed Tasks",
     "Confirm plant": "Confirm plant",
     "Failed to retrieve echo missions": "Failed to retrieve echo missions",
-    "Request error": "Request error"
+    "Request error": "Request error",
+    "No missions available": "No missions available"
 }
