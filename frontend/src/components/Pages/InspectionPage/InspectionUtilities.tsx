@@ -86,6 +86,12 @@ export const StyledDict = {
         align-items: centre;
         gap: 5px;
     `,
+    Buttons: styled.div`
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        padding-bottom: 30px;
+    `,
 }
 
 export const getDeadlineInspection = (deadline: Date) => {

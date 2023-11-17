@@ -14,6 +14,8 @@ const upsertList = (list: Mission[], mission: Mission) => {
 interface IMissionsContext {
     ongoingMissions: Mission[]
     missionQueue: Mission[]
+    loadingMissionSet: Set<string>
+    setLoadingMissionSet: (newLoadingMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => void
 }
 
 interface Props {
@@ -23,6 +25,8 @@ interface Props {
 const defaultMissionsContext: IMissionsContext = {
     ongoingMissions: [],
     missionQueue: [],
+    loadingMissionSet: new Set(),
+    setLoadingMissionSet: (newLoadingMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => {},
 }
 
 export const MissionsContext = createContext<IMissionsContext>(defaultMissionsContext)
@@ -30,6 +34,8 @@ export const MissionsContext = createContext<IMissionsContext>(defaultMissionsCo
 interface MissionsResult {
     ongoingMissions: Mission[]
     missionQueue: Mission[]
+    loadingMissionSet: Set<string>
+    setLoadingMissionSet: (newLoadingMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => void
 }
 
 const updateQueueIfMissionAlreadyQueued = (oldQueue: Mission[], updatedMission: Mission) => {
@@ -71,6 +77,7 @@ const fetchMissions = (params: {
 export const useMissions = (): MissionsResult => {
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
+    const [loadingMissionSet, setLoadingMissionSet] = useState<Set<string>>(new Set())
     const { registerEvent, connectionReady } = useSignalRContext()
 
     useEffect(() => {
@@ -114,7 +121,6 @@ export const useMissions = (): MissionsResult => {
                 })
             })
         }
-        // Need to exclude missionQueue from dependency array to prevent duplicated missions
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady])
 
@@ -134,18 +140,20 @@ export const useMissions = (): MissionsResult => {
             })
             setMissionQueue(queue)
         }
-
         if (BackendAPICaller.accessToken) fetchAndUpdateMissions()
-        // Need to include BackendAPICaller.accessToken in dependency array to ensure initial render
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [BackendAPICaller.accessToken])
 
-    return { ongoingMissions, missionQueue }
+    return { ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet }
 }
 
 export const MissionsProvider: FC<Props> = ({ children }) => {
-    const { ongoingMissions, missionQueue } = useMissions()
-    return <MissionsContext.Provider value={{ ongoingMissions, missionQueue }}>{children}</MissionsContext.Provider>
+    const { ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet } = useMissions()
+    return (
+        <MissionsContext.Provider value={{ ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet }}>
+            {children}
+        </MissionsContext.Provider>
+    )
 }
 
 export const useMissionsContext = () => useContext(MissionsContext)

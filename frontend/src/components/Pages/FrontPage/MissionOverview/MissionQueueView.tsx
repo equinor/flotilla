@@ -2,7 +2,7 @@ import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { MissionQueueCard } from './MissionQueueCard'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Mission, placeholderMission } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { ScheduleMissionDialog } from './ScheduleMissionDialog/ScheduleMissionDialog'
@@ -31,9 +31,8 @@ const MissionButtonView = styled.div`
 
 export const MissionQueueView = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
-    const { missionQueue, ongoingMissions } = useMissionsContext()
+    const { missionQueue, ongoingMissions, loadingMissionSet, setLoadingMissionSet } = useMissionsContext()
     const { installationCode } = useInstallationContext()
-    const [loadingMissionSet, setLoadingMissionSet] = useState<Set<string>>(new Set())
 
     const onDeleteMission = (mission: Mission) => BackendAPICaller.deleteMission(mission.id)
 
@@ -48,6 +47,7 @@ export const MissionQueueView = (): JSX.Element => {
             ongoingMissions.forEach((mission) => updatedLoadingMissionNames.delete(mission.name))
             return updatedLoadingMissionNames
         })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionQueue, ongoingMissions])
 
     const missionQueueDisplay = localMissionQueue.map((mission, index) => (
@@ -74,7 +74,7 @@ export const MissionQueueView = (): JSX.Element => {
                 {loadingMissionSet.size === 0 && localMissionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
             </MissionTable>
             <MissionButtonView>
-                <ScheduleMissionDialog setLoadingMissionSet={setLoadingMissionSet}></ScheduleMissionDialog>
+                <ScheduleMissionDialog />
                 <MissionButton />
             </MissionButtonView>
         </StyledMissionView>
