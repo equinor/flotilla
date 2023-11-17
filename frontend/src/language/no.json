@@ -11,7 +11,7 @@
     "Name": "Navn",
     "Completion Time": "Fullført tid",
     "Please select installation": "Vennligst velg anlegg",
-    "This installation has no missions - Please create mission": "Dette anlegget har ingen oppdrag - Vennligst lag oppdrag",
+    "This installation does not have missions. Please create mission.": "Dette anlegget har ingen oppdrag. Vennligst lag oppdrag.",
     "Cancel": "Avbryt",
     "Add mission": "Legg til oppdrag",
     "Select missions": "Velg oppdrag",
@@ -205,5 +205,6 @@
     "Completed Tasks": "Fullførte oppgaver",
     "Confirm plant": "Bekreft anlegg",
     "Failed to retrieve echo missions": "Kunne ikke hente ut oppdrag fra echo",
-    "Request error": "Forespørselsfeil"
+    "Request error": "Forespørselsfeil",
+    "No missions available": "Ingen oppdrag tilgjengelig"
 }
