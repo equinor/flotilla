@@ -11,10 +11,7 @@ import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { FetchingMissionsDialog } from './FetchingMissionsDialog'
 import { NoMissionsDialog } from './NoMissionsDialog'
 import { SelectMissionsToScheduleDialog } from './SelectMissionsToScheduleDialog'
-
-interface IProps {
-    setLoadingMissionSet: (foo: (missionIds: Set<string>) => Set<string>) => void
-}
+import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, EchoMissionDefinition> => {
     var missionMap = new Map<string, EchoMissionDefinition>()
@@ -24,7 +21,7 @@ const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, 
     return missionMap
 }
 
-export const ScheduleMissionDialog = ({ setLoadingMissionSet }: IProps): JSX.Element => {
+export const ScheduleMissionDialog = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
@@ -38,6 +35,8 @@ export const ScheduleMissionDialog = ({ setLoadingMissionSet }: IProps): JSX.Ele
     const [echoMissions, setEchoMissions] = useState<Map<string, EchoMissionDefinition>>(
         new Map<string, EchoMissionDefinition>()
     )
+    const { setLoadingMissionSet } = useMissionsContext()
+
     const anchorRef = useRef<HTMLButtonElement>(null)
 
     const echoMissionsOptions = Array.from(echoMissions.keys())

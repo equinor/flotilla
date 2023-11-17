@@ -3,6 +3,14 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef, useState } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import styled from 'styled-components'
+
+const StyledButton = styled(Button)`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 4px;
+`
 
 export const MissionButton = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
@@ -38,18 +46,17 @@ export const MissionButton = (): JSX.Element => {
                 onFocus={openPopover}
                 onBlur={handleClose}
             >
-                <Button
+                <StyledButton
+                    variant="outlined"
                     onClick={() => {
                         window.open(echoURL + installationCode)
                     }}
                     disabled={installationCode === ''}
                     ref={anchorRef}
                 >
-                    <>
-                        <Icon name={Icons.ExternalLink} size={16}></Icon>
-                        {TranslateText('Create mission')}
-                    </>
-                </Button>
+                    <Icon name={Icons.ExternalLink} size={16}></Icon>
+                    {TranslateText('Create a new mission')}
+                </StyledButton>
             </div>
 
             <Popover

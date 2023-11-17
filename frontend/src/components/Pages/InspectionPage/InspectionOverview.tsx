@@ -1,28 +1,26 @@
-import { Button, Tabs, Icon } from '@equinor/eds-core-react'
+import { Tabs } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { InspectionSection } from './InspectionSection'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { AllInspectionsTable } from './InspectionTable'
 import { getInspectionDeadline } from 'utils/StringFormatting'
 import { Inspection } from './InspectionSection'
 import styled from 'styled-components'
-import { useContext } from 'react'
-import { InstallationContext } from 'components/Contexts/InstallationContext'
-import { Icons } from 'utils/icons'
-
-const StyledButton = styled(Button)`
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-radius: 4px;
-`
+import { ScheduleMissionDialog } from '../FrontPage/MissionOverview/ScheduleMissionDialog/ScheduleMissionDialog'
+import { MissionButton } from 'components/Displays/MissionButtons/MissionButton'
 
 const StyledContent = styled.div`
     display: flex;
     flex-direction: column;
     align-items: end;
-    gap: 20px;
+`
+
+const StyledButtons = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    padding-bottom: 30px;
 `
 
 const StyledView = styled.div`
@@ -34,9 +32,6 @@ export const InspectionOverviewSection = () => {
     const { TranslateText } = useLanguageContext()
     const [activeTab, setActiveTab] = useState(0)
     const [allMissions, setAllMissions] = useState<Inspection[]>()
-    const installationCode = useContext(InstallationContext).installationCode
-    const echoURL = 'https://echo.equinor.com/missionplanner?instCode='
-    const anchorRef = useRef<HTMLButtonElement>(null)
 
     useEffect(() => {
         const fetchMissionDefinitions = async () => {
@@ -71,17 +66,10 @@ export const InspectionOverviewSection = () => {
                 <Tabs.Panel>
                     <StyledView>
                         <StyledContent>
-                            <StyledButton
-                                variant="outlined"
-                                onClick={() => {
-                                    window.open(echoURL + installationCode)
-                                }}
-                                disabled={installationCode === ''}
-                                ref={anchorRef}
-                            >
-                                <Icon name={Icons.ExternalLink} size={16}></Icon>
-                                {TranslateText('Create a new mission in the Mission Planner')}
-                            </StyledButton>
+                            <StyledButtons>
+                                <ScheduleMissionDialog />
+                                <MissionButton />
+                            </StyledButtons>
                             {allMissions && <AllInspectionsTable inspections={allMissions} />}
                         </StyledContent>
                     </StyledView>
