@@ -4,9 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Database.Context
 {
-    public class FlotillaDbContext : DbContext
+    public class FlotillaDbContext(DbContextOptions options) : DbContext(options)
     {
-        public FlotillaDbContext(DbContextOptions options) : base(options) { }
         public DbSet<Robot> Robots => Set<Robot>();
         public DbSet<RobotModel> RobotModels => Set<RobotModel>();
         public DbSet<MissionRun> MissionRuns => Set<MissionRun>();

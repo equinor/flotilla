@@ -31,23 +31,16 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class InstallationService : IInstallationService
+    public class InstallationService(FlotillaDbContext context) : IInstallationService
     {
-        private readonly FlotillaDbContext _context;
-
-        public InstallationService(FlotillaDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task<IEnumerable<Installation>> ReadAll()
         {
             return await GetInstallations().ToListAsync();
         }
 
-        private IQueryable<Installation> GetInstallations()
+        private DbSet<Installation> GetInstallations()
         {
-            return _context.Installations;
+            return context.Installations;
         }
 
         public async Task<Installation?> ReadById(string id)
@@ -60,7 +53,7 @@ namespace Api.Services
         {
             if (installationCode == null)
                 return null;
-            return await _context.Installations.Where(a =>
+            return await context.Installations.Where(a =>
                 a.InstallationCode.ToLower().Equals(installationCode.ToLower())
             ).FirstOrDefaultAsync();
         }
@@ -75,8 +68,8 @@ namespace Api.Services
                     Name = newInstallationQuery.Name,
                     InstallationCode = newInstallationQuery.InstallationCode
                 };
-                await _context.Installations.AddAsync(installation);
-                await _context.SaveChangesAsync();
+                await context.Installations.AddAsync(installation);
+                await context.SaveChangesAsync();
             }
 
             return installation!;
@@ -84,8 +77,8 @@ namespace Api.Services
 
         public async Task<Installation> Update(Installation installation)
         {
-            var entry = _context.Update(installation);
-            await _context.SaveChangesAsync();
+            var entry = context.Update(installation);
+            await context.SaveChangesAsync();
             return entry.Entity;
         }
 
@@ -98,8 +91,8 @@ namespace Api.Services
                 return null;
             }
 
-            _context.Installations.Remove(installation);
-            await _context.SaveChangesAsync();
+            context.Installations.Remove(installation);
+            await context.SaveChangesAsync();
 
             return installation;
         }

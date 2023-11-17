@@ -437,13 +437,12 @@ namespace Api.Database.Context
                 Status = TaskStatus.Cancelled
             };
 
-            return new List<MissionTask>
-            {
+            return [
                 task1,
                 task2,
                 task3,
                 task4
-            };
+            ];
         }
 
         private static List<MissionRun> GetMissionRuns()

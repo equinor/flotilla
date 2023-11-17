@@ -24,23 +24,16 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class DefaultLocalizationPoseService : IDefaultLocalizationPoseService
+    public class DefaultLocalizationPoseService(FlotillaDbContext context) : IDefaultLocalizationPoseService
     {
-        private readonly FlotillaDbContext _context;
-
-        public DefaultLocalizationPoseService(FlotillaDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task<IEnumerable<DefaultLocalizationPose>> ReadAll()
         {
             return await GetDefaultLocalizationPoses().ToListAsync();
         }
 
-        private IQueryable<DefaultLocalizationPose> GetDefaultLocalizationPoses()
+        private DbSet<DefaultLocalizationPose> GetDefaultLocalizationPoses()
         {
-            return _context.DefaultLocalizationPoses;
+            return context.DefaultLocalizationPoses;
         }
 
         public async Task<DefaultLocalizationPose?> ReadById(string id)
@@ -52,16 +45,16 @@ namespace Api.Services
         public async Task<DefaultLocalizationPose> Create(DefaultLocalizationPose defaultLocalizationPose)
         {
 
-            await _context.DefaultLocalizationPoses.AddAsync(defaultLocalizationPose);
-            await _context.SaveChangesAsync();
+            await context.DefaultLocalizationPoses.AddAsync(defaultLocalizationPose);
+            await context.SaveChangesAsync();
 
             return defaultLocalizationPose;
         }
 
         public async Task<DefaultLocalizationPose> Update(DefaultLocalizationPose defaultLocalizationPose)
         {
-            var entry = _context.Update(defaultLocalizationPose);
-            await _context.SaveChangesAsync();
+            var entry = context.Update(defaultLocalizationPose);
+            await context.SaveChangesAsync();
             return entry.Entity;
         }
 
@@ -74,8 +67,8 @@ namespace Api.Services
                 return null;
             }
 
-            _context.DefaultLocalizationPoses.Remove(defaultLocalizationPose);
-            await _context.SaveChangesAsync();
+            context.DefaultLocalizationPoses.Remove(defaultLocalizationPose);
+            await context.SaveChangesAsync();
 
             return defaultLocalizationPose;
         }

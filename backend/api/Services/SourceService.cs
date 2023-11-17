@@ -34,33 +34,19 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class SourceService : ISourceService
+    public class SourceService(
+        FlotillaDbContext context,
+        ICustomMissionService customMissionService,
+        IEchoService echoService,
+        IStidService stidService) : ISourceService
     {
-        private readonly FlotillaDbContext _context;
-        private readonly ICustomMissionService _customMissionService;
-        private readonly IEchoService _echoService;
-        private readonly IStidService _stidService;
-
-        public SourceService(
-            FlotillaDbContext context,
-            ICustomMissionService customMissionService,
-            IEchoService echoService,
-            IStidService stidService
-        )
-        {
-            _context = context;
-            _customMissionService = customMissionService;
-            _echoService = echoService;
-            _stidService = stidService;
-        }
-
         public async Task<PagedList<Source>> ReadAll(SourceQueryStringParameters? parameters)
         {
             var query = GetSources();
             parameters ??= new SourceQueryStringParameters { };
             var filter = ConstructFilter(parameters);
 
-            query = query.Where(filter);
+            query = (DbSet<Source>)query.Where(filter);
 
             return await PagedList<Source>.ToPagedListAsync(
                 query,
@@ -69,9 +55,9 @@ namespace Api.Services
             );
         }
 
-        private IQueryable<Source> GetSources()
+        private DbSet<Source> GetSources()
         {
-            return _context.Sources;
+            return context.Sources;
         }
 
         public async Task<Source?> ReadById(string id)
@@ -97,10 +83,10 @@ namespace Api.Services
                 case MissionSourceType.Custom:
                     throw new ArgumentException("Source is not of type Echo");
                 case MissionSourceType.Echo:
-                    var mission = await _echoService.GetMissionById(int.Parse(source.SourceId, new CultureInfo("en-US")));
+                    var mission = await echoService.GetMissionById(int.Parse(source.SourceId, new CultureInfo("en-US")));
                     var tasks = mission.Tags.Select(t =>
                     {
-                        var tagPosition = _stidService
+                        var tagPosition = stidService
                             .GetTagPosition(t.TagId, installationCode)
                             .Result;
                         return new MissionTask(t, tagPosition);
@@ -120,7 +106,7 @@ namespace Api.Services
             switch (source.Type)
             {
                 case MissionSourceType.Custom:
-                    var tasks = await _customMissionService.GetMissionTasksFromSourceId(source.SourceId);
+                    var tasks = await customMissionService.GetMissionTasksFromSourceId(source.SourceId);
                     if (tasks == null) return null;
                     return new SourceResponse(source, tasks);
                 case MissionSourceType.Echo:
@@ -137,14 +123,14 @@ namespace Api.Services
 
         public async Task<Source?> CheckForExistingCustomSource(IList<MissionTask> tasks)
         {
-            string hash = _customMissionService.CalculateHashFromTasks(tasks);
+            string hash = customMissionService.CalculateHashFromTasks(tasks);
             return await ReadBySourceId(hash);
         }
 
         public async Task<Source> Update(Source source)
         {
-            var entry = _context.Update(source);
-            await _context.SaveChangesAsync();
+            var entry = context.Update(source);
+            await context.SaveChangesAsync();
             return entry.Entity;
         }
 
@@ -157,8 +143,8 @@ namespace Api.Services
                 return null;
             }
 
-            _context.Sources.Remove(source);
-            await _context.SaveChangesAsync();
+            context.Sources.Remove(source);
+            await context.SaveChangesAsync();
 
             return source;
         }

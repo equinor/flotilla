@@ -2,7 +2,6 @@
 using Api.Services;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -35,15 +34,8 @@ namespace Api.Test
                     services.AddScoped<IBlobService, MockBlobService>();
                     services.AddScoped<IStidService, MockStidService>();
                     services.AddScoped<ICustomMissionService, MockCustomMissionService>();
-                    services.AddAuthorization(
-                        options =>
-                        {
-                            options.FallbackPolicy = new AuthorizationPolicyBuilder(
-                                    TestAuthHandler.AuthenticationScheme
-                                )
-                                .RequireAuthenticatedUser()
-                                .Build();
-                        }
+                    services.AddAuthorizationBuilder().AddFallbackPolicy(
+                        TestAuthHandler.AuthenticationScheme, policy => policy.RequireAuthenticatedUser()
                     );
                     services
                         .AddAuthentication(

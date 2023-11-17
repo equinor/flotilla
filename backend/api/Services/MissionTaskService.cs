@@ -16,24 +16,15 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class MissionTaskService : IMissionTaskService
+    public class MissionTaskService(FlotillaDbContext context, ILogger<MissionTaskService> logger) : IMissionTaskService
     {
-        private readonly FlotillaDbContext _context;
-        private readonly ILogger<MissionTaskService> _logger;
-
-        public MissionTaskService(FlotillaDbContext context, ILogger<MissionTaskService> logger)
-        {
-            _context = context;
-            _logger = logger;
-        }
-
         public async Task<MissionTask> UpdateMissionTaskStatus(string isarTaskId, IsarTaskStatus isarTaskStatus)
         {
             var missionTask = await ReadByIsarTaskId(isarTaskId);
             if (missionTask is null)
             {
                 string errorMessage = $"Inspection with ID {isarTaskId} could not be found";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new MissionTaskNotFoundException(errorMessage);
             }
 
@@ -43,10 +34,10 @@ namespace Api.Services
 
         private async Task<MissionTask> Update(MissionTask missionTask)
         {
-            foreach (var inspection in missionTask.Inspections) { _context.Entry(inspection).State = EntityState.Unchanged; }
+            foreach (var inspection in missionTask.Inspections) { context.Entry(inspection).State = EntityState.Unchanged; }
 
-            var entry = _context.Update(missionTask);
-            await _context.SaveChangesAsync();
+            var entry = context.Update(missionTask);
+            await context.SaveChangesAsync();
             return entry.Entity;
         }
 
@@ -57,7 +48,7 @@ namespace Api.Services
 
         private IQueryable<MissionTask> GetMissionTasks()
         {
-            return _context.MissionTasks.Include(missionTask => missionTask.Inspections).ThenInclude(inspection => inspection.InspectionFindings);
+            return context.MissionTasks.Include(missionTask => missionTask.Inspections).ThenInclude(inspection => inspection.InspectionFindings);
         }
     }
 }

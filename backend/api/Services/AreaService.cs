@@ -39,25 +39,10 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class AreaService : IAreaService
-    {
-        private readonly FlotillaDbContext _context;
-        private readonly IDeckService _deckService;
-        private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
-        private readonly IInstallationService _installationService;
-        private readonly IPlantService _plantService;
-
-        public AreaService(
+    public class AreaService(
             FlotillaDbContext context, IInstallationService installationService, IPlantService plantService, IDeckService deckService,
-            IDefaultLocalizationPoseService defaultLocalizationPoseService)
-        {
-            _context = context;
-            _installationService = installationService;
-            _plantService = plantService;
-            _deckService = deckService;
-            _defaultLocalizationPoseService = defaultLocalizationPoseService;
-        }
-
+            IDefaultLocalizationPoseService defaultLocalizationPoseService) : IAreaService
+    {
         public async Task<IEnumerable<Area>> ReadAll()
         {
             return await GetAreas().ToListAsync();
@@ -73,7 +58,7 @@ namespace Api.Services
         {
             if (deckId == null) { return new List<Area>(); }
 
-            return await _context.Areas.Where(a =>
+            return await context.Areas.Where(a =>
                     a.Deck != null && a.Deck.Id.Equals(deckId)
                 ).Include(a => a.SafePositions).Include(a => a.Installation)
                 .Include(a => a.Plant).Include(a => a.Deck).ToListAsync();
@@ -81,10 +66,10 @@ namespace Api.Services
 
         public async Task<Area?> ReadByInstallationAndName(string installationCode, string areaName)
         {
-            var installation = await _installationService.ReadByName(installationCode);
+            var installation = await installationService.ReadByName(installationCode);
             if (installation == null) { return null; }
 
-            return await _context.Areas.Where(a =>
+            return await context.Areas.Where(a =>
                     a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                     a.Name.ToLower().Equals(areaName.ToLower())
                 ).Include(a => a.SafePositions).Include(a => a.Installation)
@@ -93,10 +78,10 @@ namespace Api.Services
 
         public async Task<IEnumerable<Area>> ReadByInstallation(string installationCode)
         {
-            var installation = await _installationService.ReadByName(installationCode);
+            var installation = await installationService.ReadByName(installationCode);
             if (installation == null) { return new List<Area>(); }
 
-            return await _context.Areas.Where(a =>
+            return await context.Areas.Where(a =>
                     a.Installation != null && a.Installation.Id.Equals(installation.Id)).Include(a => a.SafePositions).Include(a => a.Installation)
                 .Include(a => a.Plant).Include(a => a.Deck).ToListAsync();
         }
@@ -109,13 +94,13 @@ namespace Api.Services
                 safePositions.Add(new SafePosition(pose));
             }
 
-            var installation = await _installationService.ReadByName(newAreaQuery.InstallationCode) ??
+            var installation = await installationService.ReadByName(newAreaQuery.InstallationCode) ??
                                throw new InstallationNotFoundException($"No installation with name {newAreaQuery.InstallationCode} could be found");
 
-            var plant = await _plantService.ReadByInstallationAndName(installation, newAreaQuery.PlantCode) ??
+            var plant = await plantService.ReadByInstallationAndName(installation, newAreaQuery.PlantCode) ??
                         throw new PlantNotFoundException($"No plant with name {newAreaQuery.PlantCode} could be found");
 
-            var deck = await _deckService.ReadByInstallationAndPlantAndName(installation, plant, newAreaQuery.DeckName) ??
+            var deck = await deckService.ReadByInstallationAndPlantAndName(installation, plant, newAreaQuery.DeckName) ??
                        throw new DeckNotFoundException($"No deck with name {newAreaQuery.DeckName} could be found");
 
             var existingArea = await ReadByInstallationAndPlantAndDeckAndName(
@@ -128,7 +113,7 @@ namespace Api.Services
             DefaultLocalizationPose? defaultLocalizationPose = null;
             if (newAreaQuery.DefaultLocalizationPose != null)
             {
-                defaultLocalizationPose = await _defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newAreaQuery.DefaultLocalizationPose));
+                defaultLocalizationPose = await defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newAreaQuery.DefaultLocalizationPose));
             }
 
             var newArea = new Area
@@ -142,20 +127,20 @@ namespace Api.Services
                 Installation = installation!
             };
 
-            _context.Entry(newArea.Installation).State = EntityState.Unchanged;
-            _context.Entry(newArea.Plant).State = EntityState.Unchanged;
-            _context.Entry(newArea.Deck).State = EntityState.Unchanged;
+            context.Entry(newArea.Installation).State = EntityState.Unchanged;
+            context.Entry(newArea.Plant).State = EntityState.Unchanged;
+            context.Entry(newArea.Deck).State = EntityState.Unchanged;
 
-            if (newArea.DefaultLocalizationPose is not null) { _context.Entry(newArea.DefaultLocalizationPose).State = EntityState.Modified; }
+            if (newArea.DefaultLocalizationPose is not null) { context.Entry(newArea.DefaultLocalizationPose).State = EntityState.Modified; }
 
-            await _context.Areas.AddAsync(newArea);
-            await _context.SaveChangesAsync();
+            await context.Areas.AddAsync(newArea);
+            await context.SaveChangesAsync();
             return newArea;
         }
 
         public async Task<Area> Create(CreateAreaQuery newArea)
         {
-            var area = await Create(newArea, new List<Pose>());
+            var area = await Create(newArea, []);
             return area;
         }
 
@@ -166,15 +151,15 @@ namespace Api.Services
 
             area.SafePositions.Add(safePosition);
 
-            _context.Areas.Update(area);
-            await _context.SaveChangesAsync();
+            context.Areas.Update(area);
+            await context.SaveChangesAsync();
             return area;
         }
 
         public async Task<Area> Update(Area area)
         {
-            var entry = _context.Update(area);
-            await _context.SaveChangesAsync();
+            var entry = context.Update(area);
+            await context.SaveChangesAsync();
             return entry.Entity;
         }
 
@@ -187,15 +172,15 @@ namespace Api.Services
                 return null;
             }
 
-            _context.Areas.Remove(area);
-            await _context.SaveChangesAsync();
+            context.Areas.Remove(area);
+            await context.SaveChangesAsync();
 
             return area;
         }
 
         private IQueryable<Area> GetAreas()
         {
-            return _context.Areas.Include(a => a.SafePositions)
+            return context.Areas.Include(a => a.SafePositions)
                 .Include(a => a.Deck).Include(d => d.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose);
         }
 
@@ -203,7 +188,7 @@ namespace Api.Services
         {
             if (installation == null) { return null; }
 
-            return await _context.Areas.Where(a =>
+            return await context.Areas.Where(a =>
                     a.Name.ToLower().Equals(areaName.ToLower()) &&
                     a.Installation.InstallationCode.Equals(installation.InstallationCode)
                 ).Include(a => a.SafePositions).Include(a => a.Installation)
@@ -212,7 +197,7 @@ namespace Api.Services
 
         public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName)
         {
-            return await _context.Areas.Where(a =>
+            return await context.Areas.Where(a =>
                     a.Deck != null && a.Deck.Id.Equals(deck.Id) &&
                     a.Plant != null && a.Plant.Id.Equals(plant.Id) &&
                     a.Installation != null && a.Installation.Id.Equals(installation.Id) &&

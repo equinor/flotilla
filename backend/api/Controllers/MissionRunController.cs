@@ -9,17 +9,8 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("missions/runs")]
-    public class MissionRunController : ControllerBase
+    public class MissionRunController(ILogger<MissionRunController> logger, IMissionRunService missionRunService) : ControllerBase
     {
-        private readonly ILogger<MissionRunController> _logger;
-        private readonly IMissionRunService _missionRunService;
-
-        public MissionRunController(ILogger<MissionRunController> logger, IMissionRunService missionRunService)
-        {
-            _logger = logger;
-            _missionRunService = missionRunService;
-        }
-
         /// <summary>
         ///     List all mission runs in the Flotilla database
         /// </summary>
@@ -53,11 +44,11 @@ namespace Api.Controllers
             PagedList<MissionRun> missionRuns;
             try
             {
-                missionRuns = await _missionRunService.ReadAll(parameters);
+                missionRuns = await missionRunService.ReadAll(parameters);
             }
             catch (InvalidDataException e)
             {
-                _logger.LogError(e, "Message: {errorMessage}", e.Message);
+                logger.LogError(e, "Message: {errorMessage}", e.Message);
                 return BadRequest(e.Message);
             }
 
@@ -71,7 +62,7 @@ namespace Api.Controllers
                 missionRuns.HasPrevious
             };
 
-            Response.Headers.Add(
+            Response.Headers.Append(
                 QueryStringParameters.PaginationHeader,
                 JsonSerializer.Serialize(metadata)
             );
@@ -91,7 +82,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionRun>> GetMissionRunById([FromRoute] string id)
         {
-            var missionRun = await _missionRunService.ReadById(id);
+            var missionRun = await missionRunService.ReadById(id);
             if (missionRun == null)
             {
                 return NotFound($"Could not find mission run with id {id}");
@@ -111,7 +102,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionRun>> DeleteMissionRun([FromRoute] string id)
         {
-            var missionRun = await _missionRunService.Delete(id);
+            var missionRun = await missionRunService.Delete(id);
             if (missionRun is null)
             {
                 return NotFound($"Mission run with id {id} not found");

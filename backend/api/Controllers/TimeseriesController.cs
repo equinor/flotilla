@@ -9,21 +9,11 @@ namespace Api.Controllers
     [ApiController]
     [Route("timeseries")]
     [Authorize(Roles = Role.Any)]
-    public class TimeseriesController : ControllerBase
-    {
-        private readonly ITimeseriesService _timeseriesService;
-
-        private readonly ILogger<TimeseriesController> _logger;
-
-        public TimeseriesController(
+    public class TimeseriesController(
             ILogger<TimeseriesController> logger,
             ITimeseriesService timeseriesService
-        )
-        {
-            _logger = logger;
-            _timeseriesService = timeseriesService;
-        }
-
+        ) : ControllerBase
+    {
         /// <summary>
         /// Get pressure timeseries
         /// </summary>
@@ -45,14 +35,14 @@ namespace Api.Controllers
             try
             {
                 var robotPressureTimeseries =
-                    await _timeseriesService.ReadAll<RobotPressureTimeseries>(
+                    await timeseriesService.ReadAll<RobotPressureTimeseries>(
                         queryStringParameters
                     );
                 return Ok(robotPressureTimeseries);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of robot pressure timeseries from database");
+                logger.LogError(e, "Error during GET of robot pressure timeseries from database");
                 throw;
             }
         }
@@ -78,12 +68,12 @@ namespace Api.Controllers
             try
             {
                 var robotBatteryTimeseries =
-                    await _timeseriesService.ReadAll<RobotBatteryTimeseries>(queryStringParameters);
+                    await timeseriesService.ReadAll<RobotBatteryTimeseries>(queryStringParameters);
                 return Ok(robotBatteryTimeseries);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of robot battery timeseries from database");
+                logger.LogError(e, "Error during GET of robot battery timeseries from database");
                 throw;
             }
         }
@@ -108,14 +98,14 @@ namespace Api.Controllers
         {
             try
             {
-                var robotPoseTimeseries = await _timeseriesService.ReadAll<RobotPoseTimeseries>(
+                var robotPoseTimeseries = await timeseriesService.ReadAll<RobotPoseTimeseries>(
                     queryStringParameters
                 );
                 return Ok(robotPoseTimeseries);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of robot pose timeseries from database");
+                logger.LogError(e, "Error during GET of robot pose timeseries from database");
                 throw;
             }
         }

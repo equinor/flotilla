@@ -7,14 +7,8 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("missions")]
-    public class MapController : ControllerBase
+    public class MapController(IMapService mapService) : ControllerBase
     {
-        private readonly IMapService _mapService;
-        public MapController(IMapService mapService)
-        {
-            _mapService = mapService;
-        }
-
         /// <summary>
         ///     Get map for mission with specified id.
         /// </summary>
@@ -32,7 +26,7 @@ namespace Api.Controllers
         {
             try
             {
-                byte[] mapStream = await _mapService.FetchMapImage(mapName, installationCode);
+                byte[] mapStream = await mapService.FetchMapImage(mapName, installationCode);
                 return File(mapStream, "image/png");
             }
             catch (RequestFailedException)

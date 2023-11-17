@@ -6,31 +6,20 @@ namespace Api.Services.ActionServices
         public Task AddPoseEntry(Pose pose, string isarId);
     }
 
-    public class PoseTimeseriesService : IPoseTimeseriesService
+    public class PoseTimeseriesService(ILogger<PoseTimeseriesService> logger, IRobotService robotService, ITimeseriesService timeseriesService) : IPoseTimeseriesService
     {
-        private readonly ILogger<PoseTimeseriesService> _logger;
-        private readonly IRobotService _robotService;
-        private readonly ITimeseriesService _timeseriesService;
-
-        public PoseTimeseriesService(ILogger<PoseTimeseriesService> logger, IRobotService robotService, ITimeseriesService timeseriesService)
-        {
-            _logger = logger;
-            _robotService = robotService;
-            _timeseriesService = timeseriesService;
-        }
-
         public async Task AddPoseEntry(Pose pose, string isarId)
         {
-            var robot = await _robotService.ReadByIsarId(isarId);
+            var robot = await robotService.ReadByIsarId(isarId);
             if (robot == null)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Could not find corresponding robot for pose update on robot with ISAR id '{IsarId}'", isarId);
                 return;
             }
 
-            await _robotService.UpdateRobotPose(robot.Id, pose);
-            await _timeseriesService.Create(
+            await robotService.UpdateRobotPose(robot.Id, pose);
+            await timeseriesService.Create(
                 new RobotPoseTimeseries(robot.Pose)
                 {
                     MissionId = robot.CurrentMissionId,
@@ -38,7 +27,7 @@ namespace Api.Services.ActionServices
                     Time = DateTime.UtcNow
                 }
             );
-            _logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
+            logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
 
         }
     }

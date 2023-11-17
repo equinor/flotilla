@@ -117,28 +117,16 @@ namespace Api.Test.Services
             return new AxisAngle(new EnuPosition(0, 0, 1), angle);
         }
 
-        public class AxisAngle
+        public class AxisAngle(EnuPosition axis, float angle)
         {
-            public EnuPosition Axis;
-            public float Angle;
-
-            public AxisAngle(EnuPosition axis, float angle)
-            {
-                Axis = axis;
-                Angle = angle;
-            }
+            public EnuPosition Axis = axis;
+            public float Angle = angle;
         }
 
-        public class EchoPose
+        public class EchoPose(EnuPosition position, AxisAngle orientation)
         {
-            public EnuPosition Position;
-            public AxisAngle Orientation;
-
-            public EchoPose(EnuPosition position, AxisAngle orientation)
-            {
-                Position = position;
-                Orientation = orientation;
-            }
+            public EnuPosition Position = position;
+            public AxisAngle Orientation = orientation;
         }
     }
 }

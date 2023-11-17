@@ -10,7 +10,7 @@ namespace Api.Services
 {
     public class MockCustomMissionService : ICustomMissionService
     {
-        private static readonly Dictionary<string, List<MissionTask>> mockBlobStore = new();
+        private static readonly Dictionary<string, List<MissionTask>> mockBlobStore = [];
 
         public Task<string> UploadSource(List<MissionTask> tasks)
         {
@@ -36,7 +36,7 @@ namespace Api.Services
 
         public string CalculateHashFromTasks(IList<MissionTask> tasks)
         {
-            IList<MissionTask> genericTasks = new List<MissionTask>();
+            List<MissionTask> genericTasks = [];
             foreach (var task in tasks)
             {
                 var taskCopy = new MissionTask(task);

@@ -44,38 +44,20 @@ namespace Api.Services
         "CA1307:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class MissionDefinitionService : IMissionDefinitionService
-    {
-        private readonly FlotillaDbContext _context;
-        private readonly ICustomMissionService _customMissionService;
-        private readonly IEchoService _echoService;
-        private readonly ILogger<IMissionDefinitionService> _logger;
-        private readonly ISignalRService _signalRService;
-        private readonly IStidService _stidService;
-
-        public MissionDefinitionService(
-            FlotillaDbContext context,
+    public class MissionDefinitionService(FlotillaDbContext context,
             IEchoService echoService,
             IStidService stidService,
             ICustomMissionService customMissionService,
             ISignalRService signalRService,
-            ILogger<IMissionDefinitionService> logger)
-        {
-            _context = context;
-            _echoService = echoService;
-            _stidService = stidService;
-            _customMissionService = customMissionService;
-            _signalRService = signalRService;
-            _logger = logger;
-        }
-
+            ILogger<IMissionDefinitionService> logger) : IMissionDefinitionService
+    {
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
         {
-            if (missionDefinition.LastSuccessfulRun is not null) { _context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged; }
-            if (missionDefinition.Area is not null) { _context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
+            if (missionDefinition.LastSuccessfulRun is not null) { context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged; }
+            if (missionDefinition.Area is not null) { context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
 
-            await _context.MissionDefinitions.AddAsync(missionDefinition);
-            await _context.SaveChangesAsync();
+            await context.MissionDefinitions.AddAsync(missionDefinition);
+            await context.SaveChangesAsync();
 
             return missionDefinition;
         }
@@ -124,12 +106,12 @@ namespace Api.Services
 
         public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)
         {
-            if (missionDefinition.LastSuccessfulRun is not null) { _context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged; }
-            if (missionDefinition.Area is not null) { _context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
+            if (missionDefinition.LastSuccessfulRun is not null) { context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged; }
+            if (missionDefinition.Area is not null) { context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
 
-            var entry = _context.Update(missionDefinition);
-            await _context.SaveChangesAsync();
-            _ = _signalRService.SendMessageAsync("Mission definition updated", new CondensedMissionDefinitionResponse(missionDefinition));
+            var entry = context.Update(missionDefinition);
+            await context.SaveChangesAsync();
+            _ = signalRService.SendMessageAsync("Mission definition updated", new CondensedMissionDefinitionResponse(missionDefinition));
             return entry.Entity;
         }
 
@@ -140,7 +122,7 @@ namespace Api.Services
             if (missionDefinition is null) { return null; }
 
             missionDefinition.IsDeprecated = true;
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return missionDefinition;
         }
@@ -153,13 +135,13 @@ namespace Api.Services
                 {
                     MissionSourceType.Echo =>
                         // CultureInfo is not important here since we are not using decimal points
-                        _echoService.GetMissionById(
+                        echoService.GetMissionById(
                                 int.Parse(source.SourceId, new CultureInfo("en-US"))
                             ).Result.Tags
                             .Select(
                                 t =>
                                 {
-                                    var tagPosition = _stidService
+                                    var tagPosition = stidService
                                         .GetTagPosition(t.TagId, installationCode)
                                         .Result;
                                     return new MissionTask(t, tagPosition);
@@ -167,21 +149,21 @@ namespace Api.Services
                             )
                             .ToList(),
                     MissionSourceType.Custom =>
-                        await _customMissionService.GetMissionTasksFromSourceId(source.SourceId),
+                        await customMissionService.GetMissionTasksFromSourceId(source.SourceId),
                     _ =>
                         throw new MissionSourceTypeException($"Mission type {source.Type} is not accounted for")
                 };
             }
             catch (FormatException)
             {
-                _logger.LogError("Echo source ID was not formatted correctly");
+                logger.LogError("Echo source ID was not formatted correctly");
                 throw new FormatException("Echo source ID was not formatted correctly");
             }
         }
 
         private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
         {
-            return _context.MissionDefinitions
+            return context.MissionDefinitions
                 .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
@@ -201,7 +183,7 @@ namespace Api.Services
 
             missionDefinitions = missionDefinitions.Where(
                 missionDefinition =>
-                    missionDefinition.Name != null && missionDefinition.Name.ToLower().Contains(name.Trim().ToLower())
+                    missionDefinition.Name != null && missionDefinition.Name.Contains(name.Trim(), StringComparison.OrdinalIgnoreCase)
             );
         }
 

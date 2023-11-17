@@ -10,7 +10,6 @@ using Api.Services.ActionServices;
 using Api.SignalRHubs;
 using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Identity.Web;
@@ -124,13 +123,8 @@ builder.Services
     .AddDownstreamApi(StidService.ServiceName, builder.Configuration.GetSection("Stid"))
     .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
-builder.Services.AddAuthorization(
-    options =>
-    {
-        options.FallbackPolicy = new AuthorizationPolicyBuilder()
-            .RequireAuthenticatedUser()
-            .Build();
-    }
+builder.Services.AddAuthorizationBuilder().AddFallbackPolicy(
+    "RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser()
 );
 
 builder.Services.AddSignalR();
@@ -179,7 +173,7 @@ var option = new RewriteOptions();
 option.AddRedirect("^$", "swagger");
 app.UseRewriter(option);
 
-string[] allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+string[] allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
 app.UseCors(
     corsBuilder =>
         corsBuilder

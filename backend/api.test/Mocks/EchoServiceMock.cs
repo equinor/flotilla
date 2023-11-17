@@ -8,8 +8,7 @@ namespace Api.Test.Mocks
 {
     public class MockEchoService : IEchoService
     {
-        private readonly List<EchoPlantInfo> _mockEchoPlantInfo = new()
-        {
+        private readonly List<EchoPlantInfo> _mockEchoPlantInfo = [
             new EchoPlantInfo
             {
                 PlantCode = "testInstallation",
@@ -20,7 +19,7 @@ namespace Api.Test.Mocks
                 PlantCode = "JSV",
                 ProjectDescription = "JSVtestInstallation"
             }
-        };
+        ];
 
         public EchoMission MockEchoMission =
             new()

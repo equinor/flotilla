@@ -1,19 +1,13 @@
 ﻿namespace Api.Services.Models
 {
-    public class IsarStep
+    public class IsarStep(IsarStepResponse stepResponse)
     {
-        public string IsarStepId { get; set; }
+        public string IsarStepId { get; } = stepResponse.IsarStepId;
 
-        public IsarStepStatus StepStatus { get; set; }
+        public IsarStepStatus StepStatus { get; } = IsarStepStatus.NotStarted;
 
-        public IsarStepType StepType { get; set; }
+        public IsarStepType StepType { get; } = StepTypeFromString(stepResponse.Type);
 
-        public IsarStep(IsarStepResponse stepResponse)
-        {
-            IsarStepId = stepResponse.IsarStepId;
-            StepType = StepTypeFromString(stepResponse.Type);
-            StepStatus = IsarStepStatus.NotStarted;
-        }
 
         public static IsarStepStatus StatusFromString(string status)
         {

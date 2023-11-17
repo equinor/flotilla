@@ -7,7 +7,7 @@ namespace Api.Test
 {
     public class TestMqttDictionnary
     {
-        private readonly Dictionary<string, string> _topics = new();
+        private readonly Dictionary<string, string> _topics = [];
 
         public TestMqttDictionnary()
         {

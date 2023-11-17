@@ -8,25 +8,11 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("installations")]
-    public class InstallationController : ControllerBase
-    {
-        private readonly IInstallationService _installationService;
-
-        private readonly IMapService _mapService;
-
-        private readonly ILogger<InstallationController> _logger;
-
-        public InstallationController(
+    public class InstallationController(
             ILogger<InstallationController> logger,
-            IMapService mapService,
             IInstallationService installationService
-        )
-        {
-            _logger = logger;
-            _mapService = mapService;
-            _installationService = installationService;
-        }
-
+        ) : ControllerBase
+    {
         /// <summary>
         /// List all installations in the Flotilla database
         /// </summary>
@@ -44,12 +30,12 @@ namespace Api.Controllers
         {
             try
             {
-                var installations = await _installationService.ReadAll();
+                var installations = await installationService.ReadAll();
                 return Ok(installations);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of installations from database");
+                logger.LogError(e, "Error during GET of installations from database");
                 throw;
             }
         }
@@ -69,14 +55,14 @@ namespace Api.Controllers
         {
             try
             {
-                var installation = await _installationService.ReadById(id);
+                var installation = await installationService.ReadById(id);
                 if (installation == null)
                     return NotFound($"Could not find installation with id {id}");
                 return Ok(installation);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of installation from database");
+                logger.LogError(e, "Error during GET of installation from database");
                 throw;
             }
 
@@ -97,18 +83,18 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Installation>> Create([FromBody] CreateInstallationQuery installation)
         {
-            _logger.LogInformation("Creating new installation");
+            logger.LogInformation("Creating new installation");
             try
             {
-                var existingInstallation = await _installationService.ReadByName(installation.InstallationCode);
+                var existingInstallation = await installationService.ReadByName(installation.InstallationCode);
                 if (existingInstallation != null)
                 {
-                    _logger.LogInformation("An installation for given name and installation already exists");
+                    logger.LogInformation("An installation for given name and installation already exists");
                     return BadRequest($"Installation already exists");
                 }
 
-                var newInstallation = await _installationService.Create(installation);
-                _logger.LogInformation(
+                var newInstallation = await installationService.Create(installation);
+                logger.LogInformation(
                     "Succesfully created new installation with id '{installationId}'",
                     newInstallation.Id
                 );
@@ -120,7 +106,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while creating new installation");
+                logger.LogError(e, "Error while creating new installation");
                 throw;
             }
         }
@@ -138,7 +124,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Installation>> DeleteInstallation([FromRoute] string id)
         {
-            var installation = await _installationService.Delete(id);
+            var installation = await installationService.Delete(id);
             if (installation is null)
                 return NotFound($"Installation with id {id} not found");
             return Ok(installation);

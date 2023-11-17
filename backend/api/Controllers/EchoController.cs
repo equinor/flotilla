@@ -10,21 +10,8 @@ namespace Api.Controllers
     [ApiController]
     [Route("echo")]
     [Authorize(Roles = Role.Any)]
-    public class EchoController : ControllerBase
+    public class EchoController(ILogger<EchoController> logger, IEchoService echoService, IRobotService robotService) : ControllerBase
     {
-
-        private readonly IEchoService _echoService;
-        private readonly ILogger<EchoController> _logger;
-
-        private readonly IRobotService _robotService;
-
-        public EchoController(ILogger<EchoController> logger, IEchoService echoService, IRobotService robotService)
-        {
-            _logger = logger;
-            _echoService = echoService;
-            _robotService = robotService;
-        }
-
         /// <summary>
         ///     List all available Echo missions for the installation
         /// </summary>
@@ -43,17 +30,17 @@ namespace Api.Controllers
         {
             try
             {
-                var missions = await _echoService.GetAvailableMissions(plantCode);
+                var missions = await echoService.GetAvailableMissions(plantCode);
                 return Ok(missions);
             }
             catch (HttpRequestException e)
             {
-                _logger.LogError(e, "Error retrieving missions from Echo");
+                logger.LogError(e, "Error retrieving missions from Echo");
                 return new StatusCodeResult(StatusCodes.Status502BadGateway);
             }
             catch (JsonException e)
             {
-                _logger.LogError(e, "Error retrieving missions from Echo");
+                logger.LogError(e, "Error retrieving missions from Echo");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
@@ -77,30 +64,30 @@ namespace Api.Controllers
         {
             try
             {
-                var mission = await _echoService.GetMissionById(missionId);
+                var mission = await echoService.GetMissionById(missionId);
                 return Ok(mission);
             }
             catch (HttpRequestException e)
             {
                 if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
                 {
-                    _logger.LogWarning("Could not find echo mission with id={id}", missionId);
+                    logger.LogWarning("Could not find echo mission with id={id}", missionId);
                     return NotFound("Echo mission not found");
                 }
 
-                _logger.LogError(e, "Error getting mission from Echo");
+                logger.LogError(e, "Error getting mission from Echo");
                 return new StatusCodeResult(StatusCodes.Status502BadGateway);
             }
             catch (JsonException e)
             {
-                _logger.LogError(e, "Error deserializing mission from Echo");
+                logger.LogError(e, "Error deserializing mission from Echo");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
             catch (InvalidDataException e)
             {
                 string message =
                     "EchoMission invalid: One or more tags are missing associated robot poses.";
-                _logger.LogError(e, message);
+                logger.LogError(e, message);
                 return StatusCode(StatusCodes.Status502BadGateway, message);
             }
         }
@@ -120,17 +107,17 @@ namespace Api.Controllers
         {
             try
             {
-                var echoPlantInfos = await _echoService.GetEchoPlantInfos();
+                var echoPlantInfos = await echoService.GetEchoPlantInfos();
                 return Ok(echoPlantInfos);
             }
             catch (HttpRequestException e)
             {
-                _logger.LogError(e, "Error getting plant info from Echo");
+                logger.LogError(e, "Error getting plant info from Echo");
                 return new StatusCodeResult(StatusCodes.Status502BadGateway);
             }
             catch (JsonException e)
             {
-                _logger.LogError(e, "Error deserializing plant info response from Echo");
+                logger.LogError(e, "Error deserializing plant info response from Echo");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
@@ -151,11 +138,11 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IList<EchoPlantInfo>>> GetActivePlants()
         {
-            var plants = await _robotService.ReadAllActivePlants();
+            var plants = await robotService.ReadAllActivePlants();
 
             if (plants == null)
             {
-                _logger.LogWarning("Could not retrieve robot plants information");
+                logger.LogWarning("Could not retrieve robot plants information");
                 throw new RobotInformationNotAvailableException("Could not retrieve robot plants information");
             }
 
@@ -163,19 +150,19 @@ namespace Api.Controllers
 
             try
             {
-                var echoPlantInfos = await _echoService.GetEchoPlantInfos();
+                var echoPlantInfos = await echoService.GetEchoPlantInfos();
 
                 echoPlantInfos = echoPlantInfos.Where(p => plants.Contains(p.PlantCode.ToLower(CultureInfo.CurrentCulture))).ToList();
                 return Ok(echoPlantInfos);
             }
             catch (HttpRequestException e)
             {
-                _logger.LogError(e, "Error getting plant info from Echo");
+                logger.LogError(e, "Error getting plant info from Echo");
                 return new StatusCodeResult(StatusCodes.Status502BadGateway);
             }
             catch (JsonException e)
             {
-                _logger.LogError(e, "Error deserializing plant info response from Echo");
+                logger.LogError(e, "Error deserializing plant info response from Echo");
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }

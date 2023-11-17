@@ -35,21 +35,8 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class DeckService : IDeckService
+    public class DeckService(FlotillaDbContext context, IDefaultLocalizationPoseService defaultLocalizationPoseService, IInstallationService installationService, IPlantService plantService) : IDeckService
     {
-        private readonly FlotillaDbContext _context;
-        private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
-        private readonly IInstallationService _installationService;
-        private readonly IPlantService _plantService;
-
-        public DeckService(FlotillaDbContext context, IDefaultLocalizationPoseService defaultLocalizationPoseService, IInstallationService installationService, IPlantService plantService)
-        {
-            _context = context;
-            _defaultLocalizationPoseService = defaultLocalizationPoseService;
-            _installationService = installationService;
-            _plantService = plantService;
-        }
-
         public async Task<IEnumerable<Deck>> ReadAll()
         {
             return await GetDecks().ToListAsync();
@@ -63,23 +50,23 @@ namespace Api.Services
 
         public async Task<IEnumerable<Deck>> ReadByInstallation(string installationCode)
         {
-            var installation = await _installationService.ReadByName(installationCode);
+            var installation = await installationService.ReadByName(installationCode);
             if (installation == null) { return new List<Deck>(); }
-            return await _context.Decks.Where(a =>
+            return await context.Decks.Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
         public async Task<Deck?> ReadByName(string deckName)
         {
             if (deckName == null) { return null; }
-            return await _context.Decks.Where(a =>
+            return await context.Decks.Where(a =>
                 a.Name.ToLower().Equals(deckName.ToLower())
             ).FirstOrDefaultAsync();
         }
 
         public async Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string name)
         {
-            return await _context.Decks.Where(a =>
+            return await context.Decks.Where(a =>
                 a.Plant != null && a.Plant.Id.Equals(plant.Id) &&
                 a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                 a.Name.ToLower().Equals(name.ToLower())
@@ -88,9 +75,9 @@ namespace Api.Services
 
         public async Task<Deck> Create(CreateDeckQuery newDeckQuery)
         {
-            var installation = await _installationService.ReadByName(newDeckQuery.InstallationCode) ??
+            var installation = await installationService.ReadByName(newDeckQuery.InstallationCode) ??
                                throw new InstallationNotFoundException($"No installation with name {newDeckQuery.InstallationCode} could be found");
-            var plant = await _plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode) ??
+            var plant = await plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode) ??
                         throw new PlantNotFoundException($"No plant with name {newDeckQuery.PlantCode} could be found");
             var existingDeck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name);
 
@@ -103,7 +90,7 @@ namespace Api.Services
             DefaultLocalizationPose? defaultLocalizationPose = null;
             if (newDeckQuery.DefaultLocalizationPose != null)
             {
-                defaultLocalizationPose = await _defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newDeckQuery.DefaultLocalizationPose));
+                defaultLocalizationPose = await defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newDeckQuery.DefaultLocalizationPose));
             }
 
             var deck = new Deck
@@ -114,19 +101,19 @@ namespace Api.Services
                 DefaultLocalizationPose = defaultLocalizationPose
             };
 
-            _context.Entry(deck.Installation).State = EntityState.Unchanged;
-            _context.Entry(deck.Plant).State = EntityState.Unchanged;
-            if (deck.DefaultLocalizationPose is not null) { _context.Entry(deck.DefaultLocalizationPose).State = EntityState.Modified; }
+            context.Entry(deck.Installation).State = EntityState.Unchanged;
+            context.Entry(deck.Plant).State = EntityState.Unchanged;
+            if (deck.DefaultLocalizationPose is not null) { context.Entry(deck.DefaultLocalizationPose).State = EntityState.Modified; }
 
-            await _context.Decks.AddAsync(deck);
-            await _context.SaveChangesAsync();
+            await context.Decks.AddAsync(deck);
+            await context.SaveChangesAsync();
             return deck!;
         }
 
         public async Task<Deck> Update(Deck deck)
         {
-            var entry = _context.Update(deck);
-            await _context.SaveChangesAsync();
+            var entry = context.Update(deck);
+            await context.SaveChangesAsync();
             return entry.Entity;
         }
 
@@ -139,15 +126,15 @@ namespace Api.Services
                 return null;
             }
 
-            _context.Decks.Remove(deck);
-            await _context.SaveChangesAsync();
+            context.Decks.Remove(deck);
+            await context.SaveChangesAsync();
 
             return deck;
         }
 
         private IQueryable<Deck> GetDecks()
         {
-            return _context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose);
+            return context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose);
         }
     }
 }

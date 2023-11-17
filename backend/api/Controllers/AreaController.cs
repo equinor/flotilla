@@ -9,32 +9,14 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("areas")]
-    public class AreaController : ControllerBase
-    {
-        private readonly IAreaService _areaService;
-        private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
-
-        private readonly IMissionDefinitionService _missionDefinitionService;
-
-        private readonly IMapService _mapService;
-
-        private readonly ILogger<AreaController> _logger;
-
-        public AreaController(
+    public class AreaController(
             ILogger<AreaController> logger,
             IMapService mapService,
             IAreaService areaService,
             IDefaultLocalizationPoseService defaultLocalizationPoseService,
             IMissionDefinitionService missionDefinitionService
-        )
-        {
-            _logger = logger;
-            _mapService = mapService;
-            _areaService = areaService;
-            _defaultLocalizationPoseService = defaultLocalizationPoseService;
-            _missionDefinitionService = missionDefinitionService;
-        }
-
+        ) : ControllerBase
+    {
         /// <summary>
         /// Add a new area
         /// </summary>
@@ -51,18 +33,18 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<AreaResponse>> Create([FromBody] CreateAreaQuery area)
         {
-            _logger.LogInformation("Creating new area");
+            logger.LogInformation("Creating new area");
             try
             {
-                var existingArea = await _areaService.ReadByInstallationAndName(area.InstallationCode, area.AreaName);
+                var existingArea = await areaService.ReadByInstallationAndName(area.InstallationCode, area.AreaName);
                 if (existingArea != null)
                 {
-                    _logger.LogWarning("An area for given name and installation already exists");
+                    logger.LogWarning("An area for given name and installation already exists");
                     return Conflict($"Area already exists");
                 }
 
-                var newArea = await _areaService.Create(area);
-                _logger.LogInformation(
+                var newArea = await areaService.Create(area);
+                logger.LogInformation(
                     "Succesfully created new area with id '{areaId}'",
                     newArea.Id
                 );
@@ -75,7 +57,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while creating new area");
+                logger.LogError(e, "Error while creating new area");
                 throw;
             }
         }
@@ -100,18 +82,18 @@ namespace Api.Controllers
             [FromBody] Pose safePosition
         )
         {
-            _logger.LogInformation(@"Adding new safe position to {Installation}, {Area}", installationCode, areaName);
+            logger.LogInformation(@"Adding new safe position to {Installation}, {Area}", installationCode, areaName);
             try
             {
-                var area = await _areaService.AddSafePosition(installationCode, areaName, new SafePosition(safePosition));
+                var area = await areaService.AddSafePosition(installationCode, areaName, new SafePosition(safePosition));
                 if (area != null)
                 {
-                    _logger.LogInformation(@"Successfully added new safe position for installation '{installationId}'
+                    logger.LogInformation(@"Successfully added new safe position for installation '{installationId}'
                         and name '{name}'", installationCode, areaName);
                     if (area.Deck == null || area.Plant == null || area.Installation == null)
                     {
                         string errorMessage = "Deck, plant or installation missing from area";
-                        _logger.LogWarning(errorMessage);
+                        logger.LogWarning(errorMessage);
                         return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
                     }
                     var response = new AreaResponse(area);
@@ -120,13 +102,13 @@ namespace Api.Controllers
                 }
                 else
                 {
-                    _logger.LogInformation(@"No area with installation {installationCode} and name {areaName} could be found.", installationCode, areaName);
+                    logger.LogInformation(@"No area with installation {installationCode} and name {areaName} could be found.", installationCode, areaName);
                     return NotFound(@$"No area with installation {installationCode} and name {areaName} could be found.");
                 }
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while creating or adding new safe zone");
+                logger.LogError(e, "Error while creating or adding new safe zone");
                 throw;
             }
         }
@@ -147,25 +129,25 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<AreaResponse>> UpdateDefaultLocalizationPose([FromRoute] string areaId, [FromBody] Pose newDefaultLocalizationPose)
         {
-            _logger.LogInformation("Updating default localization pose on area '{areaId}'", areaId);
+            logger.LogInformation("Updating default localization pose on area '{areaId}'", areaId);
             try
             {
-                var area = await _areaService.ReadById(areaId);
+                var area = await areaService.ReadById(areaId);
                 if (area is null)
                 {
-                    _logger.LogInformation("A area with id '{areaId}' does not exist", areaId);
+                    logger.LogInformation("A area with id '{areaId}' does not exist", areaId);
                     return NotFound("Area does not exists");
                 }
 
                 if (area.DefaultLocalizationPose != null)
                 {
                     area.DefaultLocalizationPose.Pose = newDefaultLocalizationPose;
-                    _ = await _defaultLocalizationPoseService.Update(area.DefaultLocalizationPose);
+                    _ = await defaultLocalizationPoseService.Update(area.DefaultLocalizationPose);
                 }
                 else
                 {
                     area.DefaultLocalizationPose = new DefaultLocalizationPose(newDefaultLocalizationPose);
-                    area = await _areaService.Update(area);
+                    area = await areaService.Update(area);
                 }
 
 
@@ -173,7 +155,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while updating the default localization pose");
+                logger.LogError(e, "Error while updating the default localization pose");
                 throw;
             }
         }
@@ -192,14 +174,14 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<AreaResponse>> DeleteArea([FromRoute] string id)
         {
-            var area = await _areaService.Delete(id);
+            var area = await areaService.Delete(id);
             if (area is null)
                 return NotFound($"Area with id {id} not found");
 
             if (area.Deck == null || area.Plant == null || area.Installation == null)
             {
                 string errorMessage = "Deck, plant or installation missing from area";
-                _logger.LogWarning(errorMessage);
+                logger.LogWarning(errorMessage);
                 return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
             }
 
@@ -224,13 +206,13 @@ namespace Api.Controllers
         {
             try
             {
-                var areas = await _areaService.ReadAll();
+                var areas = await areaService.ReadAll();
                 var response = areas.Select(area => new AreaResponse(area));
                 return Ok(response);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of areas from database");
+                logger.LogError(e, "Error during GET of areas from database");
                 throw;
             }
         }
@@ -250,14 +232,14 @@ namespace Api.Controllers
         {
             try
             {
-                var area = await _areaService.ReadById(id);
+                var area = await areaService.ReadById(id);
                 if (area == null)
                     return NotFound($"Could not find area with id {id}");
 
                 if (area.Deck == null || area.Plant == null || area.Installation == null)
                 {
                     string errorMessage = "Deck, plant or installation missing from area";
-                    _logger.LogWarning(errorMessage);
+                    logger.LogWarning(errorMessage);
                     return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
                 }
 
@@ -266,7 +248,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of areas from database");
+                logger.LogError(e, "Error during GET of areas from database");
                 throw;
             }
         }
@@ -286,7 +268,7 @@ namespace Api.Controllers
         {
             try
             {
-                var areas = await _areaService.ReadByDeckId(deckId);
+                var areas = await areaService.ReadByDeckId(deckId);
                 if (!areas.Any())
                     return NotFound($"Could not find area for deck with id {deckId}");
 
@@ -295,7 +277,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of areas from database");
+                logger.LogError(e, "Error during GET of areas from database");
                 throw;
             }
         }
@@ -315,17 +297,17 @@ namespace Api.Controllers
         {
             try
             {
-                var area = await _areaService.ReadById(id);
+                var area = await areaService.ReadById(id);
                 if (area == null)
                     return NotFound($"Could not find area with id {id}");
 
-                var missionDefinitions = await _missionDefinitionService.ReadByAreaId(area.Id);
+                var missionDefinitions = await missionDefinitionService.ReadByAreaId(area.Id);
                 var missionDefinitionResponses = missionDefinitions.FindAll(m => !m.IsDeprecated).Select(m => new CondensedMissionDefinitionResponse(m));
                 return Ok(missionDefinitionResponses);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of area missions from database");
+                logger.LogError(e, "Error during GET of area missions from database");
                 throw;
             }
         }
@@ -343,24 +325,24 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MapMetadata>> GetMapMetadata([FromRoute] string id)
         {
-            var area = await _areaService.ReadById(id);
+            var area = await areaService.ReadById(id);
             if (area is null)
             {
                 string errorMessage = $"Area not found for area with ID {id}";
-                _logger.LogError("{ErrorMessage}", errorMessage);
+                logger.LogError("{ErrorMessage}", errorMessage);
                 return NotFound(errorMessage);
             }
             if (area.Installation == null)
             {
                 string errorMessage = "Installation missing from area";
-                _logger.LogWarning(errorMessage);
+                logger.LogWarning(errorMessage);
                 return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
             }
 
             if (area.DefaultLocalizationPose is null)
             {
                 string errorMessage = $"Area with id '{area.Id}' does not have a default localization pose";
-                _logger.LogInformation("{ErrorMessage}", errorMessage);
+                logger.LogInformation("{ErrorMessage}", errorMessage);
                 return NotFound(errorMessage);
             }
 
@@ -371,18 +353,18 @@ namespace Api.Controllers
             };
             try
             {
-                mapMetadata = await _mapService.ChooseMapFromPositions(positions, area.Installation.InstallationCode);
+                mapMetadata = await mapService.ChooseMapFromPositions(positions, area.Installation.InstallationCode);
             }
             catch (RequestFailedException e)
             {
                 string errorMessage = $"An error occurred while retrieving the map for area {area.Id}";
-                _logger.LogError(e, "{ErrorMessage}", errorMessage);
+                logger.LogError(e, "{ErrorMessage}", errorMessage);
                 return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
             }
             catch (ArgumentOutOfRangeException e)
             {
                 string errorMessage = $"Could not find a suitable map for area {area.Id}";
-                _logger.LogError(e, "{ErrorMessage}", errorMessage);
+                logger.LogError(e, "{ErrorMessage}", errorMessage);
                 return NotFound(errorMessage);
             }
 

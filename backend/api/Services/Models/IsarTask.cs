@@ -1,19 +1,13 @@
 ﻿namespace Api.Services.Models
 {
-    public class IsarTask
+    public class IsarTask(IsarTaskResponse taskResponse)
     {
-        public string IsarTaskId { get; set; }
+        public string IsarTaskId { get; } = taskResponse.IsarTaskId;
 
-        public IsarTaskStatus TaskStatus { get; set; }
+        public IsarTaskStatus TaskStatus { get; } = IsarTaskStatus.NotStarted;
 
-        public IList<IsarStep> Steps { get; set; }
+        public IList<IsarStep> Steps { get; } = taskResponse.Steps.Select(step => new IsarStep(step)).ToList();
 
-        public IsarTask(IsarTaskResponse taskResponse)
-        {
-            IsarTaskId = taskResponse.IsarTaskId;
-            TaskStatus = IsarTaskStatus.NotStarted;
-            Steps = taskResponse.Steps.Select(step => new IsarStep(step)).ToList();
-        }
 
         public static IsarTaskStatus StatusFromString(string status)
         {

@@ -28,6 +28,14 @@ namespace Api.Mqtt
         private readonly int _serverPort;
         private readonly bool _shouldFailOnMaxRetries;
 
+        private static readonly JsonSerializerOptions serializerOptions = new()
+        {
+            Converters =
+                {
+                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+                }
+        };
+
         private CancellationToken _cancellationToken;
         private int _reconnectAttempts;
 
@@ -70,7 +78,7 @@ namespace Api.Mqtt
 
             RegisterCallbacks();
 
-            var topics = mqttConfig.GetSection("Topics").Get<List<string>>() ?? new List<string>();
+            var topics = mqttConfig.GetSection("Topics").Get<List<string>>() ?? [];
             SubscribeToTopics(topics);
         }
         public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotStatusReceived;
@@ -235,7 +243,7 @@ namespace Api.Mqtt
 
         public void SubscribeToTopics(List<string> topics)
         {
-            List<MqttTopicFilter> topicFilters = new();
+            List<MqttTopicFilter> topicFilters = [];
             StringBuilder sb = new();
             sb.AppendLine("Mqtt service subscribing to the following topics:");
             topics.ForEach(
@@ -255,16 +263,10 @@ namespace Api.Mqtt
         private void OnIsarTopicReceived<T>(string content) where T : MqttMessage
         {
             T? message;
+
             try
             {
-                var options = new JsonSerializerOptions
-                {
-                    Converters =
-                    {
-                        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
-                    }
-                };
-                message = JsonSerializer.Deserialize<T>(content, options);
+                message = JsonSerializer.Deserialize<T>(content, serializerOptions);
                 if (message is null)
                 {
                     throw new JsonException();

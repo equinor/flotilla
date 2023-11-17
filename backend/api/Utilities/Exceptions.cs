@@ -1,8 +1,7 @@
 ﻿namespace Api.Utilities
 {
-    public class ConfigException : Exception
+    public class ConfigException(string message) : Exception(message)
     {
-        public ConfigException(string message) : base(message) { }
     }
 
     public class MissionException : Exception
@@ -16,88 +15,71 @@
         public int IsarStatusCode { get; set; }
     }
 
-    public class MissionSourceTypeException : Exception
+    public class MissionSourceTypeException(string message) : Exception(message)
     {
-        public MissionSourceTypeException(string message) : base(message) { }
     }
 
-    public class SourceException : Exception
+    public class SourceException(string message) : Exception(message)
     {
-        public SourceException(string message) : base(message) { }
     }
 
-    public class InstallationNotFoundException : Exception
+    public class InstallationNotFoundException(string message) : Exception(message)
     {
-        public InstallationNotFoundException(string message) : base(message) { }
     }
 
-    public class PlantNotFoundException : Exception
+    public class PlantNotFoundException(string message) : Exception(message)
     {
-        public PlantNotFoundException(string message) : base(message) { }
     }
 
-    public class DeckNotFoundException : Exception
+    public class DeckNotFoundException(string message) : Exception(message)
     {
-        public DeckNotFoundException(string message) : base(message) { }
     }
 
-    public class AreaNotFoundException : Exception
+    public class AreaNotFoundException(string message) : Exception(message)
     {
-        public AreaNotFoundException(string message) : base(message) { }
     }
 
-    public class MissionNotFoundException : Exception
+    public class MissionNotFoundException(string message) : Exception(message)
     {
-        public MissionNotFoundException(string message) : base(message) { }
     }
 
-    public class InspectionNotFoundException : Exception
+    public class InspectionNotFoundException(string message) : Exception(message)
     {
-        public InspectionNotFoundException(string message) : base(message) { }
     }
 
-    public class MissionTaskNotFoundException : Exception
+    public class MissionTaskNotFoundException(string message) : Exception(message)
     {
-        public MissionTaskNotFoundException(string message) : base(message) { }
     }
 
-    public class MissionRunNotFoundException : Exception
+    public class MissionRunNotFoundException(string message) : Exception(message)
     {
-        public MissionRunNotFoundException(string message) : base(message) { }
     }
 
-    public class RobotPositionNotFoundException : Exception
+    public class RobotPositionNotFoundException(string message) : Exception(message)
     {
-        public RobotPositionNotFoundException(string message) : base(message) { }
     }
 
-    public class RobotNotFoundException : Exception
+    public class RobotNotFoundException(string message) : Exception(message)
     {
-        public RobotNotFoundException(string message) : base(message) { }
     }
 
-    public class RobotInformationNotAvailableException : Exception
+    public class RobotInformationNotAvailableException(string message) : Exception(message)
     {
-        public RobotInformationNotAvailableException(string message) : base(message) { }
     }
 
-    public class TagPositionNotFoundException : Exception
+    public class TagPositionNotFoundException(string message) : Exception(message)
     {
-        public TagPositionNotFoundException(string message) : base(message) { }
     }
 
-    public class AreaExistsException : Exception
+    public class AreaExistsException(string message) : Exception(message)
     {
-        public AreaExistsException(string message) : base(message) { }
     }
 
-    public class DeckExistsException : Exception
+    public class DeckExistsException(string message) : Exception(message)
     {
-        public DeckExistsException(string message) : base(message) { }
     }
 
-    public class SafeZoneException : Exception
+    public class SafeZoneException(string message) : Exception(message)
     {
-        public SafeZoneException(string message) : base(message) { }
     }
 }

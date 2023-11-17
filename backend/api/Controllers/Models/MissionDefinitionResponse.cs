@@ -51,50 +51,36 @@ namespace Api.Controllers.Models
         }
     }
 
-    public class MissionDefinitionResponse
+    public class MissionDefinitionResponse(IMissionDefinitionService service, MissionDefinition missionDefinition)
     {
         [JsonPropertyName("id")]
-        public string Id { get; set; }
+        public string Id { get; } = missionDefinition.Id;
 
         [JsonPropertyName("tasks")]
-        public List<MissionTask> Tasks { get; set; } = new();
+        public List<MissionTask> Tasks { get; } = service.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode).Result!;
 
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string Name { get; } = missionDefinition.Name;
 
         [JsonPropertyName("installationCode")]
-        public string InstallationCode { get; set; }
+        public string InstallationCode { get; } = missionDefinition.InstallationCode;
 
         [JsonPropertyName("comment")]
-        public string? Comment { get; set; }
+        public string? Comment { get; } = missionDefinition.Comment;
 
         [JsonPropertyName("inspectionFrequency")]
-        public TimeSpan? InspectionFrequency { get; set; }
+        public TimeSpan? InspectionFrequency { get; } = missionDefinition.InspectionFrequency;
 
         [JsonPropertyName("lastSuccessfulRun")]
-        public virtual MissionRun? LastSuccessfulRun { get; set; }
+        public virtual MissionRun? LastSuccessfulRun { get; } = missionDefinition.LastSuccessfulRun;
 
         [JsonPropertyName("area")]
-        public Area? Area { get; set; }
+        public Area? Area { get; } = missionDefinition.Area;
 
         [JsonPropertyName("isDeprecated")]
-        public bool IsDeprecated { get; set; }
+        public bool IsDeprecated { get; } = missionDefinition.IsDeprecated;
 
         [JsonPropertyName("sourceType")]
-        public MissionSourceType SourceType { get; set; }
-
-        public MissionDefinitionResponse(IMissionDefinitionService service, MissionDefinition missionDefinition)
-        {
-            Id = missionDefinition.Id;
-            Name = missionDefinition.Name;
-            InstallationCode = missionDefinition.InstallationCode;
-            Comment = missionDefinition.Comment;
-            InspectionFrequency = missionDefinition.InspectionFrequency;
-            Area = missionDefinition.Area;
-            Tasks = service.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode).Result!;
-            LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
-            IsDeprecated = missionDefinition.IsDeprecated;
-            SourceType = missionDefinition.Source.Type;
-        }
+        public MissionSourceType SourceType { get; } = missionDefinition.Source.Type;
     }
 }

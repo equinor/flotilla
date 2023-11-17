@@ -8,20 +8,11 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("inspection-findings")]
-    public class InspectionFindingsController : ControllerBase
-    {
-        private readonly IInspectionService _inspectionService;
-        private readonly ILogger<InspectionFindingsController> _logger;
-        public InspectionFindingsController(
+    public class InspectionFindingsController(
             ILogger<InspectionFindingsController> logger,
             IInspectionService inspectionService
-        )
-        {
-            _logger = logger;
-            _inspectionService = inspectionService;
-
-        }
-
+        ) : ControllerBase
+    {
         /// <summary>
         /// Associate a new inspection finding with the inspection corresponding to isarStepId
         /// </summary>
@@ -38,10 +29,10 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<InspectionFinding>> AddFindings([FromBody] InspectionFindingsQuery inspectionFinding, [FromRoute] string isarStepId)
         {
-            _logger.LogInformation("Updating inspection findings for inspection with isarStepId '{Id}'", isarStepId);
+            logger.LogInformation("Updating inspection findings for inspection with isarStepId '{Id}'", isarStepId);
             try
             {
-                var inspection = await _inspectionService.AddFindings(inspectionFinding, isarStepId);
+                var inspection = await inspectionService.AddFindings(inspectionFinding, isarStepId);
 
                 if (inspection != null)
                 {
@@ -51,7 +42,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while adding findings to inspection with IsarStepId '{Id}'", isarStepId);
+                logger.LogError(e, "Error while adding findings to inspection with IsarStepId '{Id}'", isarStepId);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
             return NotFound($"Could not find any inspection with the provided '{isarStepId}'");
@@ -73,10 +64,10 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Inspection>> GetInspections([FromRoute] string id)
         {
-            _logger.LogInformation("Get inspection by ID '{id}'", id);
+            logger.LogInformation("Get inspection by ID '{id}'", id);
             try
             {
-                var inspection = await _inspectionService.ReadByIsarStepId(id);
+                var inspection = await inspectionService.ReadByIsarStepId(id);
                 if (inspection != null)
                 {
                     return Ok(inspection);
@@ -85,7 +76,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while finding an inspection with inspection id '{id}'", id);
+                logger.LogError(e, "Error while finding an inspection with inspection id '{id}'", id);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
             return NotFound("Could not find any inspection with the provided '{id}'");

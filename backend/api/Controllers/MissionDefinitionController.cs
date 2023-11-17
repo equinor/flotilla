@@ -9,20 +9,8 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("missions/definitions")]
-    public class MissionDefinitionController : ControllerBase
+    public class MissionDefinitionController(ILogger<MissionDefinitionController> logger, IMissionDefinitionService missionDefinitionService, IMissionRunService missionRunService) : ControllerBase
     {
-
-        private readonly ILogger<MissionDefinitionController> _logger;
-        private readonly IMissionDefinitionService _missionDefinitionService;
-        private readonly IMissionRunService _missionRunService;
-
-        public MissionDefinitionController(ILogger<MissionDefinitionController> logger, IMissionDefinitionService missionDefinitionService, IMissionRunService missionRunService)
-        {
-            _logger = logger;
-            _missionDefinitionService = missionDefinitionService;
-            _missionRunService = missionRunService;
-        }
-
         /// <summary>
         ///     List all mission definitions in the Flotilla database
         /// </summary>
@@ -43,11 +31,11 @@ namespace Api.Controllers
             PagedList<MissionDefinition> missionDefinitions;
             try
             {
-                missionDefinitions = await _missionDefinitionService.ReadAll(parameters);
+                missionDefinitions = await missionDefinitionService.ReadAll(parameters);
             }
             catch (InvalidDataException e)
             {
-                _logger.LogError(e, "{ErrorMessage}", e.Message);
+                logger.LogError(e, "{ErrorMessage}", e.Message);
                 return BadRequest(e.Message);
             }
 
@@ -61,7 +49,7 @@ namespace Api.Controllers
                 missionDefinitions.HasPrevious
             };
 
-            Response.Headers.Add(
+            Response.Headers.Append(
                 QueryStringParameters.PaginationHeader,
                 JsonSerializer.Serialize(metadata)
             );
@@ -90,11 +78,11 @@ namespace Api.Controllers
             PagedList<MissionDefinition> missionDefinitions;
             try
             {
-                missionDefinitions = await _missionDefinitionService.ReadAll(parameters);
+                missionDefinitions = await missionDefinitionService.ReadAll(parameters);
             }
             catch (InvalidDataException e)
             {
-                _logger.LogError(e.Message);
+                logger.LogError(e.Message);
                 return BadRequest(e.Message);
             }
 
@@ -108,7 +96,7 @@ namespace Api.Controllers
                 missionDefinitions.HasPrevious
             };
 
-            Response.Headers.Add(
+            Response.Headers.Append(
                 QueryStringParameters.PaginationHeader,
                 JsonSerializer.Serialize(metadata)
             );
@@ -130,7 +118,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<CondensedMissionDefinitionResponse>> GetCondensedMissionDefinitionById([FromRoute] string id)
         {
-            var missionDefinition = await _missionDefinitionService.ReadById(id);
+            var missionDefinition = await missionDefinitionService.ReadById(id);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id {id}");
@@ -152,12 +140,12 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinitionById([FromRoute] string id)
         {
-            var missionDefinition = await _missionDefinitionService.ReadById(id);
+            var missionDefinition = await missionDefinitionService.ReadById(id);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id {id}");
             }
-            var missionDefinitionResponse = new MissionDefinitionResponse(_missionDefinitionService, missionDefinition);
+            var missionDefinitionResponse = new MissionDefinitionResponse(missionDefinitionService, missionDefinition);
             return Ok(missionDefinitionResponse);
         }
 
@@ -174,12 +162,12 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionRun>> GetNextMissionRun([FromRoute] string id)
         {
-            var missionDefinition = await _missionDefinitionService.ReadById(id);
+            var missionDefinition = await missionDefinitionService.ReadById(id);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id {id}");
             }
-            var nextRun = await _missionRunService.ReadNextScheduledRunByMissionId(id);
+            var nextRun = await missionRunService.ReadNextScheduledRunByMissionId(id);
             return Ok(nextRun);
         }
 
@@ -203,14 +191,14 @@ namespace Api.Controllers
             [FromBody] UpdateMissionDefinitionQuery missionDefinitionQuery
         )
         {
-            _logger.LogInformation("Updating mission definition with id '{Id}'", id);
+            logger.LogInformation("Updating mission definition with id '{Id}'", id);
 
             if (!ModelState.IsValid)
             {
                 return BadRequest("Invalid data.");
             }
 
-            var missionDefinition = await _missionDefinitionService.ReadById(id);
+            var missionDefinition = await missionDefinitionService.ReadById(id);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id '{id}'");
@@ -225,7 +213,7 @@ namespace Api.Controllers
             missionDefinition.Comment = missionDefinitionQuery.Comment;
             missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
 
-            var newMissionDefinition = await _missionDefinitionService.Update(missionDefinition);
+            var newMissionDefinition = await missionDefinitionService.Update(missionDefinition);
             return new CondensedMissionDefinitionResponse(newMissionDefinition);
         }
 
@@ -242,12 +230,12 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionDefinitionResponse>> DeleteMissionDefinition([FromRoute] string id)
         {
-            var missionDefinition = await _missionDefinitionService.Delete(id);
+            var missionDefinition = await missionDefinitionService.Delete(id);
             if (missionDefinition is null)
             {
                 return NotFound($"Mission definition with id {id} not found");
             }
-            var missionDefinitionResponse = new MissionDefinitionResponse(_missionDefinitionService, missionDefinition);
+            var missionDefinitionResponse = new MissionDefinitionResponse(missionDefinitionService, missionDefinition);
             return Ok(missionDefinitionResponse);
         }
     }
