@@ -10,51 +10,20 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("missions")]
-    public class MissionSchedulingController : ControllerBase
-    {
-        private readonly IAreaService _areaService;
-        private readonly IInstallationService _installationService;
-        private readonly ICustomMissionService _customMissionService;
-        private readonly IEchoService _echoService;
-        private readonly ILogger<MissionSchedulingController> _logger;
-        private readonly IMapService _mapService;
-        private readonly IMissionDefinitionService _missionDefinitionService;
-        private readonly IMissionRunService _missionRunService;
-        private readonly ICustomMissionSchedulingService _customMissionSchedulingService;
-        private readonly IRobotService _robotService;
-        private readonly ISourceService _sourceService;
-        private readonly IStidService _stidService;
-
-        public MissionSchedulingController(
+    public class MissionSchedulingController(
             IMissionDefinitionService missionDefinitionService,
             IMissionRunService missionRunService,
             IAreaService areaService,
             IInstallationService installationService,
             IRobotService robotService,
             IEchoService echoService,
-            ICustomMissionService customMissionService,
             ILogger<MissionSchedulingController> logger,
             IMapService mapService,
             IStidService stidService,
             ISourceService sourceService,
             ICustomMissionSchedulingService customMissionSchedulingService
-        )
-        {
-            _missionDefinitionService = missionDefinitionService;
-            _missionRunService = missionRunService;
-            _areaService = areaService;
-            _installationService = installationService;
-            _robotService = robotService;
-            _echoService = echoService;
-            _customMissionService = customMissionService;
-            _mapService = mapService;
-            _stidService = stidService;
-            _sourceService = sourceService;
-            _missionDefinitionService = missionDefinitionService;
-            _customMissionSchedulingService = customMissionSchedulingService;
-            _logger = logger;
-        }
-
+        ) : ControllerBase
+    {
         /// <summary>
         ///     Schedule an existing mission definition
         /// </summary>
@@ -73,20 +42,20 @@ namespace Api.Controllers
             [FromBody] ScheduleMissionQuery scheduledMissionQuery
         )
         {
-            var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
+            var robot = await robotService.ReadById(scheduledMissionQuery.RobotId);
             if (robot is null)
             {
                 return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
             }
 
-            var missionDefinition = await _missionDefinitionService.ReadById(scheduledMissionQuery.MissionDefinitionId);
+            var missionDefinition = await missionDefinitionService.ReadById(scheduledMissionQuery.MissionDefinitionId);
             if (missionDefinition == null)
             {
                 return NotFound("Mission definition not found");
             }
 
             List<MissionTask>? missionTasks;
-            missionTasks = await _missionDefinitionService.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode);
+            missionTasks = await missionDefinitionService.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode);
 
             if (missionTasks == null)
             {
@@ -107,14 +76,14 @@ namespace Api.Controllers
                 Map = new MapMetadata()
             };
 
-            await _mapService.AssignMapToMission(missionRun);
+            await mapService.AssignMapToMission(missionRun);
 
             if (missionRun.Tasks.Any())
             {
                 missionRun.CalculateEstimatedDuration();
             }
 
-            var newMissionRun = await _missionRunService.Create(missionRun);
+            var newMissionRun = await missionRunService.Create(missionRun);
 
             return CreatedAtAction(nameof(Schedule), new
             {
@@ -140,7 +109,7 @@ namespace Api.Controllers
             [FromBody] ScheduledMissionQuery scheduledMissionQuery
         )
         {
-            var robot = await _robotService.ReadById(scheduledMissionQuery.RobotId);
+            var robot = await robotService.ReadById(scheduledMissionQuery.RobotId);
             if (robot is null)
             {
                 return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
@@ -149,33 +118,33 @@ namespace Api.Controllers
             EchoMission? echoMission;
             try
             {
-                echoMission = await _echoService.GetMissionById(scheduledMissionQuery.EchoMissionId);
+                echoMission = await echoService.GetMissionById(scheduledMissionQuery.EchoMissionId);
             }
             catch (HttpRequestException e)
             {
                 if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
                 {
-                    _logger.LogWarning(
+                    logger.LogWarning(
                         "Could not find echo mission with id={Id}",
                         scheduledMissionQuery.EchoMissionId
                     );
                     return NotFound("Echo mission not found");
                 }
 
-                _logger.LogError(e, "Error getting mission from Echo");
+                logger.LogError(e, "Error getting mission from Echo");
                 return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
             }
             catch (JsonException e)
             {
                 const string Message = "Error deserializing mission from Echo";
-                _logger.LogError(e, "{Message}", Message);
+                logger.LogError(e, "{Message}", Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, Message);
             }
             catch (InvalidDataException e)
             {
                 const string Message =
                     "Can not schedule mission because EchoMission is invalid. One or more tasks does not contain a robot pose";
-                _logger.LogError(e, "Message: {errorMessage}", Message);
+                logger.LogError(e, "Message: {errorMessage}", Message);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
 
@@ -183,7 +152,7 @@ namespace Api.Controllers
                 .Select(
                     t =>
                     {
-                        var tagPosition = _stidService
+                        var tagPosition = stidService
                             .GetTagPosition(t.TagId, scheduledMissionQuery.InstallationCode)
                             .Result;
                         return new MissionTask(t, tagPosition);
@@ -194,10 +163,10 @@ namespace Api.Controllers
             Area? area = null;
             if (scheduledMissionQuery.AreaName != null)
             {
-                area = await _areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
+                area = await areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
             }
 
-            var source = await _sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId);
+            var source = await sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId);
             MissionDefinition? existingMissionDefinition = null;
             if (source == null)
             {
@@ -209,7 +178,7 @@ namespace Api.Controllers
             }
             else
             {
-                var missionDefinitions = await _missionDefinitionService.ReadBySourceId(source.SourceId);
+                var missionDefinitions = await missionDefinitionService.ReadBySourceId(source.SourceId);
                 if (missionDefinitions.Count > 0)
                 {
                     existingMissionDefinition = missionDefinitions.First();
@@ -240,7 +209,7 @@ namespace Api.Controllers
                 Map = new MapMetadata()
             };
 
-            await _mapService.AssignMapToMission(missionRun);
+            await mapService.AssignMapToMission(missionRun);
 
             if (missionRun.Tasks.Any())
             {
@@ -249,10 +218,10 @@ namespace Api.Controllers
 
             if (existingMissionDefinition == null)
             {
-                await _missionDefinitionService.Create(scheduledMissionDefinition);
+                await missionDefinitionService.Create(scheduledMissionDefinition);
             }
 
-            var newMissionRun = await _missionRunService.Create(missionRun);
+            var newMissionRun = await missionRunService.Create(missionRun);
 
             return CreatedAtAction(nameof(Create), new
             {
@@ -279,20 +248,20 @@ namespace Api.Controllers
             [FromBody] CustomMissionQuery customMissionQuery
         )
         {
-            var robot = await _robotService.ReadById(customMissionQuery.RobotId);
+            var robot = await robotService.ReadById(customMissionQuery.RobotId);
             if (robot is null) { return NotFound($"Could not find robot with id {customMissionQuery.RobotId}"); }
 
-            var installation = await _installationService.ReadByName(customMissionQuery.InstallationCode);
+            var installation = await installationService.ReadByName(customMissionQuery.InstallationCode);
             if (installation == null) { return NotFound($"Could not find installation with name {customMissionQuery.InstallationCode}"); }
 
             var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 
             MissionDefinition? customMissionDefinition;
-            try { customMissionDefinition = await _customMissionSchedulingService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
+            try { customMissionDefinition = await customMissionSchedulingService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
             catch (SourceException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
 
             MissionRun? newMissionRun;
-            try { newMissionRun = await _customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
+            try { newMissionRun = await customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
             catch (Exception e) when (e is RobotNotFoundException or MissionNotFoundException) { return NotFound(e.Message); }
 
             return CreatedAtAction(nameof(Create), new

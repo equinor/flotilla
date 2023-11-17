@@ -20,39 +20,28 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class InspectionService : IInspectionService
+    public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, ISignalRService signalRService) : IInspectionService
     {
-        private readonly FlotillaDbContext _context;
-        private readonly ILogger<InspectionService> _logger;
-        private readonly ISignalRService _signalRService;
-
-        public InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, ISignalRService signalRService)
-        {
-            _context = context;
-            _logger = logger;
-            _signalRService = signalRService;
-        }
-
         public async Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus)
         {
             var inspection = await ReadByIsarStepId(isarStepId);
             if (inspection is null)
             {
                 string errorMessage = $"Inspection with ID {isarStepId} could not be found";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new InspectionNotFoundException(errorMessage);
             }
 
             inspection.UpdateStatus(isarStepStatus);
             inspection = await Update(inspection);
-            _ = _signalRService.SendMessageAsync("Inspection updated", inspection);
+            _ = signalRService.SendMessageAsync("Inspection updated", inspection);
             return inspection;
         }
 
         private async Task<Inspection> Update(Inspection inspection)
         {
-            var entry = _context.Update(inspection);
-            await _context.SaveChangesAsync();
+            var entry = context.Update(inspection);
+            await context.SaveChangesAsync();
             return entry.Entity;
         }
 
@@ -63,7 +52,7 @@ namespace Api.Services
 
         private IQueryable<Inspection> GetInspections()
         {
-            return _context.Inspections.Include(inspection => inspection.InspectionFindings);
+            return context.Inspections.Include(inspection => inspection.InspectionFindings);
         }
 
         public async Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery, string isarStepId)
@@ -84,7 +73,7 @@ namespace Api.Services
 
             inspection.InspectionFindings.Add(inspectionFindings);
             inspection = await Update(inspection);
-            _ = _signalRService.SendMessageAsync("Inspection findings added", inspection);
+            _ = signalRService.SendMessageAsync("Inspection findings added", inspection);
             return inspection;
         }
     }

@@ -18,17 +18,8 @@ namespace Api.Services
         public Task UploadJsonToBlob(string json, string path, string containerName, string accountName, bool overwrite);
     }
 
-    public class BlobService : IBlobService
+    public class BlobService(ILogger<BlobService> logger, IOptions<AzureAdOptions> azureOptions) : IBlobService
     {
-        private readonly IOptions<AzureAdOptions> _azureOptions;
-        private readonly ILogger<BlobService> _logger;
-
-        public BlobService(ILogger<BlobService> logger, IOptions<AzureAdOptions> azureOptions)
-        {
-            _logger = logger;
-            _azureOptions = azureOptions;
-        }
-
         public async Task<byte[]> DownloadBlob(string blobName, string containerName, string accountName)
         {
             var blobContainerClient = GetBlobContainerClient(containerName, accountName);
@@ -50,7 +41,7 @@ namespace Api.Services
             catch (RequestFailedException e)
             {
                 string errorMessage = $"Failed to fetch blob items because: {e.Message}";
-                _logger.LogError(e, "{ErrorMessage}", errorMessage);
+                logger.LogError(e, "{ErrorMessage}", errorMessage);
                 throw;
             }
         }
@@ -68,13 +59,13 @@ namespace Api.Services
             {
                 if (e.Status == 404 && e.ErrorCode == "ContainerNotFound")
                 {
-                    _logger.LogError(e, "{ErrorMessage}", $"Unable to find blob container {containerName}");
+                    logger.LogError(e, "{ErrorMessage}", $"Unable to find blob container {containerName}");
                     throw new ConfigException($"Unable to find blob container {containerName}");
                 }
                 else
                 {
                     string errorMessage = $"Failed to fetch blob items because: {e.Message}";
-                    _logger.LogError(e, "{ErrorMessage}", errorMessage);
+                    logger.LogError(e, "{ErrorMessage}", errorMessage);
                     throw;
                 }
             }
@@ -85,9 +76,9 @@ namespace Api.Services
             var serviceClient = new BlobServiceClient(
                 new Uri($"https://{accountName}.blob.core.windows.net"),
                 new ClientSecretCredential(
-                    _azureOptions.Value.TenantId,
-                    _azureOptions.Value.ClientId,
-                    _azureOptions.Value.ClientSecret
+                    azureOptions.Value.TenantId,
+                    azureOptions.Value.ClientId,
+                    azureOptions.Value.ClientSecret
                 )
             );
             var containerClient = serviceClient.GetBlobContainerClient(containerName.ToLower(CultureInfo.CurrentCulture));

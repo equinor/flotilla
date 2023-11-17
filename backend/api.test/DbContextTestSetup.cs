@@ -68,24 +68,19 @@ namespace Api.Test
     }
 
     // Class for mocking authentication handler
-    public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+    public class TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
+                               ILoggerFactory logger,
+                               UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
     {
         public const string AuthenticationScheme = "Test";
-
-        public TestAuthHandler(
-            IOptionsMonitor<AuthenticationSchemeOptions> options,
-            ILoggerFactory logger,
-            UrlEncoder encoder,
-            ISystemClock clock
-        ) : base(options, logger, encoder, clock) { }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, "Test.User"),
-                new Claim(ClaimTypes.Role, "Role.Admin")
-            };
+            new Claim(ClaimTypes.Name, "Test.User"),
+            new Claim(ClaimTypes.Role, "Role.Admin")
+        };
             var identity = new ClaimsIdentity(claims, AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, AuthenticationScheme);

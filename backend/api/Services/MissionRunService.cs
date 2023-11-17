@@ -51,29 +51,18 @@ namespace Api.Services
         "CA1307:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class MissionRunService : IMissionRunService
+    public class MissionRunService(FlotillaDbContext context, ISignalRService signalRService, ILogger<MissionRunService> logger) : IMissionRunService
     {
-        private readonly FlotillaDbContext _context;
-        private readonly ILogger<MissionRunService> _logger;
-        private readonly ISignalRService _signalRService;
-
-        public MissionRunService(FlotillaDbContext context, ISignalRService signalRService, ILogger<MissionRunService> logger)
-        {
-            _context = context;
-            _signalRService = signalRService;
-            _logger = logger;
-        }
-
         public async Task<MissionRun> Create(MissionRun missionRun)
         {
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
             // Making sure database does not try to create new robot
-            _context.Entry(missionRun.Robot).State = EntityState.Unchanged;
-            if (missionRun.Area is not null) { _context.Entry(missionRun.Area).State = EntityState.Unchanged; }
+            context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+            if (missionRun.Area is not null) { context.Entry(missionRun.Area).State = EntityState.Unchanged; }
 
-            await _context.MissionRuns.AddAsync(missionRun);
-            await _context.SaveChangesAsync();
-            _ = _signalRService.SendMessageAsync("Mission run created", missionRun);
+            await context.MissionRuns.AddAsync(missionRun);
+            await context.SaveChangesAsync();
+            _ = signalRService.SendMessageAsync("Mission run created", missionRun);
 
             var args = new MissionRunCreatedEventArgs(missionRun.Id);
             OnMissionRunCreated(args);
@@ -140,12 +129,12 @@ namespace Api.Services
 
         public async Task<MissionRun> Update(MissionRun missionRun)
         {
-            _context.Entry(missionRun.Robot).State = EntityState.Unchanged;
-            if (missionRun.Area is not null) { _context.Entry(missionRun.Area).State = EntityState.Unchanged; }
+            context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+            if (missionRun.Area is not null) { context.Entry(missionRun.Area).State = EntityState.Unchanged; }
 
-            var entry = _context.Update(missionRun);
-            await _context.SaveChangesAsync();
-            _ = _signalRService.SendMessageAsync("Mission run updated", missionRun);
+            var entry = context.Update(missionRun);
+            await context.SaveChangesAsync();
+            _ = signalRService.SendMessageAsync("Mission run updated", missionRun);
             return entry.Entity;
         }
 
@@ -158,16 +147,16 @@ namespace Api.Services
                 return null;
             }
 
-            _context.MissionRuns.Remove(missionRun);
-            await _context.SaveChangesAsync();
-            _ = _signalRService.SendMessageAsync("Mission run deleted", missionRun);
+            context.MissionRuns.Remove(missionRun);
+            await context.SaveChangesAsync();
+            _ = signalRService.SendMessageAsync("Mission run deleted", missionRun);
 
             return missionRun;
         }
 
         private IQueryable<MissionRun> GetMissionRunsWithSubModels()
         {
-            return _context.MissionRuns
+            return context.MissionRuns
                 .Include(missionRun => missionRun.Area)
                 .ThenInclude(area => area != null ? area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
@@ -196,7 +185,7 @@ namespace Api.Services
 
             missionRuns = missionRuns.Where(
                 missionRun =>
-                    missionRun.Name != null && missionRun.Name.ToLower().Contains(name.Trim().ToLower())
+                    missionRun.Name != null && missionRun.Name.Contains(name.Trim(), StringComparison.OrdinalIgnoreCase)
             );
         }
 
@@ -205,7 +194,7 @@ namespace Api.Services
             if (!missionRuns.Any() || string.IsNullOrWhiteSpace(robotName)) { return; }
 
             missionRuns = missionRuns.Where(
-                missionRun => missionRun.Robot.Name.ToLower().Contains(robotName.Trim().ToLower())
+                missionRun => missionRun.Robot.Name.Contains(robotName.Trim(), StringComparison.OrdinalIgnoreCase)
             );
         }
 
@@ -218,7 +207,7 @@ namespace Api.Services
                     missionRun.Tasks.Any(
                         task =>
                             task.TagId != null
-                            && task.TagId.ToLower().Contains(tag.Trim().ToLower())
+                            && task.TagId.Contains(tag.Trim(), StringComparison.OrdinalIgnoreCase)
                     )
             );
         }
@@ -356,7 +345,7 @@ namespace Api.Services
             if (missionRun is null)
             {
                 string errorMessage = $"Mission with isar mission Id {isarMissionId} was not found";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new MissionRunNotFoundException(errorMessage);
             }
 
@@ -364,7 +353,7 @@ namespace Api.Services
 
             missionRun = await Update(missionRun);
 
-            if (missionRun.Status == MissionStatus.Failed) { _ = _signalRService.SendMessageAsync("Mission run failed", missionRun); }
+            if (missionRun.Status == MissionStatus.Failed) { _ = signalRService.SendMessageAsync("Mission run failed", missionRun); }
             return missionRun;
         }
 

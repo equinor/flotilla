@@ -102,78 +102,54 @@ namespace Api.Services.Models
         }
     }
 
-    public struct IsarOrientation
+    public readonly struct IsarOrientation(float x, float y, float z, float w, string frameName)
     {
         [JsonPropertyName("x")]
-        public float X { get; set; }
+        public float X { get; } = x;
 
         [JsonPropertyName("y")]
-        public float Y { get; set; }
+        public float Y { get; } = y;
 
         [JsonPropertyName("z")]
-        public float Z { get; set; }
+        public float Z { get; } = z;
 
         [JsonPropertyName("w")]
-        public float W { get; set; }
+        public float W { get; } = w;
 
         [JsonPropertyName("frame_name")]
-        public string FrameName { get; set; }
-
-        public IsarOrientation(float x, float y, float z, float w, string frameName)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-            W = w;
-            FrameName = frameName;
-        }
+        public string FrameName { get; } = frameName;
     }
 
-    public struct IsarPosition
+    public readonly struct IsarPosition(float x, float y, float z, string frameName)
     {
         [JsonPropertyName("x")]
-        public float X { get; set; }
+        public float X { get; } = x;
 
         [JsonPropertyName("y")]
-        public float Y { get; set; }
+        public float Y { get; } = y;
 
         [JsonPropertyName("z")]
-        public float Z { get; set; }
+        public float Z { get; } = z;
 
         [JsonPropertyName("frame_name")]
-        public string FrameName { get; set; }
-
-        public IsarPosition(float x, float y, float z, string frameName)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-            FrameName = frameName;
-        }
+        public string FrameName { get; } = frameName;
     }
 
-    public struct IsarPose
+    public readonly struct IsarPose(Pose pose)
     {
         [JsonPropertyName("position")]
-        public IsarPosition Position { get; set; }
+        public IsarPosition Position { get; } = new IsarPosition(pose.Position.X, pose.Position.Y, pose.Position.Z, "asset");
 
         [JsonPropertyName("orientation")]
-        public IsarOrientation Orientation { get; set; }
-
-        [JsonPropertyName("frame_name")]
-        public string FrameName { get; set; }
-
-        public IsarPose(Pose pose)
-        {
-            Position = new IsarPosition(pose.Position.X, pose.Position.Y, pose.Position.Z, "asset");
-            Orientation = new IsarOrientation(
+        public IsarOrientation Orientation { get; } = new IsarOrientation(
                 pose.Orientation.X,
                 pose.Orientation.Y,
                 pose.Orientation.Z,
                 pose.Orientation.W,
                 "asset"
             );
-            FrameName = "asset";
-        }
+
+        [JsonPropertyName("frame_name")]
+        public string FrameName { get; } = "asset";
     }
 }

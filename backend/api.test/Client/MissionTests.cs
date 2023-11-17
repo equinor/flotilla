@@ -205,23 +205,22 @@ namespace Api.Test
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
-                Tasks = new List<CustomTaskQuery>
-                {
+                Tasks = [
                     new()
                     {
                         RobotPose = new Pose(),
-                        Inspections = new List<CustomInspectionQuery>(),
+                        Inspections = [],
                         InspectionTarget = new Position(),
                         TaskOrder = 0
                     },
                     new()
                     {
                         RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-                        Inspections = new List<CustomInspectionQuery>(),
+                        Inspections = [],
                         InspectionTarget = new Position(),
                         TaskOrder = 1
                     }
-                }
+                ]
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -283,16 +282,15 @@ namespace Api.Test
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
-                Tasks = new List<CustomTaskQuery>
-                {
+                Tasks = [
                     new()
                     {
                         RobotPose = new Pose(),
-                        Inspections = new List<CustomInspectionQuery>(),
+                        Inspections = [],
                         InspectionTarget = new Position(),
                         TaskOrder = 0
                     }
-                }
+                ]
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),

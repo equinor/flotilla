@@ -10,20 +10,11 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("sources")]
-public class SourceController : ControllerBase
-{
-    private readonly ISourceService _sourceService;
-    private readonly ILogger<SourceController> _logger;
-
-    public SourceController(
+public class SourceController(
         ISourceService sourceService,
         ILogger<SourceController> logger
-    )
-    {
-        _sourceService = sourceService;
-        _logger = logger;
-    }
-
+    ) : ControllerBase
+{
     /// <summary>
     /// List all sources in the Flotilla database
     /// </summary>
@@ -44,11 +35,11 @@ public class SourceController : ControllerBase
         PagedList<Source> sources;
         try
         {
-            sources = await _sourceService.ReadAll(parameters);
+            sources = await sourceService.ReadAll(parameters);
         }
         catch (InvalidDataException e)
         {
-            _logger.LogError(e.Message);
+            logger.LogError(e.Message);
             return BadRequest(e.Message);
         }
 
@@ -62,7 +53,7 @@ public class SourceController : ControllerBase
             sources.HasPrevious
         };
 
-        Response.Headers.Add(
+        Response.Headers.Append(
             QueryStringParameters.PaginationHeader,
             JsonSerializer.Serialize(metadata)
         );
@@ -83,7 +74,7 @@ public class SourceController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SourceResponse>> GetCustomSourceById([FromRoute] string id)
     {
-        var source = await _sourceService.ReadByIdWithTasks(id);
+        var source = await sourceService.ReadByIdWithTasks(id);
         if (source == null)
             return NotFound($"Could not find mission definition with id {id}");
         return Ok(source);
@@ -102,7 +93,7 @@ public class SourceController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<SourceResponse>> GetEchoSourceById([FromRoute] string id, [FromRoute] string installationCode)
     {
-        var source = await _sourceService.ReadByIdAndInstallationWithTasks(id, installationCode);
+        var source = await sourceService.ReadByIdAndInstallationWithTasks(id, installationCode);
         if (source == null)
             return NotFound($"Could not find mission definition with id {id}");
         return Ok(source);

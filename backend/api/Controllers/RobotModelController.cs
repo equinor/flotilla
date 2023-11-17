@@ -8,21 +8,11 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("robot-models")]
-public class RobotModelController : ControllerBase
-{
-    private readonly IRobotModelService _robotModelService;
-
-    private readonly ILogger<RobotModelController> _logger;
-
-    public RobotModelController(
+public class RobotModelController(
         ILogger<RobotModelController> logger,
         IRobotModelService robotModelService
-    )
-    {
-        _logger = logger;
-        _robotModelService = robotModelService;
-    }
-
+    ) : ControllerBase
+{
     /// <summary>
     /// List all robot models in the Flotilla database
     /// </summary>
@@ -40,12 +30,12 @@ public class RobotModelController : ControllerBase
     {
         try
         {
-            var robotModels = await _robotModelService.ReadAll();
+            var robotModels = await robotModelService.ReadAll();
             return Ok(robotModels);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error during GET of robot models from database");
+            logger.LogError(e, "Error during GET of robot models from database");
             throw;
         }
     }
@@ -65,7 +55,7 @@ public class RobotModelController : ControllerBase
         [FromRoute] RobotType robotType
     )
     {
-        var robotModel = await _robotModelService.ReadByRobotType(robotType);
+        var robotModel = await robotModelService.ReadByRobotType(robotType);
         if (robotModel == null)
             return NotFound($"Could not find robotModel with robot type '{robotType}'");
         return Ok(robotModel);
@@ -84,7 +74,7 @@ public class RobotModelController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<RobotModel>> GetRobotModelById([FromRoute] string id)
     {
-        var robotModel = await _robotModelService.ReadById(id);
+        var robotModel = await robotModelService.ReadById(id);
         if (robotModel == null)
             return NotFound($"Could not find robotModel with id '{id}'");
         return Ok(robotModel);
@@ -107,17 +97,17 @@ public class RobotModelController : ControllerBase
         [FromBody] CreateRobotModelQuery robotModelQuery
     )
     {
-        _logger.LogInformation("Creating new robot model");
+        logger.LogInformation("Creating new robot model");
 
         RobotModel robotModel = new(robotModelQuery);
 
-        if (_robotModelService.ReadByRobotType(robotModel.Type).Result != null)
+        if (robotModelService.ReadByRobotType(robotModel.Type).Result != null)
             return BadRequest($"A robot already exists with the robot type '{robotModel.Type}");
 
         try
         {
-            var newRobotModel = await _robotModelService.Create(robotModel);
-            _logger.LogInformation(
+            var newRobotModel = await robotModelService.Create(robotModel);
+            logger.LogInformation(
                 "Successfully created new robot model with id '{robotModelId}'",
                 newRobotModel.Id
             );
@@ -129,7 +119,7 @@ public class RobotModelController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while creating new robot model");
+            logger.LogError(e, "Error while creating new robot model");
             throw;
         }
     }
@@ -154,12 +144,12 @@ public class RobotModelController : ControllerBase
         [FromBody] UpdateRobotModelQuery robotModelQuery
     )
     {
-        _logger.LogInformation("Updating robot model with id '{id}'", id);
+        logger.LogInformation("Updating robot model with id '{id}'", id);
 
         if (!ModelState.IsValid)
             return BadRequest("Invalid data.");
 
-        var robotModel = await _robotModelService.ReadById(id);
+        var robotModel = await robotModelService.ReadById(id);
         if (robotModel == null)
             return NotFound($"Could not find robot model with id '{id}'");
 
@@ -186,12 +176,12 @@ public class RobotModelController : ControllerBase
         [FromBody] UpdateRobotModelQuery robotModelQuery
     )
     {
-        _logger.LogInformation("Updating robot model with robot type '{robotType}'", robotType);
+        logger.LogInformation("Updating robot model with robot type '{robotType}'", robotType);
 
         if (!ModelState.IsValid)
             return BadRequest("Invalid data.");
 
-        var robotModel = await _robotModelService.ReadByRobotType(robotType);
+        var robotModel = await robotModelService.ReadByRobotType(robotType);
         if (robotModel == null)
             return NotFound($"Could not find robot model with robot type '{robotType}'");
 
@@ -211,7 +201,7 @@ public class RobotModelController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<RobotModel>> DeleteRobotModel([FromRoute] string id)
     {
-        var robotModel = await _robotModelService.Delete(id);
+        var robotModel = await robotModelService.Delete(id);
         if (robotModel is null)
             return NotFound($"Area with id {id} not found");
         return Ok(robotModel);
@@ -225,15 +215,15 @@ public class RobotModelController : ControllerBase
         robotModel.Update(robotModelQuery);
         try
         {
-            var updatedRobotModel = await _robotModelService.Update(robotModel);
+            var updatedRobotModel = await robotModelService.Update(robotModel);
 
-            _logger.LogInformation("Successful PUT of robot model to database");
+            logger.LogInformation("Successful PUT of robot model to database");
 
             return Ok(updatedRobotModel);
         }
         catch (Exception e)
         {
-            _logger.LogError(
+            logger.LogError(
                 e,
                 "Error while updating robot model with id '{id}' and robot type '{robotType}'",
                 robotModel.Id,

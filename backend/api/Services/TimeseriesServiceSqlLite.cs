@@ -15,20 +15,13 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class TimeseriesServiceSqlLite : ITimeseriesService
+    public class TimeseriesServiceSqlLite(FlotillaDbContext context) : ITimeseriesService
     {
-        private readonly FlotillaDbContext _context;
-
-        public TimeseriesServiceSqlLite(FlotillaDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task<IEnumerable<T>> ReadAll<T>(
             TimeseriesQueryStringParameters queryStringParameters
         ) where T : TimeseriesBase
         {
-            var query = _context.Set<T>().AsQueryable();
+            var query = context.Set<T>().AsQueryable();
             var filter = ConstructFilter<T>(queryStringParameters);
 
             query = query.Where(filter);

@@ -32,22 +32,9 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class RobotService : IRobotService, IDisposable
+    public class RobotService(FlotillaDbContext context, ILogger<RobotService> logger, IRobotModelService robotModelService, ISignalRService signalRService) : IRobotService, IDisposable
     {
-        private readonly FlotillaDbContext _context;
-        private readonly ILogger<RobotService> _logger;
-        private readonly IRobotModelService _robotModelService;
-
         private readonly Semaphore _robotSemaphore = new(1, 1);
-        private readonly ISignalRService _signalRService;
-
-        public RobotService(FlotillaDbContext context, ILogger<RobotService> logger, IRobotModelService robotModelService, ISignalRService signalRService)
-        {
-            _context = context;
-            _logger = logger;
-            _robotModelService = robotModelService;
-            _signalRService = signalRService;
-        }
 
         public void Dispose()
         {
@@ -57,26 +44,26 @@ namespace Api.Services
 
         public async Task<Robot> Create(Robot newRobot)
         {
-            if (newRobot.CurrentArea is not null) { _context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged; }
+            if (newRobot.CurrentArea is not null) { context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged; }
 
-            await _context.Robots.AddAsync(newRobot);
-            await _context.SaveChangesAsync();
+            await context.Robots.AddAsync(newRobot);
+            await context.SaveChangesAsync();
             return newRobot;
         }
 
         public async Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery)
         {
-            var robotModel = await _robotModelService.ReadByRobotType(robotQuery.RobotType);
+            var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType);
             if (robotModel != null)
             {
                 var newRobot = new Robot(robotQuery)
                 {
                     Model = robotModel
                 };
-                _context.Entry(robotModel).State = EntityState.Unchanged;
-                await _context.Robots.AddAsync(newRobot);
-                await _context.SaveChangesAsync();
-                _ = _signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
+                context.Entry(robotModel).State = EntityState.Unchanged;
+                await context.Robots.AddAsync(newRobot);
+                await context.SaveChangesAsync();
+                _ = signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
                 return newRobot;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
@@ -110,16 +97,16 @@ namespace Api.Services
 
         public async Task<IEnumerable<string>> ReadAllActivePlants()
         {
-            return await _context.Robots.Where(r => r.Enabled).Select(r => r.CurrentInstallation).ToListAsync();
+            return await context.Robots.Where(r => r.Enabled).Select(r => r.CurrentInstallation).ToListAsync();
         }
 
         public async Task<Robot> Update(Robot robot)
         {
-            if (robot.CurrentArea is not null) { _context.Entry(robot.CurrentArea).State = EntityState.Unchanged; }
+            if (robot.CurrentArea is not null) { context.Entry(robot.CurrentArea).State = EntityState.Unchanged; }
 
-            var entry = _context.Update(robot);
-            await _context.SaveChangesAsync();
-            _ = _signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
+            var entry = context.Update(robot);
+            await context.SaveChangesAsync();
+            _ = signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
             return entry.Entity;
         }
 
@@ -128,9 +115,9 @@ namespace Api.Services
             var robot = await GetRobotsWithSubModels().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (robot is null) { return null; }
 
-            _context.Robots.Remove(robot);
-            await _context.SaveChangesAsync();
-            _ = _signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
+            context.Robots.Remove(robot);
+            await context.SaveChangesAsync();
+            _ = signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
             return robot;
         }
 
@@ -152,7 +139,7 @@ namespace Api.Services
             if (robot is null)
             {
                 string errorMessage = $"Robot with ID {robotId} was not found in the database";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 _robotSemaphore.Release();
                 throw new RobotNotFoundException(errorMessage);
             }
@@ -169,7 +156,7 @@ namespace Api.Services
 
         private IQueryable<Robot> GetRobotsWithSubModels()
         {
-            return _context.Robots
+            return context.Robots
                 .Include(r => r.VideoStreams)
                 .Include(r => r.Model)
                 .Include(r => r.CurrentArea)

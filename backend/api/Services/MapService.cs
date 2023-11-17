@@ -13,27 +13,13 @@ namespace Api.Services
         public Task AssignMapToMission(MissionRun mission);
     }
 
-    public class MapService : IMapService
-    {
-        private readonly IOptions<MapBlobOptions> _blobOptions;
-        private readonly IBlobService _blobService;
-        private readonly ILogger<MapService> _logger;
-
-
-        public MapService(
-            ILogger<MapService> logger,
+    public class MapService(ILogger<MapService> logger,
             IOptions<MapBlobOptions> blobOptions,
-            IBlobService blobService
-        )
-        {
-            _logger = logger;
-            _blobOptions = blobOptions;
-            _blobService = blobService;
-        }
-
+            IBlobService blobService) : IMapService
+    {
         public async Task<byte[]> FetchMapImage(string mapName, string installationCode)
         {
-            return await _blobService.DownloadBlob(mapName, installationCode, _blobOptions.Value.StorageAccount);
+            return await blobService.DownloadBlob(mapName, installationCode, blobOptions.Value.StorageAccount);
         }
 
         public async Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string installationCode)
@@ -41,7 +27,7 @@ namespace Api.Services
             var boundaries = new Dictionary<string, Boundary>();
             var imageSizes = new Dictionary<string, int[]>();
 
-            var blobs = _blobService.FetchAllBlobs(installationCode, _blobOptions.Value.StorageAccount);
+            var blobs = blobService.FetchAllBlobs(installationCode, blobOptions.Value.StorageAccount);
 
             await foreach (var blob in blobs)
             {
@@ -52,7 +38,7 @@ namespace Api.Services
                 }
                 catch (Exception e) when (e is FormatException || e is KeyNotFoundException)
                 {
-                    _logger.LogWarning(e, "Failed to extract boundary and image size for {MapName}", blob.Name);
+                    logger.LogWarning(e, "Failed to extract boundary and image size for {MapName}", blob.Name);
                 }
             }
 
@@ -85,7 +71,7 @@ namespace Api.Services
             }
             catch (ArgumentOutOfRangeException)
             {
-                _logger.LogWarning("Unable to find a map for mission '{missionId}'", missionRun.Id);
+                logger.LogWarning("Unable to find a map for mission '{missionId}'", missionRun.Id);
                 return;
             }
 
@@ -95,7 +81,7 @@ namespace Api.Services
             }
 
             missionRun.Map = mapMetadata;
-            _logger.LogInformation("Assigned map {map} to mission {mission}", mapMetadata.MapName, missionRun.Name);
+            logger.LogInformation("Assigned map {map} to mission {mission}", mapMetadata.MapName, missionRun.Name);
         }
 
         private Boundary ExtractMapMetadata(BlobItem map)
@@ -125,7 +111,7 @@ namespace Api.Services
             }
             catch (FormatException e)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Unable to extract metadata from map {map.Name}: {e.Message}",
                     map.Name,
                     e.Message
@@ -134,7 +120,7 @@ namespace Api.Services
             }
             catch (KeyNotFoundException e)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Map {map.Name} is missing required metadata: {e.message}",
                     map.Name,
                     e.Message
@@ -149,14 +135,11 @@ namespace Api.Services
             {
                 int x = int.Parse(map.Metadata["imageWidth"], CultureInfo.CurrentCulture);
                 int y = int.Parse(map.Metadata["imageHeight"], CultureInfo.CurrentCulture);
-                return new[]
-                {
-                    x, y
-                };
+                return [x, y];
             }
             catch (FormatException e)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Unable to extract image size from map {map.Name}: {e.Message}",
                     map.Name,
                     e.Message
@@ -207,7 +190,7 @@ namespace Api.Services
                 }
                 catch
                 {
-                    _logger.LogWarning("An error occurred while checking if tag was within boundary");
+                    logger.LogWarning("An error occurred while checking if tag was within boundary");
                 }
             }
 

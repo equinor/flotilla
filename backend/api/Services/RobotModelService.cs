@@ -47,7 +47,7 @@ namespace Api.Services
             return await GetRobotModels().ToListAsync();
         }
 
-        private IQueryable<RobotModel> GetRobotModels()
+        private DbSet<RobotModel> GetRobotModels()
         {
             return _context.RobotModels;
         }

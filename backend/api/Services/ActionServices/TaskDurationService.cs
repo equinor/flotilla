@@ -8,29 +8,16 @@ namespace Api.Services.ActionServices
         public Task UpdateAverageDurationPerTask(RobotType robotType);
     }
 
-    public class TaskDurationService : ITaskDurationService
+    public class TaskDurationService(ILogger<TaskDurationService> logger, IConfiguration configuration, IRobotModelService robotModelService, IMissionRunService missionRunService) : ITaskDurationService
     {
-        private readonly IConfiguration _configuration;
-        private readonly ILogger<TaskDurationService> _logger;
-        private readonly IMissionRunService _missionRunService;
-        private readonly IRobotModelService _robotModelService;
-
-        public TaskDurationService(ILogger<TaskDurationService> logger, IConfiguration configuration, IRobotModelService robotModelService, IMissionRunService missionRunService)
-        {
-            _logger = logger;
-            _configuration = configuration;
-            _robotModelService = robotModelService;
-            _missionRunService = missionRunService;
-        }
-
         public async Task UpdateAverageDurationPerTask(RobotType robotType)
         {
-            int timeRangeInDays = _configuration.GetValue<int>("TimeRangeForMissionDurationEstimationInDays");
+            int timeRangeInDays = configuration.GetValue<int>("TimeRangeForMissionDurationEstimationInDays");
             long minEpochTime = DateTimeOffset.Now
                 .AddDays(-timeRangeInDays)
                 .ToUnixTimeSeconds();
 
-            var missionRunsForEstimation = await _missionRunService.ReadAll(
+            var missionRunsForEstimation = await missionRunService.ReadAll(
                 new MissionRunQueryStringParameters
                 {
                     MinDesiredStartTime = minEpochTime,
@@ -39,10 +26,10 @@ namespace Api.Services.ActionServices
                 }
             );
 
-            var model = await _robotModelService.ReadByRobotType(robotType);
+            var model = await robotModelService.ReadByRobotType(robotType);
             if (model is null)
             {
-                _logger.LogWarning("Could not update average duration for robot model {RobotType} as the model was not found", robotType);
+                logger.LogWarning("Could not update average duration for robot model {RobotType} as the model was not found", robotType);
                 return;
             }
 
@@ -98,9 +85,9 @@ namespace Api.Services.ActionServices
 
             robotModel.AverageDurationPerTag = (float)result;
 
-            await _robotModelService.Update(robotModel);
+            await robotModelService.Update(robotModel);
 
-            _logger.LogInformation("Robot model '{ModelType}' - Updated average time spent per tag to {AverageTimeSpent}s", robotModel.Type, robotModel.AverageDurationPerTag);
+            logger.LogInformation("Robot model '{ModelType}' - Updated average time spent per tag to {AverageTimeSpent}s", robotModel.Type, robotModel.AverageDurationPerTag);
         }
     }
 }

@@ -2,13 +2,8 @@
 
 namespace Api.Mqtt.Events
 {
-    public class MqttReceivedArgs : EventArgs
+    public class MqttReceivedArgs(MqttMessage message) : EventArgs
     {
-        public MqttMessage Message { get; set; }
-
-        public MqttReceivedArgs(MqttMessage message)
-        {
-            Message = message;
-        }
+        public MqttMessage Message { get; } = message;
     }
 }

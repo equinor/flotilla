@@ -1,21 +1,13 @@
 ﻿namespace Api.Database.Models
 {
-    public class SourceResponse
+    public class SourceResponse(Source source, IList<MissionTask> tasks)
     {
-        public string Id { get; set; }
+        public string Id { get; } = source.Id;
 
-        public string SourceId { get; set; }
+        public string SourceId { get; } = source.SourceId;
 
-        public MissionSourceType Type { get; set; }
+        public MissionSourceType Type { get; } = source.Type;
 
-        public IList<MissionTask> Tasks;
-
-        public SourceResponse(Source source, IList<MissionTask> tasks)
-        {
-            Id = source.Id;
-            SourceId = source.SourceId;
-            Type = source.Type;
-            Tasks = tasks;
-        }
+        public IList<MissionTask> Tasks = tasks;
     }
 }

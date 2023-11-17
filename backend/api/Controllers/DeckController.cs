@@ -8,37 +8,15 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("decks")]
-    public class DeckController : ControllerBase
-    {
-        private readonly IDeckService _deckService;
-        private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
-        private readonly IInstallationService _installationService;
-        private readonly IMissionDefinitionService _missionDefinitionService;
-        private readonly IPlantService _plantService;
-
-        private readonly IMapService _mapService;
-
-        private readonly ILogger<DeckController> _logger;
-
-        public DeckController(
+    public class DeckController(
             ILogger<DeckController> logger,
-            IMapService mapService,
             IDeckService deckService,
             IDefaultLocalizationPoseService defaultLocalizationPoseService,
             IInstallationService installationService,
             IPlantService plantService,
             IMissionDefinitionService missionDefinitionService
-        )
-        {
-            _logger = logger;
-            _mapService = mapService;
-            _deckService = deckService;
-            _defaultLocalizationPoseService = defaultLocalizationPoseService;
-            _installationService = installationService;
-            _plantService = plantService;
-            _missionDefinitionService = missionDefinitionService;
-        }
-
+        ) : ControllerBase
+    {
         /// <summary>
         /// List all decks in the Flotilla database
         /// </summary>
@@ -56,13 +34,13 @@ namespace Api.Controllers
         {
             try
             {
-                var decks = await _deckService.ReadAll();
+                var decks = await deckService.ReadAll();
                 var deckResponses = decks.Select(d => new DeckResponse(d)).ToList();
                 return Ok(deckResponses);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of decks from database");
+                logger.LogError(e, "Error during GET of decks from database");
                 throw;
             }
         }
@@ -82,14 +60,14 @@ namespace Api.Controllers
         {
             try
             {
-                var deck = await _deckService.ReadById(id);
+                var deck = await deckService.ReadById(id);
                 if (deck == null)
                     return NotFound($"Could not find deck with id {id}");
                 return Ok(new DeckResponse(deck));
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of deck from database");
+                logger.LogError(e, "Error during GET of deck from database");
                 throw;
             }
         }
@@ -109,17 +87,17 @@ namespace Api.Controllers
         {
             try
             {
-                var deck = await _deckService.ReadById(id);
+                var deck = await deckService.ReadById(id);
                 if (deck == null)
                     return NotFound($"Could not find deck with id {id}");
 
-                var missionDefinitions = await _missionDefinitionService.ReadByDeckId(deck.Id);
+                var missionDefinitions = await missionDefinitionService.ReadByDeckId(deck.Id);
                 var missionDefinitionResponses = missionDefinitions.FindAll(m => !m.IsDeprecated).Select(m => new CondensedMissionDefinitionResponse(m));
                 return Ok(missionDefinitionResponses);
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error during GET of deck missions from database");
+                logger.LogError(e, "Error during GET of deck missions from database");
                 throw;
             }
         }
@@ -139,28 +117,28 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<DeckResponse>> Create([FromBody] CreateDeckQuery deck)
         {
-            _logger.LogInformation("Creating new deck");
+            logger.LogInformation("Creating new deck");
             try
             {
-                var existingInstallation = await _installationService.ReadByName(deck.InstallationCode);
+                var existingInstallation = await installationService.ReadByName(deck.InstallationCode);
                 if (existingInstallation == null)
                 {
                     return NotFound($"Could not find installation with name {deck.InstallationCode}");
                 }
-                var existingPlant = await _plantService.ReadByInstallationAndName(existingInstallation, deck.PlantCode);
+                var existingPlant = await plantService.ReadByInstallationAndName(existingInstallation, deck.PlantCode);
                 if (existingPlant == null)
                 {
                     return NotFound($"Could not find plant with name {deck.PlantCode}");
                 }
-                var existingDeck = await _deckService.ReadByInstallationAndPlantAndName(existingInstallation, existingPlant, deck.Name);
+                var existingDeck = await deckService.ReadByInstallationAndPlantAndName(existingInstallation, existingPlant, deck.Name);
                 if (existingDeck != null)
                 {
-                    _logger.LogInformation("An deck for given name and deck already exists");
+                    logger.LogInformation("An deck for given name and deck already exists");
                     return BadRequest($"Deck already exists");
                 }
 
-                var newDeck = await _deckService.Create(deck);
-                _logger.LogInformation(
+                var newDeck = await deckService.Create(deck);
+                logger.LogInformation(
                     "Succesfully created new deck with id '{deckId}'",
                     newDeck.Id
                 );
@@ -172,7 +150,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while creating new deck");
+                logger.LogError(e, "Error while creating new deck");
                 throw;
             }
         }
@@ -193,25 +171,25 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<DeckResponse>> UpdateDefaultLocalizationPose([FromRoute] string deckId, [FromBody] Pose newDefaultLocalizationPose)
         {
-            _logger.LogInformation("Updating default localization pose on deck '{deckId}'", deckId);
+            logger.LogInformation("Updating default localization pose on deck '{deckId}'", deckId);
             try
             {
-                var deck = await _deckService.ReadById(deckId);
+                var deck = await deckService.ReadById(deckId);
                 if (deck is null)
                 {
-                    _logger.LogInformation("A deck with id '{deckId}' does not exist", deckId);
+                    logger.LogInformation("A deck with id '{deckId}' does not exist", deckId);
                     return NotFound("Deck does not exists");
                 }
 
                 if (deck.DefaultLocalizationPose != null)
                 {
                     deck.DefaultLocalizationPose.Pose = newDefaultLocalizationPose;
-                    _ = await _defaultLocalizationPoseService.Update(deck.DefaultLocalizationPose);
+                    _ = await defaultLocalizationPoseService.Update(deck.DefaultLocalizationPose);
                 }
                 else
                 {
                     deck.DefaultLocalizationPose = new DefaultLocalizationPose(newDefaultLocalizationPose);
-                    deck = await _deckService.Update(deck);
+                    deck = await deckService.Update(deck);
                 }
 
 
@@ -219,7 +197,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error while updating the default localization pose");
+                logger.LogError(e, "Error while updating the default localization pose");
                 throw;
             }
         }
@@ -237,7 +215,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<DeckResponse>> DeleteDeck([FromRoute] string id)
         {
-            var deck = await _deckService.Delete(id);
+            var deck = await deckService.Delete(id);
             if (deck is null)
                 return NotFound($"Deck with id {id} not found");
             return Ok(new DeckResponse(deck));

@@ -1,33 +1,17 @@
 ﻿namespace Api.Services.Events
 {
-    public class MissionRunCreatedEventArgs : EventArgs
+    public class MissionRunCreatedEventArgs(string missionRunId) : EventArgs
     {
-
-        public MissionRunCreatedEventArgs(string missionRunId)
-        {
-            MissionRunId = missionRunId;
-        }
-        public string MissionRunId { get; set; }
+        public string MissionRunId { get; } = missionRunId;
     }
 
-    public class RobotAvailableEventArgs : EventArgs
+    public class RobotAvailableEventArgs(string robotId) : EventArgs
     {
-
-        public RobotAvailableEventArgs(string robotId)
-        {
-            RobotId = robotId;
-        }
-        public string RobotId { get; set; }
+        public string RobotId { get; } = robotId;
     }
 
-    public class EmergencyButtonPressedForRobotEventArgs : EventArgs
+    public class EmergencyButtonPressedForRobotEventArgs(string robotId) : EventArgs
     {
-        public EmergencyButtonPressedForRobotEventArgs(string robotId)
-        {
-            RobotId = robotId;
-        }
-
-        public string RobotId { get; set; }
-
+        public string RobotId { get; } = robotId;
     }
 }

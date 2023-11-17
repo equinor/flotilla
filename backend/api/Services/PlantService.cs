@@ -35,17 +35,8 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class PlantService : IPlantService
+    public class PlantService(FlotillaDbContext context, IInstallationService installationService) : IPlantService
     {
-        private readonly FlotillaDbContext _context;
-        private readonly IInstallationService _installationService;
-
-        public PlantService(FlotillaDbContext context, IInstallationService installationService)
-        {
-            _context = context;
-            _installationService = installationService;
-        }
-
         public async Task<IEnumerable<Plant>> ReadAll()
         {
             return await GetPlants().ToListAsync();
@@ -59,24 +50,24 @@ namespace Api.Services
 
         public async Task<IEnumerable<Plant>> ReadByInstallation(string installationCode)
         {
-            var installation = await _installationService.ReadByName(installationCode);
+            var installation = await installationService.ReadByName(installationCode);
             if (installation == null) { return new List<Plant>(); }
-            return await _context.Plants.Where(a =>
+            return await context.Plants.Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
         public async Task<Plant?> ReadByInstallationAndName(Installation installation, string plantCode)
         {
-            return await _context.Plants.Where(a =>
+            return await context.Plants.Where(a =>
                 a.PlantCode.ToLower().Equals(plantCode.ToLower()) &&
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).FirstOrDefaultAsync();
         }
 
         public async Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode)
         {
-            var installation = await _installationService.ReadByName(installationCode);
+            var installation = await installationService.ReadByName(installationCode);
             if (installation == null) { return null; }
-            return await _context.Plants.Where(a =>
+            return await context.Plants.Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                 a.PlantCode.ToLower().Equals(plantCode.ToLower())
             ).FirstOrDefaultAsync();
@@ -84,7 +75,7 @@ namespace Api.Services
 
         public async Task<Plant> Create(CreatePlantQuery newPlantQuery)
         {
-            var installation = await _installationService.ReadByName(newPlantQuery.InstallationCode) ??
+            var installation = await installationService.ReadByName(newPlantQuery.InstallationCode) ??
                                throw new InstallationNotFoundException($"No installation with name {newPlantQuery.InstallationCode} could be found");
 
             var plant = await ReadByInstallationAndName(installation, newPlantQuery.PlantCode);
@@ -96,17 +87,17 @@ namespace Api.Services
                     PlantCode = newPlantQuery.PlantCode,
                     Installation = installation
                 };
-                _context.Entry(plant.Installation).State = EntityState.Unchanged;
-                await _context.Plants.AddAsync(plant);
-                await _context.SaveChangesAsync();
+                context.Entry(plant.Installation).State = EntityState.Unchanged;
+                await context.Plants.AddAsync(plant);
+                await context.SaveChangesAsync();
             }
             return plant!;
         }
 
         public async Task<Plant> Update(Plant plant)
         {
-            var entry = _context.Update(plant);
-            await _context.SaveChangesAsync();
+            var entry = context.Update(plant);
+            await context.SaveChangesAsync();
             return entry.Entity;
         }
 
@@ -119,15 +110,15 @@ namespace Api.Services
                 return null;
             }
 
-            _context.Plants.Remove(plant);
-            await _context.SaveChangesAsync();
+            context.Plants.Remove(plant);
+            await context.SaveChangesAsync();
 
             return plant;
         }
 
         private IQueryable<Plant> GetPlants()
         {
-            return _context.Plants.Include(i => i.Installation);
+            return context.Plants.Include(i => i.Installation);
         }
     }
 }

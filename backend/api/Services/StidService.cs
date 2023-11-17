@@ -10,25 +10,19 @@ namespace Api.Services
         public abstract Task<Position> GetTagPosition(string tag, string installationCode);
     }
 
-    public class StidService : IStidService
+    public class StidService(IDownstreamApi stidApi) : IStidService
     {
         public const string ServiceName = "StidApi";
-        private readonly IDownstreamApi _stidApi;
-
-        public StidService(IDownstreamApi downstreamWebApi)
-        {
-            _stidApi = downstreamWebApi;
-        }
 
         public async Task<Position> GetTagPosition(string tag, string installationCode)
         {
             string relativePath = $"{installationCode}/tag?tagNo={tag}";
 
-            var response = await _stidApi.CallApiForAppAsync(
+            var response = await stidApi.CallApiForAppAsync(
                 ServiceName,
                 options =>
                 {
-                    options.HttpMethod = HttpMethod.Get;
+                    options.HttpMethod = HttpMethod.Get.Method;
                     options.RelativePath = relativePath;
                 }
             );

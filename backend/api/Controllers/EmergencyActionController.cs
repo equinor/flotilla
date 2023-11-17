@@ -7,17 +7,8 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("emergency-action")]
-    public class EmergencyActionController : ControllerBase
+    public class EmergencyActionController(IRobotService robotService, IEmergencyActionService emergencyActionService) : ControllerBase
     {
-        private readonly IEmergencyActionService _emergencyActionService;
-        private readonly IRobotService _robotService;
-
-        public EmergencyActionController(IRobotService robotService, IEmergencyActionService emergencyActionService)
-        {
-            _robotService = robotService;
-            _emergencyActionService = emergencyActionService;
-        }
-
         /// <summary>
         ///     This endpoint will abort the current running mission run and attempt to return the robot to a safe position in the
         ///     area. The mission run queue for the robot will be frozen and no further missions will run until the emergency
@@ -39,11 +30,11 @@ namespace Api.Controllers
             [FromRoute] string installationCode)
         {
 
-            var robots = await _robotService.ReadLocalizedRobotsForInstallation(installationCode);
+            var robots = await robotService.ReadLocalizedRobotsForInstallation(installationCode);
 
             foreach (var robot in robots)
             {
-                _emergencyActionService.TriggerEmergencyButtonPressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id));
+                emergencyActionService.TriggerEmergencyButtonPressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id));
 
             }
 
@@ -67,11 +58,11 @@ namespace Api.Controllers
         public async Task<ActionResult<string>> ClearEmergencyStateForAllRobots(
             [FromRoute] string installationCode)
         {
-            var robots = await _robotService.ReadLocalizedRobotsForInstallation(installationCode);
+            var robots = await robotService.ReadLocalizedRobotsForInstallation(installationCode);
 
             foreach (var robot in robots)
             {
-                _emergencyActionService.TriggerEmergencyButtonDepressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id));
+                emergencyActionService.TriggerEmergencyButtonDepressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id));
             }
 
             return NoContent();

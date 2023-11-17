@@ -15,17 +15,9 @@ namespace Api.Services
         public Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
     }
 
-    public class EchoService : IEchoService
+    public class EchoService(IDownstreamApi echoApi, ILogger<EchoService> logger) : IEchoService
     {
         public const string ServiceName = "EchoApi";
-        private readonly IDownstreamApi _echoApi;
-        private readonly ILogger<EchoService> _logger;
-
-        public EchoService(IDownstreamApi downstreamWebApi, ILogger<EchoService> logger)
-        {
-            _echoApi = downstreamWebApi;
-            _logger = logger;
-        }
 
         public async Task<IList<CondensedEchoMissionDefinition>> GetAvailableMissions(string? installationCode)
         {
@@ -33,11 +25,11 @@ namespace Api.Services
                 ? "robots/robot-plan?Status=Ready"
                 : $"robots/robot-plan?InstallationCode={installationCode}&&Status=Ready";
 
-            var response = await _echoApi.CallApiForUserAsync(
+            var response = await echoApi.CallApiForUserAsync(
                 ServiceName,
                 options =>
                 {
-                    options.HttpMethod = HttpMethod.Get;
+                    options.HttpMethod = HttpMethod.Get.Method;
                     options.RelativePath = relativePath;
                 }
             );
@@ -56,11 +48,11 @@ namespace Api.Services
         {
             string relativePath = $"robots/robot-plan/{missionId}";
 
-            var response = await _echoApi.CallApiForUserAsync(
+            var response = await echoApi.CallApiForUserAsync(
                 ServiceName,
                 options =>
                 {
-                    options.HttpMethod = HttpMethod.Get;
+                    options.HttpMethod = HttpMethod.Get.Method;
                     options.RelativePath = relativePath;
                 }
             );
@@ -75,11 +67,11 @@ namespace Api.Services
         public async Task<IList<EchoPlantInfo>> GetEchoPlantInfos()
         {
             string relativePath = "plantinfo";
-            var response = await _echoApi.CallApiForUserAsync(
+            var response = await echoApi.CallApiForUserAsync(
                 ServiceName,
                 options =>
                 {
-                    options.HttpMethod = HttpMethod.Get;
+                    options.HttpMethod = HttpMethod.Get.Method;
                     options.RelativePath = relativePath;
                 }
             );
@@ -155,7 +147,7 @@ namespace Api.Services
                 }
                 catch (InvalidDataException e)
                 {
-                    _logger.LogWarning(
+                    logger.LogWarning(
                         "Echo mission with ID '{Id}' is invalid: '{Message}'",
                         echoMission.Id,
                         e.Message
@@ -185,7 +177,7 @@ namespace Api.Services
             }
             catch (InvalidDataException e)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Echo mission with ID '{Id}' is invalid: '{Message}'",
                     echoMission.Id,
                     e.Message

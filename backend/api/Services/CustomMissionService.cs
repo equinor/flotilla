@@ -16,22 +16,13 @@ namespace Api.Services
         string CalculateHashFromTasks(IList<MissionTask> tasks);
     }
 
-    public class CustomMissionService : ICustomMissionService
+    public class CustomMissionService(IOptions<StorageOptions> storageOptions, IBlobService blobService) : ICustomMissionService
     {
-        private readonly IBlobService _blobService;
-        private readonly IOptions<StorageOptions> _storageOptions;
-
-        public CustomMissionService(IOptions<StorageOptions> storageOptions, IBlobService blobService)
-        {
-            _storageOptions = storageOptions;
-            _blobService = blobService;
-        }
-
         public async Task<string> UploadSource(List<MissionTask> tasks)
         {
             string json = JsonSerializer.Serialize(tasks);
             string hash = CalculateHashFromTasks(tasks);
-            await _blobService.UploadJsonToBlob(json, hash, _storageOptions.Value.CustomMissionContainerName, _storageOptions.Value.AccountName, false);
+            await blobService.UploadJsonToBlob(json, hash, storageOptions.Value.CustomMissionContainerName, storageOptions.Value.AccountName, false);
 
             return hash;
         }
@@ -41,7 +32,7 @@ namespace Api.Services
             List<MissionTask>? content;
             try
             {
-                byte[] rawContent = await _blobService.DownloadBlob(id, _storageOptions.Value.CustomMissionContainerName, _storageOptions.Value.AccountName);
+                byte[] rawContent = await blobService.DownloadBlob(id, storageOptions.Value.CustomMissionContainerName, storageOptions.Value.AccountName);
                 var rawBinaryContent = new BinaryData(rawContent);
                 content = rawBinaryContent.ToObjectFromJson<List<MissionTask>>();
                 foreach (var task in content)
@@ -59,7 +50,7 @@ namespace Api.Services
 
         public string CalculateHashFromTasks(IList<MissionTask> tasks)
         {
-            IList<MissionTask> genericTasks = new List<MissionTask>();
+            var genericTasks = new List<MissionTask>();
             foreach (var task in tasks)
             {
                 var taskCopy = new MissionTask(task);

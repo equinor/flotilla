@@ -10,18 +10,7 @@ namespace Api.Services.ActionServices
         public Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, string robotId, IList<MissionTask> missionTasks);
     }
 
-    public class CustomMissionSchedulingService : ICustomMissionSchedulingService
-    {
-        private readonly IAreaService _areaService;
-        private readonly ICustomMissionService _customMissionService;
-        private readonly ILogger<MissionSchedulingService> _logger;
-        private readonly IMapService _mapService;
-        private readonly IMissionDefinitionService _missionDefinitionService;
-        private readonly IMissionRunService _missionRunService;
-        private readonly IRobotService _robotService;
-        private readonly ISourceService _sourceService;
-
-        public CustomMissionSchedulingService(
+    public class CustomMissionSchedulingService(
             ILogger<MissionSchedulingService> logger,
             ICustomMissionService customMissionService,
             IAreaService areaService,
@@ -30,31 +19,21 @@ namespace Api.Services.ActionServices
             IMissionRunService missionRunService,
             IRobotService robotService,
             IMapService mapService
-        )
-        {
-            _logger = logger;
-            _customMissionService = customMissionService;
-            _areaService = areaService;
-            _sourceService = sourceService;
-            _missionDefinitionService = missionDefinitionService;
-            _missionRunService = missionRunService;
-            _robotService = robotService;
-            _mapService = mapService;
-        }
-
+        ) : ICustomMissionSchedulingService
+    {
         public async Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks)
         {
             Area? area = null;
-            if (customMissionQuery.AreaName != null) { area = await _areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName); }
+            if (customMissionQuery.AreaName != null) { area = await areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName); }
 
-            var source = await _sourceService.CheckForExistingCustomSource(missionTasks);
+            var source = await sourceService.CheckForExistingCustomSource(missionTasks);
 
             MissionDefinition? existingMissionDefinition = null;
             if (source == null)
             {
                 try
                 {
-                    string sourceUrl = await _customMissionService.UploadSource(missionTasks);
+                    string sourceUrl = await customMissionService.UploadSource(missionTasks);
                     source = new Source
                     {
                         SourceId = sourceUrl,
@@ -65,14 +44,14 @@ namespace Api.Services.ActionServices
                 {
                     {
                         string errorMessage = $"Unable to upload source for mission {customMissionQuery.Name}";
-                        _logger.LogError(e, "{Message}", errorMessage);
+                        logger.LogError(e, "{Message}", errorMessage);
                         throw new SourceException(errorMessage);
                     }
                 }
             }
             else
             {
-                var missionDefinitions = await _missionDefinitionService.ReadBySourceId(source.SourceId);
+                var missionDefinitions = await missionDefinitionService.ReadBySourceId(source.SourceId);
                 if (missionDefinitions.Count > 0) { existingMissionDefinition = missionDefinitions.First(); }
             }
 
@@ -86,26 +65,26 @@ namespace Api.Services.ActionServices
                 Area = area
             };
 
-            if (existingMissionDefinition == null) { await _missionDefinitionService.Create(customMissionDefinition); }
+            if (existingMissionDefinition == null) { await missionDefinitionService.Create(customMissionDefinition); }
 
             return customMissionDefinition;
         }
 
         public async Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, string robotId, IList<MissionTask> missionTasks)
         {
-            var missionDefinition = await _missionDefinitionService.ReadById(missionDefinitionId);
+            var missionDefinition = await missionDefinitionService.ReadById(missionDefinitionId);
             if (missionDefinition is null)
             {
                 string errorMessage = $"The mission definition with ID {missionDefinition} could not be found";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new MissionNotFoundException(errorMessage);
             }
 
-            var robot = await _robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId);
             if (robot is null)
             {
                 string errorMessage = $"The robot with ID {robotId} could not be found";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new RobotNotFoundException(errorMessage);
             }
 
@@ -125,11 +104,11 @@ namespace Api.Services.ActionServices
                 Map = new MapMetadata()
             };
 
-            await _mapService.AssignMapToMission(scheduledMission);
+            await mapService.AssignMapToMission(scheduledMission);
 
             if (scheduledMission.Tasks.Any()) { scheduledMission.CalculateEstimatedDuration(); }
 
-            return await _missionRunService.Create(scheduledMission);
+            return await missionRunService.Create(scheduledMission);
         }
     }
 }

@@ -120,7 +120,7 @@ namespace Api.EventHandlers
                     return;
                 }
 
-                List<string> updatedFields = new();
+                List<string> updatedFields = [];
 
                 if (isarRobotInfo.VideoStreamQueries is not null) { UpdateVideoStreamsIfChanged(isarRobotInfo.VideoStreamQueries, ref robot, ref updatedFields); }
                 if (isarRobotInfo.Host is not null) { UpdateHostIfChanged(isarRobotInfo.Host, ref robot, ref updatedFields); }
@@ -154,11 +154,11 @@ namespace Api.EventHandlers
 
             var existingVideoStreams = robot.VideoStreams;
             if (updatedStreams.Count == robot.VideoStreams.Count && updatedStreams.TrueForAll(stream => existingVideoStreams.Contains(stream))) { return; }
-
+            var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
             updatedFields.Add(
-                $"\nVideoStreams ({JsonSerializer.Serialize(robot.VideoStreams, new JsonSerializerOptions { WriteIndented = true })} "
+                $"\nVideoStreams ({JsonSerializer.Serialize(robot.VideoStreams, serializerOptions)} "
                 + "\n-> "
-                + $"\n{JsonSerializer.Serialize(updatedStreams, new JsonSerializerOptions { WriteIndented = true })})\n"
+                + $"\n{JsonSerializer.Serialize(updatedStreams, serializerOptions)})\n"
             );
             robot.VideoStreams = updatedStreams;
         }

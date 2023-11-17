@@ -23,15 +23,15 @@ namespace Api.Test.EventHandlers
     [Collection("Database collection")]
     public class TestMissionEventHandler : IDisposable
     {
-        private readonly IAreaService _areaService;
+        private readonly AreaService _areaService;
         private readonly FlotillaDbContext _context;
-        private readonly IDeckService _deckService;
+        private readonly DeckService _deckService;
         private readonly IDefaultLocalizationPoseService _defaultLocalisationPoseService;
-        private readonly IInstallationService _installationService;
+        private readonly InstallationService _installationService;
         private readonly IIsarService _isarServiceMock;
 
         private readonly MissionEventHandler _missionEventHandler;
-        private readonly IMissionRunService _missionRunService;
+        private readonly MissionRunService _missionRunService;
         private readonly IMissionSchedulingService _missionSchedulingService;
 
 #pragma warning disable IDE0052
@@ -39,10 +39,10 @@ namespace Api.Test.EventHandlers
 #pragma warning restore IDE0052
 
         private readonly MqttService _mqttService;
-        private readonly IPlantService _plantService;
+        private readonly PlantService _plantService;
         private readonly RobotControllerMock _robotControllerMock;
-        private readonly IRobotModelService _robotModelService;
-        private readonly IRobotService _robotService;
+        private readonly RobotModelService _robotModelService;
+        private readonly RobotService _robotService;
         private readonly ISignalRService _signalRService;
 
         public TestMissionEventHandler(DatabaseFixture fixture)
@@ -316,10 +316,9 @@ namespace Api.Test.EventHandlers
             var ongoingMission = await _missionRunService.ReadAll(
                 new MissionRunQueryStringParameters
                 {
-                    Statuses = new List<MissionStatus>
-                    {
+                    Statuses = [
                         MissionStatus.Ongoing
-                    },
+                    ],
                     OrderBy = "DesiredStartTime",
                     PageSize = 100
                 });
