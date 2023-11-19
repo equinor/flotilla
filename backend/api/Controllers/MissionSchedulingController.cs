@@ -175,7 +175,7 @@ namespace Api.Controllers
             {
                 const string Message =
                     "Can not schedule mission because EchoMission is invalid. One or more tasks does not contain a robot pose";
-                _logger.LogError(e, "Message", Message);
+                _logger.LogError(e, "Message: {errorMessage}", Message);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
 
