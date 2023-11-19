@@ -130,7 +130,7 @@ namespace Api.Services
                     map.Name,
                     e.Message
                 );
-                throw e;
+                throw;
             }
             catch (KeyNotFoundException e)
             {
@@ -139,7 +139,7 @@ namespace Api.Services
                     map.Name,
                     e.Message
                 );
-                throw e;
+                throw;
             }
         }
 
@@ -161,7 +161,7 @@ namespace Api.Services
                     map.Name,
                     e.Message
                 );
-                throw e;
+                throw;
             }
         }
 
