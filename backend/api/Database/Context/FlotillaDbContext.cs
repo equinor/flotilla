@@ -11,6 +11,7 @@ namespace Api.Database.Context
         public DbSet<MissionRun> MissionRuns => Set<MissionRun>();
         public DbSet<MissionTask> MissionTasks => Set<MissionTask>();
         public DbSet<Inspection> Inspections => Set<Inspection>();
+        public DbSet<InspectionFinding> InspectionFindings => Set<InspectionFinding>();
         public DbSet<MissionDefinition> MissionDefinitions => Set<MissionDefinition>();
         public DbSet<Plant> Plants => Set<Plant>();
         public DbSet<Installation> Installations => Set<Installation>();
@@ -48,11 +49,11 @@ namespace Api.Database.Context
                     }
                 );
             });
-            modelBuilder.Entity<Inspection>(inspectionEntity =>
-            {
-                if (isSqlLite) { AddConverterForDateTimeOffsets(ref inspectionEntity); }
-                inspectionEntity.OwnsMany(i => i.InspectionFindings);
-            });
+            // modelBuilder.Entity<Inspection>(inspectionEntity =>
+            //{
+            //    if (isSqlLite) { AddConverterForDateTimeOffsets(ref inspectionEntity); }
+            //   inspectionEntity.OwnsMany(i => i.InspectionFindings);
+            //});
 
             modelBuilder.Entity<MissionDefinition>()
                 .Property(m => m.InspectionFrequency)
