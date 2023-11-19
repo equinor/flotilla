@@ -68,7 +68,8 @@ namespace Api.Services
             var inspectionFindings = new InspectionFinding
             {
                 InspectionDate = inspectionFindingsQuery.InspectionDate,
-                Findings = inspectionFindingsQuery.Findings
+                Findings = inspectionFindingsQuery.Findings,
+                IsarStepId = isarStepId,
             };
 
             inspection.InspectionFindings.Add(inspectionFindings);
