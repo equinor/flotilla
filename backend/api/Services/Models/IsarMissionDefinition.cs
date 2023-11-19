@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 using Api.Database.Models;
 namespace Api.Services.Models
 {
@@ -91,7 +92,7 @@ namespace Api.Services.Models
             {
                 { "map", missionRun.Map?.MapName },
                 { "description", missionRun.Description },
-                { "estimated_duration", missionRun.EstimatedDuration.ToString() },
+                { "estimated_duration", missionRun.EstimatedDuration?.ToString("D", CultureInfo.InvariantCulture) },
                 { "asset_code", missionRun.InstallationCode },
                 { "mission_name", missionRun.Name },
                 { "status_reason", missionRun.StatusReason },

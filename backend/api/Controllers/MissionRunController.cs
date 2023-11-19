@@ -57,7 +57,7 @@ namespace Api.Controllers
             }
             catch (InvalidDataException e)
             {
-                _logger.LogError(e, "Message", e.Message);
+                _logger.LogError(e, "Message: {errorMessage}", e.Message);
                 return BadRequest(e.Message);
             }
 
