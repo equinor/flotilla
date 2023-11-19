@@ -49,11 +49,6 @@ namespace Api.Database.Context
                     }
                 );
             });
-            // modelBuilder.Entity<Inspection>(inspectionEntity =>
-            //{
-            //    if (isSqlLite) { AddConverterForDateTimeOffsets(ref inspectionEntity); }
-            //   inspectionEntity.OwnsMany(i => i.InspectionFindings);
-            //});
 
             modelBuilder.Entity<MissionDefinition>()
                 .Property(m => m.InspectionFrequency)

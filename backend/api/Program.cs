@@ -91,8 +91,8 @@ builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
 
 builder.Services.AddTransient<ISignalRService, SignalRService>();
-builder.Services.AddTransient<IHostedService, InspectionFindingService>();
 
+builder.Services.AddHostedService<InspectionFindingService>();
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MissionEventHandler>();
 builder.Services.AddHostedService<MqttService>();
