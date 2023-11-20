@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
+using Api.Test.Database;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -15,9 +14,10 @@ namespace Api.Test.Services
     public class MissionServiceTest : IDisposable
     {
         private readonly FlotillaDbContext _context;
+        private readonly DatabaseUtilities _databaseUtilities;
         private readonly ILogger<MissionRunService> _logger;
-        private readonly ISignalRService _signalRService;
         private readonly MissionRunService _missionRunService;
+        private readonly ISignalRService _signalRService;
 
         public MissionServiceTest(DatabaseFixture fixture)
         {
@@ -25,6 +25,7 @@ namespace Api.Test.Services
             _logger = new Mock<ILogger<MissionRunService>>().Object;
             _signalRService = new MockSignalRService();
             _missionRunService = new MissionRunService(_context, _signalRService, _logger);
+            _databaseUtilities = new DatabaseUtilities(_context);
         }
 
         public void Dispose()
@@ -40,54 +41,26 @@ namespace Api.Test.Services
             Assert.Null(missionRun);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Awaiting fix for testing with database")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async Task Create()
         {
-            var robot = _context.Robots.First();
-            var reportsBefore = await _missionRunService.ReadAll(new MissionRunQueryStringParameters());
+            var reportsBefore = await _missionRunService.ReadAll(
+                new MissionRunQueryStringParameters()
+            );
             int nReportsBefore = reportsBefore.Count;
-            var testInstallation = new Installation
-            {
-                InstallationCode = "test",
-                Name = "test test"
-            };
-            var testPlant = new Plant
-            {
-                PlantCode = "test",
-                Name = "test test",
-                Installation = testInstallation
-            };
 
-            MissionRun missionRun =
-                new()
-                {
-                    Name = "testMission",
-                    Robot = robot,
-                    MissionId = Guid.NewGuid().ToString(),
-                    Map = new MapMetadata { MapName = "testMap" },
-                    Area = new Area
-                    {
-                        Deck = new Deck
-                        {
-                            Plant = testPlant,
-                            Installation = testInstallation,
-                            Name = "testDeck"
-                        },
-                        Installation = testInstallation,
-                        Plant = testPlant,
-                        Name = "testArea",
-                        MapMetadata = new MapMetadata { MapName = "testMap" },
-                        DefaultLocalizationPose = null,
-                        SafePositions = new List<SafePosition>()
-                    },
-                    InstallationCode = "testInstallation",
-                    DesiredStartTime = DateTime.Now
-                };
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, area);
+            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
             await _missionRunService.Create(missionRun);
-            var reportsAfter = await _missionRunService.ReadAll(new MissionRunQueryStringParameters());
+
+            var reportsAfter = await _missionRunService.ReadAll(
+                new MissionRunQueryStringParameters()
+            );
             int nReportsAfter = reportsAfter.Count;
             Assert.Equal(nReportsBefore + 1, nReportsAfter);
         }
