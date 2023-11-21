@@ -3,14 +3,14 @@ import { Mission } from 'models/Mission'
 import { MapMetadata } from 'models/MapMetadata'
 import { Pose } from 'models/Pose'
 import { Task, TaskStatus } from 'models/Task'
-import { GetColorsFromTaskStatus } from './MarkerStyles'
+import { getColorsFromTaskStatus } from './MarkerStyles'
 
 interface ObjectPosition {
     x: number
     y: number
 }
 
-export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, currentTaskOrder?: number) => {
+export const placeTagsInMap = (mission: Mission, map: HTMLCanvasElement, currentTaskOrder?: number) => {
     const maxTaskOrder: number = Math.max(
         ...mission.tasks.map((task) => {
             return task.taskOrder
@@ -31,14 +31,14 @@ export const PlaceTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
     })
 }
 
-export const PlaceRobotInMap = (mapMetadata: MapMetadata, map: HTMLCanvasElement, robotPose: Pose) => {
+export const placeRobotInMap = (mapMetadata: MapMetadata, map: HTMLCanvasElement, robotPose: Pose) => {
     const pixelPosition = calculateObjectPixelPosition(mapMetadata, robotPose.position)
     const rad = calculateNavigatorAngle(robotPose)
     drawRobotMarker(pixelPosition[0], pixelPosition[1], map, 22)
     drawNavigator(pixelPosition[0], pixelPosition[1], map, rad)
 }
 
-export const InverseCalculatePixelPosition = (mapMetadata: MapMetadata, pixelPosition: ObjectPosition) => {
+export const inverseCalculatePixelPosition = (mapMetadata: MapMetadata, pixelPosition: ObjectPosition) => {
     const p1 = pixelPosition.x
     const p2 = pixelPosition.y
 
@@ -105,7 +105,7 @@ const drawTagMarker = (
         return
     }
 
-    const colors = GetColorsFromTaskStatus(taskStatus)
+    const colors = getColorsFromTaskStatus(taskStatus)
 
     context.beginPath()
     const path = new Path2D()

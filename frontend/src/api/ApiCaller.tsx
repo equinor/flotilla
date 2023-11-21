@@ -12,7 +12,7 @@ import { Area } from 'models/Area'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 import { TaskStatus } from 'models/Task'
-import { CreateCustomMission, CustomMissionQuery } from 'models/CustomMission'
+import { createCustomMission, CustomMissionQuery } from 'models/CustomMission'
 import { MapMetadata } from 'models/MapMetadata'
 import { CondensedMissionDefinition, EchoMissionDefinition } from 'models/MissionDefinition'
 import { EchoMission } from 'models/EchoMission'
@@ -462,7 +462,7 @@ export class BackendAPICaller {
             }
         }
 
-        const customMission = CreateCustomMission(mission)
+        const customMission = createCustomMission(mission)
 
         const path: string = 'missions/custom'
         const body = customMission

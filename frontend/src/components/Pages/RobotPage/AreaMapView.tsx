@@ -2,7 +2,7 @@ import { CircularProgress, Typography } from '@equinor/eds-core-react'
 import { MouseEvent, useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
-import { PlaceRobotInMap, InverseCalculatePixelPosition } from 'utils/MapMarkers'
+import { placeRobotInMap, inverseCalculatePixelPosition } from 'utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { MapMetadata } from 'models/MapMetadata'
 import { Area } from 'models/Area'
@@ -60,7 +60,7 @@ export function AreaMapView({ area, localizationPose, setLocalizationPose }: Are
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
         if (mapMetadata) {
-            PlaceRobotInMap(mapMetadata, mapCanvas, localizationPose)
+            placeRobotInMap(mapMetadata, mapCanvas, localizationPose)
         }
     }, [mapCanvas, mapImage, mapMetadata, localizationPose])
 
@@ -137,7 +137,7 @@ export function AreaMapView({ area, localizationPose, setLocalizationPose }: Are
         if (!mapMetadata) {
             return
         }
-        const assetPosition = InverseCalculatePixelPosition(mapMetadata, pixelPosition)
+        const assetPosition = inverseCalculatePixelPosition(mapMetadata, pixelPosition)
         if (!area.defaultLocalizationPose) {
             return
         }
