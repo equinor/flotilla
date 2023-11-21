@@ -41,7 +41,7 @@ export const SelectMissionsToScheduleDialog = ({
     echoMissions,
     closeDialog,
     setLoadingMissionSet,
-}: ScheduleDialogProps) => {
+}: ScheduleDialogProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
     const { installationCode } = useInstallationContext()

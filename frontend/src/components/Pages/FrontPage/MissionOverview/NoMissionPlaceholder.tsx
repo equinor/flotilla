@@ -19,7 +19,7 @@ const StyledPlaceholder = styled.div`
     flex-grow: 1;
 `
 
-export function NoOngoingMissionsPlaceholder() {
+export const NoOngoingMissionsPlaceholder = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledPlaceholder>
@@ -31,7 +31,7 @@ export function NoOngoingMissionsPlaceholder() {
     )
 }
 
-export function EmptyMissionQueuePlaceholder() {
+export const EmptyMissionQueuePlaceholder = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledPlaceholder>

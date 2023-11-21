@@ -39,7 +39,7 @@ const BottomContent = styled.div`
     display: flex;
     justify-content: space-between;
 `
-export function OngoingMissionCard({ mission }: MissionProps) {
+export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
     let navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
