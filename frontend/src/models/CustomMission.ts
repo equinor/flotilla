@@ -29,7 +29,7 @@ export interface CustomInspectionQuery {
     analysisType?: string
 }
 
-export function CreateCustomMission(mission: Mission): CustomMissionQuery {
+export const createCustomMission = (mission: Mission): CustomMissionQuery => {
     const customMission: CustomMissionQuery = {
         name: mission.name,
         description: mission.description,

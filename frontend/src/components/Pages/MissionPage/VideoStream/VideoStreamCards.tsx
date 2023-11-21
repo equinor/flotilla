@@ -1,6 +1,6 @@
 import { Card, Typography, Icon, Button } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { VideoPlayerOvenPlayer, IsValidOvenPlayerType } from './VideoPlayerOvenPlayer'
+import { VideoPlayerOvenPlayer, isValidOvenPlayerType } from './VideoPlayerOvenPlayer'
 import { VideoPlayerSimple } from './VideoPlayerSimple'
 import { VideoStream } from 'models/VideoStream'
 import styled from 'styled-components'
@@ -56,7 +56,7 @@ export function VideoStreamCard({ videoStream, toggleFullScreenMode, setFullScre
     )
 
     const getVideoPlayer = () => {
-        if (IsValidOvenPlayerType({ videoStream })) {
+        if (isValidOvenPlayerType(videoStream)) {
             if (videoStream.shouldRotate270Clockwise) {
                 return (
                     <StyledVideoSectionRotated>

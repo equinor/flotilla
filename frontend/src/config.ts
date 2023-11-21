@@ -1,6 +1,6 @@
 const globalVars = window as any
 
-function GetEnvVariable(name: string): string {
+function getEnvVariable(name: string): string {
     const value = process.env[name]
     if (value === undefined) {
         console.warn('Environment variable named "' + name + '" undefined. Attempting to use global variable.')
@@ -18,11 +18,11 @@ function GetEnvVariable(name: string): string {
 }
 
 export const config = {
-    BACKEND_URL: GetEnvVariable('REACT_APP_BACKEND_URL'),
-    BACKEND_API_SCOPE: GetEnvVariable('REACT_APP_BACKEND_API_SCOPE'),
-    BACKEND_API_SIGNALR_URL: GetEnvVariable('REACT_APP_BACKEND_URL') + '/hub',
-    FRONTEND_URL: GetEnvVariable('REACT_APP_FRONTEND_URL'),
-    FRONTEND_BASE_ROUTE: GetEnvVariable('REACT_APP_FRONTEND_BASE_ROUTE'),
-    AD_CLIENT_ID: GetEnvVariable('REACT_APP_AD_CLIENT_ID'),
-    AD_TENANT_ID: GetEnvVariable('REACT_APP_AD_TENANT_ID'),
+    BACKEND_URL: getEnvVariable('REACT_APP_BACKEND_URL'),
+    BACKEND_API_SCOPE: getEnvVariable('REACT_APP_BACKEND_API_SCOPE'),
+    BACKEND_API_SIGNALR_URL: getEnvVariable('REACT_APP_BACKEND_URL') + '/hub',
+    FRONTEND_URL: getEnvVariable('REACT_APP_FRONTEND_URL'),
+    FRONTEND_BASE_ROUTE: getEnvVariable('REACT_APP_FRONTEND_BASE_ROUTE'),
+    AD_CLIENT_ID: getEnvVariable('REACT_APP_AD_CLIENT_ID'),
+    AD_TENANT_ID: getEnvVariable('REACT_APP_AD_TENANT_ID'),
 }

@@ -41,7 +41,7 @@ export function VideoPlayerOvenPlayer({ videoStream }: IVideoPlayerProps) {
     return <div id={videoStream.id} />
 }
 
-export function IsValidOvenPlayerType({ videoStream }: IVideoPlayerProps) {
+export const isValidOvenPlayerType = (videoStream: VideoStream) => {
     const validTypes = ['webrtc', 'hls', 'llhls', 'dash', 'lldash', 'mp4']
     return validTypes.includes(videoStream.type)
 }

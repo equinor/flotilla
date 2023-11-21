@@ -1,4 +1,4 @@
-import { VideoPlayerOvenPlayer, IsValidOvenPlayerType } from './VideoPlayerOvenPlayer'
+import { VideoPlayerOvenPlayer, isValidOvenPlayerType } from './VideoPlayerOvenPlayer'
 import { VideoPlayerSimple } from './VideoPlayerSimple'
 import { VideoStream } from 'models/VideoStream'
 import styled from 'styled-components'
@@ -82,7 +82,7 @@ export function FullScreenVideoStreamCard({ videoStream, toggleFullScreenMode }:
         )
     }
 
-    if (IsValidOvenPlayerType({ videoStream })) {
+    if (isValidOvenPlayerType(videoStream)) {
         if (videoStream.shouldRotate270Clockwise) {
             return (
                 <FullScreenCardRotated style={{ boxShadow: tokens.elevation.raised, width: rotatedCardWidth() }}>

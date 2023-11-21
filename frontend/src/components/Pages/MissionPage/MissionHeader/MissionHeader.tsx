@@ -45,12 +45,14 @@ function HeaderText(text: string) {
     )
 }
 
-function StartUsedAndRemainingTime(mission: Mission): {
+const startUsedAndRemainingTime = (
+    mission: Mission
+): {
     startTime: string
     startDate: string
     usedTime: string
     remainingTime: string
-} {
+} => {
     var startTime: string
     var startDate: string
     var remainingTime: string
@@ -109,7 +111,7 @@ export function MissionHeader({ mission }: MissionHeaderProps) {
     const translatedPressureLevel = TranslateText('Pressure level')
     const translatedDescription = TranslateText('Description')
 
-    const { startTime, startDate, usedTime, remainingTime } = StartUsedAndRemainingTime(mission)
+    const { startTime, startDate, usedTime, remainingTime } = startUsedAndRemainingTime(mission)
     const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
 
     return (

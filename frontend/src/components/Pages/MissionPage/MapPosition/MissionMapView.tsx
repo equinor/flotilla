@@ -4,7 +4,7 @@ import { Mission } from 'models/Mission'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
-import { PlaceRobotInMap, PlaceTagsInMap } from 'utils/MapMarkers'
+import { placeRobotInMap, placeTagsInMap } from 'utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
 import { MapCompass } from 'utils/MapCompass'
@@ -53,9 +53,9 @@ export function MissionMapView({ mission }: MissionProps) {
         }
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
-        PlaceTagsInMap(mission, mapCanvas, currentTaskOrder)
+        placeTagsInMap(mission, mapCanvas, currentTaskOrder)
         if (mission.robot.pose && mission.map) {
-            PlaceRobotInMap(mission.map, mapCanvas, mission.robot.pose)
+            placeRobotInMap(mission.map, mapCanvas, mission.robot.pose)
         }
     }, [currentTaskOrder, mapCanvas, mapImage, mission])
 
