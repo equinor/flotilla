@@ -1,14 +1,13 @@
 import { Card, Typography } from '@equinor/eds-core-react'
-import { Robot } from 'models/Robot'
+import { Robot, RobotStatus } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusChip'
-import BatteryStatusDisplay from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
+import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import styled from 'styled-components'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { useNavigate } from 'react-router-dom'
-import { BatteryStatus } from 'models/Battery'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import PressureStatusDisplay from 'components/Displays/RobotDisplays/PressureStatusDisplay'
+import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { config } from 'config'
 import { RobotType } from 'models/RobotModel'
 
@@ -48,34 +47,6 @@ const StyledPadding = styled.div`
     padding: 8px;
 `
 
-function cardContent({ robot }: RobotProps) {
-    return (
-        <StyledPadding>
-            <RobotImage robotType={robot.model.type} height="200px" />
-            <HorizontalContent>
-                <VerticalContent $alignItems="start">
-                    <Typography variant="h5">{robot.name}</Typography>
-                    <Typography variant="caption">{robot.model.type}</Typography>
-                    <RobotStatusChip status={robot.status} />
-                </VerticalContent>
-                <VerticalContent $alignItems="end">
-                    <PressureStatusDisplay
-                        pressureInBar={robot.pressureLevel}
-                        upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
-                        lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
-                        robotStatus={robot.status}
-                    />
-                    <BatteryStatusDisplay
-                        battery={robot.batteryLevel}
-                        batteryStatus={BatteryStatus.Normal}
-                        robotStatus={robot.status}
-                    />
-                </VerticalContent>
-            </HorizontalContent>
-        </StyledPadding>
-    )
-}
-
 export function RobotStatusCard({ robot }: RobotProps) {
     let navigate = useNavigate()
     const goToRobot = () => {
@@ -84,7 +55,30 @@ export function RobotStatusCard({ robot }: RobotProps) {
     }
     return (
         <HoverableStyledCard style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
-            {cardContent({ robot })}
+            <StyledPadding>
+                <RobotImage robotType={robot.model.type} height="200px" />
+                <HorizontalContent>
+                    <VerticalContent $alignItems="start">
+                        <Typography variant="h5">{robot.name}</Typography>
+                        <Typography variant="caption">{robot.model.type}</Typography>
+                        <RobotStatusChip status={robot.status} />
+                    </VerticalContent>
+                    <VerticalContent $alignItems="end">
+                        {robot.status !== RobotStatus.Offline ? (
+                            <>
+                                <PressureStatusDisplay
+                                    pressureInBar={robot.pressureLevel}
+                                    upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
+                                    lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
+                                />
+                                <BatteryStatusDisplay batteryLevel={robot.batteryLevel} />
+                            </>
+                        ) : (
+                            <></>
+                        )}
+                    </VerticalContent>
+                </HorizontalContent>
+            </StyledPadding>
         </HoverableStyledCard>
     )
 }

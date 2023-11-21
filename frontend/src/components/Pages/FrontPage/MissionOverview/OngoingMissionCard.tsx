@@ -7,8 +7,7 @@ import { MissionProgressDisplay } from 'components/Displays/MissionDisplays/Miss
 import { MissionStatusDisplayWithHeader } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { MissionControlButtons } from 'components/Displays/MissionButtons/MissionControlButtons'
-import BatteryStatusDisplay from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
-import { BatteryStatus } from 'models/Battery'
+import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import { MissionRobotDisplay } from 'components/Displays/MissionDisplays/MissionRobotDisplay'
 
 interface MissionProps {
@@ -59,11 +58,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                 <MissionStatusDisplayWithHeader status={mission.status} />
                 <MissionProgressDisplay mission={mission} />
                 <MissionRobotDisplay mission={mission} />
-                <BatteryStatusDisplay
-                    battery={mission.robot.batteryLevel}
-                    batteryStatus={BatteryStatus.Normal}
-                    robotStatus={mission.robot.status}
-                />
+                <BatteryStatusDisplay batteryLevel={mission.robot.batteryLevel} />
             </BottomContent>
         </StyledMissionCard>
     )

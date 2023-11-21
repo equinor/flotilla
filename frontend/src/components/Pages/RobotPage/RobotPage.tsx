@@ -9,9 +9,8 @@ import { LocalizationSection } from './LocalizationSection'
 import { Header } from 'components/Header/Header'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { MoveRobotArm } from './RobotArmMovement'
-import PressureStatusDisplay from 'components/Displays/RobotDisplays/PressureStatusDisplay'
-import BatteryStatusDisplay from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
-import { BatteryStatus } from 'models/Battery'
+import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
+import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusChip'
 import { RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -84,12 +83,7 @@ export function RobotPage() {
                             <VerticalContent $alignItems="start">
                                 {selectedRobot.status !== RobotStatus.Offline && (
                                     <>
-                                        <BatteryStatusDisplay
-                                            itemSize={48}
-                                            battery={selectedRobot.batteryLevel}
-                                            batteryStatus={BatteryStatus.Normal}
-                                            robotStatus={selectedRobot.status}
-                                        />
+                                        <BatteryStatusDisplay itemSize={48} batteryLevel={selectedRobot.batteryLevel} />
                                         {selectedRobot.model.upperPressureWarningThreshold && (
                                             <PressureStatusDisplay
                                                 itemSize={48}
@@ -100,7 +94,6 @@ export function RobotPage() {
                                                 lowerPressureWarningThreshold={
                                                     selectedRobot.model.lowerPressureWarningThreshold
                                                 }
-                                                robotStatus={selectedRobot.status}
                                             />
                                         )}
                                     </>
