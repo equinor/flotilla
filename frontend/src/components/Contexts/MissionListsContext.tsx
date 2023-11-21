@@ -114,7 +114,7 @@ export const useMissions = (): MissionsResult => {
                 })
             })
         }
-    }, [registerEvent, connectionReady])
+    }, [registerEvent, connectionReady, missionQueue])
 
     useEffect(() => {
         const fetchAndUpdateMissions = async () => {
@@ -134,7 +134,7 @@ export const useMissions = (): MissionsResult => {
         }
 
         if (BackendAPICaller.accessToken) fetchAndUpdateMissions()
-    }, [BackendAPICaller.accessToken])
+    }, [])
 
     return { ongoingMissions, missionQueue }
 }
