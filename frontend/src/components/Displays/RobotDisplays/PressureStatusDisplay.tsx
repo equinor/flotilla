@@ -3,7 +3,6 @@ import { Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 import { PressureStatus } from 'models/Pressure'
-import { RobotStatus } from 'models/Robot'
 
 const PressureAlignment = styled.div`
     display: flex;
@@ -20,11 +19,9 @@ export interface PressureStatusDisplayProps {
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
     upperPressureWarningThreshold?: number
     lowerPressureWarningThreshold?: number
-    robotStatus: RobotStatus
 }
 
-const PressureStatusDisplay = ({
-    robotStatus,
+export const PressureStatusDisplay = ({
     pressureInBar,
     itemSize,
     upperPressureWarningThreshold,
@@ -39,9 +36,6 @@ const PressureStatusDisplay = ({
         pressureInMilliBar = ''
         pressureStatus = PressureStatus.Default
         return <></>
-    } else if (robotStatus === RobotStatus.Offline) {
-        pressureInMilliBar = ''
-        pressureStatus = PressureStatus.Default
     } else if (!upperPressureWarningThreshold || !lowerPressureWarningThreshold) {
         pressureStatus = PressureStatus.Normal
     } else {
@@ -76,5 +70,3 @@ const PressureStatusDisplay = ({
         </PressureAlignment>
     )
 }
-
-export default PressureStatusDisplay
