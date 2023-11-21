@@ -21,7 +21,7 @@ const StyledMissionSection = styled.div`
     gap: 10px;
 `
 
-export const NoMissionsDialog = ({ closeDialog }: { closeDialog: () => void }) => {
+export const NoMissionsDialog = ({ closeDialog }: { closeDialog: () => void }): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledMissionDialog>

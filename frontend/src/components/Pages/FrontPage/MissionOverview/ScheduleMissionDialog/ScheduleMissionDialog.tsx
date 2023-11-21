@@ -34,7 +34,7 @@ export const ScheduleMissionDialog = ({ setLoadingMissionSet }: IProps): JSX.Ele
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [isScheduleMissionsPressed, setIsScheduleMissionsPressed] = useState<boolean>(false)
     const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
-    const [frontPageScheduleButtonDisabled, setFrontPageScheduleButtonDisabled] = useState<boolean>(true)
+    const [isFrontPageScheduleButtonDisabled, setIsFrontPageScheduleButtonDisabled] = useState<boolean>(true)
     const [echoMissions, setEchoMissions] = useState<Map<string, EchoMissionDefinition>>(
         new Map<string, EchoMissionDefinition>()
     )
@@ -44,9 +44,9 @@ export const ScheduleMissionDialog = ({ setLoadingMissionSet }: IProps): JSX.Ele
 
     useEffect(() => {
         if (enabledRobots.length === 0 || installationCode === '') {
-            setFrontPageScheduleButtonDisabled(true)
+            setIsFrontPageScheduleButtonDisabled(true)
         } else {
-            setFrontPageScheduleButtonDisabled(false)
+            setIsFrontPageScheduleButtonDisabled(false)
         }
     }, [enabledRobots, installationCode])
 
@@ -77,7 +77,7 @@ export const ScheduleMissionDialog = ({ setLoadingMissionSet }: IProps): JSX.Ele
 
     let timer: ReturnType<typeof setTimeout>
     const openPopover = () => {
-        if (frontPageScheduleButtonDisabled) setIsPopoverOpen(true)
+        if (isFrontPageScheduleButtonDisabled) setIsPopoverOpen(true)
     }
 
     const closePopover = () => setIsPopoverOpen(false)
@@ -111,7 +111,7 @@ export const ScheduleMissionDialog = ({ setLoadingMissionSet }: IProps): JSX.Ele
                     onClick={() => {
                         onClickScheduleMission()
                     }}
-                    disabled={frontPageScheduleButtonDisabled}
+                    disabled={isFrontPageScheduleButtonDisabled}
                     ref={anchorRef}
                 >
                     <>

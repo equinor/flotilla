@@ -32,7 +32,7 @@ const OngoingMissionHeader = styled.div`
     gap: 0.5rem;
 `
 
-export function OngoingMissionView() {
+export const OngoingMissionView = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
     const { installationCode } = useInstallationContext()

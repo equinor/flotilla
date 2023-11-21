@@ -29,7 +29,7 @@ const MissionButtonView = styled.div`
     gap: 1rem;
 `
 
-export function MissionQueueView() {
+export const MissionQueueView = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions } = useMissionsContext()
     const { installationCode } = useInstallationContext()

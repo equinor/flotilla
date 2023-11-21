@@ -69,7 +69,7 @@ const CircularCard = styled(Card)`
     align-items: center;
 `
 
-export function MissionQueueCard({ order, mission, onDeleteMission }: MissionQueueCardProps) {
+export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQueueCardProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const routeChange = () => {
