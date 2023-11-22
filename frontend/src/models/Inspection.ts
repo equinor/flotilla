@@ -1,9 +1,12 @@
+import { Position } from './Position'
+
 export interface Inspection {
     id: string
     isarStepId?: string
     status: InspectionStatus
     isCompleted: boolean
     inspectionType: InspectionType
+    inspectionTarget: Position
     videoDuration?: number
     analysisType?: string
     inspectionUrl?: string
