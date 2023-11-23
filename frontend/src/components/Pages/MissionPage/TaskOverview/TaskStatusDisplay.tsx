@@ -15,7 +15,7 @@ const StyledStatusDisplay = styled.div`
     align-items: flex-end;
 `
 
-function displayIcon(status: TaskStatus) {
+const TaskStatusIcon = ({ status }: StatusProps) => {
     switch (status) {
         case TaskStatus.NotStarted: {
             return <Icon name={Icons.Pending} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
@@ -40,7 +40,7 @@ export function TaskStatusDisplay({ status }: StatusProps) {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledStatusDisplay>
-            {displayIcon(status)}
+            <TaskStatusIcon status={status} />
             <Typography>{TranslateText(status)}</Typography>
         </StyledStatusDisplay>
     )
