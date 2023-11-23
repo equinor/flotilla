@@ -14,6 +14,7 @@ namespace Api.Database.Context
         private static readonly List<MissionTask> tasks = GetMissionTasks();
         private static readonly List<MissionDefinition> missionDefinitions = GetMissionDefinitions();
         private static readonly List<MissionRun> missionRuns = GetMissionRuns();
+        private static readonly List<AccessRole> accessRoles = GetAccessRoles();
 
         private static VideoStream VideoStream =>
             new()
@@ -41,6 +42,27 @@ namespace Api.Database.Context
                 InspectionTarget = new Position(),
                 RobotPose = new Pose()
             };
+
+        private static List<AccessRole> GetAccessRoles()
+        {
+            var accessRole1 = new AccessRole
+            {
+                AccessLevel = RoleAccessLevel.USER,
+                RoleName = "Role.User"
+            };
+
+            var accessRole2 = new AccessRole
+            {
+                AccessLevel = RoleAccessLevel.ADMIN,
+                RoleName = "Role.Admin"
+            };
+
+            return new List<AccessRole>(new[]
+            {
+                accessRole1,
+                accessRole2
+            });
+        }
 
         private static List<Installation> GetInstallations()
         {
@@ -618,6 +640,7 @@ namespace Api.Database.Context
             context.AddRange(plants);
             context.AddRange(decks);
             context.AddRange(areas);
+            context.AddRange(accessRoles);
             context.SaveChanges();
         }
     }
