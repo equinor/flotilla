@@ -27,6 +27,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.robotListUpdated, (username: string, message: string) => {
                 let newRobotList: Robot[] = JSON.parse(message)
+                console.log(newRobotList)
                 newRobotList = newRobotList.map((r) => {
                     r.status = Object.values(RobotStatus)[r.status as unknown as number]
                     r.batteryStatus = Object.values(BatteryStatus)[r.batteryStatus as unknown as number]

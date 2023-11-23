@@ -34,7 +34,8 @@ namespace Api.Services
 
             inspection.UpdateStatus(isarStepStatus);
             inspection = await Update(inspection);
-            _ = signalRService.SendMessageAsync("Inspection updated", inspection);
+            // Disabled for now as we need to be able to assign it to an installation to get granular access control
+            // _ = signalRService.SendMessageAsync("Inspection updated", inspection);
             return inspection;
         }
 
@@ -57,7 +58,6 @@ namespace Api.Services
 
         public async Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingQuery, string isarStepId)
         {
-
             var inspection = await ReadByIsarStepId(isarStepId);
 
             if (inspection is null)
@@ -74,7 +74,8 @@ namespace Api.Services
 
             inspection.InspectionFindings.Add(inspectionFinding);
             inspection = await Update(inspection);
-            _ = signalRService.SendMessageAsync("Inspection finding added", inspection);
+            // Disabled for now as we need to be able to assign it to an installation to get granular access control
+            //_ = signalRService.SendMessageAsync("Inspection finding added", inspection);
             return inspection;
         }
     }

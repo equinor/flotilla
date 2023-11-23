@@ -67,7 +67,7 @@ namespace Api.Services
                 context.Entry(robotModel).State = EntityState.Unchanged;
                 await context.Robots.AddAsync(newRobot);
                 await context.SaveChangesAsync();
-                _ = signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
+                _ = signalRService.SendMessageAsync("Robot list updated", null, GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
                 return newRobot;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
@@ -110,7 +110,7 @@ namespace Api.Services
 
             var entry = context.Update(robot);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
+            _ = signalRService.SendMessageAsync("Robot list updated", null, GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
             return entry.Entity;
         }
 
@@ -121,7 +121,7 @@ namespace Api.Services
 
             context.Robots.Remove(robot);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Robot list updated", GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
+            _ = signalRService.SendMessageAsync("Robot list updated", null, GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
             return robot;
         }
 
@@ -172,7 +172,7 @@ namespace Api.Services
                 .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(r => r.CurrentArea)
                 .ThenInclude(area => area != null ? area.SafePositions : null)
-                .Where((r) => accessibleInstallationCodes.Result.Contains(r.CurrentArea.Installation.InstallationCode));
+                .Where((r) => r.CurrentArea == null || accessibleInstallationCodes.Result.Contains(r.CurrentArea.Installation.InstallationCode.ToUpper()));
         }
 
         private IQueryable<Robot> GetEnabledRobotsWithSubModels()

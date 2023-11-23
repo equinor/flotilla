@@ -107,7 +107,7 @@ namespace Api.Services
 
             var entry = context.Update(missionDefinition);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Mission definition updated", new CondensedMissionDefinitionResponse(missionDefinition));
+            _ = signalRService.SendMessageAsync("Mission definition updated", missionDefinition?.Area?.Installation, new CondensedMissionDefinitionResponse(missionDefinition));
             return entry.Entity;
         }
 
@@ -169,7 +169,7 @@ namespace Api.Services
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
                 .ThenInclude(missionTask => missionTask.Inspections)
                 .ThenInclude(inspection => inspection.InspectionFindings)
-                .Where((m) => accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode));
+                .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()));
         }
 
         private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)

@@ -183,7 +183,7 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.Areas.Include(a => a.SafePositions)
                 .Include(a => a.Deck).Include(d => d.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
-                .Where((a) => accessibleInstallationCodes.Result.Contains(a.Installation.InstallationCode)); ;
+                .Where((a) => accessibleInstallationCodes.Result.Contains(a.Installation.InstallationCode.ToUpper()));
         }
 
         public async Task<Area?> ReadByInstallationAndName(Installation? installation, string areaName)

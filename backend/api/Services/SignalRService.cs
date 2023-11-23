@@ -1,42 +1,33 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
+using Api.Database.Models;
 using Api.SignalRHubs;
 using Microsoft.AspNetCore.SignalR;
 namespace Api.Services
 {
     public interface ISignalRService
     {
-        public Task SendMessageAsync<T>(string label, T messageObject);
-        public Task SendMessageAsync<T>(string label, string user, T messageObject);
-        public Task SendMessageAsync(string label, string message);
-        public Task SendMessageAsync(string label, string user, string message);
+        public Task SendMessageAsync<T>(string label, Installation? installation, T messageObject);
+        public Task SendMessageAsync(string label, Installation? installation, string message);
     }
 
     public class SignalRService(IHubContext<SignalRHub> signalRHub) : ISignalRService
     {
         private readonly JsonSerializerOptions _serializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-        public async Task SendMessageAsync<T>(string label, T messageObject)
+        public async Task SendMessageAsync<T>(string label, Installation? installation, T messageObject)
         {
             string json = JsonSerializer.Serialize(messageObject, _serializerOptions);
-            await signalRHub.Clients.All.SendAsync(label, "all", json);
-            await Task.CompletedTask;
+            await SendMessageAsync(label, installation, json);
         }
 
-        public async Task SendMessageAsync<T>(string label, string user, T messageObject)
+        public async Task SendMessageAsync(string label, Installation? installation, string message)
         {
-            await signalRHub.Clients.All.SendAsync(label, user, JsonSerializer.Serialize(messageObject, _serializerOptions));
-            await Task.CompletedTask;
-        }
+            if (installation != null)
+                await signalRHub.Clients.Group(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)).SendAsync(label, "all", message);
+            else
+                await signalRHub.Clients.All.SendAsync(label, "all", message);
 
-        public async Task SendMessageAsync(string label, string message)
-        {
-            await signalRHub.Clients.All.SendAsync(label, "all", message);
-            await Task.CompletedTask;
-        }
-
-        public async Task SendMessageAsync(string label, string user, string message)
-        {
-            await signalRHub.Clients.All.SendAsync(label, user, message);
             await Task.CompletedTask;
         }
     }

@@ -141,7 +141,7 @@ namespace Api.Services
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
-                .Where((d) => accessibleInstallationCodes.Result.Contains(d.Installation.InstallationCode));
+                .Where((d) => accessibleInstallationCodes.Result.Contains(d.Installation.InstallationCode.ToUpper()));
         }
     }
 }
