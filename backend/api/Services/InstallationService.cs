@@ -42,7 +42,7 @@ namespace Api.Services
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.Installations
-                .Where((i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode));
+                .Where((i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper()));
         }
 
         public async Task<Installation?> ReadById(string id)

@@ -256,9 +256,9 @@ namespace Api.EventHandlers
             catch (MissionTaskNotFoundException) { return; }
 
             var missionRun = await missionRunService.ReadByIsarMissionId(task.MissionId);
-            if (missionRun is null) { _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId); }
+            if (missionRun is null) _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId);
 
-            _ = signalRService.SendMessageAsync("Mission run updated", missionRun);
+            _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun);
 
             _logger.LogInformation(
                 "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", task.TaskId, task.Status, task.RobotName, task.IsarId);
@@ -291,7 +291,7 @@ namespace Api.EventHandlers
             var missionRun = await missionRunService.ReadByIsarMissionId(step.MissionId);
             if (missionRun is null) { _logger.LogWarning("Mission run with ID {Id} was not found", step.MissionId); }
 
-            _ = signalRService.SendMessageAsync("Mission run updated", missionRun);
+            _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun);
 
             _logger.LogInformation(
                 "Inspection '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", step.StepId, step.Status, step.RobotName, step.IsarId);

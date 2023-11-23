@@ -61,7 +61,7 @@ namespace Api.Services
 
             await context.MissionRuns.AddAsync(missionRun);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Mission run created", missionRun);
+            _ = signalRService.SendMessageAsync("Mission run created", missionRun?.Area?.Installation, missionRun);
 
             var args = new MissionRunCreatedEventArgs(missionRun.Id);
             OnMissionRunCreated(args);
@@ -133,7 +133,7 @@ namespace Api.Services
 
             var entry = context.Update(missionRun);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Mission run updated", new MissionRunResponse(missionRun));
+            _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
             return entry.Entity;
         }
 
@@ -148,7 +148,7 @@ namespace Api.Services
 
             context.MissionRuns.Remove(missionRun);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Mission run deleted", new MissionRunResponse(missionRun));
+            _ = signalRService.SendMessageAsync("Mission run deleted", missionRun?.Area?.Installation,  missionRun != null ? new MissionRunResponse(missionRun) : null);
 
             return missionRun;
         }
@@ -169,7 +169,7 @@ namespace Api.Services
                 .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspections)
-                .Where((m) => accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode)); ;
+                .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper())); ;
         }
 
         protected virtual void OnMissionRunCreated(MissionRunCreatedEventArgs e)
@@ -356,8 +356,8 @@ namespace Api.Services
 
             missionRun = await Update(missionRun);
 
-            if (missionRun.Status == MissionStatus.Failed) { _ = signalRService.SendMessageAsync("Mission run failed", new MissionRunResponse(missionRun)); }
-            return missionRun;
+            if (missionRun.Status == MissionStatus.Failed) { _ = signalRService.SendMessageAsync("Mission run failed", missionRun?.Area?.Installation,  missionRun != null ? new MissionRunResponse(missionRun) : null); }
+            return missionRun!;
         }
 
         #endregion ISAR Specific methods

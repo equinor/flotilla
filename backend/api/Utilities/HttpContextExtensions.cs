@@ -2,8 +2,6 @@
 
 namespace Api.Utilities
 {
-    public readonly record struct ExecutorIdentity(string ObjectId, string? ExecutorName);
-
     public static class HttpContextExtensions
     {
         public static string GetRequestToken(this HttpContext client)

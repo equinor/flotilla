@@ -1,15 +1,31 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Api.Services;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Api.SignalRHubs
 {
     public interface ISignalRClient
     {
-        Task ReceiveMessage(string user, string message);
     }
 
-    public class SignalRHub : Hub<ISignalRClient>
+    public class SignalRHub(IAccessRoleService accessRoleService) : Hub<ISignalRClient>
     {
-        public async Task SendMessage(string user, string message)
-            => await Clients.All.ReceiveMessage(user, message);
+        /// <summary>
+        /// Called when a new connection is made.
+        /// </summary>
+        public override async Task OnConnectedAsync()
+        {
+            if (Context.User != null) {
+                var roles = Context.User.Claims
+                    .Where((c) => c.Type.EndsWith("/role", StringComparison.CurrentCulture)).Select((c) => c.Value).ToList();
+
+                var installationCodes = await accessRoleService.GetAllowedInstallationCodes(roles);
+                foreach (string installationCode in installationCodes)
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, installationCode.ToUpperInvariant());
+                }
+            }
+
+            await base.OnConnectedAsync();
+        }
     }
 }

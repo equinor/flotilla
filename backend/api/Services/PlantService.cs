@@ -120,7 +120,7 @@ namespace Api.Services
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.Plants.Include(i => i.Installation)
-                .Where((p) => accessibleInstallationCodes.Result.Contains(p.Installation.InstallationCode));
+                .Where((p) => accessibleInstallationCodes.Result.Contains(p.Installation.InstallationCode.ToUpper()));
         }
     }
 }
