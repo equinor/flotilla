@@ -18,7 +18,6 @@ interface MissionProps {
 
 export const TaskTable = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
-    const rows = mission && mission.tasks.length > 0 ? RenderTasks(mission.tasks) : <></>
     return (
         <StyledTable>
             <Table.Caption>
@@ -33,12 +32,12 @@ export const TaskTable = ({ mission }: MissionProps) => {
                     <Table.Cell>{TranslateText('Status')}</Table.Cell>
                 </Table.Row>
             </Table.Head>
-            <Table.Body>{rows}</Table.Body>
+            <Table.Body>{mission && <TaskTableRows tasks={mission.tasks} />}</Table.Body>
         </StyledTable>
     )
 }
 
-const RenderTasks = (tasks: Task[]) => {
+const TaskTableRows = ({ tasks }: { tasks: Task[] }) => {
     const rows = tasks.map((task) => {
         // Workaround for current bug in echo
         const order: number = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
@@ -57,13 +56,13 @@ const RenderTasks = (tasks: Task[]) => {
                     </Chip>
                 </Table.Cell>
                 <Table.Cell>
-                    <RenderTagId task={task} />
+                    <TagIdDisplay task={task} />
                 </Table.Cell>
                 <Table.Cell>
-                    <RenderDescription task={task} />
+                    <DescriptionDisplay task={task} />
                 </Table.Cell>
                 <Table.Cell>
-                    <RenderInspectionTypes task={task} />
+                    <InspectionTypesDisplay task={task} />
                 </Table.Cell>
                 <Table.Cell>
                     <TaskStatusDisplay status={task.status} />
@@ -71,10 +70,10 @@ const RenderTasks = (tasks: Task[]) => {
             </Table.Row>
         )
     })
-    return rows
+    return <>{rows}</>
 }
 
-const RenderTagId = ({ task }: { task: Task }) => {
+const TagIdDisplay = ({ task }: { task: Task }) => {
     if (!task.tagId) return <Typography key={task.id + 'tagId'}>{'N/A'}</Typography>
 
     if (task.echoTagLink)
@@ -86,12 +85,12 @@ const RenderTagId = ({ task }: { task: Task }) => {
     else return <Typography key={task.id + 'tagId'}>{task.tagId!}</Typography>
 }
 
-const RenderDescription = ({ task }: { task: Task }) => {
+const DescriptionDisplay = ({ task }: { task: Task }) => {
     if (!task.description) return <Typography key={task.id + 'descr'}>{'N/A'}</Typography>
     return <Typography key={task.id + 'descr'}>{task.description}</Typography>
 }
 
-const RenderInspectionTypes = ({ task }: { task: Task }) => {
+const InspectionTypesDisplay = ({ task }: { task: Task }) => {
     return (
         <>
             {task.inspections?.map((inspection) => {
