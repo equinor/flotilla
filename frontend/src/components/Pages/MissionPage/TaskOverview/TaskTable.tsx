@@ -18,7 +18,7 @@ interface MissionProps {
 
 export function TaskTable({ mission }: MissionProps) {
     const { TranslateText } = useLanguageContext()
-    const rows = mission && mission.tasks.length > 0 ? renderTasks(mission.tasks) : <></>
+    const rows = mission && mission.tasks.length > 0 ? RenderTasks(mission.tasks) : <></>
     return (
         <StyledTable>
             <Table.Caption>
@@ -38,7 +38,7 @@ export function TaskTable({ mission }: MissionProps) {
     )
 }
 
-function renderTasks(tasks: Task[]) {
+const RenderTasks = (tasks: Task[]) => {
     const rows = tasks.map((task) => {
         // Workaround for current bug in echo
         const order: number = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
@@ -56,9 +56,15 @@ function renderTasks(tasks: Task[]) {
                         </Typography>
                     </Chip>
                 </Table.Cell>
-                <Table.Cell> {renderTagId(task)} </Table.Cell>
-                <Table.Cell> {renderDescription(task)} </Table.Cell>
-                <Table.Cell> {renderInspectionTypes(task)} </Table.Cell>
+                <Table.Cell>
+                    <RenderTagId task={task} />
+                </Table.Cell>
+                <Table.Cell>
+                    <RenderDescription task={task} />
+                </Table.Cell>
+                <Table.Cell>
+                    <RenderInspectionTypes task={task} />
+                </Table.Cell>
                 <Table.Cell>
                     <TaskStatusDisplay status={task.status} />
                 </Table.Cell>
@@ -68,7 +74,7 @@ function renderTasks(tasks: Task[]) {
     return rows
 }
 
-function renderTagId(task: Task) {
+const RenderTagId = ({ task }: { task: Task }) => {
     if (!task.tagId) return <Typography key={task.id + 'tagId'}>{'N/A'}</Typography>
 
     if (task.echoTagLink)
@@ -80,24 +86,28 @@ function renderTagId(task: Task) {
     else return <Typography key={task.id + 'tagId'}>{task.tagId!}</Typography>
 }
 
-function renderDescription(task: Task) {
+const RenderDescription = ({ task }: { task: Task }) => {
     if (!task.description) return <Typography key={task.id + 'descr'}>{'N/A'}</Typography>
     return <Typography key={task.id + 'descr'}>{task.description}</Typography>
 }
 
-function renderInspectionTypes(task: Task) {
-    return task.inspections?.map(function (inspection) {
-        if (inspection.inspectionUrl)
-            return (
-                <Typography key={task.id + inspection.id + 'insp'} link href={inspection.inspectionUrl}>
-                    {TranslateTextWithContext(inspection.inspectionType as string)}
-                </Typography>
-            )
-        else
-            return (
-                <Typography key={task.id + inspection.id + 'insp'}>
-                    {TranslateTextWithContext(inspection.inspectionType as string)}
-                </Typography>
-            )
-    })
+const RenderInspectionTypes = ({ task }: { task: Task }) => {
+    return (
+        <>
+            {task.inspections?.map((inspection) => {
+                if (inspection.inspectionUrl)
+                    return (
+                        <Typography key={task.id + inspection.id + 'insp'} link href={inspection.inspectionUrl}>
+                            {TranslateTextWithContext(inspection.inspectionType as string)}
+                        </Typography>
+                    )
+                else
+                    return (
+                        <Typography key={task.id + inspection.id + 'insp'}>
+                            {TranslateTextWithContext(inspection.inspectionType as string)}
+                        </Typography>
+                    )
+            })}
+        </>
+    )
 }
