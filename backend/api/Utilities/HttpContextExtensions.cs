@@ -27,5 +27,11 @@ namespace Api.Utilities
             var roles = claims.Where((c) => c.Type == "roles").ToList();
             return roles;
         }
+
+        public static List<string> GetRequestedRoleNames(this HttpContext client)
+        {
+            var roleClaims = GetRequestedRoles(client);
+            return roleClaims.Select((c) => c.Value).ToList();
+        }
     }
 }

@@ -35,7 +35,12 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class DeckService(FlotillaDbContext context, IDefaultLocalizationPoseService defaultLocalizationPoseService, IInstallationService installationService, IPlantService plantService) : IDeckService
+    public class DeckService(
+        FlotillaDbContext context,
+        IDefaultLocalizationPoseService defaultLocalizationPoseService,
+        IInstallationService installationService,
+        IPlantService plantService,
+        IAccessRoleService accessRoleService) : IDeckService
     {
         public async Task<IEnumerable<Deck>> ReadAll()
         {
@@ -52,21 +57,21 @@ namespace Api.Services
         {
             var installation = await installationService.ReadByName(installationCode);
             if (installation == null) { return new List<Deck>(); }
-            return await context.Decks.Where(a =>
+            return await GetDecks().Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
         public async Task<Deck?> ReadByName(string deckName)
         {
             if (deckName == null) { return null; }
-            return await context.Decks.Where(a =>
+            return await GetDecks().Where(a =>
                 a.Name.ToLower().Equals(deckName.ToLower())
             ).FirstOrDefaultAsync();
         }
 
         public async Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string name)
         {
-            return await context.Decks.Where(a =>
+            return await GetDecks().Where(a =>
                 a.Plant != null && a.Plant.Id.Equals(plant.Id) &&
                 a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                 a.Name.ToLower().Equals(name.ToLower())
@@ -134,7 +139,9 @@ namespace Api.Services
 
         private IQueryable<Deck> GetDecks()
         {
-            return context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose);
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            return context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
+                .Where((d) => accessibleInstallationCodes.Result.Contains(d.Installation.InstallationCode));
         }
     }
 }

@@ -49,6 +49,7 @@ builder.Services.ConfigureDatabase(builder.Configuration);
 
 builder.Services.AddApplicationInsightsTelemetry();
 
+builder.Services.AddScoped<IAccessRoleService, AccessRoleService>();
 builder.Services.AddScoped<IRobotService, RobotService>();
 builder.Services.AddScoped<IMissionRunService, MissionRunService>();
 builder.Services.AddScoped<IMissionTaskService, MissionTaskService>();

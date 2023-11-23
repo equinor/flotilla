@@ -20,6 +20,7 @@ namespace Api.Database.Context
         public DbSet<Source> Sources => Set<Source>();
         public DbSet<SafePosition> SafePositions => Set<SafePosition>();
         public DbSet<DefaultLocalizationPose> DefaultLocalizationPoses => Set<DefaultLocalizationPose>();
+        public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
 
         // Timeseries:
         public DbSet<RobotPressureTimeseries> RobotPressureTimeseries => Set<RobotPressureTimeseries>();
