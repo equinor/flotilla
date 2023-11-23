@@ -1,4 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 
 namespace Api.Utilities
 {
@@ -10,10 +10,10 @@ namespace Api.Utilities
         {
             if (!client.Request.Headers.TryGetValue("Authorization", out var value))
             {
-                throw new Exception("Not a protected endpoint!");
+                throw new HttpRequestException("Not a protected endpoint!");
             }
 
-            return value.ToString().Replace("Bearer ", "");
+            return value.ToString().Replace("Bearer ", "", StringComparison.CurrentCulture);
         }
 
         public static List<System.Security.Claims.Claim> GetRequestedRoles(this HttpContext client)

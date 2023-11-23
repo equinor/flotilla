@@ -35,7 +35,7 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class PlantService(FlotillaDbContext context, IInstallationService installationService) : IPlantService
+    public class PlantService(FlotillaDbContext context, IInstallationService installationService, IAccessRoleService accessRoleService) : IPlantService
     {
         public async Task<IEnumerable<Plant>> ReadAll()
         {
@@ -118,7 +118,9 @@ namespace Api.Services
 
         private IQueryable<Plant> GetPlants()
         {
-            return context.Plants.Include(i => i.Installation);
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            return context.Plants.Include(i => i.Installation)
+                .Where((p) => accessibleInstallationCodes.Result.Contains(p.Installation.InstallationCode));
         }
     }
 }

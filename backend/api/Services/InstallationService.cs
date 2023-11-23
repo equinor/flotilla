@@ -31,16 +31,18 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class InstallationService(FlotillaDbContext context) : IInstallationService
+    public class InstallationService(FlotillaDbContext context, IAccessRoleService accessRoleService) : IInstallationService
     {
         public async Task<IEnumerable<Installation>> ReadAll()
         {
             return await GetInstallations().ToListAsync();
         }
 
-        private DbSet<Installation> GetInstallations()
+        private IQueryable<Installation> GetInstallations()
         {
-            return context.Installations;
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            return context.Installations
+                .Where((i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode));
         }
 
         public async Task<Installation?> ReadById(string id)

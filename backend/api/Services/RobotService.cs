@@ -32,7 +32,11 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class RobotService(FlotillaDbContext context, ILogger<RobotService> logger, IRobotModelService robotModelService, ISignalRService signalRService) : IRobotService, IDisposable
+    public class RobotService(FlotillaDbContext context,
+        ILogger<RobotService> logger,
+        IRobotModelService robotModelService,
+        ISignalRService signalRService,
+        IAccessRoleService accessRoleService) : IRobotService, IDisposable
     {
         private readonly Semaphore _robotSemaphore = new(1, 1);
 
@@ -156,6 +160,7 @@ namespace Api.Services
 
         private IQueryable<Robot> GetRobotsWithSubModels()
         {
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.Robots
                 .Include(r => r.VideoStreams)
                 .Include(r => r.Model)
@@ -166,7 +171,8 @@ namespace Api.Services
                 .Include(r => r.CurrentArea)
                 .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(r => r.CurrentArea)
-                .ThenInclude(area => area != null ? area.SafePositions : null);
+                .ThenInclude(area => area != null ? area.SafePositions : null)
+                .Where((r) => accessibleInstallationCodes.Result.Contains(r.CurrentArea.Installation.InstallationCode));
         }
 
         private IQueryable<Robot> GetEnabledRobotsWithSubModels()

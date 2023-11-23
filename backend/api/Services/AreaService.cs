@@ -41,7 +41,7 @@ namespace Api.Services
     )]
     public class AreaService(
             FlotillaDbContext context, IInstallationService installationService, IPlantService plantService, IDeckService deckService,
-            IDefaultLocalizationPoseService defaultLocalizationPoseService) : IAreaService
+            IDefaultLocalizationPoseService defaultLocalizationPoseService, IAccessRoleService accessRoleService) : IAreaService
     {
         public async Task<IEnumerable<Area>> ReadAll()
         {
@@ -180,8 +180,10 @@ namespace Api.Services
 
         private IQueryable<Area> GetAreas()
         {
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.Areas.Include(a => a.SafePositions)
-                .Include(a => a.Deck).Include(d => d.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose);
+                .Include(a => a.Deck).Include(d => d.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
+                .Where((a) => accessibleInstallationCodes.Result.Contains(a.Installation.InstallationCode)); ;
         }
 
         public async Task<Area?> ReadByInstallationAndName(Installation? installation, string areaName)
