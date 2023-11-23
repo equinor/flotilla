@@ -39,17 +39,13 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    [SuppressMessage(
-        "Globalization",
-        "CA1307:Specify CultureInfo",
-        Justification = "Entity framework does not support translating culture info to SQL calls"
-    )]
     public class MissionDefinitionService(FlotillaDbContext context,
             IEchoService echoService,
             IStidService stidService,
             ICustomMissionService customMissionService,
             ISignalRService signalRService,
-            ILogger<IMissionDefinitionService> logger) : IMissionDefinitionService
+            ILogger<IMissionDefinitionService> logger,
+            IAccessRoleService accessRoleService) : IMissionDefinitionService
     {
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
         {
@@ -163,6 +159,7 @@ namespace Api.Services
 
         private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
         {
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.MissionDefinitions
                 .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
@@ -171,7 +168,8 @@ namespace Api.Services
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
                 .ThenInclude(missionTask => missionTask.Inspections)
-                .ThenInclude(inspection => inspection.InspectionFindings);
+                .ThenInclude(inspection => inspection.InspectionFindings)
+                .Where((m) => accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode));
         }
 
         private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)

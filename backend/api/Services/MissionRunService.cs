@@ -46,12 +46,11 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    [SuppressMessage(
-        "Globalization",
-        "CA1307:Specify CultureInfo",
-        Justification = "Entity framework does not support translating culture info to SQL calls"
-    )]
-    public class MissionRunService(FlotillaDbContext context, ISignalRService signalRService, ILogger<MissionRunService> logger) : IMissionRunService
+    public class MissionRunService(
+        FlotillaDbContext context,
+        ISignalRService signalRService,
+        ILogger<MissionRunService> logger,
+        IAccessRoleService accessRoleService) : IMissionRunService
     {
         public async Task<MissionRun> Create(MissionRun missionRun)
         {
@@ -156,6 +155,7 @@ namespace Api.Services
 
         private IQueryable<MissionRun> GetMissionRunsWithSubModels()
         {
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.MissionRuns
                 .Include(missionRun => missionRun.Area)
                 .ThenInclude(area => area != null ? area.Deck : null)
@@ -168,7 +168,8 @@ namespace Api.Services
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)
-                .ThenInclude(task => task.Inspections);
+                .ThenInclude(task => task.Inspections)
+                .Where((m) => accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode)); ;
         }
 
         protected virtual void OnMissionRunCreated(MissionRunCreatedEventArgs e)

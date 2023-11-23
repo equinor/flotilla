@@ -1,5 +1,4 @@
-using Api.Database.Context;
-using Api.Database.Models;
+﻿using Api.Database.Context;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +11,7 @@ namespace Api.Services
 
     public class AccessRoleService(FlotillaDbContext context, IHttpContextAccessor httpContextAccessor, IInstallationService installationService) : IAccessRoleService
     {
-        private const string SUPER_ADMIN_ROLE_NAME  = "Role.Admin";
+        private const string SUPER_ADMIN_ROLE_NAME = "Role.Admin";
 
         public async Task<List<string>> GetAllowedInstallationCodes()
         {
