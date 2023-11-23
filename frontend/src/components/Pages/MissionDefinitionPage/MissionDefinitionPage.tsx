@@ -14,7 +14,7 @@ import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledDict } from './MissionDefinitionStyledComponents'
 
-function MetadataItem({ title, content, onEdit }: { title: string; content: any; onEdit?: () => void }) {
+const MetadataItem = ({ title, content, onEdit }: { title: string; content: any; onEdit?: () => void }) => {
     return (
         <StyledDict.FormItem>
             <StyledDict.Card style={{ boxShadow: tokens.elevation.raised }}>
@@ -45,7 +45,7 @@ interface IMissionDefinitionPageBodyProps {
     updateMissionDefinition: (missionDefinition: CondensedMissionDefinition) => void
 }
 
-function MissionDefinitionPageBody({ missionDefinition, updateMissionDefinition }: IMissionDefinitionPageBodyProps) {
+const MissionDefinitionPageBody = ({ missionDefinition, updateMissionDefinition }: IMissionDefinitionPageBodyProps) => {
     const { TranslateText } = useLanguageContext()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
     const [selectedField, setSelectedField] = useState<string>('')
@@ -132,12 +132,12 @@ interface IMissionDefinitionEditDialogProps {
     updateMissionDefinition: (missionDefinition: CondensedMissionDefinition) => void
 }
 
-function MissionDefinitionEditDialog({
+const MissionDefinitionEditDialog = ({
     missionDefinition,
     updateMissionDefinition,
     fieldName,
     closeEditDialog,
-}: IMissionDefinitionEditDialogProps) {
+}: IMissionDefinitionEditDialogProps) => {
     const defaultMissionDefinitionForm: MissionDefinitionUpdateForm = {
         comment: missionDefinition.comment,
         inspectionFrequency: missionDefinition.inspectionFrequency,
@@ -249,7 +249,7 @@ function MissionDefinitionEditDialog({
     )
 }
 
-export function MissionDefinitionPage() {
+export const MissionDefinitionPage = () => {
     const { missionId } = useParams()
     const { registerEvent, connectionReady } = useSignalRContext()
     const [selectedMissionDefinition, setSelectedMissionDefinition] = useState<CondensedMissionDefinition>()

@@ -21,7 +21,7 @@ export const placeTagsInMap = (mission: Mission, map: HTMLCanvasElement, current
     }
 
     const orderedTasks = orderTasksByDrawOrder(mission.tasks, currentTaskOrder, maxTaskOrder)
-    orderedTasks.forEach(function (task) {
+    orderedTasks.forEach((task) => {
         if (task.inspectionTarget) {
             const pixelPosition = calculateObjectPixelPosition(mission.map!, task.inspectionTarget)
             // Workaround for current bug in echo
@@ -68,7 +68,7 @@ const calculateObjectPixelPosition = (mapMetadata: MapMetadata, objectPosition: 
 }
 
 const orderTasksByDrawOrder = (tasks: Task[], currentTaskOrder: number, maxTaskOrder: number) => {
-    let tasksWithDrawOrder = tasks.map(function (task) {
+    let tasksWithDrawOrder = tasks.map((task) => {
         var drawOrder
         if (task.taskOrder === currentTaskOrder) {
             drawOrder = maxTaskOrder
@@ -81,9 +81,7 @@ const orderTasksByDrawOrder = (tasks: Task[], currentTaskOrder: number, maxTaskO
     })
 
     tasksWithDrawOrder.sort((a, b) => a.drawOrder - b.drawOrder)
-    return tasksWithDrawOrder.map(function (taskWithDrawOrder) {
-        return taskWithDrawOrder.task
-    })
+    return tasksWithDrawOrder.map((taskWithDrawOrder) => taskWithDrawOrder.task)
 }
 
 const calculateNavigatorAngle = (currentRobotPose: Pose) => {

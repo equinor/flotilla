@@ -19,7 +19,7 @@ const StyledButton = styled.div`
     margintop: auto;
 `
 
-export function MoveRobotArm({ robot, armPosition, isRobotAvailable }: RobotProps) {
+export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProps) => {
     const { TranslateText } = useLanguageContext()
     const [feedback, setFeedback] = useState('')
     const [usable, setUsable] = useState(!!isRobotAvailable)

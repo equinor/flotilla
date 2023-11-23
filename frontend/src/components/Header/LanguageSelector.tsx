@@ -38,7 +38,7 @@ const VerticalBar = styled(Divider)`
     margin: 13px 3px 1px 3px;
 `
 
-export function SelectLanguage() {
+export const SelectLanguage = () => {
     const { language, switchLanguage } = useLanguageContext()
     const handleLanguageChange = (selectedLanguage: string) => {
         switchLanguage(selectedLanguage)

@@ -34,7 +34,7 @@ export interface DeckMissionCount {
     }
 }
 
-export function InspectionSection() {
+export const InspectionSection = () => {
     const { installationCode } = useInstallationContext()
     const [deckMissions, setDeckMissions] = useState<DeckMissionType>({})
     const [selectedDeck, setSelectedDeck] = useState<Deck>()

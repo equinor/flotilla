@@ -98,7 +98,7 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
     )
 }
 
-export function DeckCards({ deckMissions, setSelectedDeck, selectedDeck, handleScheduleAll }: IDeckCardProps) {
+export const DeckCards = ({ deckMissions, setSelectedDeck, selectedDeck, handleScheduleAll }: IDeckCardProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (

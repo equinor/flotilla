@@ -19,7 +19,7 @@ const RobotView = styled.div`
     gap: 1rem;
 `
 
-export function RobotStatusSection() {
+export const RobotStatusSection = () => {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
@@ -34,7 +34,7 @@ export function RobotStatusSection() {
             return sortedRobots
         }
         const relevantRobots = sortRobotsByStatus(
-            enabledRobots.filter(function (robot) {
+            enabledRobots.filter((robot) => {
                 return robot.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
             })
         )
@@ -51,9 +51,7 @@ export function RobotStatusSection() {
     }, [enabledRobots, installationCode, switchSafeZoneStatus])
 
     const getRobotDisplay = () => {
-        return robots.map(function (robot) {
-            return <RobotStatusCard key={robot.id} robot={robot} />
-        })
+        return robots.map((robot) => <RobotStatusCard key={robot.id} robot={robot} />)
     }
 
     return (

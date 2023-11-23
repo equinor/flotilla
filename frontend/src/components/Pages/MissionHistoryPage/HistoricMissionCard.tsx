@@ -14,7 +14,7 @@ interface MissionProps {
     mission: Mission
 }
 
-function MissionEndTimeDisplay({ mission }: MissionProps) {
+const MissionEndTimeDisplay = ({ mission }: MissionProps) => {
     return (
         <>
             {mission.endTime ? (
@@ -26,7 +26,7 @@ function MissionEndTimeDisplay({ mission }: MissionProps) {
     )
 }
 
-export function HistoricMissionCard({ index, mission }: IndexedMissionProps) {
+export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => {
     let navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`

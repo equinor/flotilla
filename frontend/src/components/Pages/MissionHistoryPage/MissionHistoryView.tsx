@@ -37,7 +37,7 @@ const ActiveFilterList = styled.div`
     min-height: 24px;
 `
 
-function flatten(filters: IFilterState) {
+const flatten = (filters: IFilterState) => {
     const allFilters = []
     for (const [filterName, filterValue] of Object.entries(filters)) {
         allFilters.push({ name: filterName, value: filterValue })
@@ -45,7 +45,7 @@ function flatten(filters: IFilterState) {
     return allFilters
 }
 
-export function MissionHistoryView({ refreshInterval }: RefreshProps) {
+export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
     const { TranslateText } = useLanguageContext()
     const { page, switchPage, filterState, filterIsSet, filterFunctions, filterError, clearFilterError } =
         useMissionFilterContext()
@@ -132,9 +132,9 @@ export function MissionHistoryView({ refreshInterval }: RefreshProps) {
         return () => clearInterval(id)
     }, [refreshInterval, updateFilteredMissions, page])
 
-    const missionsDisplay = filteredMissions.map(function (mission, index) {
-        return <HistoricMissionCard key={index} index={index} mission={mission} />
-    })
+    const missionsDisplay = filteredMissions.map((mission, index) => (
+        <HistoricMissionCard key={index} index={index} mission={mission} />
+    ))
 
     const PaginationComponent = () => {
         return (

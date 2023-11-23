@@ -16,7 +16,7 @@ enum StatusColors {
     SafeZone = '#FF0000',
 }
 
-export function RobotStatusChip({ status }: StatusProps) {
+export const RobotStatusChip = ({ status }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
     const { safeZoneStatus } = useSafeZoneContext()
 

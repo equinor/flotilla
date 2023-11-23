@@ -27,7 +27,7 @@ const MissionsContent = styled.div`
     gap: 2rem;
 `
 
-export function FrontPage() {
+export const FrontPage = () => {
     return (
         <>
             <Header page={'root'} />

@@ -37,7 +37,7 @@ const StyledAlertList = styled.div`
     gap: 0.5rem;
 `
 
-export function Header({ page }: { page: string }) {
+export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
     const { installationName } = useInstallationContext()
     return (

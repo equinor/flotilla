@@ -18,7 +18,7 @@ const Indent = styled.div`
     padding: 0px 9px;
 `
 
-export function FailedRequestAlertContent({ message }: { message: string }) {
+export const FailedRequestAlertContent = ({ message }: { message: string }) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledDiv>

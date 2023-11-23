@@ -137,7 +137,7 @@ interface ICardMissionInformationProps {
     inspections: Inspection[]
 }
 
-export function CardMissionInformation({ deckName, inspections }: ICardMissionInformationProps) {
+export const CardMissionInformation = ({ deckName, inspections }: ICardMissionInformationProps) => {
     const { TranslateText } = useLanguageContext()
 
     var colorsCount: DeckMissionCount = {

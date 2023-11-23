@@ -30,7 +30,7 @@ const StyledView = styled.div`
     align-items: flex-start;
 `
 
-export function InspectionOverviewSection() {
+export const InspectionOverviewSection = () => {
     const { TranslateText } = useLanguageContext()
     const [activeTab, setActiveTab] = useState(0)
     const [allMissions, setAllMissions] = useState<Inspection[]>()

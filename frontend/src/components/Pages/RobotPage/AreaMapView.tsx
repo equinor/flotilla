@@ -43,7 +43,7 @@ const StyledMapCompass = styled.div`
     align-items: end;
 `
 
-export function AreaMapView({ area, localizationPose, setLocalizationPose }: AreaProps) {
+export const AreaMapView = ({ area, localizationPose, setLocalizationPose }: AreaProps) => {
     const { TranslateText } = useLanguageContext()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
