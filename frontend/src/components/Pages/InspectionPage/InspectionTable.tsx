@@ -59,50 +59,22 @@ const formatDateString = (dateStr: Date | string) => {
     return newStr
 }
 
-export const getInspectionStatus = (deadlineDate: Date) => {
+const getStatusColorAndTextFromDeadline = (deadlineDate: Date): { statusColor: string; statusText: string } => {
     const deadlineDays = getDeadlineInDays(deadlineDate)
 
     switch (true) {
         case deadlineDays <= 0:
-            return (
-                <StyledContent>
-                    <StyledCircle style={{ background: 'red' }} />
-                    {TranslateTextWithContext('Past deadline')}
-                </StyledContent>
-            )
+            return { statusColor: 'red', statusText: 'Past deadline' }
         case deadlineDays > 0 && deadlineDays <= 1:
-            return (
-                <StyledContent>
-                    <StyledCircle style={{ background: 'red' }} /> {TranslateTextWithContext('Due today')}
-                </StyledContent>
-            )
+            return { statusColor: 'red', statusText: 'Due today' }
         case deadlineDays > 1 && deadlineDays <= 7:
-            return (
-                <StyledContent>
-                    <StyledCircle style={{ background: 'red' }} />
-                    {TranslateTextWithContext('Due this week')}
-                </StyledContent>
-            )
+            return { statusColor: 'red', statusText: 'Due this week' }
         case deadlineDays > 7 && deadlineDays <= 14:
-            return (
-                <StyledContent>
-                    <StyledCircle style={{ background: 'orange' }} /> {TranslateTextWithContext('Due within two weeks')}
-                </StyledContent>
-            )
+            return { statusColor: 'orange', statusText: 'Due within two weeks' }
         case deadlineDays > 7 && deadlineDays <= 30:
-            return (
-                <StyledContent>
-                    <StyledCircle style={{ background: 'green' }} />
-                    {TranslateTextWithContext('Due within a month')}
-                </StyledContent>
-            )
+            return { statusColor: 'green', statusText: 'Due within a month' }
     }
-    return (
-        <StyledContent>
-            <StyledCircle style={{ background: 'green' }} />
-            {TranslateTextWithContext('Up to date')}
-        </StyledContent>
-    )
+    return { statusColor: 'green', statusText: 'Up to date' }
 }
 
 interface IInspectionRowProps {
@@ -122,50 +94,48 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
     const isScheduled = missionQueue.map((m) => m.missionId).includes(mission.id)
     const isOngoing = ongoingMissions.map((m) => m.missionId).includes(mission.id)
 
-    if (isScheduled || isOngoing) {
-        if (isOngoing) {
+    if (isOngoing) {
+        status = (
+            <StyledContent>
+                <Icon name={Icons.Ongoing} size={16} />
+                {TranslateText('InProgress')}
+            </StyledContent>
+        )
+    } else if (isScheduled) {
+        status = (
+            <StyledContent>
+                <Icon name={Icons.Pending} size={16} />
+                {TranslateText('Pending')}
+            </StyledContent>
+        )
+    } else if (!mission.lastSuccessfulRun || !mission.lastSuccessfulRun.endTime) {
+        if (inspection.missionDefinition.inspectionFrequency) {
             status = (
                 <StyledContent>
-                    <Icon name={Icons.Ongoing} size={16} />
-                    {TranslateText('InProgress')}
+                    <StyledCircle style={{ background: 'red' }} />
+                    {TranslateText('Not yet performed')}
                 </StyledContent>
             )
-        } else
-            status = (
-                <StyledContent>
-                    <Icon name={Icons.Pending} size={16} />
-                    {TranslateText('Pending')}
-                </StyledContent>
-            )
-    } else {
-        if (!mission.lastSuccessfulRun || !mission.lastSuccessfulRun.endTime) {
-            if (inspection.missionDefinition.inspectionFrequency) {
-                status = (
-                    <StyledContent>
-                        <StyledCircle style={{ background: 'red' }} />
-                        {TranslateText('Not yet performed')}
-                    </StyledContent>
-                )
-            } else {
-                status = (
-                    <StyledContent>
-                        <StyledCircle style={{ background: 'green' }} />
-                        {TranslateText('No planned inspection')}
-                    </StyledContent>
-                )
-            }
-            lastCompleted = TranslateText('Never')
         } else {
-            status = inspection.missionDefinition.inspectionFrequency ? (
-                getInspectionStatus(inspection.deadline!)
-            ) : (
+            status = (
                 <StyledContent>
                     <StyledCircle style={{ background: 'green' }} />
                     {TranslateText('No planned inspection')}
                 </StyledContent>
             )
-            lastCompleted = formatDateString(mission.lastSuccessfulRun.endTime!)
         }
+        lastCompleted = TranslateText('Never')
+    } else {
+        const { statusColor, statusText } = inspection.missionDefinition.inspectionFrequency
+            ? getStatusColorAndTextFromDeadline(inspection.deadline!)
+            : { statusColor: 'green', statusText: 'No planned inspection' }
+        status = (
+            <StyledContent>
+                <StyledCircle style={{ background: statusColor }} />
+                {TranslateText(statusText)}
+            </StyledContent>
+        )
+        lastCompleted = formatDateString(mission.lastSuccessfulRun.endTime!)
     }
 
     return (
