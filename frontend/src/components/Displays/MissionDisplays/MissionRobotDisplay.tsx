@@ -14,7 +14,7 @@ interface MissionProps {
     mission: Mission
 }
 
-export function MissionRobotDisplay({ mission }: MissionProps) {
+export const MissionRobotDisplay = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledRobotDisplay>

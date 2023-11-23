@@ -1,6 +1,6 @@
 const globalVars = window as any
 
-function getEnvVariable(name: string): string {
+const getEnvVariable = (name: string): string => {
     const value = process.env[name]
     if (value === undefined) {
         console.warn('Environment variable named "' + name + '" undefined. Attempting to use global variable.')

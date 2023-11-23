@@ -9,7 +9,7 @@ const StyledButton = styled(Button)`
     align-items: baseline;
 `
 
-export function BackButton() {
+export const BackButton = () => {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     return (

@@ -193,7 +193,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
 
 const columns = ['Status', 'Name', 'Description', 'Area', 'Last completed', 'Deadline', 'Add to queue']
 
-export function InspectionTable({ deck, inspections, openDialog, setSelectedMissions }: IProps) {
+export const InspectionTable = ({ deck, inspections, openDialog, setSelectedMissions }: IProps) => {
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
@@ -245,7 +245,7 @@ export function InspectionTable({ deck, inspections, openDialog, setSelectedMiss
     )
 }
 
-export function AllInspectionsTable({ inspections }: ITableProps) {
+export const AllInspectionsTable = ({ inspections }: ITableProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()

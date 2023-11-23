@@ -24,7 +24,7 @@ const ButtonText = styled.div`
     align-items: center;
 `
 
-export function MissionControlButtons({ mission }: MissionProps) {
+export const MissionControlButtons = ({ mission }: MissionProps) => {
     const { missionControlState } = useMissionControlContext()
 
     return (
@@ -41,7 +41,7 @@ export function MissionControlButtons({ mission }: MissionProps) {
     )
 }
 
-function OngoingMissionButton({ mission }: MissionProps) {
+const OngoingMissionButton = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { updateMissionState } = useMissionControlContext()
 
@@ -70,7 +70,7 @@ function OngoingMissionButton({ mission }: MissionProps) {
     )
 }
 
-function PausedMissionButton({ mission }: MissionProps) {
+const PausedMissionButton = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { updateMissionState } = useMissionControlContext()
 

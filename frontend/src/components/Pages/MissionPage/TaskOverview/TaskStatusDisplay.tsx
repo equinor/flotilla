@@ -36,7 +36,7 @@ const TaskStatusIcon = ({ status }: StatusProps) => {
     return <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
 }
 
-export function TaskStatusDisplay({ status }: StatusProps) {
+export const TaskStatusDisplay = ({ status }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledStatusDisplay>

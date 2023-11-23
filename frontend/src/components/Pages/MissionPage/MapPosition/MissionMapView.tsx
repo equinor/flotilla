@@ -38,7 +38,7 @@ const SyledContainer = styled.div`
     max-width: 100%;
 `
 
-export function MissionMapView({ mission }: MissionProps) {
+export const MissionMapView = ({ mission }: MissionProps) => {
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
@@ -67,7 +67,7 @@ export function MissionMapView({ mission }: MissionProps) {
     }
 
     const findCurrentTaskOrder = useCallback(() => {
-        mission.tasks.forEach(function (task) {
+        mission.tasks.forEach((task) => {
             if (task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused) {
                 setCurrentTaskOrder(task.taskOrder)
             }

@@ -5,7 +5,7 @@ interface MissionDefinitionHeaderProps {
     missionDefinition: CondensedMissionDefinition
 }
 
-export function MissionDefinitionHeader({ missionDefinition }: MissionDefinitionHeaderProps) {
+export const MissionDefinitionHeader = ({ missionDefinition }: MissionDefinitionHeaderProps) => {
     return (
         <StyledDict.HeaderSection>
             <StyledDict.TitleSection>

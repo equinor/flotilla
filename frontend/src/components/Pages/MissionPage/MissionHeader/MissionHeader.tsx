@@ -37,7 +37,7 @@ const InfoSection = styled.div`
     gap: 1.2rem;
 `
 
-function HeaderText(text: string) {
+const HeaderText = (text: string) => {
     return (
         <Typography variant="body_short" group="paragraph" color={tokens.colors.text.static_icons__secondary.hex}>
             {text}
@@ -93,11 +93,7 @@ const startUsedAndRemainingTime = (
     return { startTime, startDate, usedTime, remainingTime }
 }
 
-interface MissionHeaderProps {
-    mission: Mission
-}
-
-export function MissionHeader({ mission }: MissionHeaderProps) {
+export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const { TranslateText } = useLanguageContext()
     const barToMillibar = 1000
     const isMissionCompleted = mission.endTime ? true : false

@@ -26,7 +26,7 @@ const StyledIcon = styled(Icon)`
     color: #6f6f6f;
 `
 
-export function RobotImage({ robotType, height = '200px' }: TypeProps) {
+export const RobotImage = ({ robotType, height = '200px' }: TypeProps) => {
     var robotImage
     switch (robotType) {
         case RobotType.TaurobInspector: {

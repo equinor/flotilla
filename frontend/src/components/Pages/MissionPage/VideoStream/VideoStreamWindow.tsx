@@ -27,7 +27,7 @@ interface VideoStreamWindowProps {
     videoStreams: VideoStream[]
 }
 
-export function VideoStreamWindow({ videoStreams }: VideoStreamWindowProps) {
+export const VideoStreamWindow = ({ videoStreams }: VideoStreamWindowProps) => {
     const { TranslateText } = useLanguageContext()
     const [fullScreenMode, setFullScreenMode] = useState<boolean>(false)
     const [fullScreenStream, setFullScreenStream] = useState<VideoStream>()
@@ -40,16 +40,14 @@ export function VideoStreamWindow({ videoStreams }: VideoStreamWindowProps) {
         toggleFullScreenMode()
     }
 
-    const videoCards = videoStreams.map(function (videoStream, index) {
-        return (
-            <VideoStreamCard
-                key={index}
-                videoStream={videoStream}
-                toggleFullScreenMode={toggleFullScreenMode}
-                setFullScreenStream={updateFullScreenStream}
-            />
-        )
-    })
+    const videoCards = videoStreams.map((videoStream, index) => (
+        <VideoStreamCard
+            key={index}
+            videoStream={videoStream}
+            toggleFullScreenMode={toggleFullScreenMode}
+            setFullScreenStream={updateFullScreenStream}
+        />
+    ))
 
     const videoStream = fullScreenStream
     return (

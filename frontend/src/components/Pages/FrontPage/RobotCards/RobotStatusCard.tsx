@@ -47,7 +47,7 @@ const StyledPadding = styled.div`
     padding: 8px;
 `
 
-export function RobotStatusCard({ robot }: RobotProps) {
+export const RobotStatusCard = ({ robot }: RobotProps) => {
     let navigate = useNavigate()
     const goToRobot = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/robot/${robot.id}`
@@ -83,7 +83,7 @@ export function RobotStatusCard({ robot }: RobotProps) {
     )
 }
 
-export function RobotStatusCardPlaceholder() {
+export const RobotStatusCardPlaceholder = () => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledCard style={{ boxShadow: tokens.elevation.raised }}>

@@ -43,7 +43,7 @@ interface IVideoStreamCardProps {
     setFullScreenStream: Function
 }
 
-export function VideoStreamCard({ videoStream, toggleFullScreenMode, setFullScreenStream }: IVideoStreamCardProps) {
+export const VideoStreamCard = ({ videoStream, toggleFullScreenMode, setFullScreenStream }: IVideoStreamCardProps) => {
     const turnOnFullScreen = () => {
         setFullScreenStream(videoStream)
         toggleFullScreenMode()

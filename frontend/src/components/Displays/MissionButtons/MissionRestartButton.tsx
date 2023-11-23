@@ -25,7 +25,7 @@ export enum ReRunOptions {
     ReRunFailed,
 }
 
-export function MissionRestartButton({ mission }: MissionProps) {
+export const MissionRestartButton = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)

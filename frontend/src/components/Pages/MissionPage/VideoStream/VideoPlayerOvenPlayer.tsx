@@ -11,7 +11,7 @@ interface IVideoPlayerProps {
 }
 
 // TODO: Video player is not used at the moment, commented out for now
-export function VideoPlayerOvenPlayer({ videoStream }: IVideoPlayerProps) {
+export const VideoPlayerOvenPlayer = ({ videoStream }: IVideoPlayerProps) => {
     useEffect(() => {
         // const aspectRatio = videoStream.shouldRotate270Clockwise ? '9:16' : '16:9'
         switch (videoStream.type) {

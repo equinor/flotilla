@@ -15,7 +15,7 @@ interface MissionProps {
     mission: Mission
 }
 
-export function MissionProgressDisplay({ mission }: MissionProps) {
+export const MissionProgressDisplay = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const [completedTasks, setCompletedTasks] = useState<number>(0)
 

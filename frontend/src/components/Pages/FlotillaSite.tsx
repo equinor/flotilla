@@ -13,7 +13,7 @@ import { SignalRProvider } from 'components/Contexts/SignalRContext'
 import { MissionsProvider } from 'components/Contexts/MissionListsContext'
 import { RobotProvider } from 'components/Contexts/RobotContext'
 
-export function FlotillaSite() {
+export const FlotillaSite = () => {
     return (
         <>
             <InstallationProvider>

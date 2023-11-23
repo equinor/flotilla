@@ -13,7 +13,7 @@ interface MissionProps {
     mission: Mission
 }
 
-export function StatusReason({ mission }: MissionProps) {
+export const StatusReason = ({ mission }: MissionProps) => {
     if (!mission.statusReason) return <></>
 
     var warningLevel: 'default' | 'info' | 'warning' | 'danger' = 'info'

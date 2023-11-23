@@ -52,9 +52,9 @@ export const OngoingMissionView = (): JSX.Element => {
         )
     }, [ongoingMissions, installationCode])
 
-    const ongoingMissionCards = ongingMissionsToDisplay.map(function (mission, index) {
-        return <OngoingMissionCard key={index} mission={mission} />
-    })
+    const ongoingMissionCards = ongingMissionsToDisplay.map((mission, index) => (
+        <OngoingMissionCard key={index} mission={mission} />
+    ))
 
     return (
         <StyledOngoingMissionView>

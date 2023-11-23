@@ -26,7 +26,7 @@ interface AlertProps {
     dismissAlert: () => void
 }
 
-export function AlertBanner({ children, dismissAlert }: AlertProps) {
+export const AlertBanner = ({ children, dismissAlert }: AlertProps) => {
     return (
         <>
             <StyledCard variant="danger" style={{ boxShadow: tokens.elevation.raised }}>

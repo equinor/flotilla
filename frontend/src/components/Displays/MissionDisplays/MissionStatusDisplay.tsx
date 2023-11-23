@@ -42,7 +42,7 @@ export const MissionStatusIcon = ({ status }: StatusProps) => {
     return <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
 }
 
-export function MissionStatusDisplay({ status }: StatusProps) {
+export const MissionStatusDisplay = ({ status }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledStatusIcon>
@@ -52,7 +52,7 @@ export function MissionStatusDisplay({ status }: StatusProps) {
     )
 }
 
-export function MissionStatusDisplayWithHeader({ status }: StatusProps) {
+export const MissionStatusDisplayWithHeader = ({ status }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledStatusDisplay>

@@ -47,7 +47,7 @@ interface IFullScreenVideoStreamCardProps {
     toggleFullScreenMode: VoidFunction
 }
 
-export function FullScreenVideoStreamCard({ videoStream, toggleFullScreenMode }: IFullScreenVideoStreamCardProps) {
+export const FullScreenVideoStreamCard = ({ videoStream, toggleFullScreenMode }: IFullScreenVideoStreamCardProps) => {
     const cardWidth = () => {
         const availableInnerHeight = window.innerHeight - 9 * 16
         const availableInnerWidth = window.innerWidth - 2 * 16

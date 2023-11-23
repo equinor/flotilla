@@ -16,7 +16,7 @@ export type RefreshProps = {
     refreshInterval: number
 }
 
-export function MissionHistoryPage() {
+export const MissionHistoryPage = () => {
     const refreshInterval = 1000
 
     return (

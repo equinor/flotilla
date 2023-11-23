@@ -16,7 +16,7 @@ interface MissionProps {
     mission?: Mission
 }
 
-export function TaskTable({ mission }: MissionProps) {
+export const TaskTable = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const rows = mission && mission.tasks.length > 0 ? RenderTasks(mission.tasks) : <></>
     return (

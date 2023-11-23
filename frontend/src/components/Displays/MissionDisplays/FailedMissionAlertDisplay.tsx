@@ -42,7 +42,7 @@ interface MissionsProps {
     missions: Mission[]
 }
 
-function FailedMission({ mission }: MissionProps) {
+const FailedMission = ({ mission }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const goToMission = () => {
@@ -58,7 +58,7 @@ function FailedMission({ mission }: MissionProps) {
     )
 }
 
-function SeveralFailedMissions({ missions }: MissionsProps) {
+const SeveralFailedMissions = ({ missions }: MissionsProps) => {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
     const goToHistory = () => {
@@ -74,7 +74,7 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
     )
 }
 
-export function FailedMissionAlertDisplay() {
+export const FailedMissionAlertDisplay = () => {
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installationCode } = useInstallationContext()

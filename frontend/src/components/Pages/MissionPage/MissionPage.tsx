@@ -33,7 +33,7 @@ const VideoStreamSection = styled.div`
     gap: 1rem;
 `
 
-export function MissionPage() {
+export const MissionPage = () => {
     const { missionId } = useParams()
     const [videoStreams, setVideoStreams] = useState<VideoStream[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()

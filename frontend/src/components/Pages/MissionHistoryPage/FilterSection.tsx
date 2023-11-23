@@ -35,7 +35,7 @@ const StyledDialog = styled(Card)`
     right: 175px;
 `
 
-export function FilterSection() {
+export const FilterSection = () => {
     const { TranslateText } = useLanguageContext()
     const { filterFunctions, filterState } = useMissionFilterContext()
     const [isFilteringDialogOpen, setIsFilteringDialogOpen] = useState<boolean>(false)

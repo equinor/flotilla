@@ -20,7 +20,7 @@ interface MissionsProps {
     missions: Mission[]
 }
 
-function FailedMission({ missions }: MissionsProps) {
+const FailedMission = ({ missions }: MissionsProps) => {
     const mission = missions[0]
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
@@ -37,7 +37,7 @@ function FailedMission({ missions }: MissionsProps) {
     )
 }
 
-function SeveralFailedMissions({ missions }: MissionsProps) {
+const SeveralFailedMissions = ({ missions }: MissionsProps) => {
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
     const goToHistory = () => {
@@ -53,7 +53,7 @@ function SeveralFailedMissions({ missions }: MissionsProps) {
     )
 }
 
-export function FailedMissionAlertContent({ missions }: MissionsProps) {
+export const FailedMissionAlertContent = ({ missions }: MissionsProps) => {
     return (
         <Indent>
             <MissionStatusDisplay status={MissionStatus.Failed} />

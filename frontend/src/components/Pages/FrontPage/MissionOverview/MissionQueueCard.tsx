@@ -124,12 +124,12 @@ export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQue
     )
 }
 
-function RemoveMissionDialog({
+const RemoveMissionDialog = ({
     confirmDeleteDialogOpen,
     mission,
     setConfirmDeleteDialogOpen,
     onDeleteMission,
-}: RemoveMissionDialogProps) {
+}: RemoveMissionDialogProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (
@@ -167,7 +167,7 @@ function RemoveMissionDialog({
     )
 }
 
-function MissionDurationDisplay({ mission }: MissionDisplayProps) {
+const MissionDurationDisplay = ({ mission }: MissionDisplayProps) => {
     const { TranslateText } = useLanguageContext()
     const translateEstimatedDuration = TranslateText('Estimated duration')
     const translateH = TranslateText('h')

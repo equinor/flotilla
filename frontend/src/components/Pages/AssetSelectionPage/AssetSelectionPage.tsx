@@ -17,12 +17,6 @@ const Centered = styled.div`
     flex-direction: column;
     align-items: center;
 `
-
-function handleLogin(instance: IPublicClientApplication) {
-    instance.loginRedirect(loginRequest).catch((e) => {
-        console.error(e)
-    })
-}
 const StyledTopBarContent = styled(TopBar.CustomContent)`
     display: grid;
     grid-template-columns: minmax(50px, 265px) auto;
@@ -44,6 +38,12 @@ const RowContainer = styled.div`
     justify-content: flex-start;
     margin-top: 50px;
 `
+
+const handleLogin = (instance: IPublicClientApplication) => {
+    instance.loginRedirect(loginRequest).catch((e) => {
+        console.error(e)
+    })
+}
 
 export const AssetSelectionPage = () => {
     const isAuthenticated = useIsAuthenticated()
@@ -81,7 +81,7 @@ export const AssetSelectionPage = () => {
     )
 }
 
-function InstallationPicker() {
+const InstallationPicker = () => {
     const { installationName, switchInstallation } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>(new Map())

@@ -7,7 +7,7 @@ interface RobotProps {
     robot: Robot
 }
 
-export function LocalizationSection({ robot }: RobotProps) {
+export const LocalizationSection = ({ robot }: RobotProps) => {
     const { TranslateText } = useLanguageContext()
     return (
         <>
