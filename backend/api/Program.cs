@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Api.Configurations;
 using Api.Controllers;
 using Api.Controllers.Models;
@@ -73,6 +73,7 @@ builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
 builder.Services.AddScoped<IPoseTimeseriesService, PoseTimeseriesService>();
 builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
 
+
 bool useInMemoryDatabase = builder.Configuration
     .GetSection("Database")
     .GetValue<bool>("UseInMemoryDatabase");
@@ -92,6 +93,8 @@ builder.Services.AddScoped<IInspectionFindingService>();
 
 builder.Services.AddTransient<ISignalRService, SignalRService>();
 
+
+builder.Services.AddHostedService<InspectionFindingEventHandler>();
 builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MissionEventHandler>();
 builder.Services.AddHostedService<MqttService>();
