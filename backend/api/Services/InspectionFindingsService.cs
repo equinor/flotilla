@@ -8,9 +8,9 @@ namespace Api.Services
     public class IInspectionFindingService()
     {
 
-        public async Task<List<InspectionFinding>> RetrieveInspectionFindings(TimeSpan _timeSpan, FlotillaDbContext context)
+        public async Task<List<InspectionFinding>> RetrieveInspectionFindings(TimeSpan timeSpan, FlotillaDbContext context)
         {
-            var lastReportingTime = DateTime.UtcNow - _timeSpan;
+            var lastReportingTime = DateTime.UtcNow - timeSpan;
             var inspectionFindings = await context.InspectionFindings
                                         .Where(f => f.InspectionDate > lastReportingTime)
                                         .ToListAsync();
