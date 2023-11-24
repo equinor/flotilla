@@ -134,7 +134,9 @@ export const useMissions = (): MissionsResult => {
         }
 
         if (BackendAPICaller.accessToken) fetchAndUpdateMissions()
-    }, [])
+        // Need to include BackendAPICaller.accessToken in dependency array to ensure initial render
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [BackendAPICaller.accessToken])
 
     return { ongoingMissions, missionQueue }
 }
