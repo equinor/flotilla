@@ -1,5 +1,4 @@
-﻿using Api.Database.Context;
-using Api.Services;
+﻿using Api.Services;
 namespace Api.EventHandlers
 {
     public class InspectionFindingEventHandler(IConfiguration configuration,
@@ -7,22 +6,20 @@ namespace Api.EventHandlers
     ILogger<InspectionFindingEventHandler> logger) : BackgroundService
     {
         private readonly TimeSpan _interval = configuration.GetValue<TimeSpan>("InspectionFindingEventHandler:Interval");
-        private IInspectionFindingService InspectionFindingService => scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInspectionFindingService>();
+        private InspectionFindingService InspectionFindingService => scopeFactory.CreateScope().ServiceProvider.GetRequiredService<InspectionFindingService>();
         private readonly TimeSpan _timeSpan = configuration.GetValue<TimeSpan>("InspectionFindingEventHandler:TimeSpan");
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
                     await Task.Delay(_interval, stoppingToken);
 
-                    using var scope = scopeFactory.CreateScope();
-                    var context = scope.ServiceProvider.GetRequiredService<FlotillaDbContext>();
-                    var inspectionFindings = await InspectionFindingService.RetrieveInspectionFindings(_timeSpan, context);
+                    var lastReportingTime = DateTime.UtcNow - _timeSpan;
+
+                    var inspectionFindings = await InspectionFindingService.RetrieveInspectionFindings(lastReportingTime);
 
                     logger.LogInformation("Found {count} inspection findings in the last {interval}.", inspectionFindings.Count, _timeSpan);
 
@@ -33,6 +30,5 @@ namespace Api.EventHandlers
                 }
             }
         }
-
     }
 }

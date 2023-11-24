@@ -2,20 +2,16 @@
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace Api.Services
 {
-    public class IInspectionFindingService()
+    public class InspectionFindingService(FlotillaDbContext context)
     {
-
-        public async Task<List<InspectionFinding>> RetrieveInspectionFindings(TimeSpan timeSpan, FlotillaDbContext context)
+        public async Task<List<InspectionFinding>> RetrieveInspectionFindings(DateTime lastReportingTime)
         {
-            var lastReportingTime = DateTime.UtcNow - timeSpan;
             var inspectionFindings = await context.InspectionFindings
                                         .Where(f => f.InspectionDate > lastReportingTime)
                                         .ToListAsync();
             return inspectionFindings;
         }
-
     }
 }
