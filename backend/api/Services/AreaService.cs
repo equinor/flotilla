@@ -190,22 +190,20 @@ namespace Api.Services
         {
             if (installation == null) { return null; }
 
-            return await context.Areas.Where(a =>
+            return await GetAreas().Where(a =>
                     a.Name.ToLower().Equals(areaName.ToLower()) &&
                     a.Installation.InstallationCode.Equals(installation.InstallationCode)
-                ).Include(a => a.SafePositions).Include(a => a.Installation)
-                .Include(a => a.Plant).Include(a => a.Deck).FirstOrDefaultAsync();
+                ).FirstOrDefaultAsync();
         }
 
         public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName)
         {
-            return await context.Areas.Where(a =>
+            return await GetAreas().Where(a =>
                     a.Deck != null && a.Deck.Id.Equals(deck.Id) &&
                     a.Plant != null && a.Plant.Id.Equals(plant.Id) &&
                     a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                     a.Name.ToLower().Equals(areaName.ToLower())
-                ).Include(a => a.Deck).Include(d => d.Plant).Include(i => i.Installation)
-                .Include(a => a.SafePositions).FirstOrDefaultAsync();
+                ).FirstOrDefaultAsync();
         }
     }
 }

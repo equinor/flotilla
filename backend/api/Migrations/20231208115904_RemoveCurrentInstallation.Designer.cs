@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231208115904_RemoveCurrentInstallation")]
+    partial class RemoveCurrentInstallation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -430,9 +433,6 @@ namespace Api.Migrations
                     b.Property<string>("CurrentAreaId")
                         .HasColumnType("text");
 
-                    b.Property<string>("CurrentInstallationId")
-                        .HasColumnType("text");
-
                     b.Property<string>("CurrentMissionId")
                         .HasColumnType("text");
 
@@ -479,8 +479,6 @@ namespace Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CurrentAreaId");
-
-                    b.HasIndex("CurrentInstallationId");
 
                     b.HasIndex("ModelId");
 
@@ -1124,10 +1122,6 @@ namespace Api.Migrations
                         .WithMany()
                         .HasForeignKey("CurrentAreaId");
 
-                    b.HasOne("Api.Database.Models.Installation", "CurrentInstallation")
-                        .WithMany()
-                        .HasForeignKey("CurrentInstallationId");
-
                     b.HasOne("Api.Database.Models.RobotModel", "Model")
                         .WithMany()
                         .HasForeignKey("ModelId")
@@ -1239,8 +1233,6 @@ namespace Api.Migrations
                         });
 
                     b.Navigation("CurrentArea");
-
-                    b.Navigation("CurrentInstallation");
 
                     b.Navigation("Model");
 

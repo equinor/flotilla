@@ -57,7 +57,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
 
     useEffect(() => {
         const relevantRobots = [...enabledRobots].filter(
-            (robot) => robot.currentInstallation.toLowerCase() === installationCode.toLowerCase()
+            (robot) => robot.currentInstallation.installationCode.toLowerCase() === installationCode.toLowerCase()
         )
         setRobotOptions(relevantRobots)
     }, [enabledRobots, installationCode])

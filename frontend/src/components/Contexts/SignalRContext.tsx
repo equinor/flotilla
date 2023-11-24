@@ -105,6 +105,8 @@ export enum SignalREventLabels {
     missionRunCreated = 'Mission run created',
     missionRunDeleted = 'Mission run deleted',
     missionRunFailed = 'Mission run failed',
-    robotListUpdated = 'Robot list updated',
+    robotAdded = 'Robot added',
+    robotUpdated = 'Robot updated',
+    robotDeleted = 'Robot deleted',
     inspectionUpdated = 'Inspection updated',
 }

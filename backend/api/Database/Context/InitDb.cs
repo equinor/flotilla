@@ -5,8 +5,8 @@ namespace Api.Database.Context
 {
     public static class InitDb
     {
-        private static readonly List<Robot> robots = GetRobots();
         private static readonly List<Installation> installations = GetInstallations();
+        private static readonly List<Robot> robots = GetRobots();
         private static readonly List<Plant> plants = GetPlants();
         private static readonly List<Deck> decks = GetDecks();
         private static readonly List<Area> areas = GetAreas();
@@ -57,10 +57,18 @@ namespace Api.Database.Context
                 RoleName = "Role.Admin"
             };
 
+            var accessRole3 = new AccessRole
+            {
+                Installation = installations[0],
+                AccessLevel = RoleAccessLevel.ADMIN,
+                RoleName = "Role.User.JSV"
+            };
+
             return new List<AccessRole>(new[]
             {
                 accessRole1,
-                accessRole2
+                accessRole2,
+                accessRole3
             });
         }
 
@@ -73,9 +81,17 @@ namespace Api.Database.Context
                 InstallationCode = "JSV"
             };
 
+            var installation2 = new Installation
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Kårstø Nature Gas",
+                InstallationCode = "KAA"
+            };
+
             return new List<Installation>(new[]
             {
-                installation1
+                installation1,
+                installation2
             });
         }
 
@@ -259,7 +275,7 @@ namespace Api.Database.Context
                 Enabled = true,
                 Host = "localhost",
                 Port = 3000,
-                CurrentInstallation = "JSV",
+                CurrentInstallation = installations[0],
                 VideoStreams = new List<VideoStream>(),
                 Pose = new Pose()
             };
@@ -273,7 +289,7 @@ namespace Api.Database.Context
                 Enabled = true,
                 Host = "localhost",
                 Port = 3000,
-                CurrentInstallation = "JSV",
+                CurrentInstallation = installations[0],
                 VideoStreams = new List<VideoStream>(),
                 Pose = new Pose()
             };
@@ -287,7 +303,7 @@ namespace Api.Database.Context
                 Enabled = false,
                 Host = "localhost",
                 Port = 3000,
-                CurrentInstallation = "JSV",
+                CurrentInstallation = installations[0],
                 VideoStreams = new List<VideoStream>(),
                 Pose = new Pose()
             };

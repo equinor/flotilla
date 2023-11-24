@@ -63,7 +63,7 @@ namespace Api.Services
             await context.SaveChangesAsync();
             _ = signalRService.SendMessageAsync("Mission run created", missionRun?.Area?.Installation, missionRun);
 
-            var args = new MissionRunCreatedEventArgs(missionRun.Id);
+            var args = new MissionRunCreatedEventArgs(missionRun!.Id);
             OnMissionRunCreated(args);
 
             return missionRun;

@@ -5,6 +5,7 @@ using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -18,13 +19,15 @@ namespace Api.Test.Services
         private readonly ILogger<MissionRunService> _logger;
         private readonly MissionRunService _missionRunService;
         private readonly ISignalRService _signalRService;
+        private readonly IAccessRoleService _accessRoleService;
 
         public MissionServiceTest(DatabaseFixture fixture)
         {
             _context = fixture.NewContext;
             _logger = new Mock<ILogger<MissionRunService>>().Object;
             _signalRService = new MockSignalRService();
-            _missionRunService = new MissionRunService(_context, _signalRService, _logger);
+            _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
+            _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService);
             _databaseUtilities = new DatabaseUtilities(_context);
         }
 
@@ -53,7 +56,7 @@ namespace Api.Test.Services
             var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, area);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, area, installation);
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
             await _missionRunService.Create(missionRun);

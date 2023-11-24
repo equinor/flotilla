@@ -107,7 +107,7 @@ namespace Api.Services
 
             var entry = context.Update(missionDefinition);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Mission definition updated", missionDefinition?.Area?.Installation, new CondensedMissionDefinitionResponse(missionDefinition));
+            _ = signalRService.SendMessageAsync("Mission definition updated", missionDefinition?.Area?.Installation, missionDefinition != null ? new CondensedMissionDefinitionResponse(missionDefinition) : null);
             return entry.Entity;
         }
 

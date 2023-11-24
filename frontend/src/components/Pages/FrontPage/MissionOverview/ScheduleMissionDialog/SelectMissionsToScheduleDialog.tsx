@@ -97,7 +97,9 @@ export const SelectMissionsToScheduleDialog = ({
                     <Autocomplete
                         optionLabel={(r) => (r ? r.name + ' (' + r.model.type + ')' : '')}
                         options={enabledRobots.filter(
-                            (r) => r.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+                            (r) =>
+                                r.currentInstallation.installationCode.toLocaleLowerCase() ===
+                                installationCode.toLocaleLowerCase()
                         )}
                         disabled={!enabledRobots}
                         selectedOptions={[selectedRobot]}

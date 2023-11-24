@@ -67,8 +67,8 @@ namespace Api.Services
                 context.Entry(robotModel).State = EntityState.Unchanged;
                 await context.Robots.AddAsync(newRobot);
                 await context.SaveChangesAsync();
-                _ = signalRService.SendMessageAsync("Robot list updated", null, GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
-                return newRobot;
+                _ = signalRService.SendMessageAsync("Robot added", newRobot?.CurrentInstallation, new RobotResponse(newRobot!));
+                return newRobot!;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
         }
@@ -101,7 +101,7 @@ namespace Api.Services
 
         public async Task<IEnumerable<string>> ReadAllActivePlants()
         {
-            return await context.Robots.Where(r => r.Enabled).Select(r => r.CurrentInstallation).ToListAsync();
+            return await context.Robots.Where(r => r.Enabled && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
         }
 
         public async Task<Robot> Update(Robot robot)
@@ -110,7 +110,7 @@ namespace Api.Services
 
             var entry = context.Update(robot);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Robot list updated", null, GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
+            _ = signalRService.SendMessageAsync("Robot updated", robot?.CurrentInstallation, robot != null ? new RobotResponse(robot) : null);
             return entry.Entity;
         }
 
@@ -121,7 +121,7 @@ namespace Api.Services
 
             context.Robots.Remove(robot);
             await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Robot list updated", null, GetEnabledRobotsWithSubModels().Select((r) => new RobotResponse(r)));
+            _ = signalRService.SendMessageAsync("Robot deleted", robot?.CurrentInstallation, robot != null ? new RobotResponse(robot) : null);
             return robot;
         }
 
@@ -130,7 +130,8 @@ namespace Api.Services
             return await GetRobotsWithSubModels()
                 .Where(robot =>
 #pragma warning disable CA1304
-                    robot.CurrentInstallation.ToLower().Equals(installationCode.ToLower())
+                    robot.CurrentInstallation != null &&
+                    robot.CurrentInstallation.InstallationCode.ToLower().Equals(installationCode.ToLower())
 #pragma warning restore CA1304
                     && robot.CurrentArea != null)
                 .ToListAsync();
@@ -161,9 +162,11 @@ namespace Api.Services
         private IQueryable<Robot> GetRobotsWithSubModels()
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+#pragma warning disable CA1304
             return context.Robots
                 .Include(r => r.VideoStreams)
                 .Include(r => r.Model)
+                .Include(r => r.CurrentInstallation)
                 .Include(r => r.CurrentArea)
                 .ThenInclude(area => area != null ? area.Deck : null)
                 .Include(r => r.CurrentArea)
@@ -172,12 +175,8 @@ namespace Api.Services
                 .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(r => r.CurrentArea)
                 .ThenInclude(area => area != null ? area.SafePositions : null)
-                .Where((r) => r.CurrentArea == null || accessibleInstallationCodes.Result.Contains(r.CurrentArea.Installation.InstallationCode.ToUpper()));
-        }
-
-        private IQueryable<Robot> GetEnabledRobotsWithSubModels()
-        {
-            return GetRobotsWithSubModels().Where(r => r.Enabled && r.Status != RobotStatus.Deprecated);
+                .Where((r) => r.CurrentInstallation == null || r.CurrentInstallation.InstallationCode == null || accessibleInstallationCodes.Result.Contains(r.CurrentInstallation.InstallationCode.ToUpper()));
+#pragma warning restore CA1304
         }
     }
 }

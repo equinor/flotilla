@@ -22,7 +22,7 @@ namespace Api.Utilities
             var jwtSecurityToken = handler.ReadJwtToken(accessTokenBase64);
 
             var claims = jwtSecurityToken.Claims;
-            var roles = claims.Where((c) => c.Type == "roles").ToList();
+            var roles = claims.Where((c) => c.Type == "roles" || c.Type.EndsWith("role", StringComparison.CurrentCulture)).ToList();
             return roles;
         }
 
