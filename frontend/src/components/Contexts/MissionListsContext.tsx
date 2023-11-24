@@ -114,7 +114,9 @@ export const useMissions = (): MissionsResult => {
                 })
             })
         }
-    }, [registerEvent, connectionReady, missionQueue])
+        // Need to exclude missionQueue from dependency array to prevent duplicated missions
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [registerEvent, connectionReady])
 
     useEffect(() => {
         const fetchAndUpdateMissions = async () => {
