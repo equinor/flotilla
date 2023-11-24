@@ -20,7 +20,7 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, ISignalRService signalRService) : IInspectionService
+    public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger) : IInspectionService
     {
         public async Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus)
         {

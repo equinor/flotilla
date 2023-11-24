@@ -13,7 +13,6 @@ namespace Api.Database.Models
             IsarId = "defaultIsarId";
             Name = "defaultId";
             SerialNumber = "defaultSerialNumber";
-            CurrentInstallation = "defaultAsset";
             Status = RobotStatus.Offline;
             Enabled = false;
             Host = "localhost";
@@ -66,7 +65,7 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public string SerialNumber { get; set; }
 
-        public string CurrentInstallation { get; set; }
+        public Installation? CurrentInstallation { get; set; }
 
         public Area? CurrentArea { get; set; }
 

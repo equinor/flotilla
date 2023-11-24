@@ -55,7 +55,7 @@ namespace Api.Services
         {
             if (installationCode == null)
                 return null;
-            return await context.Installations.Where(a =>
+            return await GetInstallations().Where(a =>
                 a.InstallationCode.ToLower().Equals(installationCode.ToLower())
             ).FirstOrDefaultAsync();
         }

@@ -32,7 +32,7 @@ namespace Api.Services
 
             if (roles.Contains(SUPER_ADMIN_ROLE_NAME))
             {
-                return await context.Installations.Select((i) => i.InstallationCode).ToListAsync();
+                return await context.Installations.Select((i) => i.InstallationCode.ToUpperInvariant()).ToListAsync();
             }
             else
             {

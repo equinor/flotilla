@@ -12,7 +12,7 @@ namespace Api.Controllers.Models
 
         public string SerialNumber { get; set; }
 
-        public string CurrentInstallation { get; set; }
+        public Installation CurrentInstallation { get; set; }
 
         public Area CurrentArea { get; set; }
 

@@ -88,8 +88,21 @@ namespace Api.EventHandlers
         {
             var provider = GetServiceProvider();
             var robotService = provider.GetRequiredService<IRobotService>();
+            var installationService = provider.GetRequiredService<IInstallationService>();
 
             var isarRobotInfo = (IsarRobotInfoMessage)mqttArgs.Message;
+
+            var installation = await installationService.ReadByName(isarRobotInfo.CurrentInstallation);
+
+            if (installation is null)
+            {
+                _logger.LogError(
+                    new InstallationNotFoundException($"No installation with code {isarRobotInfo.CurrentInstallation} found"),
+                    "Could not create new robot due to missing installation"
+                );
+                return;
+            }
+
             try
             {
                 var robot = await robotService.ReadByIsarId(isarRobotInfo.IsarId);
@@ -106,7 +119,7 @@ namespace Api.EventHandlers
                         Name = isarRobotInfo.RobotName,
                         RobotType = isarRobotInfo.RobotType,
                         SerialNumber = isarRobotInfo.SerialNumber,
-                        CurrentInstallation = isarRobotInfo.CurrentInstallation,
+                        CurrentInstallation = installation,
                         VideoStreams = isarRobotInfo.VideoStreamQueries,
                         Host = isarRobotInfo.Host,
                         Port = isarRobotInfo.Port,
@@ -127,7 +140,7 @@ namespace Api.EventHandlers
 
                 UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
 
-                if (isarRobotInfo.CurrentInstallation is not null) { UpdateCurrentInstallationIfChanged(isarRobotInfo.CurrentInstallation, ref robot, ref updatedFields); }
+                if (isarRobotInfo.CurrentInstallation is not null) { UpdateCurrentInstallationIfChanged(installation, ref robot, ref updatedFields); }
                 if (updatedFields.IsNullOrEmpty()) { return; }
 
                 robot = await robotService.Update(robot);
@@ -179,9 +192,9 @@ namespace Api.EventHandlers
             robot.Port = port;
         }
 
-        private static void UpdateCurrentInstallationIfChanged(string newCurrentInstallation, ref Robot robot, ref List<string> updatedFields)
+        private static void UpdateCurrentInstallationIfChanged(Installation newCurrentInstallation, ref Robot robot, ref List<string> updatedFields)
         {
-            if (newCurrentInstallation.Equals(robot.CurrentInstallation, StringComparison.Ordinal)) { return; }
+            if (newCurrentInstallation.InstallationCode.Equals(robot.CurrentInstallation?.InstallationCode, StringComparison.Ordinal)) { return; }
 
             updatedFields.Add($"\nCurrentInstallation ({robot.CurrentInstallation} -> {newCurrentInstallation})\n");
             robot.CurrentInstallation = newCurrentInstallation;

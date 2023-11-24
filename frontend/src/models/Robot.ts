@@ -1,5 +1,6 @@
 import { Area } from './Area'
 import { BatteryStatus } from './Battery'
+import { Installation, placeholderInstallation } from './Installation'
 import { Pose } from './Pose'
 import { RobotModel, placeholderRobotModel } from './RobotModel'
 import { VideoStream } from './VideoStream'
@@ -17,7 +18,7 @@ export interface Robot {
     name?: string
     model: RobotModel
     serialNumber?: string
-    currentInstallation: string
+    currentInstallation: Installation
     batteryLevel?: number
     batteryStatus?: BatteryStatus
     pressureLevel?: number
@@ -35,6 +36,6 @@ export interface Robot {
 export const placeholderRobot: Robot = {
     id: 'placeholderRobotId',
     model: placeholderRobotModel,
-    currentInstallation: 'PlaceholderInstallation',
+    currentInstallation: placeholderInstallation,
     status: RobotStatus.Available,
 }

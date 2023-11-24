@@ -6,6 +6,7 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -18,6 +19,7 @@ namespace Api.Test.Services
         private readonly ILogger<RobotService> _logger;
         private readonly RobotModelService _robotModelService;
         private readonly ISignalRService _signalRService;
+        private readonly IAccessRoleService _accessRoleService;
 
         public RobotServiceTest(DatabaseFixture fixture)
         {
@@ -25,6 +27,7 @@ namespace Api.Test.Services
             _logger = new Mock<ILogger<RobotService>>().Object;
             _robotModelService = new RobotModelService(_context);
             _signalRService = new MockSignalRService();
+            _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
         }
 
         public void Dispose()
@@ -36,7 +39,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadAll()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService);
             var robots = await robotService.ReadAll();
 
             Assert.True(robots.Any());
@@ -45,7 +48,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task Read()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService);
             var robots = await robotService.ReadAll();
             var firstRobot = robots.First();
             var robotById = await robotService.ReadById(firstRobot.Id);
@@ -56,7 +59,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService);
             var robot = await robotService.ReadById("some_id_that_does_not_exist");
             Assert.Null(robot);
         }
@@ -64,7 +67,15 @@ namespace Api.Test.Services
         [Fact]
         public async Task Create()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService);
+            var installationService = new InstallationService(_context, _accessRoleService);
+
+            var installation = await installationService.Create(new CreateInstallationQuery
+            {
+                Name = "Johan Sverdrup",
+                InstallationCode = "JSV"
+            });
+
             var robotsBefore = await robotService.ReadAll();
             int nRobotsBefore = robotsBefore.Count();
             var videoStreamQuery = new CreateVideoStreamQuery
@@ -82,7 +93,7 @@ namespace Api.Test.Services
                 {
                     videoStreamQuery
                 },
-                CurrentInstallation = "",
+                CurrentInstallation = installation,
                 RobotType = RobotType.Robot,
                 Host = "",
                 Port = 1,

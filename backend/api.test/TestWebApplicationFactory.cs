@@ -3,6 +3,7 @@ using Api.Services;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +29,9 @@ namespace Api.Test
             builder.ConfigureTestServices(
                 services =>
                 {
+                    services.AddScoped<IAccessRoleService, AccessRoleService>();
                     services.AddScoped<IIsarService, MockIsarService>();
+                    services.AddScoped<IHttpContextAccessor, MockHttpContextAccessor>();
                     services.AddScoped<IEchoService, MockEchoService>();
                     services.AddScoped<IMapService, MockMapService>();
                     services.AddScoped<IBlobService, MockBlobService>();

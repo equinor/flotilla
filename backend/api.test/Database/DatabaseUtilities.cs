@@ -5,12 +5,14 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 namespace Api.Test.Database
 {
     public class DatabaseUtilities : IDisposable
     {
+        private readonly AccessRoleService _accessRoleService;
         private readonly AreaService _areaService;
         private readonly DeckService _deckService;
         private readonly InstallationService _installationService;
@@ -23,13 +25,14 @@ namespace Api.Test.Database
         {
             var defaultLocalizationPoseService = new DefaultLocalizationPoseService(context);
 
-            _installationService = new InstallationService(context);
-            _plantService = new PlantService(context, _installationService);
-            _deckService = new DeckService(context, defaultLocalizationPoseService, _installationService, _plantService);
-            _areaService = new AreaService(context, _installationService, _plantService, _deckService, defaultLocalizationPoseService);
-            _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object);
+            _accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
+            _installationService = new InstallationService(context, _accessRoleService);
+            _plantService = new PlantService(context, _installationService, _accessRoleService);
+            _deckService = new DeckService(context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService);
+            _areaService = new AreaService(context, _installationService, _plantService, _deckService, defaultLocalizationPoseService, _accessRoleService);
+            _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService);
             _robotModelService = new RobotModelService(context);
-            _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService());
+            _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService);
         }
 
         public void Dispose()
@@ -113,7 +116,7 @@ namespace Api.Test.Database
             return await _areaService.Create(createAreaQuery);
         }
 
-        public async Task<Robot> NewRobot(RobotStatus status, Area area)
+        public async Task<Robot> NewRobot(RobotStatus status, Area area, Installation installation)
         {
             var createRobotQuery = new CreateRobotQuery
             {
@@ -121,7 +124,7 @@ namespace Api.Test.Database
                 IsarId = Guid.NewGuid().ToString(),
                 RobotType = RobotType.Robot,
                 SerialNumber = "0001",
-                CurrentInstallation = "kaa",
+                CurrentInstallation = installation,
                 CurrentArea = area,
                 VideoStreams = new List<CreateVideoStreamQuery>(),
                 Host = "localhost",

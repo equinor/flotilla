@@ -5,6 +5,14 @@ import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { BatteryStatus } from 'models/Battery'
 import { RobotType } from 'models/RobotModel'
 
+const upsertRobotList = (list: Robot[], mission: Robot) => {
+    let newList = [...list]
+    const i = newList.findIndex((e) => e.id === mission.id)
+    if (i > -1) newList[i] = mission
+    else newList.push(mission)
+    return newList
+}
+
 interface Props {
     children: React.ReactNode
 }
@@ -25,16 +33,57 @@ export const RobotProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent(SignalREventLabels.robotListUpdated, (username: string, message: string) => {
-                let newRobotList: Robot[] = JSON.parse(message)
-                console.log(newRobotList)
-                newRobotList = newRobotList.map((r) => {
-                    r.status = Object.values(RobotStatus)[r.status as unknown as number]
-                    r.batteryStatus = Object.values(BatteryStatus)[r.batteryStatus as unknown as number]
-                    r.model.type = Object.values(RobotType)[r.model.type as unknown as number]
-                    return r
+            registerEvent(SignalREventLabels.robotAdded, (username: string, message: string) => {
+                let updatedRobot: Robot = JSON.parse(message)
+                updatedRobot = {
+                    ...updatedRobot,
+                    status: Object.values(RobotStatus)[updatedRobot.status as unknown as number],
+                    batteryStatus: Object.values(BatteryStatus)[updatedRobot.batteryStatus as unknown as number],
+                    model: {
+                        ...updatedRobot.model,
+                        type: Object.values(RobotType)[updatedRobot.model.type as unknown as number],
+                    },
+                }
+                setEnabledRobots((oldRobotList) => {
+                    let oldRobotListCopy = [...oldRobotList]
+                    oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
+                    return [...oldRobotListCopy]
                 })
-                setEnabledRobots(newRobotList)
+            })
+            registerEvent(SignalREventLabels.robotUpdated, (username: string, message: string) => {
+                let updatedRobot: Robot = JSON.parse(message)
+                updatedRobot = {
+                    ...updatedRobot,
+                    status: Object.values(RobotStatus)[updatedRobot.status as unknown as number],
+                    batteryStatus: Object.values(BatteryStatus)[updatedRobot.batteryStatus as unknown as number],
+                    model: {
+                        ...updatedRobot.model,
+                        type: Object.values(RobotType)[updatedRobot.model.type as unknown as number],
+                    },
+                }
+                setEnabledRobots((oldRobotList) => {
+                    let oldRobotListCopy = [...oldRobotList]
+                    oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
+                    return [...oldRobotListCopy]
+                })
+            })
+            registerEvent(SignalREventLabels.robotDeleted, (username: string, message: string) => {
+                let updatedRobot: Robot = JSON.parse(message)
+                updatedRobot = {
+                    ...updatedRobot,
+                    status: Object.values(RobotStatus)[updatedRobot.status as unknown as number],
+                    batteryStatus: Object.values(BatteryStatus)[updatedRobot.batteryStatus as unknown as number],
+                    model: {
+                        ...updatedRobot.model,
+                        type: Object.values(RobotType)[updatedRobot.model.type as unknown as number],
+                    },
+                }
+                setEnabledRobots((oldRobotList) => {
+                    let newRobotList = [...oldRobotList]
+                    const index = newRobotList.findIndex((r) => r.id === updatedRobot.id)
+                    if (index !== -1) newRobotList.splice(index, 1) // Remove deleted robot
+                    return newRobotList
+                })
             })
         }
     }, [registerEvent, connectionReady])

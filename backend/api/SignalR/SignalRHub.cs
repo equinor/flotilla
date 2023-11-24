@@ -14,7 +14,8 @@ namespace Api.SignalRHubs
         /// </summary>
         public override async Task OnConnectedAsync()
         {
-            if (Context.User != null) {
+            if (Context.User != null)
+            {
                 var roles = Context.User.Claims
                     .Where((c) => c.Type.EndsWith("/role", StringComparison.CurrentCulture)).Select((c) => c.Value).ToList();
 

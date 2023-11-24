@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Api.Database.Models;
 namespace Api.Services
 {
     public class MockSignalRService : ISignalRService
@@ -7,22 +8,12 @@ namespace Api.Services
         {
         }
 
-        public async Task SendMessageAsync<T>(string label, T messageObject)
+        public async Task SendMessageAsync<T>(string label, Installation? installation, T messageObject)
         {
             await Task.CompletedTask;
         }
 
-        public async Task SendMessageAsync<T>(string label, string user, T messageObject)
-        {
-            await Task.CompletedTask;
-        }
-
-        public async Task SendMessageAsync(string label, string message)
-        {
-            await Task.CompletedTask;
-        }
-
-        public async Task SendMessageAsync(string label, string user, string message)
+        public async Task SendMessageAsync(string label, Installation? installation, string message)
         {
             await Task.CompletedTask;
         }

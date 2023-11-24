@@ -35,7 +35,7 @@ export const RobotStatusSection = () => {
         }
         const relevantRobots = sortRobotsByStatus(
             enabledRobots.filter((robot) => {
-                return robot.currentInstallation.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+                return robot.currentInstallation.installationCode.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
             })
         )
         setRobots(relevantRobots)
