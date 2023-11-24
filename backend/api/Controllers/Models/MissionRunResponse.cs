@@ -1,5 +1,5 @@
+﻿using System.Text.Json.Serialization;
 using Api.Database.Models;
-using System.Text.Json.Serialization;
 namespace Api.Controllers.Models
 {
     public class MissionRunResponse
