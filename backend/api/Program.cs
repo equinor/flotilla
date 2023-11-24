@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using Api.Configurations;
 using Api.Controllers;
 using Api.Controllers.Models;
@@ -88,6 +88,7 @@ else
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
+builder.Services.AddScoped<IInspectionFindingService>();
 
 builder.Services.AddTransient<ISignalRService, SignalRService>();
 
