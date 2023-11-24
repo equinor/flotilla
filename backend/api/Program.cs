@@ -73,7 +73,6 @@ builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
 builder.Services.AddScoped<IPoseTimeseriesService, PoseTimeseriesService>();
 builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
 
-
 bool useInMemoryDatabase = builder.Configuration
     .GetSection("Database")
     .GetValue<bool>("UseInMemoryDatabase");
@@ -89,10 +88,9 @@ else
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
-builder.Services.AddScoped<IInspectionFindingService>();
+builder.Services.AddScoped<InspectionFindingService>();
 
 builder.Services.AddTransient<ISignalRService, SignalRService>();
-
 
 builder.Services.AddHostedService<InspectionFindingEventHandler>();
 builder.Services.AddHostedService<MqttEventHandler>();
