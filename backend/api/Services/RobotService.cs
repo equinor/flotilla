@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -51,7 +52,7 @@ namespace Api.Services
             if (newRobot.CurrentArea is not null) { context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged; }
 
             await context.Robots.AddAsync(newRobot);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
             return newRobot;
         }
 
@@ -66,7 +67,7 @@ namespace Api.Services
                 };
                 context.Entry(robotModel).State = EntityState.Unchanged;
                 await context.Robots.AddAsync(newRobot);
-                await context.SaveChangesAsync();
+                await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
                 _ = signalRService.SendMessageAsync("Robot added", newRobot?.CurrentInstallation, new RobotResponse(newRobot!));
                 return newRobot!;
             }
@@ -81,7 +82,6 @@ namespace Api.Services
         public async Task<Robot> UpdateCurrentMissionId(string robotId, string? currentMissionId) { return await UpdateRobotProperty(robotId, "CurrentMissionId", currentMissionId); }
         public async Task<Robot> UpdateCurrentArea(string robotId, Area? area) { return await UpdateRobotProperty(robotId, "CurrentArea", area); }
         public async Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen) { return await UpdateRobotProperty(robotId, "MissionQueueFrozen", missionQueueFrozen); }
-
 
         public async Task<IEnumerable<Robot>> ReadAll()
         {
@@ -109,7 +109,7 @@ namespace Api.Services
             if (robot.CurrentArea is not null) { context.Entry(robot.CurrentArea).State = EntityState.Unchanged; }
 
             var entry = context.Update(robot);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(robot.CurrentInstallation);
             _ = signalRService.SendMessageAsync("Robot updated", robot?.CurrentInstallation, robot != null ? new RobotResponse(robot) : null);
             return entry.Entity;
         }
@@ -120,7 +120,7 @@ namespace Api.Services
             if (robot is null) { return null; }
 
             context.Robots.Remove(robot);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(robot.CurrentInstallation);
             _ = signalRService.SendMessageAsync("Robot deleted", robot?.CurrentInstallation, robot != null ? new RobotResponse(robot) : null);
             return robot;
         }
@@ -177,6 +177,15 @@ namespace Api.Services
                 .ThenInclude(area => area != null ? area.SafePositions : null)
                 .Where((r) => r.CurrentInstallation == null || r.CurrentInstallation.InstallationCode == null || accessibleInstallationCodes.Result.Contains(r.CurrentInstallation.InstallationCode.ToUpper()));
 #pragma warning restore CA1304
+        }
+
+        private async Task ApplyDatabaseUpdate(Installation? installation)
+        {
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+                await context.SaveChangesAsync();
+            else
+                throw new UnauthorizedAccessException($"User does not have permission to update robot in installation {installation.Name}");
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -111,14 +112,14 @@ namespace Api.Services
             if (deck.DefaultLocalizationPose is not null) { context.Entry(deck.DefaultLocalizationPose).State = EntityState.Modified; }
 
             await context.Decks.AddAsync(deck);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(deck.Installation);
             return deck!;
         }
 
         public async Task<Deck> Update(Deck deck)
         {
             var entry = context.Update(deck);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(deck.Installation);
             return entry.Entity;
         }
 
@@ -132,7 +133,7 @@ namespace Api.Services
             }
 
             context.Decks.Remove(deck);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(deck.Installation);
 
             return deck;
         }
@@ -142,6 +143,15 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
                 .Where((d) => accessibleInstallationCodes.Result.Contains(d.Installation.InstallationCode.ToUpper()));
+        }
+
+        private async Task ApplyDatabaseUpdate(Installation? installation)
+        {
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+                await context.SaveChangesAsync();
+            else
+                throw new UnauthorizedAccessException($"User does not have permission to update deck in installation {installation.Name}");
         }
     }
 }

@@ -53,7 +53,7 @@ namespace Api.Services
             if (missionDefinition.Area is not null) { context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
 
             await context.MissionDefinitions.AddAsync(missionDefinition);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(missionDefinition.Area?.Installation);
 
             return missionDefinition;
         }
@@ -106,7 +106,7 @@ namespace Api.Services
             if (missionDefinition.Area is not null) { context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
 
             var entry = context.Update(missionDefinition);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(missionDefinition.Area?.Installation);
             _ = signalRService.SendMessageAsync("Mission definition updated", missionDefinition?.Area?.Installation, missionDefinition != null ? new CondensedMissionDefinitionResponse(missionDefinition) : null);
             return entry.Entity;
         }
@@ -118,7 +118,7 @@ namespace Api.Services
             if (missionDefinition is null) { return null; }
 
             missionDefinition.IsDeprecated = true;
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(missionDefinition.Area?.Installation);
 
             return missionDefinition;
         }
@@ -155,6 +155,15 @@ namespace Api.Services
                 logger.LogError("Echo source ID was not formatted correctly");
                 throw new FormatException("Echo source ID was not formatted correctly");
             }
+        }
+
+        private async Task ApplyDatabaseUpdate(Installation? installation)
+        {
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+                await context.SaveChangesAsync();
+            else
+                throw new UnauthorizedAccessException($"User does not have permission to update mission definition in installation {installation.Name}");
         }
 
         private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()

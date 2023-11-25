@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -89,7 +90,7 @@ namespace Api.Services
                 };
                 context.Entry(plant.Installation).State = EntityState.Unchanged;
                 await context.Plants.AddAsync(plant);
-                await context.SaveChangesAsync();
+                await ApplyDatabaseUpdate(plant.Installation);
             }
             return plant!;
         }
@@ -97,7 +98,7 @@ namespace Api.Services
         public async Task<Plant> Update(Plant plant)
         {
             var entry = context.Update(plant);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(plant.Installation);
             return entry.Entity;
         }
 
@@ -111,7 +112,7 @@ namespace Api.Services
             }
 
             context.Plants.Remove(plant);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(plant.Installation);
 
             return plant;
         }
@@ -121,6 +122,15 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.Plants.Include(i => i.Installation)
                 .Where((p) => accessibleInstallationCodes.Result.Contains(p.Installation.InstallationCode.ToUpper()));
+        }
+
+        private async Task ApplyDatabaseUpdate(Installation? installation)
+        {
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+                await context.SaveChangesAsync();
+            else
+                throw new UnauthorizedAccessException($"User does not have permission to update plant in installation {installation.Name}");
         }
     }
 }
