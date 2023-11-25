@@ -1,4 +1,5 @@
-﻿using Api.Controllers.Models;
+﻿using System.Globalization;
+using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,20 @@ namespace Api.Services
                 .Where((i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper()));
         }
 
+        private async Task ApplyUnprotectedDatabaseUpdate()
+        {
+            await context.SaveChangesAsync();
+        }
+
+        private async Task ApplyDatabaseUpdate(Installation? installation)
+        {
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+                await context.SaveChangesAsync();
+            else
+                throw new UnauthorizedAccessException($"User does not have permission to update installation in installation {installation.Name}");
+        }
+
         public async Task<Installation?> ReadById(string id)
         {
             return await GetInstallations()
@@ -71,7 +86,7 @@ namespace Api.Services
                     InstallationCode = newInstallationQuery.InstallationCode
                 };
                 await context.Installations.AddAsync(installation);
-                await context.SaveChangesAsync();
+                await ApplyUnprotectedDatabaseUpdate();
             }
 
             return installation!;
@@ -80,7 +95,7 @@ namespace Api.Services
         public async Task<Installation> Update(Installation installation)
         {
             var entry = context.Update(installation);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(installation);
             return entry.Entity;
         }
 
@@ -94,7 +109,7 @@ namespace Api.Services
             }
 
             context.Installations.Remove(installation);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(installation);
 
             return installation;
         }

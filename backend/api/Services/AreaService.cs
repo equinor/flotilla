@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -134,7 +135,7 @@ namespace Api.Services
             if (newArea.DefaultLocalizationPose is not null) { context.Entry(newArea.DefaultLocalizationPose).State = EntityState.Modified; }
 
             await context.Areas.AddAsync(newArea);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(installation);
             return newArea;
         }
 
@@ -152,14 +153,14 @@ namespace Api.Services
             area.SafePositions.Add(safePosition);
 
             context.Areas.Update(area);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(area.Installation);
             return area;
         }
 
         public async Task<Area> Update(Area area)
         {
             var entry = context.Update(area);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(area.Installation);
             return entry.Entity;
         }
 
@@ -173,9 +174,18 @@ namespace Api.Services
             }
 
             context.Areas.Remove(area);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(area.Installation);
 
             return area;
+        }
+
+        private async Task ApplyDatabaseUpdate(Installation? installation)
+        {
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+                await context.SaveChangesAsync();
+            else
+                throw new UnauthorizedAccessException($"User does not have permission to update area in installation {installation.Name}");
         }
 
         private IQueryable<Area> GetAreas()

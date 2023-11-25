@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
@@ -60,7 +61,7 @@ namespace Api.Services
             if (missionRun.Area is not null) { context.Entry(missionRun.Area).State = EntityState.Unchanged; }
 
             await context.MissionRuns.AddAsync(missionRun);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(missionRun.Area?.Installation);
             _ = signalRService.SendMessageAsync("Mission run created", missionRun?.Area?.Installation, missionRun);
 
             var args = new MissionRunCreatedEventArgs(missionRun!.Id);
@@ -132,7 +133,7 @@ namespace Api.Services
             if (missionRun.Area is not null) { context.Entry(missionRun.Area).State = EntityState.Unchanged; }
 
             var entry = context.Update(missionRun);
-            await context.SaveChangesAsync();
+            await ApplyDatabaseUpdate(missionRun.Area?.Installation);
             _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
             return entry.Entity;
         }
@@ -147,8 +148,8 @@ namespace Api.Services
             }
 
             context.MissionRuns.Remove(missionRun);
-            await context.SaveChangesAsync();
-            _ = signalRService.SendMessageAsync("Mission run deleted", missionRun?.Area?.Installation,  missionRun != null ? new MissionRunResponse(missionRun) : null);
+            await ApplyDatabaseUpdate(missionRun.Area?.Installation);
+            _ = signalRService.SendMessageAsync("Mission run deleted", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
 
             return missionRun;
         }
@@ -178,6 +179,15 @@ namespace Api.Services
         }
 
         public static event EventHandler<MissionRunCreatedEventArgs>? MissionRunCreated;
+
+        private async Task ApplyDatabaseUpdate(Installation? installation)
+        {
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+                await context.SaveChangesAsync();
+            else
+                throw new UnauthorizedAccessException($"User does not have permission to update mission run in installation {installation.Name}");
+        }
 
         private static void SearchByName(ref IQueryable<MissionRun> missionRuns, string? name)
         {
@@ -356,7 +366,7 @@ namespace Api.Services
 
             missionRun = await Update(missionRun);
 
-            if (missionRun.Status == MissionStatus.Failed) { _ = signalRService.SendMessageAsync("Mission run failed", missionRun?.Area?.Installation,  missionRun != null ? new MissionRunResponse(missionRun) : null); }
+            if (missionRun.Status == MissionStatus.Failed) { _ = signalRService.SendMessageAsync("Mission run failed", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null); }
             return missionRun!;
         }
 
