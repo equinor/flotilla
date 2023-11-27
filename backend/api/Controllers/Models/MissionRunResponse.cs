@@ -28,11 +28,11 @@ namespace Api.Controllers.Models
 
         public bool IsCompleted;
 
-        public DateTime DesiredStartTime { get; set; }
+        public DateTimeOffset DesiredStartTime { get; set; }
 
-        public DateTime? StartTime { get; private set; }
+        public DateTimeOffset? StartTime { get; private set; }
 
-        public DateTime? EndTime { get; private set; }
+        public DateTimeOffset? EndTime { get; private set; }
 
         public uint? EstimatedDuration { get; set; }
 
@@ -61,9 +61,9 @@ namespace Api.Controllers.Models
             Robot = new RobotResponse(mission.Robot);
             Status = mission.Status;
             IsCompleted = mission.IsCompleted;
-            DesiredStartTime = mission.DesiredStartTime;
-            StartTime = mission.StartTime;
-            EndTime = mission.EndTime;
+            DesiredStartTime = mission.DesiredStartTime.ToLocalTime();
+            StartTime = mission.StartTime?.ToLocalTime();
+            EndTime = mission.EndTime?.ToLocalTime();
             EstimatedDuration = mission.EstimatedDuration;
             Tasks = mission.Tasks;
             Map = mission.Map;
