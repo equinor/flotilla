@@ -193,9 +193,13 @@ namespace Api.Services
         private IQueryable<Area> GetAreas()
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            return context.Areas.Include(a => a.SafePositions)
-                .Include(a => a.Deck).Include(d => d.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
-                .Where((a) => accessibleInstallationCodes.Result.Contains(a.Installation.InstallationCode.ToUpper()));
+            return context.Areas
+                .Include(area => area.SafePositions)
+                .Include(area => area.Deck)
+                .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
+                .Include(area => area.Plant)
+                .Include(area => area.Installation)
+                .Where((area) => accessibleInstallationCodes.Result.Contains(area.Installation.InstallationCode.ToUpper()));
         }
 
         public async Task<Area?> ReadByInstallationAndName(Installation? installation, string areaName)

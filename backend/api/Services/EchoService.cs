@@ -92,8 +92,7 @@ namespace Api.Services
             {
                 if (planItem.PoseId is null)
                 {
-                    string message =
-                        $"Invalid EchoMission: {planItem.Tag} has no associated pose id";
+                    string message = $"Invalid EchoMission {planItem.Tag} has no associated pose id";
                     throw new InvalidDataException(message);
                 }
 

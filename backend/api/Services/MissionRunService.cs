@@ -11,7 +11,7 @@ namespace Api.Services
 {
     public interface IMissionRunService
     {
-        public Task<MissionRun> Create(MissionRun missionRun);
+        public Task<MissionRun> Create(MissionRun missionRun, bool triggerCreatedMissionRunEvent = true);
 
         public Task<PagedList<MissionRun>> ReadAll(MissionRunQueryStringParameters parameters);
 
@@ -57,7 +57,7 @@ namespace Api.Services
         ILogger<MissionRunService> logger,
         IAccessRoleService accessRoleService) : IMissionRunService
     {
-        public async Task<MissionRun> Create(MissionRun missionRun)
+        public async Task<MissionRun> Create(MissionRun missionRun, bool triggerCreatedMissionRunEvent = true)
         {
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
             // Making sure database does not try to create new robot
@@ -68,8 +68,11 @@ namespace Api.Services
             await ApplyDatabaseUpdate(missionRun.Area?.Installation);
             _ = signalRService.SendMessageAsync("Mission run created", missionRun?.Area?.Installation, missionRun);
 
-            var args = new MissionRunCreatedEventArgs(missionRun!.Id);
-            OnMissionRunCreated(args);
+            if (triggerCreatedMissionRunEvent)
+            {
+                var args = new MissionRunCreatedEventArgs(missionRun.Id);
+                OnMissionRunCreated(args);
+            }
 
             return missionRun;
         }
@@ -189,10 +192,14 @@ namespace Api.Services
             return context.MissionRuns
                 .Include(missionRun => missionRun.Area)
                 .ThenInclude(area => area != null ? area.Deck : null)
-                .Include(missionRun => missionRun.Area)
-                .ThenInclude(area => area != null ? area.Plant : null)
+                .ThenInclude(deck => deck != null ? deck.Plant : null)
+                .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionRun => missionRun.Area)
                 .ThenInclude(area => area != null ? area.Installation : null)
+                .Include(missionRun => missionRun.Area)
+                .ThenInclude(area => area != null ? area.Deck : null)
+                .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
+                .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.VideoStreams)
                 .Include(missionRun => missionRun.Robot)

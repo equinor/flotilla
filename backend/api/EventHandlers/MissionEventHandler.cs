@@ -11,6 +11,8 @@ namespace Api.EventHandlers
 
         // The mutex is used to ensure multiple missions aren't attempted scheduled simultaneously whenever multiple mission runs are created
         private readonly Semaphore _scheduleMissionSemaphore = new(1, 1);
+        private readonly Semaphore _scheduleLocalizationSemaphore = new(1, 1);
+
         private readonly IServiceScopeFactory _scopeFactory;
 
         public MissionEventHandler(
@@ -69,11 +71,18 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (!await LocalizationService.RobotIsLocalized(missionRun.Robot.Id) && !missionRun.IsLocalizationMission())
-            {
-                _logger.LogWarning("A mission run was created while the robot was not localized and it will be put on the queue awaiting localization");
-                return;
-            }
+            string missionRunIdToStart = missionRun.Id;
+
+            _scheduleLocalizationSemaphore.WaitOne();
+
+            string? localizationMissionRunId = null;
+            try { localizationMissionRunId = await LocalizationService.EnsureRobotIsCorrectlyLocalized(missionRun.Robot, missionRun); }
+            catch (Exception ex) when (ex is AreaNotFoundException or DeckNotFoundException) { return; }
+            catch (Exception ex) when (ex is RobotNotAvailableException or RobotLocalizationException) { return; }
+            catch (IsarCommunicationException) { return; }
+            finally { _scheduleLocalizationSemaphore.Release(); }
+
+            if (localizationMissionRunId is not null) missionRunIdToStart = localizationMissionRunId;
 
             if (MissionScheduling.MissionRunQueueIsEmpty(await MissionService.ReadMissionRunQueue(missionRun.Robot.Id)))
             {
@@ -82,7 +91,7 @@ namespace Api.EventHandlers
             }
 
             _scheduleMissionSemaphore.WaitOne();
-            await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun.Id);
+            await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRunIdToStart);
             _scheduleMissionSemaphore.Release();
         }
 
