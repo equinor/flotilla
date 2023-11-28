@@ -1,13 +1,11 @@
 ﻿namespace Api.Controllers.Models
 {
-    public struct InspectionFindingsQuery
+    public struct InspectionFindingQuery
     {
 
         public DateTime InspectionDate { get; set; }
 
-        public string Findings { get; set; }
-
-
+        public string Finding { get; set; }
     }
 
 }
