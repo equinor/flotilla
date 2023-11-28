@@ -1,4 +1,7 @@
-﻿using Api.Services;
+﻿using System.Globalization;
+using System.Text;
+using Api.Database.Models;
+using Api.Services;
 namespace Api.EventHandlers
 {
     public class InspectionFindingEventHandler(IConfiguration configuration,
@@ -23,6 +26,7 @@ namespace Api.EventHandlers
 
                     logger.LogInformation("Found {count} inspection findings in the last {interval}.", inspectionFindings.Count, _timeSpan);
 
+                    await GenerateAdaptiveCard(inspectionFindings);
                 }
                 catch (OperationCanceledException)
                 {
@@ -30,5 +34,72 @@ namespace Api.EventHandlers
                 }
             }
         }
+        private async Task<List<Finding>> GenerateAdaptiveCard(List<InspectionFinding> inspectionFindings)
+        {
+            var findingsList = new List<Finding>();
+
+            foreach (var inspectionFinding in inspectionFindings)
+            {
+                try
+                {
+                    var missionRun = await InspectionFindingService.GetMissionRunByIsarStepId(inspectionFinding);
+                    var task = await InspectionFindingService.GetMissionTaskByIsarStepId(inspectionFinding);
+
+                    if (task?.TagId != null && missionRun?.Area?.Plant?.Name != null && missionRun?.Area?.Name != null)
+                    {
+                        var finding = new Finding(
+                            task.TagId,
+                            missionRun.Area.Plant.Name,
+                            missionRun.Area.Name,
+                            inspectionFinding.Finding,
+                            inspectionFinding.InspectionDate,
+                            missionRun.Robot.Name
+                        );
+
+                        findingsList.Add(finding);
+                    }
+                    else
+                    {
+                        logger.LogInformation("Null condiiton for TagId or PlantName or Area name failed");
+                        continue;
+                    }
+                }
+                catch
+                {
+                    throw;
+                }
+            }
+
+            return findingsList;
+        }
+
+        public static string GenerateReportFromFindingsReportsList(List<Finding> findingsReports)
+        {
+            var reportBuilder = new StringBuilder("Findings Report:");
+            reportBuilder.Append(Environment.NewLine);
+            string dateFormat = "dd/MM/yyyy HH:mm:ss";
+            var formatProvider = CultureInfo.InvariantCulture;
+
+            foreach (var finding in findingsReports)
+            {
+                _ = reportBuilder.AppendLine(
+                    formatProvider,
+                    $"- TagId: {finding.TagId}, PlantName: {finding.PlantName}, AreaName: {finding.AreaName}, Description: {finding.FindingDescription}, Timestamp: {finding.Timestamp.ToString(dateFormat, formatProvider)}, RobotName: {finding.RobotName}"
+                    );
+            }
+
+            return reportBuilder.ToString();
+        }
+
+    }
+
+    public class Finding(string tagId, string plantName, string areaName, string findingDescription, DateTime timestamp, string robotName)
+    {
+        public string TagId { get; set; } = tagId ?? throw new ArgumentNullException(nameof(tagId));
+        public string PlantName { get; set; } = plantName ?? throw new ArgumentNullException(nameof(plantName));
+        public string AreaName { get; set; } = areaName ?? throw new ArgumentNullException(nameof(areaName));
+        public string FindingDescription { get; set; } = findingDescription ?? throw new ArgumentNullException(nameof(findingDescription));
+        public DateTime Timestamp { get; set; } = timestamp;
+        public string RobotName { get; set; } = robotName ?? throw new ArgumentNullException(nameof(robotName));
     }
 }
