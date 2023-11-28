@@ -24,9 +24,7 @@ namespace Api.Controllers
             ISourceService sourceService
         ) : ControllerBase
     {
-        
-        private readonly Mutex _scheduleLocalizationMutex = new();
-        
+
         /// <summary>
         ///     Schedule an existing mission definition
         /// </summary>
@@ -57,19 +55,7 @@ namespace Api.Controllers
 
             var missionTasks = await missionDefinitionService.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode);
 
-            _scheduleLocalizationMutex.WaitOne();
-
-            try { await localizationService.EnsureRobotIsCorrectlyLocalized(robot, missionDefinition); }
-            catch (Exception e) when (e is AreaNotFoundException or DeckNotFoundException) { return NotFound(e.Message); }
-            catch (Exception e) when (e is RobotNotAvailableException or RobotLocalizationException) { return Conflict(e.Message); }
-            catch (IsarCommunicationException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
-
-            finally { _scheduleLocalizationMutex.ReleaseMutex(); }
-
-            if (missionTasks == null)
-            {
-                return NotFound("No mission tasks were found for the requested mission");
-            }
+            if (missionTasks == null) return NotFound("No mission tasks were found for the requested mission");
 
             var missionRun = new MissionRun
             {
@@ -283,15 +269,6 @@ namespace Api.Controllers
             try { await localizationService.EnsureRobotIsOnSameInstallationAsMission(robot, customMissionDefinition); }
             catch (InstallationNotFoundException e) { return NotFound(e.Message); }
             catch (MissionException e) { return Conflict(e.Message); }
-
-            _scheduleLocalizationMutex.WaitOne();
-
-            try { await localizationService.EnsureRobotIsCorrectlyLocalized(robot, customMissionDefinition); }
-            catch (Exception e) when (e is AreaNotFoundException or DeckNotFoundException) { return NotFound(e.Message); }
-            catch (Exception e) when (e is RobotNotAvailableException or RobotLocalizationException) { return Conflict(e.Message); }
-            catch (IsarCommunicationException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
-
-            finally { _scheduleLocalizationMutex.ReleaseMutex(); }
 
             MissionRun? newMissionRun;
             try { newMissionRun = await customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }

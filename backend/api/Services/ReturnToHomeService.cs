@@ -61,7 +61,8 @@ namespace Api.Services
                 Name = "Return to home mission",
                 Robot = robot,
                 InstallationCode = robot.CurrentInstallation,
-                Area = null,
+                MissionRunPriority = MissionRunPriority.Normal,
+                Area = robot.CurrentArea,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.UtcNow,
                 Tasks = new List<MissionTask>
