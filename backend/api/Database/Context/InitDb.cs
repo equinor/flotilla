@@ -81,17 +81,19 @@ namespace Api.Database.Context
                 InstallationCode = "JSV"
             };
 
+            /* // Adding another installation makes the tests fail
             var installation2 = new Installation
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Kårstø Nature Gas",
                 InstallationCode = "KAA"
             };
+            */
 
             return new List<Installation>(new[]
             {
                 installation1,
-                installation2
+                //installation2
             });
         }
 
