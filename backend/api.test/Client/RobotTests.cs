@@ -7,7 +7,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Api.Database.Models;
+using Api.Controllers.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 namespace Api.Test
@@ -43,7 +43,7 @@ namespace Api.Test
         {
             string url = "/robots";
             var response = await _client.GetAsync(url);
-            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
+            var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(_serializerOptions);
             Assert.True(response.IsSuccessStatusCode);
             Assert.True(robots != null && robots.Count == 3);
         }
@@ -62,13 +62,13 @@ namespace Api.Test
         {
             string url = "/robots";
             var response = await _client.GetAsync(url);
-            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
+            var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(_serializerOptions);
             Assert.NotNull(robots);
 
             string robotId = robots[0].Id;
 
             var robotResponse = await _client.GetAsync("/robots/" + robotId);
-            var robot = await robotResponse.Content.ReadFromJsonAsync<Robot>(_serializerOptions);
+            var robot = await robotResponse.Content.ReadFromJsonAsync<RobotResponse>(_serializerOptions);
             Assert.Equal(HttpStatusCode.OK, robotResponse.StatusCode);
             Assert.NotNull(robot);
             Assert.Equal(robot.Id, robotId);
