@@ -8,8 +8,8 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("inspection-findings")]
-    public class InspectionFindingsController(
-            ILogger<InspectionFindingsController> logger,
+    public class InspectionFindingController(
+            ILogger<InspectionFindingController> logger,
             IInspectionService inspectionService
         ) : ControllerBase
     {
@@ -27,12 +27,12 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionFinding>> AddFindings([FromBody] InspectionFindingsQuery inspectionFinding, [FromRoute] string isarStepId)
+        public async Task<ActionResult<InspectionFinding>> AddFinding([FromBody] InspectionFindingQuery inspectionFinding, [FromRoute] string isarStepId)
         {
-            logger.LogInformation("Updating inspection findings for inspection with isarStepId '{Id}'", isarStepId);
+            logger.LogInformation("Add inspection finding for inspection with isarStepId '{Id}'", isarStepId);
             try
             {
-                var inspection = await inspectionService.AddFindings(inspectionFinding, isarStepId);
+                var inspection = await inspectionService.AddFinding(inspectionFinding, isarStepId);
 
                 if (inspection != null)
                 {
@@ -42,7 +42,7 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error while adding findings to inspection with IsarStepId '{Id}'", isarStepId);
+                logger.LogError(e, "Error while adding inspection finding to inspection with IsarStepId '{Id}'", isarStepId);
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
             return NotFound($"Could not find any inspection with the provided '{isarStepId}'");

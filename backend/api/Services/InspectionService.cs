@@ -11,7 +11,7 @@ namespace Api.Services
     {
         public Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus);
         public Task<Inspection?> ReadByIsarStepId(string id);
-        public Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery, string isarStepId);
+        public Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingsQuery, string isarStepId);
 
     }
 
@@ -55,7 +55,7 @@ namespace Api.Services
             return context.Inspections.Include(inspection => inspection.InspectionFindings);
         }
 
-        public async Task<Inspection?> AddFindings(InspectionFindingsQuery inspectionFindingsQuery, string isarStepId)
+        public async Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingQuery, string isarStepId)
         {
 
             var inspection = await ReadByIsarStepId(isarStepId);
@@ -65,16 +65,16 @@ namespace Api.Services
                 return null;
             }
 
-            var inspectionFindings = new InspectionFinding
+            var inspectionFinding = new InspectionFinding
             {
-                InspectionDate = inspectionFindingsQuery.InspectionDate,
-                Findings = inspectionFindingsQuery.Findings,
+                InspectionDate = inspectionFindingQuery.InspectionDate,
+                Finding = inspectionFindingQuery.Finding,
                 IsarStepId = isarStepId,
             };
 
-            inspection.InspectionFindings.Add(inspectionFindings);
+            inspection.InspectionFindings.Add(inspectionFinding);
             inspection = await Update(inspection);
-            _ = signalRService.SendMessageAsync("Inspection findings added", inspection);
+            _ = signalRService.SendMessageAsync("Inspection finding added", inspection);
             return inspection;
         }
     }

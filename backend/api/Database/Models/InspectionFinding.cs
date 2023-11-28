@@ -14,19 +14,19 @@ namespace Api.Database.Models
 
         public string IsarStepId { get; set; }
 
-        public string Findings { get; set; }
+        public string Finding { get; set; }
 
-        public InspectionFinding(InspectionFindingsQuery createInspectionFindingQuery)
+        public InspectionFinding(InspectionFindingQuery createInspectionFindingQuery)
         {
             InspectionDate = createInspectionFindingQuery.InspectionDate;
-            Findings = createInspectionFindingQuery.Findings;
+            Finding = createInspectionFindingQuery.Finding;
         }
 
         public InspectionFinding()
         {
             InspectionDate = DateTime.UtcNow;
             IsarStepId = "string";
-            Findings = "string";
+            Finding = "string";
         }
     }
 
