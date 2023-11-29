@@ -26,15 +26,19 @@ namespace Api.EventHandlers
 
                     logger.LogInformation("Found {count} inspection findings in the last {interval}.", inspectionFindings.Count, _timeSpan);
 
-                    await GenerateAdaptiveCard(inspectionFindings);
+                    if (inspectionFindings.Count > 0)
+                    {
+                        var findingsList = await GenerateFindingsList(inspectionFindings);
+
+                        string messageString = GenerateReportFromFindingsReportsList(findingsList);
+
+                        string adaptiveCardJson = GenerateAdaptiveCard(messageString);
+                    }
                 }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
+                catch (OperationCanceledException) { throw; }
             }
         }
-        private async Task<List<Finding>> GenerateAdaptiveCard(List<InspectionFinding> inspectionFindings)
+        private async Task<List<Finding>> GenerateFindingsList(List<InspectionFinding> inspectionFindings)
         {
             var findingsList = new List<Finding>();
 
@@ -60,16 +64,12 @@ namespace Api.EventHandlers
                     }
                     else
                     {
-                        logger.LogInformation("Null condiiton for TagId or PlantName or Area name failed");
+                        logger.LogInformation("Failed to generate a finding since TagId in missionTask or Area in MissionRun is null");
                         continue;
                     }
                 }
-                catch
-                {
-                    throw;
-                }
+                catch { throw; }
             }
-
             return findingsList;
         }
 
@@ -79,7 +79,6 @@ namespace Api.EventHandlers
             reportBuilder.Append(Environment.NewLine);
             string dateFormat = "dd/MM/yyyy HH:mm:ss";
             var formatProvider = CultureInfo.InvariantCulture;
-
             foreach (var finding in findingsReports)
             {
                 _ = reportBuilder.AppendLine(
@@ -87,10 +86,42 @@ namespace Api.EventHandlers
                     $"- TagId: {finding.TagId}, PlantName: {finding.PlantName}, AreaName: {finding.AreaName}, Description: {finding.FindingDescription}, Timestamp: {finding.Timestamp.ToString(dateFormat, formatProvider)}, RobotName: {finding.RobotName}"
                     );
             }
-
             return reportBuilder.ToString();
         }
 
+        public static string GenerateAdaptiveCard(string messageContent)
+        {
+            string adaptiveCardJson = $@"{{
+                        ""type"": ""message"",
+                        ""attachments"": [
+                            {{
+                                ""contentType"": ""application/vnd.microsoft.card.adaptive"",
+                                ""content"": {{
+                                    ""type"": ""AdaptiveCard"",
+                                    ""body"": [
+                                        {{
+                                            ""type"": ""Container"",
+                                            ""height"": ""stretch"",
+                                            ""items"": [
+                                                {{
+                                                    ""type"": ""TextBlock"",
+                                                    ""text"": ""{messageContent}"",
+                                                    ""wrap"": true
+                                                }}
+                                            ]
+                                        }}
+                                    ],
+                                    ""$schema"": ""http://adaptivecards.io/schemas/adaptive-card.json"",
+                                    ""version"": ""1.0"",
+                                    ""msteams"": {{
+                                        ""displayStyle"": ""full""
+                                    }}
+                                }}
+                            }}
+                        ]
+                    }}";
+            return adaptiveCardJson;
+        }
     }
 
     public class Finding(string tagId, string plantName, string areaName, string findingDescription, DateTime timestamp, string robotName)
