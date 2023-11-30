@@ -1,7 +1,10 @@
 ﻿using System.Globalization;
+using System.Net.Http.Headers;
 using System.Text;
 using Api.Database.Models;
 using Api.Services;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 namespace Api.EventHandlers
 {
     public class InspectionFindingEventHandler(IConfiguration configuration,
@@ -33,6 +36,14 @@ namespace Api.EventHandlers
                         string messageString = GenerateReportFromFindingsReportsList(findingsList);
 
                         string adaptiveCardJson = GenerateAdaptiveCard(messageString);
+
+                        string url = GetWebhookURL("TeamsInspectionFindingsWebhook");
+
+                        var client = new HttpClient();
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        var content = new StringContent(adaptiveCardJson, Encoding.UTF8, "application/json");
+                        var response = await client.PostAsync(url, content, stoppingToken);
+                        //if (response.StatusCode == StatusCodes.Status201Created) ;
                     }
                 }
                 catch (OperationCanceledException) { throw; }
@@ -121,6 +132,37 @@ namespace Api.EventHandlers
                         ]
                     }}";
             return adaptiveCardJson;
+        }
+        public static string GetWebhookURL(string secretName)
+        {
+            string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
+
+            string projectPath = Path.Combine(
+                Directory.GetParent(Directory.GetCurrentDirectory())!.FullName,
+                "api"
+            );
+
+            var config = new ConfigurationBuilder()
+                .SetBasePath(projectPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{environment}.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            string? keyVaultUri = config.GetSection("KeyVault")["VaultUri"] ?? throw new KeyNotFoundException("No key vault in config");
+
+            var keyVault = new SecretClient(
+                new Uri(keyVaultUri),
+                new DefaultAzureCredential(
+                    new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
+                )
+            );
+
+            string webhookURL = keyVault
+                .GetSecret(secretName)
+                .Value.Value;
+
+            return webhookURL;
         }
     }
 
