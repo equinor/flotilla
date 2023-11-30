@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using Api.Database.Models;
@@ -19,68 +20,69 @@ namespace Api.EventHandlers
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                try
+                await Task.Delay(_interval, stoppingToken);
+
+                var lastReportingTime = DateTime.UtcNow - _timeSpan;
+
+                var inspectionFindings = await InspectionFindingService.RetrieveInspectionFindings(lastReportingTime);
+
+                logger.LogInformation("Found {count} inspection findings in the last {interval}.", inspectionFindings.Count, _timeSpan);
+
+                if (inspectionFindings.Count > 0)
                 {
-                    await Task.Delay(_interval, stoppingToken);
+                    var findingsList = await GenerateFindingsList(inspectionFindings);
 
-                    var lastReportingTime = DateTime.UtcNow - _timeSpan;
+                    string messageString = GenerateReportFromFindingsReportsList(findingsList);
 
-                    var inspectionFindings = await InspectionFindingService.RetrieveInspectionFindings(lastReportingTime);
+                    string adaptiveCardJson = GenerateAdaptiveCard(messageString);
 
-                    logger.LogInformation("Found {count} inspection findings in the last {interval}.", inspectionFindings.Count, _timeSpan);
+                    string url = GetWebhookURL("TeamsInspectionFindingsWebhook");
 
-                    if (inspectionFindings.Count > 0)
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    var content = new StringContent(adaptiveCardJson, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(url, content, stoppingToken);
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        var findingsList = await GenerateFindingsList(inspectionFindings);
-
-                        string messageString = GenerateReportFromFindingsReportsList(findingsList);
-
-                        string adaptiveCardJson = GenerateAdaptiveCard(messageString);
-
-                        string url = GetWebhookURL("TeamsInspectionFindingsWebhook");
-
-                        var client = new HttpClient();
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        var content = new StringContent(adaptiveCardJson, Encoding.UTF8, "application/json");
-                        var response = await client.PostAsync(url, content, stoppingToken);
-                        //if (response.StatusCode == StatusCodes.Status201Created) ;
+                        logger.LogInformation("Post request via teams incomming webhook was successful, Status Code: {response.StatusCode}", response.StatusCode);
+                    }
+                    else
+                    {
+                        logger.LogInformation("Post request via teams incomming webhook was not successful, Status Code: {response.StatusCode}", response.StatusCode);
                     }
                 }
-                catch (OperationCanceledException) { throw; }
             }
         }
+
         private async Task<List<Finding>> GenerateFindingsList(List<InspectionFinding> inspectionFindings)
         {
             var findingsList = new List<Finding>();
 
             foreach (var inspectionFinding in inspectionFindings)
             {
-                try
+                var missionRun = await InspectionFindingService.GetMissionRunByIsarStepId(inspectionFinding);
+                var task = await InspectionFindingService.GetMissionTaskByIsarStepId(inspectionFinding);
+
+                if (task?.TagId != null && missionRun?.Area?.Plant?.Name != null && missionRun?.Area?.Name != null)
                 {
-                    var missionRun = await InspectionFindingService.GetMissionRunByIsarStepId(inspectionFinding);
-                    var task = await InspectionFindingService.GetMissionTaskByIsarStepId(inspectionFinding);
+                    var finding = new Finding(
+                        task.TagId,
+                        missionRun.Area.Plant.Name,
+                        missionRun.Area.Name,
+                        inspectionFinding.Finding,
+                        inspectionFinding.InspectionDate,
+                        missionRun.Robot.Name
+                    );
 
-                    if (task?.TagId != null && missionRun?.Area?.Plant?.Name != null && missionRun?.Area?.Name != null)
-                    {
-                        var finding = new Finding(
-                            task.TagId,
-                            missionRun.Area.Plant.Name,
-                            missionRun.Area.Name,
-                            inspectionFinding.Finding,
-                            inspectionFinding.InspectionDate,
-                            missionRun.Robot.Name
-                        );
-
-                        findingsList.Add(finding);
-                    }
-                    else
-                    {
-                        logger.LogInformation("Failed to generate a finding since TagId in missionTask or Area in MissionRun is null");
-                        continue;
-                    }
+                    findingsList.Add(finding);
                 }
-                catch { throw; }
+                else
+                {
+                    logger.LogInformation("Failed to generate a finding since TagId in missionTask or Area in MissionRun is null");
+                    continue;
+                }
             }
+            logger.LogInformation("Findings List sucessfully generated");
             return findingsList;
         }
 
@@ -133,6 +135,7 @@ namespace Api.EventHandlers
                     }}";
             return adaptiveCardJson;
         }
+
         public static string GetWebhookURL(string secretName)
         {
             string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;

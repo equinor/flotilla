@@ -17,21 +17,17 @@ namespace Api.Services
         public async Task<MissionRun?> GetMissionRunByIsarStepId(InspectionFinding inspectionFinding)
         {
             return await context.MissionRuns
-                    .Include(mr => mr.Area).ThenInclude(area => area != null ? area.Plant : null)
-                    .Include(mr => mr.Robot)
-                    .Where(mr => mr.Tasks.Any(mt => mt.Inspections.Any(i => i.IsarStepId == inspectionFinding.IsarStepId)))
-                    .FirstOrDefaultAsync()
-                    ?? null;
+                    .Include(missionRun => missionRun.Area).ThenInclude(area => area != null ? area.Plant : null)
+                    .Include(missionRun => missionRun.Robot)
+                    .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspections.Any(inspection => inspection.IsarStepId == inspectionFinding.IsarStepId)))
+                    .FirstOrDefaultAsync();
         }
 
         public async Task<MissionTask?> GetMissionTaskByIsarStepId(InspectionFinding inspectionFinding)
         {
             return await context.MissionTasks
-                .Where(mt => mt.Inspections.Any(i => i.IsarStepId == inspectionFinding.IsarStepId))
-                .FirstOrDefaultAsync()
-                ?? null;
+                .Where(missionTask => missionTask.Inspections.Any(inspection => inspection.IsarStepId == inspectionFinding.IsarStepId))
+                .FirstOrDefaultAsync();
         }
-
     }
-
 }
