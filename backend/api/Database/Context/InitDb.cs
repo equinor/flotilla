@@ -47,12 +47,6 @@ namespace Api.Database.Context
         {
             var accessRole1 = new AccessRole
             {
-                AccessLevel = RoleAccessLevel.USER,
-                RoleName = "Role.User"
-            };
-
-            var accessRole2 = new AccessRole
-            {
                 Installation = installations[0],
                 AccessLevel = RoleAccessLevel.ADMIN,
                 RoleName = "Role.User.HUA"
@@ -60,8 +54,7 @@ namespace Api.Database.Context
 
             return new List<AccessRole>(new[]
             {
-                accessRole1,
-                accessRole2
+                accessRole1
             });
         }
 

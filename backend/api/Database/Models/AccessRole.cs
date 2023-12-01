@@ -17,7 +17,7 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        public Installation? Installation { get; set; }
+        public Installation Installation { get; set; }
 
         [Required]
         public string RoleName { get; set; }
