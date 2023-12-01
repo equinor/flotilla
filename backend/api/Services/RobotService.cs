@@ -68,7 +68,7 @@ namespace Api.Services
                 context.Entry(robotModel).State = EntityState.Unchanged;
                 await context.Robots.AddAsync(newRobot);
                 await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
-                _ = signalRService.SendMessageAsync("Robot added", newRobot?.CurrentInstallation, new RobotResponse(newRobot!));
+                _ = signalRService.SendMessageAsync("Robot added", newRobot!.CurrentInstallation, new RobotResponse(newRobot!));
                 return newRobot!;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
