@@ -101,7 +101,7 @@ namespace Api.Services
 
         public async Task<IEnumerable<string>> ReadAllActivePlants()
         {
-            return await context.Robots.Where(r => r.Enabled && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
+            return await GetRobotsWithSubModels().Where(r => r.Enabled && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
         }
 
         public async Task<Robot> Update(Robot robot)
