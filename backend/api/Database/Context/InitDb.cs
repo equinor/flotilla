@@ -53,22 +53,15 @@ namespace Api.Database.Context
 
             var accessRole2 = new AccessRole
             {
-                AccessLevel = RoleAccessLevel.ADMIN,
-                RoleName = "Role.Admin"
-            };
-
-            var accessRole3 = new AccessRole
-            {
                 Installation = installations[0],
                 AccessLevel = RoleAccessLevel.ADMIN,
-                RoleName = "Role.User.JSV"
+                RoleName = "Role.User.HUA"
             };
 
             return new List<AccessRole>(new[]
             {
                 accessRole1,
-                accessRole2,
-                accessRole3
+                accessRole2
             });
         }
 
@@ -77,23 +70,15 @@ namespace Api.Database.Context
             var installation1 = new Installation
             {
                 Id = Guid.NewGuid().ToString(),
-                Name = "Johan Sverdrup",
-                InstallationCode = "JSV"
+                Name = "Huldra",
+                InstallationCode = "HUA"
             };
 
-            /* // Adding another installation makes the tests fail
-            var installation2 = new Installation
-            {
-                Id = Guid.NewGuid().ToString(),
-                Name = "Kårstø Nature Gas",
-                InstallationCode = "KAA"
-            };
-            */
+            // Adding another installation makes the tests fail currently
 
             return new List<Installation>(new[]
             {
-                installation1,
-                //installation2
+                installation1
             });
         }
 
@@ -103,7 +88,7 @@ namespace Api.Database.Context
             {
                 Id = Guid.NewGuid().ToString(),
                 Installation = installations[0],
-                Name = "Johan Sverdrup - P1",
+                Name = "HULDRA - P1",
                 PlantCode = "P1"
             };
 
@@ -244,19 +229,19 @@ namespace Api.Database.Context
         {
             var source1 = new Source
             {
-                SourceId = "791",
+                SourceId = "986",
                 Type = MissionSourceType.Echo
             };
 
             var source2 = new Source
             {
-                SourceId = "792",
+                SourceId = "990",
                 Type = MissionSourceType.Echo
             };
 
             var source3 = new Source
             {
-                SourceId = "793",
+                SourceId = "991",
                 Type = MissionSourceType.Echo
             };
 
@@ -410,7 +395,7 @@ namespace Api.Database.Context
                     PlanOrder = 0,
                     Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                     URL = new Uri(
-                        "https://stid.equinor.com/jsv/tag?tagNo=ABCD"
+                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
                     ),
                     Inspections = new List<EchoInspection>
                     {
@@ -426,7 +411,7 @@ namespace Api.Database.Context
                     PlanOrder = 0,
                     Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                     URL = new Uri(
-                        "https://stid.equinor.com/jsv/tag?tagNo=ABCD"
+                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
                     ),
                     Inspections = new List<EchoInspection>
                     {
@@ -446,7 +431,7 @@ namespace Api.Database.Context
                     PlanOrder = 0,
                     Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                     URL = new Uri(
-                        "https://stid.equinor.com/jsv/tag?tagNo=ABCD"
+                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
                     ),
                     Inspections = new List<EchoInspection>
                     {
@@ -466,7 +451,7 @@ namespace Api.Database.Context
                     PlanOrder = 0,
                     Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                     URL = new Uri(
-                        "https://stid.equinor.com/jsv/tag?tagNo=ABCD"
+                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
                     ),
                     Inspections = new List<EchoInspection>
                     {
