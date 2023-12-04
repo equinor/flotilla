@@ -86,7 +86,7 @@
     public class RobotNotAvailableException(string message) : Exception(message)
     {
     }
-    
+
 
     public class PoseNotFoundException(string message) : Exception(message)
     {

@@ -139,7 +139,7 @@ namespace Api.Database.Models
                     task => task.Inspections.Sum(inspection => inspection.VideoDuration ?? 0)
                 );
                 EstimatedDuration = (uint)(
-                    Robot.Model.AverageDurationPerTag * Tasks.Count + totalInspectionDuration
+                    (Robot.Model.AverageDurationPerTag * Tasks.Count) + totalInspectionDuration
                 );
             }
             else
