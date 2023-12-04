@@ -14,39 +14,25 @@ namespace Api.Services
         public Task<bool> RobotIsLocalized(string robotId);
     }
 
-    public class LocalizationService : ILocalizationService
+    public class LocalizationService(ILogger<LocalizationService> logger, IRobotService robotService, IMissionRunService missionRunService, IInstallationService installationService, IAreaService areaService) : ILocalizationService
     {
-        private readonly IInstallationService _installationService;
-        private readonly ILogger<LocalizationService> _logger;
-        private readonly IMissionRunService _missionRunService;
-        private readonly IRobotService _robotService;
-        private readonly IAreaService _areaService;
-
-        public LocalizationService(ILogger<LocalizationService> logger, IRobotService robotService, IMissionRunService missionRunService, IInstallationService installationService, IAreaService areaService)
-        {
-            _logger = logger;
-            _robotService = robotService;
-            _missionRunService = missionRunService;
-            _installationService = installationService;
-            _areaService = areaService;
-        }
 
         public async Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition)
         {
-            var missionInstallation = await _installationService.ReadByName(missionDefinition.InstallationCode);
-            var robotInstallation = await _installationService.ReadByName(robot.CurrentInstallation);
+            var missionInstallation = await installationService.ReadByName(missionDefinition.InstallationCode);
+            var robotInstallation = await installationService.ReadByName(robot.CurrentInstallation);
 
             if (missionInstallation is null || robotInstallation is null)
             {
                 string errorMessage = $"Could not find installation for installation code {missionDefinition.InstallationCode} or the robot has no current installation";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new InstallationNotFoundException(errorMessage);
             }
 
             if (robotInstallation != missionInstallation)
             {
                 string errorMessage = $"The robot {robot.Name} is on installation {robotInstallation.Name} which is not the same as the mission installation {missionInstallation.Name}";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new MissionException(errorMessage);
             }
         }
@@ -56,7 +42,7 @@ namespace Api.Services
             if (missionRun.Area is null)
             {
                 string errorMessage = $"There was no area associated with mission run {missionRun.Id}";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new AreaNotFoundException(errorMessage);
             }
 
@@ -67,22 +53,22 @@ namespace Api.Services
             if (!await RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
             {
                 string errorMessage = $"The new mission run {missionRun.Id} will not be started as the robot is not localized on the same deck as the mission";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new RobotLocalizationException(errorMessage);
             }
 
-            _logger.LogWarning("{Message}", $"Localization mission run ID is {localizationMissionRunId}");
-            
+            logger.LogWarning("{Message}", $"Localization mission run ID is {localizationMissionRunId}");
+
             return localizationMissionRunId;
         }
 
         public async Task<bool> RobotIsLocalized(string robotId)
         {
-            var robot = await _robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId);
             if (robot is null)
             {
                 string errorMessage = $"Robot with ID: {robotId} was not found in the database";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new RobotNotFoundException(errorMessage);
             }
 
@@ -91,21 +77,21 @@ namespace Api.Services
 
         public async Task EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(string robotId)
         {
-            var robot = await _robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId);
             if (robot == null)
             {
                 string errorMessage = $"Robot with ID: {robotId} was not found in the database";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            if (await _missionRunService.OngoingMission(robot.Id)) { await WaitForLocalizationMissionStatusToBeUpdated(robot); }
+            if (await missionRunService.OngoingMission(robot.Id)) { await WaitForLocalizationMissionStatusToBeUpdated(robot); }
 
-            var lastExecutedMissionRun = await _missionRunService.ReadLastExecutedMissionRunByRobot(robot.Id);
+            var lastExecutedMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robot.Id);
             if (lastExecutedMissionRun is null)
             {
                 string errorMessage = $"Could not find last executed mission run for robot with ID {robot.Id}";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new MissionNotFoundException(errorMessage);
             }
 
@@ -113,11 +99,11 @@ namespace Api.Services
             {
                 string errorMessage =
                     $"The localization mission {lastExecutedMissionRun.Id} failed and thus subsequent scheduled missions for deck {lastExecutedMissionRun.Area?.Deck} wil be cancelled";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new LocalizationFailedException(errorMessage);
             }
 
-            await _robotService.UpdateCurrentArea(robot.Id, lastExecutedMissionRun.Area);
+            await robotService.UpdateCurrentArea(robot.Id, lastExecutedMissionRun.Area);
         }
 
         private async Task WaitForLocalizationMissionStatusToBeUpdated(Robot robot)
@@ -125,32 +111,32 @@ namespace Api.Services
             if (robot.CurrentMissionId is null)
             {
                 string errorMessage = $"Could not find current mission for robot {robot.Id}";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new MissionNotFoundException(errorMessage);
             }
 
             string ongoingMissionRunId = robot.CurrentMissionId;
-            var ongoingMissionRun = await _missionRunService.ReadById(robot.CurrentMissionId);
+            var ongoingMissionRun = await missionRunService.ReadById(robot.CurrentMissionId);
             if (ongoingMissionRun is null)
             {
                 string errorMessage = $"Could not find ongoing mission with ID {robot.CurrentMissionId}";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new MissionNotFoundException(errorMessage);
             }
 
             if (!ongoingMissionRun.IsLocalizationMission())
             {
                 string errorMessage = $"The currently executing mission for robot {robot.CurrentMissionId} is not a localization mission";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new MissionException(errorMessage);
             }
 
-            _logger.LogWarning(
+            logger.LogWarning(
                 "The RobotAvailable event was triggered before the OnMissionUpdate event and we have to wait to see that the localization mission is set to successful");
 
             const int Timeout = 5;
             var timer = new Stopwatch();
-            ongoingMissionRun = await _missionRunService.ReadById(ongoingMissionRunId);
+            ongoingMissionRun = await missionRunService.ReadById(ongoingMissionRunId);
 
             timer.Start();
             while (timer.Elapsed.TotalSeconds < Timeout)
@@ -158,40 +144,42 @@ namespace Api.Services
                 if (ongoingMissionRun is null) { continue; }
                 if (ongoingMissionRun.Status == MissionStatus.Successful) { return; }
 
-                ongoingMissionRun = await _missionRunService.ReadById(ongoingMissionRunId);
+                ongoingMissionRun = await missionRunService.ReadById(ongoingMissionRunId);
             }
 
             const string Message = "Timed out while waiting for the localization mission to get an updated status";
-            _logger.LogError("{Message}", Message);
+            logger.LogError("{Message}", Message);
             throw new TimeoutException(Message);
         }
 
         private async Task<string> StartLocalizationMissionInArea(string robotId, string areaId)
         {
-            var robot = await _robotService.ReadById(robotId);
-            if (robot is null){
+            var robot = await robotService.ReadById(robotId);
+            if (robot is null)
+            {
                 string errorMessage = $"The robot with ID {robotId} was not found";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            var area = await _areaService.ReadById(areaId);
-            if (area is null){
+            var area = await areaService.ReadById(areaId);
+            if (area is null)
+            {
                 string errorMessage = $"The area with ID {areaId} was not found";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new AreaNotFoundException(errorMessage);
             }
 
             if (area.Deck?.DefaultLocalizationPose?.Pose is null)
             {
                 const string ErrorMessage = "The mission area is not associated with any deck or that deck does not have a localization pose";
-                _logger.LogError("{Message}", ErrorMessage);
+                logger.LogError("{Message}", ErrorMessage);
                 throw new DeckNotFoundException(ErrorMessage);
             }
             if (robot.Status is not RobotStatus.Available)
             {
-                string errorMessage = $"Robot '{robot.Id}' is not available as the status is {robot.Status.ToString()}";
-                _logger.LogWarning("{Message}", errorMessage);
+                string errorMessage = $"Robot '{robot.Id}' is not available as the status is {robot.Status}";
+                logger.LogWarning("{Message}", errorMessage);
                 throw new RobotNotAvailableException(errorMessage);
             }
 
@@ -209,46 +197,47 @@ namespace Api.Services
                 },
                 Map = new MapMetadata()
             };
-            _logger.LogWarning("Starting localization mission");
-            await _missionRunService.Create(localizationMissionRun, triggerCreatedMissionRunEvent: false);
-            await _robotService.UpdateCurrentArea(robot.Id, localizationMissionRun.Area);
+            logger.LogWarning("Starting localization mission");
+            await missionRunService.Create(localizationMissionRun, triggerCreatedMissionRunEvent: false);
+            await robotService.UpdateCurrentArea(robot.Id, localizationMissionRun.Area);
             return localizationMissionRun.Id;
         }
 
         private async Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId)
         {
-            var robot = await _robotService.ReadById(robotId);
-            if (robot is null){
+            var robot = await robotService.ReadById(robotId);
+            if (robot is null)
+            {
                 string errorMessage = $"The robot with ID {robotId} was not found";
-                _logger.LogError("{Message}", errorMessage);
+                logger.LogError("{Message}", errorMessage);
                 throw new RobotNotFoundException(errorMessage);
             }
 
             if (robot.CurrentArea is null)
             {
                 const string ErrorMessage = "The robot is not associated with an area and a mission may not be started";
-                _logger.LogError("{Message}", ErrorMessage);
+                logger.LogError("{Message}", ErrorMessage);
                 throw new AreaNotFoundException(ErrorMessage);
             }
 
-            var missionArea = await _areaService.ReadById(areaId);
+            var missionArea = await areaService.ReadById(areaId);
             if (missionArea is null)
             {
                 const string ErrorMessage = "The robot is not located on the same deck as the mission as the area has not been set";
-                _logger.LogError("{Message}", ErrorMessage);
+                logger.LogError("{Message}", ErrorMessage);
                 throw new AreaNotFoundException(ErrorMessage);
             }
 
             if (robot.CurrentArea?.Deck is null)
             {
                 const string ErrorMessage = "The robot area is not associated with any deck";
-                _logger.LogError("{Message}", ErrorMessage);
+                logger.LogError("{Message}", ErrorMessage);
                 throw new DeckNotFoundException(ErrorMessage);
             }
             if (missionArea.Deck is null)
             {
                 const string ErrorMessage = "The mission area is not associated with any deck";
-                _logger.LogError("{Message}", ErrorMessage);
+                logger.LogError("{Message}", ErrorMessage);
                 throw new DeckNotFoundException(ErrorMessage);
             }
 

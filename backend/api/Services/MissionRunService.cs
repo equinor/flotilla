@@ -174,10 +174,7 @@ namespace Api.Services
             var ongoingMissions = await ReadAll(
                 new MissionRunQueryStringParameters
                 {
-                    Statuses = new List<MissionStatus>
-                    {
-                        MissionStatus.Ongoing
-                    },
+                    Statuses = [MissionStatus.Ongoing],
                     RobotId = robotId,
                     OrderBy = "DesiredStartTime",
                     PageSize = 100

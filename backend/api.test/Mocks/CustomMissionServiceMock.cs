@@ -44,10 +44,12 @@ namespace Api.Services
             return BitConverter.ToString(hash).Replace("-", "", StringComparison.CurrentCulture).ToUpperInvariant();
         }
 
+#pragma warning disable IDE0060, CA1822 // Remove unused parameter
         public async Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, MissionDefinition customMissionDefinition, Robot robot, IList<MissionTask> missionTasks)
         {
             await Task.CompletedTask;
             return new MissionRun();
         }
+#pragma warning restore IDE0060, CA1822 // Remove unused parameter
     }
 }
