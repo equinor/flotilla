@@ -110,9 +110,8 @@ namespace Api.EventHandlers
                 try { await LocalizationService.EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(robot.Id); }
                 catch (Exception ex) when (ex is LocalizationFailedException or RobotNotFoundException or MissionNotFoundException or MissionException or TimeoutException)
                 {
+                    //TODO Handle failed localization - Cancel all the missions?
                     _logger.LogError("Could not confirm that the robot was correctly localized and the scheduled missions for the deck will be cancelled");
-                    // Cancel missions
-                    // Raise localization mission failed event?
                 }
             }
 
@@ -130,7 +129,12 @@ namespace Api.EventHandlers
                 if (!lastExecutedMissionRun.IsDriveToMission())
                 {
                     try { await ReturnToHomeService.ScheduleReturnToHomeMissionRun(robot.Id); }
-                    catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException) { return; }
+                    catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException)
+                    {
+                        //TODO Handle failed return to home - Try again for a number of times?
+                        _logger.LogError("Could not schedule a mission to send the robot back to its safe position");
+                        return;
+                    }
                 }
                 else { await RobotService.UpdateCurrentArea(robot.Id, null); }
                 return;
