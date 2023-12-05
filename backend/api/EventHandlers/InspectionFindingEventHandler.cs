@@ -18,6 +18,8 @@ namespace Api.EventHandlers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            logger.LogInformation("InspectionFinding EventHandler service has started");
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 await Task.Delay(_interval, stoppingToken);
