@@ -64,24 +64,32 @@ namespace Api.EventHandlers
             _logger.LogInformation("Triggered MissionRunCreated event for mission run ID: {MissionRunId}", e.MissionRunId);
 
             var missionRun = await MissionService.ReadById(e.MissionRunId);
-
             if (missionRun == null)
             {
                 _logger.LogError("Mission run with ID: {MissionRunId} was not found in the database", e.MissionRunId);
                 return;
             }
 
-            string missionRunIdToStart = missionRun.Id;
 
             _scheduleLocalizationSemaphore.WaitOne();
 
             string? localizationMissionRunId = null;
             try { localizationMissionRunId = await LocalizationService.EnsureRobotIsCorrectlyLocalized(missionRun.Robot, missionRun); }
-            catch (Exception ex) when (ex is AreaNotFoundException or DeckNotFoundException) { return; }
-            catch (Exception ex) when (ex is RobotNotAvailableException or RobotLocalizationException) { return; }
-            catch (IsarCommunicationException) { return; }
+            catch (Exception ex) when (
+                ex is AreaNotFoundException
+                or DeckNotFoundException
+                or RobotNotAvailableException
+                or RobotLocalizationException
+                or RobotNotFoundException
+                or IsarCommunicationException
+            )
+            {
+                //TODO Cancel the mission? 
+                return;
+            }
             finally { _scheduleLocalizationSemaphore.Release(); }
 
+            string missionRunIdToStart = missionRun.Id;
             if (localizationMissionRunId is not null) missionRunIdToStart = localizationMissionRunId;
 
             if (MissionScheduling.MissionRunQueueIsEmpty(await MissionService.ReadMissionRunQueue(missionRun.Robot.Id)))
@@ -91,7 +99,8 @@ namespace Api.EventHandlers
             }
 
             _scheduleMissionSemaphore.WaitOne();
-            await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRunIdToStart);
+            try { await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRunIdToStart); }
+            catch (MissionRunNotFoundException) { return; }
             _scheduleMissionSemaphore.Release();
         }
 
@@ -105,10 +114,11 @@ namespace Api.EventHandlers
                 return;
             }
 
+            //TODO Separate into functions to make it more readable
             if (!await LocalizationService.RobotIsLocalized(robot.Id))
             {
                 try { await LocalizationService.EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(robot.Id); }
-                catch (Exception ex) when (ex is LocalizationFailedException or RobotNotFoundException or MissionNotFoundException or MissionException or TimeoutException)
+                catch (Exception ex) when (ex is LocalizationFailedException or RobotNotFoundException or MissionNotFoundException or OngoingMissionNotLocalizationException or TimeoutException)
                 {
                     //TODO Handle failed localization - Cancel all the missions?
                     _logger.LogError("Could not confirm that the robot was correctly localized and the scheduled missions for the deck will be cancelled");
@@ -131,8 +141,8 @@ namespace Api.EventHandlers
                     try { await ReturnToHomeService.ScheduleReturnToHomeMissionRun(robot.Id); }
                     catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException)
                     {
-                        //TODO Handle failed return to home - Try again for a number of times?
-                        _logger.LogError("Could not schedule a mission to send the robot back to its safe position");
+                        //TODO Create an issue on sending a warning to the frontend that the return to home mission could not be scheduled
+                        await RobotService.UpdateCurrentArea(robot.Id, null);
                         return;
                     }
                 }
@@ -151,7 +161,8 @@ namespace Api.EventHandlers
             }
 
             _scheduleMissionSemaphore.WaitOne();
-            await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun.Id);
+            try { await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun.Id); }
+            catch (MissionRunNotFoundException) { return; }
             _scheduleMissionSemaphore.Release();
         }
 

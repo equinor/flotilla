@@ -18,6 +18,9 @@
     public class MissionSourceTypeException(string message) : Exception(message)
     {
     }
+    public class OngoingMissionNotLocalizationException(string message) : Exception(message)
+    {
+    }
 
     public class SourceException(string message) : Exception(message)
     {
@@ -87,6 +90,9 @@
     {
     }
 
+    public class RobotNotInSameInstallationAsMissionException(string message) : Exception(message)
+    {
+    }
 
     public class PoseNotFoundException(string message) : Exception(message)
     {

@@ -33,7 +33,7 @@ namespace Api.Services
             {
                 string errorMessage = $"The robot {robot.Name} is on installation {robotInstallation.Name} which is not the same as the mission installation {missionInstallation.Name}";
                 logger.LogError("{Message}", errorMessage);
-                throw new MissionException(errorMessage);
+                throw new RobotNotInSameInstallationAsMissionException(errorMessage);
             }
         }
 
@@ -128,7 +128,7 @@ namespace Api.Services
             {
                 string errorMessage = $"The currently executing mission for robot {robot.CurrentMissionId} is not a localization mission";
                 logger.LogError("{Message}", errorMessage);
-                throw new MissionException(errorMessage);
+                throw new OngoingMissionNotLocalizationException(errorMessage);
             }
 
             logger.LogWarning(
