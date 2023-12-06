@@ -18,7 +18,7 @@ namespace Api.EventHandlers
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            logger.LogInformation("InspectionFinding EventHandler service has started");
+            logger.LogInformation("InspectionFinding EventHandler service started at {time}", DateTime.UtcNow);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -28,7 +28,7 @@ namespace Api.EventHandlers
 
                 var inspectionFindings = await InspectionFindingService.RetrieveInspectionFindings(lastReportingTime);
 
-                logger.LogInformation("Found {count} inspection findings in the last {interval}.", inspectionFindings.Count, _timeSpan);
+                logger.LogInformation("Found {count} inspection findings in last {interval}", inspectionFindings.Count, _timeSpan);
 
                 if (inspectionFindings.Count > 0)
                 {
@@ -84,7 +84,7 @@ namespace Api.EventHandlers
                     continue;
                 }
             }
-            logger.LogInformation("Findings List sucessfully generated");
+            logger.LogInformation("Findings List sucessfully generated, adaptive Card will be generated next");
             return findingsList;
         }
 
