@@ -66,7 +66,7 @@ namespace Api.Services
 
             await context.MissionRuns.AddAsync(missionRun);
             await ApplyDatabaseUpdate(missionRun.Area?.Installation);
-            _ = signalRService.SendMessageAsync("Mission run created", missionRun?.Area?.Installation, missionRun);
+            _ = signalRService.SendMessageAsync("Mission run created", missionRun.Area?.Installation, missionRun);
 
             if (triggerCreatedMissionRunEvent)
             {
@@ -128,6 +128,8 @@ namespace Api.Services
 
         public async Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId)
         {
+            var test = GetMissionRunsWithSubModels().OrderBy(m => m.DesiredStartTime).ToList();
+
             return await GetMissionRunsWithSubModels()
                 .Where(m => m.MissionId == missionId && m.EndTime == null)
                 .OrderBy(m => m.DesiredStartTime)

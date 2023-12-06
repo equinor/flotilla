@@ -32,7 +32,7 @@ namespace Api.Test.Database
             _areaService = new AreaService(context, _installationService, _plantService, _deckService, defaultLocalizationPoseService, _accessRoleService);
             _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService);
             _robotModelService = new RobotModelService(context);
-            _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService);
+            _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _areaService);
         }
 
         public void Dispose()
@@ -116,7 +116,7 @@ namespace Api.Test.Database
             return await _areaService.Create(createAreaQuery);
         }
 
-        public async Task<Robot> NewRobot(RobotStatus status, Installation installation)
+        public async Task<Robot> NewRobot(RobotStatus status, Installation installation, Area? area = null)
         {
             var createRobotQuery = new CreateRobotQuery
             {
@@ -125,6 +125,7 @@ namespace Api.Test.Database
                 RobotType = RobotType.Robot,
                 SerialNumber = "0001",
                 CurrentInstallationCode = installation.InstallationCode,
+                CurrentAreaName = area?.Name,
                 VideoStreams = new List<CreateVideoStreamQuery>(),
                 Host = "localhost",
                 Port = 3000,
@@ -133,7 +134,7 @@ namespace Api.Test.Database
             };
 
             var robotModel = await _robotModelService.ReadByRobotType(createRobotQuery.RobotType);
-            var robot = new Robot(createRobotQuery, installation)
+            var robot = new Robot(createRobotQuery, installation, area)
             {
                 Model = robotModel!
             };

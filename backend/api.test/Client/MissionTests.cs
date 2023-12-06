@@ -41,7 +41,7 @@ namespace Api.Test
             );
         }
 
-        private async Task<T> PostToDb<T>(string postUrl, T stringContent)
+        private async Task<T> PostToDb<T, TQueryType>(string postUrl, TQueryType stringContent)
         {
             var content = new StringContent(
                 JsonSerializer.Serialize(stringContent),
@@ -172,7 +172,7 @@ namespace Api.Test
             return responseObject;
         }
 
-        private async Task<(string installationId, string plantId, string deckId, string areaId)> PostAssetInformationToDb(string installationCode, string plantCode, string deckName, string areaName)
+        private async Task<(Installation installation, Plant plant, Deck deck, Area area)> PostAssetInformationToDb(string installationCode, string plantCode, string deckName, string areaName)
         {
             await VerifyNonDuplicateAreaDbNames(installationCode, plantCode, deckName, areaName);
 
@@ -183,12 +183,12 @@ namespace Api.Test
 
             (var installationContent, var plantContent, var deckContent, var areaContent) = ArrangeAreaPostQueries(installationCode, plantCode, deckName, areaName);
 
-            string installationId = (await PostToDb<Installation>(installationUrl, installationContent)).Id;
-            string plantId = (await PostToDb<Plant>(plantUrl, plantContent)).Id;
-            string deckId = (await PostToDb<Deck>(deckUrl, deckContent)).Id;
-            string areaId = (await PostToDb<Area>(areaUrl, areaContent)).Id;
+            var installation = await PostToDb<Installation>(installationUrl, installationContent);
+            var plant = await PostToDb<Plant>(plantUrl, plantContent);
+            var deck = await PostToDb<Deck>(deckUrl, deckContent);
+            var area = await PostToDb<Area>(areaUrl, areaContent);
 
-            return (installationId, plantId, deckId, areaId);
+            return (installation, plant, deck, area);
         }
 
         [Fact]
@@ -378,19 +378,31 @@ namespace Api.Test
             string plantCode = "plantScheduleDuplicateCustomMissionDefinitions";
             string deckName = "deckScheduleDuplicateCustomMissionDefinitions";
             string areaName = "areaScheduleDuplicateCustomMissionDefinitions";
-            (_, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
+            (var installation, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
 
             string testMissionName = "testMissionScheduleDuplicateCustomMissionDefinitions";
 
-            // Arrange - Create custom mission definition
+            // Arrange - Create robot
+            var robotQuery = new CreateRobotQuery
+            {
+                IsarId = Guid.NewGuid().ToString(),
+                Name = "RobotGetNextRun",
+                SerialNumber = "GetNextRun",
+                RobotType = RobotType.Robot,
+                Status = RobotStatus.Available,
+                Enabled = true,
+                Host = "localhost",
+                Port = 3000,
+                CurrentInstallationCode = installationCode,
+                CurrentAreaName = null,
+                VideoStreams = new List<CreateVideoStreamQuery>()
+            };
+
             string robotUrl = "/robots";
-            var response = await _client.GetAsync(robotUrl);
-            Assert.True(response.IsSuccessStatusCode);
-            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
-            Assert.True(robots != null);
-            var robot = robots[0];
+            var robot = await PostToDb<Robot, CreateRobotQuery>(robotUrl, robotQuery);
             string robotId = robot.Id;
 
+            // Arrange - Create custom mission definition
             var query = new CustomMissionQuery
             {
                 RobotId = robotId,
@@ -402,7 +414,7 @@ namespace Api.Test
                 Tasks = [
                     new()
                     {
-                        RobotPose = new Pose(),
+                        RobotPose = new Pose(new Position(23, 14, 4), new Orientation()),
                         Inspections = [],
                         InspectionTarget = new Position(),
                         TaskOrder = 0
@@ -449,21 +461,33 @@ namespace Api.Test
         public async Task GetNextRun()
         {
             // Arrange - Initialise area
-            string installationCode = "installationMissionsTest";
-            string plantCode = "plantMissionsTest";
-            string deckName = "deckMissionsTest";
-            string areaName = "areaMissionsTest";
-            (string installationId, string plantId, string deckId, string areaId) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
+            string installationCode = "installationGetNextRun";
+            string plantCode = "plantGetNextRun";
+            string deckName = "deckGetNextRun";
+            string areaName = "areaGetNextRun";
+            (var installation, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
 
-            // Arrange - Create custom mission definition
+            // Arrange - Create robot
+            var robotQuery = new CreateRobotQuery
+            {
+                IsarId = Guid.NewGuid().ToString(),
+                Name = "RobotGetNextRun",
+                SerialNumber = "GetNextRun",
+                RobotType = RobotType.Robot,
+                Status = RobotStatus.Available,
+                Enabled = true,
+                Host = "localhost",
+                Port = 3000,
+                CurrentInstallationCode = installation.InstallationCode,
+                CurrentAreaName = areaName,
+                VideoStreams = new List<CreateVideoStreamQuery>()
+            };
+
             string robotUrl = "/robots";
-            var response = await _client.GetAsync(robotUrl);
-            Assert.True(response.IsSuccessStatusCode);
-            var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
-            Assert.True(robots != null);
-            var robot = robots[0];
+            var robot = await PostToDb<Robot, CreateRobotQuery>(robotUrl, robotQuery);
             string robotId = robot.Id;
 
+            // Arrange - Schedule custom mission - create mission definition
             string testMissionName = "testMissionNextRun";
             var query = new CustomMissionQuery
             {
@@ -490,7 +514,7 @@ namespace Api.Test
             );
 
             string customMissionsUrl = "/missions/custom";
-            response = await _client.PostAsync(customMissionsUrl, content);
+            var response = await _client.PostAsync(customMissionsUrl, content);
             Assert.True(response.IsSuccessStatusCode);
             var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
             Assert.True(missionRun != null);
@@ -565,7 +589,7 @@ namespace Api.Test
             string plantCode = "plantScheduleDuplicateEchoMissionDefinitions";
             string deckName = "deckScheduleDuplicateEchoMissionDefinitions";
             string areaName = "areaScheduleDuplicateEchoMissionDefinitions";
-            (string installationId, string plantId, string deckId, string areaId) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
+            (_, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
 
             // Arrange - Create echo mission definition
             string robotUrl = "/robots";
@@ -613,5 +637,173 @@ namespace Api.Test
             Assert.NotNull(missionDefinitions);
             Assert.NotNull(missionDefinitions.Find(m => m.Id == missionId1));
         }
+
+        [Fact]
+        public async Task MissionDoesNotStartIfRobotIsNotInSameInstallationAsMission()
+        {
+            // Arrange - Initialise area
+            string installationCode = "installationMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission";
+            string plantCode = "plantMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission";
+            string deckName = "deckMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission";
+            string areaName = "areaMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission";
+            (var installation, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
+
+            string testMissionName = "testMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission";
+
+            // Arrange - Get different installation
+            string installationUrl = "/installations";
+            var installationResponse = await _client.GetAsync(installationUrl);
+            Assert.True(installationResponse.IsSuccessStatusCode);
+            var installations = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
+            Assert.True(installations != null);
+            var missionInstallation = installations[0];
+
+            // Arrange - Create robot
+            var robotQuery = new CreateRobotQuery
+            {
+                IsarId = Guid.NewGuid().ToString(),
+                Name = "RobotGetNextRun",
+                SerialNumber = "GetNextRun",
+                RobotType = RobotType.Robot,
+                Status = RobotStatus.Available,
+                Enabled = true,
+                Host = "localhost",
+                Port = 3000,
+                CurrentInstallationCode = installationCode,
+                CurrentAreaName = null,
+                VideoStreams = new List<CreateVideoStreamQuery>()
+            };
+
+            string robotUrl = "/robots";
+            var robot = await PostToDb<Robot, CreateRobotQuery>(robotUrl, robotQuery);
+            string robotId = robot.Id;
+
+            // Arrange - Create custom mission definition
+            var query = new CustomMissionQuery
+            {
+                RobotId = robotId,
+                InstallationCode = missionInstallation.InstallationCode,
+                AreaName = areaName,
+                DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
+                InspectionFrequency = new TimeSpan(14, 0, 0, 0),
+                Name = testMissionName,
+                Tasks = [
+                    new()
+                    {
+                        RobotPose = new Pose(),
+                        Inspections = [],
+                        InspectionTarget = new Position(),
+                        TaskOrder = 0
+                    },
+                    new()
+                    {
+                        RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
+                        Inspections = [],
+                        InspectionTarget = new Position(),
+                        TaskOrder = 1
+                    }
+                ]
+            };
+            var content = new StringContent(
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
+
+            // Act
+            string customMissionsUrl = "/missions/custom";
+            var response = await _client.PostAsync(customMissionsUrl, content);
+            Assert.True(response.StatusCode == HttpStatusCode.Conflict);
+        }
+
+        [Fact]
+        public async Task MissionFailsIfRobotIsNotInSameDeckAsMission()
+        {
+            // Arrange - Initialise area
+            string installationCode = "installationMissionFailsIfRobotIsNotInSameDeckAsMission";
+            string plantCode = "plantMissionFailsIfRobotIsNotInSameDeckAsMission";
+            string deckName = "deckMissionFailsIfRobotIsNotInSameDeckAsMission";
+            string areaName = "areaMissionFailsIfRobotIsNotInSameDeckAsMission";
+            (var installation, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
+
+            string testMissionName = "testMissionFailsIfRobotIsNotInSameDeckAsMission";
+
+            // Arrange - Get different area
+            string areaUrl = "/areas";
+            var response = await _client.GetAsync(areaUrl);
+            Assert.True(response.IsSuccessStatusCode);
+            var areas = await response.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
+            Assert.True(areas != null);
+            var areaResponse = areas[0];
+
+            // Arrange - Create robot
+            var robotQuery = new CreateRobotQuery
+            {
+                IsarId = Guid.NewGuid().ToString(),
+                Name = "RobotGetNextRun",
+                SerialNumber = "GetNextRun",
+                RobotType = RobotType.Robot,
+                Status = RobotStatus.Available,
+                Enabled = true,
+                Host = "localhost",
+                Port = 3000,
+                CurrentInstallationCode = installationCode,
+                CurrentAreaName = areaName,
+                VideoStreams = new List<CreateVideoStreamQuery>()
+            };
+
+            string robotUrl = "/robots";
+            var robot = await PostToDb<Robot, CreateRobotQuery>(robotUrl, robotQuery);
+            string robotId = robot.Id;
+
+            // Arrange - Create custom mission definition
+            var query = new CustomMissionQuery
+            {
+                RobotId = robotId,
+                InstallationCode = installation.InstallationCode,
+                AreaName = areaResponse.AreaName,
+                DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
+                InspectionFrequency = new TimeSpan(14, 0, 0, 0),
+                Name = testMissionName,
+                Tasks = [
+                    new()
+                    {
+                        RobotPose = new Pose(new Position(1, 9, 4), new Orientation()),
+                        Inspections = [],
+                        InspectionTarget = new Position(),
+                        TaskOrder = 0
+                    },
+                    new()
+                    {
+                        RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
+                        Inspections = [],
+                        InspectionTarget = new Position(),
+                        TaskOrder = 1
+                    }
+                ]
+            };
+            var content = new StringContent(
+                JsonSerializer.Serialize(query),
+                null,
+                "application/json"
+            );
+
+            // Act
+            string customMissionsUrl = "/missions/custom";
+            var missionResponse = await _client.PostAsync(customMissionsUrl, content);
+            Assert.True(missionResponse.IsSuccessStatusCode);
+            var missionRun = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            Assert.NotNull(missionRun);
+            Assert.True(missionRun.Status == MissionStatus.Pending);
+
+            await Task.Delay(2000);
+            string missionRunByIdUrl = $"/missions/runs/{missionRun.Id}";
+            var missionByIdResponse = await _client.GetAsync(missionRunByIdUrl);
+            Assert.True(missionByIdResponse.IsSuccessStatusCode);
+            var missionRunAfterUpdate = await missionByIdResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            Assert.NotNull(missionRunAfterUpdate);
+            Assert.True(missionRunAfterUpdate.Status == MissionStatus.Cancelled);
+        }
+
     }
 }

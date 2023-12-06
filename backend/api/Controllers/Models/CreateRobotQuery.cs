@@ -14,6 +14,8 @@ namespace Api.Controllers.Models
 
         public string CurrentInstallationCode { get; set; }
 
+        public string? CurrentAreaName { get; set; }
+
         public IList<CreateVideoStreamQuery> VideoStreams { get; set; }
 
         public string Host { get; set; }
