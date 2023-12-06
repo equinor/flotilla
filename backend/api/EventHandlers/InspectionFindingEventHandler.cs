@@ -38,7 +38,7 @@ namespace Api.EventHandlers
 
                     string adaptiveCardJson = GenerateAdaptiveCard(messageString);
 
-                    string url = GetWebhookURL("TeamsInspectionFindingsWebhook");
+                    string url = GetWebhookURL(configuration, "TeamsInspectionFindingsWebhook");
 
                     var client = new HttpClient();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -138,23 +138,10 @@ namespace Api.EventHandlers
             return adaptiveCardJson;
         }
 
-        public static string GetWebhookURL(string secretName)
+        public static string GetWebhookURL(IConfiguration configuration, string secretName)
         {
-            string environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
 
-            string projectPath = Path.Combine(
-                Directory.GetParent(Directory.GetCurrentDirectory())!.FullName,
-                "api"
-            );
-
-            var config = new ConfigurationBuilder()
-                .SetBasePath(projectPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{environment}.json", optional: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            string? keyVaultUri = config.GetSection("KeyVault")["VaultUri"] ?? throw new KeyNotFoundException("No key vault in config");
+            string? keyVaultUri = configuration.GetSection("KeyVault")["VaultUri"] ?? throw new KeyNotFoundException("No key vault in config");
 
             var keyVault = new SecretClient(
                 new Uri(keyVaultUri),
