@@ -51,10 +51,9 @@ namespace Api.Controllers
 
             try { await localizationService.EnsureRobotIsOnSameInstallationAsMission(robot, missionDefinition); }
             catch (InstallationNotFoundException e) { return NotFound(e.Message); }
-            catch (MissionException e) { return Conflict(e.Message); }
+            catch (RobotNotInSameInstallationAsMissionException e) { return Conflict(e.Message); }
 
             var missionTasks = await missionDefinitionService.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode);
-
             if (missionTasks == null) return NotFound("No mission tasks were found for the requested mission");
 
             var missionRun = new MissionRun
@@ -268,7 +267,7 @@ namespace Api.Controllers
 
             try { await localizationService.EnsureRobotIsOnSameInstallationAsMission(robot, customMissionDefinition); }
             catch (InstallationNotFoundException e) { return NotFound(e.Message); }
-            catch (MissionException e) { return Conflict(e.Message); }
+            catch (RobotNotInSameInstallationAsMissionException e) { return Conflict(e.Message); }
 
             MissionRun? newMissionRun;
             try { newMissionRun = await customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
