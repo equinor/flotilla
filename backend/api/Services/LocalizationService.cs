@@ -20,18 +20,17 @@ namespace Api.Services
         public async Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition)
         {
             var missionInstallation = await installationService.ReadByName(missionDefinition.InstallationCode);
-            var robotInstallation = await installationService.ReadByName(robot.CurrentInstallation);
 
-            if (missionInstallation is null || robotInstallation is null)
+            if (missionInstallation is null || robot.CurrentInstallation is null)
             {
                 string errorMessage = $"Could not find installation for installation code {missionDefinition.InstallationCode} or the robot has no current installation";
                 logger.LogError("{Message}", errorMessage);
                 throw new InstallationNotFoundException(errorMessage);
             }
 
-            if (robotInstallation != missionInstallation)
+            if (robot.CurrentInstallation != missionInstallation)
             {
-                string errorMessage = $"The robot {robot.Name} is on installation {robotInstallation.Name} which is not the same as the mission installation {missionInstallation.Name}";
+                string errorMessage = $"The robot {robot.Name} is on installation {robot.CurrentInstallation.Name} which is not the same as the mission installation {missionInstallation.Name}";
                 logger.LogError("{Message}", errorMessage);
                 throw new RobotNotInSameInstallationAsMissionException(errorMessage);
             }

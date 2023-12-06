@@ -19,6 +19,13 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
+            if (robot.CurrentInstallation is null)
+            {
+                string errorMessage = $"Unable to schedule a return to home mission as the robot {robot.Id} is not linked to an installation";
+                logger.LogError("{Message}", errorMessage);
+                throw new InstallationNotFoundException(errorMessage);
+            }
+
             if (robot.CurrentArea is null)
             {
                 string errorMessage = $"Unable to schedule a return to home mission as the robot {robot.Id} is not linked to an area";
@@ -49,7 +56,7 @@ namespace Api.Services
             {
                 Name = "Return to home mission",
                 Robot = robot,
-                InstallationCode = robot.CurrentInstallation,
+                InstallationCode = robot.CurrentInstallation.InstallationCode,
                 MissionRunPriority = MissionRunPriority.Normal,
                 Area = robot.CurrentArea,
                 Status = MissionStatus.Pending,

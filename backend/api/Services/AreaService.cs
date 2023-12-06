@@ -195,6 +195,7 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.Areas
                 .Include(area => area.SafePositions)
+                .Include(area => area.DefaultLocalizationPose)
                 .Include(area => area.Deck)
                 .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
                 .Include(area => area.Plant)

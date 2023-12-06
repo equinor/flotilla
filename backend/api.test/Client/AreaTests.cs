@@ -138,7 +138,7 @@ namespace Api.Test
         }
 
         [Fact]
-        public async Task GetMissionsInAreaTest()
+        public async Task MissionIsCreatedInArea()
         {
             // Arrange
             // Robot
@@ -156,7 +156,7 @@ namespace Api.Test
             Assert.True(installationResponse.IsSuccessStatusCode);
             var installations = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
             Assert.True(installations != null);
-            var installation = installations[0];
+            var installation = installations.Where(installation => installation.InstallationCode == robot.CurrentInstallation?.InstallationCode).First();
 
             // Area
             string areaUrl = "/areas";
@@ -164,7 +164,7 @@ namespace Api.Test
             Assert.True(areaResponse.IsSuccessStatusCode);
             var areas = await areaResponse.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
             Assert.True(areas != null);
-            var area = areas[0];
+            var area = areas.Where(area => area.InstallationCode == installation.InstallationCode).First();
             string areaId = area.Id;
 
             string testMissionName = "testMissionInAreaTest";
@@ -272,6 +272,9 @@ namespace Api.Test
             // Assert
             Assert.True(missionResponse.IsSuccessStatusCode);
 
+            // The endpoint posted to above triggers an event and returns a successful response.
+            // The test finishes and disposes of objects, but the operations of that event handler are still running, leading to a crash.
+            await Task.Delay(5000);
         }
 
         [Fact]
