@@ -149,13 +149,10 @@ namespace Api.Controllers
             }
 
             var missionTasks = echoMission.Tags
-                .Select(
+                .SelectMany(
                     t =>
                     {
-                        var tagPosition = stidService
-                            .GetTagPosition(t.TagId, scheduledMissionQuery.InstallationCode)
-                            .Result;
-                        return new MissionTask(t, tagPosition);
+                        return t.Inspections.Select(i => new MissionTask(t, i.InspectionPoint)).ToList();
                     }
                 )
                 .ToList();
