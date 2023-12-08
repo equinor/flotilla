@@ -196,19 +196,23 @@ namespace Api.Services
                 return;
             }
 
+#pragma warning disable CA1862
             missionRuns = missionRuns.Where(
                 missionRun =>
-                    missionRun.Name != null && missionRun.Name.Contains(name.Trim(), StringComparison.OrdinalIgnoreCase)
+                    missionRun.Name != null && missionRun.Name.ToLower().Contains(name.ToLower().Trim())
             );
+#pragma warning restore CA1862
         }
 
         private static void SearchByRobotName(ref IQueryable<MissionRun> missionRuns, string? robotName)
         {
             if (!missionRuns.Any() || string.IsNullOrWhiteSpace(robotName)) { return; }
 
+#pragma warning disable CA1862
             missionRuns = missionRuns.Where(
-                missionRun => missionRun.Robot.Name.Contains(robotName.Trim(), StringComparison.OrdinalIgnoreCase)
+                missionRun => missionRun.Robot.Name.ToLower().Contains(robotName.ToLower().Trim())
             );
+#pragma warning restore CA1862
         }
 
         private static void SearchByTag(ref IQueryable<MissionRun> missionRuns, string? tag)
@@ -219,8 +223,10 @@ namespace Api.Services
                 missionRun =>
                     missionRun.Tasks.Any(
                         task =>
+#pragma warning disable CA1307
                             task.TagId != null
-                            && task.TagId.Contains(tag.Trim(), StringComparison.OrdinalIgnoreCase)
+                            && task.TagId.Contains(tag.Trim())
+#pragma warning restore CA1307
                     )
             );
         }
