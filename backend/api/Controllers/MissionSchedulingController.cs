@@ -13,7 +13,6 @@ namespace Api.Controllers
     public class MissionSchedulingController(
             IMissionDefinitionService missionDefinitionService,
             IMissionRunService missionRunService,
-            IAreaService areaService,
             IInstallationService installationService,
             IRobotService robotService,
             IEchoService echoService,
@@ -166,11 +165,16 @@ namespace Api.Controllers
             }
             catch (AreaNotFoundException) { return NotFound("Area not found"); }
 
-            Area? area = null;
-            if (scheduledMissionQuery.AreaName != null)
+            Deck? missionDeck = null;
+            foreach (var missionArea in missionAreas)
             {
-                area = await areaService.ReadByInstallationAndName(scheduledMissionQuery.InstallationCode, scheduledMissionQuery.AreaName);
+                missionDeck ??= missionArea.Deck;
+
+                if (missionDeck != missionArea.Deck) { return BadRequest("The mission spans multiple decks"); }
             }
+
+            Area? area = null;
+            area = missionAreas.GroupBy(i => i).OrderByDescending(grp => grp.Count()).Select(grp => grp.Key).First();
 
             var source = await sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId);
             MissionDefinition? existingMissionDefinition = null;
