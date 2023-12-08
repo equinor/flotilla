@@ -157,6 +157,15 @@ namespace Api.Controllers
                 )
                 .ToList();
 
+            List<Area>? missionAreas;
+            try
+            {
+                missionAreas = echoMission.Tags
+                    .Select(t => stidService.GetTagArea(t.TagId, scheduledMissionQuery.InstallationCode).Result)
+                    .ToList();
+            }
+            catch (AreaNotFoundException) { return NotFound("Area not found"); }
+
             Area? area = null;
             if (scheduledMissionQuery.AreaName != null)
             {
