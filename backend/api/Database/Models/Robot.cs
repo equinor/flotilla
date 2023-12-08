@@ -20,7 +20,7 @@ namespace Api.Database.Models
             Pose = new Pose();
         }
 
-        public Robot(CreateRobotQuery createQuery)
+        public Robot(CreateRobotQuery createQuery, Installation installation, Area? area = null)
         {
             var videoStreams = new List<VideoStream>();
             foreach (var videoStreamQuery in createQuery.VideoStreams)
@@ -37,8 +37,8 @@ namespace Api.Database.Models
             IsarId = createQuery.IsarId;
             Name = createQuery.Name;
             SerialNumber = createQuery.SerialNumber;
-            CurrentInstallation = createQuery.CurrentInstallation;
-            CurrentArea = createQuery.CurrentArea;
+            CurrentInstallation = installation;
+            CurrentArea = area;
             VideoStreams = videoStreams;
             Host = createQuery.Host;
             Port = createQuery.Port;

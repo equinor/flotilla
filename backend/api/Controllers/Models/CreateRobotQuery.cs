@@ -12,9 +12,9 @@ namespace Api.Controllers.Models
 
         public string SerialNumber { get; set; }
 
-        public Installation CurrentInstallation { get; set; }
+        public string CurrentInstallationCode { get; set; }
 
-        public Area CurrentArea { get; set; }
+        public string CurrentAreaName { get; set; }
 
         public IList<CreateVideoStreamQuery> VideoStreams { get; set; }
 

@@ -67,7 +67,6 @@ namespace Api.Test.EventHandlers
             _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
             _missionRunService = new MissionRunService(_context, _signalRService, missionLogger, _accessRoleService);
             _robotModelService = new RobotModelService(_context);
-            _robotService = new RobotService(_context, robotServiceLogger, _robotModelService, _signalRService, _accessRoleService);
             _robotModelService = new RobotModelService(_context);
             _robotControllerMock = new RobotControllerMock();
             _isarServiceMock = new MockIsarService();
@@ -76,6 +75,7 @@ namespace Api.Test.EventHandlers
             _plantService = new PlantService(_context, _installationService, _accessRoleService);
             _deckService = new DeckService(_context, _defaultLocalisationPoseService, _installationService, _plantService, _accessRoleService);
             _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalisationPoseService, _accessRoleService);
+            _robotService = new RobotService(_context, robotServiceLogger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
             _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, _robotControllerMock.Mock.Object, _areaService,
                 _isarServiceMock);
 

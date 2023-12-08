@@ -109,12 +109,7 @@ namespace Api.Controllers
                     );
                 }
 
-                var robot = new Robot(robotQuery)
-                {
-                    Model = robotModel
-                };
-
-                var newRobot = await robotService.Create(robot);
+                var newRobot = await robotService.CreateFromQuery(robotQuery);
                 var robotResponses = new RobotResponse(newRobot);
 
                 logger.LogInformation("Succesfully created new robot");

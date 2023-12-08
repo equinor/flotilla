@@ -37,7 +37,9 @@ namespace Api.Services
         ILogger<RobotService> logger,
         IRobotModelService robotModelService,
         ISignalRService signalRService,
-        IAccessRoleService accessRoleService) : IRobotService, IDisposable
+        IAccessRoleService accessRoleService,
+        IInstallationService installationService,
+        IAreaService areaService) : IRobotService, IDisposable
     {
         private readonly Semaphore _robotSemaphore = new(1, 1);
 
@@ -61,11 +63,27 @@ namespace Api.Services
             var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType);
             if (robotModel != null)
             {
-                var newRobot = new Robot(robotQuery)
+                var installation = await installationService.ReadByName(robotQuery.CurrentInstallationCode);
+                if (installation is null)
+                {
+                    logger.LogError("Installation {CurrentInstallation} does not exist", robotQuery.CurrentInstallationCode);
+                    throw new DbUpdateException($"Could not create new robot in database as installation {robotQuery.CurrentInstallationCode} doesn't exist");
+                }
+
+                var area = await areaService.ReadByInstallationAndName(robotQuery.CurrentInstallationCode, robotQuery.CurrentAreaName);
+                if (area is null && robotQuery.CurrentAreaName is not null)
+                {
+                    logger.LogError("Area '{AreaName}' does not exist in installation {CurrentInstallation}", robotQuery.CurrentAreaName, robotQuery.CurrentInstallationCode);
+                    throw new DbUpdateException($"Could not create new robot in database as area '{robotQuery.CurrentAreaName}' does not exist in installation {robotQuery.CurrentInstallationCode}");
+                }
+
+                var newRobot = new Robot(robotQuery, installation, area)
                 {
                     Model = robotModel
                 };
                 context.Entry(robotModel).State = EntityState.Unchanged;
+                if (newRobot.CurrentArea is not null) { context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged; }
+
                 await context.Robots.AddAsync(newRobot);
                 await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
                 _ = signalRService.SendMessageAsync("Robot added", newRobot!.CurrentInstallation, new RobotResponse(newRobot!));
