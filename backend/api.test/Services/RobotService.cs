@@ -20,6 +20,11 @@ namespace Api.Test.Services
         private readonly RobotModelService _robotModelService;
         private readonly ISignalRService _signalRService;
         private readonly IAccessRoleService _accessRoleService;
+        private readonly IInstallationService _installationService;
+        private readonly IPlantService _plantService;
+        private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
+        private readonly IDeckService _deckService;
+        private readonly IAreaService _areaService;
 
         public RobotServiceTest(DatabaseFixture fixture)
         {
@@ -28,6 +33,11 @@ namespace Api.Test.Services
             _robotModelService = new RobotModelService(_context);
             _signalRService = new MockSignalRService();
             _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
+            _installationService = new InstallationService(_context, _accessRoleService);
+            _plantService = new PlantService(_context, _installationService, _accessRoleService);
+            _defaultLocalizationPoseService = new DefaultLocalizationPoseService(_context);
+            _deckService = new DeckService(_context, _defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService);
+            _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalizationPoseService, _accessRoleService);
         }
 
         public void Dispose()
@@ -39,7 +49,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadAll()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
             var robots = await robotService.ReadAll();
 
             Assert.True(robots.Any());
@@ -48,7 +58,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task Read()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
             var robots = await robotService.ReadAll();
             var firstRobot = robots.First();
             var robotById = await robotService.ReadById(firstRobot.Id);
@@ -59,7 +69,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
             var robot = await robotService.ReadById("some_id_that_does_not_exist");
             Assert.Null(robot);
         }
@@ -67,7 +77,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task Create()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
             var installationService = new InstallationService(_context, _accessRoleService);
 
             var installation = await installationService.Create(new CreateInstallationQuery
@@ -93,7 +103,7 @@ namespace Api.Test.Services
                 {
                     videoStreamQuery
                 },
-                CurrentInstallation = installation,
+                CurrentInstallationCode = installation.InstallationCode,
                 RobotType = RobotType.Robot,
                 Host = "",
                 Port = 1,
@@ -101,7 +111,7 @@ namespace Api.Test.Services
                 Status = RobotStatus.Available
             };
 
-            var robot = new Robot(robotQuery);
+            var robot = new Robot(robotQuery, installation);
             var robotModel = _context.RobotModels.First();
             robot.Model = robotModel;
 
