@@ -1,5 +1,4 @@
-﻿using NCrontab;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -7,6 +6,7 @@ using Api.Database.Models;
 using Api.Services;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using NCrontab;
 
 namespace Api.EventHandlers
 {
@@ -14,8 +14,7 @@ namespace Api.EventHandlers
     IServiceScopeFactory scopeFactory,
     ILogger<InspectionFindingEventHandler> logger) : BackgroundService
     {
-        private readonly string _cronExpression = "30 16 * * * ";
-        private readonly TimeSpan _interval = configuration.GetValue<TimeSpan>("InspectionFindingEventHandler:Interval");
+        private readonly string _cronExpression = "00 13 * * * ";
         private InspectionFindingService InspectionFindingService => scopeFactory.CreateScope().ServiceProvider.GetRequiredService<InspectionFindingService>();
         private readonly TimeSpan _timeSpan = configuration.GetValue<TimeSpan>("InspectionFindingEventHandler:TimeSpan");
 
