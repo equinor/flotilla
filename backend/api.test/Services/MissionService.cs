@@ -56,7 +56,7 @@ namespace Api.Test.Services
             var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, area, installation);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
             await _missionRunService.Create(missionRun);
