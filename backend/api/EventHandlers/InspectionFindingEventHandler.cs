@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using NCrontab;
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -6,12 +7,14 @@ using Api.Database.Models;
 using Api.Services;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+
 namespace Api.EventHandlers
 {
     public class InspectionFindingEventHandler(IConfiguration configuration,
     IServiceScopeFactory scopeFactory,
     ILogger<InspectionFindingEventHandler> logger) : BackgroundService
     {
+        private readonly string _cronExpression = "30 16 * * * ";
         private readonly TimeSpan _interval = configuration.GetValue<TimeSpan>("InspectionFindingEventHandler:Interval");
         private InspectionFindingService InspectionFindingService => scopeFactory.CreateScope().ServiceProvider.GetRequiredService<InspectionFindingService>();
         private readonly TimeSpan _timeSpan = configuration.GetValue<TimeSpan>("InspectionFindingEventHandler:TimeSpan");
@@ -22,7 +25,17 @@ namespace Api.EventHandlers
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(_interval, stoppingToken);
+
+                var now = DateTime.UtcNow;
+
+                var nextExecutionTime = CrontabSchedule.Parse(_cronExpression).GetNextOccurrence(now);
+
+                var delay = nextExecutionTime - now;
+
+                if (delay.TotalMilliseconds > 0)
+                {
+                    await Task.Delay(delay, stoppingToken);
+                }
 
                 var lastReportingTime = DateTime.UtcNow - _timeSpan;
 
