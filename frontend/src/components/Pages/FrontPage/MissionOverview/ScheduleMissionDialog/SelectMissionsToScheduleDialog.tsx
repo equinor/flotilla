@@ -81,7 +81,7 @@ export const SelectMissionsToScheduleDialog = ({
         <StyledMissionDialog>
             <StyledDialog open={true} isDismissable>
                 <StyledAutoComplete>
-                    <Typography variant="h3">{TranslateText('Add mission')}</Typography>
+                    <Typography variant="h3">{TranslateText('Add mission to the queue')}</Typography>
                     <Autocomplete
                         options={echoMissionsOptions}
                         onOptionsChange={(changes) => onChangeMissionSelections(changes.selectedItems)}
@@ -120,7 +120,7 @@ export const SelectMissionsToScheduleDialog = ({
                             disabled={scheduleButtonDisabled}
                         >
                             {' '}
-                            {TranslateText('Add mission')}
+                            {TranslateText('Add mission to the queue')}
                         </Button>
                     </StyledMissionSection>
                 </StyledAutoComplete>

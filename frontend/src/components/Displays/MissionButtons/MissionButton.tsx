@@ -55,7 +55,7 @@ export const MissionButton = (): JSX.Element => {
                     ref={anchorRef}
                 >
                     <Icon name={Icons.ExternalLink} size={16}></Icon>
-                    {TranslateText('Create a new mission')}
+                    {TranslateText('Create new Echo mission')}
                 </StyledButton>
             </div>
 

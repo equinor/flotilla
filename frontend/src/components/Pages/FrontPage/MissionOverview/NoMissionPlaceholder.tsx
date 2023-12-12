@@ -1,22 +1,14 @@
-import { Typography } from '@equinor/eds-core-react'
+import { Card, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { tokens } from '@equinor/eds-tokens'
 
-const StyledPlaceholder = styled.div`
+const StyledPlaceholder = styled(Card)`
     display: flex;
     box-sizing: border-box;
-    flex-direction: row;
-    align-items: flex-start;
     padding: 24px;
-    gap: 8px;
-
-    border: 1px solid #dcdcdc;
-    border-radius: 4px;
-
-    flex: none;
-    order: 1;
-    align-self: stretch;
-    flex-grow: 1;
+    min-width: 250px;
+    border: 1px solid ${tokens.colors.interactive.disabled__border.hex};
 `
 
 export const NoOngoingMissionsPlaceholder = (): JSX.Element => {

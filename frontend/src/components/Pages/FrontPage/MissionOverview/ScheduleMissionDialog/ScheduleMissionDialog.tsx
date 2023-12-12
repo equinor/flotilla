@@ -26,6 +26,7 @@ export const ScheduleMissionDialog = (): JSX.Element => {
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
     const { setAlert } = useAlertContext()
+    const { setLoadingMissionSet } = useMissionsContext()
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
     const [isEmptyEchoMissionsDialogOpen, setIsEmptyEchoMissionsDialogOpen] = useState<boolean>(false)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
@@ -35,7 +36,6 @@ export const ScheduleMissionDialog = (): JSX.Element => {
     const [echoMissions, setEchoMissions] = useState<Map<string, EchoMissionDefinition>>(
         new Map<string, EchoMissionDefinition>()
     )
-    const { setLoadingMissionSet } = useMissionsContext()
 
     const anchorRef = useRef<HTMLButtonElement>(null)
 
@@ -115,7 +115,7 @@ export const ScheduleMissionDialog = (): JSX.Element => {
                 >
                     <>
                         <Icon name={Icons.Add} size={16} />
-                        {TranslateText('Add mission')}
+                        {TranslateText('Add predefined Echo mission')}
                     </>
                 </Button>
             </div>
