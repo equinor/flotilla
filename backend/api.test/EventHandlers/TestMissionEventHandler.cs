@@ -75,7 +75,7 @@ namespace Api.Test.EventHandlers
             _plantService = new PlantService(_context, _installationService, _accessRoleService);
             _deckService = new DeckService(_context, _defaultLocalisationPoseService, _installationService, _plantService, _accessRoleService);
             _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalisationPoseService, _accessRoleService);
-            _robotService = new RobotService(_context, robotServiceLogger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
+            _robotService = new RobotService(_context, robotServiceLogger, _robotModelService, _signalRService, _accessRoleService, _installationService);
             _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, _robotControllerMock.Mock.Object, _areaService,
                 _isarServiceMock);
 
@@ -125,7 +125,7 @@ namespace Api.Test.EventHandlers
             var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, area, installation);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
             SetupMocksForRobotController(robot, missionRun);
@@ -146,7 +146,7 @@ namespace Api.Test.EventHandlers
             var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, area, installation);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRunOne = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
             var missionRunTwo = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
@@ -171,7 +171,7 @@ namespace Api.Test.EventHandlers
             var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, area, installation);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation);
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
             SetupMocksForRobotController(robot, missionRun);
@@ -208,7 +208,7 @@ namespace Api.Test.EventHandlers
             var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, area, installation);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation);
 
             var mqttEventArgs = new MqttReceivedArgs(
                 new IsarRobotStatusMessage
@@ -248,8 +248,8 @@ namespace Api.Test.EventHandlers
             var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robotOne = await _databaseUtilities.NewRobot(RobotStatus.Available, area, installation);
-            var robotTwo = await _databaseUtilities.NewRobot(RobotStatus.Available, area, installation);
+            var robotOne = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
+            var robotTwo = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRunOne = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robotOne, area, false);
             var missionRunTwo = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robotTwo, area, false);
 

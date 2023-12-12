@@ -76,47 +76,6 @@ namespace Api.Test
             Assert.Equal(robot.Id, robotId);
         }
 
-        [Fact]
-        public async Task RobotIsCreatedWithCurrentArea()
-        {
-            // Area
-            string areaUrl = "/areas";
-            var areaResponse = await _client.GetAsync(areaUrl);
-            Assert.True(areaResponse.IsSuccessStatusCode);
-            var areas = await areaResponse.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
-            Assert.True(areas != null);
-            var area = areas[0];
-
-            // Arrange - Create robot
-            var robotQuery = new CreateRobotQuery
-            {
-                IsarId = Guid.NewGuid().ToString(),
-                Name = "RobotGetNextRun",
-                SerialNumber = "GetNextRun",
-                RobotType = RobotType.Robot,
-                Status = RobotStatus.Available,
-                Enabled = true,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallationCode = area.InstallationCode,
-                CurrentAreaName = area.AreaName,
-                VideoStreams = new List<CreateVideoStreamQuery>()
-            };
-
-            string robotUrl = "/robots";
-            var content = new StringContent(
-                JsonSerializer.Serialize(robotQuery),
-                null,
-                "application/json"
-            );
-            var response = await _client.PostAsync(robotUrl, content);
-            Assert.True(response != null, $"Failed to post to {robotUrl}. Null returned");
-            Assert.True(response.IsSuccessStatusCode, $"Failed to post to {robotUrl}. Status code: {response.StatusCode}");
-            var robot = await response.Content.ReadFromJsonAsync<RobotResponse>(_serializerOptions);
-            Assert.True(robot != null, $"No object returned from post to {robotUrl}");
-            Assert.True(robot.CurrentArea?.Id == area.Id);
-
-        }
 
         [Fact]
         public async Task RobotIsNotCreatedWithAreaNotInInstallation()
@@ -161,7 +120,6 @@ namespace Api.Test
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallationCode = wrongInstallation.InstallationCode,
-                CurrentAreaName = area.AreaName,
                 VideoStreams = new List<CreateVideoStreamQuery>()
             };
 
