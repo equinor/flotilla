@@ -109,7 +109,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             <StyledMissionDialog>
                 <StyledDialog open={true}>
                     <StyledDialogContent>
-                        <Typography variant="h4">{TranslateText('Add mission')}</Typography>
+                        <Typography variant="h4">{TranslateText('Add mission to the queue')}</Typography>
                         {props.isAlreadyScheduled && (
                             <StyledDangerContent>
                                 <Icon name={Icons.Warning} size={16} color="red" />

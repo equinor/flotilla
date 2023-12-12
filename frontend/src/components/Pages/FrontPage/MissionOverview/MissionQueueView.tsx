@@ -5,15 +5,14 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { useEffect } from 'react'
 import { Mission, placeholderMission } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
-import { ScheduleMissionDialog } from './ScheduleMissionDialog/ScheduleMissionDialog'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { MissionButton } from 'components/Displays/MissionButtons/MissionButton'
 
 const StyledMissionView = styled.div`
     display: grid;
     grid-column: 1/ -1;
+    align-content: start;
     gap: 1rem;
 `
 
@@ -21,11 +20,6 @@ const MissionTable = styled.div`
     display: grid;
     grid-template-rows: repeat(auto-fill);
     align-items: center;
-    gap: 1rem;
-`
-
-const MissionButtonView = styled.div`
-    display: flex;
     gap: 1rem;
 `
 
@@ -73,10 +67,6 @@ export const MissionQueueView = (): JSX.Element => {
                 {loadingMissionSet.size > 0 && loadingQueueDisplay}
                 {loadingMissionSet.size === 0 && localMissionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
             </MissionTable>
-            <MissionButtonView>
-                <ScheduleMissionDialog />
-                <MissionButton />
-            </MissionButtonView>
         </StyledMissionView>
     )
 }
