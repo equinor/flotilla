@@ -31,7 +31,7 @@ namespace Api.Test
                 {
                     services.AddScoped<IAccessRoleService, AccessRoleService>();
                     services.AddScoped<IIsarService, MockIsarService>();
-                    services.AddScoped<IHttpContextAccessor, MockHttpContextAccessor>();
+                    services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
                     services.AddScoped<IEchoService, MockEchoService>();
                     services.AddScoped<IMapService, MockMapService>();
                     services.AddScoped<IBlobService, MockBlobService>();
