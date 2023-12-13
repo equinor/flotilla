@@ -19,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentName}'\n");
 
+builder.Configuration.AddEnvironmentVariables();
+
 builder.AddAzureEnvironmentVariables();
 
 if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))

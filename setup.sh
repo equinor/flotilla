@@ -64,6 +64,26 @@ if [ "$backend_abort" != "true" ]; then
     dotnet user-secrets set "AzureAd:ClientSecret" $az_client_secret --project backend/api > /dev/null
     echo -e "Added client secret to ASP.NET secret manager"
 
+    echo -e "A username is needed for local development with SignalR"
+    echo -en "Input a username for yourself (this only needs to be unique within your development environment):\n" 
+
+    while [ true ]
+    do
+        read -s local_dev_username
+
+        if [ -z "$local_dev_username" ]; then
+            echo "The local dev username cannot be empty"
+            echo "Try again:"
+        else
+            break
+        fi
+    done
+
+
+    echo "Local__DevUserId='$local_dev_username'" >> $flotilla_dir/.env
+    dotnet user-secrets set "Local:DevUserId" $az_client_secret --project backend/api > /dev/null
+    echo -e "Added local development username to .env file"
+
     echo -e "Backup setup - Done!"
     echo -e "-----------------------------\n"
 fi

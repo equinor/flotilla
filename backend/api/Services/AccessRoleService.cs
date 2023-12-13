@@ -10,7 +10,6 @@ namespace Api.Services
         public Task<List<string>> GetAllowedInstallationCodes(List<string> roles);
         public bool IsUserAdmin();
         public bool IsAuthenticationAvailable();
-        public string? GetRequestNameId();
     }
 
     public class AccessRoleService(FlotillaDbContext context, IHttpContextAccessor httpContextAccessor) : IAccessRoleService
@@ -53,11 +52,6 @@ namespace Api.Services
         public bool IsAuthenticationAvailable()
         {
             return httpContextAccessor.HttpContext != null;
-        }
-
-        public string? GetRequestNameId()
-        {
-            return httpContextAccessor.HttpContext?.GetUserNameId();
         }
     }
 }
