@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
@@ -140,6 +141,7 @@ namespace Api.Services
         {
             return await GetMissionRunsWithSubModels()
                 .Where(m => m.Robot.Id == robotId)
+                .Where(m => m.EndTime != null)
                 .OrderByDescending(m => m.EndTime)
                 .FirstOrDefaultAsync();
         }
