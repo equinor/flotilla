@@ -372,6 +372,8 @@ namespace Api.EventHandlers
             }
             else
             {
+                if (pressureStatus.PressureLevel == robot.PressureLevel) return;
+
                 await robotService.UpdateRobotPressureLevel(robot.Id, pressureStatus.PressureLevel);
                 await timeseriesService.Create(
                     new RobotPressureTimeseries

@@ -11,7 +11,7 @@ namespace Api.Services
         public Task SendMessageAsync(string label, Installation? installation, string message);
     }
 
-    public class SignalRService(IHubContext<SignalRHub> signalRHub) : ISignalRService
+    public class SignalRService(IHubContext<SignalRHub> signalRHub, IAccessRoleService accessRoleService) : ISignalRService
     {
         private readonly JsonSerializerOptions _serializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -23,10 +23,25 @@ namespace Api.Services
 
         public async Task SendMessageAsync(string label, Installation? installation, string message)
         {
-            if (installation != null)
-                await signalRHub.Clients.Group(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)).SendAsync(label, "all", message);
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                string? nameId = accessRoleService.GetRequestNameId();
+                if (nameId is null) return;
+                if (installation != null)
+                    await signalRHub.Clients.Group(nameId + installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)).SendAsync(label, "all", message);
+                else
+                    // TODO: can't do this if we use DEV. Then we instead need a generic group for connection id
+                    await signalRHub.Clients.User(nameId).SendAsync(label, "all", message);
+            }
             else
-                await signalRHub.Clients.All.SendAsync(label, "all", message);
+            {
+                if (installation != null)
+                    await signalRHub.Clients.Group(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)).SendAsync(label, "all", message);
+                else
+                    // TODO: can't do this if we use DEV. Then we instead need a generic group for connection id
+                    await signalRHub.Clients.All.SendAsync(label, "all", message);
+            }
+            
 
             await Task.CompletedTask;
         }

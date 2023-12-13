@@ -18,11 +18,19 @@ namespace Api.SignalRHubs
             {
                 var roles = Context.User.Claims
                     .Where((c) => c.Type.EndsWith("/role", StringComparison.CurrentCulture)).Select((c) => c.Value).ToList();
-
+                
                 var installationCodes = await accessRoleService.GetAllowedInstallationCodes(roles);
-                foreach (string installationCode in installationCodes)
+
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
                 {
-                    await Groups.AddToGroupAsync(Context.ConnectionId, installationCode.ToUpperInvariant());
+                    string? objectId = Context.User.Claims.Where((c) => c.Type.EndsWith("/objectidentifier", StringComparison.CurrentCulture)).Select((c) => c.Value).FirstOrDefault();
+                    foreach (string installationCode in installationCodes)
+                        await Groups.AddToGroupAsync(Context.ConnectionId, objectId + installationCode.ToUpperInvariant());
+                }
+                else
+                {
+                    foreach (string installationCode in installationCodes)
+                        await Groups.AddToGroupAsync(Context.ConnectionId, installationCode.ToUpperInvariant());
                 }
             }
 
