@@ -85,7 +85,7 @@ namespace Api.EventHandlers
             robot = await robotService.UpdateRobotStatus(robot.Id, isarRobotStatus.RobotStatus);
             _logger.LogInformation("Updated status for robot {Name} to {Status}", robot.Name, robot.Status);
 
-            if (robot.Status == RobotStatus.Available) { missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id)); }
+            if (isarRobotStatus.RobotStatus == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
         }
 
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
@@ -139,13 +139,13 @@ namespace Api.EventHandlers
 
                 List<string> updatedFields = [];
 
-                if (isarRobotInfo.VideoStreamQueries is not null) { UpdateVideoStreamsIfChanged(isarRobotInfo.VideoStreamQueries, ref robot, ref updatedFields); }
-                if (isarRobotInfo.Host is not null) { UpdateHostIfChanged(isarRobotInfo.Host, ref robot, ref updatedFields); }
+                if (isarRobotInfo.VideoStreamQueries is not null) UpdateVideoStreamsIfChanged(isarRobotInfo.VideoStreamQueries, ref robot, ref updatedFields);
+                if (isarRobotInfo.Host is not null) UpdateHostIfChanged(isarRobotInfo.Host, ref robot, ref updatedFields);
 
                 UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
 
-                if (isarRobotInfo.CurrentInstallation is not null) { UpdateCurrentInstallationIfChanged(installation, ref robot, ref updatedFields); }
-                if (updatedFields.IsNullOrEmpty()) { return; }
+                if (isarRobotInfo.CurrentInstallation is not null) UpdateCurrentInstallationIfChanged(installation, ref robot, ref updatedFields);
+                if (updatedFields.IsNullOrEmpty()) return;
 
                 robot = await robotService.Update(robot);
                 _logger.LogInformation("Updated robot '{Id}' ('{RobotName}') in database: {Updates}", robot.Id, robot.Name, updatedFields);
@@ -170,7 +170,7 @@ namespace Api.EventHandlers
                 .ToList();
 
             var existingVideoStreams = robot.VideoStreams;
-            if (updatedStreams.Count == robot.VideoStreams.Count && updatedStreams.TrueForAll(stream => existingVideoStreams.Contains(stream))) { return; }
+            if (updatedStreams.Count == robot.VideoStreams.Count && updatedStreams.TrueForAll(stream => existingVideoStreams.Contains(stream))) return;
             var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
             updatedFields.Add(
                 $"\nVideoStreams ({JsonSerializer.Serialize(robot.VideoStreams, serializerOptions)} "
@@ -182,7 +182,7 @@ namespace Api.EventHandlers
 
         private static void UpdateHostIfChanged(string host, ref Robot robot, ref List<string> updatedFields)
         {
-            if (host.Equals(robot.Host, StringComparison.Ordinal)) { return; }
+            if (host.Equals(robot.Host, StringComparison.Ordinal)) return;
 
             updatedFields.Add($"\nHost ({robot.Host} -> {host})\n");
             robot.Host = host;
@@ -190,7 +190,7 @@ namespace Api.EventHandlers
 
         private static void UpdatePortIfChanged(int port, ref Robot robot, ref List<string> updatedFields)
         {
-            if (port.Equals(robot.Port)) { return; }
+            if (port.Equals(robot.Port)) return;
 
             updatedFields.Add($"\nPort ({robot.Port} -> {port})\n");
             robot.Port = port;
@@ -198,7 +198,7 @@ namespace Api.EventHandlers
 
         private static void UpdateCurrentInstallationIfChanged(Installation newCurrentInstallation, ref Robot robot, ref List<string> updatedFields)
         {
-            if (newCurrentInstallation.InstallationCode.Equals(robot.CurrentInstallation?.InstallationCode, StringComparison.Ordinal)) { return; }
+            if (newCurrentInstallation.InstallationCode.Equals(robot.CurrentInstallation?.InstallationCode, StringComparison.Ordinal)) return;
 
             updatedFields.Add($"\nCurrentInstallation ({robot.CurrentInstallation} -> {newCurrentInstallation})\n");
             robot.CurrentInstallation = newCurrentInstallation;
@@ -231,7 +231,7 @@ namespace Api.EventHandlers
                 flotillaMissionRun.Id, isarMission.MissionId, isarMission.Status, isarMission.RobotName, isarMission.IsarId
             );
 
-            if (!flotillaMissionRun.IsCompleted) { return; }
+            if (!flotillaMissionRun.IsCompleted) return;
 
             var robot = await robotService.ReadByIsarId(isarMission.IsarId);
             if (robot is null)
@@ -304,7 +304,7 @@ namespace Api.EventHandlers
 
             // Flotilla does not care about DriveTo or localization steps
             var stepType = IsarStep.StepTypeFromString(step.StepType);
-            if (stepType is IsarStepType.DriveToPose or IsarStepType.Localize) { return; }
+            if (stepType is IsarStepType.DriveToPose or IsarStepType.Localize) return;
 
             IsarStepStatus status;
             try { status = IsarStep.StatusFromString(step.Status); }
@@ -318,7 +318,7 @@ namespace Api.EventHandlers
             catch (InspectionNotFoundException) { return; }
 
             var missionRun = await missionRunService.ReadByIsarMissionId(step.MissionId);
-            if (missionRun is null) { _logger.LogWarning("Mission run with ID {Id} was not found", step.MissionId); }
+            if (missionRun is null) _logger.LogWarning("Mission run with ID {Id} was not found", step.MissionId);
 
             _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun);
 
