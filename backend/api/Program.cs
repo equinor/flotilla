@@ -9,6 +9,7 @@ using Api.Services;
 using Api.Services.ActionServices;
 using Api.SignalRHubs;
 using Azure.Identity;
+using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Rewrite;
@@ -48,6 +49,11 @@ builder.ConfigureLogger();
 builder.Services.ConfigureDatabase(builder.Configuration);
 
 builder.Services.AddApplicationInsightsTelemetry();
+
+// Disable Application Insights Telemetry when debugging
+#if DEBUG
+TelemetryDebugWriter.IsTracingDisabled = true;
+#endif
 
 builder.Services.AddScoped<IAccessRoleService, AccessRoleService>();
 builder.Services.AddScoped<IRobotService, RobotService>();
