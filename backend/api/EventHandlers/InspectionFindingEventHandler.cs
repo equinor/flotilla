@@ -104,7 +104,7 @@ namespace Api.EventHandlers
         {
             var reportBuilder = new StringBuilder("Findings Report:");
             reportBuilder.Append(Environment.NewLine);
-            string dateFormat = "dd/MM/yyyy HH:mm:ss";
+            string dateFormat = "dd/MM/yyyy HH:mm";
             var formatProvider = CultureInfo.InvariantCulture;
             foreach (var finding in findingsReports)
             {
