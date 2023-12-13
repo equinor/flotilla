@@ -231,14 +231,12 @@ namespace Api.Controllers
                 return NotFound(errorMessage);
             }
 
-            robot.Status = robotStatus;
-
             try
             {
-                var updatedRobot = await robotService.Update(robot);
-                var robotResponse = new RobotResponse(updatedRobot);
+                var updatedRobot = await robotService.UpdateRobotStatus(id, robotStatus);
+                logger.LogInformation("Successfully updated robot {RobotId}", updatedRobot.Id);
 
-                logger.LogInformation("Successful PUT of robot to database");
+                var robotResponse = new RobotResponse(updatedRobot);
 
                 return Ok(robotResponse);
             }
