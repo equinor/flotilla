@@ -11,13 +11,13 @@ namespace Api.Controllers
     [ApiController]
     [Route("robots")]
     public class RobotController(
-            ILogger<RobotController> logger,
-            IRobotService robotService,
-            IIsarService isarService,
-            IMissionRunService missionRunService,
-            IRobotModelService robotModelService,
-            IAreaService areaService
-        ) : ControllerBase
+        ILogger<RobotController> logger,
+        IRobotService robotService,
+        IIsarService isarService,
+        IMissionRunService missionRunService,
+        IRobotModelService robotModelService,
+        IAreaService areaService
+    ) : ControllerBase
     {
         /// <summary>
         ///     List all robots on the installation.
@@ -221,10 +221,7 @@ namespace Api.Controllers
         {
             logger.LogInformation("Updating robot status with id={Id}", id);
 
-            if (!ModelState.IsValid)
-            {
-                return BadRequest("Invalid data");
-            }
+            if (!ModelState.IsValid) return BadRequest("Invalid data");
 
             var robot = await robotService.ReadById(id);
             if (robot == null)
