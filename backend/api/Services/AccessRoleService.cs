@@ -8,6 +8,8 @@ namespace Api.Services
     {
         public Task<List<string>> GetAllowedInstallationCodes();
         public Task<List<string>> GetAllowedInstallationCodes(List<string> roles);
+        public bool IsUserAdmin();
+        public bool IsAuthenticationAvailable();
     }
 
     public class AccessRoleService(FlotillaDbContext context, IHttpContextAccessor httpContextAccessor) : IAccessRoleService
@@ -28,8 +30,6 @@ namespace Api.Services
 
         public async Task<List<string>> GetAllowedInstallationCodes(List<string> roles)
         {
-            var dbRoles = await context.AccessRoles.Include((r) => r.Installation).ToListAsync();
-
             if (roles.Contains(SUPER_ADMIN_ROLE_NAME))
             {
                 return await context.Installations.Select((i) => i.InstallationCode.ToUpperInvariant()).ToListAsync();
@@ -39,6 +39,19 @@ namespace Api.Services
                 return await context.AccessRoles.Include((r) => r.Installation)
                     .Where((r) => roles.Contains(r.RoleName)).Select((r) => r.Installation != null ? r.Installation.InstallationCode.ToUpperInvariant() : "").ToListAsync();
             }
+        }
+
+        public bool IsUserAdmin()
+        {
+            if (!IsAuthenticationAvailable())
+                return false;
+            var roles = httpContextAccessor.HttpContext!.GetRequestedRoleNames();
+            return roles.Contains(SUPER_ADMIN_ROLE_NAME);
+        }
+
+        public bool IsAuthenticationAvailable()
+        {
+            return httpContextAccessor.HttpContext != null;
         }
     }
 }
