@@ -6,20 +6,6 @@ namespace Api.Database.Models
 {
     public class Robot
     {
-
-        public Robot()
-        {
-            VideoStreams = new List<VideoStream>();
-            IsarId = "defaultIsarId";
-            Name = "defaultId";
-            SerialNumber = "defaultSerialNumber";
-            Status = RobotStatus.Offline;
-            Enabled = false;
-            Host = "localhost";
-            Port = 3000;
-            Pose = new Pose();
-        }
-
         public Robot(CreateRobotQuery createQuery, Installation installation, Area? area = null)
         {
             var videoStreams = new List<VideoStream>();

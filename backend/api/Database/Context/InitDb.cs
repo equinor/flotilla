@@ -246,47 +246,56 @@ namespace Api.Database.Context
 
         private static List<Robot> GetRobots()
         {
-            var robot1 = new Robot
-            {
-                IsarId = "c68b679d-308b-460f-9fe0-87eaadbd8a6e",
-                Name = "R2-D2",
-                SerialNumber = "D2",
-                Status = RobotStatus.Available,
-                Enabled = true,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallation = installations[0],
-                VideoStreams = new List<VideoStream>(),
-                Pose = new Pose()
-            };
+            var robot1 = new Robot(
+                new CreateRobotQuery
+                {
+                    Name = "R2-D2",
+                    IsarId = "c68b679d-308b-460f-9fe0-87eaadbd8a6e",
+                    RobotType = RobotType.Robot,
+                    SerialNumber = "D2",
+                    CurrentInstallationCode = installations[0].InstallationCode,
+                    VideoStreams = new List<CreateVideoStreamQuery>(),
+                    Host = "localhost",
+                    Port = 3000,
+                    Enabled = true,
+                    Status = RobotStatus.Available
+                },
+                installations[0]
+            );
 
-            var robot2 = new Robot
-            {
-                Name = "Shockwave",
-                IsarId = "c68b679d-308b-460f-9fe0-87eaadbd1234",
-                SerialNumber = "SS79",
-                Status = RobotStatus.Busy,
-                Enabled = true,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallation = installations[0],
-                VideoStreams = new List<VideoStream>(),
-                Pose = new Pose()
-            };
+            var robot2 = new Robot(
+                new CreateRobotQuery
+                {
+                    Name = "Shockwave",
+                    IsarId = "c68b679d-308b-460f-9fe0-87eaadbd1234",
+                    Status = RobotStatus.Busy,
+                    Enabled = true,
+                    Host = "localhost",
+                    Port = 3000,
+                    RobotType = RobotType.Robot,
+                    SerialNumber = "D2",
+                    CurrentInstallationCode = installations[0].InstallationCode,
+                    VideoStreams = new List<CreateVideoStreamQuery>(),
+                },
+                installations[0]
+            );
 
-            var robot3 = new Robot
-            {
-                Name = "Ultron",
-                IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
-                SerialNumber = "Earth616",
-                Status = RobotStatus.Available,
-                Enabled = false,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallation = installations[0],
-                VideoStreams = new List<VideoStream>(),
-                Pose = new Pose()
-            };
+            var robot3 = new Robot(
+                new CreateRobotQuery
+                {
+                    Name = "Ultron",
+                    IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
+                    SerialNumber = "Earth616",
+                    Status = RobotStatus.Available,
+                    Enabled = false,
+                    Host = "localhost",
+                    Port = 3000,
+                    RobotType = RobotType.Robot,
+                    CurrentInstallationCode = installations[0].InstallationCode,
+                    VideoStreams = new List<CreateVideoStreamQuery>(),
+                },
+                installations[0]
+            );
 
             return new List<Robot>(new[]
             {
