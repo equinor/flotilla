@@ -101,6 +101,7 @@ export const useSignalRContext = () => useContext(SignalRContext)
 
 export enum SignalREventLabels {
     missionRunUpdated = 'Mission run updated',
+    missionDefinitionCreated = 'Mission definition created',
     missionDefinitionUpdated = 'Mission definition updated',
     missionRunCreated = 'Mission run created',
     missionRunDeleted = 'Mission run deleted',

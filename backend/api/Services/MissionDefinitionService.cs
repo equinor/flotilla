@@ -54,7 +54,7 @@ namespace Api.Services
 
             await context.MissionDefinitions.AddAsync(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.Area?.Installation);
-
+            _ = signalRService.SendMessageAsync("Mission definition created", missionDefinition.Area?.Installation, new CondensedMissionDefinitionResponse(missionDefinition));
             return missionDefinition;
         }
 

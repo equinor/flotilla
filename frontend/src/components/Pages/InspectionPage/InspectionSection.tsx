@@ -121,6 +121,25 @@ export const InspectionSection = () => {
             return relevantDeck
         }
 
+        const updateDeckInspectionsWithCreatedMissionDefinition = (
+            mDef: CondensedMissionDefinition,
+            relevantDeck: DeckInspectionTuple
+        ) => {
+            const inspections = relevantDeck.inspections
+            const index = inspections.findIndex((i) => i.missionDefinition.id === mDef.id)
+            if (index === -1) {
+                // Ignore mission definitions for other decks
+                inspections.push({
+                    missionDefinition: mDef,
+                    deadline: mDef.lastSuccessfulRun // If there are no completed runs, set the deadline to undefined
+                        ? getInspectionDeadline(mDef.inspectionFrequency, mDef.lastSuccessfulRun.endTime!)
+                        : undefined,
+                })
+                relevantDeck = { ...relevantDeck, inspections: inspections }
+            }
+            return relevantDeck
+        }
+
         if (connectionReady) {
             registerEvent(SignalREventLabels.missionDefinitionUpdated, (username: string, message: string) => {
                 const mDef: CondensedMissionDefinition = JSON.parse(message)
@@ -130,6 +149,20 @@ export const InspectionSection = () => {
                     return {
                         ...deckMissions,
                         [relevantDeckName]: updateDeckInspectionsWithUpdatedMissionDefinition(
+                            mDef,
+                            deckMissions[relevantDeckName]
+                        ),
+                    }
+                })
+            })
+            registerEvent(SignalREventLabels.missionDefinitionCreated, (username: string, message: string) => {
+                const mDef: CondensedMissionDefinition = JSON.parse(message)
+                if (!mDef.area) return
+                const relevantDeckName = mDef.area.deckName
+                setDeckMissions((deckMissions) => {
+                    return {
+                        ...deckMissions,
+                        [relevantDeckName]: updateDeckInspectionsWithCreatedMissionDefinition(
                             mDef,
                             deckMissions[relevantDeckName]
                         ),
