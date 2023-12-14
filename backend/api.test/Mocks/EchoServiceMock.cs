@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
+using Api.Database.Models;
 using Api.Services;
 namespace Api.Test.Mocks
 {
@@ -21,16 +22,6 @@ namespace Api.Test.Mocks
             }
         ];
 
-        public EchoMission MockEchoMission =
-            new()
-            {
-                Id = 1,
-                Name = "test",
-                InstallationCode = "testInstallation",
-                URL = new Uri("https://www.I-am-echo-stid-tag-url.com"),
-                Tags = new List<EchoTag>()
-            };
-
         public CondensedEchoMissionDefinition MockMissionDefinition =
             new()
             {
@@ -47,7 +38,25 @@ namespace Api.Test.Mocks
         public async Task<EchoMission> GetMissionById(int missionId)
         {
             await Task.Run(() => Thread.Sleep(1));
-            return MockEchoMission;
+
+            var mockEchoMission = new EchoMission
+            {
+                Id = missionId,
+                Name = "test",
+                InstallationCode = "testInstallation",
+                URL = new Uri("https://testurl.com"),
+                Tags = new List<EchoTag>{new() {
+                    Id = 1,
+                    TagId = "testTag",
+                    Pose = new Pose(),
+                    Inspections = new List<EchoInspection>{new() {
+                        InspectionType = InspectionType.Image,
+                        InspectionPoint = new Position{X=1, Y=1, Z=1}
+                    }}
+                }}
+            };
+
+            return mockEchoMission;
         }
 
         public async Task<IList<EchoPlantInfo>> GetEchoPlantInfos()
