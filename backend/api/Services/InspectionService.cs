@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -20,7 +21,7 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger) : IInspectionService
+    public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, IAccessRoleService accessRoleService) : IInspectionService
     {
         public async Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus)
         {
@@ -34,15 +35,31 @@ namespace Api.Services
 
             inspection.UpdateStatus(isarStepStatus);
             inspection = await Update(inspection);
-            // Disabled for now as we need to be able to assign it to an installation to get granular access control
-            // _ = signalRService.SendMessageAsync("Inspection updated", inspection);
             return inspection;
+        }
+
+        private async Task ApplyDatabaseUpdate(Installation? installation)
+        {
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
+            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+                await context.SaveChangesAsync();
+            else
+                throw new UnauthorizedAccessException($"User does not have permission to update area in installation {installation.Name}");
         }
 
         private async Task<Inspection> Update(Inspection inspection)
         {
             var entry = context.Update(inspection);
-            await context.SaveChangesAsync();
+
+            var missionRun = await context.MissionRuns
+                    .Include(missionRun => missionRun.Area).ThenInclude(area => area != null ? area.Installation : null)
+                    .Include(missionRun => missionRun.Robot)
+                    .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspections.Any(i => i.Id == inspection.Id)))
+                    .FirstOrDefaultAsync();
+            var installation = missionRun?.Area?.Installation;
+
+            await ApplyDatabaseUpdate(installation);
+
             return entry.Entity;
         }
 
@@ -53,7 +70,10 @@ namespace Api.Services
 
         private IQueryable<Inspection> GetInspections()
         {
-            return context.Inspections.Include(inspection => inspection.InspectionFindings);
+            if (accessRoleService.IsUserAdmin() || !accessRoleService.IsAuthenticationAvailable())
+                return context.Inspections.Include(inspection => inspection.InspectionFindings);
+            else
+                throw new UnauthorizedAccessException($"User does not have permission to view inspections");
         }
 
         public async Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingQuery, string isarStepId)
@@ -74,8 +94,6 @@ namespace Api.Services
 
             inspection.InspectionFindings.Add(inspectionFinding);
             inspection = await Update(inspection);
-            // Disabled for now as we need to be able to assign it to an installation to get granular access control
-            //_ = signalRService.SendMessageAsync("Inspection finding added", inspection);
             return inspection;
         }
     }

@@ -78,8 +78,8 @@ namespace Api.EventHandlers
 
             foreach (var inspectionFinding in inspectionFindings)
             {
-                var missionRun = await InspectionFindingService.GetMissionRunByIsarStepId(inspectionFinding);
-                var task = await InspectionFindingService.GetMissionTaskByIsarStepId(inspectionFinding);
+                var missionRun = await InspectionFindingService.GetMissionRunByIsarStepId(inspectionFinding.IsarStepId);
+                var task = await InspectionFindingService.GetMissionTaskByIsarStepId(inspectionFinding.IsarStepId);
 
                 if (task != null && missionRun != null)
                 {
