@@ -30,6 +30,14 @@ namespace Api.Database.Models
             D2 = 0;
         }
 
+        public TransformationMatrices(TransformationMatrices copy)
+        {
+            C1 = copy.C1;
+            C2 = copy.C2;
+            D1 = copy.D1;
+            D2 = copy.D2;
+        }
+
         public TransformationMatrices(double[] p1, double[] p2, int imageWidth, int imageHeight)
         {
             C1 = imageWidth / (p2[0] - p1[0]);

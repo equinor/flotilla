@@ -560,7 +560,6 @@ namespace Api.Test
             {
                 RobotId = robotId,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(2050, 1, 1), DateTimeKind.Utc),
-                MissionDefinitionId = missionRun.MissionId
             };
             var scheduleContent1 = new StringContent(
                 JsonSerializer.Serialize(scheduleQuery1),
@@ -571,7 +570,6 @@ namespace Api.Test
             {
                 RobotId = robotId,
                 DesiredStartTime = DateTime.UtcNow,
-                MissionDefinitionId = missionRun.MissionId
             };
             var scheduleContent2 = new StringContent(
                 JsonSerializer.Serialize(scheduleQuery2),
@@ -582,14 +580,13 @@ namespace Api.Test
             {
                 RobotId = robotId,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(2100, 1, 1), DateTimeKind.Utc),
-                MissionDefinitionId = missionRun.MissionId
             };
             var scheduleContent3 = new StringContent(
                 JsonSerializer.Serialize(scheduleQuery3),
                 null,
                 "application/json"
             );
-            string scheduleMissionsUrl = "/missions/schedule";
+            string scheduleMissionsUrl = $"/missions/schedule/{missionRun.MissionId}";
             var missionRun1Response = await _client.PostAsync(scheduleMissionsUrl, scheduleContent1);
             var missionRun2Response = await _client.PostAsync(scheduleMissionsUrl, scheduleContent2);
             var missionRun3Response = await _client.PostAsync(scheduleMissionsUrl, scheduleContent3);

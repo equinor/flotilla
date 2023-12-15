@@ -11,8 +11,6 @@ import { Pose } from 'models/Pose'
 import { Area } from 'models/Area'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
-import { TaskStatus } from 'models/Task'
-import { createCustomMission, CustomMissionQuery } from 'models/CustomMission'
 import { MapMetadata } from 'models/MapMetadata'
 import { CondensedMissionDefinition, EchoMissionDefinition } from 'models/MissionDefinition'
 import { EchoMission } from 'models/EchoMission'
@@ -334,16 +332,14 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async scheduleMissionDefinition(missionDefinitionId: string, robotId: string) {
-        const path: string = 'missions/schedule'
+    static async scheduleMissionDefinition(missionDefinitionId: string, robotId: string): Promise<Mission> {
+        const path: string = `missions/schedule/${missionDefinitionId}`
         const robots: Robot[] = await BackendAPICaller.getEnabledRobots()
         const desiredRobot = filterRobots(robots, robotId)
         const body = {
             robotId: desiredRobot[0].id,
-            missionDefinitionId: missionDefinitionId,
-            desiredStartTime: new Date(),
         }
-        const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch((e) => {
+        const result = await BackendAPICaller.POST<unknown, Mission>(path, body).catch((e) => {
             console.error(`Failed to POST /${path}: ` + e)
             throw e
         })
@@ -455,24 +451,18 @@ export class BackendAPICaller {
         let mission = await this.getMissionRunById(missionId)
 
         if (failedTasksOnly) {
-            mission.tasks = mission.tasks.filter(
-                (task) => task.status !== TaskStatus.PartiallySuccessful && task.status !== TaskStatus.Successful
-            )
-            // Fix task ordering
-            for (let index = 0; index < mission.tasks.length; index++) {
-                mission.tasks[index].taskOrder = index
+            const path = `missions/rerun/${mission.id}`
+            const body = {
+                robotId: mission.robot.id,
             }
+            const result = await BackendAPICaller.POST<unknown, Mission>(path, body).catch((e) => {
+                console.error(`Failed to POST /${path}: ` + e)
+                throw e
+            })
+            return result.content
+        } else {
+            return BackendAPICaller.scheduleMissionDefinition(mission.missionId!, mission.robot.id)
         }
-
-        const customMission = createCustomMission(mission)
-
-        const path: string = 'missions/custom'
-        const body = customMission
-        const result = await BackendAPICaller.POST<CustomMissionQuery, Mission>(path, body).catch((e) => {
-            console.error(`Failed to POST /${path}: ` + e)
-            throw e
-        })
-        return result.content
     }
 
     static async sendRobotsToSafePosition(installationCode: string) {

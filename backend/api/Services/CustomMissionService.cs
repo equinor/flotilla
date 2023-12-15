@@ -53,7 +53,11 @@ namespace Api.Services
             var genericTasks = new List<MissionTask>();
             foreach (var task in tasks)
             {
-                var taskCopy = new MissionTask(task);
+                var taskCopy = new MissionTask(task)
+                {
+                    Id = "",
+                    IsarTaskId = ""
+                };
                 genericTasks.Add(taskCopy);
             }
 

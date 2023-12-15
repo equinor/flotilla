@@ -17,6 +17,14 @@ namespace Api.Database.Models
             W = 1;
         }
 
+        public Orientation(Orientation copy)
+        {
+            X = copy.X;
+            Y = copy.Y;
+            Z = copy.Z;
+            W = copy.W;
+        }
+
         public Orientation(float x = 0, float y = 0, float z = 0, float w = 1)
         {
             X = x;
@@ -58,6 +66,13 @@ namespace Api.Database.Models
             Z = 0;
         }
 
+        public Position(Position copy)
+        {
+            X = copy.X;
+            Y = copy.Y;
+            Z = copy.Z;
+        }
+
         public Position(float x = 0, float y = 0, float z = 0)
         {
             X = x;
@@ -95,6 +110,12 @@ namespace Api.Database.Models
         {
             Position = new Position();
             Orientation = new Orientation();
+        }
+
+        public Pose(Pose copy)
+        {
+            Position = new Position(copy.Position);
+            Orientation = new Orientation(copy.Orientation);
         }
 
         public Pose(IsarPoseMqtt isarPose)

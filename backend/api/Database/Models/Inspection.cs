@@ -34,17 +34,18 @@ namespace Api.Database.Models
         }
 
         // Creates a blank deepcopy of the provided inspection
-        public Inspection(Inspection copy)
+        public Inspection(Inspection copy, InspectionStatus? inspectionStatus = null)
         {
             Id = "";
             IsarStepId = "";
-            Status = copy.Status;
+            Status = inspectionStatus ?? copy.Status;
             InspectionType = copy.InspectionType;
             VideoDuration = copy.VideoDuration;
             AnalysisType = copy.AnalysisType;
             InspectionUrl = copy.InspectionUrl;
-            InspectionTarget = copy.InspectionTarget;
+            InspectionTarget = new Position(copy.InspectionTarget);
         }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }

@@ -14,6 +14,13 @@ namespace Api.Database.Models
             TransformationMatrices = new TransformationMatrices();
         }
 
+        public MapMetadata(MapMetadata copy)
+        {
+            MapName = copy.MapName;
+            Boundary = new Boundary(copy.Boundary);
+            TransformationMatrices = new TransformationMatrices(copy.TransformationMatrices);
+        }
+
         [Required]
         [MaxLength(200)]
         public string MapName { get; set; }
@@ -36,6 +43,16 @@ namespace Api.Database.Models
             Y2 = 0;
             Z1 = 0;
             Z2 = 0;
+        }
+
+        public Boundary(Boundary copy)
+        {
+            X1 = copy.X1;
+            X2 = copy.X2;
+            Y1 = copy.Y1;
+            Y2 = copy.Y2;
+            Z1 = copy.Z1;
+            Z2 = copy.Z2;
         }
 
         public Boundary(double x1, double y1, double x2, double y2, double z1, double z2)
