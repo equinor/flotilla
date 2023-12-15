@@ -48,7 +48,7 @@ namespace Api.EventHandlers
 
                     string messageString = GenerateReportFromFindingsReportsList(findingsList);
 
-                    string adaptiveCardJson = GenerateAdaptiveCard(messageString);
+                    string adaptiveCardJson = GenerateAdaptiveCard(messageString, logger);
 
                     string url = GetWebhookURL(configuration, "TeamsInspectionFindingsWebhook");
 
@@ -116,8 +116,9 @@ namespace Api.EventHandlers
             return reportBuilder.ToString();
         }
 
-        public static string GenerateAdaptiveCard(string messageContent)
+        public static string GenerateAdaptiveCard(string messageContent, ILogger<InspectionFindingEventHandler> logger)
         {
+            logger.LogInformation("Message content for Adaptive card: {message}", messageContent);
             string adaptiveCardJson = $@"{{
                         ""type"": ""message"",
                         ""attachments"": [
