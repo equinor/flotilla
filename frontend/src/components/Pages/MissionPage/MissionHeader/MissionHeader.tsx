@@ -126,7 +126,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                         missionStatus={mission.status}
                     />
                 )}
-                {mission.isCompleted && (
+                {mission.endTime && (
                     <MissionRestartButton missionId={mission.id} hasFailedTasks={missionHasFailedTasks} />
                 )}
             </TitleSection>

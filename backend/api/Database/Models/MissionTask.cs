@@ -74,27 +74,27 @@ namespace Api.Database.Models
         }
 
         // Creates a blank deepcopy of the provided task
-        public MissionTask(MissionTask copy)
+        public MissionTask(MissionTask copy, TaskStatus? status = null)
         {
-            Id = "";
-            IsarTaskId = "";
             TaskOrder = copy.TaskOrder;
             TagId = copy.TagId;
+            IsarTaskId = status == null ? "" : null;
             Description = copy.Description;
             EchoTagLink = copy.EchoTagLink;
-            InspectionTarget = copy.InspectionTarget;
-            RobotPose = copy.RobotPose;
+            InspectionTarget = new Position(copy.InspectionTarget);
+            RobotPose = new Pose(copy.RobotPose);
             EchoPoseId = copy.EchoPoseId;
-            Status = copy.Status;
-            Inspections = copy.Inspections.Select(i => new Inspection(i)).ToList();
+            Status = status ?? copy.Status;
+            Inspections = copy.Inspections.Select(i => new Inspection(i, InspectionStatus.NotStarted)).ToList();
         }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
         [MaxLength(200)]
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-        public string? IsarTaskId { get; private set; } = Guid.NewGuid().ToString();
+        public string? IsarTaskId { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         public int TaskOrder { get; set; }

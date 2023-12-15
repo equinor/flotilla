@@ -26,12 +26,79 @@ namespace Api.Controllers
     {
 
         /// <summary>
+        ///     Rerun a mission run, running only the parts that did not previously complete
+        /// </summary>
+        /// <remarks>
+        ///     <para> This query runs the unfinished tasks of a previous mission run </para>
+        /// </remarks>
+        [HttpPost("rerun/{missionRunId}")]
+        [Authorize(Roles = Role.User)]
+        [ProducesResponseType(typeof(MissionRun), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<MissionRun>> Rerun(
+            [FromRoute] string missionRunId,
+            [FromBody] ScheduleMissionQuery scheduledMissionQuery
+        )
+        {
+            var robot = await robotService.ReadById(scheduledMissionQuery.RobotId);
+            if (robot is null) return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
+
+            var missionRun = await missionRunService.ReadById(missionRunId);
+            if (missionRun == null) return NotFound("Mission run not found");
+
+            var missionTasks = missionRun.Tasks.Where((t) => t.Status != Database.Models.TaskStatus.Successful && t.Status != Database.Models.TaskStatus.PartiallySuccessful).Select((t) => new MissionTask(t, Database.Models.TaskStatus.NotStarted)).ToList();
+
+            if (missionTasks == null || missionTasks.Count == 0) return NotFound("No unfinished mission tasks were found for the requested mission");
+
+            foreach (var task in missionTasks)
+            {
+                task.Id = Guid.NewGuid().ToString();
+                foreach (var inspection in task.Inspections)
+                {
+                    inspection.Id = Guid.NewGuid().ToString();
+                }
+            }
+
+            var newMissionRun = new MissionRun
+            {
+                Name = missionRun.Name,
+                Robot = robot,
+                MissionId = missionRun.MissionId,
+                Status = MissionStatus.Pending,
+                MissionRunPriority = MissionRunPriority.Normal,
+                Tasks = missionTasks,
+                DesiredStartTime = scheduledMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
+                InstallationCode = missionRun.InstallationCode,
+                Area = missionRun.Area,
+                Map = new MapMetadata(missionRun.Map)
+            };
+
+            if (newMissionRun.Tasks.Any())
+            {
+                newMissionRun.CalculateEstimatedDuration();
+            }
+
+            // Compare with GetTasksFromSource
+
+            newMissionRun = await missionRunService.Create(newMissionRun);
+
+            return CreatedAtAction(nameof(Rerun), new
+            {
+                id = newMissionRun.Id
+            }, newMissionRun);
+        }
+
+        /// <summary>
         ///     Schedule an existing mission definition
         /// </summary>
         /// <remarks>
         ///     <para> This query schedules an existing mission and adds it to the database </para>
         /// </remarks>
-        [HttpPost("schedule")]
+        [HttpPost("schedule/{missionDefinitionId}")]
         [Authorize(Roles = Role.User)]
         [ProducesResponseType(typeof(MissionRun), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -40,14 +107,21 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionRun>> Schedule(
+            [FromRoute] string missionDefinitionId,
             [FromBody] ScheduleMissionQuery scheduledMissionQuery
         )
         {
             var robot = await robotService.ReadById(scheduledMissionQuery.RobotId);
-            if (robot is null) { return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}"); }
+            if (robot is null)
+            {
+                return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
+            }
 
-            var missionDefinition = await missionDefinitionService.ReadById(scheduledMissionQuery.MissionDefinitionId);
-            if (missionDefinition == null) { return NotFound("Mission definition not found"); }
+            var missionDefinition = await missionDefinitionService.ReadById(missionDefinitionId);
+            if (missionDefinition == null)
+            {
+                return NotFound("Mission definition not found");
+            }
 
             try { await localizationService.EnsureRobotIsOnSameInstallationAsMission(robot, missionDefinition); }
             catch (InstallationNotFoundException e) { return NotFound(e.Message); }
@@ -63,7 +137,7 @@ namespace Api.Controllers
                 MissionId = missionDefinition.Id,
                 Status = MissionStatus.Pending,
                 MissionRunPriority = MissionRunPriority.Normal,
-                DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
+                DesiredStartTime = scheduledMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
                 Tasks = missionTasks,
                 InstallationCode = missionDefinition.InstallationCode,
                 Area = missionDefinition.Area,

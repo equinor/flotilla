@@ -5,6 +5,7 @@ namespace Api.Database.Context
 {
     public static class InitDb
     {
+        private static readonly List<Inspection> inspections = GetInspections();
         private static readonly List<Installation> installations = GetInstallations();
         private static readonly List<Robot> robots = GetRobots();
         private static readonly List<Plant> plants = GetPlants();
@@ -24,25 +25,23 @@ namespace Api.Database.Context
                 Type = "mjpeg"
             };
 
-        private static Inspection Inspection => new()
+        private static List<Inspection> GetInspections()
         {
-            InspectionType = InspectionType.Image
-        };
-        private static Inspection Inspection2 => new()
-        {
-            InspectionType = InspectionType.ThermalImage
-        };
-
-        private static MissionTask ExampleTask =>
-            new()
+            var inspection1 = new Inspection
             {
-                Inspections = new List<Inspection>(),
-                TagId = "Tagid here",
-                EchoTagLink = new Uri("https://www.I-am-echo-stid-tag-url.com"),
-                InspectionTarget = new Position(),
-                RobotPose = new Pose(),
-                Type = MissionTaskType.Inspection
+                InspectionType = InspectionType.Image
             };
+
+            var inspection2 = new Inspection
+            {
+                InspectionType = InspectionType.ThermalImage
+            };
+
+            return new List<Inspection>(new[]
+            {
+                inspection1, inspection2
+            });
+        }
 
         private static List<AccessRole> GetAccessRoles()
         {
@@ -312,7 +311,7 @@ namespace Api.Database.Context
                 IsarId = "c68b679d-308b-460f-9fe0-87eaadbd5678",
                 SerialNumber = "Earth616",
                 Status = RobotStatus.Available,
-                Enabled = false,
+                Enabled = true,
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[0],
@@ -426,12 +425,16 @@ namespace Api.Database.Context
                     {
                         new()
                     }
-                }, new Position(1.0f, 1.0f, 1.0f));
+                }, new Position(1.0f, 1.0f, 1.0f))
+            {
+                Status = TaskStatus.Successful
+            };
+
             var task2 = new MissionTask(
                 new EchoTag
                 {
-                    Id = 2,
-                    TagId = "ABCD",
+                    Id = 3,
+                    TagId = "ABCDE",
                     PoseId = 2,
                     PlanOrder = 0,
                     Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
@@ -450,8 +453,8 @@ namespace Api.Database.Context
             var task3 = new MissionTask(
                 new EchoTag
                 {
-                    Id = 2,
-                    TagId = "ABCD",
+                    Id = 4,
+                    TagId = "ABCDEF",
                     PoseId = 2,
                     PlanOrder = 0,
                     Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
@@ -470,8 +473,8 @@ namespace Api.Database.Context
             var task4 = new MissionTask(
                 new EchoTag
                 {
-                    Id = 2,
-                    TagId = "ABCD",
+                    Id = 5,
+                    TagId = "ABCDEFG",
                     PoseId = 2,
                     PlanOrder = 0,
                     Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
@@ -487,11 +490,74 @@ namespace Api.Database.Context
                 Status = TaskStatus.Cancelled
             };
 
+            var task5 = new MissionTask(
+                new EchoTag
+                {
+                    Id = 6,
+                    TagId = "ABCDEFGH",
+                    PoseId = 2,
+                    PlanOrder = 0,
+                    Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                    URL = new Uri(
+                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
+                    ),
+                    Inspections = new List<EchoInspection>
+                    {
+                        new()
+                    }
+                }, new Position(1.0f, 1.0f, 1.0f))
+            {
+                Status = TaskStatus.Failed
+            };
+
+            var task6 = new MissionTask(
+                new EchoTag
+                {
+                    Id = 7,
+                    TagId = "ABCDEFGHI",
+                    PoseId = 2,
+                    PlanOrder = 0,
+                    Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                    URL = new Uri(
+                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
+                    ),
+                    Inspections = new List<EchoInspection>
+                    {
+                        new()
+                    }
+                }, new Position(1.0f, 1.0f, 1.0f))
+            {
+                Status = TaskStatus.Failed
+            };
+
+            var task7 = new MissionTask(
+                new EchoTag
+                {
+                    Id = 8,
+                    TagId = "ABCDEFGHIJ",
+                    PoseId = 2,
+                    PlanOrder = 0,
+                    Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                    URL = new Uri(
+                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
+                    ),
+                    Inspections = new List<EchoInspection>
+                    {
+                        new()
+                    }
+                }, new Position(1.0f, 1.0f, 1.0f))
+            {
+                Status = TaskStatus.Failed
+            };
+
             return [
                 task1,
                 task2,
                 task3,
-                task4
+                task4,
+                task5,
+                task6,
+                task7
             ];
         }
 
@@ -590,7 +656,7 @@ namespace Api.Database.Context
 
             var missionRun7 = new MissionRun
             {
-                Name = "Says failed but all tasks succeeded",
+                Name = "Some failed tasks",
                 Robot = robots[2],
                 InstallationCode = areas[1].Installation.InstallationCode,
                 Area = areas[1],
@@ -600,7 +666,12 @@ namespace Api.Database.Context
                 Tasks = new List<MissionTask>
                 {
                     tasks[0],
-                    tasks[0]
+                    tasks[1],
+                    tasks[2],
+                    tasks[3],
+                    tasks[4],
+                    tasks[5],
+                    tasks[6]
                 },
                 Map = new MapMetadata()
             };
@@ -638,33 +709,31 @@ namespace Api.Database.Context
                 return;
             }
 
+            context.AddRange(inspections);
+            context.AddRange(installations);
             AddRobotModelsToDatabase(context);
-
             foreach (var robot in robots)
-            {
                 robot.VideoStreams.Add(VideoStream);
-            }
-
             var models = context.RobotModels.AsEnumerable().ToList();
             robots[0].Model = models.Find(model => model.Type == RobotType.TaurobInspector)!;
             robots[1].Model = models.Find(model => model.Type == RobotType.ExR2)!;
             robots[2].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
 
-            foreach (var missionRun in missionRuns)
-            {
-                var task = ExampleTask;
-                task.Inspections.Add(Inspection);
-                task.Inspections.Add(Inspection2);
-                var tasks = new List<MissionTask> { task };
-                missionRun.Tasks = tasks;
-            }
             context.AddRange(robots);
-            context.AddRange(missionDefinitions);
-            context.AddRange(missionRuns);
-            context.AddRange(installations);
             context.AddRange(plants);
             context.AddRange(decks);
             context.AddRange(areas);
+            context.AddRange(sources);
+
+            var tasks = GetMissionTasks();
+            foreach (var task in tasks)
+            {
+                task.Inspections.Add(inspections[0]);
+                task.Inspections.Add(inspections[1]);
+            }
+            context.AddRange(tasks);
+            context.AddRange(missionDefinitions);
+            context.AddRange(missionRuns);
             context.AddRange(accessRoles);
 
             context.SaveChanges();

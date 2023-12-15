@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
 import { useRef, useState } from 'react'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 
 const Centered = styled.div`
     display: flex;
@@ -26,6 +28,7 @@ export enum ReRunOptions {
 
 export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
+    const { setAlert } = useAlertContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
 
@@ -42,11 +45,9 @@ export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps
         navigate(path)
     }
 
-    const startReRun = (option: ReRunOptions) => {
-        BackendAPICaller.reRunMission(missionId, option === ReRunOptions.ReRunFailed).then((mission) =>
-            navigateToHome()
-        )
-    }
+    const startReRun = (option: ReRunOptions) =>
+        BackendAPICaller.reRunMission(missionId, option === ReRunOptions.ReRunFailed)
+            .then(() => navigateToHome())
 
     return (
         <Centered>
