@@ -740,8 +740,8 @@ namespace Api.Test
             var robotQuery = new CreateRobotQuery
             {
                 IsarId = Guid.NewGuid().ToString(),
-                Name = "RobotGetNextRun",
-                SerialNumber = "GetNextRun",
+                Name = "RobotMissionFailsIfRobotIsNotInSameDeckAsMission",
+                SerialNumber = "GetMissionFailsIfRobotIsNotInSameDeckAsMission",
                 RobotType = RobotType.Robot,
                 Status = RobotStatus.Available,
                 Enabled = true,
@@ -756,7 +756,7 @@ namespace Api.Test
             var robot = await PostToDb<Robot, CreateRobotQuery>(robotUrl, robotQuery);
             string robotId = robot.Id;
 
-            // Arrange - Create custom mission definition
+            // Arrange - Mission Run Query
             var query = new CustomMissionQuery
             {
                 RobotId = robotId,

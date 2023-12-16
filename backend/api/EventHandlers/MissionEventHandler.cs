@@ -84,7 +84,9 @@ namespace Api.EventHandlers
                 or IsarCommunicationException
             )
             {
-                //TODO Cancel the mission? 
+                _logger.LogError("Mission run {MissionRunId} will be cancelled as robot {RobotId} was not correctly localized", missionRun.Id, missionRun.Robot.Id);
+                missionRun.Status = MissionStatus.Cancelled;
+                await MissionService.Update(missionRun);
                 return;
             }
             finally { _scheduleLocalizationSemaphore.Release(); }
@@ -120,8 +122,13 @@ namespace Api.EventHandlers
                 try { await LocalizationService.EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(robot.Id); }
                 catch (Exception ex) when (ex is LocalizationFailedException or RobotNotFoundException or MissionNotFoundException or OngoingMissionNotLocalizationException or TimeoutException)
                 {
-                    //TODO Handle failed localization - Cancel all the missions?
-                    _logger.LogError("Could not confirm that the robot was correctly localized and the scheduled missions for the deck will be cancelled");
+                    _logger.LogError("Could not confirm that the robot {RobotId} was correctly localized and the scheduled missions for the deck will be cancelled", robot.Id);
+                    try { await MissionScheduling.CancelAllScheduledMissions(robot.Id); }
+                    catch (RobotNotFoundException)
+                    {
+                        _logger.LogError("Failed to cancel scheduled missions for robot {RobotId}", robot.Id);
+                        return;
+                    }
                 }
             }
 
