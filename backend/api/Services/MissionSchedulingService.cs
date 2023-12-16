@@ -17,6 +17,8 @@ namespace Api.Services
 
         public Task StopCurrentMissionRun(string robotId);
 
+        public Task CancelAllScheduledMissions(string robotId);
+
         public Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId);
 
         public Task UnfreezeMissionRunQueueForRobot(string robotId);
@@ -128,6 +130,33 @@ namespace Api.Services
             catch (RobotNotFoundException) { }
         }
 
+        public async Task CancelAllScheduledMissions(string robotId)
+        {
+            var robot = await robotService.ReadById(robotId);
+            if (robot == null)
+            {
+                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
+            }
+
+            var pendingMissionRuns = await missionRunService.ReadMissionRunQueue(robotId);
+            if (pendingMissionRuns is null)
+            {
+                string infoMessage = $"There were no mission runs in the queue to stop for robot {robotId}";
+                logger.LogWarning("{Message}", infoMessage);
+                return;
+            }
+
+            IList<string> pendingMissionRunIds = pendingMissionRuns.Select(missionRun => missionRun.Id).ToList();
+
+            foreach (var pendingMissionRun in pendingMissionRuns)
+            {
+                pendingMissionRun.Status = MissionStatus.Cancelled;
+                await missionRunService.Update(pendingMissionRun);
+            }
+        }
+
         public async Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId)
         {
             var area = await areaService.ReadById(areaId);
@@ -181,6 +210,7 @@ namespace Api.Services
         {
             OnRobotAvailable(e);
         }
+
         private async Task MoveInterruptedMissionsToQueue(IEnumerable<string> interruptedMissionRunIds)
         {
             foreach (string missionRunId in interruptedMissionRunIds)
@@ -346,6 +376,7 @@ namespace Api.Services
             var pos2 = pose2.Position;
             return (float)Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2) + Math.Pow(pos1.Z - pos2.Z, 2));
         }
+
         protected virtual void OnRobotAvailable(RobotAvailableEventArgs e) { RobotAvailable?.Invoke(this, e); }
         public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
     }
