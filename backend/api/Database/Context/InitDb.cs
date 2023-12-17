@@ -41,7 +41,7 @@ namespace Api.Database.Context
                 EchoTagLink = new Uri("https://www.I-am-echo-stid-tag-url.com"),
                 InspectionTarget = new Position(),
                 RobotPose = new Pose(),
-                Type = "inspection"
+                Type = MissionTaskType.Inspection
             };
 
         private static List<AccessRole> GetAccessRoles()

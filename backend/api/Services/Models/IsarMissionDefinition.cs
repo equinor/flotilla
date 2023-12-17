@@ -52,7 +52,7 @@ namespace Api.Services.Models
         public IsarTaskDefinition(MissionTask missionTask, MissionRun missionRun)
         {
             Id = missionTask.IsarTaskId;
-            Type = missionTask.Type;
+            Type = MissionTask.ConvertMissionTaskTypeToIsarTaskType(missionTask.Type);
             Pose = new IsarPose(missionTask.RobotPose);
             Tag = missionTask.TagId;
             var isarInspections = new List<IsarInspectionDefinition>();

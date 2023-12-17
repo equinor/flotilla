@@ -63,7 +63,7 @@ namespace Api.Services
                 DesiredStartTime = DateTime.UtcNow,
                 Tasks = new List<MissionTask>
                 {
-                    new(robot.CurrentArea.Deck.DefaultLocalizationPose.Pose, "drive_to")
+                    new(robot.CurrentArea.Deck.DefaultLocalizationPose.Pose, MissionTaskType.DriveTo)
                 },
                 Map = new MapMetadata()
             };
