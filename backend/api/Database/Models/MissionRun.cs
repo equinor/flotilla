@@ -195,7 +195,7 @@ namespace Api.Database.Models
             {
                 return false;
             }
-            return Tasks[0].Type == "localization";
+            return Tasks[0].Type == MissionTaskType.Localization;
         }
 
         public bool IsDriveToMission()
@@ -204,7 +204,7 @@ namespace Api.Database.Models
             {
                 return false;
             }
-            return Tasks[0].Type == "drive_to";
+            return Tasks[0].Type == MissionTaskType.DriveTo;
         }
     }
 

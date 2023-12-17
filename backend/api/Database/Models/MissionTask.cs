@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using Api.Controllers.Models;
 using Api.Services.Models;
+using Api.Utilities;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
@@ -26,7 +28,7 @@ namespace Api.Database.Models
             EchoPoseId = echoTag.PoseId;
             TaskOrder = echoTag.PlanOrder;
             Status = TaskStatus.NotStarted;
-            Type = "inspection";
+            Type = MissionTaskType.Inspection;
         }
 
         // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
@@ -41,14 +43,14 @@ namespace Api.Database.Models
             RobotPose = taskQuery.RobotPose;
             TaskOrder = taskQuery.TaskOrder;
             Status = TaskStatus.NotStarted;
-            Type = "inspection";
+            Type = MissionTaskType.Inspection;
         }
 
-        public MissionTask(Pose robotPose, string type)
+        public MissionTask(Pose robotPose, MissionTaskType type)
         {
             switch (type)
             {
-                case "localization":
+                case MissionTaskType.Localization:
                     Type = type;
                     Description = "Localization";
                     RobotPose = robotPose;
@@ -57,7 +59,7 @@ namespace Api.Database.Models
                     InspectionTarget = new Position();
                     Inspections = new List<Inspection>();
                     break;
-                case "drive_to":
+                case MissionTaskType.DriveTo:
                     Type = type;
                     Description = "Return to home";
                     RobotPose = robotPose;
@@ -66,6 +68,8 @@ namespace Api.Database.Models
                     InspectionTarget = new Position();
                     Inspections = new List<Inspection>();
                     break;
+                default:
+                    throw new MissionTaskNotFoundException("MissionTaskType should be Localization or DriveTo");
             }
         }
 
@@ -95,7 +99,7 @@ namespace Api.Database.Models
         [Required]
         public int TaskOrder { get; set; }
 
-        public string Type { get; set; }
+        public MissionTaskType Type { get; set; }
 
         [MaxLength(200)]
         public string? TagId { get; set; }
@@ -175,6 +179,12 @@ namespace Api.Database.Models
                     && inspection.IsarStepId.Equals(isarStepId, StringComparison.Ordinal)
             );
         }
+
+        public static string ConvertMissionTaskTypeToIsarTaskType(MissionTaskType missionTaskType)
+        {
+            if (missionTaskType == MissionTaskType.DriveTo) { return "drive_to"; }
+            else { return missionTaskType.ToString().ToLower(CultureInfo.CurrentCulture); }
+        }
     }
 
     public enum TaskStatus
@@ -186,5 +196,12 @@ namespace Api.Database.Models
         Failed,
         Cancelled,
         Paused
+    }
+
+    public enum MissionTaskType
+    {
+        Inspection,
+        Localization,
+        DriveTo
     }
 }
