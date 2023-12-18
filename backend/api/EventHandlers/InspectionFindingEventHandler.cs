@@ -14,7 +14,7 @@ namespace Api.EventHandlers
     IServiceScopeFactory scopeFactory,
     ILogger<InspectionFindingEventHandler> logger) : BackgroundService
     {
-        private readonly string _cronExpression = "00 13 * * * ";
+        private readonly string _cronExpression = "30 14 * * * ";
         private InspectionFindingService InspectionFindingService => scopeFactory.CreateScope().ServiceProvider.GetRequiredService<InspectionFindingService>();
         private readonly TimeSpan _timeSpan = configuration.GetValue<TimeSpan>("InspectionFindingEventHandler:TimeSpan");
 
