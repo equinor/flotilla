@@ -18,7 +18,6 @@ namespace Api.Test.EventHandlers
 
             //Act
             string generatedReport = InspectionFindingEventHandler.GenerateReportFromFindingsReportsList([finding1, finding2]);
-            Console.WriteLine(generatedReport);
 
             //Assert 
             Assert.Equal(expectedReport, generatedReport);
