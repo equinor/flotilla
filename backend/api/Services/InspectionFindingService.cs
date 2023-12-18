@@ -21,8 +21,9 @@ namespace Api.Services
             return await context.MissionRuns
                     .Include(missionRun => missionRun.Area).ThenInclude(area => area != null ? area.Plant : null)
                     .Include(missionRun => missionRun.Robot)
+                    .Include(missionRun => missionRun.Tasks).ThenInclude(task => task.Inspections)
                     .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspections.Any(inspection => inspection.IsarStepId == isarStepId)))
-                    .Where((m) => m.Area != null && accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()))
+                    .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()))
                     .FirstOrDefaultAsync();
 #pragma warning restore CA1304
         }
