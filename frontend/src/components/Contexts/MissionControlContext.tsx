@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, FC } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { Mission } from 'models/Mission'
 import { MissionStatusRequest } from 'components/Pages/FrontPage/MissionOverview/StopDialogs'
 
 interface IMissionControlState {
@@ -13,12 +12,12 @@ interface Props {
 
 export interface IMissionControlContext {
     missionControlState: IMissionControlState
-    updateMissionState: (newState: MissionStatusRequest, mission: Mission) => void
+    updateRobotMissionState: (newState: MissionStatusRequest, robotId: string) => void
 }
 
 const defaultMissionControlInterface = {
     missionControlState: { isWaitingForResponse: false },
-    updateMissionState: (newState: MissionStatusRequest, mission: Mission) => {},
+    updateRobotMissionState: (newState: MissionStatusRequest, robotId: string) => {},
 }
 
 export const MissionControlContext = createContext<IMissionControlContext>(defaultMissionControlInterface)
@@ -33,21 +32,21 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
         setMissionControlState({ isWaitingForResponse: isWaiting })
     }
 
-    const updateMissionState = (newState: MissionStatusRequest, mission: Mission) => {
+    const updateRobotMissionState = (newState: MissionStatusRequest, robotId: string) => {
         switch (newState) {
             case MissionStatusRequest.Pause: {
                 setIsWaitingForResponse(true)
-                BackendAPICaller.pauseMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
+                BackendAPICaller.pauseMission(robotId).then((_) => setIsWaitingForResponse(false))
                 break
             }
             case MissionStatusRequest.Resume: {
                 setIsWaitingForResponse(true)
-                BackendAPICaller.resumeMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
+                BackendAPICaller.resumeMission(robotId).then((_) => setIsWaitingForResponse(false))
                 break
             }
             case MissionStatusRequest.Stop: {
                 setIsWaitingForResponse(true)
-                BackendAPICaller.stopMission(mission.robot.id).then((_) => setIsWaitingForResponse(false))
+                BackendAPICaller.stopMission(robotId).then((_) => setIsWaitingForResponse(false))
                 break
             }
         }
@@ -57,7 +56,7 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
         <MissionControlContext.Provider
             value={{
                 missionControlState,
-                updateMissionState,
+                updateRobotMissionState,
             }}
         >
             {children}

@@ -52,7 +52,11 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                         {mission.name}
                     </Typography>
                 </StyledTitle>
-                <MissionControlButtons mission={mission} />
+                <MissionControlButtons
+                    missionName={mission.name}
+                    robotId={mission.robot.id}
+                    missionStatus={mission.status}
+                />
             </TopContent>
             <BottomContent>
                 <MissionStatusDisplayWithHeader status={mission.status} />

@@ -85,14 +85,16 @@ export const MissionMapView = ({ mission }: MissionProps) => {
             .then(() => {
                 getMeta(imageObjectURL.current).then((img) => {
                     const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement
-                    mapCanvas.width = img.width
-                    mapCanvas.height = img.height
-                    let context = mapCanvas?.getContext('2d')
-                    if (context) {
-                        setMapContext(context)
-                        context.drawImage(img, 0, 0)
+                    if (mapCanvas) {
+                        mapCanvas.width = img.width
+                        mapCanvas.height = img.height
+                        let context = mapCanvas?.getContext('2d')
+                        if (context) {
+                            setMapContext(context)
+                            context.drawImage(img, 0, 0)
+                        }
+                        setMapCanvas(mapCanvas)
                     }
-                    setMapCanvas(mapCanvas)
                     setMapImage(img)
                 })
             })

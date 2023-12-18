@@ -1,6 +1,6 @@
 import { Card, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { Mission, MissionStatus } from 'models/Mission'
+import { MissionStatus } from 'models/Mission'
 import styled from 'styled-components'
 
 const StyledCard = styled(Card)`
@@ -10,14 +10,15 @@ const StyledCard = styled(Card)`
 `
 
 interface MissionProps {
-    mission: Mission
+    statusReason: string | undefined
+    status: MissionStatus
 }
 
-export const StatusReason = ({ mission }: MissionProps) => {
-    if (!mission.statusReason) return <></>
+export const StatusReason = ({ statusReason, status }: MissionProps) => {
+    if (!statusReason) return <></>
 
     var warningLevel: 'default' | 'info' | 'warning' | 'danger' = 'info'
-    switch (mission.status) {
+    switch (status) {
         case MissionStatus.Failed:
             warningLevel = 'danger'
             break
@@ -34,7 +35,7 @@ export const StatusReason = ({ mission }: MissionProps) => {
 
     return (
         <StyledCard variant={warningLevel} style={{ boxShadow: tokens.elevation.raised }}>
-            <Typography variant="h5">{mission.statusReason}</Typography>
+            <Typography variant="h5">{statusReason}</Typography>
         </StyledCard>
     )
 }

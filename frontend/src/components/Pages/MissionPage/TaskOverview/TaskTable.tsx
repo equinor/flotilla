@@ -1,5 +1,4 @@
 import { Chip, Table, Typography } from '@equinor/eds-core-react'
-import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
 import { useLanguageContext, TranslateTextWithContext } from 'components/Contexts/LanguageContext'
@@ -12,11 +11,7 @@ const StyledTable = styled(Table)`
     font: equinor;
 `
 
-interface MissionProps {
-    mission?: Mission
-}
-
-export const TaskTable = ({ mission }: MissionProps) => {
+export const TaskTable = ({ tasks }: { tasks: Task[] | undefined }) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledTable>
@@ -32,7 +27,7 @@ export const TaskTable = ({ mission }: MissionProps) => {
                     <Table.Cell>{TranslateText('Status')}</Table.Cell>
                 </Table.Row>
             </Table.Head>
-            <Table.Body>{mission && <TaskTableRows tasks={mission.tasks} />}</Table.Body>
+            <Table.Body>{tasks && <TaskTableRows tasks={tasks} />}</Table.Body>
         </StyledTable>
     )
 }
