@@ -8,6 +8,7 @@ import styled from 'styled-components'
 import { useLanguageContext, TranslateTextWithContext } from 'components/Contexts/LanguageContext'
 import { StatusReason } from '../StatusReason'
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
+import { TaskStatus } from 'models/Task'
 
 const HeaderSection = styled(Card)`
     width: 100%;
@@ -110,17 +111,29 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const { startTime, startDate, usedTime, remainingTime } = startUsedAndRemainingTime(mission)
     const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
 
+    const missionHasFailedTasks = mission.tasks.some(
+        (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
+    )
+
     return (
         <HeaderSection>
             <TitleSection>
                 <Typography variant="h1">{mission.name}</Typography>
-                {isMissionActive && <MissionControlButtons mission={mission} />}
-                {mission.isCompleted && <MissionRestartButton mission={mission} />}
+                {isMissionActive && (
+                    <MissionControlButtons
+                        missionName={mission.name}
+                        robotId={mission.robot.id}
+                        missionStatus={mission.status}
+                    />
+                )}
+                {mission.isCompleted && (
+                    <MissionRestartButton missionId={mission.id} hasFailedTasks={missionHasFailedTasks} />
+                )}
             </TitleSection>
             <Typography variant="body_long" group="paragraph" color={tokens.colors.text.static_icons__secondary.hex}>
                 {mission.description && `${translatedDescription}: ${mission.description}`}
             </Typography>
-            <StatusReason mission={mission}></StatusReason>
+            <StatusReason statusReason={mission.statusReason} status={mission.status}></StatusReason>
             <InfoSection>
                 <MissionStatusDisplay status={mission.status} />
                 {HeaderText(`${translatedStartDate}: ${startDate}`)}

@@ -2,6 +2,7 @@ import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
+import { translateSignalRMission } from 'utils/EnumTranslations'
 
 const upsertList = (list: Mission[], mission: Mission) => {
     let newList = [...list]
@@ -91,8 +92,7 @@ export const useMissions = (): MissionsResult => {
             })
             registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
                 let updatedMission: Mission = JSON.parse(message)
-                // This conversion translates from the enum as a number to an enum as a string
-                updatedMission.status = Object.values(MissionStatus)[updatedMission.status as unknown as number]
+                updatedMission = translateSignalRMission(updatedMission)
 
                 setMissionQueue((oldQueue) => {
                     const oldQueueCopy = [...oldQueue]

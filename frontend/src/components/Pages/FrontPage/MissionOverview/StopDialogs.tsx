@@ -2,9 +2,8 @@ import { Button, Dialog, Typography, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { tokens } from '@equinor/eds-tokens'
-import { Mission } from 'models/Mission'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
@@ -39,7 +38,8 @@ const Square = styled.div`
 `
 
 interface MissionProps {
-    mission: Mission
+    missionName: string
+    robotId: string
 }
 
 export enum MissionStatusRequest {
@@ -48,24 +48,14 @@ export enum MissionStatusRequest {
     Resume,
 }
 
-export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
+export const StopMissionDialog = ({ missionName, robotId }: MissionProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const [isStopMissionDialogOpen, setIsStopMissionDialogOpen] = useState<boolean>(false)
-    const [missionId, setMissionId] = useState<string>()
-    const { updateMissionState } = useMissionControlContext()
-
-    const openDialog = () => {
-        setIsStopMissionDialogOpen(true)
-        setMissionId(mission.id)
-    }
-
-    useEffect(() => {
-        if (missionId !== mission.id) setIsStopMissionDialogOpen(false)
-    }, [mission.id, missionId])
+    const { updateRobotMissionState } = useMissionControlContext()
 
     return (
         <>
-            <Button variant="ghost_icon" onClick={openDialog}>
+            <Button variant="ghost_icon" onClick={() => setIsStopMissionDialogOpen(true)}>
                 <Icon
                     name={Icons.StopButton}
                     style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
@@ -77,7 +67,7 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
                 <Dialog.Header>
                     <Dialog.Title>
                         <Typography variant="h5">
-                            {TranslateText('Stop mission')} <strong>'{mission.name}'</strong>?{' '}
+                            {TranslateText('Stop mission')} <strong>'{missionName}'</strong>?{' '}
                         </Typography>
                     </Dialog.Title>
                 </Dialog.Header>
@@ -91,19 +81,13 @@ export const StopMissionDialog = ({ mission }: MissionProps): JSX.Element => {
                 </Dialog.CustomContent>
                 <Dialog.Actions>
                     <StyledDisplayButtons>
-                        <Button
-                            variant="outlined"
-                            color="danger"
-                            onClick={() => {
-                                setIsStopMissionDialogOpen(false)
-                            }}
-                        >
+                        <Button variant="outlined" color="danger" onClick={() => setIsStopMissionDialogOpen(false)}>
                             {TranslateText('Cancel')}
                         </Button>
                         <Button
                             variant="contained"
                             color="danger"
-                            onClick={() => updateMissionState(MissionStatusRequest.Stop, mission)}
+                            onClick={() => updateRobotMissionState(MissionStatusRequest.Stop, robotId)}
                         >
                             {TranslateText('Stop mission')}
                         </Button>

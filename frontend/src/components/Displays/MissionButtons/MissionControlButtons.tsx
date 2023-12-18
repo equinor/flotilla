@@ -1,4 +1,4 @@
-import { Mission, MissionStatus } from 'models/Mission'
+import { MissionStatus } from 'models/Mission'
 import { Button, CircularProgress, Icon } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
@@ -8,8 +8,15 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { StopMissionDialog, MissionStatusRequest } from 'components/Pages/FrontPage/MissionOverview/StopDialogs'
 
+interface MissionControlButtonsProps {
+    missionName: string
+    robotId: string
+    missionStatus: MissionStatus
+}
+
 interface MissionProps {
-    mission: Mission
+    missionName: string
+    robotId: string
 }
 
 const ButtonStyle = styled.div`
@@ -24,7 +31,7 @@ const ButtonText = styled.div`
     align-items: center;
 `
 
-export const MissionControlButtons = ({ mission }: MissionProps) => {
+export const MissionControlButtons = ({ missionName, robotId, missionStatus }: MissionControlButtonsProps) => {
     const { missionControlState } = useMissionControlContext()
 
     return (
@@ -33,29 +40,33 @@ export const MissionControlButtons = ({ mission }: MissionProps) => {
                 <CircularProgress size={32} />
             ) : (
                 <>
-                    {mission.status === MissionStatus.Ongoing && <OngoingMissionButton mission={mission} />}
-                    {mission.status === MissionStatus.Paused && <PausedMissionButton mission={mission} />}
+                    {missionStatus === MissionStatus.Ongoing && (
+                        <OngoingMissionButton missionName={missionName} robotId={robotId} />
+                    )}
+                    {missionStatus === MissionStatus.Paused && (
+                        <PausedMissionButton missionName={missionName} robotId={robotId} />
+                    )}
                 </>
             )}
         </>
     )
 }
 
-const OngoingMissionButton = ({ mission }: MissionProps) => {
+const OngoingMissionButton = ({ missionName, robotId }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
-    const { updateMissionState } = useMissionControlContext()
+    const { updateRobotMissionState } = useMissionControlContext()
 
     return (
         <>
             <ButtonStyle>
                 <ButtonText>
-                    <StopMissionDialog mission={mission} />
+                    <StopMissionDialog missionName={missionName} robotId={robotId} />
                     <Typography variant="caption">{TranslateText('Stop')}</Typography>
                 </ButtonText>
                 <ButtonText>
                     <Button
                         variant="ghost_icon"
-                        onClick={() => updateMissionState(MissionStatusRequest.Pause, mission)}
+                        onClick={() => updateRobotMissionState(MissionStatusRequest.Pause, robotId)}
                     >
                         <Icon
                             name={Icons.PauseButton}
@@ -70,21 +81,21 @@ const OngoingMissionButton = ({ mission }: MissionProps) => {
     )
 }
 
-const PausedMissionButton = ({ mission }: MissionProps) => {
+const PausedMissionButton = ({ missionName, robotId }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
-    const { updateMissionState } = useMissionControlContext()
+    const { updateRobotMissionState } = useMissionControlContext()
 
     return (
         <>
             <ButtonStyle>
                 <ButtonText>
-                    <StopMissionDialog mission={mission} />
+                    <StopMissionDialog missionName={missionName} robotId={robotId} />
                     <Typography variant="caption">{TranslateText('Stop')}</Typography>
                 </ButtonText>
                 <ButtonText>
                     <Button
                         variant="ghost_icon"
-                        onClick={() => updateMissionState(MissionStatusRequest.Resume, mission)}
+                        onClick={() => updateRobotMissionState(MissionStatusRequest.Resume, robotId)}
                     >
                         <Icon
                             name={Icons.PlayButton}

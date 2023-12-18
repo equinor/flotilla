@@ -1,4 +1,3 @@
-import { Mission } from 'models/Mission'
 import { Button, EdsProvider, Icon, Menu, Tooltip } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
@@ -8,7 +7,6 @@ import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
 import { useRef, useState } from 'react'
-import { TaskStatus } from 'models/Task'
 
 const Centered = styled.div`
     display: flex;
@@ -17,7 +15,8 @@ const Centered = styled.div`
 `
 
 interface MissionProps {
-    mission: Mission
+    missionId: string
+    hasFailedTasks: boolean
 }
 
 export enum ReRunOptions {
@@ -25,7 +24,7 @@ export enum ReRunOptions {
     ReRunFailed,
 }
 
-export const MissionRestartButton = ({ mission }: MissionProps) => {
+export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
@@ -44,7 +43,7 @@ export const MissionRestartButton = ({ mission }: MissionProps) => {
     }
 
     const startReRun = (option: ReRunOptions) => {
-        BackendAPICaller.reRunMission(mission.id, option === ReRunOptions.ReRunFailed).then((mission) =>
+        BackendAPICaller.reRunMission(missionId, option === ReRunOptions.ReRunFailed).then((mission) =>
             navigateToHome()
         )
     }
@@ -59,7 +58,7 @@ export const MissionRestartButton = ({ mission }: MissionProps) => {
                     aria-haspopup="true"
                     aria-expanded={isOpen}
                     aria-controls="menu-default"
-                    onClick={() => (isOpen ? closeMenu() : openMenu())}
+                    onClick={isOpen ? closeMenu : openMenu}
                 >
                     <Icon
                         name={Icons.Replay}
@@ -79,9 +78,7 @@ export const MissionRestartButton = ({ mission }: MissionProps) => {
                     <Menu.Item onClick={() => startReRun(ReRunOptions.ReRun)}>
                         {TranslateText('Re-run full mission')}
                     </Menu.Item>
-                    {mission.tasks.some(
-                        (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
-                    ) && (
+                    {hasFailedTasks && (
                         <Menu.Item onClick={() => startReRun(ReRunOptions.ReRunFailed)}>
                             {TranslateText('Re-run failed and cancelled tasks in the mission')}
                         </Menu.Item>
