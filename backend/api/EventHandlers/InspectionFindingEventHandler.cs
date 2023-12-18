@@ -53,9 +53,13 @@ namespace Api.EventHandlers
                     string url = GetWebhookURL(configuration, "TeamsInspectionFindingsWebhook");
 
                     var client = new HttpClient();
+
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
                     var content = new StringContent(adaptiveCardJson, Encoding.UTF8, "application/json");
+
                     var response = await client.PostAsync(url, content, stoppingToken);
+
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         logger.LogInformation("Post request via teams incomming webhook was successful, Status Code: {response.StatusCode}", response.StatusCode);
@@ -77,15 +81,15 @@ namespace Api.EventHandlers
                 var missionRun = await InspectionFindingService.GetMissionRunByIsarStepId(inspectionFinding);
                 var task = await InspectionFindingService.GetMissionTaskByIsarStepId(inspectionFinding);
 
-                if (task?.TagId != null && missionRun?.Area?.Plant?.Name != null && missionRun?.Area?.Name != null)
+                if (task != null && missionRun != null)
                 {
                     var finding = new Finding(
-                        task.TagId,
-                        missionRun.Area.Plant.Name,
-                        missionRun.Area.Name,
+                        task.TagId ?? "NA",
+                        missionRun.Area?.Plant.Name ?? "NA",
+                        missionRun.Area?.Name ?? "NA",
                         inspectionFinding.Finding,
                         inspectionFinding.InspectionDate,
-                        missionRun.Robot.Name
+                        missionRun.Robot.Name ?? "NA"
                     );
 
                     findingsList.Add(finding);
