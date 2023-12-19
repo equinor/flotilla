@@ -169,7 +169,7 @@ namespace Api.Database.Context
                 Name = "AP320",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>()
+                SafePositions = new List<SafePosition>(new []{new SafePosition()})
             };
 
             var area2 = new Area
@@ -181,7 +181,7 @@ namespace Api.Database.Context
                 Name = "AP330",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>()
+                SafePositions = new List<SafePosition>(new []{new SafePosition()})
             };
 
             var area3 = new Area
@@ -193,7 +193,7 @@ namespace Api.Database.Context
                 Name = "testArea",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>()
+                SafePositions = new List<SafePosition>(new []{new SafePosition()})
             };
 
             var area4 = new Area
@@ -205,7 +205,7 @@ namespace Api.Database.Context
                 Name = "testArea2",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>()
+                SafePositions = new List<SafePosition>(new []{new SafePosition()})
             };
 
             var area5 = new Area
@@ -217,7 +217,7 @@ namespace Api.Database.Context
                 Name = "testArea3",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>()
+                SafePositions = new List<SafePosition>(new []{new SafePosition()})
             };
 
             var area6 = new Area
@@ -229,7 +229,7 @@ namespace Api.Database.Context
                 Name = "testArea4",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>()
+                SafePositions = new List<SafePosition>(new []{new SafePosition()})
             };
 
             var areaHuldraHB = new Area
