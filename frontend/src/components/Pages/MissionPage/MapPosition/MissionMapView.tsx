@@ -66,11 +66,13 @@ export const MissionMapView = ({ mission }: MissionProps) => {
         return image
     }
 
-    const findCurrentTaskOrder = useCallback(() => {
-        return mission.tasks
-            .filter((task) => task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused)
-            .map((task) => task.taskOrder)[0]
-    }, [mission.tasks])
+    const findCurrentTaskOrder = useCallback(
+        () =>
+            mission.tasks
+                .filter((task) => task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused)
+                .map((task) => task.taskOrder)[0],
+        [mission.tasks]
+    )
 
     useEffect(() => {
         BackendAPICaller.getMap(mission.installationCode!, mission.map?.mapName!)
