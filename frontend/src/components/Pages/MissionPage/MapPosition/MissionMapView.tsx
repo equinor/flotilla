@@ -42,7 +42,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
-    const [currentTaskOrder, setCurrentTaskOrder] = useState<number>()
+    const [currentTaskOrder, setCurrentTaskOrder] = useState<number>(0)
 
     const imageObjectURL = useRef<string>('')
 
@@ -53,7 +53,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
         }
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
-        placeTagsInMap(mission, mapCanvas, currentTaskOrder)
+        placeTagsInMap(mission.tasks, mission.map!, mapCanvas, currentTaskOrder)
         if (mission.robot.pose && mission.map) {
             placeRobotInMap(mission.map, mapCanvas, mission.robot.pose)
         }
@@ -67,11 +67,9 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     }
 
     const findCurrentTaskOrder = useCallback(() => {
-        mission.tasks.forEach((task) => {
-            if (task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused) {
-                setCurrentTaskOrder(task.taskOrder)
-            }
-        })
+        return mission.tasks
+            .filter((task) => task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused)
+            .map((task) => task.taskOrder)[0]
     }, [mission.tasks])
 
     useEffect(() => {
@@ -102,9 +100,10 @@ export const MissionMapView = ({ mission }: MissionProps) => {
 
     useEffect(() => {
         if (mission.isCompleted) {
-            setCurrentTaskOrder(undefined)
+            const maxTaskOrder: number = Math.max(...mission.tasks.map((task) => task.taskOrder))
+            setCurrentTaskOrder(maxTaskOrder + 1)
         } else {
-            findCurrentTaskOrder()
+            setCurrentTaskOrder(findCurrentTaskOrder())
         }
     }, [findCurrentTaskOrder, mission])
 
