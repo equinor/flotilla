@@ -31,9 +31,13 @@ export class BackendAPICaller {
         }
     }
 
-    private static initializeRequest<T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: T): RequestInit {
+    private static initializeRequest<T>(
+        method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+        body?: T,
+        contentType?: string
+    ): RequestInit {
         const headers = {
-            'content-type': 'application/json',
+            'content-type': contentType ?? 'application/json',
             Authorization: `Bearer ${BackendAPICaller.accessToken}`,
         }
 
@@ -51,11 +55,12 @@ export class BackendAPICaller {
     private static async query<TBody, TContent>(
         method: 'GET' | 'POST' | 'PUT' | 'DELETE',
         path: string,
-        body?: TBody
+        body?: TBody,
+        contentType?: string
     ): Promise<{ content: TContent; headers: Headers }> {
         await BackendAPICaller.ApiReady()
 
-        const initializedRequest: RequestInit = BackendAPICaller.initializeRequest(method, body)
+        const initializedRequest: RequestInit = BackendAPICaller.initializeRequest(method, body, contentType)
 
         const url = `${config.BACKEND_URL}/${path}`
 
@@ -79,8 +84,11 @@ export class BackendAPICaller {
         return { content: responseContent, headers: response.headers }
     }
 
-    private static async GET<TContent>(path: string): Promise<{ content: TContent; headers: Headers }> {
-        return BackendAPICaller.query('GET', path)
+    private static async GET<TContent>(
+        path: string,
+        contentType?: string
+    ): Promise<{ content: TContent; headers: Headers }> {
+        return BackendAPICaller.query('GET', path, undefined, contentType)
     }
 
     private static async POST<TBody, TContent>(
@@ -398,28 +406,13 @@ export class BackendAPICaller {
 
     static async getMap(installationCode: string, mapName: string): Promise<Blob> {
         const path: string = 'missions/' + installationCode + '/' + mapName + '/map'
-        const url = `${config.BACKEND_URL}/${path}`
 
-        const headers = {
-            'content-type': 'image/png',
-            Authorization: `Bearer ${BackendAPICaller.accessToken}`,
-        }
-
-        const options: RequestInit = {
-            method: 'GET',
-            headers,
-            mode: 'cors',
-        }
-
-        let response = await fetch(url, options)
-
-        if (response.status === 200) {
-            const imageBlob = await response.blob()
-            return imageBlob
-        } else {
-            console.error('HTTP-Error: ' + response.status)
-            throw Error
-        }
+        return BackendAPICaller.GET<Response>(path, 'image/png')
+            .then((response) => response.content.blob())
+            .catch((e) => {
+                console.error(`Failed to GET /${path}: ` + e)
+                throw e
+            })
     }
 
     static async getAreas(): Promise<Area[]> {
