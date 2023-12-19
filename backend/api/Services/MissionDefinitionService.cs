@@ -23,9 +23,7 @@ namespace Api.Services
         public Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCodes);
 
         public Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
-
-        public Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks);
-
+        
         public Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
         public Task<MissionDefinition?> Delete(string id);
@@ -169,55 +167,6 @@ namespace Api.Services
             else
                 throw new UnauthorizedAccessException($"User does not have permission to update mission definition in installation {installation.Name}");
 
-        }
-
-        public async Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks)
-        {
-            Area? area = null;
-            if (customMissionQuery.AreaName != null) { area = await areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName); }
-
-            var source = await sourceService.CheckForExistingCustomSource(missionTasks);
-
-            MissionDefinition? existingMissionDefinition = null;
-            if (source == null)
-            {
-                try
-                {
-                    string sourceUrl = await customMissionService.UploadSource(missionTasks);
-                    source = new Source
-                    {
-                        SourceId = sourceUrl,
-                        Type = MissionSourceType.Custom
-                    };
-                }
-                catch (Exception e)
-                {
-                    {
-                        string errorMessage = $"Unable to upload source for mission {customMissionQuery.Name}";
-                        logger.LogError(e, "{Message}", errorMessage);
-                        throw new SourceException(errorMessage);
-                    }
-                }
-            }
-            else
-            {
-                var missionDefinitions = await ReadBySourceId(source.SourceId);
-                if (missionDefinitions.Count > 0) { existingMissionDefinition = missionDefinitions.First(); }
-            }
-
-            var customMissionDefinition = existingMissionDefinition ?? new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Source = source,
-                Name = customMissionQuery.Name,
-                InspectionFrequency = customMissionQuery.InspectionFrequency,
-                InstallationCode = customMissionQuery.InstallationCode,
-                Area = area
-            };
-
-            if (existingMissionDefinition == null) { await Create(customMissionDefinition); }
-
-            return customMissionDefinition;
         }
 
         private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
