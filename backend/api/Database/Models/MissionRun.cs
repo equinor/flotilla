@@ -189,23 +189,9 @@ namespace Api.Database.Models
             }
         }
 
-        public bool IsLocalizationMission()
-        {
-            if (Tasks.Count != 1)
-            {
-                return false;
-            }
-            return Tasks[0].Type == MissionTaskType.Localization;
-        }
+        public bool IsLocalizationMission() { return Tasks is [{ Type: MissionTaskType.Localization }]; }
 
-        public bool IsDriveToMission()
-        {
-            if (Tasks.Count != 1)
-            {
-                return false;
-            }
-            return Tasks[0].Type == MissionTaskType.DriveTo;
-        }
+        public bool IsDriveToMission() { return Tasks is [{ Type: MissionTaskType.DriveTo }]; }
     }
 
     public enum MissionStatus

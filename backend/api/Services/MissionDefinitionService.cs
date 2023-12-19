@@ -23,7 +23,7 @@ namespace Api.Services
         public Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCodes);
 
         public Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
-        
+
         public Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
         public Task<MissionDefinition?> Delete(string id);
