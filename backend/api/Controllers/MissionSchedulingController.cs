@@ -171,6 +171,11 @@ namespace Api.Controllers
             Area? area = null;
             area = missionAreas.GroupBy(i => i).OrderByDescending(grp => grp.Count()).Select(grp => grp.Key).First();
 
+            if (area == null)
+            {
+                return NotFound($"No area with name {scheduledMissionQuery.AreaName} in installation {scheduledMissionQuery.InstallationCode} was found");
+            }
+
             var source = await sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId);
             MissionDefinition? existingMissionDefinition = null;
             if (source == null)
@@ -264,6 +269,7 @@ namespace Api.Controllers
             MissionDefinition? customMissionDefinition;
             try { customMissionDefinition = await customMissionSchedulingService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
             catch (SourceException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
+            catch (AreaNotFoundException) { return NotFound($"No area with name {customMissionQuery.AreaName} in installation {customMissionQuery.InstallationCode} was found"); }
 
             try { await localizationService.EnsureRobotIsOnSameInstallationAsMission(robot, customMissionDefinition); }
             catch (InstallationNotFoundException e) { return NotFound(e.Message); }

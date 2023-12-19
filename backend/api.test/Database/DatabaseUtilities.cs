@@ -44,7 +44,7 @@ namespace Api.Test.Database
         public async Task<MissionRun> NewMissionRun(
             string installationCode,
             Robot robot,
-            Area? area,
+            Area area,
             bool writeToDatabase = true
         )
         {

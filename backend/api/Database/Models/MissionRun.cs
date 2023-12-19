@@ -69,7 +69,8 @@ namespace Api.Database.Models
         [MaxLength(1000)]
         public string? Comment { get; set; }
 
-        public Area? Area { get; set; }
+        [Required]
+        public Area Area { get; set; }
 
         public bool IsCompleted =>
             _status
