@@ -46,7 +46,7 @@ const HeaderText = (text: string) => {
     )
 }
 
-const startUsedAndRemainingTime = (
+const getStartUsedAndRemainingTime = (
     mission: Mission
 ): {
     startTime: string
@@ -108,7 +108,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const translatedPressureLevel = TranslateText('Pressure level')
     const translatedDescription = TranslateText('Description')
 
-    const { startTime, startDate, usedTime, remainingTime } = startUsedAndRemainingTime(mission)
+    const { startTime, startDate, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission)
     const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
 
     const missionHasFailedTasks = mission.tasks.some(

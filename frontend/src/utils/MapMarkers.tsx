@@ -1,5 +1,4 @@
 import { tokens } from '@equinor/eds-tokens'
-import { Mission } from 'models/Mission'
 import { MapMetadata } from 'models/MapMetadata'
 import { Pose } from 'models/Pose'
 import { Task, TaskStatus } from 'models/Task'
@@ -10,20 +9,18 @@ interface ObjectPosition {
     y: number
 }
 
-export const placeTagsInMap = (mission: Mission, map: HTMLCanvasElement, currentTaskOrder?: number) => {
-    const maxTaskOrder: number = Math.max(
-        ...mission.tasks.map((task) => {
-            return task.taskOrder
-        })
-    )
-    if (!currentTaskOrder) {
-        currentTaskOrder = mission.isCompleted ? maxTaskOrder + 1 : 0
-    }
+export const placeTagsInMap = (
+    tasks: Task[],
+    mapMetadata: MapMetadata,
+    map: HTMLCanvasElement,
+    currentTaskOrder: number
+) => {
+    const maxTaskOrder: number = Math.max(...tasks.map((task) => task.taskOrder))
 
-    const orderedTasks = orderTasksByDrawOrder(mission.tasks, currentTaskOrder, maxTaskOrder)
+    const orderedTasks = orderTasksByDrawOrder(tasks, currentTaskOrder, maxTaskOrder)
     orderedTasks.forEach((task) => {
         if (task.inspectionTarget) {
-            const pixelPosition = calculateObjectPixelPosition(mission.map!, task.inspectionTarget)
+            const pixelPosition = calculateObjectPixelPosition(mapMetadata, task.inspectionTarget)
             // Workaround for current bug in echo
             const order = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
