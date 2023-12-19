@@ -1,7 +1,4 @@
 import { Typography } from '@equinor/eds-core-react'
-import { BackendAPICaller } from 'api/ApiCaller'
-import { Robot } from 'models/Robot'
-import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { BackButton } from 'utils/BackButton'
@@ -15,6 +12,7 @@ import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusCh
 import { RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotType } from 'models/RobotModel'
+import { useRobotContext } from 'components/Contexts/RobotContext'
 
 const StyledRobotPage = styled.div`
     display: flex;
@@ -24,7 +22,6 @@ const StyledRobotPage = styled.div`
     gap: 1rem;
     margin: 2rem;
 `
-
 const StyledButtons = styled.div`
     display: flex;
     flex-direction: row;
@@ -43,30 +40,12 @@ const VerticalContent = styled.div<{ $alignItems?: string }>`
     gap: 2rem;
 `
 
-const updateSiteTimer = 1000
 export const RobotPage = () => {
     const { TranslateText } = useLanguageContext()
     const { robotId } = useParams()
-    const [selectedRobot, setSelectedRobot] = useState<Robot>()
+    const { enabledRobots } = useRobotContext()
 
-    const fetchRobotData = useCallback(() => {
-        if (robotId) {
-            BackendAPICaller.getRobotById(robotId).then((robot) => {
-                setSelectedRobot(robot)
-            })
-        }
-    }, [robotId])
-
-    useEffect(() => {
-        fetchRobotData()
-    }, [fetchRobotData])
-
-    useEffect(() => {
-        const intervalId = setInterval(fetchRobotData, updateSiteTimer)
-        return () => {
-            clearInterval(intervalId)
-        }
-    }, [fetchRobotData])
+    const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
 
     return (
         <>
