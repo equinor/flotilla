@@ -103,7 +103,7 @@ namespace Api.EventHandlers
             _scheduleMissionSemaphore.WaitOne();
             try { await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRunIdToStart); }
             catch (MissionRunNotFoundException) { }
-            finally{ _scheduleMissionSemaphore.Release(); }
+            finally { _scheduleMissionSemaphore.Release(); }
         }
 
         private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
