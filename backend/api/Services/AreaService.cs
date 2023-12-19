@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq.Dynamic.Core;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -15,13 +16,9 @@ namespace Api.Services
 
         public Task<IEnumerable<Area?>> ReadByDeckId(string deckId);
 
-        public Task<IEnumerable<Area>> ReadByInstallation(string installationCode);
-
         public Task<Area?> ReadByInstallationAndName(string installationCode, string areaName);
 
         public Task<Area> Create(CreateAreaQuery newArea);
-
-        public Task<Area> Create(CreateAreaQuery newArea, List<Pose> safePositions);
 
         public Task<Area> Update(Area area);
 
@@ -58,11 +55,7 @@ namespace Api.Services
         public async Task<IEnumerable<Area?>> ReadByDeckId(string deckId)
         {
             if (deckId == null) { return new List<Area>(); }
-
-            return await context.Areas.Where(a =>
-                    a.Deck != null && a.Deck.Id.Equals(deckId)
-                ).Include(a => a.SafePositions).Include(a => a.Installation)
-                .Include(a => a.Plant).Include(a => a.Deck).ToListAsync();
+            return await GetAreas().Where(a => a.Deck != null && a.Deck.Id.Equals(deckId)).ToListAsync();
         }
 
         public async Task<Area?> ReadByInstallationAndName(string installationCode, string areaName)
@@ -70,13 +63,8 @@ namespace Api.Services
             var installation = await installationService.ReadByName(installationCode);
             if (installation == null) { return null; }
 
-            return await context.Areas.Where(a => a.Installation.Id.Equals(installation.Id) && a.Name.ToLower().Equals(areaName.ToLower()))
-                .Include(a => a.SafePositions)
-                .Include(a => a.Installation)
-                .Include(a => a.Plant)
-                .Include(a => a.Deck)
-                .ThenInclude(d => d != null ? d.DefaultLocalizationPose : null)
-                .FirstOrDefaultAsync();
+            return await GetAreas().Where(a =>
+                a.Installation.Id.Equals(installation.Id) && a.Name.ToLower().Equals(areaName.ToLower())).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<Area>> ReadByInstallation(string installationCode)
@@ -84,9 +72,7 @@ namespace Api.Services
             var installation = await installationService.ReadByName(installationCode);
             if (installation == null) { return new List<Area>(); }
 
-            return await context.Areas.Where(a =>
-                    a.Installation.Id.Equals(installation.Id)).Include(a => a.SafePositions).Include(a => a.Installation)
-                .Include(a => a.Plant).Include(a => a.Deck).ToListAsync();
+            return await GetAreas().Where(a => a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
         public async Task<Area> Create(CreateAreaQuery newAreaQuery, List<Pose> positions)
@@ -201,16 +187,6 @@ namespace Api.Services
                 .Include(area => area.Plant)
                 .Include(area => area.Installation)
                 .Where((area) => accessibleInstallationCodes.Result.Contains(area.Installation.InstallationCode.ToUpper()));
-        }
-
-        public async Task<Area?> ReadByInstallationAndName(Installation? installation, string areaName)
-        {
-            if (installation == null) { return null; }
-
-            return await context.Areas.Where(a =>
-                    a.Name.ToLower().Equals(areaName.ToLower()) && a.Installation.Id.Equals(installation.Id)
-                ).Include(a => a.SafePositions).Include(a => a.Installation)
-                .Include(a => a.Plant).Include(a => a.Deck).FirstOrDefaultAsync();
         }
 
         public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName)
