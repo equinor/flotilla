@@ -12,7 +12,7 @@ namespace Api.Migrations
         {
             migrationBuilder.AddColumn<string>(
                 name: "Type",
-                table: "MissionTask",
+                table: "MissionTasks",
                 type: "text",
                 nullable: false,
                 defaultValue: "");
@@ -23,7 +23,7 @@ namespace Api.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "Type",
-                table: "MissionTask");
+                table: "MissionTasks");
         }
     }
 }

@@ -381,6 +381,10 @@ namespace Api.Migrations
                     b.Property<int>("TaskOrder")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MissionRunId");
