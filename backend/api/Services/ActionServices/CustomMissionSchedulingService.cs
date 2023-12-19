@@ -26,6 +26,11 @@ namespace Api.Services.ActionServices
             Area? area = null;
             if (customMissionQuery.AreaName != null) { area = await areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName); }
 
+            if (area == null)
+            {
+                throw new AreaNotFoundException($"No area with name {customMissionQuery.AreaName} in installation {customMissionQuery.InstallationCode} was found");
+            }
+
             var source = await sourceService.CheckForExistingCustomSource(missionTasks);
 
             MissionDefinition? existingMissionDefinition = null;
