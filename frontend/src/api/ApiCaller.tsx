@@ -374,17 +374,26 @@ export class BackendAPICaller {
 
     static async pauseMission(robotId: string): Promise<void> {
         const path: string = 'robots/' + robotId + '/pause'
-        return BackendAPICaller.postControlMissionRequest(path, robotId)
+        return BackendAPICaller.postControlMissionRequest(path, robotId).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
     }
 
     static async resumeMission(robotId: string): Promise<void> {
         const path: string = 'robots/' + robotId + '/resume'
-        return BackendAPICaller.postControlMissionRequest(path, robotId)
+        return BackendAPICaller.postControlMissionRequest(path, robotId).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
     }
 
     static async stopMission(robotId: string): Promise<void> {
         const path: string = 'robots/' + robotId + '/stop'
-        return BackendAPICaller.postControlMissionRequest(path, robotId)
+        return BackendAPICaller.postControlMissionRequest(path, robotId).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
     }
 
     static async getMap(installationCode: string, mapName: string): Promise<Blob> {
