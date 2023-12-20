@@ -183,6 +183,11 @@ namespace Api.Controllers
                 return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
             }
 
+            if (!robot.IsRobotPressureHighEnoughToStartMission())
+            {
+                return BadRequest($"The robot pressure on {robot.Name} is too low to start a mission");
+            }
+
             EchoMission? echoMission;
             try
             {
@@ -351,6 +356,7 @@ namespace Api.Controllers
 
             MissionRun? newMissionRun;
             try { newMissionRun = await customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
+            catch (RobotPressureTooLowException e) { return BadRequest(e.Message); }
             catch (Exception e) when (e is RobotNotFoundException or MissionNotFoundException) { return NotFound(e.Message); }
 
             return CreatedAtAction(nameof(Create), new
