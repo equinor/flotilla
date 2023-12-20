@@ -2,7 +2,7 @@ import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { MissionQueueCard } from './MissionQueueCard'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Mission, placeholderMission } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -30,14 +30,17 @@ export const MissionQueueView = (): JSX.Element => {
     const { missionQueue, ongoingMissions, loadingMissionSet, setLoadingMissionSet } = useMissionsContext()
     const { installationCode } = useInstallationContext()
     const { setAlert } = useAlertContext()
-    const [ localMissionQueue, setLocalMissionQueue] = useState<Mission[]>([])
+    const localMissionQueue = missionQueue.filter(
+        (m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+    )
 
-    const onDeleteMission = (mission: Mission) => 
-        BackendAPICaller.deleteMission(mission.id)
-            .catch((e) => setAlert(
+    const onDeleteMission = (mission: Mission) =>
+        BackendAPICaller.deleteMission(mission.id).catch((_) =>
+            setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent message={'Failed to delete mission from queue'} />
-            ))
+            )
+        )
 
     useEffect(() => {
         setLoadingMissionSet((currentLoadingNames) => {
@@ -46,9 +49,6 @@ export const MissionQueueView = (): JSX.Element => {
             ongoingMissions.forEach((mission) => updatedLoadingMissionNames.delete(mission.name))
             return updatedLoadingMissionNames
         })
-        setLocalMissionQueue(missionQueue.filter(
-            (m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
-        ))
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionQueue, ongoingMissions])
 

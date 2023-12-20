@@ -67,13 +67,9 @@ const updateOngoingMissionsWithUpdatedMission = (oldMissionList: Mission[], upda
     return oldMissionList
 }
 
-const fetchMissions = (params: {
-    statuses: MissionStatus[]
-    pageSize: number
-    orderBy: string
-}): Promise<Mission[]> => {
-    return BackendAPICaller.getMissionRuns(params).then((response) => response.content)
-}
+const fetchMissions = (params: { statuses: MissionStatus[]; pageSize: number; orderBy: string }): Promise<Mission[]> =>
+    BackendAPICaller.getMissionRuns(params).then((response) => response.content)
+
 export const useMissions = (): MissionsResult => {
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
@@ -110,14 +106,16 @@ export const useMissions = (): MissionsResult => {
             registerEvent(SignalREventLabels.missionRunDeleted, (username: string, message: string) => {
                 let deletedMission: Mission = JSON.parse(message)
                 setOngoingMissions((missions) => {
-                    const ongoingIndex = missions.findIndex((m) => m.id === deletedMission.id)
-                    if (ongoingIndex !== -1) missions.splice(ongoingIndex, 1) // Remove deleted mission
-                    return missions
+                    const oldMissionListCopy = [...missions]
+                    const ongoingIndex = oldMissionListCopy.findIndex((m) => m.id === deletedMission.id)
+                    if (ongoingIndex !== -1) oldMissionListCopy.splice(ongoingIndex, 1) // Remove deleted mission
+                    return oldMissionListCopy
                 })
                 setMissionQueue((missions) => {
-                    const queueIndex = missions.findIndex((m) => m.id === deletedMission.id)
-                    if (queueIndex !== -1) missions.splice(queueIndex, 1) // Remove deleted mission
-                    return missions
+                    const oldQueueCopy = [...missions]
+                    const queueIndex = oldQueueCopy.findIndex((m) => m.id === deletedMission.id)
+                    if (queueIndex !== -1) oldQueueCopy.splice(queueIndex, 1) // Remove deleted mission
+                    return oldQueueCopy
                 })
             })
         }
