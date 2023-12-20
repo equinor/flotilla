@@ -96,7 +96,11 @@ namespace Api.Services
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
         }
 
-        public async Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status) { return await UpdateRobotProperty(robotId, "Status", status); }
+        public async Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status)
+        {
+            logger.LogInformation("Updating robot {robotId} status to {status}", robotId, status);
+            return await UpdateRobotProperty(robotId, "Status", status);
+        }
         public async Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel) { return await UpdateRobotProperty(robotId, "BatteryLevel", batteryLevel); }
         public async Task<Robot> UpdateRobotPressureLevel(string robotId, float? pressureLevel) { return await UpdateRobotProperty(robotId, "PressureLevel", pressureLevel); }
         public async Task<Robot> UpdateRobotPose(string robotId, Pose pose) { return await UpdateRobotProperty(robotId, "Pose", pose); }
