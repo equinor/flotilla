@@ -28,7 +28,7 @@ namespace Api.Services
                 throw new InstallationNotFoundException(errorMessage);
             }
 
-            if (robot.CurrentInstallation != missionInstallation)
+            if (robot.CurrentInstallation.Id != missionInstallation.Id)
             {
                 string errorMessage = $"The robot {robot.Name} is on installation {robot.CurrentInstallation.Name} which is not the same as the mission installation {missionInstallation.Name}";
                 logger.LogError("{Message}", errorMessage);
@@ -240,7 +240,7 @@ namespace Api.Services
                 throw new DeckNotFoundException(ErrorMessage);
             }
 
-            return robot.CurrentArea.Deck == missionArea.Deck;
+            return robot.CurrentArea.Deck.Id == missionArea.Deck.Id;
         }
     }
 }
