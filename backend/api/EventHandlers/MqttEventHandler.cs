@@ -76,7 +76,11 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (robot.Status == isarRobotStatus.RobotStatus) { return; }
+            if (robot.Status == isarRobotStatus.RobotStatus)
+            {
+                _logger.LogInformation("Robot {robotName} received a new isar robot status {isarRobotStatus}, but the robot status was already the same", robot.Name, isarRobotStatus.RobotStatus);
+                return;
+            }
 
             robot = await robotService.UpdateRobotStatus(robot.Id, isarRobotStatus.RobotStatus);
             _logger.LogInformation("Updated status for robot {Name} to {Status}", robot.Name, robot.Status);
@@ -237,14 +241,26 @@ namespace Api.EventHandlers
             }
 
             try { await robotService.UpdateCurrentMissionId(robot.Id, null); }
-            catch (RobotNotFoundException) { return; }
+            catch (RobotNotFoundException)
+            {
+                _logger.LogError("Robot {robotName} not found when updating current mission id to null", robot.Name);
+                return;
+            }
 
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, flotillaMissionRun.Id);
 
-            if (flotillaMissionRun.MissionId == null) { return; }
+            if (flotillaMissionRun.MissionId == null)
+            {
+                _logger.LogInformation("Mission run {missionRunId} does not have a mission definition assosiated with it", flotillaMissionRun.Id);
+                return;
+            }
 
             try { await lastMissionRunService.SetLastMissionRun(flotillaMissionRun.Id, flotillaMissionRun.MissionId); }
-            catch (MissionNotFoundException) { return; }
+            catch (MissionNotFoundException)
+            {
+                _logger.LogError("Mission not found when setting last mission run for mission definition {missionId}", flotillaMissionRun.MissionId);
+                return;
+            }
 
             await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
         }
