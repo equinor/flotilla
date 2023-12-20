@@ -73,6 +73,13 @@ namespace Api.Database.Models
 
         public float? PressureLevel { get; set; }
 
+        public float? MinAllowedPressureLevel { get; set; }
+
+        public bool IsRobotPressureHighEnoughToStartMission()
+        {
+            return MinAllowedPressureLevel == null || MinAllowedPressureLevel <= PressureLevel;
+        }
+
         public IList<VideoStream> VideoStreams { get; set; }
 
         [Required]

@@ -93,6 +93,11 @@ namespace Api.Services.ActionServices
                 throw new RobotNotFoundException(errorMessage);
             }
 
+            if (!robot.IsRobotPressureHighEnoughToStartMission())
+            {
+                throw new RobotPressureTooLowException($"The robot pressure on {robot.Name} is too low to start a mission");
+            }
+
             var scheduledMission = new MissionRun
             {
                 Name = customMissionQuery.Name,
