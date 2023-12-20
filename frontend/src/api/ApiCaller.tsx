@@ -366,7 +366,7 @@ export class BackendAPICaller {
 
     static async deleteMission(missionId: string) {
         const path: string = 'missions/runs/' + missionId
-        await BackendAPICaller.DELETE(path, '').catch((e) => {
+        return await BackendAPICaller.DELETE(path, '').catch((e) => {
             console.error(`Failed to DELETE /${path}: ` + e)
             throw e
         })

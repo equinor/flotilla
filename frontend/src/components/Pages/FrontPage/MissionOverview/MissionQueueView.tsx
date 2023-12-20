@@ -2,12 +2,14 @@ import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { MissionQueueCard } from './MissionQueueCard'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Mission, placeholderMission } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -27,12 +29,15 @@ export const MissionQueueView = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions, loadingMissionSet, setLoadingMissionSet } = useMissionsContext()
     const { installationCode } = useInstallationContext()
+    const { setAlert } = useAlertContext()
+    const [ localMissionQueue, setLocalMissionQueue] = useState<Mission[]>([])
 
-    const onDeleteMission = (mission: Mission) => BackendAPICaller.deleteMission(mission.id)
-
-    const localMissionQueue = missionQueue.filter(
-        (m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
-    )
+    const onDeleteMission = (mission: Mission) => 
+        BackendAPICaller.deleteMission(mission.id)
+            .catch((e) => setAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertContent message={'Failed to delete mission from queue'} />
+            ))
 
     useEffect(() => {
         setLoadingMissionSet((currentLoadingNames) => {
@@ -41,6 +46,9 @@ export const MissionQueueView = (): JSX.Element => {
             ongoingMissions.forEach((mission) => updatedLoadingMissionNames.delete(mission.name))
             return updatedLoadingMissionNames
         })
+        setLocalMissionQueue(missionQueue.filter(
+            (m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+        ))
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionQueue, ongoingMissions])
 
