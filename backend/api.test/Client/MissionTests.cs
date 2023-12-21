@@ -87,6 +87,16 @@ namespace Api.Test
             Assert.False(installationResponses.Where((i) => i.InstallationCode == installationCode).Any(), $"Duplicate installation name detected: {installationCode}");
         }
 
+        private async Task VerifyNonDuplicateInstallationDbName(string installationCode)
+        {
+            string installationUrl = "/installations";
+            var installationResponse = await _client.GetAsync(installationUrl);
+            Assert.True(installationResponse.IsSuccessStatusCode);
+            var installationResponses = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
+            Assert.True(installationResponses != null);
+            Assert.False(installationResponses.Where((i) => i.InstallationCode == installationCode).Any(), $"Duplicate installation name detected: {installationCode}");
+        }
+
         private static (StringContent installationContent, StringContent plantContent, StringContent deckContent, StringContent areaContent) ArrangeAreaPostQueries(string installationCode, string plantCode, string deckName, string areaName)
         {
             var testPose = new Pose
@@ -189,6 +199,29 @@ namespace Api.Test
             var area = await PostToDb<AreaResponse>(areaUrl, areaContent);
 
             return (installation, plant, deck, area);
+        }
+
+        private async Task<Installation> PostInstallationInformationToDb(string installationCode)
+        {
+            await VerifyNonDuplicateInstallationDbName(installationCode);
+
+            string installationUrl = "/installations";
+
+            var installationQuery = new CreateInstallationQuery
+            {
+                InstallationCode = installationCode,
+                Name = installationCode
+            };
+
+            var installationContent = new StringContent(
+                JsonSerializer.Serialize(installationQuery),
+                null,
+                "application/json"
+            );
+
+            var installation = await PostToDb<Installation>(installationUrl, installationContent);
+
+            return installation;
         }
 
         [Fact]
@@ -651,12 +684,8 @@ namespace Api.Test
             string testMissionName = "testMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission";
 
             // Arrange - Get different installation
-            string installationUrl = "/installations";
-            var installationResponse = await _client.GetAsync(installationUrl);
-            Assert.True(installationResponse.IsSuccessStatusCode);
-            var installations = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
-            Assert.True(installations != null);
-            var missionInstallation = installations[0];
+            string otherInstallationCode = "installationMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission_Other";
+            var otherInstallation = await PostInstallationInformationToDb(otherInstallationCode);
 
             // Arrange - Create robot
             var robotQuery = new CreateRobotQuery
@@ -669,7 +698,7 @@ namespace Api.Test
                 Enabled = true,
                 Host = "localhost",
                 Port = 3000,
-                CurrentInstallationCode = installationCode,
+                CurrentInstallationCode = otherInstallation.InstallationCode,
                 CurrentAreaName = null,
                 VideoStreams = new List<CreateVideoStreamQuery>()
             };
@@ -682,7 +711,7 @@ namespace Api.Test
             var query = new CustomMissionQuery
             {
                 RobotId = robotId,
-                InstallationCode = missionInstallation.InstallationCode,
+                InstallationCode = installation.InstallationCode,
                 AreaName = areaName,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
@@ -740,7 +769,7 @@ namespace Api.Test
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallationCode = installation.InstallationCode,
-                CurrentAreaName = areaName,
+                CurrentAreaName = null,
                 VideoStreams = new List<CreateVideoStreamQuery>()
             };
 
