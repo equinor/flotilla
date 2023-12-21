@@ -172,7 +172,7 @@ namespace Api.Test
             return responseObject;
         }
 
-        private async Task<(Installation installation, Plant plant, Deck deck, Area area)> PostAssetInformationToDb(string installationCode, string plantCode, string deckName, string areaName)
+        private async Task<(Installation installation, Plant plant, DeckResponse deck, AreaResponse area)> PostAssetInformationToDb(string installationCode, string plantCode, string deckName, string areaName)
         {
             await VerifyNonDuplicateAreaDbNames(installationCode, plantCode, deckName, areaName);
 
@@ -185,8 +185,8 @@ namespace Api.Test
 
             var installation = await PostToDb<Installation>(installationUrl, installationContent);
             var plant = await PostToDb<Plant>(plantUrl, plantContent);
-            var deck = await PostToDb<Deck>(deckUrl, deckContent);
-            var area = await PostToDb<Area>(areaUrl, areaContent);
+            var deck = await PostToDb<DeckResponse>(deckUrl, deckContent);
+            var area = await PostToDb<AreaResponse>(areaUrl, areaContent);
 
             return (installation, plant, deck, area);
         }
@@ -724,17 +724,9 @@ namespace Api.Test
             string plantCode = "plantMissionFailsIfRobotIsNotInSameDeckAsMission";
             string deckName = "deckMissionFailsIfRobotIsNotInSameDeckAsMission";
             string areaName = "areaMissionFailsIfRobotIsNotInSameDeckAsMission";
-            (var installation, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
+            (var installation, _, _, var area) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
 
             string testMissionName = "testMissionFailsIfRobotIsNotInSameDeckAsMission";
-
-            // Arrange - Get different area
-            string areaUrl = "/areas";
-            var response = await _client.GetAsync(areaUrl);
-            Assert.True(response.IsSuccessStatusCode);
-            var areas = await response.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
-            Assert.True(areas != null);
-            var areaResponse = areas[0];
 
             // Arrange - Create robot
             var robotQuery = new CreateRobotQuery
@@ -747,7 +739,7 @@ namespace Api.Test
                 Enabled = true,
                 Host = "localhost",
                 Port = 3000,
-                CurrentInstallationCode = installationCode,
+                CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = areaName,
                 VideoStreams = new List<CreateVideoStreamQuery>()
             };
@@ -761,7 +753,7 @@ namespace Api.Test
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                AreaName = areaResponse.AreaName,
+                AreaName = area.AreaName,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
