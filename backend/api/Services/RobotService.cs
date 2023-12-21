@@ -98,8 +98,18 @@ namespace Api.Services
 
         public async Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status)
         {
-            logger.LogInformation("Updating robot {robotId} status to {status}", robotId, status);
-            return await UpdateRobotProperty(robotId, "Status", status);
+            var robot = await ReadById(robotId);
+            if (robot == null) { logger.LogError("Shit..."); return null; }
+
+
+            logger.LogError("Updating robot {robotId} status from {oldStatus} to {newStatus}", robotId, robot.Status, status);
+            var updatedRobot = await UpdateRobotProperty(robotId, "Status", status);
+            logger.LogError("This was the new robot status: '{status}'", updatedRobot.Status);
+            var doubleCheckRobot = await ReadById(robotId);
+            if (doubleCheckRobot == null) { logger.LogError("Shit..."); return null; }
+
+            logger.LogError("This was found in the database: '{status}'", doubleCheckRobot.Status);
+            return updatedRobot;
         }
         public async Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel) { return await UpdateRobotProperty(robotId, "BatteryLevel", batteryLevel); }
         public async Task<Robot> UpdateRobotPressureLevel(string robotId, float? pressureLevel) { return await UpdateRobotProperty(robotId, "PressureLevel", pressureLevel); }
@@ -179,7 +189,13 @@ namespace Api.Services
             {
                 if (property.Name == propertyName)
                 {
-                    logger.LogInformation("Setting {robotName} field {propertyName} from {oldValue} to {NewValue}", robot.Name, propertyName, property.GetValue(robot), value);
+                    if (propertyName == "Status")
+                    {
+                        if (value.ToString() == "Available")
+                        {
+                            logger.LogInformation("Setting {robotName} field {propertyName} from {oldValue} to {NewValue}", robot.Name, propertyName, property.GetValue(robot), value);
+                        }
+                    }
                     property.SetValue(robot, value);
                 }
             }

@@ -148,10 +148,14 @@ namespace Api.Services
         {
             context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             if (missionRun.Area is not null) { context.Entry(missionRun.Area).State = EntityState.Unchanged; }
-
+            logger.LogError("Mission run robot status: '{status}'", missionRun.Robot.Status);
             var entry = context.Update(missionRun);
             await ApplyDatabaseUpdate(missionRun.Area?.Installation);
             _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
+
+            var robot = await context.Robots.Where(r => r.Id == missionRun.Robot.Id).FirstOrDefaultAsync();
+
+            logger.LogError("The robot status after saving the mission run save was: '{status}'", robot.Status);
             return entry.Entity;
         }
 
