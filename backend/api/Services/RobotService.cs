@@ -177,7 +177,11 @@ namespace Api.Services
 
             foreach (var property in typeof(Robot).GetProperties())
             {
-                if (property.Name == propertyName) { property.SetValue(robot, value); }
+                if (property.Name == propertyName)
+                {
+                    logger.LogDebug("Setting {robotName} field {propertyName} from {oldValue} to {NewValue}", robot.Name, propertyName, property.GetValue(robot), value);
+                    property.SetValue(robot, value);
+                }
             }
 
             robot = await Update(robot);
