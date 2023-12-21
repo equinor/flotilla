@@ -179,7 +179,7 @@ namespace Api.Services
             {
                 if (property.Name == propertyName)
                 {
-                    logger.LogDebug("Setting {robotName} field {propertyName} from {oldValue} to {NewValue}", robot.Name, propertyName, property.GetValue(robot), value);
+                    logger.LogInformation("Setting {robotName} field {propertyName} from {oldValue} to {NewValue}", robot.Name, propertyName, property.GetValue(robot), value);
                     property.SetValue(robot, value);
                 }
             }
