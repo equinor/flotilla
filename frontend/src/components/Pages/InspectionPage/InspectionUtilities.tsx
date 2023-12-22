@@ -1,6 +1,6 @@
 import { Card, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { DeckMissionCount, Inspection } from './InspectionSection'
+import { Inspection } from './InspectionSection'
 import { getDeadlineInDays } from 'utils/StringFormatting'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -149,6 +149,13 @@ export const compareInspections = (inspection1: Inspection, inspection2: Inspect
 interface ICardMissionInformationProps {
     deckName: string
     inspections: Inspection[]
+}
+
+interface DeckMissionCount {
+    [color: string]: {
+        count: number
+        message: string
+    }
 }
 
 export const CardMissionInformation = ({ deckName, inspections }: ICardMissionInformationProps) => {
