@@ -62,6 +62,16 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
                     upsertMissionDefinition(oldMissionDefinitions, missionDefinition)
                 )
             })
+            registerEvent(SignalREventLabels.missionDefinitionDeleted, (username: string, message: string) => {
+                const mDef: CondensedMissionDefinition = JSON.parse(message)
+                if (!mDef.area) return
+                setMissionDefinitions((oldMissionDefs) => {
+                    const oldListCopy = [...oldMissionDefs]
+                    const queueIndex = oldListCopy.findIndex((m) => m.id === mDef.id)
+                    if (queueIndex !== -1) oldListCopy.splice(queueIndex, 1) // Remove deleted mission definition
+                    return oldListCopy
+                })
+            })
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady])
