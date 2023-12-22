@@ -107,7 +107,7 @@ namespace Api.Services
             {
                 const string Message = "Error connecting to ISAR while stopping mission";
                 logger.LogError(e, "{Message}", Message);
-                await OnIsarUnavailable(robot.Id);
+                await robotService.SetRobotOffline(robot.Id);
                 throw new MissionException(Message, (int)e.StatusCode!);
             }
             catch (MissionException e)
@@ -255,38 +255,6 @@ namespace Api.Services
                 throw new MissionException(errorMessage);
             }
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
-        }
-
-        private async Task OnIsarUnavailable(string robotId)
-        {
-            var robot = await robotService.ReadById(robotId);
-            if (robot == null)
-            {
-                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-                return;
-            }
-
-            if (robot.CurrentMissionId != null)
-            {
-                var missionRun = await missionRunService.ReadById(robot.CurrentMissionId);
-                if (missionRun != null)
-                {
-                    missionRun.SetToFailed();
-                    await missionRunService.Update(missionRun);
-                    logger.LogWarning(
-                        "Mission '{Id}' failed because ISAR could not be reached",
-                        missionRun.Id
-                    );
-                }
-            }
-
-            try
-            {
-                await robotService.UpdateRobotStatus(robot.Id, RobotStatus.Offline);
-                await robotService.UpdateCurrentMissionId(robot.Id, null);
-                await robotService.UpdateRobotEnabled(robot.Id, false);
-            }
-            catch (RobotNotFoundException) { }
         }
 
         private static Pose ClosestSafePosition(Pose robotPose, IList<SafePosition> safePositions)
