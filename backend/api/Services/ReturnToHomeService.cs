@@ -4,11 +4,23 @@ namespace Api.Services
 {
     public interface IReturnToHomeService
     {
+        public Task<bool> IsRobotHome(string robotId);
         public Task<MissionRun?> ScheduleReturnToHomeMissionRun(string robotId);
     }
 
     public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService) : IReturnToHomeService
     {
+        public async Task<bool> IsRobotHome(string robotId)
+        {
+            var lastExecutedMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robotId);
+            if (lastExecutedMissionRun is null)
+            {
+                logger.LogInformation("Could not find last executed mission run for robot {RobotId}, can not guarantee that the robot is in its home", robotId);
+                return false;
+            }
+
+            return lastExecutedMissionRun.IsDriveToMission();
+        }
         public async Task<MissionRun?> ScheduleReturnToHomeMissionRun(string robotId)
         {
             var robot = await robotService.ReadById(robotId);

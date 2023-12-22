@@ -5,7 +5,7 @@ namespace Api.Services
 {
     public interface ILocalizationService
     {
-        public Task<string?> EnsureRobotIsCorrectlyLocalized(Robot robot, MissionRun missionRun);
+        public Task<string?> CreateLocalizationMissionIfRobotIsNotLocalized(Robot robot, MissionRun missionRun);
 
         public Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition);
 
@@ -36,7 +36,7 @@ namespace Api.Services
             }
         }
 
-        public async Task<string?> EnsureRobotIsCorrectlyLocalized(Robot robot, MissionRun missionRun)
+        public async Task<string?> CreateLocalizationMissionIfRobotIsNotLocalized(Robot robot, MissionRun missionRun)
         {
             if (missionRun.Area is null)
             {
@@ -45,9 +45,14 @@ namespace Api.Services
                 throw new AreaNotFoundException(errorMessage);
             }
 
-            string? localizationMissionRunId = null;
+            MissionRun? localizationMissionRun = null;
 
-            if (!await RobotIsLocalized(robot.Id)) { localizationMissionRunId = await StartLocalizationMissionInArea(robot.Id, missionRun.Area.Id); }
+            if (!await RobotIsLocalized(robot.Id))
+            {
+                localizationMissionRun = await CreateLocalizationMissionInArea(robot.Id, missionRun.Area.Id);
+                await robotService.UpdateCurrentArea(robot.Id, localizationMissionRun.Area);
+                logger.LogInformation("{Message}", $"Created localization mission run with ID {localizationMissionRun.Id}");
+            }
 
             if (!await RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
             {
@@ -56,9 +61,7 @@ namespace Api.Services
                 throw new RobotLocalizationException(errorMessage);
             }
 
-            logger.LogWarning("{Message}", $"Localization mission run ID is {localizationMissionRunId}");
-
-            return localizationMissionRunId;
+            return localizationMissionRun?.Id;
         }
 
         public async Task<bool> RobotIsLocalized(string robotId)
@@ -76,6 +79,8 @@ namespace Api.Services
 
         public async Task EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(string robotId)
         {
+            if (await RobotIsLocalized(robotId)) { return; }
+
             var robot = await robotService.ReadById(robotId);
             if (robot == null)
             {
@@ -151,7 +156,7 @@ namespace Api.Services
             throw new TimeoutException(Message);
         }
 
-        private async Task<string> StartLocalizationMissionInArea(string robotId, string areaId)
+        private async Task<MissionRun> CreateLocalizationMissionInArea(string robotId, string areaId)
         {
             var robot = await robotService.ReadById(robotId);
             if (robot is null)
@@ -198,8 +203,7 @@ namespace Api.Services
             };
             logger.LogWarning("Starting localization mission");
             await missionRunService.Create(localizationMissionRun, triggerCreatedMissionRunEvent: false);
-            await robotService.UpdateCurrentArea(robot.Id, localizationMissionRun.Area);
-            return localizationMissionRun.Id;
+            return localizationMissionRun;
         }
 
         private async Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId)

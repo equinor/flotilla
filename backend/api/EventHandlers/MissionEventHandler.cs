@@ -74,7 +74,7 @@ namespace Api.EventHandlers
             _scheduleLocalizationSemaphore.WaitOne();
 
             string? localizationMissionRunId = null;
-            try { localizationMissionRunId = await LocalizationService.EnsureRobotIsCorrectlyLocalized(missionRun.Robot, missionRun); }
+            try { localizationMissionRunId = await LocalizationService.CreateLocalizationMissionIfRobotIsNotLocalized(missionRun.Robot, missionRun); }
             catch (Exception ex) when (
                 ex is AreaNotFoundException
                 or DeckNotFoundException
@@ -116,44 +116,26 @@ namespace Api.EventHandlers
                 return;
             }
 
-            //TODO Separate into functions to make it more readable
-            if (!await LocalizationService.RobotIsLocalized(robot.Id))
+            try { await LocalizationService.EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(robot.Id); }
+            catch (Exception ex) when (ex is LocalizationFailedException or RobotNotFoundException or MissionNotFoundException or OngoingMissionNotLocalizationException or TimeoutException)
             {
-                try { await LocalizationService.EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(robot.Id); }
-                catch (Exception ex) when (ex is LocalizationFailedException or RobotNotFoundException or MissionNotFoundException or OngoingMissionNotLocalizationException or TimeoutException)
-                {
-                    _logger.LogError("Could not confirm that the robot {RobotId} was correctly localized and the scheduled missions for the deck will be cancelled", robot.Id);
-                    try { await MissionScheduling.CancelAllScheduledMissions(robot.Id); }
-                    catch (RobotNotFoundException)
-                    {
-                        _logger.LogError("Failed to cancel scheduled missions for robot {RobotId}", robot.Id);
-                        return;
-                    }
-                }
+                _logger.LogError("Could not confirm that the robot {RobotId} was correctly localized and the scheduled missions for the deck will be cancelled", robot.Id);
+                try { await MissionScheduling.CancelAllScheduledMissions(robot.Id); }
+                catch (RobotNotFoundException) { _logger.LogError("Failed to cancel scheduled missions for robot {RobotId}", robot.Id); }
+                return;
             }
 
             if (MissionScheduling.MissionRunQueueIsEmpty(await MissionService.ReadMissionRunQueue(robot.Id)))
             {
                 _logger.LogInformation("The robot was changed to available but there are no mission runs in the queue to be scheduled");
 
-                var lastExecutedMissionRun = await MissionService.ReadLastExecutedMissionRunByRobot(robot.Id);
-                if (lastExecutedMissionRun is null)
+                if (await ReturnToHomeService.IsRobotHome(robot.Id))
                 {
-                    _logger.LogError("Could not find last executed mission run for robot");
+                    await RobotService.UpdateCurrentArea(robot.Id, null);
                     return;
                 }
-
-                if (!lastExecutedMissionRun.IsDriveToMission())
-                {
-                    try { await ReturnToHomeService.ScheduleReturnToHomeMissionRun(robot.Id); }
-                    catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException)
-                    {
-                        //TODO Create an issue on sending a warning to the frontend that the return to home mission could not be scheduled
-                        await RobotService.UpdateCurrentArea(robot.Id, null);
-                        return;
-                    }
-                }
-                else { await RobotService.UpdateCurrentArea(robot.Id, null); }
+                try { await ReturnToHomeService.ScheduleReturnToHomeMissionRun(robot.Id); }
+                catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException) { await RobotService.UpdateCurrentArea(robot.Id, null); }
                 return;
             }
 
