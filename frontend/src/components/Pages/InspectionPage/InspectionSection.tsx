@@ -23,20 +23,17 @@ export interface DeckInspectionTuple {
     deck: Deck
 }
 
-export interface DeckMissionCount {
-    [color: string]: {
-        count: number
-        message: string
-    }
+interface DeckAreaTuple {
+    areas: Area[]
+    deck: Deck
 }
 
 export const InspectionSection = () => {
     const { installationCode } = useInstallationContext()
-    const [deckMissions, setDeckMissions] = useState<DeckInspectionTuple[]>([])
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
+    const [decks, setDecks] = useState<DeckAreaTuple[]>()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-    const [unscheduledMissions, setUnscheduledMissions] = useState<CondensedMissionDefinition[]>([])
     const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
     const { ongoingMissions, missionQueue } = useMissionsContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
@@ -44,97 +41,58 @@ export const InspectionSection = () => {
     const closeDialog = () => {
         setIsAlreadyScheduled(false)
         setSelectedMissions([])
-        setUnscheduledMissions([])
         setIsDialogOpen(false)
     }
 
-    useEffect(() => {
-        const isScheduled = (mission: CondensedMissionDefinition) =>
-            missionQueue.map((m) => m.missionId).includes(mission.id)
-        const isOngoing = (mission: CondensedMissionDefinition) =>
-            ongoingMissions.map((m) => m.missionId).includes(mission.id)
+    const isScheduled = (mission: CondensedMissionDefinition) =>
+        missionQueue.map((m) => m.missionId).includes(mission.id)
+    const isOngoing = (mission: CondensedMissionDefinition) =>
+        ongoingMissions.map((m) => m.missionId).includes(mission.id)
 
-        if (selectedMissions) {
-            let unscheduledMissions: CondensedMissionDefinition[] = []
-            selectedMissions.forEach((mission) => {
-                if (isOngoing(mission) || isScheduled(mission)) setIsAlreadyScheduled(true)
-                else unscheduledMissions = unscheduledMissions.concat([mission])
-            })
-            setUnscheduledMissions(unscheduledMissions)
-        }
-    }, [isDialogOpen, ongoingMissions, missionQueue, selectedMissions])
+    const unscheduledMissions = selectedMissions?.filter((m) => !isOngoing(m) && !isScheduled(m))
+
+    useEffect(() => {
+        if (selectedMissions && selectedMissions.some((mission) => isOngoing(mission) || isScheduled(mission)))
+            setIsAlreadyScheduled(true)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ongoingMissions, missionQueue, selectedMissions])
 
     useMemo(() => {
-        const updateDeckMissions = () =>
-            BackendAPICaller.getDecks().then(async (decks: Deck[]) =>
-                setDeckMissions(
-                    await Promise.all(
-                        // This is needed since the map function uses async calls
-                        decks
-                            .filter((deck) => deck.installationCode.toLowerCase() === installationCode.toLowerCase())
-                            .map(async (deck) => {
-                                let missionDefinitionsInDeck =
-                                    missionDefinitions.filter((m) => m.area?.deckName === deck.deckName) ?? []
-                                return {
-                                    inspections: missionDefinitionsInDeck.map((m) => {
-                                        return {
-                                            missionDefinition: m,
-                                            deadline: m.lastSuccessfulRun
-                                                ? getInspectionDeadline(
-                                                      m.inspectionFrequency,
-                                                      m.lastSuccessfulRun.endTime!
-                                                  )
-                                                : undefined,
-                                        }
-                                    }),
-                                    areas: await BackendAPICaller.getAreasByDeckId(deck.id),
-                                    deck: deck,
-                                }
-                            })
-                    )
+        setSelectedDeck(undefined)
+
+        // Fetch relevant decks and their areas from the database
+        BackendAPICaller.getDecks().then(async (decks: Deck[]) =>
+            setDecks(
+                await Promise.all(
+                    // This is needed since the map function uses async calls
+                    decks
+                        .filter((deck) => deck.installationCode.toLowerCase() === installationCode.toLowerCase())
+                        .map(async (deck) => {
+                            return {
+                                areas: await BackendAPICaller.getAreasByDeckId(deck.id),
+                                deck: deck
+                            }
+                        })
                 )
             )
+        )
+    }, [installationCode])
 
-        if (deckMissions.length === 0 && missionDefinitions) {
-            setSelectedDeck(undefined)
-            updateDeckMissions()
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [installationCode, missionDefinitions])
-
-    useEffect(() => {
-        const updateInspections = (oldInspections: Inspection[], mDefs: CondensedMissionDefinition[]) => {
-            return [...oldInspections].map((inspection) => {
-                const updatedMDef = mDefs.find((m) => m.id === inspection.missionDefinition.id)
-                if (updatedMDef) {
-                    const newDeadline = updatedMDef.lastSuccessfulRun // If there are no completed runs, set the deadline to undefined
-                        ? getInspectionDeadline(updatedMDef.inspectionFrequency, updatedMDef.lastSuccessfulRun.endTime!)
-                        : undefined
-                    return {
-                        ...inspection,
-                        missionDefinition: updatedMDef,
-                        deadline: newDeadline,
-                    }
+    const deckMissions: DeckInspectionTuple[] = decks?.map(({ areas, deck }) => {
+        const missionDefinitionsInDeck = missionDefinitions.filter((m) => m.area?.deckName === deck.deckName)
+        return {
+            inspections: missionDefinitionsInDeck.map((m) => {
+                return {
+                    missionDefinition: m,
+                    deadline: m.lastSuccessfulRun
+                        ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
+                        : undefined,
                 }
-                return inspection
-            })
+            }),
+            areas: areas,
+            deck: deck,
         }
-
-        if (deckMissions) {
-            setDeckMissions((deckMissions) =>
-                [...deckMissions].map((deckMission) => {
-                    const relevantMissionDefinitions = missionDefinitions.filter(
-                        (m) => m.area?.deckName === deckMission.deck.deckName
-                    )
-                    return {
-                        ...deckMission,
-                        inspections: updateInspections(deckMission.inspections, relevantMissionDefinitions),
-                    }
-                })
-            )
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [missionDefinitions])
+    }) ?? []
 
     const handleScheduleAll = (inspections: Inspection[]) => {
         setIsDialogOpen(true)
