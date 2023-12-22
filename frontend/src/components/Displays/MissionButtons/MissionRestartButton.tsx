@@ -32,13 +32,6 @@ export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const anchorRef = useRef<HTMLButtonElement>(null)
 
-    const openMenu = () => {
-        setIsOpen(true)
-    }
-    const closeMenu = () => {
-        setIsOpen(false)
-    }
-
     let navigate = useNavigate()
     const navigateToHome = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
@@ -48,6 +41,9 @@ export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps
     const startReRun = (option: ReRunOptions) =>
         BackendAPICaller.reRunMission(missionId, option === ReRunOptions.ReRunFailed)
             .then(() => navigateToHome())
+            .catch(() =>
+                setAlert(AlertType.RequestFail, <FailedRequestAlertContent message={'Failed to rerun missions'} />)
+            )
 
     return (
         <Centered>
@@ -59,7 +55,7 @@ export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps
                     aria-haspopup="true"
                     aria-expanded={isOpen}
                     aria-controls="menu-default"
-                    onClick={isOpen ? closeMenu : openMenu}
+                    onClick={() => setIsOpen(!isOpen)}
                 >
                     <Icon
                         name={Icons.Replay}
@@ -73,7 +69,7 @@ export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps
                     open={isOpen}
                     id="menu-default"
                     aria-labelledby="anchor-default"
-                    onClose={closeMenu}
+                    onClose={() => setIsOpen(false)}
                     anchorEl={anchorRef.current}
                 >
                     <Menu.Item onClick={() => startReRun(ReRunOptions.ReRun)}>
