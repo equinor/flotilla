@@ -26,6 +26,7 @@ namespace Api.Services
         public Task<Robot> UpdateCurrentArea(string robotId, Area? area);
         public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
         public Task<Robot?> Delete(string id);
+        public Task SetRobotOffline(string robotId);
     }
 
     [SuppressMessage(
@@ -39,7 +40,8 @@ namespace Api.Services
         ISignalRService signalRService,
         IAccessRoleService accessRoleService,
         IInstallationService installationService,
-        IAreaService areaService) : IRobotService, IDisposable
+        IAreaService areaService,
+        IMissionRunService missionRunService) : IRobotService, IDisposable
     {
         private readonly Semaphore _robotSemaphore = new(1, 1);
 
@@ -161,6 +163,39 @@ namespace Api.Services
 #pragma warning restore CA1304
                     && robot.CurrentArea != null)
                 .ToListAsync();
+        }
+
+        public async Task SetRobotOffline(string robotId)
+        {
+            var robot = await ReadById(robotId);
+            if (robot == null)
+            {
+                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                return;
+            }
+
+            if (robot.CurrentMissionId != null)
+            {
+                var missionRun = await missionRunService.ReadById(robot.CurrentMissionId);
+                if (missionRun != null)
+                {
+                    missionRun.SetToFailed();
+                    await missionRunService.Update(missionRun);
+                    logger.LogWarning(
+                        "Mission '{Id}' failed because ISAR could not be reached",
+                        missionRun.Id
+                    );
+                }
+            }
+
+            try
+            {
+                await UpdateRobotStatus(robot.Id, RobotStatus.Offline);
+                await UpdateCurrentMissionId(robot.Id, null);
+                await UpdateRobotEnabled(robot.Id, false);
+                await UpdateCurrentArea(robot.Id, null);
+            }
+            catch (RobotNotFoundException) { }
         }
 
         private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)

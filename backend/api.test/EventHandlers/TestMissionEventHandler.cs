@@ -73,7 +73,7 @@ namespace Api.Test.EventHandlers
             _plantService = new PlantService(_context, _installationService, _accessRoleService);
             _deckService = new DeckService(_context, _defaultLocalisationPoseService, _installationService, _plantService, _accessRoleService);
             _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalisationPoseService, _accessRoleService);
-            _robotService = new RobotService(_context, robotServiceLogger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
+            _robotService = new RobotService(_context, robotServiceLogger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
             _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, _robotControllerMock.Mock.Object, _areaService,
                 _isarServiceMock);
             _localizationService = new LocalizationService(localizationServiceLogger, _robotService, _missionRunService, _installationService, _areaService);

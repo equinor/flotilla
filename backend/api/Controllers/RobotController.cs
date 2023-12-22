@@ -384,7 +384,7 @@ namespace Api.Controllers
             {
                 string errorMessage = $"Could not reach ISAR at {robot.IsarUri}";
                 logger.LogError(e, "{Message}", errorMessage);
-                await OnIsarUnavailable(robot);
+                await robotService.SetRobotOffline(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
             }
             catch (MissionException e)
@@ -451,7 +451,7 @@ namespace Api.Controllers
             {
                 const string Message = "Error connecting to ISAR while stopping mission";
                 logger.LogError(e, "{Message}", Message);
-                await OnIsarUnavailable(robot);
+                await robotService.SetRobotOffline(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
             catch (MissionException e)
@@ -510,7 +510,7 @@ namespace Api.Controllers
             {
                 const string Message = "Error connecting to ISAR while pausing mission";
                 logger.LogError(e, "{Message}", Message);
-                await OnIsarUnavailable(robot);
+                await robotService.SetRobotOffline(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
             catch (MissionException e)
@@ -560,7 +560,7 @@ namespace Api.Controllers
             {
                 const string Message = "Error connecting to ISAR while resuming mission";
                 logger.LogError(e, "{Message}", Message);
-                await OnIsarUnavailable(robot);
+                await robotService.SetRobotOffline(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
             catch (MissionException e)
@@ -618,7 +618,7 @@ namespace Api.Controllers
             {
                 string errorMessage = $"Error connecting to ISAR at {robot.IsarUri}";
                 logger.LogError(e, "{Message}", errorMessage);
-                await OnIsarUnavailable(robot);
+                await robotService.SetRobotOffline(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
             }
             catch (MissionException e)
@@ -703,7 +703,7 @@ namespace Api.Controllers
             {
                 string message = $"Could not reach ISAR at {robot.IsarUri}";
                 logger.LogError(e, "{Message}", message);
-                await OnIsarUnavailable(robot);
+                await robotService.SetRobotOffline(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, message);
             }
             catch (MissionException e)
@@ -734,25 +734,5 @@ namespace Api.Controllers
             return Ok(missionRun);
         }
 
-        private async Task OnIsarUnavailable(Robot robot)
-        {
-            robot.Enabled = false;
-            robot.Status = RobotStatus.Offline;
-            if (robot.CurrentMissionId != null)
-            {
-                var missionRun = await missionRunService.ReadById(robot.CurrentMissionId);
-                if (missionRun != null)
-                {
-                    missionRun.SetToFailed();
-                    await missionRunService.Update(missionRun);
-                    logger.LogWarning(
-                        "Mission '{Id}' failed because ISAR could not be reached",
-                        missionRun.Id
-                    );
-                }
-            }
-
-            await robotService.UpdateCurrentMissionId(robot.Id, null);
-        }
     }
 }
