@@ -4,14 +4,13 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { translateSignalRMission } from 'utils/EnumTranslations'
 
-const upsertList = (list: Mission[], mission: Mission) => {
+const upsertMissionList = (list: Mission[], mission: Mission) => {
     let newList = [...list]
     const i = newList.findIndex((e) => e.id === mission.id)
     if (i > -1) newList[i] = mission
     else newList.push(mission)
     return newList
 }
-
 interface IMissionRunsContext {
     ongoingMissions: Mission[]
     missionQueue: Mission[]
@@ -82,7 +81,7 @@ export const useMissionRuns = (): IMissionRunsContext => {
                 else
                     setMissionQueue((oldQueue) => {
                         let missionQueueCopy = [...oldQueue]
-                        missionQueueCopy = upsertList(missionQueueCopy, newMission)
+                        missionQueueCopy = upsertMissionList(missionQueueCopy, newMission)
                         return [...missionQueueCopy]
                     })
             })
