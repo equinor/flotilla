@@ -1,4 +1,4 @@
-import { Icon, Tabs } from '@equinor/eds-core-react'
+import { Icon, Tabs, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { InspectionSection } from './InspectionSection'
 import { useEffect, useRef, useState } from 'react'
@@ -14,6 +14,7 @@ import { useRobotContext } from 'components/Contexts/RobotContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { StyledDict } from './InspectionUtilities'
 import { Icons } from 'utils/icons'
 import { StyledButton } from 'components/Styles/StyledComponents'
 
@@ -28,6 +29,10 @@ const StyledButtons = styled.div`
     flex-direction: row;
     gap: 8px;
     padding-bottom: 30px;
+`
+
+const StyledPlaceholderContent = styled.div`
+    width: 100%;
 `
 
 const StyledView = styled.div`
@@ -124,7 +129,17 @@ export const InspectionOverviewSection = () => {
                                 <AddPredefinedMissionsButton />
                                 <CreateEchoMissionButton />
                             </StyledButtons>
-                            {allMissions && <AllInspectionsTable inspections={allMissions} />}
+                            {allMissions && allMissions.length > 0 ? (
+                                <AllInspectionsTable inspections={allMissions} />
+                            ) : (
+                                <StyledPlaceholderContent>
+                                    <StyledDict.Placeholder>
+                                        <Typography variant="h4" color="disabled">
+                                            {TranslateText('No predefined missions available')}
+                                        </Typography>
+                                    </StyledDict.Placeholder>
+                                </StyledPlaceholderContent>
+                            )}
                         </StyledContent>
                     </StyledView>
                 </Tabs.Panel>
