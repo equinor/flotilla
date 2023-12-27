@@ -11,7 +11,6 @@ import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { FetchingMissionsDialog } from './FetchingMissionsDialog'
 import { NoMissionsDialog } from './NoMissionsDialog'
 import { SelectMissionsToScheduleDialog } from './SelectMissionsToScheduleDialog'
-import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, EchoMissionDefinition> => {
     var missionMap = new Map<string, EchoMissionDefinition>()
@@ -26,7 +25,6 @@ export const ScheduleMissionDialog = (): JSX.Element => {
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
     const { setAlert } = useAlertContext()
-    const { setLoadingMissionSet } = useMissionsContext()
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
     const [isEmptyEchoMissionsDialogOpen, setIsEmptyEchoMissionsDialogOpen] = useState<boolean>(false)
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
@@ -143,7 +141,6 @@ export const ScheduleMissionDialog = (): JSX.Element => {
                 <SelectMissionsToScheduleDialog
                     echoMissions={echoMissions}
                     closeDialog={() => setIsScheduleMissionDialogOpen(false)}
-                    setLoadingMissionSet={setLoadingMissionSet}
                 />
             )}
         </>

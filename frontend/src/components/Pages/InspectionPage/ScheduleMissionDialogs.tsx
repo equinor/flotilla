@@ -9,6 +9,7 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { Icons } from 'utils/icons'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { StyledAutoComplete, StyledDialog } from 'components/Styles/StyledComponents'
+import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 interface IProps {
     missions: CondensedMissionDefinition[]
@@ -47,6 +48,7 @@ const StyledDangerContent = styled.div`
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
+    const { setLoadingMissionSet } = useMissionsContext()
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [robotOptions, setRobotOptions] = useState<Robot[]>([])
@@ -71,7 +73,14 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const onScheduleButtonPress = () => {
         if (!selectedRobot) return
 
-        props.missions.forEach((mission) => BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id))
+        props.missions.forEach((mission) => {
+            BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id)
+            setLoadingMissionSet((currentSet: Set<string>) => {
+                const updatedSet: Set<string> = new Set(currentSet)
+                updatedSet.add(String(mission.name))
+                return updatedSet
+            })
+        })
 
         setSelectedRobot(undefined)
     }
@@ -86,9 +95,14 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const onScheduleOnlyButtonPress = () => {
         if (!selectedRobot) return
 
-        props.unscheduledMissions.forEach((mission) =>
+        props.unscheduledMissions.forEach((mission) => {
             BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id)
-        )
+            setLoadingMissionSet((currentSet: Set<string>) => {
+                const updatedSet: Set<string> = new Set(currentSet)
+                updatedSet.add(String(mission.name))
+                return updatedSet
+            })
+        })
 
         setSelectedRobot(undefined)
     }
