@@ -13,6 +13,8 @@ import { getDeadlineInDays } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { useEffect, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
+import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -125,11 +127,17 @@ interface IInspectionRowProps {
 const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialog, navigate }: IInspectionRowProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
+    const { installationCode } = useInstallationContext()
+    const { enabledRobots } = useRobotContext()
     const mission = inspection.missionDefinition
     let status
     let lastCompleted: string = ''
     const isScheduled = missionQueue.map((m) => m.missionId).includes(mission.id)
     const isOngoing = ongoingMissions.map((m) => m.missionId).includes(mission.id)
+
+    const isScheduleButtonDisabled =
+        enabledRobots.filter((r) => r.currentInstallation.installationCode === installationCode).length === 0 ||
+        installationCode === ''
 
     if (isOngoing) {
         status = (
@@ -196,6 +204,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                 {!isScheduled && (
                     <Button
                         variant="ghost_icon"
+                        disabled={isScheduleButtonDisabled}
                         onClick={() => {
                             openDialog()
                             setMissions([mission])
@@ -211,6 +220,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                 {isScheduled && (
                     <Button
                         variant="ghost_icon"
+                        disabled={enabledRobots.length === 0}
                         onClick={() => {
                             openScheduledDialog()
                             setMissions([mission])
