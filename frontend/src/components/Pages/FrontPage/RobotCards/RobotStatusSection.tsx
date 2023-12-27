@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import { Robot } from 'models/Robot'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import styled from 'styled-components'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
@@ -24,38 +24,20 @@ export const RobotStatusSection = () => {
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
     const { switchSafeZoneStatus } = useSafeZoneContext()
-    const [robots, setRobots] = useState<Robot[]>([])
+
+    const relevantRobots = enabledRobots
+        .filter(
+            (robot) =>
+                robot.currentInstallation.installationCode.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+        )
+        .sort((robot, robotToCompareWith) => (robot.status! > robotToCompareWith.status! ? 1 : -1))
 
     useEffect(() => {
-        const sortRobotsByStatus = (robots: Robot[]): Robot[] => {
-            const sortedRobots = robots.sort((robot, robotToCompareWith) =>
-                robot.status! > robotToCompareWith.status! ? 1 : -1
-            )
-            return sortedRobots
-        }
-        const relevantRobots = sortRobotsByStatus(
-            enabledRobots.filter((robot) => {
-                return (
-                    robot.currentInstallation.installationCode.toLocaleLowerCase() ===
-                    installationCode.toLocaleLowerCase()
-                )
-            })
-        )
-        setRobots(relevantRobots)
+        const missionQueueFozenStatus = relevantRobots.some((robot: Robot) => robot.missionQueueFrozen)
+        switchSafeZoneStatus(missionQueueFozenStatus)
+    }, [enabledRobots, installationCode, switchSafeZoneStatus, relevantRobots])
 
-        const missionQueueFozenStatus = relevantRobots
-            .map((robot: Robot) => {
-                return robot.missionQueueFrozen
-            })
-            .filter((status) => status === true)
-
-        if (missionQueueFozenStatus.length > 0) switchSafeZoneStatus(true)
-        else switchSafeZoneStatus(false)
-    }, [enabledRobots, installationCode, switchSafeZoneStatus])
-
-    const getRobotDisplay = () => {
-        return robots.map((robot) => <RobotStatusCard key={robot.id} robot={robot} />)
-    }
+    const robotDisplay = relevantRobots.map((robot) => <RobotStatusCard key={robot.id} robot={robot} />)
 
     return (
         <RobotView>
@@ -63,8 +45,8 @@ export const RobotStatusSection = () => {
                 {TranslateText('Robot Status')}
             </Typography>
             <RobotCardSection>
-                {robots.length > 0 && getRobotDisplay()}
-                {robots.length === 0 && <RobotStatusCardPlaceholder />}
+                {relevantRobots.length > 0 && robotDisplay}
+                {relevantRobots.length === 0 && <RobotStatusCardPlaceholder />}
             </RobotCardSection>
         </RobotView>
     )
