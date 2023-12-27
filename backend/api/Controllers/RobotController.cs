@@ -10,12 +10,14 @@ namespace Api.Controllers
     [ApiController]
     [Route("robots")]
     public class RobotController(
-        ILogger<RobotController> logger,
-        IRobotService robotService,
-        IIsarService isarService,
-        IMissionSchedulingService missionSchedulingService,
-        IRobotModelService robotModelService
-    ) : ControllerBase
+            ILogger<RobotController> logger,
+            IRobotService robotService,
+            IIsarService isarService,
+            IMissionSchedulingService missionSchedulingService,
+            IRobotModelService robotModelService,
+            IAreaService areaService,
+            IInstallationService installationService
+        ) : ControllerBase
     {
         /// <summary>
         ///     List all robots on the installation.
@@ -161,6 +163,96 @@ namespace Api.Controllers
             try
             {
                 var updatedRobot = await robotService.Update(robot);
+                var robotResponse = new RobotResponse(updatedRobot);
+                logger.LogInformation("Successful PUT of robot to database");
+
+                return Ok(robotResponse);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error while updating robot with id={Id}", id);
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Updates a specific field of a robot in the database
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        /// <response code="200"> The robot was successfully updated </response>
+        /// <response code="400"> The robot data is invalid </response>
+        /// <response code="404"> There was no robot with the given ID in the database </response>
+        /// /// <response code="404"> The given field name is not valid </response>
+        [HttpPut]
+        [Authorize(Roles = Role.Admin)]
+        [Route("{id}/{fieldName}")]
+        [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<RobotResponse>> UpdateRobotField(
+            [FromRoute] string id,
+            [FromRoute] string fieldName,
+            [FromBody] UpdateRobotQuery query
+        )
+        {
+            logger.LogInformation("Updating robot with id={Id}", id);
+
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid data");
+
+            try
+            {
+                var robot = await robotService.ReadById(id);
+                if (robot == null)
+                {
+                    string errorMessage = $"No robot with id: {id} could be found";
+                    logger.LogError("{Message}", errorMessage);
+                    return NotFound(errorMessage);
+                }
+
+                Robot updatedRobot;
+                switch (fieldName)
+                {
+                    case "installationId":
+                        if (query.InstallationId == null)
+                            updatedRobot = await robotService.UpdateCurrentInstallation(id, null);
+                        else
+                        {
+                            var installation = await installationService.ReadById(query.InstallationId);
+                            if (installation == null) return NotFound($"No installation with ID {query.InstallationId} was found");
+                            updatedRobot = await robotService.UpdateCurrentInstallation(id, installation);
+                        }
+                        break;
+                    case "areaId":
+                        if (query.AreaId == null)
+                            updatedRobot = await robotService.UpdateCurrentArea(id, null);
+                        else
+                        {
+                            var area = await areaService.ReadById(query.AreaId);
+                            if (area == null) return NotFound($"No area with ID {query.AreaId} was found");
+                            updatedRobot = await robotService.UpdateCurrentArea(id, area);
+                        }
+                        break;
+                    case "minAllowedPressureLevel":
+                        if (query.MinAllowedPressureLevel < 0.0)
+                            return BadRequest("Min allowed pressure level must be a positive value");
+                        updatedRobot = await robotService.UpdateRobotMinAllowedPressureLevel(id, query.MinAllowedPressureLevel);
+                        break;
+                    case "pose":
+                        if (query.Pose == null) return BadRequest("Cannot set robot pose to null");
+                        updatedRobot = await robotService.UpdateRobotPose(id, query.Pose);
+                        break;
+                    case "missionId":
+                        updatedRobot = await robotService.UpdateCurrentMissionId(id, query.MissionId);
+                        break;
+                    default:
+                        return NotFound($"Could not find any field with name {fieldName}");
+                }
+
                 var robotResponse = new RobotResponse(updatedRobot);
                 logger.LogInformation("Successful PUT of robot to database");
 
