@@ -7,6 +7,7 @@ import { Robot } from 'models/Robot'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { BackendAPICaller } from 'api/ApiCaller'
+import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 const StyledMissionDialog = styled.div`
     display: flex;
@@ -34,17 +35,13 @@ const StyledDialog = styled(Dialog)`
 interface ScheduleDialogProps {
     echoMissions: Map<string, EchoMissionDefinition>
     closeDialog: () => void
-    setLoadingMissionSet: (foo: (missionIds: Set<string>) => Set<string>) => void
 }
 
-export const SelectMissionsToScheduleDialog = ({
-    echoMissions,
-    closeDialog,
-    setLoadingMissionSet,
-}: ScheduleDialogProps): JSX.Element => {
+export const SelectMissionsToScheduleDialog = ({ echoMissions, closeDialog }: ScheduleDialogProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
     const { installationCode } = useInstallationContext()
+    const { setLoadingMissionSet } = useMissionsContext()
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(undefined)
 
