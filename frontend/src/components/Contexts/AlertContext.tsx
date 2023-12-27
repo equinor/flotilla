@@ -5,13 +5,21 @@ import { FailedMissionAlertContent } from 'components/Alerts/FailedMissionAlert'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useInstallationContext } from './InstallationContext'
+import { Alert } from 'models/Alert'
+import { FailedSafeZoneAlertContent } from 'components/Alerts/FailedSafeZoneAlertContent'
+import { useRobotContext } from './RobotContext'
+
+type AlertDictionaryType = { [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void } }
 
 export enum AlertType {
     MissionFail,
     RequestFail,
+    SafeZoneFail,
 }
 
-type AlertDictionaryType = { [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void } }
+const alertTypeEnumMap: { [key: string]: AlertType } = {
+    safezoneFailure: AlertType.SafeZoneFail,
+}
 
 interface IAlertContext {
     alerts: AlertDictionaryType
@@ -38,6 +46,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installationCode } = useInstallationContext()
+    const { enabledRobots } = useRobotContext()
 
     const pageSize: number = 100
     // The default amount of minutes in the past for failed missions to generate an alert
@@ -95,7 +104,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
     // Register a signalR event handler that listens for new failed missions
     useEffect(() => {
-        if (connectionReady)
+        if (connectionReady) {
             registerEvent(SignalREventLabels.missionRunFailed, (username: string, message: string) => {
                 const newFailedMission: Mission = JSON.parse(message)
                 const lastDismissTime: Date = getLastDismissalTime()
@@ -115,6 +124,23 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     return [...failedMissions, newFailedMission]
                 })
             })
+            registerEvent(SignalREventLabels.alert, (username: string, message: string) => {
+                const backendAlert: Alert = JSON.parse(message)
+                const alertType = alertTypeEnumMap[backendAlert.alertCode]
+
+                if (backendAlert.robotId !== null) {
+                    const relevantRobots = enabledRobots.filter((r) => r.id === backendAlert.robotId)
+                    if (!relevantRobots) return
+                    const relevantRobot = relevantRobots[0]
+                    if (relevantRobot.currentInstallation.installationCode !== installationCode) return
+
+                    // Here we could update the robot state manually, but this is best done on the backend
+                }
+
+                setAlert(alertType, <FailedSafeZoneAlertContent message={backendAlert.alertDescription} />)
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady, installationCode])
 
     useEffect(() => {
