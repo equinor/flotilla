@@ -10,6 +10,8 @@ import { Icons } from 'utils/icons'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { StyledAutoComplete, StyledDialog } from 'components/Styles/StyledComponents'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 
 interface IProps {
     missions: CondensedMissionDefinition[]
@@ -49,6 +51,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const { setLoadingMissionSet } = useMissionsContext()
+    const { setAlert } = useAlertContext()
     const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [robotOptions, setRobotOptions] = useState<Robot[]>([])
@@ -74,7 +77,17 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         if (!selectedRobot) return
 
         props.missions.forEach((mission) => {
-            BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id)
+            BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id).catch(() => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent message={`Failed to schedule mission ${mission.name}`} />
+                )
+                setLoadingMissionSet((currentSet: Set<string>) => {
+                    const updatedSet: Set<string> = new Set(currentSet)
+                    updatedSet.delete(String(mission.name))
+                    return updatedSet
+                })
+            })
             setLoadingMissionSet((currentSet: Set<string>) => {
                 const updatedSet: Set<string> = new Set(currentSet)
                 updatedSet.add(String(mission.name))
@@ -96,7 +109,17 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         if (!selectedRobot) return
 
         props.unscheduledMissions.forEach((mission) => {
-            BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id)
+            BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id).catch(() => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent message={`Failed to schedule mission ${mission.name}`} />
+                )
+                setLoadingMissionSet((currentSet: Set<string>) => {
+                    const updatedSet: Set<string> = new Set(currentSet)
+                    updatedSet.delete(String(mission.name))
+                    return updatedSet
+                })
+            })
             setLoadingMissionSet((currentSet: Set<string>) => {
                 const updatedSet: Set<string> = new Set(currentSet)
                 updatedSet.add(String(mission.name))
