@@ -1,7 +1,7 @@
-import { Autocomplete, Dialog, Typography, Popover, Icon } from '@equinor/eds-core-react'
+import { Autocomplete, Dialog, Typography, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useRef, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Robot } from 'models/Robot'
 import { CondensedMissionDefinition } from 'models/MissionDefinition'
@@ -15,7 +15,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { ScheduleMissionWithLocalizationVerificationDialog } from 'components/Displays/LocalizationVerification/ScheduleMissionWithLocalizationVerification'
 
 interface IProps {
-    missions: CondensedMissionDefinition[]
+    selectedMissions: CondensedMissionDefinition[]
     closeDialog: () => void
     setMissions: (selectedMissions: CondensedMissionDefinition[] | undefined) => void
     unscheduledMissions: CondensedMissionDefinition[]
@@ -55,14 +55,10 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { installationCode } = useInstallationContext()
     const { setLoadingMissionSet } = useMissionsContext()
     const { setAlert } = useAlertContext()
-    const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
     const [isLocalizationVerificationDialogOpen, setIsLocalizationVerificationDialog] = useState<boolean>(false)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [missionsToSchedule, setMissionsToSchedule] = useState<CondensedMissionDefinition[]>()
     const [robotOptions, setRobotOptions] = useState<Robot[]>([])
-    const anchorRef = useRef<HTMLButtonElement>(null)
-
-    let timer: ReturnType<typeof setTimeout>
 
     useEffect(() => {
         const relevantRobots = [...enabledRobots].filter(
@@ -72,29 +68,13 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     }, [enabledRobots, installationCode])
 
     const onSelectedRobot = (selectedRobot: Robot) => {
-        if (!robotOptions) return
-
-        setSelectedRobot(selectedRobot)
+        if (robotOptions) setSelectedRobot(selectedRobot)
     }
 
-    const onScheduleButtonPress = () => {
+    const onScheduleButtonPress = (missions: CondensedMissionDefinition[]) => () => {
         if (!selectedRobot) return
 
-        setMissionsToSchedule(props.missions)
-        setIsLocalizationVerificationDialog(true)
-    }
-
-    const closePopover = () => setIsPopoverOpen(false)
-
-    const handleClose = () => {
-        clearTimeout(timer)
-        closePopover()
-    }
-
-    const onScheduleOnlyButtonPress = () => {
-        if (!selectedRobot) return
-
-        setMissionsToSchedule(props.unscheduledMissions)
+        setMissionsToSchedule(missions)
         setIsLocalizationVerificationDialog(true)
     }
 
@@ -134,17 +114,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
 
     return (
         <>
-            <Popover
-                anchorEl={anchorRef.current}
-                onClose={handleClose}
-                open={isPopoverOpen && installationCode === ''}
-                placement="top"
-            >
-                <Popover.Content>
-                    <Typography variant="body_short">{TranslateText('Please select installation')}</Typography>
-                </Popover.Content>
-            </Popover>
-
             <StyledMissionDialog>
                 <StyledDialog open={!isLocalizationVerificationDialogOpen}>
                     <StyledDialogContent>
@@ -153,7 +122,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             <StyledDangerContent>
                                 <Icon name={Icons.Warning} size={16} color="red" />
                                 <Typography variant="body_short" color="red">
-                                    {props.missions.length > 1
+                                    {props.selectedMissions.length > 1
                                         ? TranslateText('Some missions are already in the queue')
                                         : TranslateText('The mission is already in the queue')}
                                 </Typography>
@@ -179,20 +148,17 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     {TranslateText('Cancel')}
                                 </StyledButton>
                                 <StyledButton
-                                    onClick={() => {
-                                        onScheduleButtonPress()
-                                    }}
+                                    onClick={onScheduleButtonPress(props.selectedMissions)}
                                     disabled={!selectedRobot}
                                 >
-                                    {props.missions.length > 1
+                                    {' '}
+                                    {props.selectedMissions.length > 1
                                         ? TranslateText('Queue all missions')
                                         : TranslateText('Queue mission')}
                                 </StyledButton>
                                 {props.isAlreadyScheduled && props.unscheduledMissions.length > 0 && (
                                     <StyledButton
-                                        onClick={() => {
-                                            onScheduleOnlyButtonPress()
-                                        }}
+                                        onClick={onScheduleButtonPress(props.unscheduledMissions)}
                                         disabled={!selectedRobot}
                                     >
                                         {TranslateText('Queue unscheduled missions')}
@@ -208,9 +174,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     scheduleMissions={scheduleMissions}
                     closeDialog={closeScheduleDialogs}
                     robotId={selectedRobot!.id}
-                    missionDeckNames={props.missions.map((mission) => {
-                        return mission.area?.deckName ?? ''
-                    })}
+                    missionDeckNames={props.selectedMissions.map((mission) => mission.area?.deckName ?? '')}
                 />
             )}
         </>

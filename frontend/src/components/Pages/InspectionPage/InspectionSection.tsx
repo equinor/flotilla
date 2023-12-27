@@ -70,7 +70,7 @@ export const InspectionSection = () => {
                         .map(async (deck) => {
                             return {
                                 areas: await BackendAPICaller.getAreasByDeckId(deck.id),
-                                deck: deck
+                                deck: deck,
                             }
                         })
                 )
@@ -78,21 +78,22 @@ export const InspectionSection = () => {
         )
     }, [installationCode])
 
-    const deckMissions: DeckInspectionTuple[] = decks?.map(({ areas, deck }) => {
-        const missionDefinitionsInDeck = missionDefinitions.filter((m) => m.area?.deckName === deck.deckName)
-        return {
-            inspections: missionDefinitionsInDeck.map((m) => {
-                return {
-                    missionDefinition: m,
-                    deadline: m.lastSuccessfulRun
-                        ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
-                        : undefined,
-                }
-            }),
-            areas: areas,
-            deck: deck,
-        }
-    }) ?? []
+    const deckMissions: DeckInspectionTuple[] =
+        decks?.map(({ areas, deck }) => {
+            const missionDefinitionsInDeck = missionDefinitions.filter((m) => m.area?.deckName === deck.deckName)
+            return {
+                inspections: missionDefinitionsInDeck.map((m) => {
+                    return {
+                        missionDefinition: m,
+                        deadline: m.lastSuccessfulRun
+                            ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
+                            : undefined,
+                    }
+                }),
+                areas: areas,
+                deck: deck,
+            }
+        }) ?? []
 
     const handleScheduleAll = (inspections: Inspection[]) => {
         setIsDialogOpen(true)
@@ -120,7 +121,7 @@ export const InspectionSection = () => {
             </StyledDict.DeckOverview>
             {isDialogOpen && (
                 <ScheduleMissionDialog
-                    missions={selectedMissions!}
+                    selectedMissions={selectedMissions!}
                     closeDialog={closeDialog}
                     setMissions={setSelectedMissions}
                     unscheduledMissions={unscheduledMissions!}
