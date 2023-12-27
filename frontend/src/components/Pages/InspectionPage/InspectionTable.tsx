@@ -370,7 +370,7 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
                 </Table>
                 {isDialogOpen && (
                     <ScheduleMissionDialog
-                        missions={selectedMissions!}
+                        selectedMissions={selectedMissions!}
                         closeDialog={closeDialog}
                         setMissions={setSelectedMissions}
                         unscheduledMissions={unscheduledMissions}
