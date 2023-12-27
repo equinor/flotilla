@@ -8,6 +8,8 @@ import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 
 const StyledMissionDialog = styled.div`
     display: flex;
@@ -41,6 +43,7 @@ export const SelectMissionsToScheduleDialog = ({ echoMissions, closeDialog }: Sc
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
     const { installationCode } = useInstallationContext()
+    const { setAlert } = useAlertContext()
     const { setLoadingMissionSet } = useMissionsContext()
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(undefined)
@@ -62,7 +65,17 @@ export const SelectMissionsToScheduleDialog = ({ echoMissions, closeDialog }: Sc
         if (!selectedRobot) return
 
         selectedEchoMissions.forEach((mission: EchoMissionDefinition) => {
-            BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode).catch(console.error)
+            BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode).catch(() => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent message={`Failed to schedule mission ${mission.name}`} />
+                )
+                setLoadingMissionSet((currentSet: Set<string>) => {
+                    const updatedSet: Set<string> = new Set(currentSet)
+                    updatedSet.delete(String(mission.name))
+                    return updatedSet
+                })
+            })
             setLoadingMissionSet((currentSet: Set<string>) => {
                 const updatedSet: Set<string> = new Set(currentSet)
                 updatedSet.add(String(mission.name))
