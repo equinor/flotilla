@@ -1,4 +1,5 @@
-﻿using Api.Database.Models;
+﻿using Api.Controllers.Models;
+using Api.Database.Models;
 using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
@@ -37,6 +38,8 @@ namespace Api.EventHandlers
         private IAreaService AreaService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IAreaService>();
 
         private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
+
+        private ISignalRService SignalRService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
 
         public override void Subscribe()
         {
@@ -134,8 +137,19 @@ namespace Api.EventHandlers
                     await RobotService.UpdateCurrentArea(robot.Id, null);
                     return;
                 }
+
                 try { await ReturnToHomeService.ScheduleReturnToHomeMissionRun(robot.Id); }
-                catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException) { await RobotService.UpdateCurrentArea(robot.Id, null); }
+                catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException)
+                {
+                    var installation = robot.CurrentInstallation;
+                    if (installation != null)
+                        _ = SignalRService.SendMessageAsync(
+                            "Alert",
+                            installation,
+                            new AlertResponse("safezoneFailure", "Safezone failure", $"Failed to send {robot.Name} to a safezone", installation.InstallationCode, robot.Id));
+                    await RobotService.UpdateCurrentArea(robot.Id, null);
+                    return;
+                }
                 return;
             }
 
