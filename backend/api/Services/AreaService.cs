@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -10,7 +10,7 @@ namespace Api.Services
 {
     public interface IAreaService
     {
-        public Task<IEnumerable<Area>> ReadAll();
+        public Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters);
 
         public Task<Area?> ReadById(string id);
 
@@ -41,9 +41,18 @@ namespace Api.Services
             FlotillaDbContext context, IInstallationService installationService, IPlantService plantService, IDeckService deckService,
             IDefaultLocalizationPoseService defaultLocalizationPoseService, IAccessRoleService accessRoleService) : IAreaService
     {
-        public async Task<IEnumerable<Area>> ReadAll()
+        public async Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters)
         {
-            return await GetAreas().ToListAsync();
+            var query = GetAreasWithSubModels().OrderBy(a => a.Installation);
+            var filter = ConstructFilter(parameters);
+
+            query = (IOrderedQueryable<Area>)query.Where(filter);
+
+            return await PagedList<Area>.ToPagedListAsync(
+                query,
+                parameters.PageNumber,
+                parameters.PageSize
+            );
         }
 
         public async Task<Area?> ReadById(string id)
@@ -66,7 +75,6 @@ namespace Api.Services
             return await GetAreas().Where(a =>
                 a.Installation.Id.Equals(installation.Id) && a.Name.ToLower().Equals(areaName.ToLower())).FirstOrDefaultAsync();
         }
-
         public async Task<IEnumerable<Area>> ReadByInstallation(string installationCode)
         {
             var installation = await installationService.ReadByName(installationCode);
@@ -74,7 +82,6 @@ namespace Api.Services
 
             return await GetAreas().Where(a => a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
-
         public async Task<Area> Create(CreateAreaQuery newAreaQuery, List<Pose> positions)
         {
             var safePositions = new List<SafePosition>();
@@ -198,5 +205,47 @@ namespace Api.Services
                     a.Name.ToLower().Equals(areaName.ToLower())
                 ).FirstOrDefaultAsync();
         }
+
+        private static Expression<Func<Area, bool>> ConstructFilter(
+            AreaQueryStringParameters parameters
+        )
+        {
+            Expression<Func<Area, bool>> installationFilter = string.IsNullOrEmpty(parameters.InstallationCode)
+                ? area => true
+                : area => area.Deck != null &&
+                    area.Deck.Plant != null &&
+                    area.Deck.Plant.Installation != null &&
+                    area.Deck.Plant.Installation.InstallationCode.Equals(parameters.InstallationCode.Trim(), global::System.StringComparison.CurrentCultureIgnoreCase);
+
+            Expression<Func<Area, bool>> deckFilter = area => string.IsNullOrEmpty(parameters.Deck) ||
+                (area.Deck != null &&
+                    area.Deck.Name != null &&
+                    area.Deck.Name.Equals(parameters.Deck.Trim(), StringComparison.CurrentCultureIgnoreCase));
+
+            var area = Expression.Parameter(typeof(Area));
+
+            Expression body = Expression.AndAlso(
+                Expression.Invoke(installationFilter, area),
+                Expression.Invoke(deckFilter, area)
+            );
+
+            return Expression.Lambda<Func<Area, bool>>(body, area);
+        }
+
+        private IQueryable<Area> GetAreasWithSubModels()
+        {
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+
+            // Include related entities using the Include method
+            return context.Areas
+             .Include(a => a.SafePositions)
+             .Include(a => a.Deck)
+                 .ThenInclude(deck => deck != null ? deck.Plant : null)
+                 .ThenInclude(plant => plant != null ? plant.Installation : null)
+             .Include(a => a.Installation)
+             .Include(a => a.DefaultLocalizationPose)
+             .Where(a => a.Installation != null && accessibleInstallationCodes.Result.Contains(a.Installation.InstallationCode.ToUpper()));
+        }
+
     }
 }

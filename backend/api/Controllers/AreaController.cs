@@ -1,6 +1,7 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Utilities;
 using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -202,11 +203,12 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<AreaResponse>>> GetAreas()
+        public async Task<ActionResult<IList<AreaResponse>>> GetAreas([FromQuery] AreaQueryStringParameters parameters)
         {
+            PagedList<Area> areas;
             try
             {
-                var areas = await areaService.ReadAll();
+                areas = await areaService.ReadAll(parameters);
                 var response = areas.Select(area => new AreaResponse(area));
                 return Ok(response);
             }
