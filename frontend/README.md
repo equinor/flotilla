@@ -1,5 +1,7 @@
 # Flotilla frontend
 
+This document describes how to run the frontend. For information on best practises related to development, [see the best practises document](./best_practises.md).
+
 ## Setup
 
 The app uses TypeScript and React. For development, Node v20.x needs to be installed. Installation instructions can be found
