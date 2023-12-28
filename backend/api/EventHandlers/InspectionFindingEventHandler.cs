@@ -24,7 +24,6 @@ namespace Api.EventHandlers
 
             while (!stoppingToken.IsCancellationRequested)
             {
-
                 var now = DateTime.UtcNow;
 
                 var nextExecutionTime = CrontabSchedule.Parse(_cronExpression).GetNextOccurrence(now);
@@ -157,7 +156,6 @@ namespace Api.EventHandlers
 
         public static string GetWebhookURL(IConfiguration configuration, string secretName)
         {
-
             string? keyVaultUri = configuration.GetSection("KeyVault")["VaultUri"] ?? throw new KeyNotFoundException("No key vault in config");
 
             var keyVault = new SecretClient(
