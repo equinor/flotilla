@@ -118,6 +118,28 @@ although in this contrived example it would be easier to give a more meaningful 
 const ExampleComponent = ({ x: number } : { x: number }) => <div>{x + 1}</div>
 ```
 
+It is also worth noting that calls to the update functions of react state are grouped together at the end of each render. So in the following code:
+```
+const [x, setX] = useState<number>(0)
+
+useEffect(() => {
+    console.log(x) // 0
+    setX(x + 1)
+    console.log(x) // still 0
+    set(x + 1)
+}, [x])
+```
+we do not yet see the updated value of x in the same render we updated it. Additionally, if we call setX several times in one render (ie. inside the same useEffect), they will overwrite each other. 'x' will be 1 at the end of this render, not 2. In order to prevent this overwriting we can instead pass a function to the set function which describes how to update the variable using its current value. This will be done in turn for each call to setX in this case, prevent updates from being overwritten.
+```
+const [x, setX] = useState<number>(0)
+
+useEffect(() => {
+    setX((oldX) => oldX + 1)
+    setX((oldX) => oldX + 1)
+}, [x])
+```
+At the end of the above code the value of 'x' will be 2, as the second update call will use the output from the first update call as the input to its function. This is important to keep in mind in event handlers, as the state inside for instance signalR event handlers is frozen when they are first registered.
+
 ### Nesting
 
 React components naturally include other react components within their HTML return statement. If these nested components are rather large, or if they are not strictly related to the name of the file you are currently in, it is better to include these components in their own file. If there are several nested components that are needed for a certain section, or if the nested component has some small related files, then it can be good to place these component files in a nested folder.
