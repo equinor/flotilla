@@ -7,28 +7,42 @@ import { MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { MissionsProvider } from 'components/Contexts/MissionListsContext'
 import { SafeZoneProvider } from 'components/Contexts/SafeZoneContext'
 import { AlertProvider } from 'components/Contexts/AlertContext'
+import { InstallationProvider } from 'components/Contexts/InstallationContext'
+import { AuthProvider } from 'components/Contexts/AuthProvider'
+import { SignalRProvider } from 'components/Contexts/SignalRContext'
+import { RobotProvider } from 'components/Contexts/RobotContext'
 
 const App = () => (
-    <AlertProvider>
-        <SafeZoneProvider>
-            <MissionsProvider>
-                <LanguageProvider>
-                    <MissionControlProvider>
-                        <UnauthenticatedTemplate>
-                            <div className="sign-in-page">
-                                <AssetSelectionPage></AssetSelectionPage>
-                            </div>
-                        </UnauthenticatedTemplate>
-                        <AuthenticatedTemplate>
-                            <MissionFilterProvider>
-                                <FlotillaSite />
-                            </MissionFilterProvider>
-                        </AuthenticatedTemplate>
-                    </MissionControlProvider>
-                </LanguageProvider>
-            </MissionsProvider>
-        </SafeZoneProvider>
-    </AlertProvider>
+    <InstallationProvider>
+        <AuthProvider>
+            <SignalRProvider>
+                <RobotProvider>
+                    <MissionsProvider>
+                        <AlertProvider>
+                            <SafeZoneProvider>
+                                <MissionsProvider>
+                                    <LanguageProvider>
+                                        <MissionControlProvider>
+                                            <UnauthenticatedTemplate>
+                                                <div className="sign-in-page">
+                                                    <AssetSelectionPage></AssetSelectionPage>
+                                                </div>
+                                            </UnauthenticatedTemplate>
+                                            <AuthenticatedTemplate>
+                                                <MissionFilterProvider>
+                                                    <FlotillaSite />
+                                                </MissionFilterProvider>
+                                            </AuthenticatedTemplate>
+                                        </MissionControlProvider>
+                                    </LanguageProvider>
+                                </MissionsProvider>
+                            </SafeZoneProvider>
+                        </AlertProvider>
+                    </MissionsProvider>
+                </RobotProvider>
+            </SignalRProvider>
+        </AuthProvider>
+    </InstallationProvider>
 )
 
 export default App

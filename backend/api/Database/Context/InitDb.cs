@@ -241,7 +241,7 @@ namespace Api.Database.Context
                 Name = "HB",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>()
+                SafePositions = new List<SafePosition>(new[] { new SafePosition() })
             };
 
             return new List<Area>(new[]

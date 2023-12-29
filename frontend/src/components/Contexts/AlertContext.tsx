@@ -124,6 +124,12 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     return [...failedMissions, newFailedMission]
                 })
             })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [registerEvent, connectionReady, installationCode])
+
+    useEffect(() => {
+        if (connectionReady) {
             registerEvent(SignalREventLabels.alert, (username: string, message: string) => {
                 const backendAlert: Alert = JSON.parse(message)
                 const alertType = alertTypeEnumMap[backendAlert.alertCode]
@@ -137,11 +143,11 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     // Here we could update the robot state manually, but this is best done on the backend
                 }
 
-                setAlert(alertType, <FailedSafeZoneAlertContent message={backendAlert.alertDescription} />)
+                setAlert(alertType, <FailedSafeZoneAlertContent message={backendAlert.alertMessage} />)
             })
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [registerEvent, connectionReady, installationCode])
+    }, [registerEvent, connectionReady, installationCode, enabledRobots])
 
     useEffect(() => {
         if (newFailedMissions.length > 0) {

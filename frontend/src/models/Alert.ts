@@ -1,6 +1,6 @@
 export interface Alert {
     alertCode: string
     alertName: string
-    alertDescription: string
+    alertMessage: string
     robotId?: string
 }
