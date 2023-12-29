@@ -157,6 +157,43 @@ In general it is good to minimise the number of function calls that need to be m
 
 It is also good to not be afraid to define local small react components inside react component functions. Additionally, instead of writing code inside useEffects which define how the data of one useState variable can be converted into another useState variable, it is best to limit the number of react state variables and instead define subsequent variables in terms of the first variable. This can be done in conjunction with functional programming techniques, by for example describing how one variable maps to another using map/filter/reduce functions.
 
+Here are some examples for good and bad practises. 'getIndexDisplay' is small enough that it would not need to be separated from the react function return statement, but here it is just used as an example.
+
+Bad (A multiline function being called inside the HTML object):
+```
+const FooComponent = ({ index }: { index: number }) => {
+    const getIndexDisplay(x: number) => {
+        return <p>{x + 1}</p>
+    }
+
+    return (
+        <div>{getIndexDisplay(index)}</div>
+    )
+}
+```
+
+Better (The function has been inlined so that it becomes a simple mapping from input to output):
+```
+const FooComponent = ({ index }: { index: number }) => {
+    const getIndexDisplay(x: number) => <p>{x + 1}</p>
+
+    return (
+        <div>{getIndexDisplay(index)}</div>
+    )
+}
+```
+
+Good (The function has become a react component, so that it does not need to be excplicitly called):
+```
+const FooComponent = ({ index }: { index: number }) => {
+    const IndexDisplay({ x: number }: { x: number }) => <p>{x + 1}</p>
+
+    return (
+        <div><IndexDisplay x={index} /></div>
+    )
+}
+```
+
 ### Input
 
 It can be tempting to use temporary variables which are updated whenever a change to an input component is detected, and to keep this separate from the input component itself. However, react supports so-called "controlled components", which are components where we set the value of the input component to be the same as the variable that is updated when a change is detected. React automatically deals with this circular definition, allowing us to have a variable which both tells us when the input changes, whilst also telling us what the input box contains at any given time.
