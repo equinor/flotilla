@@ -141,12 +141,7 @@ namespace Api.EventHandlers
                 try { await ReturnToHomeService.ScheduleReturnToHomeMissionRun(robot.Id); }
                 catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException)
                 {
-                    var installation = robot.CurrentInstallation;
-                    if (installation != null)
-                        _ = SignalRService.SendMessageAsync(
-                            "Alert",
-                            installation,
-                            new AlertResponse("safezoneFailure", "Safezone failure", $"Failed to send {robot.Name} to a safezone", installation.InstallationCode, robot.Id));
+                    ReportFailureToSignalR(robot, $"Failed to send {robot.Name} to a safe zone");
                     await RobotService.UpdateCurrentArea(robot.Id, null);
                     return;
                 }
@@ -169,6 +164,16 @@ namespace Api.EventHandlers
             _scheduleMissionSemaphore.Release();
         }
 
+        private void ReportFailureToSignalR(Robot robot, string message)
+        {
+            var installation = robot.CurrentInstallation;
+            if (installation != null)
+                _ = SignalRService.SendMessageAsync(
+                    "Alert",
+                    installation,
+                    new AlertResponse("safezoneFailure", "Safezone failure", message, installation.InstallationCode, robot.Id));
+        }
+
         private async void OnEmergencyButtonPressedForRobot(object? sender, EmergencyButtonPressedForRobotEventArgs e)
         {
             _logger.LogInformation("Triggered EmergencyButtonPressed event for robot ID: {RobotId}", e.RobotId);
@@ -183,6 +188,7 @@ namespace Api.EventHandlers
             if (area == null)
             {
                 _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
+                ReportFailureToSignalR(robot, $"Robot {robot.Name} was not correctly localised. Could not find area {robot.CurrentArea.Name}");
                 return;
             }
 
@@ -193,6 +199,7 @@ namespace Api.EventHandlers
             catch (SafeZoneException ex)
             {
                 _logger.LogError(ex, "Failed to schedule return to safe zone mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
+                ReportFailureToSignalR(robot, $"Failed to send {robot.Name} to a safe zone");
                 try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
                 catch (RobotNotFoundException) { return; }
             }
@@ -209,12 +216,14 @@ namespace Api.EventHandlers
                 if (ex.IsarStatusCode != StatusCodes.Status409Conflict)
                 {
                     _logger.LogError(ex, "Failed to stop the current mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
+                    ReportFailureToSignalR(robot, $"Failed to stop current mission for robot {robot.Name}");
                     return;
                 }
             }
             catch (Exception ex)
             {
                 const string Message = "Error in ISAR while stopping current mission, cannot drive to safe position";
+                ReportFailureToSignalR(robot, $"Robot {robot.Name} failed to drive to safe position");
                 _logger.LogError(ex, "{Message}", Message);
                 return;
             }
@@ -233,7 +242,11 @@ namespace Api.EventHandlers
             }
 
             var area = await AreaService.ReadById(robot.CurrentArea!.Id);
-            if (area == null) { _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id); }
+            if (area == null)
+            {
+                _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
+                ReportFailureToSignalR(robot, $"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised");
+            }
 
             try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
             catch (RobotNotFoundException) { return; }

@@ -2,60 +2,30 @@ import { config } from 'config'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { FrontPage } from './FrontPage/FrontPage'
 import { MissionPage } from './MissionPage/MissionPage'
-import { InstallationProvider } from 'components/Contexts/InstallationContext'
 import { MissionHistoryPage } from './MissionHistoryPage/MissionHistoryPage'
 import { RobotPage } from './RobotPage/RobotPage'
-import { AuthProvider } from 'components/Contexts/AuthProvider'
 import { APIUpdater } from 'components/Contexts/APIUpdater'
 import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
 import { AssetSelectionPage } from './AssetSelectionPage/AssetSelectionPage'
-import { SignalRProvider } from 'components/Contexts/SignalRContext'
-import { MissionsProvider } from 'components/Contexts/MissionListsContext'
-import { RobotProvider } from 'components/Contexts/RobotContext'
 
 export const FlotillaSite = () => {
     return (
         <>
-            <InstallationProvider>
-                <AuthProvider>
-                    <SignalRProvider>
-                        <RobotProvider>
-                            <MissionsProvider>
-                                <APIUpdater>
-                                    <BrowserRouter>
-                                        <Routes>
-                                            <Route
-                                                path={`${config.FRONTEND_BASE_ROUTE}/`}
-                                                element={<AssetSelectionPage />}
-                                            />
-                                            <Route
-                                                path={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
-                                                element={<FrontPage />}
-                                            />
-                                            <Route
-                                                path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`}
-                                                element={<MissionPage />}
-                                            />
-                                            <Route
-                                                path={`${config.FRONTEND_BASE_ROUTE}/mission-definition/:missionId`}
-                                                element={<MissionDefinitionPage />}
-                                            />
-                                            <Route
-                                                path={`${config.FRONTEND_BASE_ROUTE}/history`}
-                                                element={<MissionHistoryPage />}
-                                            />
-                                            <Route
-                                                path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`}
-                                                element={<RobotPage />}
-                                            />
-                                        </Routes>
-                                    </BrowserRouter>
-                                </APIUpdater>
-                            </MissionsProvider>
-                        </RobotProvider>
-                    </SignalRProvider>
-                </AuthProvider>
-            </InstallationProvider>
+            <APIUpdater>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/`} element={<AssetSelectionPage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/FrontPage`} element={<FrontPage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/mission/:missionId`} element={<MissionPage />} />
+                        <Route
+                            path={`${config.FRONTEND_BASE_ROUTE}/mission-definition/:missionId`}
+                            element={<MissionDefinitionPage />}
+                        />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/history`} element={<MissionHistoryPage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`} element={<RobotPage />} />
+                    </Routes>
+                </BrowserRouter>
+            </APIUpdater>
         </>
     )
 }
