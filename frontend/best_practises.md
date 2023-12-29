@@ -149,6 +149,89 @@ Making the code as functional as possible does not only make it more readable, i
 
 Using coding styles common in functional languages are also encouraged in Typescript. This involves using data pipelines, such as map/filter/reduce/etc. If formatted on several lines it can be just as readable as using temporary variables, but this should be done within reason. Temporary variables are not neccessarily worse than doing the above approach, as long the as the temporary variables are kept within the scope of a pure function.
 
+In the following examples the functions are kept simple for the sake of demonstration.
+
+Bad (all updates are kept obfuscated inside the updateLists function):
+```
+const [x, setX] = useState<number>(0)
+const [numberList, setNumberList] = useState<number[]>(0)
+const [otherNumberList, setOtherNumberList] = useState<number[]>(0)
+
+const updateLists = () => {
+    let currentX = x
+    let numberListCopy = [...numberList]
+    let xIndex = numberList.findIndex(currentX)
+    numberListCopy.splice(xIndex, 1)
+    setNumberList(numberListCopy)
+
+    let otherNumberListCopy = [...otherNumberList]
+    otherNumberListCopy.push(currentX)
+    setOtherNumberList(otherNumberListCopy)
+}
+
+useEffect(() => {
+    updateLists()
+}, [x, numberList, otherNumberList])
+```
+
+Better (the updates of each list is separated, and the number is passed as an argument):
+```
+const [x, setX] = useState<number>(0)
+const [numberList, setNumberList] = useState<number[]>(0)
+const [otherNumberList, setOtherNumberList] = useState<number[]>(0)
+
+const removeNumberFromNumberList = (y: number) => {
+    let numberListCopy = [...numberList]
+    let yIndex = numberList.findIndex(y)
+    numberListCopy.splice(yIndex, 1)
+    setNumberList(numberListCopy)
+}
+
+const insertNumberInOtherNumberList = (y: number) => {
+    let otherNumberListCopy = [...otherNumberList]
+    otherNumberListCopy.push(y)
+    setOtherNumberList(otherNumberListCopy)
+}
+
+useEffect(() => {
+    removeNumberFromNumberList(x)
+    insertNumberInOtherNumberList(x)
+}, [x, numberList, otherNumberList])
+```
+
+Best (The functions only manipulate the given arguments and does not access any react state directly, whilst all the state updates are being done in the useEffect on the top level):
+```
+const [x, setX] = useState<number>(0)
+const [numberList, setNumberList] = useState<number[]>(0)
+const [otherNumberList, setOtherNumberList] = useState<number[]>(0)
+
+const removeNumberFromNumberList = (y: number, list: number[]) => {
+    let listCopy = [...list]
+    let yIndex = listCopy.findIndex(y)
+    listCopy.splice(yIndex, 1)
+    return listCopy
+}
+
+const insertNumberInOtherNumberList = (y: number, list: number[]) => {
+    let listcopy = [...list]
+    listcopy.push(y)
+    return listCopy
+}
+
+useEffect(() => {
+    setNumberList(removeNumberFromList(x, numberList))
+    setOtherNumberList(insertNumberIntoList(x, otherNumberList))
+}, [x, numberList, otherNumberList])
+```
+
+If we do the following then we also prevent any conflicts that would arise from having multiple updates to numberList and otherNumberList in the same render, but that is not the case in this simple example.
+```
+useEffect(() => {
+    setNumberList((oldList) => removeNumberFromList(x, oldList))
+    setOtherNumberList((oldList) => insertNumberIntoList(x, oldList))
+}, [x, numberList, otherNumberList])
+```
+
 ## Declarative programming
 
 React is a naturally declarative framwork. Declarative programming is a programming paradigm where we define what the result of the code running should be, instead of explicitly explaining how this should be achieved step-by-step. When making a react component we for instance do not state the order in which things should be rendered, instead we provide the HTML we wish to render, and refer to other components which hide further complexity behind them.
