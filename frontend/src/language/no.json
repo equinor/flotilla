@@ -208,5 +208,6 @@
     "Failed to retrieve Echo missions": "Kunne ikke hente ut oppdrag fra Echo",
     "Request error": "Forespørselsfeil",
     "No missions available": "Ingen oppdrag tilgjengelig",
-    "Failed to delete mission from queue": "Kunne ikke fjerne oppdrag fra køen"
+    "Failed to delete mission from queue": "Kunne ikke fjerne oppdrag fra køen",
+    "Failed to rerun mission": "Kunne ikke kjøre oppdraget på nytt"
 }
