@@ -34,12 +34,20 @@ const StyledDialog = styled(Dialog)`
     width: 320px;
 `
 
+const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, EchoMissionDefinition> => {
+    var missionMap = new Map<string, EchoMissionDefinition>()
+    missions.forEach((mission: EchoMissionDefinition) => {
+        missionMap.set(mission.echoMissionId + ': ' + mission.name, mission)
+    })
+    return missionMap
+}
+
 interface ScheduleDialogProps {
-    echoMissions: Map<string, EchoMissionDefinition>
+    echoMissionsList: EchoMissionDefinition[]
     closeDialog: () => void
 }
 
-export const SelectMissionsToScheduleDialog = ({ echoMissions, closeDialog }: ScheduleDialogProps): JSX.Element => {
+export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }: ScheduleDialogProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
     const { installationCode } = useInstallationContext()
@@ -48,6 +56,7 @@ export const SelectMissionsToScheduleDialog = ({ echoMissions, closeDialog }: Sc
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(undefined)
 
+    const echoMissions: Map<string, EchoMissionDefinition> = mapEchoMissionToString(echoMissionsList)
     const echoMissionsOptions = Array.from(echoMissions.keys())
     const scheduleButtonDisabled = !selectedRobot || selectedEchoMissions.length === 0
 
@@ -87,37 +96,41 @@ export const SelectMissionsToScheduleDialog = ({ echoMissions, closeDialog }: Sc
         setSelectedRobot(undefined)
     }
 
+    const SelectMissionsComponent = () => (
+        <Autocomplete
+            options={echoMissionsOptions}
+            onOptionsChange={(changes) => onChangeMissionSelections(changes.selectedItems)}
+            label={TranslateText('Select missions')}
+            multiple
+            placeholder={`${selectedEchoMissions.length}/${echoMissionsOptions.length} ${TranslateText('selected')}`}
+            autoWidth
+            onFocus={(e) => e.preventDefault()}
+        />
+    )
+
+    const SelectRobotComponent = () => (
+        <Autocomplete
+            optionLabel={(r) => (r ? r.name + ' (' + r.model.type + ')' : '')}
+            options={enabledRobots.filter(
+                (r) =>
+                    r.currentInstallation.installationCode.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+            )}
+            disabled={!enabledRobots}
+            selectedOptions={[selectedRobot]}
+            label={TranslateText('Select robot')}
+            onOptionsChange={(changes) => setSelectedRobot(changes.selectedItems[0])}
+            autoWidth
+            onFocus={(e) => e.preventDefault()}
+        />
+    )
+
     return (
         <StyledMissionDialog>
             <StyledDialog open={true} isDismissable>
                 <StyledAutoComplete>
                     <Typography variant="h3">{TranslateText('Add mission to the queue')}</Typography>
-                    <Autocomplete
-                        options={echoMissionsOptions}
-                        onOptionsChange={(changes) => onChangeMissionSelections(changes.selectedItems)}
-                        label={TranslateText('Select missions')}
-                        multiple
-                        // selectedOptions={selectedEchoMissions.map((m) => m.echoMissionId + ': ' + m.name)}
-                        placeholder={`${selectedEchoMissions.length}/${echoMissionsOptions.length} ${TranslateText(
-                            'selected'
-                        )}`}
-                        autoWidth
-                        onFocus={(e) => e.preventDefault()}
-                    />
-                    <Autocomplete
-                        optionLabel={(r) => (r ? r.name + ' (' + r.model.type + ')' : '')}
-                        options={enabledRobots.filter(
-                            (r) =>
-                                r.currentInstallation.installationCode.toLocaleLowerCase() ===
-                                installationCode.toLocaleLowerCase()
-                        )}
-                        disabled={!enabledRobots}
-                        selectedOptions={[selectedRobot]}
-                        label={TranslateText('Select robot')}
-                        onOptionsChange={(changes) => setSelectedRobot(changes.selectedItems[0])}
-                        autoWidth
-                        onFocus={(e) => e.preventDefault()}
-                    />
+                    <SelectMissionsComponent />
+                    <SelectRobotComponent />
                     <StyledMissionSection>
                         <Button onClick={closeDialog} variant="outlined">
                             {TranslateText('Cancel')}
