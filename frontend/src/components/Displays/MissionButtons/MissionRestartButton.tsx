@@ -42,7 +42,10 @@ export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps
         BackendAPICaller.reRunMission(missionId, option === ReRunOptions.ReRunFailed)
             .then(() => navigateToHome())
             .catch(() =>
-                setAlert(AlertType.RequestFail, <FailedRequestAlertContent message={'Failed to rerun missions'} />)
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent message={TranslateText('Failed to rerun mission')} />
+                )
             )
 
     return (
