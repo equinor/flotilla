@@ -34,14 +34,6 @@ const StyledDialog = styled(Dialog)`
     width: 320px;
 `
 
-const mapEchoMissionToString = (missions: EchoMissionDefinition[]): Map<string, EchoMissionDefinition> => {
-    var missionMap = new Map<string, EchoMissionDefinition>()
-    missions.forEach((mission: EchoMissionDefinition) => {
-        missionMap.set(mission.echoMissionId + ': ' + mission.name, mission)
-    })
-    return missionMap
-}
-
 interface ScheduleDialogProps {
     echoMissionsList: EchoMissionDefinition[]
     closeDialog: () => void
@@ -55,20 +47,6 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
     const { setLoadingMissionSet } = useMissionsContext()
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(undefined)
-
-    const echoMissions: Map<string, EchoMissionDefinition> = mapEchoMissionToString(echoMissionsList)
-    const echoMissionsOptions = Array.from(echoMissions.keys())
-    const scheduleButtonDisabled = !selectedRobot || selectedEchoMissions.length === 0
-
-    const onChangeMissionSelections = (selectedEchoMissions: string[]) => {
-        var echoMissionsToSchedule: EchoMissionDefinition[] = []
-        if (echoMissions) {
-            selectedEchoMissions.forEach((selectedEchoMission: string) => {
-                echoMissionsToSchedule.push(echoMissions.get(selectedEchoMission) as EchoMissionDefinition)
-            })
-        }
-        setSelectedEchoMissions(echoMissionsToSchedule)
-    }
 
     const onScheduleButtonPress = () => {
         if (!selectedRobot) return
@@ -94,15 +72,18 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
 
         setSelectedEchoMissions([])
         setSelectedRobot(undefined)
+        closeDialog()
     }
 
     const SelectMissionsComponent = () => (
         <Autocomplete
-            options={echoMissionsOptions}
-            onOptionsChange={(changes) => onChangeMissionSelections(changes.selectedItems)}
+            optionLabel={(m) => m.echoMissionId + ': ' + m.name}
+            options={echoMissionsList}
+            onOptionsChange={(changes) => setSelectedEchoMissions(changes.selectedItems)}
             label={TranslateText('Select missions')}
             multiple
-            placeholder={`${selectedEchoMissions.length}/${echoMissionsOptions.length} ${TranslateText('selected')}`}
+            selectedOptions={selectedEchoMissions}
+            placeholder={`${selectedEchoMissions.length}/${echoMissionsList.length} ${TranslateText('selected')}`}
             autoWidth
             onFocus={(e) => e.preventDefault()}
         />
@@ -136,11 +117,8 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
                             {TranslateText('Cancel')}
                         </Button>
                         <Button
-                            onClick={() => {
-                                onScheduleButtonPress()
-                                closeDialog()
-                            }}
-                            disabled={scheduleButtonDisabled}
+                            onClick={onScheduleButtonPress}
+                            disabled={!selectedRobot || selectedEchoMissions.length === 0}
                         >
                             {' '}
                             {TranslateText('Add mission to the queue')}
