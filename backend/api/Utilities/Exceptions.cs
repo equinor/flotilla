@@ -74,6 +74,10 @@
     {
     }
 
+    public class RobotBatteryLevelTooLowException(string message) : Exception(message)
+    {
+    }
+
     public class TagPositionNotFoundException(string message) : Exception(message)
     {
     }

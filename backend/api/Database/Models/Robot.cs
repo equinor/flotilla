@@ -75,9 +75,16 @@ namespace Api.Database.Models
 
         public float? MinAllowedPressureLevel { get; set; }
 
+        public float? MinAllowedBatteryLevel { get; set; }
+
         public bool IsRobotPressureHighEnoughToStartMission()
         {
             return MinAllowedPressureLevel == null || MinAllowedPressureLevel <= PressureLevel;
+        }
+
+        public bool IsRobotBatteryLevelHighEnoughToStartMissions()
+        {
+            return MinAllowedBatteryLevel == null || MinAllowedBatteryLevel <= BatteryLevel;
         }
 
         public IList<VideoStream> VideoStreams { get; set; }

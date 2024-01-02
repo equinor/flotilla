@@ -242,6 +242,11 @@ namespace Api.Controllers
                             return BadRequest("Min allowed pressure level must be a positive value");
                         updatedRobot = await robotService.UpdateRobotMinAllowedPressureLevel(id, query.MinAllowedPressureLevel);
                         break;
+                    case "minAllowedBatteryLevel":
+                        if (query.MinAllowedBatteryLevel < 0.0)
+                            return BadRequest("Min allowed battery level must be a positive value");
+                        updatedRobot = await robotService.UpdateRobotMinAllowedBatteryLevel(id, query.MinAllowedBatteryLevel);
+                        break;
                     case "pose":
                         if (query.Pose == null) return BadRequest("Cannot set robot pose to null");
                         updatedRobot = await robotService.UpdateRobotPose(id, query.Pose);

@@ -9,6 +9,8 @@ namespace Api.Database.Models
 
         public float? MinAllowedPressureLevel { get; set; }
 
+        public float? MinAllowedBatteryLevel { get; set; }
+
         public Pose? Pose { get; set; }
 
         public string? MissionId { get; set; }

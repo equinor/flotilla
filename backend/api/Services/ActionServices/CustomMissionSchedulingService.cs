@@ -98,6 +98,11 @@ namespace Api.Services.ActionServices
                 throw new RobotPressureTooLowException($"The robot pressure on {robot.Name} is too low to start a mission");
             }
 
+            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
+            {
+                throw new RobotBatteryLevelTooLowException($"The robot battery level on {robot.Name} is too low to start a mission");
+            }
+
             var scheduledMission = new MissionRun
             {
                 Name = customMissionQuery.Name,
