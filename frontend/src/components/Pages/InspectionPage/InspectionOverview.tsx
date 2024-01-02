@@ -1,7 +1,7 @@
-import { Tabs } from '@equinor/eds-core-react'
+import { Button, Icon, Tabs } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { InspectionSection } from './InspectionSection'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { AllInspectionsTable } from './InspectionTable'
 import { getInspectionDeadline } from 'utils/StringFormatting'
@@ -9,6 +9,12 @@ import { Inspection } from './InspectionSection'
 import styled from 'styled-components'
 import { ScheduleMissionDialog } from '../FrontPage/MissionOverview/ScheduleMissionDialog/ScheduleMissionDialog'
 import { MissionButton } from 'components/Displays/MissionButtons/MissionButton'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { useRobotContext } from 'components/Contexts/RobotContext'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { EchoMissionDefinition } from 'models/MissionDefinition'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { Icons } from 'utils/icons'
 
 const StyledContent = styled.div`
     display: flex;
@@ -30,8 +36,16 @@ const StyledView = styled.div`
 
 export const InspectionOverviewSection = () => {
     const { TranslateText } = useLanguageContext()
+    const { installationCode } = useInstallationContext()
+    const { enabledRobots } = useRobotContext()
+    const { setAlert } = useAlertContext()
+    const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
+    const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
+    const [echoMissions, setEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [activeTab, setActiveTab] = useState(0)
     const [allMissions, setAllMissions] = useState<Inspection[]>()
+
+    const anchorRef = useRef<HTMLButtonElement>(null)
 
     useEffect(() => {
         const fetchMissionDefinitions = async () => {
@@ -53,6 +67,38 @@ export const InspectionOverviewSection = () => {
         fetchMissionDefinitions()
     }, [activeTab])
 
+    const fetchEchoMissions = () => {
+        setIsFetchingEchoMissions(true)
+        BackendAPICaller.getAvailableEchoMissions(installationCode as string)
+            .then((missions) => {
+                setEchoMissions(missions)
+                setIsFetchingEchoMissions(false)
+            })
+            .catch((_) => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent message={'Failed to retrieve echo missions'} />
+                )
+                setIsFetchingEchoMissions(false)
+            })
+    }
+
+    const onClickScheduleMission = () => {
+        setIsScheduleMissionDialogOpen(true)
+        fetchEchoMissions()
+    }
+
+    const AddPredefinedMissionsButton = () => (
+        <Button
+            onClick={onClickScheduleMission}
+            disabled={enabledRobots.length === 0 || installationCode === ''}
+            ref={anchorRef}
+        >
+            <Icon name={Icons.Add} size={16} />
+            {TranslateText('Add predefined Echo mission')}
+        </Button>
+    )
+
     return (
         <Tabs activeTab={activeTab} onChange={setActiveTab}>
             <Tabs.List>
@@ -67,7 +113,14 @@ export const InspectionOverviewSection = () => {
                     <StyledView>
                         <StyledContent>
                             <StyledButtons>
-                                <ScheduleMissionDialog />
+                                {isScheduleMissionDialogOpen && (
+                                    <ScheduleMissionDialog
+                                        isFetchingEchoMissions={isFetchingEchoMissions}
+                                        echoMissions={echoMissions}
+                                        onClose={() => setIsScheduleMissionDialogOpen(false)}
+                                    />
+                                )}
+                                <AddPredefinedMissionsButton />
                                 <MissionButton />
                             </StyledButtons>
                             {allMissions && <AllInspectionsTable inspections={allMissions} />}
