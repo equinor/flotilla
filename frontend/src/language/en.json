@@ -207,5 +207,6 @@
     "Confirm plant": "Confirm plant",
     "Failed to retrieve Echo missions": "Failed to retrieve Echo missions",
     "Request error": "Request error",
-    "No missions available": "No missions available"
+    "No missions available": "No missions available",
+    "Failed to delete mission from queue": "Failed to delete mission from queue"
 }
