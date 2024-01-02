@@ -2,7 +2,9 @@ import { Typography } from '@equinor/eds-core-react'
 import { Robot } from 'models/Robot'
 import { useEffect } from 'react'
 import styled from 'styled-components'
+import { BlockedRobotAlertContent } from 'components/Alerts/BlockedRobotAlert'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
@@ -18,13 +20,16 @@ const RobotView = styled.div`
     grid-column: 1/ -1;
     gap: 1rem;
 `
+const isRobotBlocked = (robot: Robot): boolean => {
+    return robot.status === 'Blocked'
+}
 
 export const RobotStatusSection = () => {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
     const { switchSafeZoneStatus } = useSafeZoneContext()
-
+    const { setAlert } = useAlertContext()
     const relevantRobots = enabledRobots
         .filter(
             (robot) =>
@@ -35,7 +40,11 @@ export const RobotStatusSection = () => {
     useEffect(() => {
         const missionQueueFozenStatus = relevantRobots.some((robot: Robot) => robot.missionQueueFrozen)
         switchSafeZoneStatus(missionQueueFozenStatus)
-    }, [enabledRobots, installationCode, switchSafeZoneStatus, relevantRobots])
+        const blockedRobots = relevantRobots.filter(isRobotBlocked)
+        if (blockedRobots.length > 0) {
+            setAlert(AlertType.BlockedRobot, <BlockedRobotAlertContent robot={blockedRobots[0]} />)
+        }
+    }, [enabledRobots, installationCode, switchSafeZoneStatus, relevantRobots, setAlert])
 
     const robotDisplay = relevantRobots.map((robot) => <RobotStatusCard key={robot.id} robot={robot} />)
 

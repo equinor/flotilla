@@ -15,6 +15,7 @@ export enum AlertType {
     MissionFail,
     RequestFail,
     SafeZoneFail,
+    BlockedRobot,
 }
 
 const alertTypeEnumMap: { [key: string]: AlertType } = {
