@@ -224,5 +224,7 @@
     "which is NOT within the specified range": "som IKKE er tilfredstillende",
     "The current battery level is": "Batterinivået er",
     "which is above the specified minimum": "som er høyere enn anbefalt minimum",
-    "Failed to schedule mission ": "Kunne ikke planlegge oppdrag "
+    "which is above the suggested minimum": "som er mer enn anbefalt minimum",
+    "Failed to schedule mission ": "Kunne ikke planlegge oppdrag ",
+    "Failed to schedule mission": "Kunne ikke legge til oppdrag"
 }

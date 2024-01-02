@@ -224,5 +224,7 @@
     "which is NOT within the specified range": "which is NOT within the specified range",
     "The current battery level is": "The current battery level is",
     "which is above the specified minimum": "which is above the specified minimum",
-    "Failed to schedule mission ": "Failed to schedule mission "
+    "which is above the suggested minimum": "which is above the suggested minimum",
+    "Failed to schedule mission ": "Failed to schedule mission ",
+    "Failed to schedule mission": "Failed to schedule mission"
 }
