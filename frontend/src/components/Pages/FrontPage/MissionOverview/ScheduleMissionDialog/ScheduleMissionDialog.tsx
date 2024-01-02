@@ -58,7 +58,7 @@ export const ScheduleMissionDialog = (): JSX.Element => {
             .catch((_) => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent message={'Failed to retrieve echo missions'} />
+                    <FailedRequestAlertContent message={'Failed to retrieve Echo missions'} />
                 )
                 setIsFetchingEchoMissions(false)
             })
