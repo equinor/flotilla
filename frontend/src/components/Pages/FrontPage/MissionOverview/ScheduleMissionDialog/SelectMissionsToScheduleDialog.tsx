@@ -1,7 +1,7 @@
 import { Autocomplete, Button, Card, Dialog, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Robot } from 'models/Robot'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
@@ -41,7 +41,6 @@ interface ScheduleDialogProps {
 
 export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }: ScheduleDialogProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
-    const { enabledRobots } = useRobotContext()
     const { installationCode } = useInstallationContext()
     const { setAlert } = useAlertContext()
     const { setLoadingMissionSet } = useMissionsContext()
@@ -75,43 +74,17 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
         closeDialog()
     }
 
-    const SelectMissionsComponent = () => (
-        <Autocomplete
-            optionLabel={(m) => m.echoMissionId + ': ' + m.name}
-            options={echoMissionsList}
-            onOptionsChange={(changes) => setSelectedEchoMissions(changes.selectedItems)}
-            label={TranslateText('Select missions')}
-            multiple
-            selectedOptions={selectedEchoMissions}
-            placeholder={`${selectedEchoMissions.length}/${echoMissionsList.length} ${TranslateText('selected')}`}
-            autoWidth
-            onFocus={(e) => e.preventDefault()}
-        />
-    )
-
-    const SelectRobotComponent = () => (
-        <Autocomplete
-            optionLabel={(r) => (r ? r.name + ' (' + r.model.type + ')' : '')}
-            options={enabledRobots.filter(
-                (r) =>
-                    r.currentInstallation.installationCode.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
-            )}
-            disabled={!enabledRobots}
-            selectedOptions={[selectedRobot]}
-            label={TranslateText('Select robot')}
-            onOptionsChange={(changes) => setSelectedRobot(changes.selectedItems[0])}
-            autoWidth
-            onFocus={(e) => e.preventDefault()}
-        />
-    )
-
     return (
         <StyledMissionDialog>
             <StyledDialog open={true} isDismissable>
                 <StyledAutoComplete>
                     <Typography variant="h3">{TranslateText('Add mission to the queue')}</Typography>
-                    <SelectMissionsComponent />
-                    <SelectRobotComponent />
+                    <SelectMissionsComponent
+                        missions={echoMissionsList}
+                        selectedMissions={selectedEchoMissions}
+                        setSelectedMissions={setSelectedEchoMissions}
+                    />
+                    <SelectRobotComponent selectedRobot={selectedRobot} setSelectedRobot={setSelectedRobot} />
                     <StyledMissionSection>
                         <Button onClick={closeDialog} variant="outlined">
                             {TranslateText('Cancel')}
@@ -129,3 +102,62 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
         </StyledMissionDialog>
     )
 }
+
+const SelectMissionsComponent = memo(
+    ({
+        missions,
+        selectedMissions,
+        setSelectedMissions,
+    }: {
+        missions: EchoMissionDefinition[]
+        selectedMissions: EchoMissionDefinition[]
+        setSelectedMissions: (missions: EchoMissionDefinition[]) => void
+    }) => {
+        const { TranslateText } = useLanguageContext()
+
+        return (
+            <Autocomplete
+                optionLabel={(m) => m.echoMissionId + ': ' + m.name}
+                options={missions}
+                onOptionsChange={(changes) => setSelectedMissions(changes.selectedItems)}
+                label={TranslateText('Select missions')}
+                multiple
+                selectedOptions={selectedMissions}
+                placeholder={`${selectedMissions.length}/${missions.length} ${TranslateText('selected')}`}
+                autoWidth
+                onFocus={(e) => e.preventDefault()}
+            />
+        )
+    }
+)
+
+const SelectRobotComponent = memo(
+    ({
+        selectedRobot,
+        setSelectedRobot,
+    }: {
+        selectedRobot: Robot | undefined
+        setSelectedRobot: (r: Robot | undefined) => void
+    }) => {
+        const { enabledRobots } = useRobotContext()
+        const { TranslateText } = useLanguageContext()
+        const { installationCode } = useInstallationContext()
+
+        return (
+            <Autocomplete
+                optionLabel={(r) => (r ? r.name + ' (' + r.model.type + ')' : '')}
+                options={enabledRobots.filter(
+                    (r) =>
+                        r.currentInstallation.installationCode.toLocaleLowerCase() ===
+                        installationCode.toLocaleLowerCase()
+                )}
+                disabled={!enabledRobots}
+                selectedOptions={[selectedRobot]}
+                label={TranslateText('Select robot')}
+                onOptionsChange={(changes) => setSelectedRobot(changes.selectedItems[0])}
+                autoWidth
+                onFocus={(e) => e.preventDefault()}
+            />
+        )
+    }
+)
