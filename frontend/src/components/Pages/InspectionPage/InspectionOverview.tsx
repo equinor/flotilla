@@ -8,7 +8,7 @@ import { getInspectionDeadline } from 'utils/StringFormatting'
 import { Inspection } from './InspectionSection'
 import styled from 'styled-components'
 import { ScheduleMissionDialog } from '../FrontPage/MissionOverview/ScheduleMissionDialog/ScheduleMissionDialog'
-import { MissionButton } from 'components/Displays/MissionButtons/MissionButton'
+import { CreateEchoMissionButton } from 'components/Displays/MissionButtons/CreateEchoMissionButton'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -121,7 +121,7 @@ export const InspectionOverviewSection = () => {
                                     />
                                 )}
                                 <AddPredefinedMissionsButton />
-                                <MissionButton />
+                                <CreateEchoMissionButton />
                             </StyledButtons>
                             {allMissions && <AllInspectionsTable inspections={allMissions} />}
                         </StyledContent>

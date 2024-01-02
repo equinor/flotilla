@@ -1,7 +1,7 @@
 import { Button, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { MissionButton } from 'components/Displays/MissionButtons/MissionButton'
+import { CreateEchoMissionButton } from 'components/Displays/MissionButtons/CreateEchoMissionButton'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 
 const StyledMissionSection = styled.div`
@@ -26,7 +26,7 @@ export const NoMissionsDialog = ({ closeDialog }: { closeDialog: () => void }): 
                 <Button onClick={closeDialog} variant="outlined">
                     {TranslateText('Cancel')}
                 </Button>
-                <MissionButton />
+                <CreateEchoMissionButton />
             </StyledMissionSection>
         </StyledDialog>
     )
