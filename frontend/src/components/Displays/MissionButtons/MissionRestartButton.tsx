@@ -9,6 +9,8 @@ import styled from 'styled-components'
 import { useRef, useState } from 'react'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { ScheduleMissionWithLocalizationVerificationDialog } from 'components/Displays/LocalizationVerification/ScheduleMissionWithLocalizationVerification'
+import { Mission } from 'models/Mission'
 
 const Centered = styled.div`
     display: flex;
@@ -17,7 +19,7 @@ const Centered = styled.div`
 `
 
 interface MissionProps {
-    missionId: string
+    mission: Mission
     hasFailedTasks: boolean
 }
 
@@ -26,10 +28,12 @@ enum ReRunOptions {
     ReRunFailed,
 }
 
-export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps) => {
+export const MissionRestartButton = ({ mission, hasFailedTasks }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { setAlert } = useAlertContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [isLocationVerificationOpen, setIsLocationVerificationOpen] = useState<boolean>(false)
+    const [selectedRerunOption, setSelectedRerunOption] = useState<ReRunOptions>()
     const anchorRef = useRef<HTMLButtonElement>(null)
 
     let navigate = useNavigate()
@@ -38,8 +42,8 @@ export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps
         navigate(path)
     }
 
-    const startReRun = (option: ReRunOptions) =>
-        BackendAPICaller.reRunMission(missionId, option === ReRunOptions.ReRunFailed)
+    const startReRun = (option: ReRunOptions) => {
+        BackendAPICaller.reRunMission(mission.id, option === ReRunOptions.ReRunFailed)
             .then(() => navigateToHome())
             .catch(() =>
                 setAlert(
@@ -47,6 +51,8 @@ export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps
                     <FailedRequestAlertContent message={TranslateText('Failed to rerun mission')} />
                 )
             )
+        setIsLocationVerificationOpen(false)
+    }
 
     return (
         <Centered>
@@ -75,16 +81,34 @@ export const MissionRestartButton = ({ missionId, hasFailedTasks }: MissionProps
                     onClose={() => setIsOpen(false)}
                     anchorEl={anchorRef.current}
                 >
-                    <Menu.Item onClick={() => startReRun(ReRunOptions.ReRun)}>
+                    <Menu.Item
+                        onClick={() => {
+                            setSelectedRerunOption(ReRunOptions.ReRun)
+                            setIsLocationVerificationOpen(true)
+                        }}
+                    >
                         {TranslateText('Re-run full mission')}
                     </Menu.Item>
                     {hasFailedTasks && (
-                        <Menu.Item onClick={() => startReRun(ReRunOptions.ReRunFailed)}>
+                        <Menu.Item
+                            onClick={() => {
+                                setSelectedRerunOption(ReRunOptions.ReRunFailed)
+                                setIsLocationVerificationOpen(true)
+                            }}
+                        >
                             {TranslateText('Re-run failed and cancelled tasks in the mission')}
                         </Menu.Item>
                     )}
                 </Menu>
             </EdsProvider>
+            {isLocationVerificationOpen && (
+                <ScheduleMissionWithLocalizationVerificationDialog
+                    scheduleMissions={() => startReRun(selectedRerunOption!)}
+                    closeDialog={() => setIsLocationVerificationOpen(false)}
+                    robotId={mission.robot.id}
+                    missionDeckNames={[mission.area?.deckName ?? '']}
+                />
+            )}
         </Centered>
     )
 }
