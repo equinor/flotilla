@@ -75,9 +75,15 @@ export class BackendAPICaller {
         var responseContent
         // Status code 204 means no content
         if (response.status !== 204) {
-            responseContent = await response.json().catch((e) => {
-                throw new Error(`Error getting json from response: ${e}`)
-            })
+            if (contentType === 'image/png') {
+                responseContent = await response.blob().catch((e) => {
+                    throw new Error(`Error getting blob from response: ${e}`)
+                })
+            } else {
+                responseContent = await response.json().catch((e) => {
+                    throw new Error(`Error getting json from response: ${e}`)
+                })
+            }
         } else responseContent = ''
         return { content: responseContent, headers: response.headers }
     }
@@ -403,8 +409,8 @@ export class BackendAPICaller {
     static async getMap(installationCode: string, mapName: string): Promise<Blob> {
         const path: string = 'missions/' + installationCode + '/' + mapName + '/map'
 
-        return BackendAPICaller.GET<Response>(path, 'image/png')
-            .then((response) => response.content.blob())
+        return BackendAPICaller.GET<Blob>(path, 'image/png')
+            .then((response) => response.content)
             .catch((e) => {
                 console.error(`Failed to GET /${path}: ` + e)
                 throw e
