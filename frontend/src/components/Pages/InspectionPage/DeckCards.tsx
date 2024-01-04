@@ -9,7 +9,7 @@ import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 interface IDeckCardProps {
     deckMissions: DeckMissionType
-    setSelectedDeck: React.Dispatch<React.SetStateAction<Deck | undefined>>
+    setSelectedDeck: (deck: Deck | undefined) => void
     selectedDeck: Deck | undefined
     handleScheduleAll: (inspections: Inspection[]) => void
 }
@@ -17,7 +17,7 @@ interface IDeckCardProps {
 interface DeckCardProps {
     deckData: DeckInspectionTuple
     deckName: string
-    setSelectedDeck: React.Dispatch<React.SetStateAction<Deck | undefined>>
+    setSelectedDeck: (deck: Deck | undefined) => void
     selectedDeck: Deck | undefined
     handleScheduleAll: (inspections: Inspection[]) => void
 }
