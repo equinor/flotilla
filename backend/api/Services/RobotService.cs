@@ -223,22 +223,7 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<Robot> UpdateCurrentArea(string robotId, Area? area)
-        {
-            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
-            var robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-
-            await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
-
-            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.CurrentArea, area));
-
-            robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-            NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-
-            return robot;
-        }
+        public async Task<Robot> UpdateCurrentArea(string robotId, Area? area) { return await UpdateRobotProperty(robotId, "CurrentArea", area); }
 
         public async Task<Robot> UpdateRobotMinAllowedBatteryLevel(string robotId, float? minAllowedBatteryLevel)
         {
@@ -390,29 +375,6 @@ namespace Api.Services
             catch (RobotNotFoundException) { }
         }
 
-        private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)
-        {
-            var robot = await ReadById(robotId);
-            if (robot is null)
-            {
-                string errorMessage = $"Robot with ID {robotId} was not found in the database";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            foreach (var property in typeof(Robot).GetProperties())
-            {
-                if (property.Name == propertyName)
-                {
-                    logger.LogInformation("Setting {robotName} field {propertyName} from {oldValue} to {NewValue}", robot.Name, propertyName, property.GetValue(robot), value);
-                    property.SetValue(robot, value);
-                }
-            }
-
-            robot = await Update(robot);
-            return robot;
-        }
-
         private IQueryable<Robot> GetRobotsWithSubModels()
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
@@ -435,6 +397,29 @@ namespace Api.Services
 #pragma warning disable CA1304
                 .Where((r) => r.CurrentInstallation == null || r.CurrentInstallation.InstallationCode == null || accessibleInstallationCodes.Result.Contains(r.CurrentInstallation.InstallationCode.ToUpper()));
 #pragma warning restore CA1304
+        }
+
+        private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)
+        {
+            var robot = await ReadById(robotId);
+            if (robot is null)
+            {
+                string errorMessage = $"Robot with ID {robotId} was not found in the database";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
+            }
+
+            foreach (var property in typeof(Robot).GetProperties())
+            {
+                if (property.Name == propertyName)
+                {
+                    logger.LogInformation("Setting {robotName} field {propertyName} from {oldValue} to {NewValue}", robot.Name, propertyName, property.GetValue(robot), value);
+                    property.SetValue(robot, value);
+                }
+            }
+
+            robot = await Update(robot);
+            return robot;
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
