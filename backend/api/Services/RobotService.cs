@@ -20,8 +20,6 @@ namespace Api.Services
         public Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status);
         public Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel);
         public Task<Robot> UpdateRobotPressureLevel(string robotId, float? pressureLevel);
-        public Task<Robot> UpdateRobotMinAllowedPressureLevel(string robotId, float? minAllowedPressureLevel);
-        public Task<Robot> UpdateRobotMinAllowedBatteryLevel(string robotId, float? minAllowedBatteryLevel);
         public Task<Robot> UpdateRobotPose(string robotId, Pose pose);
         public Task<Robot> UpdateRobotEnabled(string robotId, bool enabled);
         public Task<Robot> UpdateCurrentMissionId(string robotId, string? missionId);
@@ -224,40 +222,6 @@ namespace Api.Services
         }
 
         public async Task<Robot> UpdateCurrentArea(string robotId, Area? area) { return await UpdateRobotProperty(robotId, "CurrentArea", area); }
-
-        public async Task<Robot> UpdateRobotMinAllowedBatteryLevel(string robotId, float? minAllowedBatteryLevel)
-        {
-            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
-            var robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-
-            await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
-
-            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.MinAllowedBatteryLevel, minAllowedBatteryLevel));
-
-            robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-            NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-
-            return robot;
-        }
-
-        public async Task<Robot> UpdateRobotMinAllowedPressureLevel(string robotId, float? minAllowedPressureLevel)
-        {
-            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
-            var robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-
-            await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
-
-            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.MinAllowedPressureLevel, minAllowedPressureLevel));
-
-            robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-            NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-
-            return robot;
-        }
 
         public async Task<Robot> UpdateCurrentInstallation(string robotId, Installation? installation)
         {
