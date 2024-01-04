@@ -5,14 +5,14 @@ export interface EchoMission {
     tags: EchoTag[]
 }
 
-export interface EchoTag {
+interface EchoTag {
     id: number
     tagId: string
     url: string
     inspections: EchoInspection[]
 }
 
-export interface EchoInspection {
+interface EchoInspection {
     inspectionType: string
     timeInSeconds: number
 }

@@ -21,7 +21,7 @@ const StyledStatusIcon = styled.div`
     align-items: flex-end;
 `
 
-export const MissionStatusIcon = ({ status }: StatusProps) => {
+const MissionStatusIcon = ({ status }: StatusProps) => {
     switch (status) {
         case MissionStatus.Pending: {
             return <Icon name={Icons.Pending} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />

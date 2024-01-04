@@ -21,7 +21,7 @@ interface MissionProps {
     hasFailedTasks: boolean
 }
 
-export enum ReRunOptions {
+enum ReRunOptions {
     ReRun,
     ReRunFailed,
 }
