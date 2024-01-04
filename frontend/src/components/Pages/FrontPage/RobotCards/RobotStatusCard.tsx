@@ -44,7 +44,11 @@ const VerticalContent = styled.div<{ $alignItems?: string }>`
 const StyledPadding = styled.div`
     padding: 8px;
 `
-
+const LongTypography = styled(Typography)`
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+`
 export const RobotStatusCard = ({ robot }: RobotProps) => {
     let navigate = useNavigate()
     const goToRobot = () => {
@@ -55,9 +59,9 @@ export const RobotStatusCard = ({ robot }: RobotProps) => {
         <HoverableStyledCard style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
             <StyledPadding>
                 <RobotImage robotType={robot.model.type} height="200px" />
+                <LongTypography variant="h5">{robot.name}</LongTypography>
                 <HorizontalContent>
                     <VerticalContent $alignItems="start">
-                        <Typography variant="h5">{robot.name}</Typography>
                         <Typography variant="caption">{robot.model.type}</Typography>
                         <RobotStatusChip status={robot.status} />
                     </VerticalContent>
