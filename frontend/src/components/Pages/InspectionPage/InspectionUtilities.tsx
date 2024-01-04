@@ -95,19 +95,26 @@ export const StyledDict = {
     `,
 }
 
-export const getDeadlineInspection = (deadline: Date) => {
+export enum DeckCardColors {
+    Gray = 'gray',
+    Green = 'green',
+    Red = 'red',
+    Orange = 'orange'
+}
+
+export const getDeadlineInspection = (deadline: Date): DeckCardColors => {
     const deadlineDays = getDeadlineInDays(deadline)
     switch (true) {
         case deadlineDays <= 1:
-            return 'red'
+            return DeckCardColors.Red
         case deadlineDays > 1 && deadlineDays <= 7:
-            return 'red'
+            return DeckCardColors.Red
         case deadlineDays > 7 && deadlineDays <= 14:
-            return 'orange'
+            return DeckCardColors.Orange
         case deadlineDays > 7 && deadlineDays <= 30:
-            return 'green'
+            return DeckCardColors.Green
     }
-    return 'green'
+    return DeckCardColors.Green
 }
 
 /**

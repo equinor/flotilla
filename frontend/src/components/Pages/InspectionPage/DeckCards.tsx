@@ -1,7 +1,7 @@
 import { Deck } from 'models/Deck'
 import { DeckInspectionTuple, DeckMissionType, Inspection } from './InspectionSection'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { CardMissionInformation, StyledDict, compareInspections, getDeadlineInspection } from './InspectionUtilities'
+import { CardMissionInformation, DeckCardColors, StyledDict, compareInspections, getDeadlineInspection } from './InspectionUtilities'
 import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
@@ -26,37 +26,33 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
 
-    const getCardColor = (deckName: string) => {
-        const inspections = deckData.inspections
-        if (inspections.length === 0) return 'gray'
+    const getCardColorFromInspections = (inspections: Inspection[]): DeckCardColors => {
+        if (inspections.length === 0) return DeckCardColors.Gray
         const sortedInspections = inspections.sort(compareInspections)
 
-        if (sortedInspections.length === 0) return 'green'
+        if (sortedInspections.length === 0) return DeckCardColors.Green
 
         const nextInspection = sortedInspections[0]
-
         if (!nextInspection.deadline) {
-            if (!nextInspection.missionDefinition.inspectionFrequency) return 'green'
-            else return 'red'
+            if (!nextInspection.missionDefinition.inspectionFrequency) return DeckCardColors.Green
+            else return DeckCardColors.Red
         }
 
         return getDeadlineInspection(nextInspection.deadline)
     }
 
     const formattedAreaNames = deckData.areas
-        .map((area) => {
-            return area.areaName.toLocaleUpperCase()
-        })
+        .map((area) => area.areaName.toLocaleUpperCase())
         .sort()
         .join(' | ')
 
     return (
         <StyledDict.DeckCard key={deckName}>
-            <StyledDict.Rectangle style={{ background: `${getCardColor(deckName)}` }} />
+            <StyledDict.Rectangle style={{ background: `${getCardColorFromInspections(deckData.inspections)}` }} />
             <StyledDict.Card
                 key={deckName}
                 onClick={deckData.inspections.length > 0 ? () => setSelectedDeck(deckData.deck) : undefined}
-                style={selectedDeck === deckData.deck ? { border: `solid ${getCardColor(deckName)} 2px` } : {}}
+                style={selectedDeck === deckData.deck ? { border: `solid ${getCardColorFromInspections(deckData.inspections)} 2px` } : {}}
             >
                 <StyledDict.DeckText>
                     <StyledDict.TopDeckText>
