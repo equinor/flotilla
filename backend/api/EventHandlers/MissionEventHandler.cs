@@ -166,12 +166,10 @@ namespace Api.EventHandlers
 
         private void ReportFailureToSignalR(Robot robot, string message)
         {
-            var installation = robot.CurrentInstallation;
-            if (installation != null)
-                _ = SignalRService.SendMessageAsync(
-                    "Alert",
-                    installation,
-                    new AlertResponse("safezoneFailure", "Safezone failure", message, installation.InstallationCode, robot.Id));
+            _ = SignalRService.SendMessageAsync(
+                "Alert",
+                robot.CurrentInstallation,
+                new AlertResponse("safezoneFailure", "Safezone failure", message, robot.CurrentInstallation.InstallationCode, robot.Id));
         }
 
         private async void OnEmergencyButtonPressedForRobot(object? sender, EmergencyButtonPressedForRobotEventArgs e)

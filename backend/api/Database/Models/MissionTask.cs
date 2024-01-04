@@ -99,6 +99,7 @@ namespace Api.Database.Models
         [Required]
         public int TaskOrder { get; set; }
 
+        [Required]
         public MissionTaskType Type { get; set; }
 
         [MaxLength(200)]

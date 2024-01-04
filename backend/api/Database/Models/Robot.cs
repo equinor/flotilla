@@ -6,7 +6,6 @@ namespace Api.Database.Models
 {
     public class Robot
     {
-
         public Robot()
         {
             VideoStreams = new List<VideoStream>();
@@ -65,7 +64,8 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public string SerialNumber { get; set; }
 
-        public Installation? CurrentInstallation { get; set; }
+        [Required]
+        public Installation CurrentInstallation { get; set; }
 
         public Area? CurrentArea { get; set; }
 

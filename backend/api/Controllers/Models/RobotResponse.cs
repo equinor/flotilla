@@ -14,7 +14,7 @@ namespace Api.Controllers.Models
 
         public string SerialNumber { get; set; }
 
-        public Installation? CurrentInstallation { get; }
+        public Installation CurrentInstallation { get; }
 
         public AreaResponse? CurrentArea { get; set; }
 
