@@ -331,6 +331,14 @@ namespace Api.Services
                         )
                 );
 
+            Expression<Func<MissionRun, bool>> localisationFilter = parameters.IncludeLocalisation
+                ? missionRun => true
+                : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.Localization));
+
+            Expression<Func<MissionRun, bool>> returnTohomeFilter = parameters.IncludeReturnToHome
+                ? missionRun => true
+                : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.DriveTo));
+
             var minStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinStartTime);
             var maxStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxStartTime);
             Expression<Func<MissionRun, bool>> startTimeFilter = missionRun =>
@@ -366,12 +374,18 @@ namespace Api.Services
                             Expression.AndAlso(
                                 Expression.Invoke(inspectionTypeFilter, missionRun),
                                 Expression.AndAlso(
-                                    Expression.Invoke(desiredStartTimeFilter, missionRun),
+                                    Expression.Invoke(localisationFilter, missionRun),
                                     Expression.AndAlso(
-                                        Expression.Invoke(startTimeFilter, missionRun),
+                                        Expression.Invoke(returnTohomeFilter, missionRun),
                                         Expression.AndAlso(
-                                            Expression.Invoke(endTimeFilter, missionRun),
-                                            Expression.Invoke(robotTypeFilter, missionRun)
+                                            Expression.Invoke(desiredStartTimeFilter, missionRun),
+                                            Expression.AndAlso(
+                                                Expression.Invoke(startTimeFilter, missionRun),
+                                                Expression.AndAlso(
+                                                    Expression.Invoke(endTimeFilter, missionRun),
+                                                    Expression.Invoke(robotTypeFilter, missionRun)
+                                                )
+                                            )
                                         )
                                     )
                                 )
