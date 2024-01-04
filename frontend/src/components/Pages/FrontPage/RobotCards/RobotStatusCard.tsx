@@ -44,11 +44,19 @@ const VerticalContent = styled.div<{ $alignItems?: string }>`
 const StyledPadding = styled.div`
     padding: 8px;
 `
+
 const LongTypography = styled(Typography)`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    :hover {
+        overflow: visible;
+        white-space: normal;
+        text-overflow: unset;
+        word-break: break-word;
+    }
 `
+
 export const RobotStatusCard = ({ robot }: RobotProps) => {
     let navigate = useNavigate()
     const goToRobot = () => {
