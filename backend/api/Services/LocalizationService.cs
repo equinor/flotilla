@@ -21,9 +21,9 @@ namespace Api.Services
         {
             var missionInstallation = await installationService.ReadByName(missionDefinition.InstallationCode);
 
-            if (missionInstallation is null || robot.CurrentInstallation is null)
+            if (missionInstallation is null)
             {
-                string errorMessage = $"Could not find installation for installation code {missionDefinition.InstallationCode} or the robot has no current installation";
+                string errorMessage = $"Could not find installation for installation code {missionDefinition.InstallationCode}";
                 logger.LogError("{Message}", errorMessage);
                 throw new InstallationNotFoundException(errorMessage);
             }

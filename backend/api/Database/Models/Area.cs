@@ -10,10 +10,13 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        public virtual Deck? Deck { get; set; }
+        [Required]
+        public virtual Deck Deck { get; set; }
 
+        [Required]
         public virtual Plant Plant { get; set; }
 
+        [Required]
         public virtual Installation Installation { get; set; }
 
         [Required]
@@ -22,7 +25,6 @@ namespace Api.Database.Models
 
         [Required]
         public MapMetadata MapMetadata { get; set; }
-
 
         public DefaultLocalizationPose? DefaultLocalizationPose { get; set; }
 
