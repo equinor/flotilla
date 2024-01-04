@@ -11,7 +11,7 @@ const BatteryAlignment = styled.div`
 const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
     font-size: ${(props) => props.$fontSize};
 `
-export interface BatteryStatusDisplayProps {
+interface BatteryStatusDisplayProps {
     batteryLevel?: number
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
 }

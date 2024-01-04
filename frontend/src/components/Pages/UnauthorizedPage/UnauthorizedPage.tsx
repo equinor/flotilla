@@ -12,7 +12,7 @@ export const StyledCenteredPage = styled.div`
     gap: 3rem;
 `
 
-export const GoToAccessITButton = () => {
+const GoToAccessITButton = () => {
     const { TranslateText } = useLanguageContext()
     return (
         <Button href="https://accessit.equinor.com" variant="contained">

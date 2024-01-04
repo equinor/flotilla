@@ -1,4 +1,4 @@
-export const formatBackendDateTimeToDate = (date: Date) => {
+const formatBackendDateTimeToDate = (date: Date) => {
     return new Date(date.toString())
 }
 
