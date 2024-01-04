@@ -73,7 +73,7 @@ namespace Api.Services.Models
         public string Type { get; set; }
 
         [JsonPropertyName("inspection_target")]
-        public IsarPosition InspectionTarget { get; set; }
+        public IsarPosition? InspectionTarget { get; set; }
 
         [JsonPropertyName("duration")]
         public float? Duration { get; set; }
@@ -85,12 +85,12 @@ namespace Api.Services.Models
         {
             Id = inspection.IsarStepId;
             Type = inspection.InspectionType.ToString();
-            InspectionTarget = new IsarPosition(
+            InspectionTarget = inspection.InspectionTarget != null ? new IsarPosition(
                 inspection.InspectionTarget.X,
                 inspection.InspectionTarget.Y,
                 inspection.InspectionTarget.Z,
                 "asset"
-            );
+            ) : null;
             Duration = inspection.VideoDuration;
             var metadata = new Dictionary<string, string?>
             {
