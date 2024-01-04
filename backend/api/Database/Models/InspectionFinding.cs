@@ -10,10 +10,13 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
+        [Required]
         public DateTime InspectionDate { get; set; }
 
+        [Required]
         public string IsarStepId { get; set; }
 
+        [Required]
         public string Finding { get; set; }
 
         public InspectionFinding(InspectionFindingQuery createInspectionFindingQuery)

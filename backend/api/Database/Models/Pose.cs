@@ -8,7 +8,6 @@ namespace Api.Database.Models
     [Owned]
     public class Orientation
     {
-
         public Orientation()
         {
             X = 0;
@@ -32,9 +31,14 @@ namespace Api.Database.Models
             Z = z;
             W = w;
         }
+
+        [Required]
         public float X { get; set; }
+        [Required]
         public float Y { get; set; }
+        [Required]
         public float Z { get; set; }
+        [Required]
         public float W { get; set; }
 
         public override bool Equals(object obj)
@@ -80,8 +84,11 @@ namespace Api.Database.Models
             Z = z;
         }
 
+        [Required]
         public float X { get; set; }
+        [Required]
         public float Y { get; set; }
+        [Required]
         public float Z { get; set; }
 
         public override bool Equals(object obj)
