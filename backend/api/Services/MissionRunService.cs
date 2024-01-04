@@ -207,6 +207,7 @@ namespace Api.Services
                 .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspections)
+                .ThenInclude(inspections => inspections.InspectionFindings)
                 .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper())); ;
         }
 
