@@ -15,8 +15,6 @@ interface RobotProps {
     robot: Robot
 }
 
-export const card_width = 220
-
 const StyledCard = styled(Card)`
     width: 220px;
     padding: 8px;
