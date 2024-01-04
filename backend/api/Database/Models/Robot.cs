@@ -73,18 +73,14 @@ namespace Api.Database.Models
 
         public float? PressureLevel { get; set; }
 
-        public float? MinAllowedPressureLevel { get; set; }
-
-        public float? MinAllowedBatteryLevel { get; set; }
-
         public bool IsRobotPressureHighEnoughToStartMission()
         {
-            return MinAllowedPressureLevel == null || MinAllowedPressureLevel <= PressureLevel;
+            return Model.LowerPressureWarningThreshold == null || PressureLevel == null || Model.LowerPressureWarningThreshold <= PressureLevel;
         }
 
         public bool IsRobotBatteryLevelHighEnoughToStartMissions()
         {
-            return MinAllowedBatteryLevel == null || MinAllowedBatteryLevel <= BatteryLevel;
+            return Model.BatteryWarningThreshold == null || Model.BatteryWarningThreshold <= BatteryLevel;
         }
 
         public IList<VideoStream> VideoStreams { get; set; }
