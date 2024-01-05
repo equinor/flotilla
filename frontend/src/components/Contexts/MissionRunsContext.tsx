@@ -12,7 +12,7 @@ const upsertList = (list: Mission[], mission: Mission) => {
     return newList
 }
 
-interface IMissionsContext {
+interface IMissionRunsContext {
     ongoingMissions: Mission[]
     missionQueue: Mission[]
     loadingMissionSet: Set<string>
@@ -23,21 +23,14 @@ interface Props {
     children: React.ReactNode
 }
 
-const defaultMissionsContext: IMissionsContext = {
+const defaultMissionRunsContext: IMissionRunsContext = {
     ongoingMissions: [],
     missionQueue: [],
     loadingMissionSet: new Set(),
     setLoadingMissionSet: (newLoadingMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => {},
 }
 
-export const MissionsContext = createContext<IMissionsContext>(defaultMissionsContext)
-
-interface MissionsResult {
-    ongoingMissions: Mission[]
-    missionQueue: Mission[]
-    loadingMissionSet: Set<string>
-    setLoadingMissionSet: (newLoadingMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => void
-}
+export const MissionRunsContext = createContext<IMissionRunsContext>(defaultMissionRunsContext)
 
 const updateQueueIfMissionAlreadyQueued = (oldQueue: Mission[], updatedMission: Mission) => {
     const existingMissionIndex = oldQueue.findIndex((m) => m.id === updatedMission.id)
@@ -68,10 +61,13 @@ const updateOngoingMissionsWithUpdatedMission = (oldMissionList: Mission[], upda
     return oldMissionList
 }
 
-const fetchMissions = (params: { statuses: MissionStatus[]; pageSize: number; orderBy: string }): Promise<Mission[]> =>
-    BackendAPICaller.getMissionRuns(params).then((response) => response.content)
+const fetchMissionRuns = (params: {
+    statuses: MissionStatus[]
+    pageSize: number
+    orderBy: string
+}): Promise<Mission[]> => BackendAPICaller.getMissionRuns(params).then((response) => response.content)
 
-export const useMissions = (): MissionsResult => {
+export const useMissionRuns = (): IMissionRunsContext => {
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
     const [loadingMissionSet, setLoadingMissionSet] = useState<Set<string>>(new Set())
@@ -124,14 +120,14 @@ export const useMissions = (): MissionsResult => {
 
     useEffect(() => {
         const fetchAndUpdateMissions = async () => {
-            const ongoing = await fetchMissions({
+            const ongoing = await fetchMissionRuns({
                 statuses: [MissionStatus.Ongoing, MissionStatus.Paused],
                 pageSize: 100,
                 orderBy: 'StartTime desc',
             })
             setOngoingMissions(ongoing)
 
-            const queue = await fetchMissions({
+            const queue = await fetchMissionRuns({
                 statuses: [MissionStatus.Pending],
                 pageSize: 100,
                 orderBy: 'DesiredStartTime',
@@ -145,13 +141,13 @@ export const useMissions = (): MissionsResult => {
     return { ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet }
 }
 
-export const MissionsProvider: FC<Props> = ({ children }) => {
-    const { ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet } = useMissions()
+export const MissionRunsProvider: FC<Props> = ({ children }) => {
+    const { ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet } = useMissionRuns()
     return (
-        <MissionsContext.Provider value={{ ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet }}>
+        <MissionRunsContext.Provider value={{ ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet }}>
             {children}
-        </MissionsContext.Provider>
+        </MissionRunsContext.Provider>
     )
 }
 
-export const useMissionsContext = () => useContext(MissionsContext)
+export const useMissionsContext = () => useContext(MissionRunsContext)
