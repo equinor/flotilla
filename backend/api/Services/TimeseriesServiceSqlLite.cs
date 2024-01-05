@@ -34,11 +34,15 @@ namespace Api.Services
             );
         }
 
-        // Cannot use Entity framework to insert keyless entities into the timeseries database
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async Task AddBatteryEntry(string currentMissionId, float batteryLevel, string robotId) { await Task.CompletedTask; }
+
+        public async Task AddPressureEntry(string currentMissionId, float pressureLevel, string robotId) { await Task.CompletedTask; }
+
+        public async Task AddPoseEntry(string currentMissionId, Pose robotPose, string robotId) { await Task.CompletedTask; }
+
         public async Task<T> Create<T>(T newTimeseries) where T : TimeseriesBase
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
+            await Task.CompletedTask;
             return newTimeseries;
         }
 

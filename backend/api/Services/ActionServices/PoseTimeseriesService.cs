@@ -13,22 +13,13 @@ namespace Api.Services.ActionServices
             var robot = await robotService.ReadByIsarId(isarId);
             if (robot == null)
             {
-                logger.LogWarning(
-                    "Could not find corresponding robot for pose update on robot with ISAR id '{IsarId}'", isarId);
+                logger.LogWarning("Could not find corresponding robot for pose update on robot with ISAR id '{IsarId}'", isarId);
                 return;
             }
 
             await robotService.UpdateRobotPose(robot.Id, pose);
-            await timeseriesService.Create(
-                new RobotPoseTimeseries(robot.Pose)
-                {
-                    MissionId = robot.CurrentMissionId,
-                    RobotId = robot.Id,
-                    Time = DateTime.UtcNow
-                }
-            );
+            await timeseriesService.AddPoseEntry(robot.CurrentMissionId!, pose, robot.Id);
             logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
-
         }
     }
 }
