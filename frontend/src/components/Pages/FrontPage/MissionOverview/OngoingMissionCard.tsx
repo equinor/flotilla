@@ -37,7 +37,10 @@ const TopContent = styled.div`
 const BottomContent = styled.div`
     display: flex;
     justify-content: space-between;
+    gap: 12px;
+    white-space: nowrap;
 `
+
 export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
     let navigate = useNavigate()
     const routeChange = () => {
