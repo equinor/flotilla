@@ -330,54 +330,19 @@ namespace Api.EventHandlers
         private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var robotService = provider.GetRequiredService<IRobotService>();
-            var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
+            var batteryTimeseriesService = provider.GetRequiredService<IBatteryTimeseriesService>();
 
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
-
-            var robot = await robotService.ReadByIsarId(batteryStatus.IsarId);
-            if (robot == null)
-            {
-                _logger.LogWarning(
-                    "Could not find corresponding robot for battery update on robot '{RobotName}' with ISAR id '{IsarId}'", batteryStatus.RobotName, batteryStatus.IsarId);
-            }
-            else
-            {
-                await robotService.UpdateRobotBatteryLevel(robot.Id, batteryStatus.BatteryLevel);
-
-                try { await timeseriesService.AddBatteryEntry(robot.CurrentMissionId!, batteryStatus.BatteryLevel, robot.Id); }
-                catch (NpgsqlException e)
-                {
-                    _logger.LogError(e, "An error occurred while connecting to the timeseries database");
-                    return;
-                }
-
-                _logger.LogDebug("Updated battery on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
-            }
+            await batteryTimeseriesService.AddBatteryEntry(batteryStatus.BatteryLevel, batteryStatus.IsarId);
         }
 
         private async void OnPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var robotService = provider.GetRequiredService<IRobotService>();
-            var timeseriesService = provider.GetRequiredService<ITimeseriesService>();
+            var pressureTimeseriesService = provider.GetRequiredService<IPressureTimeseriesService>();
 
             var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
-
-            var robot = await robotService.ReadByIsarId(pressureStatus.IsarId);
-            if (robot == null)
-            {
-                _logger.LogWarning(
-                    "Could not find corresponding robot for pressure update on robot '{RobotName}' with ISAR id '{IsarId}'", pressureStatus.RobotName, pressureStatus.IsarId);
-            }
-            else
-            {
-                if (pressureStatus.PressureLevel == robot.PressureLevel) return;
-
-                await robotService.UpdateRobotPressureLevel(robot.Id, pressureStatus.PressureLevel);
-                await timeseriesService.AddPressureEntry(robot.CurrentMissionId!, pressureStatus.PressureLevel, robot.Id);
-                _logger.LogDebug("Updated pressure on '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
-            }
+            await pressureTimeseriesService.AddPressureEntry(pressureStatus.PressureLevel, pressureStatus.IsarId);
         }
 
         private async void OnPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
