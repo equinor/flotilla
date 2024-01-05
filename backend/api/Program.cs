@@ -81,8 +81,11 @@ builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
 builder.Services.AddScoped<ICustomMissionSchedulingService, CustomMissionSchedulingService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
-builder.Services.AddScoped<IPoseTimeseriesService, PoseTimeseriesService>();
 builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
+
+builder.Services.AddScoped<IBatteryTimeseriesService, BatteryTimeseriesService>();
+builder.Services.AddScoped<IPressureTimeseriesService, PressureTimeseriesService>();
+builder.Services.AddScoped<IPoseTimeseriesService, PoseTimeseriesService>();
 
 bool useInMemoryDatabase = builder.Configuration
     .GetSection("Database")
