@@ -1,18 +1,18 @@
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefinitionHeader'
 import { BackButton } from '../../../utils/BackButton'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Header } from 'components/Header/Header'
-import { CondensedMissionDefinition, SourceType } from 'models/MissionDefinition'
+import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { Button, Typography, TextField, Icon } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { config } from 'config'
-import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledDict } from './MissionDefinitionStyledComponents'
+import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 
 const MetadataItem = ({ title, content, onEdit }: { title: string; content: any; onEdit?: () => void }) => {
     return (
@@ -40,12 +40,7 @@ const MetadataItem = ({ title, content, onEdit }: { title: string; content: any;
     )
 }
 
-interface IMissionDefinitionPageBodyProps {
-    missionDefinition: CondensedMissionDefinition
-    updateMissionDefinition: (missionDefinition: CondensedMissionDefinition) => void
-}
-
-const MissionDefinitionPageBody = ({ missionDefinition, updateMissionDefinition }: IMissionDefinitionPageBodyProps) => {
+const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: CondensedMissionDefinition }) => {
     const { TranslateText } = useLanguageContext()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
     const [selectedField, setSelectedField] = useState<string>('')
@@ -118,7 +113,6 @@ const MissionDefinitionPageBody = ({ missionDefinition, updateMissionDefinition 
                     fieldName={selectedField}
                     missionDefinition={missionDefinition}
                     closeEditDialog={() => setIsEditDialogOpen(false)}
-                    updateMissionDefinition={updateMissionDefinition}
                 />
             )}
         </>
@@ -129,12 +123,10 @@ interface IMissionDefinitionEditDialogProps {
     missionDefinition: CondensedMissionDefinition
     fieldName: string
     closeEditDialog: () => void
-    updateMissionDefinition: (missionDefinition: CondensedMissionDefinition) => void
 }
 
 const MissionDefinitionEditDialog = ({
     missionDefinition,
-    updateMissionDefinition,
     fieldName,
     closeEditDialog,
 }: IMissionDefinitionEditDialogProps) => {
@@ -145,6 +137,7 @@ const MissionDefinitionEditDialog = ({
         isDeprecated: false,
     }
     const { TranslateText } = useLanguageContext()
+    const navigate = useNavigate()
     const [form, setForm] = useState<MissionDefinitionUpdateForm>(defaultMissionDefinitionForm)
 
     const updateInspectionFrequencyFormDays = (newDay: string) => {
@@ -175,8 +168,7 @@ const MissionDefinitionEditDialog = ({
         if (daysAndHours[0] === 0 && daysAndHours[1] === 0) form.inspectionFrequency = undefined
         BackendAPICaller.updateMissionDefinition(missionDefinition.id, form).then((missionDefinition) => {
             closeEditDialog()
-            // When we integrate signalR, we will no longer need this function call as it will update regardless
-            if (missionDefinition.isDeprecated) updateMissionDefinition(missionDefinition)
+            if (missionDefinition.isDeprecated) navigate(`${config.FRONTEND_BASE_ROUTE}/FrontPage`)
         })
     }
 
@@ -251,29 +243,9 @@ const MissionDefinitionEditDialog = ({
 
 export const MissionDefinitionPage = () => {
     const { missionId } = useParams()
-    const { registerEvent, connectionReady } = useSignalRContext()
-    const [selectedMissionDefinition, setSelectedMissionDefinition] = useState<CondensedMissionDefinition>()
+    const { missionDefinitions } = useMissionDefinitionsContext()
 
-    useEffect(() => {
-        if (missionId) {
-            BackendAPICaller.getMissionDefinitionById(missionId).then((mission) => {
-                setSelectedMissionDefinition(mission)
-            })
-        }
-    }, [missionId])
-
-    useEffect(() => {
-        if (connectionReady) {
-            registerEvent(SignalREventLabels.missionDefinitionUpdated, (username: string, message: string) => {
-                const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
-                missionDefinition.sourceType =
-                    Object.values(SourceType)[missionDefinition.sourceType as unknown as number]
-                if (missionDefinition.id === missionId) {
-                    setSelectedMissionDefinition(missionDefinition)
-                }
-            })
-        }
-    }, [registerEvent, connectionReady, missionId])
+    const selectedMissionDefinition = missionDefinitions.find((m) => m.id === missionId)
 
     return (
         <>
@@ -282,10 +254,7 @@ export const MissionDefinitionPage = () => {
                 <StyledDict.MissionDefinitionPage>
                     <BackButton />
                     <MissionDefinitionHeader missionDefinition={selectedMissionDefinition} />
-                    <MissionDefinitionPageBody
-                        missionDefinition={selectedMissionDefinition}
-                        updateMissionDefinition={setSelectedMissionDefinition}
-                    />
+                    <MissionDefinitionPageBody missionDefinition={selectedMissionDefinition} />
                 </StyledDict.MissionDefinitionPage>
             )}
         </>
