@@ -215,12 +215,12 @@ namespace Api.Services
                 : area => area.Deck != null &&
                     area.Deck.Plant != null &&
                     area.Deck.Plant.Installation != null &&
-                    area.Deck.Plant.Installation.InstallationCode.Equals(parameters.InstallationCode.Trim(), global::System.StringComparison.CurrentCultureIgnoreCase);
+                    area.Deck.Plant.Installation.InstallationCode.ToLower().Equals(parameters.InstallationCode.ToLower().Trim());
 
             Expression<Func<Area, bool>> deckFilter = area => string.IsNullOrEmpty(parameters.Deck) ||
                 (area.Deck != null &&
                     area.Deck.Name != null &&
-                    area.Deck.Name.Equals(parameters.Deck.Trim(), StringComparison.CurrentCultureIgnoreCase));
+                    area.Deck.Name.ToLower().Equals(parameters.Deck.ToLower().Trim()));
 
             var area = Expression.Parameter(typeof(Area));
 
