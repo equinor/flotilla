@@ -22,13 +22,12 @@ interface IDeckCardProps {
 
 interface DeckCardProps {
     deckData: DeckInspectionTuple
-    deckName: string
     setSelectedDeck: (deck: Deck | undefined) => void
     selectedDeck: Deck | undefined
     handleScheduleAll: (inspections: Inspection[]) => void
 }
 
-const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleScheduleAll }: DeckCardProps) => {
+const DeckCard = ({ deckData, setSelectedDeck, selectedDeck, handleScheduleAll }: DeckCardProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
 
@@ -53,10 +52,10 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
         .join(' | ')
 
     return (
-        <StyledDict.DeckCard key={deckName}>
+        <StyledDict.DeckCard key={deckData.deck.deckName}>
             <StyledDict.Rectangle style={{ background: `${getCardColorFromInspections(deckData.inspections)}` }} />
             <StyledDict.Card
-                key={deckName}
+                key={deckData.deck.deckName}
                 onClick={deckData.inspections.length > 0 ? () => setSelectedDeck(deckData.deck) : undefined}
                 style={
                     selectedDeck === deckData.deck
@@ -66,7 +65,7 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
             >
                 <StyledDict.DeckText>
                     <StyledDict.TopDeckText>
-                        <Typography variant={'body_short_bold'}>{deckName.toString()}</Typography>
+                        <Typography variant={'body_short_bold'}>{deckData.deck.deckName.toString()}</Typography>
                         {deckData.inspections
                             .filter((i) => ongoingMissions.find((m) => m.missionId === i.missionDefinition.id))
                             .map((inspection) => (
@@ -78,7 +77,7 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
                     </StyledDict.TopDeckText>
                     {deckData.areas && <Typography variant={'body_short'}>{formattedAreaNames}</Typography>}
                     {deckData.inspections && (
-                        <CardMissionInformation deckName={deckName} inspections={deckData.inspections} />
+                        <CardMissionInformation deckName={deckData.deck.deckName} inspections={deckData.inspections} />
                     )}
                 </StyledDict.DeckText>
                 <StyledDict.CardComponent>
@@ -114,7 +113,6 @@ export const DeckCards = ({ deckMissions, setSelectedDeck, selectedDeck, handleS
                     <DeckCard
                         key={'deckCard' + deckMission.deck.deckName}
                         deckData={deckMission}
-                        deckName={deckMission.deck.deckName}
                         setSelectedDeck={setSelectedDeck}
                         selectedDeck={selectedDeck}
                         handleScheduleAll={handleScheduleAll}
