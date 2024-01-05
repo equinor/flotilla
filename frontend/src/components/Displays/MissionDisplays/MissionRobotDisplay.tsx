@@ -8,6 +8,11 @@ const StyledRobotDisplay = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    overflow: hidden;
+`
+const EllipsisTypography = styled(Typography)`
+    overflow: hidden;
+    text-overflow: ellipsis;
 `
 
 interface MissionProps {
@@ -21,7 +26,7 @@ export const MissionRobotDisplay = ({ mission }: MissionProps) => {
             <Typography variant="meta" color={tokens.colors.text.static_icons__tertiary.hex}>
                 {TranslateText('Robot')}
             </Typography>
-            <Typography>{mission.robot.name}</Typography>
+            <EllipsisTypography>{mission.robot.name}</EllipsisTypography>
         </StyledRobotDisplay>
     )
 }
