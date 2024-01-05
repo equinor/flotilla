@@ -11,6 +11,7 @@ using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+
 namespace Api.EventHandlers
 {
     /// <summary>
@@ -343,15 +344,14 @@ namespace Api.EventHandlers
             else
             {
                 await robotService.UpdateRobotBatteryLevel(robot.Id, batteryStatus.BatteryLevel);
-                await timeseriesService.Create(
-                    new RobotBatteryTimeseries
-                    {
-                        MissionId = robot.CurrentMissionId,
-                        BatteryLevel = batteryStatus.BatteryLevel,
-                        RobotId = robot.Id,
-                        Time = DateTime.UtcNow
-                    }
-                );
+
+                try { await timeseriesService.AddBatteryEntry(robot.CurrentMissionId!, batteryStatus.BatteryLevel, robot.Id); }
+                catch (NpgsqlException e)
+                {
+                    _logger.LogError(e, "An error occurred while connecting to the timeseries database");
+                    return;
+                }
+
                 _logger.LogDebug("Updated battery on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
             }
         }
@@ -375,15 +375,7 @@ namespace Api.EventHandlers
                 if (pressureStatus.PressureLevel == robot.PressureLevel) return;
 
                 await robotService.UpdateRobotPressureLevel(robot.Id, pressureStatus.PressureLevel);
-                await timeseriesService.Create(
-                    new RobotPressureTimeseries
-                    {
-                        MissionId = robot.CurrentMissionId,
-                        Pressure = pressureStatus.PressureLevel,
-                        RobotId = robot.Id,
-                        Time = DateTime.UtcNow
-                    }
-                );
+                await timeseriesService.AddPressureEntry(robot.CurrentMissionId!, pressureStatus.PressureLevel, robot.Id);
                 _logger.LogDebug("Updated pressure on '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
             }
         }

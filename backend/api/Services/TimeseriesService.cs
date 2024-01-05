@@ -14,6 +14,9 @@ namespace Api.Services
             TimeseriesQueryStringParameters queryStringParameters
         ) where T : TimeseriesBase;
 
+        public Task AddBatteryEntry(string currentMissionId, float batteryLevel, string robotId);
+        public Task AddPressureEntry(string currentMissionId, float pressureLevel, string robotId);
+        public Task AddPoseEntry(string currentMissionId, Pose robotPose, string robotId);
         public Task<T> Create<T>(T newTimeseries) where T : TimeseriesBase;
     }
 
@@ -25,16 +28,77 @@ namespace Api.Services
     public class TimeseriesService : ITimeseriesService
     {
         private readonly FlotillaDbContext _context;
+        private readonly ILogger<TimeseriesService> _logger;
         private readonly NpgsqlDataSource _dataSource;
 
-        public TimeseriesService(FlotillaDbContext context)
+        public TimeseriesService(FlotillaDbContext context, ILogger<TimeseriesService> logger)
         {
             string? connectionString = context.Database.GetConnectionString() ?? throw new NotSupportedException(
                 "Could not get connection string from EF core Database context - Cannot connect to Timeseries"
             );
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
             _dataSource = dataSourceBuilder.Build();
+            _logger = logger;
             _context = context;
+        }
+
+        public async Task AddBatteryEntry(string currentMissionId, float batteryLevel, string robotId)
+        {
+            try
+            {
+                await Create(
+                    new RobotBatteryTimeseries
+                    {
+                        MissionId = currentMissionId,
+                        BatteryLevel = batteryLevel,
+                        RobotId = robotId,
+                        Time = DateTime.UtcNow
+                    }
+                );
+            }
+            catch (NpgsqlException e)
+            {
+                _logger.LogError(e, "An error occurred setting battery level while connecting to the timeseries database");
+            }
+        }
+
+        public async Task AddPressureEntry(string currentMissionId, float pressureLevel, string robotId)
+        {
+            try
+            {
+                await Create(
+                    new RobotPressureTimeseries
+                    {
+                        MissionId = currentMissionId,
+                        Pressure = pressureLevel,
+                        RobotId = robotId,
+                        Time = DateTime.UtcNow
+                    }
+                );
+            }
+            catch (NpgsqlException e)
+            {
+                _logger.LogError(e, "An error occurred setting pressure level while connecting to the timeseries database");
+            }
+        }
+
+        public async Task AddPoseEntry(string currentMissionId, Pose robotPose, string robotId)
+        {
+            try
+            {
+                await Create(
+                    new RobotPoseTimeseries(robotPose)
+                    {
+                        MissionId = currentMissionId,
+                        RobotId = robotId,
+                        Time = DateTime.UtcNow
+                    }
+                );
+            }
+            catch (NpgsqlException e)
+            {
+                _logger.LogError(e, "An error occurred setting pose while connecting to the timeseries database");
+            }
         }
 
         public async Task<IEnumerable<T>> ReadAll<T>(
@@ -60,7 +124,8 @@ namespace Api.Services
         // Unfortunately need to use npgsql framework with heavy statements for this.
         public async Task<T> Create<T>(T newTimeseries) where T : TimeseriesBase
         {
-            var connection = await _dataSource.OpenConnectionAsync();
+            await using var connection = await _dataSource.OpenConnectionAsync();
+
             string tableName =
                 _context.Set<T>().EntityType.GetTableName()
                 ?? throw new NotImplementedException(
