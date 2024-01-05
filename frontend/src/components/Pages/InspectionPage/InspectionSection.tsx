@@ -8,9 +8,9 @@ import { getInspectionDeadline } from 'utils/StringFormatting'
 import { InspectionTable } from './InspectionTable'
 import { StyledDict, compareInspections } from './InspectionUtilities'
 import { DeckCards } from './DeckCards'
-import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { Area } from 'models/Area'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
+import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 
 export interface Inspection {
     missionDefinition: CondensedMissionDefinition
@@ -23,10 +23,6 @@ export interface DeckInspectionTuple {
     deck: Deck
 }
 
-export interface DeckMissionType {
-    [deckName: string]: DeckInspectionTuple
-}
-
 export interface DeckMissionCount {
     [color: string]: {
         count: number
@@ -36,14 +32,14 @@ export interface DeckMissionCount {
 
 export const InspectionSection = () => {
     const { installationCode } = useInstallationContext()
-    const [deckMissions, setDeckMissions] = useState<DeckMissionType>({})
+    const [deckMissions, setDeckMissions] = useState<DeckInspectionTuple[]>([])
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [unscheduledMissions, setUnscheduledMissions] = useState<CondensedMissionDefinition[]>([])
     const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
-    const { registerEvent, connectionReady } = useSignalRContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
+    const { missionDefinitions } = useMissionDefinitionsContext()
 
     const closeDialog = () => {
         setIsAlreadyScheduled(false)
@@ -70,105 +66,75 @@ export const InspectionSection = () => {
 
     useMemo(() => {
         const updateDeckMissions = () =>
-            BackendAPICaller.getDecks().then(async (decks: Deck[]) => {
-                let newDeckMissions: DeckMissionType = {}
-                decks.filter(
-                    (deck) => deck.installationCode.toLowerCase() === installationCode.toLowerCase()
-                ).forEach(async (deck) => {
-                    let areasInDeck = await BackendAPICaller.getAreasByDeckId(deck.id)
+            BackendAPICaller.getDecks().then(async (decks: Deck[]) =>
+                setDeckMissions(
+                    await Promise.all(
+                        // This is needed since the map function uses async calls
+                        decks
+                            .filter((deck) => deck.installationCode.toLowerCase() === installationCode.toLowerCase())
+                            .map(async (deck) => {
+                                let missionDefinitionsInDeck =
+                                    missionDefinitions.filter((m) => m.area?.deckName === deck.deckName) ?? []
+                                return {
+                                    inspections: missionDefinitionsInDeck.map((m) => {
+                                        return {
+                                            missionDefinition: m,
+                                            deadline: m.lastSuccessfulRun
+                                                ? getInspectionDeadline(
+                                                      m.inspectionFrequency,
+                                                      m.lastSuccessfulRun.endTime!
+                                                  )
+                                                : undefined,
+                                        }
+                                    }),
+                                    areas: await BackendAPICaller.getAreasByDeckId(deck.id),
+                                    deck: deck,
+                                }
+                            })
+                    )
+                )
+            )
 
-                    let missionDefinitions = await BackendAPICaller.getMissionDefinitionsInDeck(deck)
-                    missionDefinitions = missionDefinitions ?? []
-    
-                    newDeckMissions[deck.deckName] = {
-                        inspections: missionDefinitions.map((m) => {
-                            return {
-                                missionDefinition: m,
-                                deadline: m.lastSuccessfulRun
-                                    ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
-                                    : undefined,
-                            }
-                        }),
-                        areas: areasInDeck,
-                        deck: deck,
-                    }
-                })
-                setDeckMissions(newDeckMissions)
-            })
-        setSelectedDeck(undefined)
-        updateDeckMissions()
-    }, [installationCode])
+        if (deckMissions.length === 0 && missionDefinitions) {
+            setSelectedDeck(undefined)
+            updateDeckMissions()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [installationCode, missionDefinitions])
 
     useEffect(() => {
-        const updateDeckInspectionsWithUpdatedMissionDefinition = (
-            mDef: CondensedMissionDefinition,
-            relevantDeck: DeckInspectionTuple
-        ) => {
-            const inspections = relevantDeck.inspections
-            const index = inspections.findIndex((i) => i.missionDefinition.id === mDef.id)
-            if (index !== -1) {
-                // Ignore mission definitions for other decks
-                inspections[index] = {
-                    missionDefinition: mDef,
-                    deadline: mDef.lastSuccessfulRun // If there are no completed runs, set the deadline to undefined
-                        ? getInspectionDeadline(mDef.inspectionFrequency, mDef.lastSuccessfulRun.endTime!)
-                        : undefined,
+        const updateInspections = (oldInspections: Inspection[], mDefs: CondensedMissionDefinition[]) => {
+            return [...oldInspections].map((inspection) => {
+                const updatedMDef = mDefs.find((m) => m.id === inspection.missionDefinition.id)
+                if (updatedMDef) {
+                    const newDeadline = updatedMDef.lastSuccessfulRun // If there are no completed runs, set the deadline to undefined
+                        ? getInspectionDeadline(updatedMDef.inspectionFrequency, updatedMDef.lastSuccessfulRun.endTime!)
+                        : undefined
+                    return {
+                        ...inspection,
+                        missionDefinition: updatedMDef,
+                        deadline: newDeadline,
+                    }
                 }
-                relevantDeck = { ...relevantDeck, inspections: inspections }
-            }
-            return relevantDeck
-        }
-
-        const updateDeckInspectionsWithCreatedMissionDefinition = (
-            mDef: CondensedMissionDefinition,
-            relevantDeck: DeckInspectionTuple
-        ) => {
-            const inspections = relevantDeck.inspections
-            const index = inspections.findIndex((i) => i.missionDefinition.id === mDef.id)
-            if (index === -1) {
-                // Ignore mission definitions for other decks
-                inspections.push({
-                    missionDefinition: mDef,
-                    deadline: mDef.lastSuccessfulRun // If there are no completed runs, set the deadline to undefined
-                        ? getInspectionDeadline(mDef.inspectionFrequency, mDef.lastSuccessfulRun.endTime!)
-                        : undefined,
-                })
-                relevantDeck = { ...relevantDeck, inspections: inspections }
-            }
-            return relevantDeck
-        }
-
-        if (connectionReady) {
-            registerEvent(SignalREventLabels.missionDefinitionUpdated, (username: string, message: string) => {
-                const mDef: CondensedMissionDefinition = JSON.parse(message)
-                if (!mDef.area) return
-                const relevantDeckName = mDef.area.deckName
-                setDeckMissions((deckMissions) => {
-                    return {
-                        ...deckMissions,
-                        [relevantDeckName]: updateDeckInspectionsWithUpdatedMissionDefinition(
-                            mDef,
-                            deckMissions[relevantDeckName]
-                        ),
-                    }
-                })
-            })
-            registerEvent(SignalREventLabels.missionDefinitionCreated, (username: string, message: string) => {
-                const mDef: CondensedMissionDefinition = JSON.parse(message)
-                if (!mDef.area) return
-                const relevantDeckName = mDef.area.deckName
-                setDeckMissions((deckMissions) => {
-                    return {
-                        ...deckMissions,
-                        [relevantDeckName]: updateDeckInspectionsWithCreatedMissionDefinition(
-                            mDef,
-                            deckMissions[relevantDeckName]
-                        ),
-                    }
-                })
+                return inspection
             })
         }
-    }, [registerEvent, connectionReady])
+
+        if (deckMissions) {
+            setDeckMissions((deckMissions) =>
+                [...deckMissions].map((deckMission) => {
+                    const relevantMissionDefinitions = missionDefinitions.filter(
+                        (m) => m.area?.deckName === deckMission.deck.deckName
+                    )
+                    return {
+                        ...deckMission,
+                        inspections: updateInspections(deckMission.inspections, relevantMissionDefinitions),
+                    }
+                })
+            )
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [missionDefinitions])
 
     const handleScheduleAll = (inspections: Inspection[]) => {
         setIsDialogOpen(true)
@@ -190,7 +156,7 @@ export const InspectionSection = () => {
                         deck={selectedDeck}
                         openDialog={() => setIsDialogOpen(true)}
                         setSelectedMissions={setSelectedMissions}
-                        inspections={deckMissions[selectedDeck.deckName].inspections}
+                        inspections={deckMissions.find((d) => d.deck.deckName === selectedDeck.deckName)!.inspections}
                     />
                 )}
             </StyledDict.DeckOverview>

@@ -99,7 +99,7 @@ export enum DeckCardColors {
     Gray = 'gray',
     Green = 'green',
     Red = 'red',
-    Orange = 'orange'
+    Orange = 'orange',
 }
 
 export const getDeadlineInspection = (deadline: Date): DeckCardColors => {
