@@ -58,30 +58,37 @@ TelemetryDebugWriter.IsTracingDisabled = true;
 #endif
 
 builder.Services.AddScoped<IAccessRoleService, AccessRoleService>();
+
 builder.Services.AddScoped<IRobotService, RobotService>();
+builder.Services.AddScoped<IRobotModelService, RobotModelService>();
+
+builder.Services.AddScoped<IMissionDefinitionService, MissionDefinitionService>();
 builder.Services.AddScoped<IMissionRunService, MissionRunService>();
 builder.Services.AddScoped<IMissionTaskService, MissionTaskService>();
 builder.Services.AddScoped<IInspectionService, InspectionService>();
-builder.Services.AddScoped<IEmergencyActionService, EmergencyActionService>();
-builder.Services.AddScoped<IMissionDefinitionService, MissionDefinitionService>();
+builder.Services.AddScoped<ISourceService, SourceService>();
+
+builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
+builder.Services.AddScoped<ICustomMissionSchedulingService, CustomMissionSchedulingService>();
+
 builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<IStidService, StidService>();
+
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IBlobService, BlobService>();
-builder.Services.AddScoped<IAreaService, AreaService>();
+
 builder.Services.AddScoped<IInstallationService, InstallationService>();
 builder.Services.AddScoped<IPlantService, PlantService>();
 builder.Services.AddScoped<IDeckService, DeckService>();
-builder.Services.AddScoped<IDefaultLocalizationPoseService, DefaultLocalizationPoseService>();
-builder.Services.AddScoped<ISourceService, SourceService>();
-builder.Services.AddScoped<IRobotModelService, RobotModelService>();
-builder.Services.AddScoped<IReturnToHomeService, ReturnToHomeService>();
+builder.Services.AddScoped<IAreaService, AreaService>();
+
 builder.Services.AddScoped<ILocalizationService, LocalizationService>();
-builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
-builder.Services.AddScoped<ICustomMissionSchedulingService, CustomMissionSchedulingService>();
+builder.Services.AddScoped<IDefaultLocalizationPoseService, DefaultLocalizationPoseService>();
+builder.Services.AddScoped<IReturnToHomeService, ReturnToHomeService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
 builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
+builder.Services.AddScoped<IEmergencyActionService, EmergencyActionService>();
 
 builder.Services.AddScoped<IBatteryTimeseriesService, BatteryTimeseriesService>();
 builder.Services.AddScoped<IPressureTimeseriesService, PressureTimeseriesService>();
