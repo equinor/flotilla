@@ -13,6 +13,7 @@ import { AuthProvider } from 'components/Contexts/AuthProvider'
 import { SignalRProvider } from 'components/Contexts/SignalRContext'
 import { RobotProvider } from 'components/Contexts/RobotContext'
 import { config } from 'config'
+import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitionsContext'
 
 const appInsights = new ApplicationInsights({
     config: {
@@ -29,30 +30,32 @@ const App = () => (
     <InstallationProvider>
         <AuthProvider>
             <SignalRProvider>
-                <RobotProvider>
-                    <MissionsProvider>
-                        <AlertProvider>
-                            <SafeZoneProvider>
-                                <MissionsProvider>
-                                    <LanguageProvider>
-                                        <MissionControlProvider>
-                                            <UnauthenticatedTemplate>
-                                                <div className="sign-in-page">
-                                                    <AssetSelectionPage></AssetSelectionPage>
-                                                </div>
-                                            </UnauthenticatedTemplate>
-                                            <AuthenticatedTemplate>
-                                                <MissionFilterProvider>
-                                                    <FlotillaSite />
-                                                </MissionFilterProvider>
-                                            </AuthenticatedTemplate>
-                                        </MissionControlProvider>
-                                    </LanguageProvider>
-                                </MissionsProvider>
-                            </SafeZoneProvider>
-                        </AlertProvider>
-                    </MissionsProvider>
-                </RobotProvider>
+                <MissionDefinitionsProvider>
+                    <RobotProvider>
+                        <MissionsProvider>
+                            <AlertProvider>
+                                <SafeZoneProvider>
+                                    <MissionsProvider>
+                                        <LanguageProvider>
+                                            <MissionControlProvider>
+                                                <UnauthenticatedTemplate>
+                                                    <div className="sign-in-page">
+                                                        <AssetSelectionPage></AssetSelectionPage>
+                                                    </div>
+                                                </UnauthenticatedTemplate>
+                                                <AuthenticatedTemplate>
+                                                    <MissionFilterProvider>
+                                                        <FlotillaSite />
+                                                    </MissionFilterProvider>
+                                                </AuthenticatedTemplate>
+                                            </MissionControlProvider>
+                                        </LanguageProvider>
+                                    </MissionsProvider>
+                                </SafeZoneProvider>
+                            </AlertProvider>
+                        </MissionsProvider>
+                    </RobotProvider>
+                </MissionDefinitionsProvider>
             </SignalRProvider>
         </AuthProvider>
     </InstallationProvider>

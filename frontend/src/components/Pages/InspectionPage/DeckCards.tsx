@@ -1,14 +1,20 @@
 import { Deck } from 'models/Deck'
-import { DeckInspectionTuple, DeckMissionType, Inspection } from './InspectionSection'
+import { DeckInspectionTuple, Inspection } from './InspectionSection'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { CardMissionInformation, DeckCardColors, StyledDict, compareInspections, getDeadlineInspection } from './InspectionUtilities'
+import {
+    CardMissionInformation,
+    DeckCardColors,
+    StyledDict,
+    compareInspections,
+    getDeadlineInspection,
+} from './InspectionUtilities'
 import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useMissionsContext } from 'components/Contexts/MissionListsContext'
 
 interface IDeckCardProps {
-    deckMissions: DeckMissionType
+    deckMissions: DeckInspectionTuple[]
     setSelectedDeck: (deck: Deck | undefined) => void
     selectedDeck: Deck | undefined
     handleScheduleAll: (inspections: Inspection[]) => void
@@ -52,7 +58,11 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
             <StyledDict.Card
                 key={deckName}
                 onClick={deckData.inspections.length > 0 ? () => setSelectedDeck(deckData.deck) : undefined}
-                style={selectedDeck === deckData.deck ? { border: `solid ${getCardColorFromInspections(deckData.inspections)} 2px` } : {}}
+                style={
+                    selectedDeck === deckData.deck
+                        ? { border: `solid ${getCardColorFromInspections(deckData.inspections)} 2px` }
+                        : {}
+                }
             >
                 <StyledDict.DeckText>
                     <StyledDict.TopDeckText>
@@ -100,11 +110,11 @@ export const DeckCards = ({ deckMissions, setSelectedDeck, selectedDeck, handleS
     return (
         <StyledDict.DeckCards>
             {Object.keys(deckMissions).length > 0 ? (
-                Object.keys(deckMissions).map((deckName) => (
+                deckMissions.map((deckMission) => (
                     <DeckCard
-                        key={'deckCard' + deckName}
-                        deckData={deckMissions[deckName]}
-                        deckName={deckName}
+                        key={'deckCard' + deckMission.deck.deckName}
+                        deckData={deckMission}
+                        deckName={deckMission.deck.deckName}
                         setSelectedDeck={setSelectedDeck}
                         selectedDeck={selectedDeck}
                         handleScheduleAll={handleScheduleAll}
