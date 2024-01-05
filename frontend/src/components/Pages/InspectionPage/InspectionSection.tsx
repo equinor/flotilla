@@ -69,18 +69,17 @@ export const InspectionSection = () => {
     }, [isDialogOpen, ongoingMissions, missionQueue, selectedMissions])
 
     useMemo(() => {
-        const updateDeckMissions = () => {
+        const updateDeckMissions = () =>
             BackendAPICaller.getDecks().then(async (decks: Deck[]) => {
                 let newDeckMissions: DeckMissionType = {}
-                const filteredDecks = decks.filter(
+                decks.filter(
                     (deck) => deck.installationCode.toLowerCase() === installationCode.toLowerCase()
-                )
-                for (const deck of filteredDecks) {
+                ).forEach(async (deck) => {
                     let areasInDeck = await BackendAPICaller.getAreasByDeckId(deck.id)
 
-                    // These calls need to be made sequentially to update areaMissions safely
                     let missionDefinitions = await BackendAPICaller.getMissionDefinitionsInDeck(deck)
-                    if (!missionDefinitions) missionDefinitions = []
+                    missionDefinitions = missionDefinitions ?? []
+    
                     newDeckMissions[deck.deckName] = {
                         inspections: missionDefinitions.map((m) => {
                             return {
@@ -93,10 +92,9 @@ export const InspectionSection = () => {
                         areas: areasInDeck,
                         deck: deck,
                     }
-                }
+                })
                 setDeckMissions(newDeckMissions)
             })
-        }
         setSelectedDeck(undefined)
         updateDeckMissions()
     }, [installationCode])

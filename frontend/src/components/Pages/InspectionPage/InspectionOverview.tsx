@@ -52,7 +52,7 @@ export const InspectionOverviewSection = () => {
             let missionDefinitions = await BackendAPICaller.getMissionDefinitions({ pageSize: 100 }).then(
                 (response) => response.content
             )
-            if (!missionDefinitions) missionDefinitions = []
+            missionDefinitions = missionDefinitions ?? []
             let newInspection: Inspection[] = missionDefinitions.map((m) => {
                 return {
                     missionDefinition: m,
