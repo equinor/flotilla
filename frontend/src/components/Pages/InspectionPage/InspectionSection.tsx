@@ -9,7 +9,7 @@ import { InspectionTable } from './InspectionTable'
 import { StyledDict, compareInspections } from './InspectionUtilities'
 import { DeckCards } from './DeckCards'
 import { Area } from 'models/Area'
-import { useMissionsContext } from 'components/Contexts/MissionListsContext'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 
 export interface Inspection {

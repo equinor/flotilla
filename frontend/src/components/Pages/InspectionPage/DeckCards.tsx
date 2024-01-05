@@ -11,7 +11,7 @@ import {
 import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { useMissionsContext } from 'components/Contexts/MissionListsContext'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
 interface IDeckCardProps {
     deckMissions: DeckInspectionTuple[]

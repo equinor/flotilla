@@ -13,7 +13,7 @@ import { getDeadlineInDays } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { useEffect, useState } from 'react'
 import { TranslateTextWithContext } from 'components/Contexts/LanguageContext'
-import { useMissionsContext } from 'components/Contexts/MissionListsContext'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
 const StyledIcon = styled(Icon)`
     display: flex;

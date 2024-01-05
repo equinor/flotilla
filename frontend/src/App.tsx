@@ -5,7 +5,7 @@ import { FlotillaSite } from 'components/Pages/FlotillaSite'
 import { LanguageProvider } from 'components/Contexts/LanguageContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
 import { MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
-import { MissionsProvider } from 'components/Contexts/MissionListsContext'
+import { MissionRunsProvider } from 'components/Contexts/MissionRunsContext'
 import { SafeZoneProvider } from 'components/Contexts/SafeZoneContext'
 import { AlertProvider } from 'components/Contexts/AlertContext'
 import { InstallationProvider } from 'components/Contexts/InstallationContext'
@@ -32,10 +32,10 @@ const App = () => (
             <SignalRProvider>
                 <MissionDefinitionsProvider>
                     <RobotProvider>
-                        <MissionsProvider>
+                        <MissionRunsProvider>
                             <AlertProvider>
                                 <SafeZoneProvider>
-                                    <MissionsProvider>
+                                    <MissionRunsProvider>
                                         <LanguageProvider>
                                             <MissionControlProvider>
                                                 <UnauthenticatedTemplate>
@@ -50,10 +50,10 @@ const App = () => (
                                                 </AuthenticatedTemplate>
                                             </MissionControlProvider>
                                         </LanguageProvider>
-                                    </MissionsProvider>
+                                    </MissionRunsProvider>
                                 </SafeZoneProvider>
                             </AlertProvider>
-                        </MissionsProvider>
+                        </MissionRunsProvider>
                     </RobotProvider>
                 </MissionDefinitionsProvider>
             </SignalRProvider>
