@@ -224,5 +224,9 @@
     "The missions you are trying to add are on these decks:": "The missions you are trying to add are on these decks:",
     "You can only add missions from one deck.": "You can only add missions from one deck.",
     "Unknown deck": "Unknown deck",
-    "Cannot start selected mission as it has unknown deck.": "Cannot start selected mission as it has unknown deck."
+    "Cannot start selected mission as it has unknown deck.": "Cannot start selected mission as it has unknown deck.",
+    "Robot is blocked": "Robot is blocked",
+    "The robot": "The robot",
+    "is blocked and cannot perform tasks": "is blocked and cannot perform tasks",
+    "Blocked": "Blocked"
 }

@@ -221,8 +221,12 @@
     "The missions you are trying to add are on": "Oppdragene du vil legge til er på",
     "but the robot is currently running missions on": "men roboten kjører oppdrag på",
     "Will not be added dialog text": "Disse oppdragene vil ikke bli lagt i køen. Hvis du ønsker å legge de i køen må du først fjerne oppdrag fra køen og stoppe pågående oppdrag.",
-    "The missions you are trying to add are on these decks:": "The missions you are trying to add are on these decks:",
-    "You can only add missions from one deck.": "You can only add missions from one deck.",
-    "Unknown deck": "Unknown deck",
-    "Cannot start selected mission as it has unknown deck.": "Cannot start selected mission as it has unknown deck."
+    "The missions you are trying to add are on these decks:": "Oppdragene du prøver å legge til er på disse dekkene:",
+    "You can only add missions from one deck.": "Du kan kun legge til oppdrag på et dekk.",
+    "Unknown deck": "Ukjent dekk",
+    "Cannot start selected mission as it has unknown deck.": "Kan ikke starte valgt oppdrag da det har ukjent dekk.",
+    "Robot is blocked": "Roboten er blokkert",
+    "The robot": "Roboten",
+    "is blocked and cannot perform tasks": "er blokkert og kan ikke utføre oppgaver",
+    "Blocked": "Blokkert"
 }
