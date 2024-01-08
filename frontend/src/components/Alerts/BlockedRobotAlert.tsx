@@ -33,7 +33,9 @@ export const BlockedRobotAlertContent = ({ robot }: AlertProps) => {
             </StyledAlertTitle>
             <Indent>
                 <Button as={Typography} variant="ghost" color="secondary">
-                    {TranslateText(`The robot '${robot.name}' is blocked and cannot perform tasks.`)}
+                    {`${TranslateText('The robot')} ${robot.name} ${TranslateText(
+                        'is blocked and cannot perform tasks'
+                    )}.`}
                 </Button>
             </Indent>
         </StyledDiv>
