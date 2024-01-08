@@ -20,6 +20,7 @@ const RobotView = styled.div`
     grid-column: 1/ -1;
     gap: 1rem;
 `
+
 const isRobotBlocked = (robot: Robot): boolean => {
     return robot.status === 'Blocked'
 }
@@ -35,7 +36,15 @@ export const RobotStatusSection = () => {
             (robot) =>
                 robot.currentInstallation.installationCode.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
         )
-        .sort((robot, robotToCompareWith) => (robot.status! > robotToCompareWith.status! ? 1 : -1))
+        .sort((robot, robotToCompareWith) =>
+            robot.status! !== robotToCompareWith.status!
+                ? robot.status! > robotToCompareWith.status!
+                    ? 1
+                    : -1
+                : robot.name! > robotToCompareWith.name!
+                  ? 1
+                  : -1
+        )
 
     useEffect(() => {
         const missionQueueFozenStatus = relevantRobots.some((robot: Robot) => robot.missionQueueFrozen)
