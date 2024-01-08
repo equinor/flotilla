@@ -77,7 +77,7 @@ export const InspectionOverviewSection = () => {
             .catch((_) => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent message={'Failed to retrieve echo missions'} />
+                    <FailedRequestAlertContent message={'Failed to retrieve Echo missions'} />
                 )
                 setIsFetchingEchoMissions(false)
             })
