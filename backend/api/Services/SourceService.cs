@@ -46,10 +46,10 @@ namespace Api.Services
             parameters ??= new SourceQueryStringParameters { };
             var filter = ConstructFilter(parameters);
 
-            query = (DbSet<Source>)query.Where(filter);
+            var filteredQuery = query.Where(filter);
 
             return await PagedList<Source>.ToPagedListAsync(
-                query,
+                filteredQuery,
                 parameters.PageNumber,
                 parameters.PageSize
             );
