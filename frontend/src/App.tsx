@@ -1,3 +1,4 @@
+import { ApplicationInsights } from '@microsoft/applicationinsights-web'
 import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react'
 import { AssetSelectionPage } from 'components/Pages/AssetSelectionPage/AssetSelectionPage'
 import { FlotillaSite } from 'components/Pages/FlotillaSite'
@@ -11,6 +12,18 @@ import { InstallationProvider } from 'components/Contexts/InstallationContext'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
 import { SignalRProvider } from 'components/Contexts/SignalRContext'
 import { RobotProvider } from 'components/Contexts/RobotContext'
+import { config } from 'config'
+
+const appInsights = new ApplicationInsights({
+    config: {
+        connectionString: config.AI_CONNECTION_STRING,
+    },
+})
+
+if (config.AI_CONNECTION_STRING.length > 0) {
+    appInsights.loadAppInsights()
+    appInsights.trackPageView()
+}
 
 const App = () => (
     <InstallationProvider>

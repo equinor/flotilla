@@ -22,6 +22,7 @@ spec:
       environmentConfig:
         - environment: dev
           variables:
+            REACT_APP_AI_CONNECTION_STRING: ""
             REACT_APP_BACKEND_URL: "https://backend-flotilla-dev.playground.radix.equinor.com"
             REACT_APP_BACKEND_API_SCOPE: "api://ea4c7b92-47b3-45fb-bd25-a8070f0c495c/user_impersonation"
             REACT_APP_FRONTEND_URL: "https://frontend-flotilla-dev.playground.radix.equinor.com"

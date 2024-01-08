@@ -9,6 +9,7 @@
         "@equinor/eds-core-react": "^0.20.4",
         "@equinor/eds-icons": "^0.18.0",
         "@equinor/eds-tokens": "^0.7.1",
+        "@microsoft/applicationinsights-web": "^3.0.7",
         "@microsoft/signalr": "^7.0.12",
         "@testing-library/jest-dom": "^5.16.4",
         "@testing-library/react": "^13.3.0",
