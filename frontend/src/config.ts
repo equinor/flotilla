@@ -18,6 +18,7 @@ const getEnvVariable = (name: string): string => {
 }
 
 export const config = {
+    AI_CONNECTION_STRING: getEnvVariable('REACT_APP_AI_CONNECTION_STRING'),
     BACKEND_URL: getEnvVariable('REACT_APP_BACKEND_URL'),
     BACKEND_API_SCOPE: getEnvVariable('REACT_APP_BACKEND_API_SCOPE'),
     BACKEND_API_SIGNALR_URL: getEnvVariable('REACT_APP_BACKEND_URL') + '/hub',

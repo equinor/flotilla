@@ -1,6 +1,7 @@
 #!/bin/bash
 # Substitute environment variables in the index.html file using the values in the current container environment
 envsubst '
+  ${REACT_APP_AI_CONNECTION_STRING}
   ${REACT_APP_BACKEND_URL}
   ${REACT_APP_BACKEND_API_SCOPE}
   ${REACT_APP_FRONTEND_URL}
