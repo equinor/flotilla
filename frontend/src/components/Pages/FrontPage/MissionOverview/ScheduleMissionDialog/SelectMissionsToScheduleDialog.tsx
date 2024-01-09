@@ -54,7 +54,9 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
             BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent message={`Failed to schedule mission '${mission.name}'. ${e.message}`} />
+                    <FailedRequestAlertContent
+                        message={TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`}
+                    />
                 )
                 setLoadingMissionSet((currentSet: Set<string>) => {
                     const updatedSet: Set<string> = new Set(currentSet)
