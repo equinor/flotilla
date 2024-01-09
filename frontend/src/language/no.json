@@ -201,5 +201,6 @@
     "Robot is blocked": "Roboten er blokkert",
     "The robot": "Roboten",
     "is blocked and cannot perform tasks": "er blokkert og kan ikke utføre oppgaver",
-    "Blocked": "Blokkert"
+    "Blocked": "Blokkert",
+    "Several robots are blocked and cannot perform tasks.": "Flere roboter er blokkerte og kan ikke utføre oppgaver."
 }

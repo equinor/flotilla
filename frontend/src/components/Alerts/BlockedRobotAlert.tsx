@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { Robot } from 'models/Robot'
 
 const StyledDiv = styled.div`
     align-items: center;
@@ -20,10 +19,10 @@ const Indent = styled.div`
 `
 
 interface AlertProps {
-    robot: Robot
+    robotNames: string[]
 }
 
-export const BlockedRobotAlertContent = ({ robot }: AlertProps) => {
+export const BlockedRobotAlertContent = ({ robotNames }: AlertProps) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledDiv>
@@ -33,9 +32,11 @@ export const BlockedRobotAlertContent = ({ robot }: AlertProps) => {
             </StyledAlertTitle>
             <Indent>
                 <Button as={Typography} variant="ghost" color="secondary">
-                    {`${TranslateText('The robot')} ${robot.name} ${TranslateText(
-                        'is blocked and cannot perform tasks'
-                    )}.`}
+                    {robotNames.length === 1 &&
+                        `${TranslateText('The robot')} ${robotNames[0]} ${TranslateText(
+                            'is blocked and cannot perform tasks'
+                        )}.`}
+                    {robotNames.length > 1 && TranslateText('Several robots are blocked and cannot perform tasks.')}
                 </Button>
             </Indent>
         </StyledDiv>
