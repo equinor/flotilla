@@ -44,11 +44,9 @@ namespace Api.Services
         IAreaService areaService,
         IMissionRunService missionRunService) : IRobotService, IDisposable
     {
-        private readonly Semaphore _robotSemaphore = new(1, 1);
 
         public void Dispose()
         {
-            _robotSemaphore.Dispose();
             GC.SuppressFinalize(this);
         }
 
@@ -324,13 +322,11 @@ namespace Api.Services
 
         private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)
         {
-            _robotSemaphore.WaitOne();
             var robot = await ReadById(robotId);
             if (robot is null)
             {
                 string errorMessage = $"Robot with ID {robotId} was not found in the database";
                 logger.LogError("{Message}", errorMessage);
-                _robotSemaphore.Release();
                 throw new RobotNotFoundException(errorMessage);
             }
 
@@ -344,7 +340,6 @@ namespace Api.Services
             }
 
             robot = await Update(robot);
-            _robotSemaphore.Release();
             return robot;
         }
 
