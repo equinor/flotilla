@@ -15,7 +15,7 @@ interface MissionProps {
 }
 
 const StyledMissionCard = styled(Card)`
-    width: calc(100vw - 50px);
+    width: calc(100vw - 30px);
     max-width: 400px;
     padding: 10px;
     justify-content: space-between;
