@@ -11,7 +11,8 @@ import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
 
 const StyledDisplayButtons = styled.div`
     display: flex;
-    width: 410px;
+    width: calc(100vw * 0.7);
+    max-width: 410px;
     flex-direction: columns;
     justify-content: flex-end;
     gap: 0.5rem;
@@ -19,7 +20,8 @@ const StyledDisplayButtons = styled.div`
 
 const StyledDialog = styled(Dialog)`
     display: grid;
-    width: 450px;
+    width: calc(100vw * 0.8);
+    max-width: 450px;
 `
 
 const StyledText = styled.div`
