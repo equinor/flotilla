@@ -27,20 +27,49 @@ interface RemoveMissionDialogProps {
 }
 
 const StyledMissionCard = styled(Card)`
-    width: 880px;
     display: flex;
+    width: calc(100vw - 30px);
+    max-width: 880px;
 `
 const HorizontalContent = styled.div`
     display: grid;
-    grid-template-columns: auto 50px;
+    grid-template-columns: 40px auto 50px;
     align-items: center;
+    padding-left: 10px;
 `
 const HorizontalNonButtonContent = styled.div`
-    display: grid;
-    grid-template-columns: 20px 350px auto 100px 180px;
-    align-items: center;
-    padding: 4px 0px 4px 10px;
-    gap: 10px;
+    @media (min-width: 700px) {
+        display: grid;
+        grid-template-columns: auto auto auto 180px;
+        align-items: center;
+        padding: 4px 0px 4px 10px;
+        gap: 10px;
+    }
+
+    @media (max-width: 700px) {
+        display: grid;
+        grid-template: auto auto / auto auto;
+
+        #missionName {
+            grid-area: 1 / 1 / auto / span 2;
+            padding-bottom: 10px;
+        }
+
+        #robotName {
+            grid-area: 2 / 1 / auto / span 1;
+        }
+
+        #taskProgress {
+            grid-area: 2 / 2 / 100px / span 1;
+            padding-left: 15px;
+        }
+
+        #estimatedDuration {
+            display: none;
+        }
+
+        padding: 4px 0px 10px 4px;
+    }
 `
 
 const StyledDialogContent = styled.div`
@@ -69,6 +98,17 @@ const CircularCard = styled(Card)`
     align-items: center;
 `
 
+const StyledButton = styled(Button)`
+    margin-left: -18px;
+    height: auto;
+`
+
+const EllipsisTypography = styled(Typography)`
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+`
+
 export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQueueCardProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     let navigate = useNavigate()
@@ -83,27 +123,39 @@ export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQue
     return (
         <StyledMissionCard key={mission.id} style={{ boxShadow: tokens.elevation.raised }}>
             <HorizontalContent>
+                <CircularCard style={{ background: fillColor }}>
+                    <Typography variant="body_short_bold">{order}</Typography>
+                </CircularCard>
                 <HorizontalNonButtonContent onClick={routeChange}>
-                    <CircularCard style={{ background: fillColor }}>
-                        <Typography variant="body_short_bold">{order}</Typography>
-                    </CircularCard>
+                    <div id="missionName">
+                        {mission === placeholderMission ? (
+                            <PaddingLeft>
+                                <DotProgress size={48} color="primary" />
+                            </PaddingLeft>
+                        ) : (
+                            <StyledButton variant="ghost">
+                                <Typography variant="body_short_bold">{mission.name}</Typography>
+                            </StyledButton>
+                        )}
+                    </div>
 
-                    {mission === placeholderMission ? (
-                        <PaddingLeft>
-                            <DotProgress size={48} color="primary" />
-                        </PaddingLeft>
-                    ) : (
-                        <Button variant="ghost" fullWidth>
-                            <Typography variant="body_short_bold">{mission.name}</Typography>
-                        </Button>
-                    )}
-                    <Typography variant="caption" color={tokens.colors.text.static_icons__tertiary.hex}>
+                    <EllipsisTypography
+                        id="robotName"
+                        variant="caption"
+                        color={tokens.colors.text.static_icons__tertiary.hex}
+                    >
                         {TranslateText('Robot')}: {mission.robot.name}
-                    </Typography>
-                    <Typography variant="caption" color={tokens.colors.text.static_icons__tertiary.hex}>
+                    </EllipsisTypography>
+                    <Typography
+                        id="taskProgress"
+                        variant="caption"
+                        color={tokens.colors.text.static_icons__tertiary.hex}
+                    >
                         {TranslateText('Tasks')}: {numberOfTasks}
                     </Typography>
-                    <MissionDurationDisplay mission={mission} />
+                    <div id="estimatedDuration">
+                        <MissionDurationDisplay mission={mission} />
+                    </div>
                 </HorizontalNonButtonContent>
                 <Button
                     variant="ghost_icon"
