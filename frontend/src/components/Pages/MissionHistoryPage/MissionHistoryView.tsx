@@ -181,6 +181,7 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                         <Table.Cell>{TranslateText('Area')}</Table.Cell>
                         <Table.Cell>{TranslateText('Robot')}</Table.Cell>
                         <Table.Cell>{TranslateText('Completion Time')}</Table.Cell>
+                        <Table.Cell>{TranslateText('Rerun mission')}</Table.Cell>
                     </Table.Row>
                 </Table.Head>
                 {isLoading && (
