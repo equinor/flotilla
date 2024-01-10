@@ -198,6 +198,7 @@
     "You can only add missions from one deck.": "Du kan kun legge til oppdrag på et dekk.",
     "Unknown deck": "Ukjent dekk",
     "Cannot start selected mission as it has unknown deck.": "Kan ikke starte valgt oppdrag da det har ukjent dekk.",
+    "Rerun mission": "Kjør på nytt",
     "Robot is blocked": "Roboten er blokkert",
     "The robot": "Roboten",
     "is blocked and cannot perform tasks": "er blokkert og kan ikke utføre oppgaver",
