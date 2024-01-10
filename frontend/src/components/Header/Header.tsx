@@ -11,6 +11,19 @@ const StyledTopBar = styled(TopBar)`
     margin-bottom: 2rem;
     align-items: center;
     box-shadow: none;
+
+    @media (max-width: 700px) {
+        display: flex;
+        justify-self: start;
+        flex-direction: column;
+        height: 90px;
+    }
+`
+
+const StyledWrapper = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 `
 
 const IconStyle = styled.div`
@@ -43,18 +56,20 @@ export const Header = ({ page }: { page: string }) => {
     return (
         <>
             <StyledTopBar>
-                <HandPointer>
-                    <TopBar.Header
-                        onClick={() => {
-                            window.location.href = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
-                        }}
-                    >
-                        <Typography variant="body_long_bold" color="primary">
-                            Flotilla
-                        </Typography>
-                    </TopBar.Header>
-                </HandPointer>
-                <Typography> {installationName}</Typography>
+                <StyledWrapper>
+                    <HandPointer>
+                        <TopBar.Header
+                            onClick={() => {
+                                window.location.href = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
+                            }}
+                        >
+                            <Typography variant="body_long_bold" color="primary">
+                                Flotilla
+                            </Typography>
+                        </TopBar.Header>
+                    </HandPointer>
+                    <Typography> {installationName}</Typography>
+                </StyledWrapper>
                 <TopBar.Actions>
                     <IconStyle>
                         <Button variant="ghost_icon" onClick={() => console.log('Clicked account icon')}>
