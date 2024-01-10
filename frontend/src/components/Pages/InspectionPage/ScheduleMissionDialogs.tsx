@@ -35,7 +35,7 @@ const StyledMissionSection = styled.div`
     display: flex;
     margin-left: auto;
     margin-right: 0;
-    gap: 10px;
+    gap: 6px;
 `
 const StyledDialogContent = styled.div`
     display: flex;
@@ -48,6 +48,13 @@ const StyledDangerContent = styled.div`
     flex-direction: row;
     gap: 2px;
 `
+
+const StyledButton = styled(Button)`
+    display: inline-block;
+    height: auto;
+    min-height: 35px;
+`
+
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
@@ -169,15 +176,15 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             />
 
                             <StyledMissionSection>
-                                <Button
+                                <StyledButton
                                     onClick={() => {
                                         props.closeDialog()
                                     }}
                                     variant="outlined"
                                 >
                                     {TranslateText('Cancel')}
-                                </Button>
-                                <Button
+                                </StyledButton>
+                                <StyledButton
                                     onClick={() => {
                                         onScheduleButtonPress()
                                     }}
@@ -186,16 +193,16 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                                     {props.missions.length > 1
                                         ? TranslateText('Queue all missions')
                                         : TranslateText('Queue mission')}
-                                </Button>
+                                </StyledButton>
                                 {props.isAlreadyScheduled && props.unscheduledMissions.length > 0 && (
-                                    <Button
+                                    <StyledButton
                                         onClick={() => {
                                             onScheduleOnlyButtonPress()
                                         }}
                                         disabled={!selectedRobot}
                                     >
                                         {TranslateText('Queue unscheduled missions')}
-                                    </Button>
+                                    </StyledButton>
                                 )}
                             </StyledMissionSection>
                         </StyledAutoComplete>
@@ -228,7 +235,7 @@ export const AlreadyScheduledMissionDialog = (props: IScheduledProps): JSX.Eleme
                 </Dialog.CustomContent>
                 <Dialog.Actions>
                     <StyledMissionSection>
-                        <Button
+                        <StyledButton
                             onClick={() => {
                                 props.closeDialog()
                             }}
@@ -236,8 +243,8 @@ export const AlreadyScheduledMissionDialog = (props: IScheduledProps): JSX.Eleme
                         >
                             {' '}
                             {TranslateText('Cancel')}{' '}
-                        </Button>
-                        <Button
+                        </StyledButton>
+                        <StyledButton
                             onClick={() => {
                                 props.openDialog()
                                 props.closeDialog()
@@ -245,7 +252,7 @@ export const AlreadyScheduledMissionDialog = (props: IScheduledProps): JSX.Eleme
                         >
                             {' '}
                             {TranslateText('Queue mission')}
-                        </Button>
+                        </StyledButton>
                     </StyledMissionSection>
                 </Dialog.Actions>
             </StyledDialog>

@@ -24,8 +24,12 @@ const StyledIcon = styled(Icon)`
 `
 
 const StyledTable = styled.div`
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    overflow: auto;
+    @media (max-width: 700px) {
+        width: calc(100vw - 30px);
+    }
+    max-width: 950px;
 `
 
 const StyledContent = styled.div`
@@ -304,28 +308,30 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
 
     return (
         <>
-            <Table>
-                <Table.Head sticky>
-                    <Table.Row>
-                        {columns.map((col) => (
-                            <Table.Cell key={col}>{TranslateText(col)}</Table.Cell>
-                        ))}
-                    </Table.Row>
-                </Table.Head>
-                <Table.Body>{cellValues}</Table.Body>
-            </Table>
-            {isDialogOpen && (
-                <ScheduleMissionDialog
-                    missions={selectedMissions!}
-                    closeDialog={closeDialog}
-                    setMissions={setSelectedMissions}
-                    unscheduledMissions={unscheduledMissions}
-                    isAlreadyScheduled={isAlreadyScheduled}
-                />
-            )}
-            {isScheduledDialogOpen && (
-                <AlreadyScheduledMissionDialog openDialog={openDialog} closeDialog={closeScheduleDialog} />
-            )}
+            <StyledTable>
+                <Table>
+                    <Table.Head sticky>
+                        <Table.Row>
+                            {columns.map((col) => (
+                                <Table.Cell key={col}>{TranslateText(col)}</Table.Cell>
+                            ))}
+                        </Table.Row>
+                    </Table.Head>
+                    <Table.Body>{cellValues}</Table.Body>
+                </Table>
+                {isDialogOpen && (
+                    <ScheduleMissionDialog
+                        missions={selectedMissions!}
+                        closeDialog={closeDialog}
+                        setMissions={setSelectedMissions}
+                        unscheduledMissions={unscheduledMissions}
+                        isAlreadyScheduled={isAlreadyScheduled}
+                    />
+                )}
+                {isScheduledDialogOpen && (
+                    <AlreadyScheduledMissionDialog openDialog={openDialog} closeDialog={closeScheduleDialog} />
+                )}
+            </StyledTable>
         </>
     )
 }

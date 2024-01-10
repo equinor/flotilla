@@ -2,7 +2,8 @@ import { Dialog } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 
 export const StyledDialog = styled(Dialog)`
-    width: 420px;
+    width: calc(100vw * 0.8);
+    max-width: 420px;
     padding: 10px;
     display: flex;
     flex-direction: column;
