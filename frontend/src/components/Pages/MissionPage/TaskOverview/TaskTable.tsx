@@ -7,8 +7,25 @@ import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 
 const StyledTable = styled(Table)`
-    grid-column: 1/ -1;
-    font: equinor;
+    display: block;
+    overflow: auto;
+    max-width: calc(80vw);
+`
+
+const StyledTypography = styled(Typography)`
+    font-family: Equinor;
+    font-size: 28px;
+    font-style: normal;
+    line-height: 35px;
+
+    @media (max-width: 500px) {
+        font-family: Equinor;
+        font-size: 24px;
+        font-style: normal;
+        line-height: 30px;
+    }
+
+    padding-bottom: 10px;
 `
 
 export const TaskTable = ({ tasks }: { tasks: Task[] | undefined }) => {
@@ -16,7 +33,7 @@ export const TaskTable = ({ tasks }: { tasks: Task[] | undefined }) => {
     return (
         <StyledTable>
             <Table.Caption>
-                <Typography variant="h2">{TranslateText('Tasks')}</Typography>
+                <StyledTypography variant="h2">{TranslateText('Tasks')}</StyledTypography>
             </Table.Caption>
             <Table.Head>
                 <Table.Row>
