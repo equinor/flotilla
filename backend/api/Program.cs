@@ -8,6 +8,7 @@ using Api.Options;
 using Api.Services;
 using Api.Services.ActionServices;
 using Api.SignalRHubs;
+using Api.Utilities;
 using Azure.Identity;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -126,6 +127,7 @@ builder.Services
         {
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
         }
     );
 
