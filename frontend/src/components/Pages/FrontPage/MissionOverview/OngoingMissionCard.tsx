@@ -34,7 +34,6 @@ const TopContent = styled.div`
     display: flex;
     justify-content: space-between;
 `
-
 const BottomContent = styled.div`
     display: flex;
     justify-content: space-between;

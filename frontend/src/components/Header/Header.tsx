@@ -34,22 +34,18 @@ const IconStyle = styled.div`
         margin-left: 1rem;
     }
 `
-
 const HandPointer = styled.div`
     cursor: pointer;
 `
-
 const SelectLanguageWrapper = styled.div`
     margin-left: 1.5rem;
 `
-
 const StyledAlertList = styled.div`
     display: grid;
     grid-template-rows: repeat(auto-fill);
     align-items: center;
     gap: 0.5rem;
 `
-
 export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
     const { installationName } = useInstallationContext()
