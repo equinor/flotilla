@@ -27,9 +27,10 @@ interface RemoveMissionDialogProps {
 }
 
 const StyledMissionCard = styled(Card)`
-    display: flex;
+    display: grid;
     width: calc(100vw - 30px);
     max-width: 880px;
+    min-height: 50px;
 `
 const HorizontalContent = styled.div`
     display: grid;
@@ -40,7 +41,7 @@ const HorizontalContent = styled.div`
 const HorizontalNonButtonContent = styled.div`
     @media (min-width: 700px) {
         display: grid;
-        grid-template-columns: auto auto auto 180px;
+        grid-template-columns: auto 120px 90px 180px;
         align-items: center;
         padding: 4px 0px 4px 10px;
         gap: 10px;
@@ -48,7 +49,7 @@ const HorizontalNonButtonContent = styled.div`
 
     @media (max-width: 700px) {
         display: grid;
-        grid-template: auto auto / auto auto;
+        grid-template: auto auto / 140px auto;
 
         #missionName {
             grid-area: 1 / 1 / auto / span 2;
@@ -56,11 +57,11 @@ const HorizontalNonButtonContent = styled.div`
         }
 
         #robotName {
-            grid-area: 2 / 1 / auto / span 1;
+            grid-area: 2 / 1 / 140px / span 1;
         }
 
         #taskProgress {
-            grid-area: 2 / 2 / 100px / span 1;
+            grid-area: 2 / 2 / auto / span 1;
             padding-left: 15px;
         }
 
@@ -87,7 +88,7 @@ const StyledButtonSection = styled.div`
 `
 
 const PaddingLeft = styled.div`
-    padding-left: 20px;
+    padding-left: 10px;
 `
 
 const CircularCard = styled(Card)`
@@ -126,45 +127,46 @@ export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQue
                 <CircularCard style={{ background: fillColor }}>
                     <Typography variant="body_short_bold">{order}</Typography>
                 </CircularCard>
-                <HorizontalNonButtonContent onClick={routeChange}>
-                    <div id="missionName">
-                        {mission === placeholderMission ? (
-                            <PaddingLeft>
-                                <DotProgress size={48} color="primary" />
-                            </PaddingLeft>
-                        ) : (
-                            <StyledButton variant="ghost">
-                                <Typography variant="body_short_bold">{mission.name}</Typography>
-                            </StyledButton>
-                        )}
-                    </div>
-
-                    <EllipsisTypography
-                        id="robotName"
-                        variant="caption"
-                        color={tokens.colors.text.static_icons__tertiary.hex}
-                    >
-                        {TranslateText('Robot')}: {mission.robot.name}
-                    </EllipsisTypography>
-                    <Typography
-                        id="taskProgress"
-                        variant="caption"
-                        color={tokens.colors.text.static_icons__tertiary.hex}
-                    >
-                        {TranslateText('Tasks')}: {numberOfTasks}
-                    </Typography>
-                    <div id="estimatedDuration">
-                        <MissionDurationDisplay mission={mission} />
-                    </div>
-                </HorizontalNonButtonContent>
-                <Button
-                    variant="ghost_icon"
-                    onClick={() => {
-                        setConfirmDeleteDialogOpen(true)
-                    }}
-                >
-                    <Icon name={Icons.Remove} size={24} title="more action" />
-                </Button>
+                {mission === placeholderMission ? (
+                    <PaddingLeft>
+                        <DotProgress size={48} color="primary" />
+                    </PaddingLeft>
+                ) : (
+                    <>
+                        <HorizontalNonButtonContent onClick={routeChange}>
+                            <div id="missionName">
+                                <StyledButton variant="ghost">
+                                    <Typography variant="body_short_bold">{mission.name}</Typography>
+                                </StyledButton>
+                            </div>
+                            <EllipsisTypography
+                                id="robotName"
+                                variant="caption"
+                                color={tokens.colors.text.static_icons__tertiary.hex}
+                            >
+                                {TranslateText('Robot')}: {mission.robot.name}
+                            </EllipsisTypography>
+                            <Typography
+                                id="taskProgress"
+                                variant="caption"
+                                color={tokens.colors.text.static_icons__tertiary.hex}
+                            >
+                                {TranslateText('Tasks')}: {numberOfTasks}
+                            </Typography>
+                            <div id="estimatedDuration">
+                                <MissionDurationDisplay mission={mission} />
+                            </div>
+                        </HorizontalNonButtonContent>
+                        <Button
+                            variant="ghost_icon"
+                            onClick={() => {
+                                setConfirmDeleteDialogOpen(true)
+                            }}
+                        >
+                            <Icon name={Icons.Remove} size={24} title="more action" />
+                        </Button>
+                    </>
+                )}
             </HorizontalContent>
             <RemoveMissionDialog
                 confirmDeleteDialogOpen={confirmDeleteDialogOpen}
