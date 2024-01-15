@@ -47,6 +47,16 @@ namespace Api.Controllers
             var robot = await robotService.ReadById(scheduledMissionQuery.RobotId);
             if (robot is null) return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
 
+            if (!robot.IsRobotPressureHighEnoughToStartMission())
+            {
+                return BadRequest($"The robot pressure on {robot.Name} is too low to start a mission");
+            }
+
+            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
+            {
+                return BadRequest($"The robot battery level on {robot.Name} is too low to start a mission");
+            }
+
             var missionRun = await missionRunService.ReadById(missionRunId);
             if (missionRun == null) return NotFound("Mission run not found");
 
@@ -115,6 +125,16 @@ namespace Api.Controllers
             if (robot is null)
             {
                 return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
+            }
+
+            if (!robot.IsRobotPressureHighEnoughToStartMission())
+            {
+                return BadRequest($"The robot pressure on {robot.Name} is too low to start a mission");
+            }
+
+            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
+            {
+                return BadRequest($"The robot battery level on {robot.Name} is too low to start a mission");
             }
 
             var missionDefinition = await missionDefinitionService.ReadById(missionDefinitionId);
@@ -344,6 +364,16 @@ namespace Api.Controllers
         {
             var robot = await robotService.ReadById(customMissionQuery.RobotId);
             if (robot is null) { return NotFound($"Could not find robot with id {customMissionQuery.RobotId}"); }
+
+            if (!robot.IsRobotPressureHighEnoughToStartMission())
+            {
+                return BadRequest($"The robot pressure on {robot.Name} is too low to start a mission");
+            }
+
+            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
+            {
+                return BadRequest($"The robot battery level on {robot.Name} is too low to start a mission");
+            }
 
             var installation = await installationService.ReadByName(customMissionQuery.InstallationCode);
             if (installation == null) { return NotFound($"Could not find installation with name {customMissionQuery.InstallationCode}"); }
