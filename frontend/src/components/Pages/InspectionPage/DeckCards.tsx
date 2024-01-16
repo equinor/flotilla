@@ -60,7 +60,7 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
             >
                 <StyledDict.DeckText>
                     <StyledDict.TopDeckText>
-                        <Typography variant={'body_short_bold'}>{deckName.toString()}</Typography>
+                        <Typography variant={'body_short_bold'}>{formattedAreaNames}</Typography>
                         {deckData.inspections
                             .filter((i) => ongoingMissions.find((m) => m.missionId === i.missionDefinition.id))
                             .map((inspection) => (
@@ -70,10 +70,8 @@ const DeckCard = ({ deckData, deckName, setSelectedDeck, selectedDeck, handleSch
                                 </StyledDict.Content>
                             ))}
                     </StyledDict.TopDeckText>
-                    {deckData.areas && <Typography variant={'body_short'}>{formattedAreaNames}</Typography>}
-                    {deckData.inspections && (
-                        <CardMissionInformation deckName={deckName} inspections={deckData.inspections} />
-                    )}
+                    <Typography variant={'body_short'}>{deckName}</Typography>
+                    <CardMissionInformation deckName={deckName} inspections={deckData.inspections} />
                 </StyledDict.DeckText>
                 <StyledDict.CardComponent>
                     <Tooltip
