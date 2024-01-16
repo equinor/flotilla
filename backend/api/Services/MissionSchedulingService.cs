@@ -1,10 +1,9 @@
 ﻿using System.Text.Json;
-using Api.Controllers;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services.Events;
+using Api.Services.Models;
 using Api.Utilities;
-using Microsoft.AspNetCore.Mvc;
 namespace Api.Services
 {
     public interface IMissionSchedulingService
@@ -28,7 +27,7 @@ namespace Api.Services
         public void TriggerRobotAvailable(RobotAvailableEventArgs e);
     }
 
-    public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService, RobotController robotController,
+    public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
             IAreaService areaService, IIsarService isarService) : IMissionSchedulingService
     {
         public async Task StartMissionRunIfSystemIsAvailable(string missionRunId)
@@ -48,13 +47,18 @@ namespace Api.Services
             }
 
             try { await StartMissionRun(missionRun); }
-            catch (MissionException ex)
+            catch (Exception ex) when (
+                ex is MissionException
+                    or RobotNotFoundException
+                    or RobotNotAvailableException
+                    or MissionRunNotFoundException
+                    or IsarCommunicationException)
             {
                 const MissionStatus NewStatus = MissionStatus.Failed;
-                logger.LogWarning(
-                    "Mission run {MissionRunId} was not started successfully. Status updated to '{Status}'.\nReason: {FailReason}",
+                logger.LogError(
+                    ex,
+                    "Mission run {MissionRunId} was not started successfully due to {ErrorMessage}",
                     missionRun.Id,
-                    NewStatus,
                     ex.Message
                 );
                 missionRun.Status = NewStatus;
@@ -241,19 +245,62 @@ namespace Api.Services
 
         private async Task StartMissionRun(MissionRun queuedMissionRun)
         {
-            var result = await robotController.StartMission(
-                queuedMissionRun.Robot.Id,
-                queuedMissionRun.Id
-            );
-            if (result.Result is not OkObjectResult)
+            string robotId = queuedMissionRun.Robot.Id;
+            string missionRunId = queuedMissionRun.Id;
+
+            var robot = await robotService.ReadById(robotId);
+            if (robot == null)
             {
-                string errorMessage = "Unknown error from robot controller";
-                if (result.Result is ObjectResult returnObject)
-                {
-                    errorMessage = returnObject.Value?.ToString() ?? errorMessage;
-                }
-                throw new MissionException(errorMessage);
+                string errorMessage = $"Could not find robot with id {robotId}";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
             }
+
+            if (robot.Status is not RobotStatus.Available)
+            {
+                string errorMessage = $"Robot {robotId} has status {robot.Status} and is not available";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotAvailableException(errorMessage);
+            }
+
+            var missionRun = await missionRunService.ReadById(missionRunId);
+            if (missionRun == null)
+            {
+                string errorMessage = $"Could not find mission run with id {missionRunId}";
+                logger.LogError("{Message}", errorMessage);
+                throw new MissionRunNotFoundException(errorMessage);
+            }
+
+            IsarMission isarMission;
+            try { isarMission = await isarService.StartMission(robot, missionRun); }
+            catch (HttpRequestException e)
+            {
+                string errorMessage = $"Could not reach ISAR at {robot.IsarUri}";
+                logger.LogError(e, "{Message}", errorMessage);
+                await robotService.SetRobotOffline(robot.Id);
+                throw new IsarCommunicationException(errorMessage);
+            }
+            catch (MissionException e)
+            {
+                const string ErrorMessage = "Error while starting ISAR mission";
+                logger.LogError(e, "{Message}", ErrorMessage);
+                throw new IsarCommunicationException(ErrorMessage);
+            }
+            catch (JsonException e)
+            {
+                const string ErrorMessage = "Error while processing of the response from ISAR";
+                logger.LogError(e, "{Message}", ErrorMessage);
+                throw new IsarCommunicationException(ErrorMessage);
+            }
+
+            missionRun.UpdateWithIsarInfo(isarMission);
+            missionRun.Status = MissionStatus.Ongoing;
+            await missionRunService.Update(missionRun);
+
+            robot.Status = RobotStatus.Busy;
+            await robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
+            await robotService.UpdateCurrentMissionId(robot.Id, missionRun.Id);
+
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
         }
 
