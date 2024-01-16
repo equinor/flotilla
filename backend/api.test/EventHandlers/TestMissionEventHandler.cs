@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using Api.Controllers;
+using System.Threading;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -10,7 +9,6 @@ using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
-using Api.Services.Models;
 using Api.Test.Database;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Builder;
@@ -25,26 +23,11 @@ namespace Api.Test.EventHandlers
     [Collection("Database collection")]
     public class TestMissionEventHandler : IDisposable
     {
-        private readonly AreaService _areaService;
-        private readonly FlotillaDbContext _context;
-        private readonly DeckService _deckService;
-        private readonly IDefaultLocalizationPoseService _defaultLocalisationPoseService;
-        private readonly InstallationService _installationService;
-        private readonly IIsarService _isarServiceMock;
-
         private readonly MissionEventHandler _missionEventHandler;
         private readonly MissionRunService _missionRunService;
-        private readonly IMissionSchedulingService _missionSchedulingService;
         private readonly MqttEventHandler _mqttEventHandler;
         private readonly MqttService _mqttService;
-        private readonly PlantService _plantService;
-        private readonly RobotControllerMock _robotControllerMock;
-        private readonly RobotModelService _robotModelService;
-        private readonly RobotService _robotService;
-        private readonly ISignalRService _signalRService;
-        private readonly LocalizationService _localizationService;
         private readonly DatabaseUtilities _databaseUtilities;
-        private readonly AccessRoleService _accessRoleService;
 
         public TestMissionEventHandler(DatabaseFixture fixture)
         {
@@ -58,27 +41,27 @@ namespace Api.Test.EventHandlers
 
             var configuration = WebApplication.CreateBuilder().Configuration;
 
-            _context = fixture.NewContext;
+            var context = fixture.NewContext;
 
-            _signalRService = new MockSignalRService();
+            var signalRService = new MockSignalRService();
+            var accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
+
             _mqttService = new MqttService(mqttServiceLogger, configuration);
-            _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
-            _missionRunService = new MissionRunService(_context, _signalRService, missionLogger, _accessRoleService);
-            _robotModelService = new RobotModelService(_context);
-            _robotModelService = new RobotModelService(_context);
-            _robotControllerMock = new RobotControllerMock();
-            _isarServiceMock = new MockIsarService();
-            _installationService = new InstallationService(_context, _accessRoleService);
-            _defaultLocalisationPoseService = new DefaultLocalizationPoseService(_context);
-            _plantService = new PlantService(_context, _installationService, _accessRoleService);
-            _deckService = new DeckService(_context, _defaultLocalisationPoseService, _installationService, _plantService, _accessRoleService);
-            _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalisationPoseService, _accessRoleService);
-            _robotService = new RobotService(_context, robotServiceLogger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
-            _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, _robotControllerMock.Mock.Object, _areaService,
-                _isarServiceMock);
-            _localizationService = new LocalizationService(localizationServiceLogger, _robotService, _missionRunService, _installationService, _areaService);
+            _missionRunService = new MissionRunService(context, signalRService, missionLogger, accessRoleService);
 
-            _databaseUtilities = new DatabaseUtilities(_context);
+            var robotModelService = new RobotModelService(context);
+            var isarServiceMock = new MockIsarService();
+            var installationService = new InstallationService(context, accessRoleService);
+            var defaultLocalisationPoseService = new DefaultLocalizationPoseService(context);
+            var plantService = new PlantService(context, installationService, accessRoleService);
+            var deckService = new DeckService(context, defaultLocalisationPoseService, installationService, plantService, accessRoleService);
+            var areaService = new AreaService(context, installationService, plantService, deckService, defaultLocalisationPoseService, accessRoleService);
+            var robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService, _missionRunService);
+            var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, robotService, areaService,
+                isarServiceMock);
+            var localizationService = new LocalizationService(localizationServiceLogger, robotService, _missionRunService, installationService, areaService);
+
+            _databaseUtilities = new DatabaseUtilities(context);
 
             var mockServiceProvider = new Mock<IServiceProvider>();
 
@@ -88,19 +71,16 @@ namespace Api.Test.EventHandlers
                 .Returns(_missionRunService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IRobotService)))
-                .Returns(_robotService);
+                .Returns(robotService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IMissionSchedulingService)))
-                .Returns(_missionSchedulingService);
-            mockServiceProvider
-                .Setup(p => p.GetService(typeof(RobotController)))
-                .Returns(_robotControllerMock.Mock.Object);
+                .Returns(missionSchedulingService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(FlotillaDbContext)))
-                .Returns(_context);
+                .Returns(context);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(ILocalizationService)))
-                .Returns(_localizationService);
+                .Returns(localizationService);
 
             // Mock service injector
             var mockScope = new Mock<IServiceScope>();
@@ -130,10 +110,9 @@ namespace Api.Test.EventHandlers
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
-            SetupMocksForRobotController(robot, missionRun);
-
             // Act
             await _missionRunService.Create(missionRun);
+            Thread.Sleep(100);
 
             // Assert
             var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
@@ -152,10 +131,9 @@ namespace Api.Test.EventHandlers
             var missionRunOne = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
             var missionRunTwo = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
-            SetupMocksForRobotController(robot, missionRunOne);
-
             // Act
             await _missionRunService.Create(missionRunOne);
+            Thread.Sleep(100);
             await _missionRunService.Create(missionRunTwo);
 
             // Assert
@@ -166,7 +144,7 @@ namespace Api.Test.EventHandlers
         }
 
 #pragma warning disable xUnit1004
-        [Fact(Skip = "Should be adjusted to accommodate localization feature")]
+        [Fact(Skip = "Skipping until a solution has been found for ExecuteUpdate in tests")]
 #pragma warning restore xUnit1004
         public async void NewMissionIsStartedWhenRobotBecomesAvailable()
         {
@@ -178,9 +156,8 @@ namespace Api.Test.EventHandlers
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
-            SetupMocksForRobotController(robot, missionRun);
-
             await _missionRunService.Create(missionRun);
+            Thread.Sleep(100);
 
             var mqttEventArgs = new MqttReceivedArgs(
                 new IsarRobotStatusMessage
@@ -198,6 +175,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarRobotStatusReceived), mqttEventArgs);
+            Thread.Sleep(500);
 
             // Assert
             var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
@@ -257,21 +235,18 @@ namespace Api.Test.EventHandlers
             var missionRunOne = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robotOne, area, false);
             var missionRunTwo = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robotTwo, area, false);
 
-            SetupMocksForRobotController(robotOne, missionRunOne);
-
             // Act (Ensure first mission is started)
             await _missionRunService.Create(missionRunOne);
+            Thread.Sleep(100);
 
             // Assert
             var postStartMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id);
             Assert.NotNull(postStartMissionRunOne);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunOne.Status);
 
-            // Rearrange
-            SetupMocksForRobotController(robotTwo, missionRunTwo);
-
             // Act (Ensure second mission is started for second robot)
             await _missionRunService.Create(missionRunTwo);
+            Thread.Sleep(100);
 
             // Assert
             var postStartMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
@@ -279,29 +254,6 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
         }
 
-        private void SetupMocksForRobotController(Robot robot, MissionRun missionRun)
-        {
-            _robotControllerMock.IsarServiceMock
-                .Setup(isar => isar.StartMission(robot, missionRun))
-                .ReturnsAsync(
-                    () =>
-                        new IsarMission(
-                            new IsarStartMissionResponse
-                            {
-                                MissionId = "test",
-                                Tasks = new List<IsarTaskResponse>()
-                            }
-                        )
-                );
 
-            _robotControllerMock.RobotServiceMock
-                .Setup(service => service.ReadById(robot.Id))
-                .ReturnsAsync(() => robot);
-
-            // This mock uses "It.IsAny" rather than the specific ID as the ID is created once the object is written to the database
-            _robotControllerMock.MissionServiceMock
-                .Setup(service => service.ReadById(It.IsAny<string>()))
-                .ReturnsAsync(() => missionRun);
-        }
     }
 }
