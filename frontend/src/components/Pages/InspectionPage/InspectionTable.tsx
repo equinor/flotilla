@@ -12,7 +12,6 @@ import { compareInspections } from './InspectionUtilities'
 import { getDeadlineInDays } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { useEffect, useState } from 'react'
-import { TranslateTextWithContext } from 'components/Contexts/LanguageContext'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
 const StyledIcon = styled(Icon)`
@@ -43,6 +42,30 @@ const StyledCircle = styled.div`
     width: 13px;
     height: 13px;
     border-radius: 50px;
+`
+
+enum InspectionTableColumns {
+    Status = 'Status',
+    Name = 'Name',
+    Description = 'Description',
+    Area = 'Area',
+    LastCompleted = 'LastCompleted',
+    Deadline = 'Deadline',
+    AddToQueue = 'AddToQueue',
+}
+
+const HideColumnsOnSmallScreen = styled.div`
+    @media (max-width: 500px) {
+        #${InspectionTableColumns.Description} {
+            display: none;
+        }
+        #${InspectionTableColumns.LastCompleted} {
+            display: none;
+        }
+        #${InspectionTableColumns.Deadline} {
+            display: none;
+        }
+    }
 `
 
 interface IProps {
@@ -144,8 +167,8 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
 
     return (
         <Table.Row key={mission.id}>
-            <Table.Cell>{status}</Table.Cell>
-            <Table.Cell>
+            <Table.Cell id={InspectionTableColumns.Status}>{status}</Table.Cell>
+            <Table.Cell id={InspectionTableColumns.Name}>
                 <Typography
                     link
                     onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission-definition/${mission.id}`)}
@@ -153,11 +176,13 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                     {mission.name}
                 </Typography>
             </Table.Cell>
-            <Table.Cell>{mission.comment}</Table.Cell>
-            <Table.Cell>{mission.area ? mission.area.areaName : '-'}</Table.Cell>
-            <Table.Cell>{lastCompleted}</Table.Cell>
-            <Table.Cell>{inspection.deadline ? formatDateString(inspection.deadline.toISOString()) : ''}</Table.Cell>
-            <Table.Cell>
+            <Table.Cell id={InspectionTableColumns.Description}>{mission.comment}</Table.Cell>
+            <Table.Cell id={InspectionTableColumns.Area}>{mission.area ? mission.area.areaName : '-'}</Table.Cell>
+            <Table.Cell id={InspectionTableColumns.LastCompleted}>{lastCompleted}</Table.Cell>
+            <Table.Cell id={InspectionTableColumns.Deadline}>
+                {inspection.deadline ? formatDateString(inspection.deadline.toISOString()) : ''}
+            </Table.Cell>
+            <Table.Cell id={InspectionTableColumns.AddToQueue}>
                 {!isScheduled && (
                     <Button
                         variant="ghost_icon"
@@ -170,7 +195,6 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                             color={`${tokens.colors.interactive.focus.rgba}`}
                             name={Icons.AddOutlined}
                             size={24}
-                            title={TranslateTextWithContext('Add to queue')}
                         />
                     </Button>
                 )}
@@ -186,7 +210,6 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                             color={`${tokens.colors.interactive.focus.hex}`}
                             name={Icons.AddOutlined}
                             size={24}
-                            title={TranslateTextWithContext('Add to queue')}
                         />
                     </Button>
                 )}
@@ -194,8 +217,6 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
         </Table.Row>
     )
 }
-
-const columns = ['Status', 'Name', 'Description', 'Area', 'Last completed', 'Deadline', 'Add to queue']
 
 export const InspectionTable = ({ deck, inspections, openDialog, setSelectedMissions }: IProps) => {
     const { TranslateText } = useLanguageContext()
@@ -225,21 +246,25 @@ export const InspectionTable = ({ deck, inspections, openDialog, setSelectedMiss
 
     return (
         <StyledTable>
-            <Table>
-                <Table.Caption>
-                    <Typography variant="h3" style={{ marginBottom: '14px' }}>
-                        {TranslateText('Inspection Missions') + ' ' + TranslateText('for') + ' ' + deck.deckName}
-                    </Typography>
-                </Table.Caption>
-                <Table.Head sticky>
-                    <Table.Row>
-                        {columns.map((col) => (
-                            <Table.Cell key={col}>{TranslateText(col)}</Table.Cell>
-                        ))}
-                    </Table.Row>
-                </Table.Head>
-                <Table.Body>{cellValues}</Table.Body>
-            </Table>
+            <HideColumnsOnSmallScreen>
+                <Table>
+                    <Table.Caption>
+                        <Typography variant="h3" style={{ marginBottom: '14px' }}>
+                            {TranslateText('Inspection Missions') + ' ' + TranslateText('for') + ' ' + deck.deckName}
+                        </Typography>
+                    </Table.Caption>
+                    <Table.Head sticky>
+                        <Table.Row>
+                            {Object.values(InspectionTableColumns).map((col) => (
+                                <Table.Cell id={col} key={col}>
+                                    {TranslateText(col)}
+                                </Table.Cell>
+                            ))}
+                        </Table.Row>
+                    </Table.Head>
+                    <Table.Body>{cellValues}</Table.Body>
+                </Table>
+            </HideColumnsOnSmallScreen>
             {isScheduledDialogOpen && (
                 <AlreadyScheduledMissionDialog openDialog={openDialog} closeDialog={closeScheduleDialog} />
             )}
@@ -306,28 +331,32 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
 
     return (
         <StyledTable>
-            <Table>
-                <Table.Head sticky>
-                    <Table.Row>
-                        {columns.map((col) => (
-                            <Table.Cell key={col}>{TranslateText(col)}</Table.Cell>
-                        ))}
-                    </Table.Row>
-                </Table.Head>
-                <Table.Body>{cellValues}</Table.Body>
-            </Table>
-            {isDialogOpen && (
-                <ScheduleMissionDialog
-                    missions={selectedMissions!}
-                    closeDialog={closeDialog}
-                    setMissions={setSelectedMissions}
-                    unscheduledMissions={unscheduledMissions}
-                    isAlreadyScheduled={isAlreadyScheduled}
-                />
-            )}
-            {isScheduledDialogOpen && (
-                <AlreadyScheduledMissionDialog openDialog={openDialog} closeDialog={closeScheduleDialog} />
-            )}
+            <HideColumnsOnSmallScreen>
+                <Table>
+                    <Table.Head sticky>
+                        <Table.Row>
+                            {Object.values(InspectionTableColumns).map((col) => (
+                                <Table.Cell id={col} key={col}>
+                                    {TranslateText(col)}
+                                </Table.Cell>
+                            ))}
+                        </Table.Row>
+                    </Table.Head>
+                    <Table.Body>{cellValues}</Table.Body>
+                </Table>
+                {isDialogOpen && (
+                    <ScheduleMissionDialog
+                        missions={selectedMissions!}
+                        closeDialog={closeDialog}
+                        setMissions={setSelectedMissions}
+                        unscheduledMissions={unscheduledMissions}
+                        isAlreadyScheduled={isAlreadyScheduled}
+                    />
+                )}
+                {isScheduledDialogOpen && (
+                    <AlreadyScheduledMissionDialog openDialog={openDialog} closeDialog={closeScheduleDialog} />
+                )}
+            </HideColumnsOnSmallScreen>
         </StyledTable>
     )
 }
