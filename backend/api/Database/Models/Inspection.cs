@@ -50,11 +50,12 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
+        [Required]
         [MaxLength(200)]
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-        public string? IsarStepId { get; private set; } = Guid.NewGuid().ToString();
+        public string IsarStepId { get; private set; } = Guid.NewGuid().ToString();
 
-        public Position InspectionTarget { get; set; }
+        public Position? InspectionTarget { get; set; }
 
         [Required]
         public InspectionStatus Status

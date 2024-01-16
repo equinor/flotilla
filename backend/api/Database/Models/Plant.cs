@@ -10,6 +10,7 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
+        [Required]
         public virtual Installation Installation { get; set; }
 
         [Required]

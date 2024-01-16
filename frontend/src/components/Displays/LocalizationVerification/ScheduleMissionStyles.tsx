@@ -5,7 +5,8 @@ export const StyledDialog = styled(Dialog)`
     display: flex;
     flex-direction: column;
     padding: 1rem;
-    width: 480px;
+    width: calc(100vw * 0.7);
+    max-width: 500px;
 `
 
 export const HorizontalContent = styled.div`

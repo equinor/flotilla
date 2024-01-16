@@ -15,8 +15,8 @@ interface MissionProps {
 }
 
 const StyledMissionCard = styled(Card)`
-    width: 400px;
-    height: 140px;
+    width: calc(100vw - 30px);
+    max-width: 400px;
     padding: 10px;
     justify-content: space-between;
 `
@@ -37,8 +37,8 @@ const TopContent = styled.div`
 const BottomContent = styled.div`
     display: flex;
     justify-content: space-between;
-    gap: 12px;
     white-space: nowrap;
+    gap: 6px;
 `
 
 export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {

@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240104143242_MakeCurrentRobotInstallationRequired")]
+    partial class MakeCurrentRobotInstallationRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,7 +153,6 @@ namespace Api.Migrations
                         .HasColumnType("character varying(250)");
 
                     b.Property<string>("IsarStepId")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
@@ -883,7 +885,8 @@ namespace Api.Migrations
                                 .HasForeignKey("InspectionId");
                         });
 
-                    b.Navigation("InspectionTarget");
+                    b.Navigation("InspectionTarget")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Api.Database.Models.InspectionFinding", b =>

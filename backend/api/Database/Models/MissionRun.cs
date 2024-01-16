@@ -10,6 +10,7 @@ namespace Api.Database.Models
         private MissionStatus _status;
 
         private IList<MissionTask> _tasks;
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }

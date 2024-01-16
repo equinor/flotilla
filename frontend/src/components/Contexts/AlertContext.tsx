@@ -8,6 +8,8 @@ import { useInstallationContext } from './InstallationContext'
 import { Alert } from 'models/Alert'
 import { FailedSafeZoneAlertContent } from 'components/Alerts/FailedSafeZoneAlertContent'
 import { useRobotContext } from './RobotContext'
+import { BlockedRobotAlertContent } from 'components/Alerts/BlockedRobotAlert'
+import { RobotStatus } from 'models/Robot'
 
 type AlertDictionaryType = { [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void } }
 
@@ -45,6 +47,7 @@ export const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
 export const AlertProvider: FC<Props> = ({ children }) => {
     const [alerts, setAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.alerts)
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
+    const [blockedRobotNames, setBlockedRobotNames] = useState<string[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
@@ -157,6 +160,30 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [newFailedMissions])
+
+    useEffect(() => {
+        const newBlockedRobotNames = enabledRobots
+            .filter(
+                (robot) =>
+                    robot.currentInstallation.installationCode.toLocaleLowerCase() ===
+                        installationCode.toLocaleLowerCase() && robot.status === RobotStatus.Blocked
+            )
+            .map((robot) => robot.name!)
+
+        const isBlockedRobotNamesModifyed =
+            newBlockedRobotNames.some((name) => !blockedRobotNames.includes(name)) ||
+            newBlockedRobotNames.length !== blockedRobotNames.length
+
+        if (isBlockedRobotNamesModifyed) {
+            if (newBlockedRobotNames.length > 0) {
+                setAlert(AlertType.BlockedRobot, <BlockedRobotAlertContent robotNames={newBlockedRobotNames} />)
+            } else {
+                clearAlert(AlertType.BlockedRobot)
+            }
+        }
+        setBlockedRobotNames(newBlockedRobotNames)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [enabledRobots, installationCode])
 
     return (
         <AlertContext.Provider

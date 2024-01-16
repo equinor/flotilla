@@ -11,20 +11,19 @@ import { MissionRestartButton } from 'components/Displays/MissionButtons/Mission
 import { TaskStatus } from 'models/Task'
 
 const HeaderSection = styled(Card)`
-    width: 100%;
-    min-width: 600px;
-    height: auto;
-    display: flex;
-    top: 60px;
-    flex-direction: column;
-    gap: 10px;
-    position: sticky;
+    width: 85vw;
     padding: 15px 0px 15px 0px;
+    box-shadow: none;
+    border-radius: 0px;
+    max-width: 800px;
+    top: 60px;
+    position: sticky;
     background-color: white;
     z-index: 1;
-    box-shadow: none;
-    border-bottom: 1px solid ${tokens.colors.interactive.disabled__border.hex};
-    border-radius: 0px;
+
+    @media (max-width: 500px) {
+        top: 80px;
+    }
 `
 const TitleSection = styled.div`
     display: flex;
@@ -33,16 +32,50 @@ const TitleSection = styled.div`
 `
 const InfoSection = styled.div`
     display: flex;
-    align-content: start;
-    align-items: flex-end;
-    gap: 1.2rem;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-width: 950px;
+`
+const StyledCard = styled(Card)`
+    display: flex;
+    flex: 1 0 0;
+    padding: 8px 16px;
+    flex-direction: row;
+    background: ${tokens.colors.ui.background__light.hex};
+    gap: 24px;
+    align-items: stretch;
 `
 
-const HeaderText = (text: string) => {
+const StyledTitleText = styled.div`
+    display: grid;
+    grid-direction: column;
+    gap: 5px;
+`
+
+const StyledTypography = styled(Typography)`
+    font-family: Equinor;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 40px; /* 125% */
+
+    @media (max-width: 500px) {
+        font-family: Equinor;
+        font-size: 24px;
+        font-style: normal;
+    }
+`
+
+const HeaderText = (title: string, text: string) => {
     return (
-        <Typography variant="body_short" group="paragraph" color={tokens.colors.text.static_icons__secondary.hex}>
-            {text}
-        </Typography>
+        <StyledTitleText>
+            <Typography variant="meta" color={tokens.colors.text.static_icons__secondary.hex}>
+                {title}
+            </Typography>
+            <Typography variant="caption" color={tokens.colors.text.static_icons__secondary.hex}>
+                {text}
+            </Typography>
+        </StyledTitleText>
     )
 }
 
@@ -107,6 +140,9 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const translatedBatteryLevel = TranslateText('Battery level')
     const translatedPressureLevel = TranslateText('Pressure level')
     const translatedDescription = TranslateText('Description')
+    const translatedArea = TranslateText('Area')
+    const translatedTasks = TranslateText('Completed Tasks')
+    const translatedStatus = TranslateText('Status')
 
     const { startTime, startDate, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission)
     const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
@@ -115,37 +151,61 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
         (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
     )
 
+    const numberOfCompletedTasks = mission.tasks.filter((task) => task.isCompleted).length
+
     return (
-        <HeaderSection>
-            <TitleSection>
-                <Typography variant="h1">{mission.name}</Typography>
-                {isMissionActive && (
-                    <MissionControlButtons
-                        missionName={mission.name}
-                        robotId={mission.robot.id}
-                        missionStatus={mission.status}
-                    />
-                )}
-                {mission.endTime && <MissionRestartButton mission={mission} hasFailedTasks={missionHasFailedTasks} />}
-            </TitleSection>
-            <Typography variant="body_long" group="paragraph" color={tokens.colors.text.static_icons__secondary.hex}>
-                {mission.description && `${translatedDescription}: ${mission.description}`}
-            </Typography>
-            <StatusReason statusReason={mission.statusReason} status={mission.status}></StatusReason>
-            <InfoSection>
-                <MissionStatusDisplay status={mission.status} />
-                {HeaderText(`${translatedStartDate}: ${startDate}`)}
-                {HeaderText(`${translatedStartTime}: ${startTime}`)}
-                {HeaderText(`${translatedUsedTime}: ${usedTime}`)}
-                {!isMissionCompleted && HeaderText(`${translatedEstimatedTimeRemaining}: ${remainingTime}`)}
-                {HeaderText(`${translatedRobot}: ${mission.robot.name}`)}
-                {!isMissionCompleted && HeaderText(`${translatedBatteryLevel}: ${mission.robot.batteryLevel}%`)}
-                {!isMissionCompleted &&
-                    mission.robot.pressureLevel &&
-                    HeaderText(
-                        `${translatedPressureLevel}: ${Math.round(mission.robot.pressureLevel * barToMillibar)}mBar`
+        <>
+            <HeaderSection>
+                <TitleSection>
+                    <StyledTypography>{mission.name}</StyledTypography>
+                    {isMissionActive && (
+                        <MissionControlButtons
+                            missionName={mission.name}
+                            robotId={mission.robot.id}
+                            missionStatus={mission.status}
+                        />
                     )}
+                    {mission.endTime && (
+                        <MissionRestartButton mission={mission} hasFailedTasks={missionHasFailedTasks} />
+                    )}
+                </TitleSection>
+                <Typography
+                    variant="body_long"
+                    group="paragraph"
+                    color={tokens.colors.text.static_icons__secondary.hex}
+                >
+                    {mission.description && `${translatedDescription}: ${mission.description}`}
+                </Typography>
+                <StatusReason statusReason={mission.statusReason} status={mission.status}></StatusReason>
+            </HeaderSection>
+            <InfoSection>
+                <StyledCard>
+                    <div>
+                        {HeaderText(translatedStatus, '')}
+                        <MissionStatusDisplay status={mission.status} />
+                    </div>
+                    {HeaderText(translatedArea, `${mission.area?.areaName}`)}
+                    {HeaderText(translatedTasks, `${numberOfCompletedTasks + '/' + mission.tasks.length}`)}
+                </StyledCard>
+                <StyledCard>
+                    {HeaderText(translatedStartDate, `${startDate}`)}
+                    {HeaderText(translatedStartTime, `${startTime}`)}
+                </StyledCard>
+                <StyledCard>
+                    {HeaderText(translatedUsedTime, `${usedTime}`)}
+                    {!isMissionCompleted && HeaderText(translatedEstimatedTimeRemaining, `${remainingTime}`)}
+                </StyledCard>
+                <StyledCard>
+                    {HeaderText(translatedRobot, `${mission.robot.name}`)}
+                    {!isMissionCompleted && HeaderText(translatedBatteryLevel, `${mission.robot.batteryLevel}%`)}
+                    {!isMissionCompleted &&
+                        mission.robot.pressureLevel &&
+                        HeaderText(
+                            translatedPressureLevel,
+                            `${Math.round(mission.robot.pressureLevel * barToMillibar)}mBar`
+                        )}
+                </StyledCard>
             </InfoSection>
-        </HeaderSection>
+        </>
     )
 }

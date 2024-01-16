@@ -63,7 +63,7 @@ export const RobotPage = () => {
                                 {selectedRobot.status !== RobotStatus.Offline && (
                                     <>
                                         <BatteryStatusDisplay itemSize={48} batteryLevel={selectedRobot.batteryLevel} />
-                                        {selectedRobot.model.upperPressureWarningThreshold && (
+                                        {selectedRobot.pressureLevel && (
                                             <PressureStatusDisplay
                                                 itemSize={48}
                                                 pressureInBar={selectedRobot.pressureLevel}

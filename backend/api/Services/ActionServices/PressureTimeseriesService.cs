@@ -20,9 +20,7 @@ namespace Api.Services.ActionServices
                 return;
             }
 
-            if (robot.PressureLevel is null) return;
-
-            if (Math.Abs(pressureLevel - (float)robot.PressureLevel) > Tolerance) await robotService.UpdateRobotPressureLevel(robot.Id, pressureLevel);
+            if (robot.PressureLevel is null || Math.Abs(pressureLevel - (float)robot.PressureLevel) > Tolerance) await robotService.UpdateRobotPressureLevel(robot.Id, pressureLevel);
 
             try { await timeseriesService.AddPressureEntry(robot.CurrentMissionId!, pressureLevel, robot.Id); }
             catch (NpgsqlException e)
