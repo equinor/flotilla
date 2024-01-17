@@ -1,11 +1,10 @@
 import { Icon, Tabs, Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { InspectionSection } from './InspectionSection'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { AllInspectionsTable } from './InspectionTable'
 import { getInspectionDeadline } from 'utils/StringFormatting'
-import { Inspection } from './InspectionSection'
 import styled from 'styled-components'
 import { ScheduleMissionDialog } from '../FrontPage/MissionOverview/ScheduleMissionDialog/ScheduleMissionDialog'
 import { CreateEchoMissionButton } from 'components/Displays/MissionButtons/CreateEchoMissionButton'
@@ -17,6 +16,7 @@ import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { StyledDict } from './InspectionUtilities'
 import { Icons } from 'utils/icons'
 import { StyledButton } from 'components/Styles/StyledComponents'
+import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 
 const StyledContent = styled.div`
     display: flex;
@@ -45,33 +45,22 @@ export const InspectionOverviewSection = () => {
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
     const { setAlert } = useAlertContext()
+    const { missionDefinitions } = useMissionDefinitionsContext()
     const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
     const [echoMissions, setEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [activeTab, setActiveTab] = useState(0)
-    const [allMissions, setAllMissions] = useState<Inspection[]>()
 
     const anchorRef = useRef<HTMLButtonElement>(null)
 
-    useEffect(() => {
-        const fetchMissionDefinitions = async () => {
-            let missionDefinitions = await BackendAPICaller.getMissionDefinitions({ pageSize: 100 }).then(
-                (response) => response.content
-            )
-            missionDefinitions = missionDefinitions ?? []
-            let newInspection: Inspection[] = missionDefinitions.map((m) => {
-                return {
-                    missionDefinition: m,
-                    deadline: m.lastSuccessfulRun
-                        ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
-                        : undefined,
-                }
-            })
-
-            setAllMissions(newInspection)
+    const allInspections = missionDefinitions.map((m) => {
+        return {
+            missionDefinition: m,
+            deadline: m.lastSuccessfulRun
+                ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
+                : undefined,
         }
-        fetchMissionDefinitions()
-    }, [activeTab])
+    })
 
     const fetchEchoMissions = () => {
         setIsFetchingEchoMissions(true)
@@ -129,8 +118,8 @@ export const InspectionOverviewSection = () => {
                                 <AddPredefinedMissionsButton />
                                 <CreateEchoMissionButton />
                             </StyledButtons>
-                            {allMissions && allMissions.length > 0 ? (
-                                <AllInspectionsTable inspections={allMissions} />
+                            {allInspections.length > 0 ? (
+                                <AllInspectionsTable inspections={allInspections} />
                             ) : (
                                 <StyledPlaceholderContent>
                                     <StyledDict.Placeholder>
