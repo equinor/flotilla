@@ -7,7 +7,7 @@ namespace Api.SignalRHubs
     {
     }
 
-    public class SignalRHub(IAccessRoleService accessRoleService, IConfiguration configuration) : Hub<ISignalRClient>
+    public class SignalRHub(IAccessRoleService accessRoleService) : Hub<ISignalRClient>
     {
         /// <summary>
         /// Called when a new connection is made.
@@ -23,9 +23,9 @@ namespace Api.SignalRHubs
 
                 if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")
                 {
-                    string? localDevUser = configuration.GetSection("Local")["DevUserId"];
+                    string? localDevUser = Environment.GetEnvironmentVariable("LOCAL_DEVUSERID");
                     if (localDevUser is null || localDevUser.Equals("", StringComparison.Ordinal))
-                        throw new HubException("Running in development mode, but missing Local__DevUserId value in environment");
+                        throw new HubException("Running in development mode, but missing LOCAL_DEVUSERID value in environment");
 
                     await Groups.AddToGroupAsync(Context.ConnectionId, localDevUser); // This is used instead of Users.All
                     foreach (string installationCode in installationCodes)

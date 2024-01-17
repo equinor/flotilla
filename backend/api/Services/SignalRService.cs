@@ -11,7 +11,7 @@ namespace Api.Services
         public Task SendMessageAsync(string label, Installation? installation, string message);
     }
 
-    public class SignalRService(IHubContext<SignalRHub> signalRHub, IConfiguration configuration) : ISignalRService
+    public class SignalRService(IHubContext<SignalRHub> signalRHub) : ISignalRService
     {
         private readonly JsonSerializerOptions _serializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -25,7 +25,7 @@ namespace Api.Services
         {
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")
             {
-                string? localDevUser = configuration.GetSection("Local")["DevUserId"];
+                string? localDevUser = Environment.GetEnvironmentVariable("LOCAL_DEVUSERID");
                 if (localDevUser is null || localDevUser.Equals("", StringComparison.Ordinal)) return;
 
                 if (installation != null)

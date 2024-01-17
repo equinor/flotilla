@@ -80,8 +80,7 @@ if [ "$backend_abort" != "true" ]; then
     done
 
 
-    echo "Local__DevUserId='$local_dev_username'" >> $flotilla_dir/.env
-    dotnet user-secrets set "Local:DevUserId" $az_client_secret --project backend/api > /dev/null
+    echo "LOCAL_DEVUSERID='$local_dev_username'" >> $flotilla_dir/.env
     echo -e "Added local development username to .env file"
 
     echo -e "Backup setup - Done!"
