@@ -1,4 +1,5 @@
-import { Dialog } from '@equinor/eds-core-react'
+import { Button, Dialog } from '@equinor/eds-core-react'
+import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 
 export const StyledDialog = styled(Dialog)`
@@ -15,4 +16,9 @@ export const StyledAutoComplete = styled.div`
     padding: 8px;
     gap: 25px;
     box-shadow: none;
+`
+
+export const StyledButton = styled(Button)`
+    height: auto;
+    min-height: ${tokens.shape.button.minHeight};
 `

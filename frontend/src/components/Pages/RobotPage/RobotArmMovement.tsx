@@ -5,6 +5,7 @@ import { Robot } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
+import { StyledButton } from 'components/Styles/StyledComponents'
 
 interface RobotProps {
     robot: Robot
@@ -13,10 +14,13 @@ interface RobotProps {
 }
 const feedbackTimer = 10000 // Clear feedback after 10 seconds
 
-const StyledButton = styled.div`
+const StyledCloseButton = styled.div`
     display: flex;
     justify-content: end;
     margin-top: 8px;
+`
+const LimitWidthStyle = styled.div`
+    max-width: calc(80vw);
 `
 
 export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProps) => {
@@ -73,19 +77,21 @@ export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProp
         <>
             <Popover anchorEl={anchorRef.current} onClose={closePopover} open={isPopoverOpen} placement="top">
                 <Popover.Content>
-                    <Typography variant="body_short">
-                        {TranslateText(
-                            'This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.'
-                        )}
-                    </Typography>
-                    <StyledButton>
-                        <Button onClick={closePopover}>{TranslateText('Close')}</Button>
-                    </StyledButton>
+                    <LimitWidthStyle>
+                        <Typography variant="body_short">
+                            {TranslateText(
+                                'This button is disabled because the robot is not available. Check that the robot is on, and are not doing any other activities.'
+                            )}
+                        </Typography>
+                        <StyledCloseButton>
+                            <Button onClick={closePopover}>{TranslateText('Close')}</Button>
+                        </StyledCloseButton>
+                    </LimitWidthStyle>
                 </Popover.Content>
             </Popover>
-            <Button style={moveArmButtonStyle()} onClick={!usable ? openPopover : onClickMoveArm} ref={anchorRef}>
+            <StyledButton style={moveArmButtonStyle()} onClick={!usable ? openPopover : onClickMoveArm} ref={anchorRef}>
                 {TranslateText('Set robot arm to ') + '"' + TranslateText(armPosition) + '"'}
-            </Button>
+            </StyledButton>
             {feedback && <p>{feedback}</p>}
         </>
     )
