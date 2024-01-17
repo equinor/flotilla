@@ -15,8 +15,8 @@ const feedbackTimer = 10000 // Clear feedback after 10 seconds
 
 const StyledButton = styled.div`
     display: flex;
-    justifycontent: center;
-    margintop: auto;
+    justify-content: end;
+    margin-top: 8px;
 `
 
 export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProps) => {
