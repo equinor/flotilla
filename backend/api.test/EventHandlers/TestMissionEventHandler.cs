@@ -380,5 +380,27 @@ namespace Api.Test.EventHandlers
             bool isRobotLocalized = await _localizationService.RobotIsLocalized(robot.Id);
             Assert.True(isRobotLocalized);
         }
+
+        [Fact]
+        public async void MissionIsCancelledWhenAttemptingToStartOnARobotWhichIsLocalizedOnADifferentDeck()
+        {
+            // Arrange
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck1 = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode, name: "TestDeckOne");
+            var deck2 = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode, name: "TestDeckTwo");
+            var area1 = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck1.Name, name: "TestAreaOne");
+            var area2 = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck2.Name, name: "TestAreaTwo");
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area1);
+            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area2, false);
+
+            // Act
+            await _missionRunService.Create(missionRun);
+            Thread.Sleep(1000);
+
+            // Assert
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
+            Assert.Equal(MissionStatus.Cancelled, postTestMissionRun!.Status);
+        }
     }
 }
