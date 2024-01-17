@@ -254,6 +254,26 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
         }
 
+        [Fact]
+        public async void LocalizationMissionStartedWhenNewMissionScheduledForNonLocalizedRobot()
+        {
+            // Arrange
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
+            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
+            // Act
+            await _missionRunService.Create(missionRun);
+            Thread.Sleep(1000);
+
+            // Assert
+            var ongoingMissionRun = await _missionRunService.GetOngoingMissionRunForRobot(robot.Id);
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
+            Assert.Equal(MissionStatus.Ongoing, ongoingMissionRun!.Status);
+            Assert.Equal(MissionStatus.Pending, postTestMissionRun!.Status);
+        }
     }
 }
