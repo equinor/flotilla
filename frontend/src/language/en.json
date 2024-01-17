@@ -202,5 +202,6 @@
     "The robot": "The robot",
     "is blocked and cannot perform tasks": "is blocked and cannot perform tasks",
     "Blocked": "Blocked",
-    "Several robots are blocked and cannot perform tasks.": "Several robots are blocked and cannot perform tasks."
+    "Several robots are blocked and cannot perform tasks.": "Several robots are blocked and cannot perform tasks.",
+    "Small screen info text": "Some columns in the table are hidden due to small screen. Rotate the screen to show more."
 }

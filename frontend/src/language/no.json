@@ -203,5 +203,6 @@
     "The robot": "Roboten",
     "is blocked and cannot perform tasks": "er blokkert og kan ikke utføre oppgaver",
     "Blocked": "Blokkert",
-    "Several robots are blocked and cannot perform tasks.": "Flere roboter er blokkerte og kan ikke utføre oppgaver."
+    "Several robots are blocked and cannot perform tasks.": "Flere roboter er blokkerte og kan ikke utføre oppgaver.",
+    "Small screen info text": "Noen kolonner i tabellen er skjult pga liten skjerm. Roter skjermen for å vise flere kolonner."
 }

@@ -55,6 +55,9 @@ enum InspectionTableColumns {
 }
 
 const HideColumnsOnSmallScreen = styled.div`
+    #SmallScreenInfoText {
+        display: none;
+    }
     @media (max-width: 500px) {
         #${InspectionTableColumns.Description} {
             display: none;
@@ -64,6 +67,13 @@ const HideColumnsOnSmallScreen = styled.div`
         }
         #${InspectionTableColumns.Deadline} {
             display: none;
+        }
+        #SmallScreenInfoText {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 0.3em;
+            align-items: center;
+            padding-bottom: 1rem;
         }
     }
 `
@@ -218,6 +228,16 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
     )
 }
 
+const SmallScreenInfoText = () => {
+    const { TranslateText } = useLanguageContext()
+    return (
+        <div id="SmallScreenInfoText">
+            <Icon name={Icons.Info} size={24}></Icon>
+            <Typography>{TranslateText('Small screen info text')}</Typography>
+        </div>
+    )
+}
+
 export const InspectionTable = ({ deck, inspections, openDialog, setSelectedMissions }: IProps) => {
     const { TranslateText } = useLanguageContext()
     const navigate = useNavigate()
@@ -252,6 +272,7 @@ export const InspectionTable = ({ deck, inspections, openDialog, setSelectedMiss
                         <Typography variant="h3" style={{ marginBottom: '14px' }}>
                             {TranslateText('Inspection Missions') + ' ' + TranslateText('for') + ' ' + deck.deckName}
                         </Typography>
+                        <SmallScreenInfoText />
                     </Table.Caption>
                     <Table.Head sticky>
                         <Table.Row>
@@ -333,6 +354,9 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
         <StyledTable>
             <HideColumnsOnSmallScreen>
                 <Table>
+                    <Table.Caption>
+                        <SmallScreenInfoText />
+                    </Table.Caption>
                     <Table.Head sticky>
                         <Table.Row>
                             {Object.values(InspectionTableColumns).map((col) => (
