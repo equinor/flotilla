@@ -5,14 +5,13 @@ import { Robot } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
-import { StyledButton } from 'components/Styles/StyledComponents'
+import { StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
 
 interface RobotProps {
     robot: Robot
     armPosition: string
     isRobotAvailable: boolean
 }
-const feedbackTimer = 10000 // Clear feedback after 10 seconds
 
 const StyledCloseButton = styled.div`
     display: flex;
@@ -53,12 +52,7 @@ export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProp
     const onClickMoveArm = () => {
         BackendAPICaller.setArmPosition(robot.id, armPosition)
             .then(() => {
-                setUsable(false)
                 setFeedback(() => TranslateText('Moving arm to ') + TranslateText(armPosition))
-                setTimeout(() => {
-                    setFeedback('')
-                    setUsable(true)
-                }, feedbackTimer)
             })
             .catch((error) => {
                 setFeedback(
@@ -68,9 +62,6 @@ export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProp
                         TranslateText(' Error message: ') +
                         error.message
                 )
-                setTimeout(() => {
-                    setFeedback('')
-                }, feedbackTimer)
             })
     }
     return (
@@ -92,7 +83,12 @@ export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProp
             <StyledButton style={moveArmButtonStyle()} onClick={!usable ? openPopover : onClickMoveArm} ref={anchorRef}>
                 {TranslateText('Set robot arm to ') + '"' + TranslateText(armPosition) + '"'}
             </StyledButton>
-            {feedback && <p>{feedback}</p>}
+            <StyledDialog open={feedback !== ''}>
+                {feedback}
+                <StyledCloseButton>
+                    <Button onClick={() => setFeedback('')}>{TranslateText('Close')}</Button>
+                </StyledCloseButton>
+            </StyledDialog>
         </>
     )
 }
