@@ -49,6 +49,8 @@ namespace Api.Services
 
         public Task<MissionRun?> Delete(string id);
 
+        public Task<MissionRun?> GetOngoingMissionRunForRobot(string robotId);
+
         public Task<bool> OngoingMission(string robotId);
     }
 
@@ -249,6 +251,14 @@ namespace Api.Services
             _ = signalRService.SendMessageAsync("Mission run deleted", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
 
             return missionRun;
+        }
+
+        public async Task<MissionRun?> GetOngoingMissionRunForRobot(string robotId)
+        {
+            return await GetMissionRunsWithSubModels()
+                .Where(missionRun => missionRun.Robot.Id == robotId)
+                .Where(missionRun => missionRun.Status == MissionStatus.Ongoing)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<bool> OngoingMission(string robotId)
