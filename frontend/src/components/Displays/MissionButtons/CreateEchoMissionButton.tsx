@@ -4,12 +4,15 @@ import { Icons } from 'utils/icons'
 import { useRef } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import styled from 'styled-components'
+import { tokens } from '@equinor/eds-tokens'
 
 const StyledButton = styled(Button)`
     display: flex;
     align-items: center;
     gap: 8px;
     border-radius: 4px;
+    height: auto;
+    min-height: ${tokens.shape.button.minHeight};
 `
 
 export const CreateEchoMissionButton = (): JSX.Element => {

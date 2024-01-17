@@ -13,6 +13,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { ScheduleMissionWithLocalizationVerificationDialog } from 'components/Displays/LocalizationVerification/ScheduleMissionWithLocalizationVerification'
+import { tokens } from '@equinor/eds-tokens'
 
 interface IProps {
     missions: CondensedMissionDefinition[]
@@ -52,7 +53,7 @@ const StyledDangerContent = styled.div`
 const StyledButton = styled(Button)`
     display: inline-block;
     height: auto;
-    min-height: 35px;
+    min-height: ${tokens.shape.button.minHeight};
 `
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {

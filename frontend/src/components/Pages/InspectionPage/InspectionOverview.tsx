@@ -15,6 +15,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { Icons } from 'utils/icons'
+import { tokens } from '@equinor/eds-tokens'
 
 const StyledContent = styled.div`
     display: flex;
@@ -32,6 +33,11 @@ const StyledButtons = styled.div`
 const StyledView = styled.div`
     display: flex;
     align-items: flex-start;
+`
+
+const StyledButton = styled(Button)`
+    height: auto;
+    min-height: ${tokens.shape.button.minHeight};
 `
 
 export const InspectionOverviewSection = () => {
@@ -89,14 +95,14 @@ export const InspectionOverviewSection = () => {
     }
 
     const AddPredefinedMissionsButton = () => (
-        <Button
+        <StyledButton
             onClick={onClickScheduleMission}
             disabled={enabledRobots.length === 0 || installationCode === ''}
             ref={anchorRef}
         >
             <Icon name={Icons.Add} size={16} />
             {TranslateText('Add predefined Echo mission')}
-        </Button>
+        </StyledButton>
     )
 
     return (
