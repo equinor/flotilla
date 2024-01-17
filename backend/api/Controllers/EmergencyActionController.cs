@@ -39,7 +39,6 @@ namespace Api.Controllers
             }
 
             return NoContent();
-
         }
 
         /// <summary>
