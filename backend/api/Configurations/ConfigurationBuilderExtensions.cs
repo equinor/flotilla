@@ -3,13 +3,13 @@
     public static class ConfigurationBuilderExtensions
     {
         /// <summary>
-        /// Creates the AZURE_CLIENT_ID and AZURE_TENANT_ID configuration values for the
+        /// Creates the AZURE_CLIENT_ID, AZURE_TENANT_ID and LOCAL_DEVUSERID configuration values for the
         /// <see href="https://docs.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet">Environment Credentials</see>
         /// used by the application when dockerized.
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
-        public static void AddAzureEnvironmentVariables(this WebApplicationBuilder builder)
+        public static void AddAppSettingsEnvironmentVariables(this WebApplicationBuilder builder)
         {
             string? clientId = builder.Configuration
                 .GetSection("AzureAd")
@@ -28,6 +28,43 @@
                 Environment.SetEnvironmentVariable("AZURE_TENANT_ID", tenantId);
                 Console.WriteLine("'AZURE_TENANT_ID' set to " + tenantId);
             }
+
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")
+            {
+
+                string? userId = builder.Configuration
+                .GetSection("Local")
+                .GetValue<string?>("DevUserId");
+                if (tenantId is not null)
+                {
+                    Environment.SetEnvironmentVariable("LOCAL_DEVUSERID", userId);
+                    Console.WriteLine("'LOCAL_DEVUSERID' set to " + userId);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates if don't already exist/sets all the configuration variables present on the .env file for the
+        /// <see href="https://docs.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet">Environment Credentials</see>
+        /// used by the application when dockerized.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public static void AddDotEnvironmentVariables(this WebApplicationBuilder builder, string filePath)
+        {
+            if (!File.Exists(filePath)) return;
+
+            foreach (string line in File.ReadAllLines(filePath))
+            {
+                string[] parts = line.Split(
+                    '=',
+                    StringSplitOptions.RemoveEmptyEntries);
+
+                Environment.SetEnvironmentVariable(parts[0], parts[1]);
+            }
+
+            builder.Configuration.AddEnvironmentVariables();
         }
 
         /// <summary>
