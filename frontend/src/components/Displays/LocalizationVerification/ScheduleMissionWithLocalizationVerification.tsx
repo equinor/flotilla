@@ -1,6 +1,6 @@
 import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
-import { ConfirmLocalizationDialog } from './ConfirmLocalizationDialog'
+import { ScheduleMissionChecklistDialog } from './ScheduleMissionChecklistDialog'
 import { ConflictingMissionDecksDialog, ConflictingRobotDeckDialog } from './ConflictingLocalizationDialog'
 import { UnknownDeckDialog } from './UnknownDeckDialog'
 import { useRobotContext } from 'components/Contexts/RobotContext'
@@ -76,11 +76,11 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
     return (
         <>
             {dialogToOpen === DialogTypes.verifyDeck && (
-                <ConfirmLocalizationDialog
+                <ScheduleMissionChecklistDialog
                     closeDialog={closeDialog}
                     scheduleMissions={scheduleMissions}
                     robot={selectedRobot!}
-                    newDeckName={unikMissionDeckNames![0]}
+                    missionDeckName={unikMissionDeckNames![0]}
                 />
             )}
             {dialogToOpen === DialogTypes.conflictingMissionDecks && (

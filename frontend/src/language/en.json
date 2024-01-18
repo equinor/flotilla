@@ -206,5 +206,20 @@
     "Several robots are blocked and cannot perform tasks.": "Several robots are blocked and cannot perform tasks.",
     "Small screen info text": "Some columns in the table are hidden due to small screen. Rotate the screen to show more.",
     "No predefined missions available": "No predefined missions available",
-    "No robot available": "No robot available"
+    "No robot available": "No robot available",
+    "Confirm that you wish to add the selected mission(s) to the robot queue": "Confirm that you wish to add the selected mission(s) to the robot queue",
+    "The robot is ready to run missions": "The robot is ready to run missions",
+    "The pressure measurement is not currently available, so start the mission at your own risk.": "The pressure measurement is not currently available, so start the mission at your own risk.",
+    "Confirm pressure level of robot": "Confirm pressure level of robot",
+    "needs to be have a pressure level of between": "needs to be have a pressure level of between",
+    "and": "and",
+    "The battery measurement is not currently available, so start the mission at your own risk.": "The battery measurement is not currently available, so start the mission at your own risk.",
+    "has a pressure level making it safe for the area it is operating in": "has a pressure level making it safe for the area it is operating in",
+    "has a battery level making it safe for the area it is operating in": "has a battery level making it safe for the area it is operating in",
+    "needs to be have a battery level greater than": "needs to be have a battery level greater than",
+    "Confirm battery level of robot": "Confirm battery level of robot",
+    "The current pressure level is": "The current pressure level is",
+    "which is within the suggested range": "which is within the suggested range",
+    "Warning": "Warning",
+    "which is NOT within the suggested range": "which is NOT within the suggested range"
 }

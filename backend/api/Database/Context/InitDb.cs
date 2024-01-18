@@ -288,7 +288,8 @@ namespace Api.Database.Context
                 Port = 3000,
                 CurrentInstallation = installations[0],
                 VideoStreams = new List<VideoStream>(),
-                Pose = new Pose()
+                Pose = new Pose(),
+                PressureLevel = 0.001f
             };
 
             var robot2 = new Robot
