@@ -8,12 +8,12 @@
         public float? BatteryWarningThreshold { get; set; }
 
         /// <summary>
-        /// Upper pressure warning threshold in mBar
+        /// Upper pressure warning threshold in Bar
         /// </summary>
         public float? UpperPressureWarningThreshold { get; set; }
 
         /// <summary>
-        /// Lower pressure warning threshold in mBar
+        /// Lower pressure warning threshold in Bar
         /// </summary>
         public float? LowerPressureWarningThreshold { get; set; }
     }

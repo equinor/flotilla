@@ -78,7 +78,7 @@ export const RobotStatusCard = ({ robot }: RobotProps) => {
                             <>
                                 {robot.pressureLevel && (
                                     <PressureStatusDisplay
-                                        pressureInBar={robot.pressureLevel}
+                                        pressure={robot.pressureLevel}
                                         upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
                                         lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
                                     />

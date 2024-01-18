@@ -62,19 +62,22 @@ const LocalisationDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialo
 
 const PressureDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialogProps) => {
     const { TranslateText } = useLanguageContext()
+    const barToMillibar = 1000
 
     let statusText = ''
     if (robot.pressureLevel) {
         if (
-            robot.pressureLevel * 1000 > robot.model.lowerPressureWarningThreshold &&
-            robot.pressureLevel * 1000 < robot.model.upperPressureWarningThreshold
+            (!robot.model.lowerPressureWarningThreshold ||
+                robot.pressureLevel > robot.model.lowerPressureWarningThreshold) &&
+            (!robot.model.upperPressureWarningThreshold ||
+                robot.pressureLevel < robot.model.upperPressureWarningThreshold)
         ) {
             statusText = `${TranslateText('The current pressure level is')} ${
-                robot.pressureLevel * 1000
+                robot.pressureLevel * barToMillibar
             } ${TranslateText('which is within the specified range')}`
         } else {
             statusText = `${TranslateText('Warning')}: ${TranslateText('The current pressure level is')} ${
-                robot.pressureLevel * 1000
+                robot.pressureLevel * barToMillibar
             } ${TranslateText('which is NOT within the specified range')}`
         }
     } else {

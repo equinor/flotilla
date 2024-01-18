@@ -14,29 +14,26 @@ const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40
     font-size: ${(props) => props.$fontSize};
 `
 interface PressureStatusDisplayProps {
-    pressureInBar: number
+    pressure: number
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
     upperPressureWarningThreshold?: number
     lowerPressureWarningThreshold?: number
 }
 
 export const PressureStatusDisplay = ({
-    pressureInBar,
+    pressure,
     itemSize,
     upperPressureWarningThreshold,
     lowerPressureWarningThreshold,
 }: PressureStatusDisplayProps): JSX.Element => {
     const barToMillibar = 1000
-    const pressureInMilliBar = `${Math.round(pressureInBar * barToMillibar)}mBar`
+    const pressureInMilliBar = `${Math.round(pressure * barToMillibar)}mBar`
     let icon_color: string = tokens.colors.interactive.primary__resting.hex
     let pressureStatus: PressureStatus
 
     if (!upperPressureWarningThreshold || !lowerPressureWarningThreshold) {
         pressureStatus = PressureStatus.Normal
-    } else if (
-        pressureInBar * barToMillibar > upperPressureWarningThreshold ||
-        pressureInBar * barToMillibar < lowerPressureWarningThreshold
-    ) {
+    } else if (pressure > upperPressureWarningThreshold || pressure < lowerPressureWarningThreshold) {
         pressureStatus = PressureStatus.Critical
     } else {
         pressureStatus = PressureStatus.Normal

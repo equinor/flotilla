@@ -13,12 +13,10 @@ export interface RobotModel {
     id: string
     type: RobotType
     batteryWarningThreshold?: number
-    upperPressureWarningThreshold: number
-    lowerPressureWarningThreshold: number
+    upperPressureWarningThreshold?: number
+    lowerPressureWarningThreshold?: number
 }
 export const placeholderRobotModel: RobotModel = {
     id: 'placeholderModelId',
     type: RobotType.Robot,
-    upperPressureWarningThreshold: 100,
-    lowerPressureWarningThreshold: 10,
 }

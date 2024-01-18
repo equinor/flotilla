@@ -694,8 +694,8 @@ namespace Api.Database.Context
                     {
                         Type = type,
                         BatteryWarningThreshold = 0f,
-                        LowerPressureWarningThreshold = 0f,
-                        UpperPressureWarningThreshold = 80f
+                        LowerPressureWarningThreshold = 0.01f,
+                        UpperPressureWarningThreshold = 0.08f
                     };
                 context.Add(model);
             }
