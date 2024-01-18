@@ -83,7 +83,10 @@ export const RobotStatusCard = ({ robot }: RobotProps) => {
                                         lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
                                     />
                                 )}
-                                <BatteryStatusDisplay batteryLevel={robot.batteryLevel} />
+                                <BatteryStatusDisplay
+                                    batteryLevel={robot.batteryLevel}
+                                    batteryWarningLimit={robot.model.batteryWarningThreshold}
+                                />
                             </>
                         ) : (
                             <></>

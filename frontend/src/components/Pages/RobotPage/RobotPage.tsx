@@ -63,7 +63,11 @@ export const RobotPage = () => {
                             <VerticalContent $alignItems="start">
                                 {selectedRobot.status !== RobotStatus.Offline && (
                                     <>
-                                        <BatteryStatusDisplay itemSize={48} batteryLevel={selectedRobot.batteryLevel} />
+                                        <BatteryStatusDisplay
+                                            itemSize={48}
+                                            batteryLevel={selectedRobot.batteryLevel}
+                                            batteryWarningLimit={selectedRobot.model.batteryWarningThreshold}
+                                        />
                                         {selectedRobot.pressureLevel && (
                                             <PressureStatusDisplay
                                                 itemSize={48}

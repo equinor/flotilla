@@ -70,7 +70,10 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                 <MissionStatusDisplayWithHeader status={mission.status} />
                 <MissionProgressDisplay mission={mission} />
                 <MissionRobotDisplay mission={mission} />
-                <BatteryStatusDisplay batteryLevel={robot?.batteryLevel} />
+                <BatteryStatusDisplay
+                    batteryLevel={robot?.batteryLevel}
+                    batteryWarningLimit={robot?.model.batteryWarningThreshold}
+                />
             </BottomContent>
         </StyledMissionCard>
     )
