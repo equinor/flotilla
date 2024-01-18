@@ -14,18 +14,23 @@ const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40
 interface BatteryStatusDisplayProps {
     batteryLevel?: number
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
+    batteryWarningLimit?: number
 }
 
-export const BatteryStatusDisplay = ({ batteryLevel, itemSize }: BatteryStatusDisplayProps): JSX.Element => {
+export const BatteryStatusDisplay = ({
+    batteryLevel,
+    itemSize,
+    batteryWarningLimit,
+}: BatteryStatusDisplayProps): JSX.Element => {
     let iconColor: string = tokens.colors.interactive.primary__resting.hex
 
     const getBatteryIcon = (batteryLevel: number) => {
         switch (true) {
             case !batteryLevel:
                 return Icons.BatteryUnknown
-            case batteryLevel > 10:
+            case !batteryWarningLimit || batteryLevel > batteryWarningLimit:
                 return Icons.Battery
-            case batteryLevel <= 10:
+            case batteryWarningLimit && batteryLevel <= batteryWarningLimit:
                 return Icons.BatteryAlert
             default:
                 return Icons.BatteryUnknown
@@ -36,7 +41,7 @@ export const BatteryStatusDisplay = ({ batteryLevel, itemSize }: BatteryStatusDi
 
     const batteryValue = batteryLevel ? `${batteryLevel}%` : '---%'
 
-    iconColor = batteryIcon === Icons.BatteryAlert ? tokens.colors.interactive.danger__resting.hex : iconColor
+    iconColor = batteryIcon === Icons.BatteryAlert ? tokens.colors.interactive.warning__resting.hex : iconColor
 
     return (
         <BatteryAlignment>
