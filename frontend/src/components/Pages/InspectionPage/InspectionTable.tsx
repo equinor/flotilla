@@ -250,7 +250,7 @@ const SmallScreenInfoText = () => {
 
 export const InspectionTable = ({ deck, inspections, openDialog, setSelectedMissions }: IProps) => {
     const { TranslateText } = useLanguageContext()
-    
+
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
 
     const openScheduleDialog = () => {
