@@ -5,11 +5,11 @@ import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { translateSignalRMission } from 'utils/EnumTranslations'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
-    let newList = [...list]
-    const i = newList.findIndex((e) => e.id === mission.id)
-    if (i > -1) newList[i] = mission
-    else newList.push(mission)
-    return newList
+    let newMissionList = [...list]
+    const i = newMissionList.findIndex((e) => e.id === mission.id)
+    if (i > -1) newMissionList[i] = mission
+    else newMissionList.push(mission)
+    return newMissionList
 }
 interface IMissionRunsContext {
     ongoingMissions: Mission[]
