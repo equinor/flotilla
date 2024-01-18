@@ -1,4 +1,4 @@
-import { Icon, Tabs, Typography } from '@equinor/eds-core-react'
+import { Icon, Tabs, Typography, Tooltip } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { InspectionSection } from './InspectionSection'
 import { useRef, useState } from 'react'
@@ -51,6 +51,10 @@ export const InspectionOverviewSection = () => {
     const [echoMissions, setEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [activeTab, setActiveTab] = useState(0)
 
+    const isScheduleButtonDisabled =
+        enabledRobots.filter((r) => r.currentInstallation.installationCode === installationCode).length === 0 ||
+        installationCode === ''
+
     const anchorRef = useRef<HTMLButtonElement>(null)
 
     const allInspections = missionDefinitions.map((m) => {
@@ -84,14 +88,12 @@ export const InspectionOverviewSection = () => {
     }
 
     const AddPredefinedMissionsButton = () => (
-        <StyledButton
-            onClick={onClickScheduleMission}
-            disabled={enabledRobots.length === 0 || installationCode === ''}
-            ref={anchorRef}
-        >
-            <Icon name={Icons.Add} size={16} />
-            {TranslateText('Add predefined Echo mission')}
-        </StyledButton>
+        <Tooltip placement="top" title={isScheduleButtonDisabled ? TranslateText('No robot available') : ''}>
+            <StyledButton onClick={onClickScheduleMission} disabled={isScheduleButtonDisabled} ref={anchorRef}>
+                <Icon name={Icons.Add} size={16} />
+                {TranslateText('Add predefined Echo mission')}
+            </StyledButton>
+        </Tooltip>
     )
 
     return (

@@ -55,6 +55,10 @@ const DeckCard = ({ deckData, setSelectedDeck, selectedDeck, handleScheduleAll }
         return getDeadlineInspection(nextInspection.deadline)
     }
 
+    let queueMissionsTooltip = ''
+    if (deckData.inspections.length === 0) queueMissionsTooltip = TranslateText('No planned inspection')
+    else if (isScheduleMissionsDisabled) queueMissionsTooltip = TranslateText('No robot available')
+
     const formattedAreaNames = deckData.areas
         .map((area) => area.areaName.toLocaleUpperCase())
         .sort()
@@ -90,10 +94,7 @@ const DeckCard = ({ deckData, setSelectedDeck, selectedDeck, handleScheduleAll }
                     )}
                 </StyledDict.DeckText>
                 <StyledDict.CardComponent>
-                    <Tooltip
-                        placement="top"
-                        title={deckData.inspections.length > 0 ? '' : TranslateText('No planned inspection')}
-                    >
+                    <Tooltip placement="top" title={queueMissionsTooltip}>
                         <Button
                             disabled={isScheduleMissionsDisabled}
                             variant="outlined"

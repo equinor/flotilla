@@ -205,5 +205,6 @@
     "Blocked": "Blocked",
     "Several robots are blocked and cannot perform tasks.": "Several robots are blocked and cannot perform tasks.",
     "Small screen info text": "Some columns in the table are hidden due to small screen. Rotate the screen to show more.",
-    "No predefined missions available": "No predefined missions available"
+    "No predefined missions available": "No predefined missions available",
+    "No robot available": "No robot available"
 }
