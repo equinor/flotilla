@@ -70,7 +70,7 @@ export const RobotPage = () => {
                                         {selectedRobot.pressureLevel && (
                                             <PressureStatusDisplay
                                                 itemSize={48}
-                                                pressureInBar={selectedRobot.pressureLevel}
+                                                pressure={selectedRobot.pressureLevel}
                                                 upperPressureWarningThreshold={
                                                     selectedRobot.model.upperPressureWarningThreshold
                                                 }
