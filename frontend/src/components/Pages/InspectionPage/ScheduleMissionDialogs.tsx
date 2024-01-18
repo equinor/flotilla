@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Dialog, Typography, Popover, Icon } from '@equinor/eds-core-react'
+import { Autocomplete, Dialog, Typography, Popover, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useRef, useState, useEffect } from 'react'
@@ -8,12 +8,11 @@ import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Icons } from 'utils/icons'
 import { useRobotContext } from 'components/Contexts/RobotContext'
-import { StyledAutoComplete, StyledDialog } from 'components/Styles/StyledComponents'
+import { StyledAutoComplete, StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { ScheduleMissionWithLocalizationVerificationDialog } from 'components/Displays/LocalizationVerification/ScheduleMissionWithLocalizationVerification'
-import { tokens } from '@equinor/eds-tokens'
 
 interface IProps {
     missions: CondensedMissionDefinition[]
@@ -48,12 +47,6 @@ const StyledDangerContent = styled.div`
     display: flex;
     flex-direction: row;
     gap: 2px;
-`
-
-const StyledButton = styled(Button)`
-    display: inline-block;
-    height: auto;
-    min-height: ${tokens.shape.button.minHeight};
 `
 
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
