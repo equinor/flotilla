@@ -1,4 +1,4 @@
-import { Button, Icon, Tabs } from '@equinor/eds-core-react'
+import { Icon, Tabs } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { InspectionSection } from './InspectionSection'
 import { useEffect, useRef, useState } from 'react'
@@ -15,7 +15,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { Icons } from 'utils/icons'
-import { tokens } from '@equinor/eds-tokens'
+import { StyledButton } from 'components/Styles/StyledComponents'
 
 const StyledContent = styled.div`
     display: flex;
@@ -33,11 +33,6 @@ const StyledButtons = styled.div`
 const StyledView = styled.div`
     display: flex;
     align-items: flex-start;
-`
-
-const StyledButton = styled(Button)`
-    height: auto;
-    min-height: ${tokens.shape.button.minHeight};
 `
 
 export const InspectionOverviewSection = () => {

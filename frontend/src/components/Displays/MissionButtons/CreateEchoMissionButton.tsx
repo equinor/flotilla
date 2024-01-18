@@ -1,18 +1,16 @@
-import { Button, Icon } from '@equinor/eds-core-react'
+import { Icon } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { useRef } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import styled from 'styled-components'
-import { tokens } from '@equinor/eds-tokens'
+import { StyledButton } from 'components/Styles/StyledComponents'
 
-const StyledButton = styled(Button)`
+const StyledCreateMissionButton = styled(StyledButton)`
     display: flex;
     align-items: center;
     gap: 8px;
     border-radius: 4px;
-    height: auto;
-    min-height: ${tokens.shape.button.minHeight};
 `
 
 export const CreateEchoMissionButton = (): JSX.Element => {
@@ -22,7 +20,7 @@ export const CreateEchoMissionButton = (): JSX.Element => {
     const echoURL = 'https://echo.equinor.com/missionplanner?instCode='
 
     return (
-        <StyledButton
+        <StyledCreateMissionButton
             variant="outlined"
             onClick={() => {
                 window.open(echoURL + installationCode)
@@ -32,6 +30,6 @@ export const CreateEchoMissionButton = (): JSX.Element => {
         >
             <Icon name={Icons.ExternalLink} size={16}></Icon>
             {TranslateText('Create new Echo mission')}
-        </StyledButton>
+        </StyledCreateMissionButton>
     )
 }
