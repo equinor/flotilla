@@ -4,7 +4,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Deck } from 'models/Deck'
 import { tokens } from '@equinor/eds-tokens'
 import { CondensedMissionDefinition } from 'models/MissionDefinition'
-import { NavigateFunction, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { Inspection } from './InspectionSection'
@@ -121,14 +121,14 @@ interface IInspectionRowProps {
     openDialog: () => void
     setMissions: (selectedMissions: CondensedMissionDefinition[]) => void
     openScheduledDialog: () => void
-    navigate: NavigateFunction
 }
 
-const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialog, navigate }: IInspectionRowProps) => {
+const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialog }: IInspectionRowProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
+    const navigate = useNavigate()
     const mission = inspection.missionDefinition
     let status
     let lastCompleted: string = ''
@@ -250,7 +250,7 @@ const SmallScreenInfoText = () => {
 
 export const InspectionTable = ({ deck, inspections, openDialog, setSelectedMissions }: IProps) => {
     const { TranslateText } = useLanguageContext()
-    const navigate = useNavigate()
+    
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
 
     const openScheduleDialog = () => {
@@ -270,7 +270,6 @@ export const InspectionTable = ({ deck, inspections, openDialog, setSelectedMiss
                 openDialog={openDialog}
                 setMissions={setSelectedMissions}
                 openScheduledDialog={openScheduleDialog}
-                navigate={navigate}
             />
         ))
 
@@ -346,7 +345,6 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
         }
     }, [isDialogOpen, ongoingMissions, missionQueue, selectedMissions])
 
-    const navigate = useNavigate()
     const cellValues = inspections
         .sort(compareInspections)
         .map((inspection) => (
@@ -356,7 +354,6 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
                 openDialog={openDialog}
                 setMissions={setSelectedMissions}
                 openScheduledDialog={openScheduleDialog}
-                navigate={navigate}
             />
         ))
 
