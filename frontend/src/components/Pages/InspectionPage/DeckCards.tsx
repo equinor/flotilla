@@ -12,6 +12,8 @@ import { Button, Icon, Tooltip, Typography } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
+import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 interface IDeckCardProps {
     deckMissions: DeckInspectionTuple[]
@@ -30,6 +32,13 @@ interface DeckCardProps {
 const DeckCard = ({ deckData, setSelectedDeck, selectedDeck, handleScheduleAll }: DeckCardProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
+    const { enabledRobots } = useRobotContext()
+    const { installationCode } = useInstallationContext()
+
+    const isScheduleMissionsDisabled =
+        enabledRobots.filter((r) => r.currentInstallation.installationCode === installationCode).length === 0 ||
+        installationCode === '' ||
+        deckData.inspections.length === 0
 
     const getCardColorFromInspections = (inspections: Inspection[]): DeckCardColors => {
         if (inspections.length === 0) return DeckCardColors.Gray
@@ -86,7 +95,7 @@ const DeckCard = ({ deckData, setSelectedDeck, selectedDeck, handleScheduleAll }
                         title={deckData.inspections.length > 0 ? '' : TranslateText('No planned inspection')}
                     >
                         <Button
-                            disabled={deckData.inspections.length === 0}
+                            disabled={isScheduleMissionsDisabled}
                             variant="outlined"
                             onClick={() => handleScheduleAll(deckData.inspections)}
                             color="secondary"
