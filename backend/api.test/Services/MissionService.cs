@@ -23,7 +23,7 @@ namespace Api.Test.Services
 
         public MissionServiceTest(DatabaseFixture fixture)
         {
-            _context = fixture.NewContext;
+            _context = fixture.Context;
             _logger = new Mock<ILogger<MissionRunService>>().Object;
             _signalRService = new MockSignalRService();
             _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());

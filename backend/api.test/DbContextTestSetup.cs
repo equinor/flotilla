@@ -1,55 +1,40 @@
-﻿using System;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Api.Database.Context;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Api.Test
 {
     // Class for building and disposing dbcontext
-    public class DatabaseFixture : IDisposable
+    public class DatabaseFixture : IAsyncLifetime
     {
-        public FlotillaDbContext NewContext => CreateContext();
-        private SqliteConnection? _connection;
+        private readonly PostgreSqlContainer _container = new PostgreSqlBuilder().Build();
 
-        private DbContextOptions<FlotillaDbContext> CreateOptions()
-        {
-            string connectionString = new SqliteConnectionStringBuilder
-            {
-                DataSource = ":memory:",
-                Cache = SqliteCacheMode.Shared
-            }.ToString();
-            _connection = new SqliteConnection(connectionString);
-            _connection.Open();
-            var builder = new DbContextOptionsBuilder<FlotillaDbContext>();
-            builder.EnableSensitiveDataLogging();
-            builder.UseSqlite(_connection);
-            return builder.Options;
-        }
+        private string ConnectionString => _container.GetConnectionString();
+        public string ContainerId => $"{_container.Id}";
+        public Task InitializeAsync()
+            => _container.StartAsync();
+        public Task DisposeAsync()
+            => _container.DisposeAsync().AsTask();
 
-        public FlotillaDbContext CreateContext()
+        public FlotillaDbContext Context => CreateContext();
+
+        private FlotillaDbContext CreateContext()
         {
-            var options = CreateOptions();
-            var context = new FlotillaDbContext(options);
+            var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
+            optionsBuilder.UseNpgsql(
+                ConnectionString,
+                o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery));
+            var context = new FlotillaDbContext(optionsBuilder.Options);
             context.Database.EnsureCreated();
-            InitDb.PopulateDb(context);
+            //InitDb.PopulateDb(context);
             return context;
-        }
-
-        public void Dispose()
-        {
-            if (_connection != null)
-            {
-                _connection.Dispose();
-                _connection = null;
-            }
-            GC.SuppressFinalize(this);
         }
     }
 

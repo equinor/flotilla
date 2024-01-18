@@ -44,7 +44,7 @@ namespace Api.Test.EventHandlers
 
             var configuration = WebApplication.CreateBuilder().Configuration;
 
-            var context = fixture.NewContext;
+            var context = fixture.Context;
 
             var signalRService = new MockSignalRService();
             var accessRoleService = new AccessRoleService(context, new HttpContextAccessor());

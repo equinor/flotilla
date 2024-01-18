@@ -6,6 +6,7 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
+using Api.Test.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -26,10 +27,13 @@ namespace Api.Test.Services
         private readonly IDeckService _deckService;
         private readonly IAreaService _areaService;
         private readonly IMissionRunService _missionRunService;
+        private readonly DatabaseUtilities _databaseUtilities;
+
+        private readonly IRobotService _robotService;
 
         public RobotServiceTest(DatabaseFixture fixture)
         {
-            _context = fixture.NewContext;
+            _context = fixture.Context;
             _logger = new Mock<ILogger<RobotService>>().Object;
             _robotModelService = new RobotModelService(_context);
             _signalRService = new MockSignalRService();
@@ -40,6 +44,9 @@ namespace Api.Test.Services
             _deckService = new DeckService(_context, _defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService);
             _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalizationPoseService, _accessRoleService);
             _missionRunService = new MissionRunService(_context, _signalRService, new Mock<ILogger<MissionRunService>>().Object, _accessRoleService);
+            _databaseUtilities = new DatabaseUtilities(_context);
+
+            _robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
         }
 
         public void Dispose()
@@ -122,6 +129,26 @@ namespace Api.Test.Services
             int nRobotsAfter = robotsAfter.Count();
 
             Assert.Equal(nRobotsBefore + 1, nRobotsAfter);
+        }
+
+        [Fact]
+        public async Task TestThatRobotStatusIsCorrectlyUpdated()
+        {
+            // Arrange
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
+
+            // Act
+            robot.Status = RobotStatus.Busy;
+            await _robotService.Update(robot);
+            //await _robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
+
+            // Assert
+            var postTestRobot = await _robotService.ReadById(robot.Id);
+            Assert.Equal(RobotStatus.Busy, postTestRobot!.Status);
         }
     }
 }
