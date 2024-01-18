@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom'
 import { MissionControlButtons } from 'components/Displays/MissionButtons/MissionControlButtons'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import { MissionRobotDisplay } from 'components/Displays/MissionDisplays/MissionRobotDisplay'
+import { useRobotContext } from 'components/Contexts/RobotContext'
 
 interface MissionProps {
     mission: Mission
@@ -42,11 +43,15 @@ const BottomContent = styled.div`
 `
 
 export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
+    const { enabledRobots } = useRobotContext()
     let navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
     }
+
+    const robot = enabledRobots.find((robot) => mission.robot.id === robot.id)
+
     return (
         <StyledMissionCard style={{ boxShadow: tokens.elevation.raised }}>
             <TopContent>
@@ -65,7 +70,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                 <MissionStatusDisplayWithHeader status={mission.status} />
                 <MissionProgressDisplay mission={mission} />
                 <MissionRobotDisplay mission={mission} />
-                <BatteryStatusDisplay batteryLevel={mission.robot.batteryLevel} />
+                <BatteryStatusDisplay batteryLevel={robot?.batteryLevel} />
             </BottomContent>
         </StyledMissionCard>
     )
