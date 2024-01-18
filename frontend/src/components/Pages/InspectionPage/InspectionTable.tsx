@@ -183,6 +183,8 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
         lastCompleted = formatDateString(mission.lastSuccessfulRun.endTime!)
     }
 
+    const noRobotAvailableText = TranslateText('No robot available')
+
     return (
         <Table.Row key={mission.id}>
             <Table.Cell id={InspectionTableColumns.Status}>{status}</Table.Cell>
@@ -215,6 +217,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                             name={Icons.AddOutlined}
                             size={24}
                         />
+                        {isScheduleButtonDisabled && noRobotAvailableText}
                     </Button>
                 )}
                 {isScheduled && (
