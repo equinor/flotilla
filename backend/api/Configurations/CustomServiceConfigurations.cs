@@ -9,14 +9,19 @@ namespace Api.Configurations
     {
         public static IServiceCollection ConfigureDatabase(
             this IServiceCollection services,
-            IConfiguration configuration
+            IConfiguration configuration,
+            string environmentName
         )
         {
             bool useInMemoryDatabase = configuration
                 .GetSection("Database")
                 .GetValue<bool>("UseInMemoryDatabase");
 
-            if (useInMemoryDatabase)
+            if (environmentName.Equals("Test", StringComparison.Ordinal))
+            {
+                // The application is running in a test state meaning the database configuration will be done in tests
+            }
+            else if (useInMemoryDatabase)
             {
                 DbContextOptionsBuilder dbBuilder =
                     new DbContextOptionsBuilder<FlotillaDbContext>();

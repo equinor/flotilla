@@ -22,11 +22,6 @@ namespace Api.Database.Context
         public DbSet<DefaultLocalizationPose> DefaultLocalizationPoses => Set<DefaultLocalizationPose>();
         public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
 
-        // Timeseries:
-        public DbSet<RobotPressureTimeseries> RobotPressureTimeseries => Set<RobotPressureTimeseries>();
-        public DbSet<RobotBatteryTimeseries> RobotBatteryTimeseries => Set<RobotBatteryTimeseries>();
-        public DbSet<RobotPoseTimeseries> RobotPoseTimeseries => Set<RobotPoseTimeseries>();
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             bool isSqlLite = Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";

@@ -72,7 +72,6 @@ namespace Api.EventHandlers
                 return;
             }
 
-
             if (!await LocalizationService.RobotIsLocalized(missionRun.Robot.Id))
             {
                 _scheduleLocalizationSemaphore.WaitOne();

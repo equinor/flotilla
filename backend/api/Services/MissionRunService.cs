@@ -16,7 +16,7 @@ namespace Api.Services
 
         public Task<PagedList<MissionRun>> ReadAll(MissionRunQueryStringParameters parameters);
 
-        public Task<MissionRun?> ReadById(string id);
+        public Task<MissionRun?> ReadById(string id, bool noTracking = false);
 
         public Task<MissionRun?> ReadByIsarMissionId(string isarMissionId);
 
@@ -49,7 +49,7 @@ namespace Api.Services
 
         public Task<MissionRun?> Delete(string id);
 
-        public Task<MissionRun?> GetOngoingMissionRunForRobot(string robotId);
+        public Task<MissionRun?> GetOngoingMissionRunForRobot(string robotId, bool noTracking = false);
 
         public Task<bool> OngoingMission(string robotId);
     }
@@ -110,8 +110,14 @@ namespace Api.Services
             );
         }
 
-        public async Task<MissionRun?> ReadById(string id)
+        public async Task<MissionRun?> ReadById(string id, bool noTracking = false)
         {
+            if (noTracking)
+            {
+                return await GetMissionRunsWithSubModels()
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
+            }
             return await GetMissionRunsWithSubModels()
                 .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
         }
@@ -253,8 +259,16 @@ namespace Api.Services
             return missionRun;
         }
 
-        public async Task<MissionRun?> GetOngoingMissionRunForRobot(string robotId)
+        public async Task<MissionRun?> GetOngoingMissionRunForRobot(string robotId, bool noTracking = false)
         {
+            if (noTracking)
+            {
+                return await GetMissionRunsWithSubModels()
+                    .AsNoTracking()
+                    .Where(missionRun => missionRun.Robot.Id == robotId)
+                    .Where(missionRun => missionRun.Status == MissionStatus.Ongoing)
+                    .FirstOrDefaultAsync();
+            }
             return await GetMissionRunsWithSubModels()
                 .Where(missionRun => missionRun.Robot.Id == robotId)
                 .Where(missionRun => missionRun.Status == MissionStatus.Ongoing)

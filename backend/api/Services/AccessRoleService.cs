@@ -62,6 +62,7 @@ namespace Api.Services
                 AccessLevel = accessLevel
             };
 
+            context.Entry(newAccessRole.Installation).State = EntityState.Unchanged;
             await context.AccessRoles.AddAsync(newAccessRole);
             await context.SaveChangesAsync();
             return newAccessRole!;

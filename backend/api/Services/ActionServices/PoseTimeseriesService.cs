@@ -18,6 +18,7 @@ namespace Api.Services.ActionServices
             }
 
             await robotService.UpdateRobotPose(robot.Id, pose);
+
             logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
         }
     }

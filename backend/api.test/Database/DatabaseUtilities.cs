@@ -53,7 +53,7 @@ namespace Api.Test.Database
                 IsarMissionId = isarMissionId,
                 MissionRunPriority = missionRunPriority,
                 Status = missionStatus,
-                DesiredStartTime = DateTime.Now,
+                DesiredStartTime = DateTime.UtcNow,
                 Area = area,
                 Tasks = [],
                 Map = new MapMetadata(),
@@ -73,7 +73,7 @@ namespace Api.Test.Database
             return missionRun;
         }
 
-        public async Task<Installation> NewInstallation(string name = "testInstallation", string installationCode = "testInstallationCode")
+        public async Task<Installation> NewInstallation(string name = "testInstallation", string installationCode = "instCode")
         {
             var createInstallationQuery = new CreateInstallationQuery
             {
@@ -84,7 +84,7 @@ namespace Api.Test.Database
             return await _installationService.Create(createInstallationQuery);
         }
 
-        public async Task<Plant> NewPlant(string installationCode, string name = "testPlant", string plantCode = "testPlantCode")
+        public async Task<Plant> NewPlant(string installationCode, string name = "testPlant", string plantCode = "plantCode")
         {
             var createPlantQuery = new CreatePlantQuery
             {

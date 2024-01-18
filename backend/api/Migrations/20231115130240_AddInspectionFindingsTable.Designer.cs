@@ -438,24 +438,6 @@ namespace Api.Migrations
                     b.ToTable("Robots");
                 });
 
-            modelBuilder.Entity("Api.Database.Models.RobotBatteryTimeseries", b =>
-                {
-                    b.Property<float>("BatteryLevel")
-                        .HasColumnType("real");
-
-                    b.Property<string>("MissionId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("RobotId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.ToTable("RobotBatteryTimeseries");
-                });
-
             modelBuilder.Entity("Api.Database.Models.RobotModel", b =>
                 {
                     b.Property<string>("Id")
@@ -484,60 +466,6 @@ namespace Api.Migrations
                         .IsUnique();
 
                     b.ToTable("RobotModels");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.RobotPoseTimeseries", b =>
-                {
-                    b.Property<string>("MissionId")
-                        .HasColumnType("text");
-
-                    b.Property<float>("OrientationW")
-                        .HasColumnType("real");
-
-                    b.Property<float>("OrientationX")
-                        .HasColumnType("real");
-
-                    b.Property<float>("OrientationY")
-                        .HasColumnType("real");
-
-                    b.Property<float>("OrientationZ")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PositionX")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PositionY")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PositionZ")
-                        .HasColumnType("real");
-
-                    b.Property<string>("RobotId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.ToTable("RobotPoseTimeseries");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.RobotPressureTimeseries", b =>
-                {
-                    b.Property<string>("MissionId")
-                        .HasColumnType("text");
-
-                    b.Property<float>("Pressure")
-                        .HasColumnType("real");
-
-                    b.Property<string>("RobotId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.ToTable("RobotPressureTimeseries");
                 });
 
             modelBuilder.Entity("Api.Database.Models.SafePosition", b =>

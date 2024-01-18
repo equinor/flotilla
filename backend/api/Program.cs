@@ -8,7 +8,6 @@ using Api.Options;
 using Api.Services;
 using Api.Services.ActionServices;
 using Api.SignalRHubs;
-using Api.Utilities;
 using Azure.Identity;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -48,7 +47,7 @@ if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
 
 builder.ConfigureLogger();
 
-builder.Services.ConfigureDatabase(builder.Configuration);
+builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment.EnvironmentName);
 
 builder.Services.AddApplicationInsightsTelemetry();
 
@@ -95,14 +94,6 @@ builder.Services.AddScoped<IBatteryTimeseriesService, BatteryTimeseriesService>(
 builder.Services.AddScoped<IPressureTimeseriesService, PressureTimeseriesService>();
 builder.Services.AddScoped<IPoseTimeseriesService, PoseTimeseriesService>();
 
-bool useInMemoryDatabase = builder.Configuration
-    .GetSection("Database")
-    .GetValue<bool>("UseInMemoryDatabase");
-
-if (useInMemoryDatabase)
-    builder.Services.AddScoped<ITimeseriesService, TimeseriesServiceSqlLite>();
-else
-    builder.Services.AddScoped<ITimeseriesService, TimeseriesService>();
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();

@@ -5,6 +5,7 @@ using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
+using Api.Test.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -12,7 +13,7 @@ using Xunit;
 namespace Api.Test.Services
 {
     [Collection("Database collection")]
-    public class MissionServiceTest : IDisposable
+    public class MissionServiceTest : IAsyncLifetime
     {
         private readonly FlotillaDbContext _context;
         private readonly DatabaseUtilities _databaseUtilities;
@@ -21,20 +22,26 @@ namespace Api.Test.Services
         private readonly ISignalRService _signalRService;
         private readonly IAccessRoleService _accessRoleService;
 
+        private readonly Func<Task> _resetDatabase;
+
         public MissionServiceTest(DatabaseFixture fixture)
         {
-            _context = fixture.NewContext;
+            _context = fixture.Context;
             _logger = new Mock<ILogger<MissionRunService>>().Object;
             _signalRService = new MockSignalRService();
             _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
             _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService);
             _databaseUtilities = new DatabaseUtilities(_context);
+
+            _resetDatabase = fixture.ResetDatabase;
         }
 
-        public void Dispose()
+        public Task InitializeAsync() => Task.CompletedTask;
+
+        public async Task DisposeAsync()
         {
-            _context.Dispose();
-            GC.SuppressFinalize(this);
+            await _resetDatabase();
+            await _context.DisposeAsync();
         }
 
         [Fact]

@@ -13,7 +13,7 @@ namespace Api.Services
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
         public Task<IEnumerable<Robot>> ReadAll();
         public Task<IEnumerable<string>> ReadAllActivePlants();
-        public Task<Robot?> ReadById(string id);
+        public Task<Robot?> ReadById(string id, bool noTracking = false);
         public Task<Robot?> ReadByIsarId(string isarId);
         public Task<IList<Robot>> ReadRobotsForInstallation(string installationCode);
         public Task<Robot> Update(Robot robot);
@@ -225,7 +225,14 @@ namespace Api.Services
 
         public async Task<IEnumerable<Robot>> ReadAll() { return await GetRobotsWithSubModels().ToListAsync(); }
 
-        public async Task<Robot?> ReadById(string id) { return await GetRobotsWithSubModels().FirstOrDefaultAsync(robot => robot.Id.Equals(id)); }
+        public async Task<Robot?> ReadById(string id, bool noTracking = false)
+        {
+            if (noTracking)
+            {
+                return await GetRobotsWithSubModels().AsNoTracking().FirstOrDefaultAsync(robot => robot.Id.Equals(id));
+            }
+            return await GetRobotsWithSubModels().FirstOrDefaultAsync(robot => robot.Id.Equals(id));
+        }
 
         public async Task<Robot?> ReadByIsarId(string isarId)
         {
