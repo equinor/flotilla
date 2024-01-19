@@ -48,7 +48,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks }: MissionProps) 
             .catch(() =>
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent message={TranslateText('Failed to rerun mission')} />
+                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to rerun mission')} />
                 )
             )
         setIsLocationVerificationOpen(false)

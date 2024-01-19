@@ -18,7 +18,7 @@ const Indent = styled.div`
     padding: 0px 9px;
 `
 
-export const FailedRequestAlertContent = ({ message }: { message: string }) => {
+export const FailedRequestAlertContent = ({ translatedMessage }: { translatedMessage: string }) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledDiv>
@@ -28,7 +28,7 @@ export const FailedRequestAlertContent = ({ message }: { message: string }) => {
             </StyledAlertTitle>
             <Indent>
                 <Button as={Typography} variant="ghost" color="secondary">
-                    {TranslateText(message)}
+                    {translatedMessage}
                 </Button>
             </Indent>
         </StyledDiv>

@@ -38,7 +38,7 @@ export const MissionQueueView = (): JSX.Element => {
         BackendAPICaller.deleteMission(mission.id).catch((_) =>
             setAlert(
                 AlertType.RequestFail,
-                <FailedRequestAlertContent message={'Failed to delete mission from queue'} />
+                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to delete mission from queue')} />
             )
         )
 
