@@ -15,13 +15,13 @@ namespace Api.Test
     public class DatabaseFixture : IAsyncLifetime
     {
         private readonly PostgreSqlContainer _container = new PostgreSqlBuilder().Build();
-
         private string ConnectionString => _container.GetConnectionString();
-        public string ContainerId => $"{_container.Id}";
-        public Task InitializeAsync()
-            => _container.StartAsync();
+        public Task InitializeAsync() => _container.StartAsync();
         public Task DisposeAsync()
-            => _container.DisposeAsync().AsTask();
+        {
+            Context.Dispose();
+            return _container.DisposeAsync().AsTask();
+        }
 
         public FlotillaDbContext Context => CreateContext();
 
@@ -33,7 +33,6 @@ namespace Api.Test
                 o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery));
             var context = new FlotillaDbContext(optionsBuilder.Options);
             context.Database.EnsureCreated();
-            //InitDb.PopulateDb(context);
             return context;
         }
     }
