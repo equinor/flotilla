@@ -14,7 +14,9 @@ interface TypeProps {
 }
 
 const StyledImage = styled.img<{ $height?: string }>`
-    height: ${(props) => props.$height};
+    object-fit: contain;
+    max-height: ${(props) => props.$height};
+    max-width: 100%;
 `
 
 const StyledIcon = styled(Icon)`
