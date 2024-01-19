@@ -31,6 +31,7 @@ const RobotInfo = styled.div`
     display: flex;
     align-items: start;
     gap: 1rem;
+    width: calc(80vw);
 `
 const VerticalContent = styled.div<{ $alignItems?: string }>`
     display: flex;
