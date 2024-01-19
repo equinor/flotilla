@@ -28,7 +28,7 @@ namespace Api.Test.Database
             _accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
             _installationService = new InstallationService(context, _accessRoleService);
             _plantService = new PlantService(context, _installationService, _accessRoleService);
-            _deckService = new DeckService(context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService);
+            _deckService = new DeckService(context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, new MockSignalRService());
             _areaService = new AreaService(context, _installationService, _plantService, _deckService, defaultLocalizationPoseService, _accessRoleService);
             _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService);
             _robotModelService = new RobotModelService(context);

@@ -41,7 +41,8 @@ namespace Api.Services
         IDefaultLocalizationPoseService defaultLocalizationPoseService,
         IInstallationService installationService,
         IPlantService plantService,
-        IAccessRoleService accessRoleService) : IDeckService
+        IAccessRoleService accessRoleService,
+        ISignalRService signalRService) : IDeckService
     {
         public async Task<IEnumerable<Deck>> ReadAll()
         {
@@ -92,7 +93,6 @@ namespace Api.Services
                 throw new DeckExistsException($"Deck with name {newDeckQuery.Name} already exists");
             }
 
-
             DefaultLocalizationPose? defaultLocalizationPose = null;
             if (newDeckQuery.DefaultLocalizationPose != null)
             {
@@ -113,6 +113,7 @@ namespace Api.Services
 
             await context.Decks.AddAsync(deck);
             await ApplyDatabaseUpdate(deck.Installation);
+            _ = signalRService.SendMessageAsync("Deck created", deck.Installation, new DeckResponse(deck));
             return deck!;
         }
 
@@ -120,6 +121,7 @@ namespace Api.Services
         {
             var entry = context.Update(deck);
             await ApplyDatabaseUpdate(deck.Installation);
+            _ = signalRService.SendMessageAsync("Deck updated", deck.Installation, new DeckResponse(deck));
             return entry.Entity;
         }
 
@@ -134,6 +136,7 @@ namespace Api.Services
 
             context.Decks.Remove(deck);
             await ApplyDatabaseUpdate(deck.Installation);
+            _ = signalRService.SendMessageAsync("Deck deleted", deck.Installation, new DeckResponse(deck));
 
             return deck;
         }

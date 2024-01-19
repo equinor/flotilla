@@ -54,7 +54,7 @@ namespace Api.Test.EventHandlers
             var installationService = new InstallationService(context, accessRoleService);
             var defaultLocalisationPoseService = new DefaultLocalizationPoseService(context);
             var plantService = new PlantService(context, installationService, accessRoleService);
-            var deckService = new DeckService(context, defaultLocalisationPoseService, installationService, plantService, accessRoleService);
+            var deckService = new DeckService(context, defaultLocalisationPoseService, installationService, plantService, accessRoleService, signalRService);
             var areaService = new AreaService(context, installationService, plantService, deckService, defaultLocalisationPoseService, accessRoleService);
             var robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService, _missionRunService);
             var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, robotService, areaService,
