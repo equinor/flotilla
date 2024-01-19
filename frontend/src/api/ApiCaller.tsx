@@ -446,6 +446,15 @@ export class BackendAPICaller {
         return result.content
     }
 
+    static async getDecksByInstallationCode(installationCode: string): Promise<Deck[]> {
+        const path: string = 'decks/installation/' + installationCode
+        const result = await this.GET<Deck[]>(path).catch((e) => {
+            console.error(`Failed to GET /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
+
     static async getAreasMapMetadata(id: string): Promise<MapMetadata> {
         const path: string = 'areas/' + id + '/map-metadata'
         const result = await this.GET<MapMetadata>(path).catch((e) => {
