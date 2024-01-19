@@ -37,7 +37,7 @@ namespace Api.Test.Services
             _installationService = new InstallationService(_context, _accessRoleService);
             _plantService = new PlantService(_context, _installationService, _accessRoleService);
             _defaultLocalizationPoseService = new DefaultLocalizationPoseService(_context);
-            _deckService = new DeckService(_context, _defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService);
+            _deckService = new DeckService(_context, _defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, _signalRService);
             _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalizationPoseService, _accessRoleService);
             _missionRunService = new MissionRunService(_context, _signalRService, new Mock<ILogger<MissionRunService>>().Object, _accessRoleService);
         }
