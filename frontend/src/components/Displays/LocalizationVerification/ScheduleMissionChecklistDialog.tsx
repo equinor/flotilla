@@ -3,9 +3,8 @@ import { DeckMapView } from 'utils/DeckMapView'
 import { HorizontalContent, StyledDialog, VerticalContent } from './ScheduleMissionStyles'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Robot } from 'models/Robot'
-import { ChangeEvent, useEffect, useState } from 'react'
-import { Deck } from 'models/Deck'
-import { BackendAPICaller } from 'api/ApiCaller'
+import { ChangeEvent, useState } from 'react'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 interface ScheduleMissionChecklistDialogProps {
     closeDialog: () => void
@@ -22,15 +21,9 @@ interface CheckDialogProps {
 
 const LocalisationDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialogProps) => {
     const { TranslateText } = useLanguageContext()
-    const [newDeck, setNewDeck] = useState<Deck>()
+    const { installationDecks } = useInstallationContext()
 
-    // TODO: consider having a deck context, or consider passing deck instead of deckName
-    // TODO: alternatively, use a filter when searching for decks, so that we do not need to do the filtering in the frontend
-    useEffect(() => {
-        BackendAPICaller.getDecks().then(async (decks: Deck[]) => {
-            setNewDeck(decks.find((deck) => deck.deckName === deckName))
-        })
-    }, [deckName])
+    const newDeck = installationDecks.find((deck) => deck.deckName === deckName)
 
     return (
         <>
