@@ -88,7 +88,9 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent
-                        message={TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`}
+                        translatedMessage={
+                            TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`
+                        }
                     />
                 )
                 setLoadingMissionSet((currentSet: Set<string>) => {

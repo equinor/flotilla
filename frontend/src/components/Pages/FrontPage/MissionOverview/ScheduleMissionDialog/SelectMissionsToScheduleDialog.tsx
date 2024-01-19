@@ -55,7 +55,9 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent
-                        message={TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`}
+                        translatedMessage={
+                            TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`
+                        }
                     />
                 )
                 setLoadingMissionSet((currentSet: Set<string>) => {
