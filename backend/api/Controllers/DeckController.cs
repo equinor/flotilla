@@ -48,6 +48,34 @@ namespace Api.Controllers
         }
 
         /// <summary>
+        /// List all decks in the Flotilla database
+        /// </summary>
+        /// <remarks>
+        /// <para> This query gets all decks </para>
+        /// </remarks>
+        [HttpGet("installation/{installationCode}")]
+        [Authorize(Roles = Role.Any)]
+        [ProducesResponseType(typeof(IList<DeckResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IList<DeckResponse>>> GetDecksByInstallationCode([FromRoute] string installationCode)
+        {
+            try
+            {
+                var decks = await deckService.ReadByInstallation(installationCode);
+                var deckResponses = decks.Select(d => new DeckResponse(d)).ToList();
+                return Ok(deckResponses);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error during GET of decks from database");
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Lookup deck by specified id.
         /// </summary>
         [HttpGet]

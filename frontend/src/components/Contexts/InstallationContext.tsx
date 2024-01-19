@@ -1,10 +1,12 @@
 import { createContext, FC, useContext, useState, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { EchoPlantInfo } from 'models/EchoMission'
+import { Deck } from 'models/Deck'
 
 interface IInstallationContext {
     installationCode: string
     installationName: string
+    installationDecks: Deck[]
     switchInstallation: (selectedName: string) => void
 }
 
@@ -23,6 +25,7 @@ interface Props {
 const defaultInstallation = {
     installationCode: '',
     installationName: '',
+    installationDecks: [],
     switchInstallation: (selectedInstallation: string) => {},
 }
 
@@ -33,6 +36,9 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
     const [installationName, setInstallationName] = useState<string>(
         window.localStorage.getItem('installationName') || ''
     )
+    const [installationDecks, setInstallationDecks] = useState<Deck[]>([])
+
+    const installationCode = allPlantsMap.get(installationName) || ''
 
     useEffect(() => {
         BackendAPICaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
@@ -41,7 +47,11 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
         })
     }, [])
 
-    const installationCode = allPlantsMap.get(installationName) || ''
+    useEffect(() => {
+        BackendAPICaller.getDecksByInstallationCode(installationCode).then(async (decks: Deck[]) => {
+            setInstallationDecks(decks)
+        })
+    }, [installationCode])
 
     const switchInstallation = (selectedName: string) => {
         setInstallationName(selectedName)
@@ -55,6 +65,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
             value={{
                 installationCode,
                 installationName,
+                installationDecks,
                 switchInstallation,
             }}
         >
