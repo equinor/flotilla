@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
-import { BackendAPICaller } from 'api/ApiCaller'
+import { useState, useEffect } from 'react'
 import { Deck } from 'models/Deck'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { CondensedMissionDefinition } from 'models/MissionDefinition'
@@ -29,14 +28,22 @@ interface DeckAreaTuple {
 }
 
 export const InspectionSection = () => {
-    const { installationCode } = useInstallationContext()
+    const { installationCode, installationDecks, installationAreas } = useInstallationContext()
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
-    const [decks, setDecks] = useState<DeckAreaTuple[]>()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
     const { ongoingMissions, missionQueue } = useMissionsContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
+
+    const decks: DeckAreaTuple[] = installationDecks
+        .filter((deck) => deck.installationCode.toLowerCase() === installationCode.toLowerCase())
+        .map((deck) => {
+            return {
+                areas: installationAreas.filter((a) => a.deckName === deck.deckName),
+                deck: deck,
+            }
+        })
 
     const closeDialog = () => {
         setIsAlreadyScheduled(false)
@@ -56,27 +63,6 @@ export const InspectionSection = () => {
             setIsAlreadyScheduled(true)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ongoingMissions, missionQueue, selectedMissions])
-
-    useMemo(() => {
-        setSelectedDeck(undefined)
-
-        // Fetch relevant decks and their areas from the database
-        BackendAPICaller.getDecks().then(async (decks: Deck[]) =>
-            setDecks(
-                await Promise.all(
-                    // This is needed since the map function uses async calls
-                    decks
-                        .filter((deck) => deck.installationCode.toLowerCase() === installationCode.toLowerCase())
-                        .map(async (deck) => {
-                            return {
-                                areas: await BackendAPICaller.getAreasByDeckId(deck.id),
-                                deck: deck,
-                            }
-                        })
-                )
-            )
-        )
-    }, [installationCode])
 
     const deckMissions: DeckInspectionTuple[] =
         decks?.map(({ areas, deck }) => {

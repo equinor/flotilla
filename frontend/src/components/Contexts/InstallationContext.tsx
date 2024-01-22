@@ -3,11 +3,13 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { EchoPlantInfo } from 'models/EchoMission'
 import { Deck } from 'models/Deck'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
+import { Area } from 'models/Area'
 
 interface IInstallationContext {
     installationCode: string
     installationName: string
     installationDecks: Deck[]
+    installationAreas: Area[]
     switchInstallation: (selectedName: string) => void
 }
 
@@ -27,6 +29,7 @@ const defaultInstallation = {
     installationCode: '',
     installationName: '',
     installationDecks: [],
+    installationAreas: [],
     switchInstallation: (selectedInstallation: string) => {},
 }
 
@@ -39,6 +42,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
         window.localStorage.getItem('installationName') || ''
     )
     const [installationDecks, setInstallationDecks] = useState<Deck[]>([])
+    const [installationAreas, setInstallationAreas] = useState<Area[]>([])
 
     const installationCode = allPlantsMap.get(installationName) || ''
 
@@ -50,9 +54,24 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
     }, [])
 
     useEffect(() => {
-        BackendAPICaller.getDecksByInstallationCode(installationCode).then(async (decks: Deck[]) => {
-            setInstallationDecks(decks)
-        })
+        if (installationCode)
+            BackendAPICaller.getDecksByInstallationCode(installationCode).then((decks: Deck[]) => {
+                setInstallationDecks(decks)
+                decks.forEach((deck) =>
+                    BackendAPICaller.getAreasByDeckId(deck.id).then((areas) =>
+                        setInstallationAreas((oldAreas) => {
+                            let areasCopy = [...oldAreas]
+                            let newAreas: Area[] = []
+                            areas.forEach((area) => {
+                                const indexBeUpdated = areasCopy.findIndex((a) => a.id === area.id)
+                                if (indexBeUpdated === -1) newAreas = [...newAreas, area]
+                                else areasCopy[indexBeUpdated] = area
+                            })
+                            return areasCopy.concat(newAreas)
+                        })
+                    )
+                )
+            })
     }, [installationCode])
 
     useEffect(() => {
@@ -108,6 +127,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                 installationCode,
                 installationName,
                 installationDecks,
+                installationAreas,
                 switchInstallation,
             }}
         >
