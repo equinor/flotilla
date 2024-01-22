@@ -27,9 +27,9 @@ if (config.AI_CONNECTION_STRING.length > 0) {
 }
 
 const App = () => (
-    <InstallationProvider>
-        <AuthProvider>
-            <SignalRProvider>
+    <AuthProvider>
+        <SignalRProvider>
+            <InstallationProvider>
                 <MissionDefinitionsProvider>
                     <RobotProvider>
                         <MissionRunsProvider>
@@ -56,9 +56,9 @@ const App = () => (
                         </MissionRunsProvider>
                     </RobotProvider>
                 </MissionDefinitionsProvider>
-            </SignalRProvider>
-        </AuthProvider>
-    </InstallationProvider>
+            </InstallationProvider>
+        </SignalRProvider>
+    </AuthProvider>
 )
 
 export default App

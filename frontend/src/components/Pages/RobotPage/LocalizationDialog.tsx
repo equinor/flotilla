@@ -2,7 +2,7 @@ import { Autocomplete, AutocompleteChanges, Button, Card, Dialog, Typography, Ic
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Area } from 'models/Area'
 import { Robot } from 'models/Robot'
@@ -51,11 +51,10 @@ interface RobotProps {
 
 export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useInstallationContext()
+    const { installationAreas } = useInstallationContext()
     const [isLocalizationDialogOpen, setIsLocalizationDialogOpen] = useState<boolean>(false)
     const [missionLocalizationStatus, setMissionLocalizationInfo] = useState<string>()
     const [selectedArea, setSelectedArea] = useState<Area>()
-    const [areas, setAreas] = useState<Area[]>()
     const [localizationPose, setLocalizationPose] = useState<Pose>()
     const [selectedDirection, setSelectedDirecion] = useState<Orientation>()
     const [localizing, setLocalizing] = useState<Boolean>(false)
@@ -69,15 +68,6 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
         [TranslateText('South'), { x: 0, y: 0, z: -0.7071, w: 0.7071 }],
         [TranslateText('West'), { x: 0, y: 0, z: 1, w: 0 }],
     ])
-
-    useEffect(() => {
-        BackendAPICaller.getAreas().then((response: Area[]) => {
-            const relevantAreas = response.filter(
-                (area) => area.installationCode.toLowerCase() === installationCode.toLowerCase()
-            )
-            setAreas(relevantAreas)
-        })
-    }, [installationCode])
 
     const localizeRobot = () => {
         if (selectedArea && localizationPose) {
@@ -107,7 +97,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
 
     const onSelectedArea = (changes: AutocompleteChanges<string>) => {
         const selectedAreaName = changes.selectedItems[0]
-        const selectedArea = areas?.find((area) => area.areaName === selectedAreaName)
+        const selectedArea = installationAreas?.find((area) => area.areaName === selectedAreaName)
         setSelectedArea(selectedArea)
         let newPose = selectedArea?.defaultLocalizationPose
         if (newPose && selectedDirection) {
@@ -141,7 +131,7 @@ export const LocalizationDialog = ({ robot }: RobotProps): JSX.Element => {
         localizeRobot()
     }
 
-    const areaNames = areas ? Array.from(getAreaNames(areas).keys()).sort() : []
+    const areaNames = installationAreas ? Array.from(getAreaNames(installationAreas).keys()).sort() : []
     return (
         <>
             <StyledLocalization>
