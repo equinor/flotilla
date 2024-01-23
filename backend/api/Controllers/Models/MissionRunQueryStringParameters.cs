@@ -61,14 +61,14 @@ namespace Api.Controllers.Models
         public List<InspectionType>? InspectionTypes { get; set; }
 
         /// <summary>
-        /// Filter for whether the result should include localisation missions. The default is false
+        /// Filter for whether the result should exclude localisation missions. The default is false
         /// </summary>
-        public bool IncludeLocalisation { get; set; }
+        public bool ExcludeLocalisation { get; set; }
 
         /// <summary>
-        /// Filter for whether the result should include return to home missions. The default is false
+        /// Filter for whether the result should exclude return to home missions. The default is false
         /// </summary>
-        public bool IncludeReturnToHome { get; set; }
+        public bool ExcludeReturnToHome { get; set; }
 
         #region Time Filters
 
