@@ -279,6 +279,8 @@ namespace Api.Services
         ///     <see cref="MissionRunQueryStringParameters.RobotNameSearch" />,
         ///     <see cref="MissionRunQueryStringParameters.TagSearch" />,
         ///     <see cref="MissionRunQueryStringParameters.InspectionTypes" />,
+        ///     <see cref="MissionRunQueryStringParameters.ExcludeLocalisation" />,
+        ///     <see cref="MissionRunQueryStringParameters.ExcludeReturnToHome" />,
         ///     <see cref="MissionRunQueryStringParameters.MinStartTime" />,
         ///     <see cref="MissionRunQueryStringParameters.MaxStartTime" />,
         ///     <see cref="MissionRunQueryStringParameters.MinEndTime" />,
@@ -331,11 +333,11 @@ namespace Api.Services
                         )
                 );
 
-            Expression<Func<MissionRun, bool>> localisationFilter = parameters.IncludeLocalisation
+            Expression<Func<MissionRun, bool>> localisationFilter = !parameters.ExcludeLocalisation
                 ? missionRun => true
                 : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.Localization));
 
-            Expression<Func<MissionRun, bool>> returnTohomeFilter = parameters.IncludeReturnToHome
+            Expression<Func<MissionRun, bool>> returnTohomeFilter = !parameters.ExcludeReturnToHome
                 ? missionRun => true
                 : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.DriveTo));
 
