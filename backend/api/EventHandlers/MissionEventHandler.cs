@@ -73,7 +73,6 @@ namespace Api.EventHandlers
                 return;
             }
 
-
             _scheduleLocalizationSemaphore.WaitOne();
 
             string? localizationMissionRunId = null;

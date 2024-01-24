@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Data.Common;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Api.Database.Context;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Respawn;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -14,16 +16,41 @@ namespace Api.Test
     // Class for building and disposing dbcontext
     public class DatabaseFixture : IAsyncLifetime
     {
+        public FlotillaDbContext Context { get; private set; }
+
         private readonly PostgreSqlContainer _container = new PostgreSqlBuilder().Build();
         private string ConnectionString => _container.GetConnectionString();
-        public Task InitializeAsync() => _container.StartAsync();
-        public Task DisposeAsync()
+
+        private Respawner _respawner;
+        private DbConnection _connection;
+
+
+        public async Task InitializeAsync()
         {
-            Context.Dispose();
-            return _container.DisposeAsync().AsTask();
+            await _container.StartAsync();
+            Context = CreateContext();
+            await Context.Database.MigrateAsync();
+            var respawnerOptions = new RespawnerOptions()
+            {
+                SchemasToInclude = new[] { "public " }, DbAdapter = DbAdapter.Postgres
+            };
+
+            _connection = Context.Database.GetDbConnection();
+            //await _connection.OpenAsync();
+
+            _respawner = await Respawner.CreateAsync(_connection, respawnerOptions);
         }
 
-        public FlotillaDbContext Context => CreateContext();
+        public async Task DisposeAsync()
+        {
+            await Context.DisposeAsync();
+            await _container.DisposeAsync();
+        }
+
+        //public async Task ResetDatabase()
+        //{
+        //    await _respawner.ResetAsync(t);
+        //}
 
         private FlotillaDbContext CreateContext()
         {
@@ -32,7 +59,8 @@ namespace Api.Test
                 ConnectionString,
                 o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery));
             var context = new FlotillaDbContext(optionsBuilder.Options);
-            context.Database.EnsureCreated();
+            //context.Database.EnsureCreatedAsync();
+            //context.Database.Migrate();
             return context;
         }
     }
