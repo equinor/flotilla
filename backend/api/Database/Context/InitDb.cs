@@ -567,6 +567,7 @@ namespace Api.Database.Context
             var missionRun1 = new MissionRun
             {
                 Name = "Placeholder Mission 1",
+                MissionRunCount = 1,
                 Robot = robots[0],
                 InstallationCode = areas[0].Installation!.InstallationCode,
                 Area = areas[0],
@@ -580,6 +581,7 @@ namespace Api.Database.Context
             var missionRun2 = new MissionRun
             {
                 Name = "Placeholder Mission 2",
+                MissionRunCount = 2,
                 Robot = robots[1],
                 InstallationCode = areas[1].Installation!.InstallationCode,
                 Area = areas[1],
@@ -594,6 +596,7 @@ namespace Api.Database.Context
             var missionRun3 = new MissionRun
             {
                 Name = "Placeholder Mission 3",
+                MissionRunCount = 3,
                 Robot = robots[2],
                 InstallationCode = areas[1].Installation!.InstallationCode,
                 Area = areas[1],
@@ -607,6 +610,7 @@ namespace Api.Database.Context
             var missionRun4 = new MissionRun
             {
                 Name = "Placeholder Mission 4",
+                MissionRunCount = 4,
                 Robot = robots[2],
                 InstallationCode = areas[1].Installation.InstallationCode,
                 Area = areas[1],
@@ -624,6 +628,7 @@ namespace Api.Database.Context
             var missionRun5 = new MissionRun
             {
                 Name = "Placeholder Mission 5",
+                MissionRunCount = 5,
                 Robot = robots[2],
                 InstallationCode = areas[1].Installation.InstallationCode,
                 Area = areas[1],
@@ -641,6 +646,7 @@ namespace Api.Database.Context
             var missionRun6 = new MissionRun
             {
                 Name = "Placeholder Mission 6",
+                MissionRunCount = 6,
                 Robot = robots[2],
                 InstallationCode = areas[1].Installation.InstallationCode,
                 Area = areas[1],
@@ -658,6 +664,7 @@ namespace Api.Database.Context
             var missionRun7 = new MissionRun
             {
                 Name = "Some failed tasks",
+                MissionRunCount = 7,
                 Robot = robots[2],
                 InstallationCode = areas[1].Installation.InstallationCode,
                 Area = areas[1],
