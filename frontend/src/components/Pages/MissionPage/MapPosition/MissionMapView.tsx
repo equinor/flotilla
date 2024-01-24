@@ -8,6 +8,7 @@ import { placeRobotInMap, placeTagsInMap } from 'utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
 import { MapCompass } from 'utils/MapCompass'
+import { useRobotContext } from 'components/Contexts/RobotContext'
 
 interface MissionProps {
     mission: Mission
@@ -39,10 +40,13 @@ const SyledContainer = styled.div`
 `
 
 export const MissionMapView = ({ mission }: MissionProps) => {
+    const { enabledRobots } = useRobotContext()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
     const [currentTaskOrder, setCurrentTaskOrder] = useState<number>(0)
+
+    const missionRobot = enabledRobots.find((robot) => robot.id === mission.robot.id)
 
     const imageObjectURL = useRef<string>('')
 
@@ -54,10 +58,10 @@ export const MissionMapView = ({ mission }: MissionProps) => {
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context?.drawImage(mapImage, 0, 0)
         placeTagsInMap(mission.tasks, mission.map!, mapCanvas, currentTaskOrder)
-        if (mission.robot.pose && mission.map) {
-            placeRobotInMap(mission.map, mapCanvas, mission.robot.pose)
+        if (missionRobot?.pose && mission.map) {
+            placeRobotInMap(mission.map, mapCanvas, missionRobot.pose)
         }
-    }, [currentTaskOrder, mapCanvas, mapImage, mission])
+    }, [currentTaskOrder, mapCanvas, mapImage, mission, missionRobot?.pose])
 
     const getMeta = async (url: string) => {
         const image = new Image()
