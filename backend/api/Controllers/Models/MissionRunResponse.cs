@@ -6,6 +6,8 @@ namespace Api.Controllers.Models
     {
         public string Id { get; set; }
 
+        public int MissionRunCount { get; set; }
+
         public string? MissionId { get; set; }
 
         public string? IsarMissionId { get; set; }
@@ -50,6 +52,7 @@ namespace Api.Controllers.Models
         public MissionRunResponse(MissionRun mission)
         {
             Id = mission.Id;
+            MissionRunCount = mission.MissionRunCount;
             MissionId = mission.MissionId;
             IsarMissionId = mission.IsarMissionId;
             Name = mission.Name;
