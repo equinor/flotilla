@@ -3,7 +3,7 @@ import { DeckMapView } from 'utils/DeckMapView'
 import { HorizontalContent, StyledDialog, VerticalContent } from './ScheduleMissionStyles'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Robot } from 'models/Robot'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useCallback, useState } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 interface ScheduleMissionChecklistDialogProps {
@@ -40,7 +40,7 @@ const LocalisationDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialo
                         {` ${TranslateText('clicking confirm')}.`}
                     </Typography>
                     {newDeck && newDeck.defaultLocalizationPose && (
-                        <DeckMapView deck={newDeck} markedRobotPosition={newDeck.defaultLocalizationPose}></DeckMapView>
+                        <DeckMapView deck={newDeck} markedRobotPosition={newDeck.defaultLocalizationPose} />
                     )}
                     <HorizontalContent>
                         <Checkbox
@@ -207,7 +207,7 @@ export const ScheduleMissionChecklistDialog = ({
         (!pressureCheckRequired || isPressureCheckboxClicked) &&
         isBatteryCheckboxClicked
 
-    const CurrentConfirmationDialog = () => {
+    const CurrentConfirmationDialog = useCallback(() => {
         if (localisationRequired && !isLocalisationCheckboxClicked) {
             return (
                 <LocalisationDialog
@@ -234,7 +234,15 @@ export const ScheduleMissionChecklistDialog = ({
             )
         }
         return <FinalConfirmationDialog />
-    }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        missionDeckName,
+        isLocalisationCheckboxClicked,
+        isPressureCheckboxClicked,
+        isBatteryCheckboxClicked,
+        localisationRequired,
+        pressureCheckRequired,
+    ])
 
     return (
         <StyledDialog open={true} onClose={closeDialog}>
