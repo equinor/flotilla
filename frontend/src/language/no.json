@@ -221,5 +221,8 @@
     "The current pressure level is": "Trykknivået er nå",
     "which is within the suggested range": "som er innenfor den anbefalte rekkevidden",
     "Warning": "Advarsel",
-    "which is NOT within the suggested range": "som IKKE er innenfor den anbefalte rekkevidden"
+    "which is NOT within the suggested range": "som IKKE er innenfor den anbefalte rekkevidden",
+    "The current battery level is": "Batterinivået er",
+    "which is above the suggested minimum": "som er mer enn anbefalt minimum",
+    "Failed to schedule mission ": "Kunne ikke planlegge oppdrag "
 }
