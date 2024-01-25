@@ -45,7 +45,6 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
     const [mapMetadata, setMapMetadata] = useState<MapMetadata>()
-    const [imageObjectURL, setImageObjectURL] = useState<string>()
     const [isLoading, setIsLoading] = useState<boolean>()
 
     const updateMap = useCallback(() => {
@@ -68,43 +67,43 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
     }
 
     useEffect(() => {
+        const processImageURL = (imageBlob: Blob | string) => {
+            const imageObjectURL = typeof imageBlob === 'string' ? imageBlob : URL.createObjectURL(imageBlob as Blob)
+            if (!imageObjectURL) return
+
+            getMeta(imageObjectURL as string).then((img) => {
+                const mapCanvas = document.getElementById('deckMapCanvas') as HTMLCanvasElement
+                if (!mapCanvas) return
+                mapCanvas.width = img.width
+                mapCanvas.height = img.height
+                let context = mapCanvas?.getContext('2d')
+                if (context) {
+                    setMapContext(context)
+                    context.drawImage(img, 0, 0)
+                }
+                setMapCanvas(mapCanvas)
+                setMapImage(img)
+            })
+            setIsLoading(false)
+        }
+
         setIsLoading(true)
-        setImageObjectURL(undefined)
         BackendAPICaller.getDeckMapMetadata(deck.id)
             .then((mapMetadata) => {
                 setMapMetadata(mapMetadata)
                 BackendAPICaller.getMap(deck.installationCode, mapMetadata.mapName)
-                    .then((imageBlob) => {
-                        setImageObjectURL(URL.createObjectURL(imageBlob))
-                    })
+                    .then(processImageURL)
                     .catch(() => {
-                        setImageObjectURL(NoMap)
+                        setIsLoading(false)
+                        processImageURL(NoMap)
                     })
             })
             .catch(() => {
                 setMapMetadata(undefined)
-                setImageObjectURL(NoMap)
+                processImageURL(NoMap)
             })
-    }, [deck.id, deck.installationCode])
-
-    useEffect(() => {
-        if (!imageObjectURL) {
-            return
-        }
-        getMeta(imageObjectURL).then((img) => {
-            const mapCanvas = document.getElementById('deckMapCanvas') as HTMLCanvasElement
-            mapCanvas.width = img.width
-            mapCanvas.height = img.height
-            let context = mapCanvas?.getContext('2d')
-            if (context) {
-                setMapContext(context)
-                context.drawImage(img, 0, 0)
-            }
-            setMapCanvas(mapCanvas)
-            setMapImage(img)
-        })
-        setIsLoading(false)
-    }, [imageObjectURL])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     useEffect(() => {
         let animationFrameId = 0
@@ -115,9 +114,7 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
             }
             render()
         }
-        return () => {
-            window.cancelAnimationFrame(animationFrameId)
-        }
+        return () => window.cancelAnimationFrame(animationFrameId)
     }, [updateMap, mapContext])
 
     return (
