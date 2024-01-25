@@ -221,5 +221,8 @@
     "The current pressure level is": "The current pressure level is",
     "which is within the suggested range": "which is within the suggested range",
     "Warning": "Warning",
-    "which is NOT within the suggested range": "which is NOT within the suggested range"
+    "which is NOT within the suggested range": "which is NOT within the suggested range",
+    "The current battery level is": "The current battery level is",
+    "which is above the suggested minimum": "which is above the suggested minimum",
+    "Failed to schedule mission ": "Failed to schedule mission "
 }

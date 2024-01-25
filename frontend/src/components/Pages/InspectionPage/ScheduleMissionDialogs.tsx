@@ -87,7 +87,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             BackendAPICaller.scheduleMissionDefinition(mission.id, selectedRobot.id).catch(() => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent message={`Failed to schedule mission ${mission.name}`} />
+                    <FailedRequestAlertContent message={TranslateText('Failed to schedule mission ') + mission.name} />
                 )
                 setLoadingMissionSet((currentSet: Set<string>) => {
                     const updatedSet: Set<string> = new Set(currentSet)
