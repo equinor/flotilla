@@ -14,7 +14,7 @@ using Xunit;
 namespace Api.Test.Services
 {
     [Collection("Database collection")]
-    public class RobotServiceTest : IDisposable
+    public class RobotServiceTest : IAsyncLifetime
     {
         private readonly FlotillaDbContext _context;
         private readonly ILogger<RobotService> _logger;
@@ -31,9 +31,12 @@ namespace Api.Test.Services
 
         private readonly IRobotService _robotService;
 
+        private readonly Func<Task> _resetDatabase;
+
         public RobotServiceTest(DatabaseFixture fixture)
         {
             _context = fixture.Context;
+            _resetDatabase = fixture.ResetDatabase;
             _logger = new Mock<ILogger<RobotService>>().Object;
             _robotModelService = new RobotModelService(_context);
             _signalRService = new MockSignalRService();
@@ -49,86 +52,66 @@ namespace Api.Test.Services
             _robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
         }
 
-        public void Dispose()
+        public Task InitializeAsync() => Task.CompletedTask;
+
+        public async Task DisposeAsync()
         {
-            _context.Dispose();
+            await _resetDatabase();
             GC.SuppressFinalize(this);
         }
 
         [Fact]
-        public async Task ReadAll()
+        public async Task CheckThatReadAllRobotsReturnCorrectNumberOfRobots()
         {
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robotOne = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
+            var robotTwo = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
+
             var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
             var robots = await robotService.ReadAll();
 
-            Assert.True(robots.Any());
+            Assert.Equal(2, robots.Count());
         }
 
         [Fact]
-        public async Task Read()
+        public async Task CheckThatReadOfSpecificRobotWorks()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
-            var robots = await robotService.ReadAll();
-            var firstRobot = robots.First();
-            var robotById = await robotService.ReadById(firstRobot.Id);
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
 
-            Assert.Equal(firstRobot, robotById);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
+            var robotById = await robotService.ReadById(robot.Id);
+
+            Assert.Equal(robot, robotById);
         }
 
         [Fact]
-        public async Task ReadIdDoesNotExist()
+        public async Task CheckThatNullIsReturnedWhenInvalidIdIsProvided()
         {
             var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
-            var robot = await robotService.ReadById("some_id_that_does_not_exist");
+            var robot = await robotService.ReadById("invalid_id");
             Assert.Null(robot);
         }
 
         [Fact]
-        public async Task Create()
+        public async Task CheckThatRobotIsCreated()
         {
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
+
             var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
-            var installationService = new InstallationService(_context, _accessRoleService);
 
-            var installation = await installationService.Create(new CreateInstallationQuery
-            {
-                Name = "Johan Sverdrup",
-                InstallationCode = "JSV"
-            });
-
-            var robotsBefore = await robotService.ReadAll();
-            int nRobotsBefore = robotsBefore.Count();
-            var videoStreamQuery = new CreateVideoStreamQuery
-            {
-                Name = "Front Camera",
-                Url = "localhost:5000",
-                Type = "mjpeg"
-            };
-            var robotQuery = new CreateRobotQuery
-            {
-                Name = "",
-                IsarId = "",
-                SerialNumber = "",
-                VideoStreams = new List<CreateVideoStreamQuery>
-                {
-                    videoStreamQuery
-                },
-                CurrentInstallationCode = installation.InstallationCode,
-                RobotType = RobotType.Robot,
-                Host = "",
-                Port = 1,
-                Enabled = true,
-                Status = RobotStatus.Available
-            };
-
-            var robot = new Robot(robotQuery, installation);
-            var robotModel = _context.RobotModels.First();
-            robot.Model = robotModel;
-
-            await robotService.Create(robot);
-            var robotsAfter = await robotService.ReadAll();
-            int nRobotsAfter = robotsAfter.Count();
-
-            Assert.Equal(nRobotsBefore + 1, nRobotsAfter);
+            var robotFromDatabase = await robotService.ReadById(robot.Id);
+            Assert.Equal(robot, robotFromDatabase);
         }
 
         [Fact]
@@ -143,8 +126,7 @@ namespace Api.Test.Services
 
             // Act
             robot.Status = RobotStatus.Busy;
-            await _robotService.Update(robot);
-            //await _robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
+            await _robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
 
             // Assert
             var postTestRobot = await _robotService.ReadById(robot.Id);

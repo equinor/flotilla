@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Respawn;
+using SQLitePCL;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -16,7 +17,7 @@ namespace Api.Test
     // Class for building and disposing dbcontext
     public class DatabaseFixture : IAsyncLifetime
     {
-        public FlotillaDbContext Context { get; private set; }
+        public FlotillaDbContext Context => CreateContext(); //{ get; private set; }
 
         private readonly PostgreSqlContainer _container = new PostgreSqlBuilder().Build();
         private string ConnectionString => _container.GetConnectionString();
@@ -28,15 +29,16 @@ namespace Api.Test
         public async Task InitializeAsync()
         {
             await _container.StartAsync();
-            Context = CreateContext();
-            await Context.Database.MigrateAsync();
+            var context = Context;
+            await context.Database.MigrateAsync();
+
             var respawnerOptions = new RespawnerOptions()
             {
-                SchemasToInclude = new[] { "public " }, DbAdapter = DbAdapter.Postgres
+                SchemasToInclude = new[] { "public" }, DbAdapter = DbAdapter.Postgres
             };
 
-            _connection = Context.Database.GetDbConnection();
-            //await _connection.OpenAsync();
+            _connection = context.Database.GetDbConnection();
+            await _connection.OpenAsync();
 
             _respawner = await Respawner.CreateAsync(_connection, respawnerOptions);
         }
@@ -44,13 +46,14 @@ namespace Api.Test
         public async Task DisposeAsync()
         {
             await Context.DisposeAsync();
+            await _connection.CloseAsync();
             await _container.DisposeAsync();
         }
 
-        //public async Task ResetDatabase()
-        //{
-        //    await _respawner.ResetAsync(t);
-        //}
+        public Task ResetDatabase()
+        {
+            return _respawner.ResetAsync(_connection);
+        }
 
         private FlotillaDbContext CreateContext()
         {

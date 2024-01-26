@@ -55,7 +55,7 @@ namespace Api.Test.Database
                 MissionId = null,
                 MissionRunPriority = MissionRunPriority.Normal,
                 Status = MissionStatus.Pending,
-                DesiredStartTime = DateTime.Now,
+                DesiredStartTime = DateTime.UtcNow,
                 Area = area,
                 Map = new MapMetadata(),
                 InstallationCode = installationCode

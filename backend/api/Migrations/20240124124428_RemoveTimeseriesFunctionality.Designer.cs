@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    [Migration("20240124122730_RemoveTimeseriesFunctionality")]
+    [Migration("20240124124428_RemoveTimeseriesFunctionality")]
     partial class RemoveTimeseriesFunctionality
     {
         /// <inheritdoc />

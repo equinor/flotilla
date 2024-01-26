@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Api.Controllers;
 using Api.Controllers.Models;
 using Api.Database.Context;
@@ -22,8 +23,10 @@ using Xunit;
 namespace Api.Test.EventHandlers
 {
     [Collection("Database collection")]
-    public class TestMissionEventHandler : IDisposable
+    public class TestMissionEventHandler : IAsyncLifetime
     {
+
+
         private readonly MissionEventHandler _missionEventHandler;
         private readonly MissionRunService _missionRunService;
         private readonly MqttEventHandler _mqttEventHandler;
@@ -31,6 +34,8 @@ namespace Api.Test.EventHandlers
         private readonly RobotService _robotService;
         private readonly EmergencyActionService _emergencyActionService;
         private readonly DatabaseUtilities _databaseUtilities;
+
+        private readonly Func<Task> _resetDatabase;
 
         public TestMissionEventHandler(DatabaseFixture fixture)
         {
@@ -45,6 +50,7 @@ namespace Api.Test.EventHandlers
             var configuration = WebApplication.CreateBuilder().Configuration;
 
             var context = fixture.Context;
+            _resetDatabase = fixture.ResetDatabase;
 
             var signalRService = new MockSignalRService();
             var accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
@@ -90,6 +96,9 @@ namespace Api.Test.EventHandlers
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IAreaService)))
                 .Returns(areaService);
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(ISignalRService)))
+                .Returns(signalRService);
 
             // Mock service injector
             var mockScope = new Mock<IServiceScope>();
@@ -102,8 +111,11 @@ namespace Api.Test.EventHandlers
             _mqttEventHandler = new MqttEventHandler(mqttEventHandlerLogger, mockFactory.Object);
         }
 
-        public void Dispose()
+        public Task InitializeAsync() => Task.CompletedTask;
+
+        public async Task DisposeAsync()
         {
+            await _resetDatabase();
             _missionEventHandler.Dispose();
             GC.SuppressFinalize(this);
         }
@@ -121,7 +133,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             await _missionRunService.Create(missionRun);
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
 
             // Assert
             var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
@@ -142,9 +154,9 @@ namespace Api.Test.EventHandlers
 
             // Act
             await _missionRunService.Create(missionRunOne);
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
             await _missionRunService.Create(missionRunTwo);
-
+            Thread.Sleep(1000);
             // Assert
             var postTestMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id);
             var postTestMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
@@ -152,9 +164,7 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Pending, postTestMissionRunTwo!.Status);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Skipping until a solution has been found for ExecuteUpdate in tests")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async void NewMissionIsStartedWhenRobotBecomesAvailable()
         {
             // Arrange
@@ -166,7 +176,7 @@ namespace Api.Test.EventHandlers
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
             await _missionRunService.Create(missionRun);
-            Thread.Sleep(100);
+            Thread.Sleep(3000);
 
             var mqttEventArgs = new MqttReceivedArgs(
                 new IsarRobotStatusMessage
@@ -184,7 +194,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarRobotStatusReceived), mqttEventArgs);
-            Thread.Sleep(500);
+            Thread.Sleep(3000);
 
             // Assert
             var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
@@ -217,6 +227,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarRobotStatusReceived), mqttEventArgs);
+            Thread.Sleep(1000);
 
             // Assert
             var ongoingMission = await _missionRunService.ReadAll(
@@ -246,7 +257,7 @@ namespace Api.Test.EventHandlers
 
             // Act (Ensure first mission is started)
             await _missionRunService.Create(missionRunOne);
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
 
             // Assert
             var postStartMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id);
@@ -255,7 +266,7 @@ namespace Api.Test.EventHandlers
 
             // Act (Ensure second mission is started for second robot)
             await _missionRunService.Create(missionRunTwo);
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
 
             // Assert
             var postStartMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
@@ -276,7 +287,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             await _missionRunService.Create(missionRun);
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
 
             // Assert
             var ongoingMissionRun = await _missionRunService.GetOngoingMissionRunForRobot(robot.Id);
@@ -323,7 +334,7 @@ namespace Api.Test.EventHandlers
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
             await _missionRunService.Create(missionRun);
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
 
             // Act
             await emergencyActionController.AbortCurrentMissionAndSendAllRobotsToSafeZone(installation.InstallationCode);
