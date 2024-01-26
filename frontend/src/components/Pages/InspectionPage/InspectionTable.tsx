@@ -136,8 +136,9 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
     const isOngoing = ongoingMissions.map((m) => m.missionId).includes(mission.id)
 
     const isScheduleButtonDisabled =
-        enabledRobots.filter((r) => r.currentInstallation.installationCode === installationCode).length === 0 ||
-        installationCode === ''
+        enabledRobots.filter(
+            (r) => r.currentInstallation.installationCode.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+        ).length === 0 || installationCode === ''
 
     if (isOngoing) {
         status = (

@@ -36,7 +36,9 @@ const DeckCard = ({ deckData, setSelectedDeck, selectedDeck, handleScheduleAll }
     const { installationCode } = useInstallationContext()
 
     const isScheduleMissionsDisabled =
-        enabledRobots.filter((r) => r.currentInstallation.installationCode === installationCode).length === 0 ||
+        enabledRobots.filter(
+            (r) => r.currentInstallation.installationCode.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
+        ).length === 0 ||
         installationCode === '' ||
         deckData.inspections.length === 0
 
