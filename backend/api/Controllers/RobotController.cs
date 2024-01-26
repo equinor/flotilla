@@ -13,6 +13,7 @@ namespace Api.Controllers
         ILogger<RobotController> logger,
         IRobotService robotService,
         IIsarService isarService,
+        IMissionSchedulingService missionSchedulingService,
         IRobotModelService robotModelService
     ) : ControllerBase
     {
@@ -537,5 +538,79 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        ///   Empties the mission queue for the robot, stops the ongoing mission, sets the robot to available and current area is set to null
+        /// </summary>
+        /// <remarks>
+        ///     <para> This query resets the robot </para>
+        /// </remarks>
+        [HttpPut]
+        [Authorize(Roles = Role.Admin)]
+        [Route("{robotId}/reset-robot")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> ResetRobot(
+            [FromRoute] string robotId
+        )
+        {
+            var robot = await robotService.ReadById(robotId);
+            if (robot == null)
+            {
+                string errorMessage = $"Could not find robot with id {robotId}";
+                logger.LogWarning("{Message}", errorMessage);
+                return NotFound(errorMessage);
+            }
+
+            try { await missionSchedulingService.CancelAllScheduledMissions(robot.Id); }
+            catch (RobotNotFoundException)
+            {
+                string errorMessage = $"Failed to cancel scheduled missions for robot with id {robotId}";
+                logger.LogWarning("{Message}", errorMessage);
+                return NotFound(errorMessage);
+            }
+
+            try { await missionSchedulingService.StopCurrentMissionRun(robot.Id); }
+            catch (RobotNotFoundException)
+            {
+                string errorMessage = $"Failed to stop current mission for robot with id {robotId} because the robot was not found";
+                logger.LogWarning("{Message}", errorMessage);
+                return NotFound(errorMessage);
+            }
+            catch (MissionRunNotFoundException)
+            {
+                string errorMessage = $"Failed to stop current mission for robot with id {robotId} because the mission was not found";
+                logger.LogWarning("{Message}", errorMessage);
+                return Conflict(errorMessage);
+            }
+            catch (MissionException ex)
+            {
+                if (ex.IsarStatusCode != StatusCodes.Status409Conflict)
+                {
+                    string errorMessage = "Error while stopping ISAR mission";
+                    logger.LogError(ex, "{Message}", errorMessage);
+                    return Conflict(errorMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                string errorMessage = "Error in ISAR while stopping current mission";
+                logger.LogError(ex, "{Message}", errorMessage);
+                return Conflict(errorMessage);
+            }
+
+            try { await robotService.UpdateCurrentArea(robot.Id, null); }
+            catch (RobotNotFoundException)
+            {
+                string errorMessage = $"Failed to set current area to null for robot with id {robotId} because the robot was not found";
+                logger.LogWarning("{Message}", errorMessage);
+                return NotFound(errorMessage);
+            }
+
+            return NoContent();
+        }
     }
 }
