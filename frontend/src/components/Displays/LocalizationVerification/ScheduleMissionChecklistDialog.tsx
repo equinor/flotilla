@@ -71,16 +71,14 @@ const PressureDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialogPro
         ) {
             statusText = `${TranslateText('The current pressure level is')} ${
                 robot.pressureLevel * 1000
-            } ${TranslateText('which is within the suggested range')}`
+            } ${TranslateText('which is within the specified range')}`
         } else {
             statusText = `${TranslateText('Warning')}: ${TranslateText('The current pressure level is')} ${
                 robot.pressureLevel * 1000
-            } ${TranslateText('which is NOT within the suggested range')}`
+            } ${TranslateText('which is NOT within the specified range')}`
         }
     } else {
-        statusText = TranslateText(
-            'The pressure measurement is not currently available, so start the mission at your own risk.'
-        )
+        statusText = TranslateText('Pressure measurement currently unavailable, proceed with caution.')
     }
 
     return (
@@ -91,9 +89,9 @@ const PressureDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialogPro
             <Dialog.Content>
                 <VerticalContent>
                     <Typography>
-                        {`${robot.name} (${robot.model.type}) ${TranslateText(
-                            'needs to be have a pressure level of between'
-                        )} ${robot.model.lowerPressureWarningThreshold} 
+                        {`${robot.name} (${robot.model.type}) ${TranslateText('must have a pressure level between')} ${
+                            robot.model.lowerPressureWarningThreshold
+                        } 
                         ${TranslateText('and')} ${robot.model.upperPressureWarningThreshold} `}
                         <b>{TranslateText('before')}</b>
                         {` ${TranslateText('clicking confirm')}. `}
@@ -106,7 +104,7 @@ const PressureDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialogPro
                         />
                         <Typography>
                             {`${TranslateText('I confirm that')} ${robot.name} (${robot.model.type}) ${TranslateText(
-                                'has a pressure level making it safe for the area it is operating in'
+                                'has a safe pressure level for operation'
                             )} `}
                             <b>{deckName}</b>
                         </Typography>
@@ -124,7 +122,7 @@ const BatteryDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialogProp
     if (robot.batteryLevel) {
         if (!robot.model.batteryWarningThreshold || robot.batteryLevel > robot.model.batteryWarningThreshold) {
             statusText = `${TranslateText('The current battery level is')} ${robot.batteryLevel}
-                            ${TranslateText('which is above the suggested minimum')}`
+                            ${TranslateText('which is above the specified minimum')}`
         } else {
             statusText = `${TranslateText('Warning')}: ${TranslateText('The current battery level is')} ${
                 robot.pressureLevel
@@ -132,9 +130,7 @@ const BatteryDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialogProp
                             ${TranslateText('which is LOWER than the suggested limit')}`
         }
     } else {
-        statusText = TranslateText(
-            'The battery measurement is not currently available, so start the mission at your own risk.'
-        )
+        statusText = TranslateText('Battery measurement is currently unavailable, proceed with caution.')
     }
 
     return (
@@ -146,7 +142,7 @@ const BatteryDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialogProp
                 <VerticalContent>
                     <Typography>
                         {`${robot.name} (${robot.model.type}) ${TranslateText(
-                            'needs to be have a battery level greater than'
+                            'must have a battery level greater than'
                         )} ${robot.model.batteryWarningThreshold} `}
                         <b>{TranslateText('before')}</b>
                         {` ${TranslateText('clicking confirm')}. `}
@@ -159,7 +155,7 @@ const BatteryDialog = ({ setIsCheckConfirmed, robot, deckName }: CheckDialogProp
                         />
                         <Typography>
                             {`${TranslateText('I confirm that')} ${robot.name} (${robot.model.type}) ${TranslateText(
-                                'has a battery level making it safe for the area it is operating in'
+                                'has a safe battery level for operation'
                             )} `}
                             <b>{deckName}</b>
                         </Typography>
@@ -176,7 +172,7 @@ const FinalConfirmationDialog = () => {
     return (
         <>
             <Dialog.Header>
-                <Typography variant="h5">{TranslateText('The robot is ready to run missions')}</Typography>
+                <Typography variant="h5">{TranslateText('Robot ready to run missions')}</Typography>
             </Dialog.Header>
             <Dialog.Content>
                 <VerticalContent>
