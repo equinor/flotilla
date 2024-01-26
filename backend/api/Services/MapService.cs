@@ -63,7 +63,13 @@ namespace Api.Services
             var positions = new List<Position>();
             foreach (var task in missionRun.Tasks)
             {
-                positions.Add(task.InspectionTarget);
+                foreach (var inspection in task.Inspections)
+                {
+                    if (inspection.InspectionTarget != null)
+                    {
+                        positions.Add(inspection.InspectionTarget);
+                    }
+                }
             }
             try
             {
