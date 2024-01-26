@@ -111,8 +111,7 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public Uri? EchoTagLink { get; set; }
 
-        [Required]
-        public Position InspectionTarget { get; set; }
+        public Position? InspectionTarget { get; set; }
 
         [Required]
         public Pose RobotPose { get; set; }
