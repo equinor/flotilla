@@ -1,6 +1,5 @@
 import { Inspection } from './Inspection'
 import { Pose } from './Pose'
-import { Position } from './Position'
 
 export interface Task {
     id: string
@@ -9,7 +8,6 @@ export interface Task {
     tagId?: string
     description?: string
     echoTagLink?: string
-    inspectionTarget: Position
     robotPose: Pose
     echoPoseId?: number
     status: TaskStatus
