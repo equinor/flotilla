@@ -45,7 +45,7 @@ namespace Api.Services
                 return false;
             }
 
-            return lastExecutedMissionRun.IsDriveToMission();
+            return lastExecutedMissionRun.IsReturnHomeMission();
         }
         private async Task<bool> IsReturnToHomeMissionAlreadyScheduled(string robotId)
         {
@@ -98,7 +98,7 @@ namespace Api.Services
                 DesiredStartTime = DateTime.UtcNow,
                 Tasks = new List<MissionTask>
                 {
-                    new(new Pose(robot.CurrentArea.Deck.DefaultLocalizationPose.Pose), MissionTaskType.DriveTo)
+                    new(new Pose(robot.CurrentArea.Deck.DefaultLocalizationPose.Pose), MissionTaskType.ReturnHome)
                 },
                 Map = new MapMetadata()
             };

@@ -56,7 +56,7 @@ namespace Api.Database.Models
                     Status = TaskStatus.NotStarted;
                     Inspections = new List<Inspection>();
                     break;
-                case MissionTaskType.DriveTo:
+                case MissionTaskType.ReturnHome:
                     Type = type;
                     Description = "Return to home";
                     RobotPose = robotPose;
@@ -65,7 +65,7 @@ namespace Api.Database.Models
                     Inspections = new List<Inspection>();
                     break;
                 default:
-                    throw new MissionTaskNotFoundException("MissionTaskType should be Localization or DriveTo");
+                    throw new MissionTaskNotFoundException("MissionTaskType should be Localization or ReturnHome");
             }
         }
 
@@ -175,7 +175,7 @@ namespace Api.Database.Models
 
         public static string ConvertMissionTaskTypeToIsarTaskType(MissionTaskType missionTaskType)
         {
-            if (missionTaskType == MissionTaskType.DriveTo) { return "drive_to"; }
+            if (missionTaskType == MissionTaskType.ReturnHome) { return "drive_to"; }
             else { return missionTaskType.ToString().ToLower(CultureInfo.CurrentCulture); }
         }
     }
@@ -195,6 +195,6 @@ namespace Api.Database.Models
     {
         Inspection,
         Localization,
-        DriveTo
+        ReturnHome
     }
 }
