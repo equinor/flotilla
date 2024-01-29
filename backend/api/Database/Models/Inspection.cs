@@ -55,7 +55,8 @@ namespace Api.Database.Models
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
         public string IsarStepId { get; private set; } = Guid.NewGuid().ToString();
 
-        public Position? InspectionTarget { get; set; }
+        [Required]
+        public Position InspectionTarget { get; set; }
 
         [Required]
         public InspectionStatus Status
