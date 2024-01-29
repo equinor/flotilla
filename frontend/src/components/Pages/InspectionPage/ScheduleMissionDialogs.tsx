@@ -12,7 +12,7 @@ import { StyledAutoComplete, StyledButton, StyledDialog } from 'components/Style
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { ScheduleMissionWithLocalizationVerificationDialog } from 'components/Displays/LocalizationVerification/ScheduleMissionWithLocalizationVerification'
+import { ScheduleMissionWithConfirmDialogs } from 'components/Displays/ConfirmScheduleDialogs/ConfirmScheduleDialog'
 
 interface IProps {
     selectedMissions: CondensedMissionDefinition[]
@@ -174,7 +174,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 </StyledDialog>
             </StyledMissionDialog>
             {isLocalizationVerificationDialogOpen && (
-                <ScheduleMissionWithLocalizationVerificationDialog
+                <ScheduleMissionWithConfirmDialogs
                     scheduleMissions={scheduleMissions}
                     closeDialog={closeScheduleDialogs}
                     robotId={selectedRobot!.id}
