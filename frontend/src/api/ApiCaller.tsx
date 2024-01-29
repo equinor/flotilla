@@ -7,7 +7,6 @@ import { filterRobots } from 'utils/filtersAndSorts'
 import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
 import { MissionDefinitionQueryParameters } from 'models/MissionDefinitionQueryParameters'
 import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'models/PaginatedResponse'
-import { Pose } from 'models/Pose'
 import { Area } from 'models/Area'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
@@ -348,20 +347,6 @@ export class BackendAPICaller {
             robotId: desiredRobot[0].id,
         }
         const result = await BackendAPICaller.POST<unknown, Mission>(path, body).catch((e) => {
-            console.error(`Failed to POST /${path}: ` + e)
-            throw e
-        })
-        return result.content
-    }
-
-    static async postLocalizationMission(localizationPose: Pose, robotId: string, areaId: string) {
-        const path: string = 'robots/start-localization'
-        const body = {
-            robotId: robotId,
-            localizationPose: localizationPose,
-            areaId: areaId,
-        }
-        const result = await this.POST<unknown, unknown>(path, body).catch((e) => {
             console.error(`Failed to POST /${path}: ` + e)
             throw e
         })
