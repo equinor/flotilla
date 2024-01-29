@@ -2,7 +2,6 @@ import { Typography } from '@equinor/eds-core-react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { BackButton } from 'utils/BackButton'
-import { LocalizationSection } from './LocalizationSection'
 import { Header } from 'components/Header/Header'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { MoveRobotArm } from './RobotArmMovement'
@@ -86,7 +85,6 @@ export const RobotPage = () => {
                             </VerticalContent>
                         </RobotInfo>
 
-                        <LocalizationSection robot={selectedRobot} />
                         {selectedRobot.model.type === RobotType.TaurobInspector && (
                             <>
                                 <Typography variant="h2">{TranslateText('Move robot arm')}</Typography>
