@@ -2,7 +2,6 @@
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
-using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,9 +13,7 @@ namespace Api.Controllers
         ILogger<RobotController> logger,
         IRobotService robotService,
         IIsarService isarService,
-        IMissionRunService missionRunService,
-        IRobotModelService robotModelService,
-        IAreaService areaService
+        IRobotModelService robotModelService
     ) : ControllerBase
     {
         /// <summary>
@@ -538,103 +535,6 @@ namespace Api.Controllers
             }
 
             return NoContent();
-        }
-
-        /// <summary>
-        ///     Start a localization mission with localization in the pose 'localizationPose' for the robot with id 'robotId'
-        /// </summary>
-        /// <remarks>
-        ///     <para> This query starts a localization for a given robot </para>
-        /// </remarks>
-        [HttpPost]
-        [Authorize(Roles = Role.User)]
-        [Route("start-localization")]
-        [ProducesResponseType(typeof(MissionRun), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MissionRun>> StartLocalizationMission(
-            [FromBody] ScheduleLocalizationMissionQuery scheduleLocalizationMissionQuery
-        )
-        {
-            var robot = await robotService.ReadById(scheduleLocalizationMissionQuery.RobotId);
-            if (robot == null)
-            {
-                logger.LogWarning("Could not find robot with id={Id}", scheduleLocalizationMissionQuery.RobotId);
-                return NotFound("Robot not found");
-            }
-
-            if (robot.Status is not RobotStatus.Available)
-            {
-                logger.LogWarning(
-                    "Robot '{Id}' is not available ({Status})",
-                    scheduleLocalizationMissionQuery.RobotId,
-                    robot.Status.ToString()
-                );
-                return Conflict($"The Robot is not available ({robot.Status})");
-            }
-
-            var area = await areaService.ReadById(scheduleLocalizationMissionQuery.AreaId);
-
-            if (area == null)
-            {
-                logger.LogWarning("Could not find area with id={Id}", scheduleLocalizationMissionQuery.AreaId);
-                return NotFound("Area not found");
-            }
-
-            var missionRun = new MissionRun
-            {
-                Name = "Localization Mission",
-                Robot = robot,
-                MissionRunPriority = MissionRunPriority.Normal,
-                InstallationCode = "NA",
-                Area = area,
-                Status = MissionStatus.Pending,
-                DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>(),
-                Map = new MapMetadata()
-            };
-
-            IsarMission isarMission;
-            try
-            {
-                isarMission = await isarService.StartLocalizationMission(robot, scheduleLocalizationMissionQuery.LocalizationPose);
-            }
-            catch (HttpRequestException e)
-            {
-                string message = $"Could not reach ISAR at {robot.IsarUri}";
-                logger.LogError(e, "{Message}", message);
-                await robotService.SetRobotOffline(robot.Id);
-                return StatusCode(StatusCodes.Status502BadGateway, message);
-            }
-            catch (MissionException e)
-            {
-                logger.LogError(e, "Error while starting ISAR localization mission");
-                return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
-            }
-            catch (JsonException e)
-            {
-                const string Message = "Error while processing of the response from ISAR";
-                logger.LogError(e, "{Message}", Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, Message);
-            }
-
-            missionRun.UpdateWithIsarInfo(isarMission);
-            missionRun.Status = MissionStatus.Ongoing;
-
-            await missionRunService.Create(missionRun);
-
-            try
-            {
-                await robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
-                await robotService.UpdateCurrentMissionId(robot.Id, missionRun.Id);
-                await robotService.UpdateCurrentArea(robot.Id, area);
-            }
-            catch (RobotNotFoundException e) { return NotFound(e.Message); }
-
-            return Ok(missionRun);
         }
 
     }
