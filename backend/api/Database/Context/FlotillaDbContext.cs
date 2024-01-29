@@ -55,7 +55,6 @@ namespace Api.Database.Context
                 .Property(m => m.InspectionFrequency)
                 .HasConversion(new TimeSpanToTicksConverter());
 
-            modelBuilder.Entity<MissionRun>().Property(m => m.MissionRunCount).ValueGeneratedOnAdd();
             modelBuilder.Entity<MissionRun>().OwnsOne(m => m.Map).OwnsOne(t => t.TransformationMatrices);
             modelBuilder.Entity<MissionRun>().OwnsOne(m => m.Map).OwnsOne(b => b.Boundary);
             modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
@@ -97,30 +96,6 @@ namespace Api.Database.Context
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Properties(typeof(Enum)).HaveConversion<string>();
-        }
-
-        public static void CreateTriggerForMissionRunsInsert(FlotillaDbContext dbContext)
-        {
-            string sql = @"CREATE TRIGGER IF NOT EXISTS tr_insert_mission_runs_inspection_id 
-                            AFTER INSERT ON MissionRuns
-                            BEGIN
-                                UPDATE MissionRuns 
-                                SET InspectionId = (SELECT MAX(Id) FROM Inspections)
-                                WHERE Id = NEW.Id;
-                            END";
-
-            if (dbContext.Database.IsSqlite())
-            {
-                dbContext.Database.ExecuteSqlRaw(sql);
-            }
-            else if (dbContext.Database.IsSqlServer())
-            {
-                throw new NotImplementedException();
-            }
-            else
-            {
-                throw new InvalidOperationException("Unknown database provider.");
-            }
         }
 
         private static void AddConverterForDateTimeOffsets<T>(ref EntityTypeBuilder<T> entity)
