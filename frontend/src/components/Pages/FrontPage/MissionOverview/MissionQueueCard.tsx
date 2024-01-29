@@ -119,8 +119,8 @@ export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQue
     }
     const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState<boolean>(false)
     const fillColor = tokens.colors.infographic.primary__energy_red_21.hex
-    let numberOfTasks = 0
-    mission.tasks.forEach((task) => (numberOfTasks += task.inspections.length))
+    const numberOfTasks = mission.tasks.length
+
     return (
         <StyledMissionCard key={mission.id} style={{ boxShadow: tokens.elevation.raised }}>
             <HorizontalContent>
