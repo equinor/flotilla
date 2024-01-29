@@ -7,8 +7,7 @@ namespace Api.Database.Models
     public class MissionRun : SortableRecord
     {
         [Required]
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public int MissionRunCount { get; set; } = 1;
+        public int MissionRunCount { get; set; }
 
         private MissionStatus _status;
 

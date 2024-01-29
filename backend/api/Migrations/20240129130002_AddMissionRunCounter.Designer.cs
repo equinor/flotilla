@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240129130002_AddMissionRunCounter")]
+    partial class AddMissionRunCounter
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -886,8 +889,7 @@ namespace Api.Migrations
                                 .HasForeignKey("InspectionId");
                         });
 
-                    b.Navigation("InspectionTarget")
-                        .IsRequired();
+                    b.Navigation("InspectionTarget");
                 });
 
             modelBuilder.Entity("Api.Database.Models.InspectionFinding", b =>
@@ -1117,7 +1119,8 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
-                    b.Navigation("InspectionTarget");
+                    b.Navigation("InspectionTarget")
+                        .IsRequired();
 
                     b.Navigation("RobotPose")
                         .IsRequired();
