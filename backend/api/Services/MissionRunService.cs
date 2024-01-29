@@ -191,7 +191,7 @@ namespace Api.Services
             var pendingMissionRuns = await ReadMissionRunQueue(robotId);
             foreach (var pendingMissionRun in pendingMissionRuns)
             {
-                if (pendingMissionRun.IsDriveToMission()) { return true; }
+                if (pendingMissionRun.IsReturnHomeMission()) { return true; }
             }
             var ongoingMissionRuns = await GetMissionRunsWithSubModels()
                 .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing)
@@ -199,7 +199,7 @@ namespace Api.Services
                 .ToListAsync();
             foreach (var ongoingMissionRun in ongoingMissionRuns)
             {
-                if (ongoingMissionRun.IsDriveToMission()) { return true; }
+                if (ongoingMissionRun.IsReturnHomeMission()) { return true; }
             }
             return false;
 
@@ -398,7 +398,7 @@ namespace Api.Services
 
             Expression<Func<MissionRun, bool>> returnTohomeFilter = !parameters.ExcludeReturnToHome
                 ? missionRun => true
-                : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.DriveTo));
+                : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.ReturnHome));
 
             var minStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinStartTime);
             var maxStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxStartTime);
