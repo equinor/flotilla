@@ -35,21 +35,6 @@ export const placeRobotInMap = (mapMetadata: MapMetadata, map: HTMLCanvasElement
     drawNavigator(pixelPosition[0], pixelPosition[1], map, rad)
 }
 
-export const inverseCalculatePixelPosition = (mapMetadata: MapMetadata, pixelPosition: ObjectPosition) => {
-    const p1 = pixelPosition.x
-    const p2 = pixelPosition.y
-
-    const a1 = mapMetadata.transformationMatrices.c1
-    const a2 = mapMetadata.transformationMatrices.c2
-    const b1 = mapMetadata.transformationMatrices.d1
-    const b2 = mapMetadata.transformationMatrices.d2
-
-    const x1 = (p1 - b1) / a1
-    const x2 = (p2 - b2) / a2
-
-    return [x1, x2]
-}
-
 const calculateObjectPixelPosition = (mapMetadata: MapMetadata, objectPosition: ObjectPosition) => {
     const x1 = objectPosition.x
     const x2 = objectPosition.y

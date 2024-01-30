@@ -440,15 +440,6 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getAreasMapMetadata(id: string): Promise<MapMetadata> {
-        const path: string = 'areas/' + id + '/map-metadata'
-        const result = await this.GET<MapMetadata>(path).catch((e) => {
-            console.error(`Failed to GET /${path}: ` + e)
-            throw e
-        })
-        return result.content
-    }
-
     static async getDeckMapMetadata(id: string): Promise<MapMetadata> {
         const path: string = 'decks/' + id + '/map-metadata'
         const result = await this.GET<MapMetadata>(path).catch((e) => {
