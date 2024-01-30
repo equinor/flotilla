@@ -2,7 +2,6 @@
 using Api.Database.Models;
 using Api.Services;
 using Api.Utilities;
-using Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +11,6 @@ namespace Api.Controllers
     [Route("areas")]
     public class AreaController(
             ILogger<AreaController> logger,
-            IMapService mapService,
             IAreaService areaService,
             IDefaultLocalizationPoseService defaultLocalizationPoseService,
             IMissionDefinitionService missionDefinitionService
@@ -312,69 +310,6 @@ namespace Api.Controllers
                 logger.LogError(e, "Error during GET of area missions from database");
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Gets map metadata for localization poses belonging to area with specified id
-        /// </summary>
-        [HttpGet]
-        [Authorize(Roles = Role.Any)]
-        [Route("{id}/map-metadata")]
-        [ProducesResponseType(typeof(MapMetadata), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MapMetadata>> GetMapMetadata([FromRoute] string id)
-        {
-            var area = await areaService.ReadById(id);
-            if (area is null)
-            {
-                string errorMessage = $"Area not found for area with ID {id}";
-                logger.LogError("{ErrorMessage}", errorMessage);
-                return NotFound(errorMessage);
-            }
-            if (area.Installation == null)
-            {
-                string errorMessage = "Installation missing from area";
-                logger.LogWarning(errorMessage);
-                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
-            }
-
-            if (area.DefaultLocalizationPose is null)
-            {
-                string errorMessage = $"Area with id '{area.Id}' does not have a default localization pose";
-                logger.LogInformation("{ErrorMessage}", errorMessage);
-                return NotFound(errorMessage);
-            }
-
-            MapMetadata? mapMetadata;
-            var positions = new List<Position>
-            {
-                area.DefaultLocalizationPose.Pose.Position
-            };
-            try
-            {
-                mapMetadata = await mapService.ChooseMapFromPositions(positions, area.Installation.InstallationCode);
-            }
-            catch (RequestFailedException e)
-            {
-                string errorMessage = $"An error occurred while retrieving the map for area {area.Id}";
-                logger.LogError(e, "{ErrorMessage}", errorMessage);
-                return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                string errorMessage = $"Could not find a suitable map for area {area.Id}";
-                logger.LogError(e, "{ErrorMessage}", errorMessage);
-                return NotFound(errorMessage);
-            }
-
-            if (mapMetadata == null)
-            {
-                return NotFound("A map which contained at least half of the points in this mission could not be found");
-            }
-            return Ok(mapMetadata);
         }
     }
 }
