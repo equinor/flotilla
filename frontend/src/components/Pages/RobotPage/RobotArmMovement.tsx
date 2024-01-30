@@ -22,6 +22,10 @@ const LimitWidthStyle = styled.div`
     max-width: calc(80vw);
 `
 
+const StyledTextButton = styled(StyledButton)`
+    text-align: left;
+`
+
 export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProps) => {
     const { TranslateText } = useLanguageContext()
     const [feedback, setFeedback] = useState('')
@@ -80,9 +84,13 @@ export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProp
                     </LimitWidthStyle>
                 </Popover.Content>
             </Popover>
-            <StyledButton style={moveArmButtonStyle()} onClick={!usable ? openPopover : onClickMoveArm} ref={anchorRef}>
+            <StyledTextButton
+                style={moveArmButtonStyle()}
+                onClick={!usable ? openPopover : onClickMoveArm}
+                ref={anchorRef}
+            >
                 {TranslateText('Set robot arm to ') + '"' + TranslateText(armPosition) + '"'}
-            </StyledButton>
+            </StyledTextButton>
             <StyledDialog open={feedback !== ''}>
                 {feedback}
                 <StyledCloseButton>

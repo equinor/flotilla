@@ -6,7 +6,6 @@ import { Icons } from 'utils/icons'
 
 const StyledButton = styled(Button)`
     width: 100px;
-    align-items: baseline;
 `
 
 export const BackButton = () => {
