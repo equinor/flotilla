@@ -13,8 +13,8 @@ import { InspectionType } from 'models/Inspection'
 import { tokens } from '@equinor/eds-tokens'
 
 const TableWithHeader = styled.div`
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-columns: auto;
     gap: 1rem;
 `
 const StyledLoading = styled.div`
@@ -35,6 +35,10 @@ const ActiveFilterList = styled.div`
     margin-top: 8px;
     flex-wrap: wrap;
     min-height: 24px;
+`
+
+const StyledTable = styled.div`
+    display: grid;
 `
 
 const flatten = (filters: IFilterState) => {
@@ -173,29 +177,34 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                 </ActiveFilterList>
             )}
             {filterError && <FilterErrorDialog />}
-            <Table>
-                <Table.Head sticky>
-                    <Table.Row>
-                        <Table.Cell>{TranslateText('Status')}</Table.Cell>
-                        <Table.Cell>{TranslateText('Name')}</Table.Cell>
-                        <Table.Cell>{TranslateText('Area')}</Table.Cell>
-                        <Table.Cell>{TranslateText('Robot')}</Table.Cell>
-                        <Table.Cell>{TranslateText('Completion Time')}</Table.Cell>
-                        <Table.Cell>{TranslateText('Rerun mission')}</Table.Cell>
-                    </Table.Row>
-                </Table.Head>
-                {isLoading && (
+            <StyledTable>
+                <Table>
+                    {isLoading && (
+                        <Table.Caption captionSide={'bottom'}>
+                            <StyledLoading>
+                                <CircularProgress />
+                            </StyledLoading>
+                        </Table.Caption>
+                    )}
                     <Table.Caption captionSide={'bottom'}>
-                        <StyledLoading>
-                            <CircularProgress />
-                        </StyledLoading>
+                        {paginationDetails &&
+                            paginationDetails.TotalPages > 1 &&
+                            !isResettingPage &&
+                            PaginationComponent()}
                     </Table.Caption>
-                )}
-                {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
-                <Table.Caption captionSide={'bottom'}>
-                    {paginationDetails && paginationDetails.TotalPages > 1 && !isResettingPage && PaginationComponent()}
-                </Table.Caption>
-            </Table>
+                    <Table.Head sticky>
+                        <Table.Row>
+                            <Table.Cell>{TranslateText('Status')}</Table.Cell>
+                            <Table.Cell>{TranslateText('Name')}</Table.Cell>
+                            <Table.Cell>{TranslateText('Area')}</Table.Cell>
+                            <Table.Cell>{TranslateText('Robot')}</Table.Cell>
+                            <Table.Cell>{TranslateText('Completion Time')}</Table.Cell>
+                            <Table.Cell>{TranslateText('Rerun mission')}</Table.Cell>
+                        </Table.Row>
+                    </Table.Head>
+                    {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
+                </Table>
+            </StyledTable>
         </TableWithHeader>
     )
 }

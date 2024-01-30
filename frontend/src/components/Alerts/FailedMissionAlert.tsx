@@ -1,16 +1,16 @@
-import { Button } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { Mission, MissionStatus } from 'models/Mission'
 import styled from 'styled-components'
 import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { TextAlignedButton } from 'components/Styles/StyledComponents'
 
 const Indent = styled.div`
     padding: 0px 0px 0px 5px;
 `
 
-const StyledButton = styled(Button)`
+const StyledButton = styled(TextAlignedButton)`
     :hover {
         background-color: #ff9797;
     }

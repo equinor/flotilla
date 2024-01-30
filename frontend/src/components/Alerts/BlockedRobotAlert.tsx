@@ -1,8 +1,9 @@
-import { Button, Icon, Typography } from '@equinor/eds-core-react'
+import { Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
+import { TextAlignedButton } from 'components/Styles/StyledComponents'
 
 const StyledDiv = styled.div`
     align-items: center;
@@ -31,13 +32,13 @@ export const BlockedRobotAlertContent = ({ robotNames }: AlertProps) => {
                 <Typography>{TranslateText('Robot is blocked')}</Typography>
             </StyledAlertTitle>
             <Indent>
-                <Button as={Typography} variant="ghost" color="secondary">
+                <TextAlignedButton variant="ghost" color="secondary">
                     {robotNames.length === 1 &&
                         `${TranslateText('The robot')} ${robotNames[0]} ${TranslateText(
                             'is blocked and cannot perform tasks'
                         )}.`}
                     {robotNames.length > 1 && TranslateText('Several robots are blocked and cannot perform tasks.')}
-                </Button>
+                </TextAlignedButton>
             </Indent>
         </StyledDiv>
     )

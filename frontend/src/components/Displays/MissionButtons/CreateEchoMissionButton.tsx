@@ -11,6 +11,7 @@ const StyledCreateMissionButton = styled(StyledButton)`
     align-items: center;
     gap: 8px;
     border-radius: 4px;
+    text-align: left;
 `
 
 export const CreateEchoMissionButton = (): JSX.Element => {

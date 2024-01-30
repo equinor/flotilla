@@ -17,8 +17,8 @@ const StyledStatusDisplay = styled.div`
 
 const StyledStatusIcon = styled.div`
     display: flex;
-    gap: 4px;
-    align-items: flex-end;
+    gap: 6px;
+    align-items: center;
 `
 
 const MissionStatusIcon = ({ status }: StatusProps) => {

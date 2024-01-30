@@ -40,6 +40,10 @@ const StyledView = styled.div`
     align-items: flex-start;
 `
 
+const AlignedTextButton = styled(StyledButton)`
+    text-align: left;
+`
+
 export const InspectionOverviewSection = () => {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
@@ -89,10 +93,10 @@ export const InspectionOverviewSection = () => {
 
     const AddPredefinedMissionsButton = () => (
         <Tooltip placement="top" title={isScheduleButtonDisabled ? TranslateText('No robot available') : ''}>
-            <StyledButton onClick={onClickScheduleMission} disabled={isScheduleButtonDisabled} ref={anchorRef}>
+            <AlignedTextButton onClick={onClickScheduleMission} disabled={isScheduleButtonDisabled} ref={anchorRef}>
                 <Icon name={Icons.Add} size={16} />
                 {TranslateText('Add predefined Echo mission')}
-            </StyledButton>
+            </AlignedTextButton>
         </Tooltip>
     )
 

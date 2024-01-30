@@ -1,4 +1,4 @@
-import { Button, Table, Typography } from '@equinor/eds-core-react'
+import { Table, Typography } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { Mission } from 'models/Mission'
 import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
@@ -6,6 +6,7 @@ import { MissionRestartButton } from 'components/Displays/MissionButtons/Mission
 import { TaskStatus } from 'models/Task'
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
+import { TextAlignedButton } from 'components/Styles/StyledComponents'
 
 interface IndexedMissionProps {
     index: number
@@ -45,9 +46,9 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
             <Table.Cell>
-                <Button as={Typography} variant="ghost" onClick={routeChange}>
+                <TextAlignedButton variant="ghost" onClick={routeChange}>
                     {mission.name}
-                </Button>
+                </TextAlignedButton>
             </Table.Cell>
             <Table.Cell>
                 <Typography>{mission.area?.areaName}</Typography>

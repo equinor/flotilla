@@ -1,8 +1,9 @@
-import { Button, Icon, Typography } from '@equinor/eds-core-react'
+import { Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
+import { TextAlignedButton } from 'components/Styles/StyledComponents'
 
 const StyledDiv = styled.div`
     align-items: center;
@@ -27,9 +28,9 @@ export const FailedSafeZoneAlertContent = ({ message }: { message: string }) => 
                 <Typography>{TranslateText('Safe zone failure')}</Typography>
             </StyledAlertTitle>
             <Indent>
-                <Button as={Typography} variant="ghost" color="secondary">
+                <TextAlignedButton variant="ghost" color="secondary">
                     {TranslateText(message)}
-                </Button>
+                </TextAlignedButton>
             </Indent>
         </StyledDiv>
     )
