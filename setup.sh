@@ -121,7 +121,7 @@ if [ "$backend_abort" != "true" ]; then
         fi
     done
 
-    echo "AZURE_CLIENT_ID='$az_client_id'" >> $flotilla_dir/backend/api/.env
+    echo "AZURE_CLIENT_ID=$az_client_id" >> $flotilla_dir/backend/api/.env
     echo -e "Added client id to .env file"
 
     echo -e "Azure tenant id needed for backend dockerization."
@@ -139,7 +139,7 @@ if [ "$backend_abort" != "true" ]; then
         fi
     done
 
-    echo "AZURE_TENANT_ID='$az_tenant_id'" >> $flotilla_dir/backend/api/.env
+    echo "AZURE_TENANT_ID=$az_tenant_id" >> $flotilla_dir/backend/api/.env
     echo -e "Added tenant id to .env file"
 
     echo -e "Azure client secret needed for backend dockerization."
@@ -157,7 +157,7 @@ if [ "$backend_abort" != "true" ]; then
         fi
     done
 
-    echo "AZURE_CLIENT_SECRET='$az_client_secret'" >> $flotilla_dir/backend/api/.env
+    echo "AZURE_CLIENT_SECRET=$az_client_secret" >> $flotilla_dir/backend/api/.env
     echo -e "Added client secret to .env file"
     
     echo -e "A username is needed for local development with SignalR"
@@ -175,7 +175,7 @@ if [ "$backend_abort" != "true" ]; then
         fi
     done
 
-    echo "LOCAL_DEVUSERID='$local_dev_username'" >> $flotilla_dir/backend/api/.env
+    echo "LOCAL_DEVUSERID=$local_dev_username" >> $flotilla_dir/backend/api/.env
     echo -e "Added local development username to .env file"
 
     echo -e "Backup setup - Done!"
@@ -215,4 +215,3 @@ if [ "$broker_abort" != "true" ]; then
     echo -e "Flotilla setup - Done!"
     echo -e "-----------------------------"
 fi
-
