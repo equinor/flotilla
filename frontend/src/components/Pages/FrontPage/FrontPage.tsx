@@ -30,7 +30,7 @@ const MissionsContent = styled.div`
 export const FrontPage = () => {
     return (
         <>
-            <Header page={'root'} />
+            <Header page={'frontPage'} />
             <StyledFrontPage>
                 <StopRobotDialog />
                 <HorizontalContent>
