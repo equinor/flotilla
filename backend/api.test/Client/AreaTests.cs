@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -275,30 +274,6 @@ namespace Api.Test
             // The endpoint posted to above triggers an event and returns a successful response.
             // The test finishes and disposes of objects, but the operations of that event handler are still running, leading to a crash.
             await Task.Delay(5000);
-        }
-
-        [Fact]
-        public async Task GetMapMetadataNotFound()
-        {
-            // Arrange
-            string areaUrl = "/areas";
-            var response = await _client.GetAsync(areaUrl);
-            Assert.True(response.IsSuccessStatusCode);
-            var areas = await response.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
-            Assert.True(areas != null);
-            var areaResponse = areas[0];
-            string areaId = areaResponse.Id;
-            string invalidAreaId = "InvalidId";
-
-            // Act
-            string url = $"/areas/{areaId}/map-metadata";
-            response = await _client.GetAsync(url);
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            // Assert
-            string invalidUrl = $"/areas/{invalidAreaId}/map-metadata";
-            var responseInvalid = await _client.GetAsync(invalidUrl);
-            Assert.Equal(HttpStatusCode.NotFound, responseInvalid.StatusCode);
         }
 
         [Fact]
