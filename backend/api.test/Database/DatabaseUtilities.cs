@@ -51,6 +51,7 @@ namespace Api.Test.Database
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.Now,
                 Area = area,
+                Tasks = [],
                 Map = new MapMetadata(),
                 InstallationCode = installationCode
             };
