@@ -148,6 +148,8 @@ namespace Api.EventHandlers
                 if (isarRobotInfo.CurrentInstallation is not null) UpdateCurrentInstallationIfChanged(installation, ref robot, ref updatedFields);
                 if (updatedFields.IsNullOrEmpty()) return;
 
+                // TODO: why do we not update status? If it is idle then the mission is clearly done
+
                 robot = await robotService.Update(robot);
                 _logger.LogInformation("Updated robot '{Id}' ('{RobotName}') in database: {Updates}", robot.Id, robot.Name, updatedFields);
 
