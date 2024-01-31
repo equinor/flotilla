@@ -67,7 +67,7 @@ namespace Api.Services
 
             await context.MissionRuns.AddAsync(missionRun);
             await ApplyDatabaseUpdate(missionRun.Area?.Installation);
-            _ = signalRService.SendMessageAsync("Mission run created", missionRun.Area?.Installation, missionRun);
+            _ = signalRService.SendMessageAsync("Mission run created", missionRun.Area?.Installation, new MissionRunResponse(missionRun));
 
             if (triggerCreatedMissionRunEvent)
             {
