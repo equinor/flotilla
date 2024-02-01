@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Linq;
+using Api.Database.Context;
 using Api.Services;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Authentication;
@@ -6,12 +8,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 namespace Api.Test
 {
-    public class TestWebApplicationFactory<TProgram> : WebApplicationFactory<Program> where TProgram : class
+    public class TestWebApplicationFactory<TProgram>(string? databaseConnectionString) : WebApplicationFactory<Program> where TProgram : class
     {
+        private string? _databaseConnectionString = databaseConnectionString;
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             string projectDir = Directory.GetCurrentDirectory();
@@ -29,6 +34,23 @@ namespace Api.Test
             builder.ConfigureTestServices(
                 services =>
                 {
+                    var descriptorDbContext =
+                        services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(FlotillaDbContext));
+                    if (descriptorDbContext != null) { services.Remove(descriptorDbContext); }
+
+                    services.AddDbContext<FlotillaDbContext>(
+                        options =>
+                            options.UseNpgsql(
+                                _databaseConnectionString,
+                                o =>
+                                {
+                                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
+                                    o.EnableRetryOnFailure();
+                                }
+                            ),
+                        ServiceLifetime.Transient
+                    );
+
                     services.AddScoped<IAccessRoleService, AccessRoleService>();
                     services.AddScoped<IIsarService, MockIsarService>();
                     services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
@@ -37,6 +59,7 @@ namespace Api.Test
                     services.AddScoped<IBlobService, MockBlobService>();
                     services.AddScoped<IStidService, MockStidService>();
                     services.AddScoped<ICustomMissionService, MockCustomMissionService>();
+
                     services.AddAuthorizationBuilder().AddFallbackPolicy(
                         TestAuthHandler.AuthenticationScheme, policy => policy.RequireAuthenticatedUser()
                     );

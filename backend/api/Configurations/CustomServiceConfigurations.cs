@@ -48,7 +48,7 @@ namespace Api.Configurations
             {
                 string? connection = configuration["Database:PostgreSqlConnectionString"];
                 // Setting splitting behavior explicitly to avoid warning
-                services.AddDbContext<FlotillaDbContext>(
+                /*services.AddDbContext<FlotillaDbContext>(
                     options =>
                         options.UseNpgsql(
                             connection,
@@ -59,7 +59,7 @@ namespace Api.Configurations
                             }
                         ),
                     ServiceLifetime.Transient
-                );
+                );*/
             }
             return services;
         }

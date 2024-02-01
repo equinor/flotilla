@@ -20,7 +20,7 @@ namespace Api.Test
         public FlotillaDbContext Context => CreateContext(); //{ get; private set; }
 
         private readonly PostgreSqlContainer _container = new PostgreSqlBuilder().Build();
-        private string ConnectionString => _container.GetConnectionString();
+        public string ConnectionString => _container.GetConnectionString();
 
         private Respawner _respawner;
         private DbConnection _connection;

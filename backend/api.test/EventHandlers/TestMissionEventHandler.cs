@@ -15,9 +15,11 @@ using Api.Test.Database;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Org.BouncyCastle.Asn1.Cms;
 using Xunit;
 
 namespace Api.Test.EventHandlers
@@ -25,21 +27,34 @@ namespace Api.Test.EventHandlers
     [Collection("Database collection")]
     public class TestMissionEventHandler : IAsyncLifetime
     {
-
-
-        private readonly MissionEventHandler _missionEventHandler;
-        private readonly MissionRunService _missionRunService;
-        private readonly MqttEventHandler _mqttEventHandler;
+        private readonly IMissionRunService _missionRunService;
         private readonly MqttService _mqttService;
-        private readonly RobotService _robotService;
-        private readonly EmergencyActionService _emergencyActionService;
+        private readonly IRobotService _robotService;
+        private readonly IEmergencyActionService _emergencyActionService;
         private readonly DatabaseUtilities _databaseUtilities;
+        private readonly EmergencyActionController _emergencyActionController;
+
+        private readonly FlotillaDbContext _context;
 
         private readonly Func<Task> _resetDatabase;
 
         public TestMissionEventHandler(DatabaseFixture fixture)
         {
-            var missionEventHandlerLogger = new Mock<ILogger<MissionEventHandler>>().Object;
+            var client = new TestWebApplicationFactory<Program>(fixture.ConnectionString);
+            var serviceProvider = client.Services;
+
+            _missionRunService = serviceProvider.GetRequiredService<IMissionRunService>();
+            _robotService = serviceProvider.GetRequiredService<IRobotService>();
+            _emergencyActionService = serviceProvider.GetRequiredService<IEmergencyActionService>();
+
+            _emergencyActionController = serviceProvider.GetRequiredService<EmergencyActionController>();
+            //_mqttService = serviceProvider.GetRequiredService<MqttService>();
+
+            _databaseUtilities = new DatabaseUtilities(fixture.Context);
+            _resetDatabase = fixture.ResetDatabase;
+            _context = fixture.Context;
+
+            /*var missionEventHandlerLogger = new Mock<ILogger<MissionEventHandler>>().Object;
             var mqttServiceLogger = new Mock<ILogger<MqttService>>().Object;
             var mqttEventHandlerLogger = new Mock<ILogger<MqttEventHandler>>().Object;
             var missionLogger = new Mock<ILogger<MissionRunService>>().Object;
@@ -108,7 +123,7 @@ namespace Api.Test.EventHandlers
 
             // Instantiating the event handlers are required for the event subscribers to be activated
             _missionEventHandler = new MissionEventHandler(missionEventHandlerLogger, mockFactory.Object);
-            _mqttEventHandler = new MqttEventHandler(mqttEventHandlerLogger, mockFactory.Object);
+            _mqttEventHandler = new MqttEventHandler(mqttEventHandlerLogger, mockFactory.Object);*/
         }
 
         public Task InitializeAsync() => Task.CompletedTask;
@@ -116,7 +131,6 @@ namespace Api.Test.EventHandlers
         public async Task DisposeAsync()
         {
             await _resetDatabase();
-            _missionEventHandler.Dispose();
             GC.SuppressFinalize(this);
         }
 
@@ -133,10 +147,10 @@ namespace Api.Test.EventHandlers
 
             // Act
             await _missionRunService.Create(missionRun);
-            Thread.Sleep(1000);
+            await Task.Delay(1000);
 
             // Assert
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, noTracking: true);
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
@@ -157,9 +171,10 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(1000);
             await _missionRunService.Create(missionRunTwo);
             Thread.Sleep(1000);
+
             // Assert
-            var postTestMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id);
-            var postTestMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
+            var postTestMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id, noTracking: true);
+            var postTestMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id, noTracking: true);
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRunOne!.Status);
             Assert.Equal(MissionStatus.Pending, postTestMissionRunTwo!.Status);
         }
@@ -176,7 +191,7 @@ namespace Api.Test.EventHandlers
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
             await _missionRunService.Create(missionRun);
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
 
             var mqttEventArgs = new MqttReceivedArgs(
                 new IsarRobotStatusMessage
@@ -194,10 +209,10 @@ namespace Api.Test.EventHandlers
 
             // Act
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarRobotStatusReceived), mqttEventArgs);
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
 
             // Assert
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, noTracking: true);
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
@@ -260,7 +275,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(1000);
 
             // Assert
-            var postStartMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id);
+            var postStartMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id, noTracking: true);
             Assert.NotNull(postStartMissionRunOne);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunOne.Status);
 
@@ -269,7 +284,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(1000);
 
             // Assert
-            var postStartMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
+            var postStartMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id, noTracking: true);
             Assert.NotNull(postStartMissionRunTwo);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
         }
@@ -290,15 +305,13 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(1000);
 
             // Assert
-            var ongoingMissionRun = await _missionRunService.GetOngoingMissionRunForRobot(robot.Id);
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
+            var ongoingMissionRun = await _missionRunService.GetOngoingMissionRunForRobot(robot.Id, noTracking: true);
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, noTracking: true);
             Assert.Equal(MissionStatus.Ongoing, ongoingMissionRun!.Status);
             Assert.Equal(MissionStatus.Pending, postTestMissionRun!.Status);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Awaiting fix to use of execute update in tests")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async void MissionIsCancelledWhenAttemptingToStartOnARobotWhichIsLocalizedOnADifferentDeck()
         {
             // Arrange
@@ -316,7 +329,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             // Assert
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, noTracking: true);
             Assert.Equal(MissionStatus.Cancelled, postTestMissionRun!.Status);
         }
 
@@ -324,8 +337,6 @@ namespace Api.Test.EventHandlers
         public async void RobotQueueIsFrozenAndOngoingMissionsMovedToPendingWhenPressingTheEmergencyButton()
         {
             // Arrange
-            var emergencyActionController = new EmergencyActionController(_robotService, _emergencyActionService);
-
             var installation = await _databaseUtilities.NewInstallation();
             var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
@@ -337,13 +348,31 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(1000);
 
             // Act
-            await emergencyActionController.AbortCurrentMissionAndSendAllRobotsToSafeZone(installation.InstallationCode);
+            await _emergencyActionController.AbortCurrentMissionAndSendAllRobotsToSafeZone(installation.InstallationCode);
             Thread.Sleep(1000);
 
             // Assert
-            var ongoingMissionRun = await _missionRunService.GetOngoingMissionRunForRobot(robot.Id);
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
-            var postTestRobot = await _robotService.ReadById(robot.Id);
+            var ongoingMissionRun = await _missionRunService.GetOngoingMissionRunForRobot(robot.Id, noTracking: true);
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, noTracking: true);
+            //var postTestRobot = await _robotService.ReadById(robot.Id, noTracking: true);
+
+
+            var postTestRobot = await _context.Robots.AsNoTracking()
+                .Include(r => r.VideoStreams)
+                .Include(r => r.Model)
+                .Include(r => r.CurrentInstallation)
+                .Include(r => r.CurrentArea)
+                .ThenInclude(area => area != null ? area.Deck : null)
+                .Include(r => r.CurrentArea)
+                .ThenInclude(area => area != null ? area.Plant : null)
+                .Include(r => r.CurrentArea)
+                .ThenInclude(area => area != null ? area.Installation : null)
+                .Include(r => r.CurrentArea)
+                .ThenInclude(area => area != null ? area.SafePositions : null)
+                .Include(r => r.CurrentArea)
+                .ThenInclude(area => area != null ? area.Deck : null)
+                .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
+                .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null).FirstOrDefaultAsync(robot => robot.Id.Equals(robot.Id));
 
             Assert.True(postTestRobot!.MissionQueueFrozen);
             Assert.Equal(MissionRunPriority.Emergency, ongoingMissionRun!.MissionRunPriority);
