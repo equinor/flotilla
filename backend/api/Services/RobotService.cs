@@ -43,13 +43,8 @@ namespace Api.Services
         IAccessRoleService accessRoleService,
         IInstallationService installationService,
         IAreaService areaService,
-        IMissionRunService missionRunService) : IRobotService, IDisposable
+        IMissionRunService missionRunService) : IRobotService
     {
-
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-        }
 
         public async Task<Robot> Create(Robot newRobot)
         {
