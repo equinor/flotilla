@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 namespace Api.Test.Database
 {
-    public class DatabaseUtilities : IDisposable
+    public class DatabaseUtilities
     {
         private readonly AccessRoleService _accessRoleService;
         private readonly AreaService _areaService;
@@ -33,12 +33,6 @@ namespace Api.Test.Database
             _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService);
             _robotModelService = new RobotModelService(context);
             _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _areaService, _missionRunService);
-        }
-
-        public void Dispose()
-        {
-            _robotService.Dispose();
-            GC.SuppressFinalize(this);
         }
 
         public async Task<MissionRun> NewMissionRun(
