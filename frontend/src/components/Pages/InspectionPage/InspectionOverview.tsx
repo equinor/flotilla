@@ -52,9 +52,8 @@ export const InspectionOverviewSection = () => {
     const [activeTab, setActiveTab] = useState(0)
 
     const isScheduleButtonDisabled =
-        enabledRobots.filter(
-            (r) => r.currentInstallation.installationCode.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
-        ).length === 0 || installationCode === ''
+        enabledRobots.filter((r) => r.currentInstallation.installationCode === installationCode.toLocaleLowerCase())
+            .length === 0 || installationCode === ''
 
     const anchorRef = useRef<HTMLButtonElement>(null)
 
