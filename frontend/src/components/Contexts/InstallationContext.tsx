@@ -44,7 +44,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
     const [installationDecks, setInstallationDecks] = useState<Deck[]>([])
     const [installationAreas, setInstallationAreas] = useState<Area[]>([])
 
-    const installationCode = allPlantsMap.get(installationName) || ''
+    const installationCode = (allPlantsMap.get(installationName) || '').toLowerCase()
 
     useEffect(() => {
         BackendAPICaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
