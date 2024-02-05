@@ -6,7 +6,7 @@ namespace Api.Database.Models
 {
     public class Installation
     {
-        private string? _installationCode;
+        private string _installationCode;
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -20,10 +20,8 @@ namespace Api.Database.Models
         [MaxLength(10)]
         public string InstallationCode
         {
-            get => _installationCode?.ToLower(System.Globalization.CultureInfo.CurrentCulture)
-                ?? "";
+            get => _installationCode.ToUpper(System.Globalization.CultureInfo.CurrentCulture);
             set => _installationCode = value;
-
         }
     }
 }
