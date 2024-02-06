@@ -84,6 +84,7 @@ namespace Api.Services
                 };
                 context.Entry(robotModel).State = EntityState.Unchanged;
                 if (newRobot.CurrentArea is not null) context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged;
+                if (newRobot.CurrentInstallation is not null) context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
 
                 await context.Robots.AddAsync(newRobot);
                 await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
