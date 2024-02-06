@@ -10,11 +10,6 @@ namespace Api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // MANUALLY ADDED:
-            // Adding timescale extension to the database
-            migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;");
-            //
-
             migrationBuilder.CreateTable(
                 name: "Installations",
                 columns: table => new
@@ -27,23 +22,6 @@ namespace Api.Migrations
                 {
                     table.PrimaryKey("PK_Installations", x => x.Id);
                 });
-
-            migrationBuilder.CreateTable(
-                name: "RobotBatteryTimeseries",
-                columns: table => new
-                {
-                    BatteryLevel = table.Column<float>(type: "real", nullable: false),
-                    Time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    RobotId = table.Column<string>(type: "text", nullable: false),
-                    MissionId = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.Sql(
-                "SELECT create_hypertable( '\"RobotBatteryTimeseries\"', 'Time');\n"
-            );
 
             migrationBuilder.CreateTable(
                 name: "RobotModels",
@@ -60,47 +38,6 @@ namespace Api.Migrations
                 {
                     table.PrimaryKey("PK_RobotModels", x => x.Id);
                 });
-
-            migrationBuilder.CreateTable(
-                name: "RobotPoseTimeseries",
-                columns: table => new
-                {
-                    PositionX = table.Column<float>(type: "real", nullable: false),
-                    PositionY = table.Column<float>(type: "real", nullable: false),
-                    PositionZ = table.Column<float>(type: "real", nullable: false),
-                    OrientationX = table.Column<float>(type: "real", nullable: false),
-                    OrientationY = table.Column<float>(type: "real", nullable: false),
-                    OrientationZ = table.Column<float>(type: "real", nullable: false),
-                    OrientationW = table.Column<float>(type: "real", nullable: false),
-                    Time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    RobotId = table.Column<string>(type: "text", nullable: false),
-                    MissionId = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.Sql(
-                "SELECT create_hypertable( '\"RobotPoseTimeseries\"', 'Time');\n"
-            );
-
-
-            migrationBuilder.CreateTable(
-                name: "RobotPressureTimeseries",
-                columns: table => new
-                {
-                    Pressure = table.Column<float>(type: "real", nullable: false),
-                    Time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    RobotId = table.Column<string>(type: "text", nullable: false),
-                    MissionId = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.Sql(
-                "SELECT create_hypertable( '\"RobotPressureTimeseries\"', 'Time');\n"
-            );
 
             migrationBuilder.CreateTable(
                 name: "Sources",
@@ -557,15 +494,6 @@ namespace Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "MissionDefinitions");
-
-            migrationBuilder.DropTable(
-                name: "RobotBatteryTimeseries");
-
-            migrationBuilder.DropTable(
-                name: "RobotPoseTimeseries");
-
-            migrationBuilder.DropTable(
-                name: "RobotPressureTimeseries");
 
             migrationBuilder.DropTable(
                 name: "SafePositions");

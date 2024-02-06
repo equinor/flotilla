@@ -49,7 +49,7 @@ namespace Api.Test.Database
                 MissionId = null,
                 MissionRunPriority = MissionRunPriority.Normal,
                 Status = MissionStatus.Pending,
-                DesiredStartTime = DateTime.Now,
+                DesiredStartTime = DateTime.UtcNow,
                 Area = area,
                 Tasks = [],
                 Map = new MapMetadata(),
@@ -62,49 +62,50 @@ namespace Api.Test.Database
             return missionRun;
         }
 
-        public async Task<Installation> NewInstallation()
+        public async Task<Installation> NewInstallation(string name = "testInstallation", string installationCode = "instCode")
         {
             var createInstallationQuery = new CreateInstallationQuery
             {
-                InstallationCode = "testInstallationCode",
-                Name = "testInstallation"
+                InstallationCode = installationCode,
+                Name = name
             };
 
             return await _installationService.Create(createInstallationQuery);
         }
 
-        public async Task<Plant> NewPlant(string installationCode)
+        public async Task<Plant> NewPlant(string installationCode, string name = "testPlant", string plantCode = "plantCode")
         {
             var createPlantQuery = new CreatePlantQuery
             {
                 InstallationCode = installationCode,
-                PlantCode = "testPlantCode",
-                Name = "testPlant"
+                PlantCode = plantCode,
+                Name = name
             };
 
             return await _plantService.Create(createPlantQuery);
         }
 
-        public async Task<Deck> NewDeck(string installationCode, string plantCode)
+        public async Task<Deck> NewDeck(string installationCode, string plantCode, string name = "testDeck")
         {
             var createDeckQuery = new CreateDeckQuery
             {
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
-                Name = "testDeck"
+                Name = name,
+                DefaultLocalizationPose = new Pose()
             };
 
             return await _deckService.Create(createDeckQuery);
         }
 
-        public async Task<Area> NewArea(string installationCode, string plantCode, string deckName)
+        public async Task<Area> NewArea(string installationCode, string plantCode, string deckName, string name = "testArea")
         {
             var createAreaQuery = new CreateAreaQuery
             {
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
                 DeckName = deckName,
-                AreaName = "testArea",
+                AreaName = name,
                 DefaultLocalizationPose = new Pose()
             };
 

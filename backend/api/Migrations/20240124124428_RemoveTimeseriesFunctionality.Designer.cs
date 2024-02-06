@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    [Migration("20231128111821_FixNamingConventions")]
-    partial class FixNamingConventions
+    [Migration("20240124124428_RemoveTimeseriesFunctionality")]
+    partial class RemoveTimeseriesFunctionality
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,30 @@ namespace Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Api.Database.Models.AccessRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<string>("AccessLevel")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InstallationId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InstallationId");
+
+                    b.ToTable("AccessRoles");
+                });
+
             modelBuilder.Entity("Api.Database.Models.Area", b =>
                 {
                     b.Property<string>("Id")
@@ -32,6 +56,7 @@ namespace Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("DeckId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("DefaultLocalizationPoseId")
@@ -128,6 +153,7 @@ namespace Api.Migrations
                         .HasColumnType("character varying(250)");
 
                     b.Property<string>("IsarStepId")
+                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
@@ -209,6 +235,7 @@ namespace Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("AreaId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Comment")
@@ -255,6 +282,7 @@ namespace Api.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("AreaId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Comment")
@@ -360,6 +388,10 @@ namespace Api.Migrations
                     b.Property<int>("TaskOrder")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MissionRunId");
@@ -409,7 +441,7 @@ namespace Api.Migrations
                     b.Property<string>("CurrentAreaId")
                         .HasColumnType("text");
 
-                    b.Property<string>("CurrentInstallation")
+                    b.Property<string>("CurrentInstallationId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -459,6 +491,8 @@ namespace Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CurrentAreaId");
+
+                    b.HasIndex("CurrentInstallationId");
 
                     b.HasIndex("ModelId");
 
@@ -530,12 +564,22 @@ namespace Api.Migrations
                     b.ToTable("Sources");
                 });
 
+            modelBuilder.Entity("Api.Database.Models.AccessRole", b =>
+                {
+                    b.HasOne("Api.Database.Models.Installation", "Installation")
+                        .WithMany()
+                        .HasForeignKey("InstallationId");
+
+                    b.Navigation("Installation");
+                });
+
             modelBuilder.Entity("Api.Database.Models.Area", b =>
                 {
                     b.HasOne("Api.Database.Models.Deck", "Deck")
                         .WithMany()
                         .HasForeignKey("DeckId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Api.Database.Models.DefaultLocalizationPose", "DefaultLocalizationPose")
                         .WithMany()
@@ -770,8 +814,7 @@ namespace Api.Migrations
                                 .HasForeignKey("InspectionId");
                         });
 
-                    b.Navigation("InspectionTarget")
-                        .IsRequired();
+                    b.Navigation("InspectionTarget");
                 });
 
             modelBuilder.Entity("Api.Database.Models.InspectionFinding", b =>
@@ -785,7 +828,9 @@ namespace Api.Migrations
                 {
                     b.HasOne("Api.Database.Models.Area", "Area")
                         .WithMany()
-                        .HasForeignKey("AreaId");
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Api.Database.Models.MissionRun", "LastSuccessfulRun")
                         .WithMany()
@@ -808,7 +853,9 @@ namespace Api.Migrations
                 {
                     b.HasOne("Api.Database.Models.Area", "Area")
                         .WithMany()
-                        .HasForeignKey("AreaId");
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Api.Database.Models.Robot", "Robot")
                         .WithMany()
@@ -1021,6 +1068,12 @@ namespace Api.Migrations
                         .WithMany()
                         .HasForeignKey("CurrentAreaId");
 
+                    b.HasOne("Api.Database.Models.Installation", "CurrentInstallation")
+                        .WithMany()
+                        .HasForeignKey("CurrentInstallationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Api.Database.Models.RobotModel", "Model")
                         .WithMany()
                         .HasForeignKey("ModelId")
@@ -1132,6 +1185,8 @@ namespace Api.Migrations
                         });
 
                     b.Navigation("CurrentArea");
+
+                    b.Navigation("CurrentInstallation");
 
                     b.Navigation("Model");
 

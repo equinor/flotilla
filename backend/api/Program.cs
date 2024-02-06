@@ -94,14 +94,6 @@ builder.Services.AddScoped<IBatteryTimeseriesService, BatteryTimeseriesService>(
 builder.Services.AddScoped<IPressureTimeseriesService, PressureTimeseriesService>();
 builder.Services.AddScoped<IPoseTimeseriesService, PoseTimeseriesService>();
 
-bool useInMemoryDatabase = builder.Configuration
-    .GetSection("Database")
-    .GetValue<bool>("UseInMemoryDatabase");
-
-if (useInMemoryDatabase)
-    builder.Services.AddScoped<ITimeseriesService, TimeseriesServiceSqlLite>();
-else
-    builder.Services.AddScoped<ITimeseriesService, TimeseriesService>();
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
