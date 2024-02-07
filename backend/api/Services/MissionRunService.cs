@@ -58,24 +58,9 @@ namespace Api.Services
         ILogger<MissionRunService> logger,
         IAccessRoleService accessRoleService) : IMissionRunService
     {
-
-        private static readonly SemaphoreSlim missionRunCountSemaphore = new(1);
-
         public async Task<MissionRun> Create(MissionRun missionRun, bool triggerCreatedMissionRunEvent = true)
         {
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
-
-            missionRunCountSemaphore.Wait();
-            try
-            {
-                int maxCount = await context.MissionRuns.MaxAsync(mr => (int?)mr.MissionRunCount) ?? 0;
-                missionRun.MissionRunCount = maxCount + 1;
-            }
-            finally
-            {
-                missionRunCountSemaphore.Release();
-            }
-
             // Making sure database does not try to create new robot
             context.Entry(missionRun.Robot).State = EntityState.Unchanged;
 
