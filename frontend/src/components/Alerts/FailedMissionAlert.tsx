@@ -7,13 +7,16 @@ import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 const Indent = styled.div`
-    padding: 0px 9px;
+    padding: 0px 0px 0px 5px;
 `
 
 const StyledButton = styled(Button)`
     :hover {
         background-color: #ff9797;
     }
+    text-align: left;
+    height: auto;
+    padding: 5px 5px;
 `
 
 interface MissionsProps {
@@ -47,8 +50,9 @@ const SeveralFailedMissions = ({ missions }: MissionsProps) => {
 
     return (
         <StyledButton onClick={goToHistory} variant="ghost" color="secondary">
-            <strong>{missions.length}</strong>{' '}
-            {' ' + TranslateText("missions failed recently. See 'Mission History' for more information.")}
+            {missions.length.toString() +
+                ' ' +
+                TranslateText("missions failed recently. See 'Mission History' for more information.")}
         </StyledButton>
     )
 }
