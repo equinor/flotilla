@@ -1,13 +1,11 @@
-﻿using Npgsql;
-
-namespace Api.Services.ActionServices
+﻿namespace Api.Services.ActionServices
 {
     public interface IBatteryTimeseriesService
     {
         public Task AddBatteryEntry(float batteryLevel, string isarId);
     }
 
-    public class BatteryTimeseriesService(ILogger<BatteryTimeseriesService> logger, IRobotService robotService, ITimeseriesService timeseriesService) : IBatteryTimeseriesService
+    public class BatteryTimeseriesService(ILogger<BatteryTimeseriesService> logger, IRobotService robotService) : IBatteryTimeseriesService
     {
         private const double Tolerance = 1E-05D;
 
@@ -22,12 +20,6 @@ namespace Api.Services.ActionServices
 
             if (Math.Abs(batteryLevel - robot.BatteryLevel) > Tolerance) await robotService.UpdateRobotBatteryLevel(robot.Id, batteryLevel);
 
-            try { await timeseriesService.AddBatteryEntry(robot.CurrentMissionId!, batteryLevel, robot.Id); }
-            catch (NpgsqlException e)
-            {
-                logger.LogError(e, "An error occurred while connecting to the timeseries database");
-                return;
-            }
             logger.LogDebug("Updated battery on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
         }
     }
