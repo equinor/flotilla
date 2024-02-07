@@ -5,7 +5,7 @@ import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 
 const StyledDiv = styled.div`
-    align-items: center;
+    flex-direction: column;
 `
 
 const StyledAlertTitle = styled.div`
@@ -14,8 +14,13 @@ const StyledAlertTitle = styled.div`
     align-items: flex-end;
 `
 
-const Indent = styled.div`
-    padding: 0px 9px;
+const StyledButton = styled(Button)`
+    :hover {
+        background-color: #ff9797;
+    }
+    text-align: left;
+    height: auto;
+    padding: 5px 5px;
 `
 
 export const FailedRequestAlertContent = ({ translatedMessage }: { translatedMessage: string }) => {
@@ -26,11 +31,9 @@ export const FailedRequestAlertContent = ({ translatedMessage }: { translatedMes
                 <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
                 <Typography>{TranslateText('Request error')}</Typography>
             </StyledAlertTitle>
-            <Indent>
-                <Button as={Typography} variant="ghost" color="secondary">
-                    {translatedMessage}
-                </Button>
-            </Indent>
+            <StyledButton variant="ghost" color="secondary">
+                {translatedMessage}
+            </StyledButton>
         </StyledDiv>
     )
 }
