@@ -6,7 +6,7 @@ namespace Api.Services.ActionServices
         public Task AddPoseEntry(Pose pose, string isarId);
     }
 
-    public class PoseTimeseriesService(ILogger<PoseTimeseriesService> logger, IRobotService robotService, ITimeseriesService timeseriesService) : IPoseTimeseriesService
+    public class PoseTimeseriesService(ILogger<PoseTimeseriesService> logger, IRobotService robotService) : IPoseTimeseriesService
     {
         public async Task AddPoseEntry(Pose pose, string isarId)
         {
@@ -18,7 +18,6 @@ namespace Api.Services.ActionServices
             }
 
             await robotService.UpdateRobotPose(robot.Id, pose);
-            await timeseriesService.AddPoseEntry(robot.CurrentMissionId!, pose, robot.Id);
             logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
         }
     }
