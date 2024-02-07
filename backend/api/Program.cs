@@ -56,13 +56,14 @@ builder.Services.AddApplicationInsightsTelemetry();
 #if DEBUG
 TelemetryDebugWriter.IsTracingDisabled = true;
 #endif
-builder.Services.AddTransient<IMissionRunService, MissionRunService>();
+
 
 builder.Services.AddScoped<IAccessRoleService, AccessRoleService>();
 
 builder.Services.AddScoped<IRobotService, RobotService>();
 builder.Services.AddScoped<IRobotModelService, RobotModelService>();
 
+builder.Services.AddScoped<IMissionRunService, MissionRunService>();
 builder.Services.AddScoped<IMissionDefinitionService, MissionDefinitionService>();
 builder.Services.AddScoped<IMissionTaskService, MissionTaskService>();
 builder.Services.AddScoped<IInspectionService, InspectionService>();

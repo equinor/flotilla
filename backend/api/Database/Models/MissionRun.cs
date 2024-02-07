@@ -6,9 +6,6 @@ namespace Api.Database.Models
 {
     public class MissionRun : SortableRecord
     {
-        [Required]
-        public int MissionRunCount { get; set; }
-
         private MissionStatus _status;
 
         private IList<MissionTask> _tasks;
