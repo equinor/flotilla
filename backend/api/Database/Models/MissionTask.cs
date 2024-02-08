@@ -23,7 +23,6 @@ namespace Api.Database.Models
                 .ToList();
             EchoTagLink = echoTag.URL;
             TagId = echoTag.TagId;
-            InspectionTarget = tagPosition;
             RobotPose = echoTag.Pose;
             EchoPoseId = echoTag.PoseId;
             TaskOrder = echoTag.PlanOrder;
@@ -39,7 +38,6 @@ namespace Api.Database.Models
                 .ToList();
             TagId = taskQuery.TagId;
             Description = taskQuery.Description;
-            InspectionTarget = taskQuery.InspectionTarget;
             RobotPose = taskQuery.RobotPose;
             TaskOrder = taskQuery.TaskOrder;
             Status = TaskStatus.NotStarted;
@@ -56,7 +54,6 @@ namespace Api.Database.Models
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
-                    InspectionTarget = new Position();
                     Inspections = new List<Inspection>();
                     break;
                 case MissionTaskType.DriveTo:
@@ -65,7 +62,6 @@ namespace Api.Database.Models
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
-                    InspectionTarget = new Position();
                     Inspections = new List<Inspection>();
                     break;
                 default:
@@ -81,7 +77,6 @@ namespace Api.Database.Models
             IsarTaskId = status == null ? "" : null;
             Description = copy.Description;
             EchoTagLink = copy.EchoTagLink;
-            InspectionTarget = new Position(copy.InspectionTarget);
             RobotPose = new Pose(copy.RobotPose);
             EchoPoseId = copy.EchoPoseId;
             Status = status ?? copy.Status;
@@ -110,8 +105,6 @@ namespace Api.Database.Models
 
         [MaxLength(200)]
         public Uri? EchoTagLink { get; set; }
-
-        public Position? InspectionTarget { get; set; }
 
         [Required]
         public Pose RobotPose { get; set; }
