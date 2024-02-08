@@ -16,8 +16,6 @@ namespace Api.Controllers.Models
     {
         public int TaskOrder { get; set; }
 
-        public Position InspectionTarget { get; set; }
-
         public string? TagId { get; set; }
 
         public string? Description { get; set; }

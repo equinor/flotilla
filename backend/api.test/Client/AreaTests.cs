@@ -182,7 +182,6 @@ namespace Api.Test
                 new()
                 {
                     Inspections = inspections,
-                    InspectionTarget = new Position(),
                     TagId = "test",
                     RobotPose = new Pose(),
                     TaskOrder = 0

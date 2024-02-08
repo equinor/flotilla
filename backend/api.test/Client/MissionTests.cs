@@ -449,14 +449,12 @@ namespace Api.Test
                     {
                         RobotPose = new Pose(new Position(23, 14, 4), new Orientation()),
                         Inspections = [],
-                        InspectionTarget = new Position(),
                         TaskOrder = 0
                     },
                     new()
                     {
                         RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
                         Inspections = [],
-                        InspectionTarget = new Position(),
                         TaskOrder = 1
                     }
                 ]
@@ -535,7 +533,6 @@ namespace Api.Test
                     {
                         RobotPose = new Pose(),
                         Inspections = [],
-                        InspectionTarget = new Position(),
                         TaskOrder = 0
                     }
                 ]
@@ -718,14 +715,12 @@ namespace Api.Test
                     {
                         RobotPose = new Pose(),
                         Inspections = [],
-                        InspectionTarget = new Position(),
                         TaskOrder = 0
                     },
                     new()
                     {
                         RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
                         Inspections = [],
-                        InspectionTarget = new Position(),
                         TaskOrder = 1
                     }
                 ]
@@ -788,14 +783,12 @@ namespace Api.Test
                     {
                         RobotPose = new Pose(new Position(1, 9, 4), new Orientation()),
                         Inspections = [],
-                        InspectionTarget = new Position(),
                         TaskOrder = 0
                     },
                     new()
                     {
                         RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
                         Inspections = [],
-                        InspectionTarget = new Position(),
                         TaskOrder = 1
                     }
                 ]
