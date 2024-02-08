@@ -17,7 +17,7 @@ import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinit
 const MetadataItem = ({ title, content, onEdit }: { title: string; content: any; onEdit?: () => void }) => {
     return (
         <StyledDict.FormItem>
-            <StyledDict.Card style={{ boxShadow: tokens.elevation.raised }}>
+            <StyledDict.Card style={{ boxShadow: tokens.elevation.raised, height: 'auto', minHeight: '100px', overflowY: 'hidden' }}>
                 <StyledDict.TitleComponent>
                     <Typography variant="body_long_bold" color={tokens.colors.text.static_icons__secondary.rgba}>
                         {title}

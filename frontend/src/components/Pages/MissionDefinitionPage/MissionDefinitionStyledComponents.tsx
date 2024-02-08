@@ -16,15 +16,16 @@ export const StyledDict = {
     `,
 
     FormContainer: styled.div`
-        display: grid;
-        grid-template-columns: [c1] 1fr [c2] 1fr [c3] 1fr;
-        grid-template-rows: [r1] auto [r1] auto [r1] auto;
-        align: left;
-        align-items: flex-start;
-        align-content: flex-start;
-        max-width: 1200px;
-        min-width: 600px;
+        display: flex;
+        flex-wrap: wrap;
+        max-width: 1000px;
+        min-width: 270px;
         gap: 10px 20px;
+        margin: 1rem;
+        @media (min-width: 800px) {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
     `,
 
     FormItem: styled.div`
@@ -33,7 +34,7 @@ export const StyledDict = {
         padding: 5px;
         word-break: break-word;
         hyphens: auto;
-        min-height: 60px;
+        min-height: 80px;
     `,
 
     Dialog: styled(Dialog)`
