@@ -13,11 +13,19 @@ import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledDict } from './MissionDefinitionStyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
+import styled from 'styled-components'
+
+const StyledDictCard = styled(StyledDict.Card)`
+    box-shadow: ${tokens.elevation.raised};
+    height: auto;
+    min-height: 100px;
+    overflow-y: hidden;
+`
 
 const MetadataItem = ({ title, content, onEdit }: { title: string; content: any; onEdit?: () => void }) => {
     return (
         <StyledDict.FormItem>
-            <StyledDict.Card style={{ boxShadow: tokens.elevation.raised, height: 'auto', minHeight: '100px', overflowY: 'hidden' }}>
+            <StyledDictCard>
                 <StyledDict.TitleComponent>
                     <Typography variant="body_long_bold" color={tokens.colors.text.static_icons__secondary.rgba}>
                         {title}
@@ -35,7 +43,7 @@ const MetadataItem = ({ title, content, onEdit }: { title: string; content: any;
                 >
                     {content}
                 </Typography>
-            </StyledDict.Card>
+            </StyledDictCard>
         </StyledDict.FormItem>
     )
 }

@@ -41,7 +41,8 @@ export const StyledDict = {
         display: flex;
         justify-content: space-between;
         padding: 1rem;
-        width: 620px;
+        width: auto;
+        min-width: 300px;
     `,
 
     MissionDefinitionPage: styled.div`
