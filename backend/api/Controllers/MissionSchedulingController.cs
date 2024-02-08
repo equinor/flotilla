@@ -250,7 +250,7 @@ namespace Api.Controllers
                 .SelectMany(
                     t =>
                     {
-                        return t.Inspections.Select(i => new MissionTask(t, i.InspectionPoint)).ToList();
+                        return t.Inspections.Select(i => new MissionTask(t)).ToList();
                     }
                 )
                 .ToList();
