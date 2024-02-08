@@ -40,7 +40,6 @@ namespace Api.Database.Context
             modelBuilder.Entity<MissionTask>(missionTaskEntity =>
             {
                 if (isSqlLite) { AddConverterForDateTimeOffsets(ref missionTaskEntity); }
-                missionTaskEntity.OwnsOne(task => task.InspectionTarget);
                 missionTaskEntity.OwnsOne(
                     task => task.RobotPose,
                     poseEntity =>
