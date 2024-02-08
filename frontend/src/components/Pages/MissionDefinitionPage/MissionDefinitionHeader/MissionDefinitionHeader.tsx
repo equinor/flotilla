@@ -8,7 +8,7 @@ interface MissionDefinitionHeaderProps {
 export const MissionDefinitionHeader = ({ missionDefinition }: MissionDefinitionHeaderProps) => {
     return (
         <StyledDict.HeaderSection>
-            <StyledDict.TitleSection style={{ wordBreak: 'break-word'}}>
+            <StyledDict.TitleSection style={{ wordBreak: 'break-word' }}>
                 <Typography variant="h1">{missionDefinition.name}</Typography>
             </StyledDict.TitleSection>
         </StyledDict.HeaderSection>

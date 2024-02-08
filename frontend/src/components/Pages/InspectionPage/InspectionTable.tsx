@@ -196,7 +196,9 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                     {mission.name}
                 </Typography>
             </Table.Cell>
-            <Table.Cell id={InspectionTableColumns.Description}>{mission.comment}</Table.Cell>
+            <Table.Cell id={InspectionTableColumns.Description} style={{ wordBreak: 'break-word' }}>
+                {mission.comment}
+            </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Area}>{mission.area ? mission.area.areaName : '-'}</Table.Cell>
             <Table.Cell id={InspectionTableColumns.LastCompleted}>{lastCompleted}</Table.Cell>
             <Table.Cell id={InspectionTableColumns.Deadline}>
