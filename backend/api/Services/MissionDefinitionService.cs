@@ -140,7 +140,7 @@ namespace Api.Services
                                     var tagPosition = stidService
                                         .GetTagPosition(t.TagId, installationCode)
                                         .Result;
-                                    return new MissionTask(t, tagPosition);
+                                    return new MissionTask(t);
                                 }
                             )
                             .ToList(),
