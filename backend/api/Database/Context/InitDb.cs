@@ -426,7 +426,7 @@ namespace Api.Database.Context
                     {
                         new()
                     }
-                }, new Position(1.0f, 1.0f, 1.0f))
+                })
             {
                 Status = TaskStatus.Successful
             };
@@ -446,7 +446,7 @@ namespace Api.Database.Context
                     {
                         new()
                     }
-                }, new Position(1.0f, 1.0f, 1.0f))
+                })
             {
                 Status = TaskStatus.Failed
             };
@@ -466,7 +466,7 @@ namespace Api.Database.Context
                     {
                         new()
                     }
-                }, new Position(1.0f, 1.0f, 1.0f))
+                })
             {
                 Status = TaskStatus.PartiallySuccessful
             };
@@ -486,7 +486,7 @@ namespace Api.Database.Context
                     {
                         new()
                     }
-                }, new Position(1.0f, 1.0f, 1.0f))
+                })
             {
                 Status = TaskStatus.Cancelled
             };
@@ -506,7 +506,7 @@ namespace Api.Database.Context
                     {
                         new()
                     }
-                }, new Position(1.0f, 1.0f, 1.0f))
+                })
             {
                 Status = TaskStatus.Failed
             };
@@ -526,7 +526,7 @@ namespace Api.Database.Context
                     {
                         new()
                     }
-                }, new Position(1.0f, 1.0f, 1.0f))
+                })
             {
                 Status = TaskStatus.Failed
             };
@@ -546,7 +546,7 @@ namespace Api.Database.Context
                     {
                         new()
                     }
-                }, new Position(1.0f, 1.0f, 1.0f))
+                })
             {
                 Status = TaskStatus.Failed
             };
