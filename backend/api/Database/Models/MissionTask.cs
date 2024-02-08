@@ -16,7 +16,7 @@ namespace Api.Database.Models
         public MissionTask() { }
 
         // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
-        public MissionTask(EchoTag echoTag, Position tagPosition)
+        public MissionTask(EchoTag echoTag)
         {
             Inspections = echoTag.Inspections
                 .Select(inspection => new Inspection(inspection))

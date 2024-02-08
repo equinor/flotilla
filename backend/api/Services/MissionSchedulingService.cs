@@ -182,7 +182,6 @@ namespace Api.Services
             {
                 RobotPose = clonedPose,
                 Inspections = [],
-                InspectionTarget = new Position(),
                 TaskOrder = 0
             };
 
