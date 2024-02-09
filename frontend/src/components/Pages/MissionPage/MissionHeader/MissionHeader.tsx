@@ -11,20 +11,20 @@ import { MissionRestartButton } from 'components/Displays/MissionButtons/Mission
 import { TaskStatus } from 'models/Task'
 
 const HeaderSection = styled(Card)`
-    width: 85vw;
+    width: 100%;
     padding: 15px 0px 15px 0px;
-    box-shadow: none;
-    border-radius: 0px;
-    max-width: 800px;
+    box-shadow:
+        -10px 0px 0px 0px white,
+        30px 0px 0px 0px white;
     top: 60px;
     position: sticky;
-    background-color: white;
     z-index: 1;
 
-    @media (max-width: 500px) {
+    @media (max-width: 700px) {
         top: 80px;
     }
 `
+
 const TitleSection = styled.div`
     display: flex;
     align-items: center;
