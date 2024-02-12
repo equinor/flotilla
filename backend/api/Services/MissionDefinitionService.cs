@@ -60,7 +60,7 @@ namespace Api.Services
 
         public async Task<MissionDefinition?> ReadById(string id)
         {
-            return await GetMissionDefinitionsWithSubModels().Where(m => m.IsDeprecated == false)
+            return await GetMissionDefinitionsWithSubModels()
                 .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
         }
 
