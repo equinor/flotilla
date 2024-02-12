@@ -218,6 +218,44 @@ namespace Api.Controllers
         }
 
         /// <summary>
+        ///     Updates a mission definition's IsDeprecated in the database based on id
+        /// </summary>
+        /// <response code="200"> The mission definition was successfully updated </response>
+        /// <response code="400"> The mission definition data is invalid </response>
+        /// <response code="404"> There was no mission definition with the given ID in the database </response>
+        [HttpPut]
+        [Authorize(Roles = Role.Admin)]
+        [Route("{id}/is-deprecated")]
+        [ProducesResponseType(typeof(CondensedMissionDefinitionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<CondensedMissionDefinitionResponse>> UpdateMissionDefinitionIsDeprecatedById(
+            [FromRoute] string id,
+            [FromBody] UpdateMissionDefinitionIsDeprecatedQuery missionDefinitionIsDeprecatedQuery
+        )
+        {
+            logger.LogInformation("Updating mission definition IsDeprected value for id '{Id}'", id);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Invalid data.");
+            }
+
+            var missionDefinition = await missionDefinitionService.ReadById(id);
+            if (missionDefinition == null)
+            {
+                return NotFound($"Could not find mission definition with id '{id}'");
+            }
+            missionDefinition.IsDeprecated = missionDefinitionIsDeprecatedQuery.IsDeprecated;
+
+            var newMissionDefinition = await missionDefinitionService.Update(missionDefinition);
+            return new CondensedMissionDefinitionResponse(newMissionDefinition);
+        }
+
+        /// <summary>
         ///     Deletes the mission definition with the specified id from the database.
         /// </summary>
         [HttpDelete]
