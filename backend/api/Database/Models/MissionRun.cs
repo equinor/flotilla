@@ -211,7 +211,6 @@ namespace Api.Database.Models
     {
         Normal,
         Response,
-        Emergency,
-        Localization
+        Emergency
     }
 }
