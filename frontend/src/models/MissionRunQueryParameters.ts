@@ -10,7 +10,7 @@ export interface MissionRunQueryParameters {
     tagSearch?: string
     inspectionTypes?: InspectionType[]
     area?: string
-    excludeLocalisation?: boolean
+    excludeLocalization?: boolean
     excludeReturnToHome?: boolean
     minStartTime?: number
     maxStartTime?: number

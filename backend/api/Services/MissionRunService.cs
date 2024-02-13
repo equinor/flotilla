@@ -279,7 +279,7 @@ namespace Api.Services
         ///     <see cref="MissionRunQueryStringParameters.RobotNameSearch" />,
         ///     <see cref="MissionRunQueryStringParameters.TagSearch" />,
         ///     <see cref="MissionRunQueryStringParameters.InspectionTypes" />,
-        ///     <see cref="MissionRunQueryStringParameters.ExcludeLocalisation" />,
+        ///     <see cref="MissionRunQueryStringParameters.ExcludeLocalization" />,
         ///     <see cref="MissionRunQueryStringParameters.ExcludeReturnToHome" />,
         ///     <see cref="MissionRunQueryStringParameters.MinStartTime" />,
         ///     <see cref="MissionRunQueryStringParameters.MaxStartTime" />,
@@ -333,7 +333,7 @@ namespace Api.Services
                         )
                 );
 
-            Expression<Func<MissionRun, bool>> localisationFilter = !parameters.ExcludeLocalisation
+            Expression<Func<MissionRun, bool>> localizationFilter = !parameters.ExcludeLocalization
                 ? missionRun => true
                 : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.Localization));
 
@@ -376,7 +376,7 @@ namespace Api.Services
                             Expression.AndAlso(
                                 Expression.Invoke(inspectionTypeFilter, missionRun),
                                 Expression.AndAlso(
-                                    Expression.Invoke(localisationFilter, missionRun),
+                                    Expression.Invoke(localizationFilter, missionRun),
                                     Expression.AndAlso(
                                         Expression.Invoke(returnTohomeFilter, missionRun),
                                         Expression.AndAlso(
