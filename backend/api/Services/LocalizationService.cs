@@ -191,6 +191,7 @@ namespace Api.Services
             {
                 Name = "Localization mission",
                 Robot = robot,
+                MissionRunPriority = MissionRunPriority.Localization,
                 InstallationCode = area.Installation.InstallationCode,
                 Area = area,
                 Status = MissionStatus.Pending,
@@ -200,6 +201,7 @@ namespace Api.Services
                     new(area.Deck.DefaultLocalizationPose.Pose, MissionTaskType.Localization)
                 },
                 Map = new MapMetadata()
+
             };
             logger.LogWarning("Starting localization mission");
             await missionRunService.Create(localizationMissionRun, triggerCreatedMissionRunEvent: false);

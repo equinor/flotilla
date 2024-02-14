@@ -116,12 +116,9 @@ namespace Api.Services
 
         public async Task<MissionRun?> ReadNextScheduledMissionRun(string robotId)
         {
-            var nextScheduledMissionRun = await GetMissionRunsWithSubModels()
-                    .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending)
-                    .OrderBy(missionRun => missionRun.DesiredStartTime)
-                    .FirstOrDefaultAsync();
-
-            return nextScheduledMissionRun;
+            return await GetMissionRunsWithSubModels()
+                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending);
         }
 
         public async Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(string robotId)
@@ -135,9 +132,8 @@ namespace Api.Services
         public async Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId)
         {
             var nextScheduledMissionRun = await GetMissionRunsWithSubModels()
-                    .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending && missionRun.MissionRunPriority == MissionRunPriority.Localization)
                     .OrderBy(missionRun => missionRun.DesiredStartTime)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending && missionRun.MissionRunPriority == MissionRunPriority.Localization);
 
             return nextScheduledMissionRun;
         }

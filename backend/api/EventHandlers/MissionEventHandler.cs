@@ -149,8 +149,15 @@ namespace Api.EventHandlers
             }
 
             MissionRun? missionRun;
-            if (robot.MissionQueueFrozen) { missionRun = await MissionService.ReadNextScheduledEmergencyMissionRun(robot.Id); }
-            else { missionRun = await MissionService.ReadNextScheduledMissionRun(robot.Id); }
+
+            missionRun = await MissionService.ReadNextScheduledLocalizationMissionRun(robot.Id);
+
+            if (missionRun != null) { _logger.LogInformation("The robot will be localized in the next mission"); }
+            else
+            {
+                if (robot.MissionQueueFrozen) { missionRun = await MissionService.ReadNextScheduledEmergencyMissionRun(robot.Id); }
+                else { missionRun = await MissionService.ReadNextScheduledMissionRun(robot.Id); }
+            }
 
             if (missionRun == null)
             {
