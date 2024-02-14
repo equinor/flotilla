@@ -221,20 +221,7 @@ namespace Api.Services
 
         public async Task<Robot> UpdateCurrentInstallation(string robotId, Installation? installation)
         {
-            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
-            var robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-
-            await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
-            await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(installation);
-
-            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.CurrentInstallation, installation));
-
-            robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-            NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-
-            return robot;
+            return await UpdateRobotProperty(robotId, "CurrentInstallation", installation);
         }
 
         public async Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen)
