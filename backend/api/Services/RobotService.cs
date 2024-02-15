@@ -25,7 +25,6 @@ namespace Api.Services
         public Task<Robot> UpdateCurrentMissionId(string robotId, string? missionId);
         public Task<Robot> UpdateCurrentArea(string robotId, Area? area);
         public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
-        public Task<Robot> UpdateCurrentInstallation(string robotId, Installation? installation);
         public Task<Robot?> Delete(string id);
         public Task SetRobotOffline(string robotId);
     }
@@ -218,11 +217,6 @@ namespace Api.Services
         }
 
         public async Task<Robot> UpdateCurrentArea(string robotId, Area? area) { return await UpdateRobotProperty(robotId, "CurrentArea", area); }
-
-        public async Task<Robot> UpdateCurrentInstallation(string robotId, Installation? installation)
-        {
-            return await UpdateRobotProperty(robotId, "CurrentInstallation", installation);
-        }
 
         public async Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen)
         {

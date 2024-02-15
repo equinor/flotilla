@@ -15,8 +15,7 @@ namespace Api.Controllers
             IIsarService isarService,
             IMissionSchedulingService missionSchedulingService,
             IRobotModelService robotModelService,
-            IAreaService areaService,
-            IInstallationService installationService
+            IAreaService areaService
         ) : ControllerBase
     {
         /// <summary>
@@ -217,16 +216,6 @@ namespace Api.Controllers
                 Robot updatedRobot;
                 switch (fieldName)
                 {
-                    case "installationId":
-                        if (query.InstallationId == null)
-                            updatedRobot = await robotService.UpdateCurrentInstallation(id, null);
-                        else
-                        {
-                            var installation = await installationService.ReadById(query.InstallationId);
-                            if (installation == null) return NotFound($"No installation with ID {query.InstallationId} was found");
-                            updatedRobot = await robotService.UpdateCurrentInstallation(id, installation);
-                        }
-                        break;
                     case "areaId":
                         if (query.AreaId == null)
                             updatedRobot = await robotService.UpdateCurrentArea(id, null);
