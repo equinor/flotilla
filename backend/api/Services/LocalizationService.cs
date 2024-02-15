@@ -201,7 +201,6 @@ namespace Api.Services
                     new(area.Deck.DefaultLocalizationPose.Pose, MissionTaskType.Localization)
                 },
                 Map = new MapMetadata()
-
             };
             logger.LogWarning("Starting localization mission");
             await missionRunService.Create(localizationMissionRun, triggerCreatedMissionRunEvent: false);
