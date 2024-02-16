@@ -61,6 +61,9 @@
                     '=',
                     StringSplitOptions.RemoveEmptyEntries);
 
+                if (parts.Length == 0 || parts[0].StartsWith('#'))
+                    continue;
+
                 Environment.SetEnvironmentVariable(parts[0], parts[1]);
             }
 
