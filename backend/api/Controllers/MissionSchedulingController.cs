@@ -316,7 +316,7 @@ namespace Api.Controllers
                 MissionId = scheduledMissionDefinition.Id,
                 Status = MissionStatus.Pending,
                 MissionRunPriority = MissionRunPriority.Normal,
-                DesiredStartTime = scheduledMissionQuery.DesiredStartTime,
+                DesiredStartTime = scheduledMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
                 Tasks = missionTasks,
                 InstallationCode = scheduledMissionQuery.InstallationCode,
                 Area = area,
