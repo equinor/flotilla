@@ -306,7 +306,6 @@ export class BackendAPICaller {
         const body = {
             robotId: desiredRobot[0].id,
             echoMissionId: echoMissionId,
-            desiredStartTime: new Date(),
             installationCode: installationCode,
             areaName: '',
         }
