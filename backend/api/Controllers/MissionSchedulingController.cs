@@ -284,11 +284,13 @@ namespace Api.Controllers
             MissionDefinition? existingMissionDefinition = null;
             if (source == null)
             {
-                source = new Source
-                {
-                    SourceId = $"{echoMission.Id}",
-                    Type = MissionSourceType.Echo
-                };
+                source = await sourceService.Create(
+                    new Source
+                    {
+                        SourceId = $"{echoMission.Id}",
+                        Type = MissionSourceType.Echo
+                    }
+                );
             }
             else
             {

@@ -11,6 +11,8 @@ namespace Api.Services
 {
     public interface ISourceService
     {
+        public abstract Task<Source> Create(Source source);
+
         public abstract Task<PagedList<Source>> ReadAll(SourceQueryStringParameters? parameters);
 
         public abstract Task<SourceResponse?> ReadByIdAndInstallationWithTasks(string id, string installationCode);
@@ -40,6 +42,13 @@ namespace Api.Services
         IEchoService echoService,
         IStidService stidService) : ISourceService
     {
+        public async Task<Source> Create(Source source)
+        {
+            context.Sources.Add(source);
+            await context.SaveChangesAsync();
+            return source;
+        }
+
         public async Task<PagedList<Source>> ReadAll(SourceQueryStringParameters? parameters)
         {
             var query = GetSources();

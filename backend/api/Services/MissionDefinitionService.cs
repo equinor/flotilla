@@ -51,6 +51,7 @@ namespace Api.Services
         {
             if (missionDefinition.LastSuccessfulRun is not null) { context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged; }
             if (missionDefinition.Area is not null) { context.Entry(missionDefinition.Area).State = EntityState.Unchanged; }
+            if (missionDefinition.Source is not null) { context.Entry(missionDefinition.Source).State = EntityState.Unchanged; }
 
             await context.MissionDefinitions.AddAsync(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.Area?.Installation);

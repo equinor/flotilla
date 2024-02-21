@@ -39,11 +39,13 @@ namespace Api.Services.ActionServices
                 try
                 {
                     string sourceUrl = await customMissionService.UploadSource(missionTasks);
-                    source = new Source
-                    {
-                        SourceId = sourceUrl,
-                        Type = MissionSourceType.Custom
-                    };
+                    source = await sourceService.Create(
+                        new Source
+                        {
+                            SourceId = sourceUrl,
+                            Type = MissionSourceType.Custom
+                        }
+                    );
                 }
                 catch (Exception e)
                 {
