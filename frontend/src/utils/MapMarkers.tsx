@@ -18,7 +18,14 @@ export const placeTagsInMap = (
     const maxTaskOrder: number = Math.max(...tasks.map((task) => task.taskOrder))
 
     const orderedTasks = orderTasksByDrawOrder(tasks, currentTaskOrder, maxTaskOrder)
+
     orderedTasks.forEach((task) => {
+        if (task.inspections.length === 0) {
+            const pixelPosition = calculateObjectPixelPosition(mapMetadata, task.robotPose.position)
+            // Workaround for current bug in echo
+            const order = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
+            drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
+        }
         task.inspections.forEach((inspection) => {
             const pixelPosition = calculateObjectPixelPosition(mapMetadata, inspection.inspectionTarget)
             // Workaround for current bug in echo
