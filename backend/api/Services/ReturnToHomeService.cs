@@ -8,7 +8,7 @@ namespace Api.Services
         public Task<MissionRun?> ScheduleReturnToHomeMissionRun(string robotId);
     }
 
-    public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService) : IReturnToHomeService
+    public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService, IMapService mapService) : IReturnToHomeService
     {
         public async Task<bool> IsRobotHome(string robotId)
         {
@@ -72,6 +72,7 @@ namespace Api.Services
                 },
                 Map = new MapMetadata()
             };
+            await mapService.AssignMapToMission(returnToHomeMissionRun);
 
             var missionRun = await missionRunService.Create(returnToHomeMissionRun);
             logger.LogInformation(

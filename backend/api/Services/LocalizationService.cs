@@ -14,7 +14,7 @@ namespace Api.Services
         public Task<bool> RobotIsLocalized(string robotId);
     }
 
-    public class LocalizationService(ILogger<LocalizationService> logger, IRobotService robotService, IMissionRunService missionRunService, IInstallationService installationService, IAreaService areaService) : ILocalizationService
+    public class LocalizationService(ILogger<LocalizationService> logger, IRobotService robotService, IMissionRunService missionRunService, IInstallationService installationService, IAreaService areaService, IMapService mapService) : ILocalizationService
     {
 
         public async Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition)
@@ -202,6 +202,8 @@ namespace Api.Services
                 },
                 Map = new MapMetadata()
             };
+            await mapService.AssignMapToMission(localizationMissionRun);
+
             logger.LogWarning("Starting localization mission");
             await missionRunService.Create(localizationMissionRun, triggerCreatedMissionRunEvent: false);
             return localizationMissionRun;
