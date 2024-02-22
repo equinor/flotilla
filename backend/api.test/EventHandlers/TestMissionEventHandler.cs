@@ -8,6 +8,7 @@ using Api.EventHandlers;
 using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
+using Api.Options;
 using Api.Services;
 using Api.Test.Database;
 using Api.Test.Mocks;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -38,6 +40,8 @@ namespace Api.Test.EventHandlers
             var missionSchedulingServiceLogger = new Mock<ILogger<MissionSchedulingService>>().Object;
             var robotServiceLogger = new Mock<ILogger<RobotService>>().Object;
             var localizationServiceLogger = new Mock<ILogger<LocalizationService>>().Object;
+            var mapServiceLogger = new Mock<ILogger<MapService>>().Object;
+            var mapBlobOptions = new Mock<IOptions<MapBlobOptions>>().Object;
 
             var configuration = WebApplication.CreateBuilder().Configuration;
 
@@ -51,6 +55,7 @@ namespace Api.Test.EventHandlers
 
             var robotModelService = new RobotModelService(context);
             var isarServiceMock = new MockIsarService();
+            var blobServiceMock = new MockBlobService();
             var installationService = new InstallationService(context, accessRoleService);
             var defaultLocalizationPoseService = new DefaultLocalizationPoseService(context);
             var plantService = new PlantService(context, installationService, accessRoleService);
@@ -59,7 +64,8 @@ namespace Api.Test.EventHandlers
             var robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService, _missionRunService);
             var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, robotService, areaService,
                 isarServiceMock);
-            var localizationService = new LocalizationService(localizationServiceLogger, robotService, _missionRunService, installationService, areaService);
+            var mapService = new MapService(mapServiceLogger, mapBlobOptions, blobServiceMock);
+            var localizationService = new LocalizationService(localizationServiceLogger, robotService, _missionRunService, installationService, areaService, mapService);
 
             _databaseUtilities = new DatabaseUtilities(context);
 
