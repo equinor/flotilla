@@ -67,4 +67,4 @@ docker compose up --build
 
 Equinor welcomes all kinds of contributions, including code, bug reports, issues, feature requests, and documentation.
 Please initiate your contribution by creating an [issue](https://github.com/equinor/isar/issues) or by forking the
-project and making a pull requests. Commit messages shall be written according to [this guide](https://cbea.ms.git-commit/).
+project and making a pull requests. Commit messages shall be written according to [this guide](https://cbea.ms/git-commit/).
