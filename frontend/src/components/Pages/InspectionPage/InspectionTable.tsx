@@ -83,6 +83,7 @@ const HideColumnsOnSmallScreen = styled.div`
 interface IProps {
     deck: Deck
     inspections: Inspection[]
+    scrollOnToggle: boolean
     openDialog: () => void
     setSelectedMissions: (selectedMissions: CondensedMissionDefinition[]) => void
 }
@@ -253,7 +254,7 @@ const SmallScreenInfoText = () => {
     )
 }
 
-export const InspectionTable = ({ deck, inspections, openDialog, setSelectedMissions }: IProps) => {
+export const InspectionTable = ({ deck, inspections, scrollOnToggle, openDialog, setSelectedMissions }: IProps) => {
     const { TranslateText } = useLanguageContext()
 
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
@@ -278,8 +279,17 @@ export const InspectionTable = ({ deck, inspections, openDialog, setSelectedMiss
             />
         ))
 
+    useEffect(() => {
+        let inspectionTable = document.getElementById('inspectionTable')
+        let topBarHeight = document.getElementById('topBar')?.offsetHeight ?? 0
+
+        if (inspectionTable) {
+            window.scroll({ top: inspectionTable.offsetTop - topBarHeight, behavior: 'smooth' })
+        }
+    }, [scrollOnToggle])
+
     return (
-        <StyledTable>
+        <StyledTable id="inspectionTable">
             <HideColumnsOnSmallScreen>
                 <Table>
                     <Table.Caption>
