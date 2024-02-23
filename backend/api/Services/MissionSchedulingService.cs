@@ -214,6 +214,11 @@ namespace Api.Services
             OnRobotAvailable(e);
         }
 
+        public void TriggerMissionCompleted(MissionCompletedEventArgs e)
+        {
+            OnMissionCompleted(e);
+        }
+
         private async Task MoveInterruptedMissionsToQueue(IEnumerable<string> interruptedMissionRunIds)
         {
             foreach (string missionRunId in interruptedMissionRunIds)
@@ -393,5 +398,7 @@ namespace Api.Services
 
         protected virtual void OnRobotAvailable(RobotAvailableEventArgs e) { RobotAvailable?.Invoke(this, e); }
         public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
+        protected virtual void OnMissionCompleted(MissionCompletedEventArgs e) { MissionCompleted?.Invoke(this, e); }
+        public static event EventHandler<MissionCompletedEventArgs>? MissionCompleted;
     }
 }

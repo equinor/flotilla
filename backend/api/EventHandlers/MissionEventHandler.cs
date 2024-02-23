@@ -1,4 +1,4 @@
-﻿using Api.Controllers.Models;
+using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Services.Events;
@@ -26,8 +26,7 @@ namespace Api.EventHandlers
 
             Subscribe();
         }
-        private IMissionRunService MissionService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
+        private IMissionRunService MissionService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
 
@@ -45,6 +44,7 @@ namespace Api.EventHandlers
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
             MissionSchedulingService.RobotAvailable += OnRobotAvailable;
+            MissionSchedulingService.MissionCompleted += OnMissionCompleted;
             EmergencyActionService.EmergencyButtonPressedForRobot += OnEmergencyButtonPressedForRobot;
             EmergencyActionService.EmergencyButtonDepressedForRobot += OnEmergencyButtonDepressedForRobot;
         }
@@ -53,6 +53,7 @@ namespace Api.EventHandlers
         {
             MissionRunService.MissionRunCreated -= OnMissionRunCreated;
             MissionSchedulingService.RobotAvailable -= OnRobotAvailable;
+            MissionSchedulingService.MissionCompleted -= OnMissionCompleted;
             EmergencyActionService.EmergencyButtonPressedForRobot -= OnEmergencyButtonPressedForRobot;
             EmergencyActionService.EmergencyButtonDepressedForRobot -= OnEmergencyButtonDepressedForRobot;
         }
@@ -165,7 +166,9 @@ namespace Api.EventHandlers
             _scheduleMissionSemaphore.WaitOne();
             try { await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun.Id); }
             catch (MissionRunNotFoundException) { return; }
-            _scheduleMissionSemaphore.Release();
+        }
+        private async void OnMissionCompleted(object? sender, MissionCompletedEventArgs e)
+        {
         }
 
         private void ReportFailureToSignalR(Robot robot, string message)
