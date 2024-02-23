@@ -17,19 +17,19 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 interface IDeckCardProps {
     deckMissions: DeckInspectionTuple[]
-    setSelectedDeck: (deck: Deck | undefined) => void
+    onClickDeck: (deck: Deck) => void
     selectedDeck: Deck | undefined
     handleScheduleAll: (inspections: Inspection[]) => void
 }
 
 interface DeckCardProps {
     deckData: DeckInspectionTuple
-    setSelectedDeck: (deck: Deck | undefined) => void
+    onClickDeck: (deck: Deck) => void
     selectedDeck: Deck | undefined
     handleScheduleAll: (inspections: Inspection[]) => void
 }
 
-const DeckCard = ({ deckData, setSelectedDeck, selectedDeck, handleScheduleAll }: DeckCardProps) => {
+const DeckCard = ({ deckData, onClickDeck, selectedDeck, handleScheduleAll }: DeckCardProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
     const { enabledRobots } = useRobotContext()
@@ -69,7 +69,7 @@ const DeckCard = ({ deckData, setSelectedDeck, selectedDeck, handleScheduleAll }
             <StyledDict.Rectangle style={{ background: `${getCardColorFromInspections(deckData.inspections)}` }} />
             <StyledDict.Card
                 key={deckData.deck.deckName}
-                onClick={deckData.inspections.length > 0 ? () => setSelectedDeck(deckData.deck) : undefined}
+                onClick={deckData.inspections.length > 0 ? () => onClickDeck(deckData.deck) : undefined}
                 style={
                     selectedDeck === deckData.deck
                         ? { border: `solid ${getCardColorFromInspections(deckData.inspections)} 2px` }
@@ -113,7 +113,7 @@ const DeckCard = ({ deckData, setSelectedDeck, selectedDeck, handleScheduleAll }
     )
 }
 
-export const DeckCards = ({ deckMissions, setSelectedDeck, selectedDeck, handleScheduleAll }: IDeckCardProps) => {
+export const DeckCards = ({ deckMissions, onClickDeck, selectedDeck, handleScheduleAll }: IDeckCardProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (
@@ -123,7 +123,7 @@ export const DeckCards = ({ deckMissions, setSelectedDeck, selectedDeck, handleS
                     <DeckCard
                         key={'deckCard' + deckMission.deck.deckName}
                         deckData={deckMission}
-                        setSelectedDeck={setSelectedDeck}
+                        onClickDeck={onClickDeck}
                         selectedDeck={selectedDeck}
                         handleScheduleAll={handleScheduleAll}
                     />

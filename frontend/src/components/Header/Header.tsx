@@ -51,7 +51,7 @@ export const Header = ({ page }: { page: string }) => {
     const { installationName } = useInstallationContext()
     return (
         <>
-            <StyledTopBar>
+            <StyledTopBar id="topBar">
                 <StyledWrapper>
                     <HandPointer>
                         <TopBar.Header

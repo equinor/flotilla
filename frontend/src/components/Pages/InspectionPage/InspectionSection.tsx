@@ -33,6 +33,7 @@ export const InspectionSection = () => {
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
+    const [scrollOnToggle, setScrollOnToggle] = useState<boolean>(true)
     const { ongoingMissions, missionQueue } = useMissionsContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
 
@@ -87,18 +88,24 @@ export const InspectionSection = () => {
         setSelectedMissions(sortedInspections.map((i) => i.missionDefinition))
     }
 
+    const onClickDeck = (clickedDeck: Deck) => {
+        setSelectedDeck(clickedDeck)
+        setScrollOnToggle(!scrollOnToggle)
+    }
+
     return (
         <>
             <StyledDict.DeckOverview>
                 <DeckCards
                     deckMissions={deckMissions}
-                    setSelectedDeck={setSelectedDeck}
+                    onClickDeck={onClickDeck}
                     selectedDeck={selectedDeck}
                     handleScheduleAll={handleScheduleAll}
                 />
                 {selectedDeck && (
                     <InspectionTable
                         deck={selectedDeck}
+                        scrollOnToggle={scrollOnToggle}
                         openDialog={() => setIsDialogOpen(true)}
                         setSelectedMissions={setSelectedMissions}
                         inspections={deckMissions.find((d) => d.deck.deckName === selectedDeck.deckName)!.inspections}
