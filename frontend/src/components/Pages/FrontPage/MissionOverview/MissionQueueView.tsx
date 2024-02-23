@@ -66,7 +66,7 @@ export const MissionQueueView = (): JSX.Element => {
     )
 
     return (
-        <StyledMissionView>
+        <StyledMissionView id="missionQueue">
             <Typography variant="h1" color="resting">
                 {TranslateText('Mission Queue')}
             </Typography>

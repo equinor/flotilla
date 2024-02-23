@@ -106,6 +106,15 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
             })
         })
 
+        if (missionsToSchedule.length > 0) {
+            let missionQueue = document.getElementById('missionQueue')
+            let topBarHeight = document.getElementById('topBar')?.offsetHeight ?? 0
+
+            if (missionQueue) {
+                window.scroll({ top: missionQueue.offsetTop - topBarHeight, behavior: 'smooth' })
+            }
+        }
+
         setMissionsToSchedule(undefined)
         setSelectedRobot(undefined)
         props.closeDialog()
