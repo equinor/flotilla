@@ -1,4 +1,4 @@
-using Api.Controllers.Models;
+﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Services.Events;
@@ -11,7 +11,7 @@ namespace Api.EventHandlers
         private readonly ILogger<MissionEventHandler> _logger;
 
         // The mutex is used to ensure multiple missions aren't attempted scheduled simultaneously whenever multiple mission runs are created
-        private readonly Semaphore _scheduleMissionSemaphore = new(1, 1);
+        private readonly Semaphore _startMissionSemaphore = new(1, 1);
         private readonly Semaphore _scheduleLocalizationSemaphore = new(1, 1);
 
         private readonly IServiceScopeFactory _scopeFactory;
@@ -29,8 +29,6 @@ namespace Api.EventHandlers
         private IMissionRunService MissionService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
-
-        private IReturnToHomeService ReturnToHomeService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IReturnToHomeService>();
 
         private ILocalizationService LocalizationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ILocalizationService>();
 
@@ -75,39 +73,39 @@ namespace Api.EventHandlers
             }
 
 
-            _scheduleLocalizationSemaphore.WaitOne();
-
-            string? localizationMissionRunId = null;
-            try { localizationMissionRunId = await LocalizationService.CreateLocalizationMissionIfRobotIsNotLocalized(missionRun.Robot, missionRun); }
-            catch (Exception ex) when (
-                ex is AreaNotFoundException
-                or DeckNotFoundException
-                or RobotNotAvailableException
-                or RobotLocalizationException
-                or RobotNotFoundException
-                or IsarCommunicationException
-            )
+            if (!await LocalizationService.RobotIsLocalized(missionRun.Robot.Id))
             {
-                _logger.LogError("Mission run {MissionRunId} will be cancelled as robot {RobotId} was not correctly localized", missionRun.Id, missionRun.Robot.Id);
-                missionRun.Status = MissionStatus.Cancelled;
-                await MissionService.Update(missionRun);
-                return;
+                _scheduleLocalizationSemaphore.WaitOne();
+                if (await MissionService.PendingLocalizationMissionRunExists(missionRun.Robot.Id))
+                {
+                    _scheduleLocalizationSemaphore.Release();
+                    return;
+                }
+                try
+                {
+                    var localizationMissionRun = await LocalizationService.CreateLocalizationMissionInArea(missionRun.Robot.Id, missionRun.Area.Id);
+                    _logger.LogInformation("{Message}", $"Created localization mission run with ID {localizationMissionRun.Id}");
+                }
+                catch (Exception ex) when (
+                    ex is AreaNotFoundException
+                    or DeckNotFoundException
+                    or RobotNotAvailableException
+                    or RobotNotFoundException
+                    or IsarCommunicationException
+                )
+                {
+                    _logger.LogError("Mission run {MissionRunId} will be cancelled as robot {RobotId} was not correctly localized", missionRun.Id, missionRun.Robot.Id);
+                    missionRun.Status = MissionStatus.Cancelled;
+                    await MissionService.Update(missionRun);
+                    return;
+                }
+                finally { _scheduleLocalizationSemaphore.Release(); }
             }
-            finally { _scheduleLocalizationSemaphore.Release(); }
 
-            string missionRunIdToStart = missionRun.Id;
-            if (localizationMissionRunId is not null) missionRunIdToStart = localizationMissionRunId;
-
-            if (MissionScheduling.MissionRunQueueIsEmpty(await MissionService.ReadMissionRunQueue(missionRun.Robot.Id)))
-            {
-                _logger.LogInformation("Mission run {MissionRunId} was not started as there are no mission runs on the queue", e.MissionRunId);
-                return;
-            }
-
-            _scheduleMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRunIdToStart); }
-            catch (MissionRunNotFoundException) { }
-            finally { _scheduleMissionSemaphore.Release(); }
+            _startMissionSemaphore.WaitOne();
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot.Id); }
+            catch (MissionRunNotFoundException) { return; }
+            finally { _startMissionSemaphore.Release(); }
         }
 
         private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
@@ -120,55 +118,26 @@ namespace Api.EventHandlers
                 return;
             }
 
-            try { await LocalizationService.EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(robot.Id); }
-            catch (Exception ex) when (ex is LocalizationFailedException or RobotNotFoundException or MissionNotFoundException or OngoingMissionNotLocalizationException or TimeoutException)
-            {
-                _logger.LogError("Could not confirm that the robot {RobotId} was correctly localized and the scheduled missions for the deck will be cancelled", robot.Id);
-                try { await MissionScheduling.CancelAllScheduledMissions(robot.Id); }
-                catch (RobotNotFoundException) { _logger.LogError("Failed to cancel scheduled missions for robot {RobotId}", robot.Id); }
-                return;
-            }
-
-            if (MissionScheduling.MissionRunQueueIsEmpty(await MissionService.ReadMissionRunQueue(robot.Id)))
-            {
-                _logger.LogInformation("The robot was changed to available but there are no mission runs in the queue to be scheduled");
-
-                if (await ReturnToHomeService.IsRobotHome(robot.Id))
-                {
-                    await RobotService.UpdateCurrentArea(robot.Id, null);
-                    return;
-                }
-
-                try { await ReturnToHomeService.ScheduleReturnToHomeMissionRun(robot.Id); }
-                catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException)
-                {
-                    ReportFailureToSignalR(robot, $"Failed to send {robot.Name} to a safe zone");
-                    await RobotService.UpdateCurrentArea(robot.Id, null);
-                    return;
-                }
-                return;
-            }
-
-            var missionRun = await MissionService.ReadNextScheduledLocalizationMissionRun(robot.Id);
-
-            if (missionRun == null)
-            {
-                if (robot.MissionQueueFrozen) { missionRun = await MissionService.ReadNextScheduledEmergencyMissionRun(robot.Id); }
-                else { missionRun = await MissionService.ReadNextScheduledMissionRun(robot.Id); }
-            }
-
-            if (missionRun == null)
-            {
-                _logger.LogInformation("The robot was changed to available but no mission is scheduled");
-                return;
-            }
-
-            _scheduleMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartMissionRunIfSystemIsAvailable(missionRun.Id); }
+            _startMissionSemaphore.WaitOne();
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
             catch (MissionRunNotFoundException) { return; }
+            finally { _startMissionSemaphore.Release(); }
         }
+
         private async void OnMissionCompleted(object? sender, MissionCompletedEventArgs e)
         {
+            _logger.LogInformation("Triggered MissionCompleted event for robot ID: {RobotId}", e.RobotId);
+            var robot = await RobotService.ReadById(e.RobotId);
+            if (robot == null)
+            {
+                _logger.LogError("Robot with ID: {RobotId} was not found in the database", e.RobotId);
+                return;
+            }
+
+            _startMissionSemaphore.WaitOne();
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
+            catch (MissionRunNotFoundException) { return; }
+            finally { _startMissionSemaphore.Release(); }
         }
 
         private void ReportFailureToSignalR(Robot robot, string message)

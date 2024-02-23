@@ -106,15 +106,18 @@
     {
     }
 
-    public class RobotLocalizationException(string message) : Exception(message)
-    {
-    }
-
     public class IsarCommunicationException(string message) : Exception(message)
     {
     }
 
     public class LocalizationFailedException(string message) : Exception(message)
+    {
+    }
+
+    public class ReturnToHomeMissionFailedToScheduleException(string message) : Exception(message)
+    {
+    }
+    public class RobotCurrentAreaMissingException(string message) : Exception(message)
     {
     }
 }
