@@ -7,6 +7,8 @@ using Api.Services;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using NCrontab;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Api.EventHandlers
 {
@@ -14,7 +16,7 @@ namespace Api.EventHandlers
     IServiceScopeFactory scopeFactory,
     ILogger<InspectionFindingEventHandler> logger) : BackgroundService
     {
-        private readonly string _cronExpression = "30 14 * * * ";
+        private readonly string _cronExpression = "19 14 * * * ";
         private InspectionFindingService InspectionFindingService => scopeFactory.CreateScope().ServiceProvider.GetRequiredService<InspectionFindingService>();
         private readonly TimeSpan _timeSpan = configuration.GetValue<TimeSpan>("InspectionFindingEventHandler:TimeSpan");
 
@@ -45,9 +47,7 @@ namespace Api.EventHandlers
                 {
                     var findingsList = await GenerateFindingsList(inspectionFindings);
 
-                    string messageString = GenerateReportFromFindingsReportsList(findingsList);
-
-                    string adaptiveCardJson = GenerateAdaptiveCard(messageString, logger);
+                    string adaptiveCardJson = GenerateAdaptiveCard($"Rapport {DateTime.UtcNow:yyyy-MM-dd HH}", inspectionFindings.Count, findingsList);
 
                     string url = GetWebhookURL(configuration, "TeamsInspectionFindingsWebhook");
 
@@ -65,7 +65,8 @@ namespace Api.EventHandlers
                     }
                     else
                     {
-                        logger.LogInformation("Post request via teams incomming webhook was not successful, Status Code: {response.StatusCode}", response.StatusCode);
+                        string errorBody = await response.Content.ReadAsStringAsync(stoppingToken);
+                        logger.LogError($"Webhook request failed with status code {response.StatusCode}. Response body: {errorBody}");
                     }
                 }
             }
@@ -87,8 +88,7 @@ namespace Api.EventHandlers
                         missionRun.Area?.Plant.Name ?? "NA",
                         missionRun.Area?.Name ?? "NA",
                         inspectionFinding.Finding,
-                        inspectionFinding.InspectionDate,
-                        missionRun.Robot.Name ?? "NA"
+                        inspectionFinding.InspectionDate
                     );
 
                     findingsList.Add(finding);
@@ -103,54 +103,50 @@ namespace Api.EventHandlers
             return findingsList;
         }
 
-        public static string GenerateReportFromFindingsReportsList(List<Finding> findingsReports)
+        public static string GenerateAdaptiveCard(string title, int numberOfFindings, List<Finding> findingsReports)
         {
-            var reportBuilder = new StringBuilder("Findings Report:");
-            reportBuilder.Append(Environment.NewLine);
-            string dateFormat = "dd/MM/yyyy HH:mm";
-            var formatProvider = CultureInfo.InvariantCulture;
+            var findingsJsonArray = new JArray();
+
             foreach (var finding in findingsReports)
             {
-                _ = reportBuilder.AppendLine(
-                    formatProvider,
-                    $"- TagId: {finding.TagId}, PlantName: {finding.PlantName}, AreaName: {finding.AreaName}, Description: {finding.FindingDescription}, Timestamp: {finding.Timestamp.ToString(dateFormat, formatProvider)}, RobotName: {finding.RobotName}"
-                    );
-            }
-            return reportBuilder.ToString();
-        }
 
-        public static string GenerateAdaptiveCard(string messageContent, ILogger<InspectionFindingEventHandler> logger)
-        {
-            logger.LogInformation("Message content for Adaptive card: {message}", messageContent);
-            string adaptiveCardJson = $@"{{
-                        ""type"": ""message"",
-                        ""attachments"": [
-                            {{
-                                ""contentType"": ""application/vnd.microsoft.card.adaptive"",
-                                ""content"": {{
-                                    ""type"": ""AdaptiveCard"",
-                                    ""body"": [
-                                        {{
-                                            ""type"": ""Container"",
-                                            ""height"": ""stretch"",
-                                            ""items"": [
-                                                {{
-                                                    ""type"": ""TextBlock"",
-                                                    ""text"": ""{messageContent}"",
-                                                    ""wrap"": true
-                                                }}
-                                            ]
-                                        }}
-                                    ],
-                                    ""$schema"": ""http://adaptivecards.io/schemas/adaptive-card.json"",
-                                    ""version"": ""1.0"",
-                                    ""msteams"": {{
-                                        ""displayStyle"": ""full""
-                                    }}
-                                }}
-                            }}
-                        ]
-                    }}";
+                var factsArray = new JArray(
+                    new JObject(new JProperty("name", "Anlegg"), new JProperty("value", finding.PlantName)),
+                    new JObject(new JProperty("name", "Område"), new JProperty("value", finding.AreaName)),
+                    new JObject(new JProperty("name", "Tag Number"), new JProperty("value", finding.TagId)),
+                    new JObject(new JProperty("name", "Beskrivelse"), new JProperty("value", finding.FindingDescription)),
+                    new JObject(new JProperty("name", "Tidspunkt"), new JProperty("value", finding.Timestamp.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)))
+                );
+
+                var findingObj = new JObject(
+                    new JProperty("activityTitle", $"Finding ID: \"{finding.TagId}\""),
+                    new JProperty("facts", factsArray));
+                findingsJsonArray.Add(findingObj);
+            }
+
+            var sections = new JArray(
+                new JObject(
+                    new JProperty("activityTitle", $"Inspection report for \"{findingsReports[0].PlantName}\""),
+                    new JProperty("activitySubtitle", $"Generated on: {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)}"),
+                    new JProperty("facts", new JArray(
+                        new JObject(
+                            new JProperty("name", "Number of findings:"),
+                            new JProperty("value", numberOfFindings))))),
+                new JObject(
+                    new JProperty("activityTitle", "The following inspection findings were identified:")));
+
+            foreach (var findingObj in findingsJsonArray)
+            {
+                sections.Add(findingObj);
+            }
+
+            var adaptiveCardObj = new JObject(
+                new JProperty("summary", "Inspection Findings Report"),
+                new JProperty("themeColor", "0078D7"),
+                new JProperty("title", $"Inspection Findings: \"{title}\""),
+                new JProperty("sections", sections));
+
+            string adaptiveCardJson = adaptiveCardObj.ToString(Formatting.Indented);
             return adaptiveCardJson;
         }
 
@@ -173,13 +169,12 @@ namespace Api.EventHandlers
         }
     }
 
-    public class Finding(string tagId, string plantName, string areaName, string findingDescription, DateTime timestamp, string robotName)
+    public class Finding(string tagId, string plantName, string areaName, string findingDescription, DateTime timestamp)
     {
         public string TagId { get; set; } = tagId ?? throw new ArgumentNullException(nameof(tagId));
         public string PlantName { get; set; } = plantName ?? throw new ArgumentNullException(nameof(plantName));
         public string AreaName { get; set; } = areaName ?? throw new ArgumentNullException(nameof(areaName));
         public string FindingDescription { get; set; } = findingDescription ?? throw new ArgumentNullException(nameof(findingDescription));
         public DateTime Timestamp { get; set; } = timestamp;
-        public string RobotName { get; set; } = robotName ?? throw new ArgumentNullException(nameof(robotName));
     }
 }
