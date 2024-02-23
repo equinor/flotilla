@@ -42,6 +42,7 @@ namespace Api.Test.EventHandlers
             var localizationServiceLogger = new Mock<ILogger<LocalizationService>>().Object;
             var mapServiceLogger = new Mock<ILogger<MapService>>().Object;
             var mapBlobOptions = new Mock<IOptions<MapBlobOptions>>().Object;
+            var returnToHomeServiceLogger = new Mock<ILogger<ReturnToHomeService>>().Object;
 
             var configuration = WebApplication.CreateBuilder().Configuration;
 
@@ -62,10 +63,11 @@ namespace Api.Test.EventHandlers
             var deckService = new DeckService(context, defaultLocalizationPoseService, installationService, plantService, accessRoleService, signalRService);
             var areaService = new AreaService(context, installationService, plantService, deckService, defaultLocalizationPoseService, accessRoleService);
             var robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService, _missionRunService);
-            var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, robotService, areaService,
-                isarServiceMock);
             var mapService = new MapService(mapServiceLogger, mapBlobOptions, blobServiceMock);
             var localizationService = new LocalizationService(localizationServiceLogger, robotService, _missionRunService, installationService, areaService, mapService);
+            var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, robotService, _missionRunService, mapService);
+            var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, robotService, areaService,
+                isarServiceMock, localizationService, returnToHomeService);
 
             _databaseUtilities = new DatabaseUtilities(context);
 
@@ -87,6 +89,9 @@ namespace Api.Test.EventHandlers
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(ILocalizationService)))
                 .Returns(localizationService);
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(IReturnToHomeService)))
+                .Returns(returnToHomeService);
 
             // Mock service injector
             var mockScope = new Mock<IServiceScope>();

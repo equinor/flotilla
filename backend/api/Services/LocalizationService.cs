@@ -5,13 +5,10 @@ namespace Api.Services
 {
     public interface ILocalizationService
     {
-        public Task<string?> CreateLocalizationMissionIfRobotIsNotLocalized(Robot robot, MissionRun missionRun);
-
+        public Task<MissionRun> CreateLocalizationMissionInArea(string robotId, string areaId);
         public Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition);
-
-        public Task EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(string robotId);
-
         public Task<bool> RobotIsLocalized(string robotId);
+        public Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId);
     }
 
     public class LocalizationService(ILogger<LocalizationService> logger, IRobotService robotService, IMissionRunService missionRunService, IInstallationService installationService, IAreaService areaService, IMapService mapService) : ILocalizationService
@@ -36,34 +33,6 @@ namespace Api.Services
             }
         }
 
-        public async Task<string?> CreateLocalizationMissionIfRobotIsNotLocalized(Robot robot, MissionRun missionRun)
-        {
-            if (missionRun.Area is null)
-            {
-                string errorMessage = $"There was no area associated with mission run {missionRun.Id}";
-                logger.LogError("{Message}", errorMessage);
-                throw new AreaNotFoundException(errorMessage);
-            }
-
-            MissionRun? localizationMissionRun = null;
-
-            if (!await RobotIsLocalized(robot.Id))
-            {
-                localizationMissionRun = await CreateLocalizationMissionInArea(robot.Id, missionRun.Area.Id);
-                await robotService.UpdateCurrentArea(robot.Id, localizationMissionRun.Area);
-                logger.LogInformation("{Message}", $"Created localization mission run with ID {localizationMissionRun.Id}");
-            }
-
-            if (!await RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
-            {
-                string errorMessage = $"The new mission run {missionRun.Id} will not be started as the robot is not localized on the same deck as the mission";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotLocalizationException(errorMessage);
-            }
-
-            return localizationMissionRun?.Id;
-        }
-
         public async Task<bool> RobotIsLocalized(string robotId)
         {
             var robot = await robotService.ReadById(robotId);
@@ -77,86 +46,7 @@ namespace Api.Services
             return robot.CurrentArea is not null;
         }
 
-        public async Task EnsureRobotWasCorrectlyLocalizedInPreviousMissionRun(string robotId)
-        {
-            if (await RobotIsLocalized(robotId)) { return; }
-
-            var robot = await robotService.ReadById(robotId);
-            if (robot == null)
-            {
-                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            if (await missionRunService.OngoingMission(robot.Id)) { await WaitForLocalizationMissionStatusToBeUpdated(robot); }
-
-            var lastExecutedMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robot.Id);
-            if (lastExecutedMissionRun is null)
-            {
-                string errorMessage = $"Could not find last executed mission run for robot with ID {robot.Id}";
-                logger.LogError("{Message}", errorMessage);
-                throw new MissionNotFoundException(errorMessage);
-            }
-
-            if (lastExecutedMissionRun.Status != MissionStatus.Successful)
-            {
-                string errorMessage =
-                    $"The localization mission {lastExecutedMissionRun.Id} failed and thus subsequent scheduled missions for deck {lastExecutedMissionRun.Area?.Deck} wil be cancelled";
-                logger.LogError("{Message}", errorMessage);
-                throw new LocalizationFailedException(errorMessage);
-            }
-
-            await robotService.UpdateCurrentArea(robot.Id, lastExecutedMissionRun.Area);
-        }
-
-        private async Task WaitForLocalizationMissionStatusToBeUpdated(Robot robot)
-        {
-            if (robot.CurrentMissionId is null)
-            {
-                string errorMessage = $"Could not find current mission for robot {robot.Id}";
-                logger.LogError("{Message}", errorMessage);
-                throw new MissionNotFoundException(errorMessage);
-            }
-
-            string ongoingMissionRunId = robot.CurrentMissionId;
-            var ongoingMissionRun = await missionRunService.ReadById(robot.CurrentMissionId);
-            if (ongoingMissionRun is null)
-            {
-                string errorMessage = $"Could not find ongoing mission with ID {robot.CurrentMissionId}";
-                logger.LogError("{Message}", errorMessage);
-                throw new MissionNotFoundException(errorMessage);
-            }
-
-            if (!ongoingMissionRun.IsLocalizationMission())
-            {
-                string errorMessage = $"The currently executing mission for robot {robot.CurrentMissionId} is not a localization mission";
-                logger.LogError("{Message}", errorMessage);
-                throw new OngoingMissionNotLocalizationException(errorMessage);
-            }
-
-            logger.LogWarning(
-                "The RobotAvailable event was triggered before the OnMissionUpdate event and we have to wait to see that the localization mission is set to successful");
-
-            const int Timeout = 5;
-            var timer = new Stopwatch();
-            ongoingMissionRun = await missionRunService.ReadById(ongoingMissionRunId);
-
-            timer.Start();
-            while (timer.Elapsed.TotalSeconds < Timeout)
-            {
-                if (ongoingMissionRun is null) { continue; }
-                if (ongoingMissionRun.Status == MissionStatus.Successful) { return; }
-
-                ongoingMissionRun = await missionRunService.ReadById(ongoingMissionRunId);
-            }
-
-            const string Message = "Timed out while waiting for the localization mission to get an updated status";
-            logger.LogError("{Message}", Message);
-            throw new TimeoutException(Message);
-        }
-
-        private async Task<MissionRun> CreateLocalizationMissionInArea(string robotId, string areaId)
+        public async Task<MissionRun> CreateLocalizationMissionInArea(string robotId, string areaId)
         {
             var robot = await robotService.ReadById(robotId);
             if (robot is null)
@@ -209,7 +99,7 @@ namespace Api.Services
             return localizationMissionRun;
         }
 
-        private async Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId)
+        public async Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId)
         {
             var robot = await robotService.ReadById(robotId);
             if (robot is null)
@@ -223,7 +113,7 @@ namespace Api.Services
             {
                 const string ErrorMessage = "The robot is not associated with an area and a mission may not be started";
                 logger.LogError("{Message}", ErrorMessage);
-                throw new AreaNotFoundException(ErrorMessage);
+                throw new RobotCurrentAreaMissingException(ErrorMessage);
             }
 
             var missionArea = await areaService.ReadById(areaId);

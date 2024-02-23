@@ -4,13 +4,28 @@ namespace Api.Services
 {
     public interface IReturnToHomeService
     {
-        public Task<bool> IsRobotHome(string robotId);
-        public Task<MissionRun?> ScheduleReturnToHomeMissionRun(string robotId);
+        public Task ScheduleReturnToHomeMissionRunIfRobotIsNotHome(string robotId);
     }
 
     public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService, IMapService mapService) : IReturnToHomeService
     {
-        public async Task<bool> IsRobotHome(string robotId)
+        public async Task ScheduleReturnToHomeMissionRunIfRobotIsNotHome(string robotId)
+        {
+            logger.LogInformation("Scheduling return to home mission if not home for robot {RobotId}", robotId);
+            if (await IsRobotHome(robotId))
+            {
+                logger.LogInformation("Robot {RobotId} is home, setting current area to null", robotId);
+                await robotService.UpdateCurrentArea(robotId, null);
+                return;
+            }
+
+            try { await ScheduleReturnToHomeMissionRun(robotId); }
+            catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException)
+            {
+                throw new ReturnToHomeMissionFailedToScheduleException(ex.Message);
+            }
+        }
+        private async Task<bool> IsRobotHome(string robotId)
         {
             var lastExecutedMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robotId);
             if (lastExecutedMissionRun is null)
@@ -21,7 +36,7 @@ namespace Api.Services
 
             return lastExecutedMissionRun.IsDriveToMission();
         }
-        public async Task<MissionRun?> ScheduleReturnToHomeMissionRun(string robotId)
+        private async Task<MissionRun?> ScheduleReturnToHomeMissionRun(string robotId)
         {
             var robot = await robotService.ReadById(robotId);
             if (robot is null)
