@@ -241,6 +241,12 @@ namespace Api.EventHandlers
                 return;
             }
 
+            if (flotillaMissionRun.IsLocalizationMission())
+            {
+                if (flotillaMissionRun.Status != MissionStatus.Successful) { await robotService.UpdateCurrentArea(robot.Id, null); }
+                else { await robotService.UpdateCurrentArea(robot.Id, flotillaMissionRun.Area); }
+            }
+
             try { await robotService.UpdateCurrentMissionId(robot.Id, null); }
             catch (RobotNotFoundException)
             {
