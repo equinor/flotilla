@@ -9,6 +9,10 @@
     {
         public string RobotId { get; } = robotId;
     }
+    public class MissionCompletedEventArgs(string robotId) : EventArgs
+    {
+        public string RobotId { get; } = robotId;
+    }
 
     public class EmergencyButtonPressedForRobotEventArgs(string robotId) : EventArgs
     {

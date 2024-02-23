@@ -212,6 +212,7 @@ namespace Api.EventHandlers
             var robotService = provider.GetRequiredService<IRobotService>();
             var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
             var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
+            var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
 
@@ -270,6 +271,8 @@ namespace Api.EventHandlers
             }
 
             await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
+
+            missionSchedulingService.TriggerMissionCompleted(new MissionCompletedEventArgs(robot.Id));
         }
 
         private async void OnIsarTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
