@@ -88,7 +88,7 @@ namespace Api.Services
                 DesiredStartTime = DateTime.UtcNow,
                 Tasks = new List<MissionTask>
                 {
-                    new(area.Deck.DefaultLocalizationPose.Pose, MissionTaskType.Localization)
+                    new(new Pose(area.Deck.DefaultLocalizationPose.Pose), MissionTaskType.Localization)
                 },
                 Map = new MapMetadata()
             };
