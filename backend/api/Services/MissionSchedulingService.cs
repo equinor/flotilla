@@ -53,19 +53,18 @@ namespace Api.Services
             if (missionRun == null)
             {
                 logger.LogInformation("The robot was ready to start mission, but no mission is scheduled");
-                if (!robot.MissionQueueFrozen)
+                if (robot.MissionQueueFrozen) { return; }
+
+                try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfRobotIsNotHome(robot.Id); }
+                catch (ReturnToHomeMissionFailedToScheduleException)
                 {
-                    try { await returnToHomeService.ScheduleReturnToHomeMissionRunIfRobotIsNotHome(robot.Id); }
-                    catch (ReturnToHomeMissionFailedToScheduleException)
-                    {
-                        logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
-                        await robotService.UpdateCurrentArea(robot.Id, null);
-                    }
+                    logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
+                    await robotService.UpdateCurrentArea(robot.Id, null);
                 }
-                return;
+                if (missionRun == null) { return; }  // The robot is already home
             }
 
-            if (!await TheSystemIsAvailableToRunAMission(missionRun.Robot.Id, missionRun.Id))
+            if (!await TheSystemIsAvailableToRunAMission(robotId, missionRun.Id))
             {
                 logger.LogInformation("Mission {MissionRunId} was put on the queue as the system may not start a mission now", missionRun.Id);
                 return;
@@ -73,7 +72,7 @@ namespace Api.Services
 
 
             // Verify that localization is fine
-            if (!await localizationService.RobotIsLocalized(missionRun.Robot.Id) && !missionRun.IsLocalizationMission())
+            if (!await localizationService.RobotIsLocalized(robotId) && !missionRun.IsLocalizationMission())
             {
                 logger.LogError("Tried to schedule mission {MissionRunId} on robot {RobotId} before the robot was localized, scheduled missions will be canceled", missionRun.Id, missionRun.Robot.Id);
                 try { await CancelAllScheduledMissions(robot.Id); }
@@ -81,9 +80,9 @@ namespace Api.Services
                 return;
             }
 
-            if (!missionRun.IsLocalizationMission() && !await localizationService.RobotIsOnSameDeckAsMission(missionRun.Robot.Id, missionRun.Area.Id))
+            if (!missionRun.IsLocalizationMission() && !await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
             {
-                logger.LogError("Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Cancelling all mission run", missionRun.Robot.Id, missionRun.Id);
+                logger.LogError("Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Cancelling all mission runs", missionRun.Robot.Id, missionRun.Id);
                 try { await CancelAllScheduledMissions(missionRun.Robot.Id); }
                 catch (RobotNotFoundException) { logger.LogError("Failed to cancel scheduled missions for robot {RobotId}", missionRun.Robot.Id); }
 

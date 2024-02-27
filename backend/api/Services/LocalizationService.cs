@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Api.Database.Models;
+﻿using Api.Database.Models;
 using Api.Utilities;
 namespace Api.Services
 {

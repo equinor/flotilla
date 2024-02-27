@@ -4,26 +4,29 @@ namespace Api.Services
 {
     public interface IReturnToHomeService
     {
-        public Task ScheduleReturnToHomeMissionRunIfRobotIsNotHome(string robotId);
+        public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfRobotIsNotHome(string robotId);
     }
 
     public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService, IMapService mapService) : IReturnToHomeService
     {
-        public async Task ScheduleReturnToHomeMissionRunIfRobotIsNotHome(string robotId)
+        public async Task<MissionRun?> ScheduleReturnToHomeMissionRunIfRobotIsNotHome(string robotId)
         {
             logger.LogInformation("Scheduling return to home mission if not home for robot {RobotId}", robotId);
             if (await IsRobotHome(robotId))
             {
                 logger.LogInformation("Robot {RobotId} is home, setting current area to null", robotId);
                 await robotService.UpdateCurrentArea(robotId, null);
-                return;
+                return null;
             }
 
-            try { await ScheduleReturnToHomeMissionRun(robotId); }
+            MissionRun missionRun;
+            try { missionRun = await ScheduleReturnToHomeMissionRun(robotId); }
             catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException)
             {
                 throw new ReturnToHomeMissionFailedToScheduleException(ex.Message);
             }
+
+            return missionRun;
         }
         private async Task<bool> IsRobotHome(string robotId)
         {
@@ -34,9 +37,10 @@ namespace Api.Services
                 return false;
             }
 
+            // The robot is only home if the last mission run was successful, right?
             return lastExecutedMissionRun.IsDriveToMission();
         }
-        private async Task<MissionRun?> ScheduleReturnToHomeMissionRun(string robotId)
+        private async Task<MissionRun> ScheduleReturnToHomeMissionRun(string robotId)
         {
             var robot = await robotService.ReadById(robotId);
             if (robot is null)
@@ -89,7 +93,7 @@ namespace Api.Services
             };
             await mapService.AssignMapToMission(returnToHomeMissionRun);
 
-            var missionRun = await missionRunService.Create(returnToHomeMissionRun);
+            var missionRun = await missionRunService.Create(returnToHomeMissionRun, false);
             logger.LogInformation(
                 "Scheduled a mission for the robot {RobotName} to return to home location on deck {DeckName}",
                 robot.Name, robot.CurrentArea.Deck.Name);
