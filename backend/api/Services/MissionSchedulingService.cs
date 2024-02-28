@@ -278,8 +278,7 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            MissionRun? missionRun = await missionRunService.ReadNextScheduledLocalizationMissionRun(robot.Id);
-            if (missionRun == null) { missionRun = await missionRunService.ReadNextScheduledEmergencyMissionRun(robot.Id); }
+            var missionRun = await missionRunService.ReadNextScheduledLocalizationMissionRun(robot.Id) ?? await missionRunService.ReadNextScheduledEmergencyMissionRun(robot.Id);
             if (robot.MissionQueueFrozen == false && missionRun == null) { missionRun = await missionRunService.ReadNextScheduledMissionRun(robot.Id); }
             return missionRun;
         }
