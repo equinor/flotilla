@@ -55,7 +55,7 @@ namespace Api.Services
                 logger.LogInformation("The robot was ready to start mission, but no mission is scheduled");
                 if (robot.MissionQueueFrozen) { return; }
 
-                try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfRobotIsNotHome(robot.Id); }
+                try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
                 catch (ReturnToHomeMissionFailedToScheduleException)
                 {
                     logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
@@ -86,7 +86,7 @@ namespace Api.Services
                 try { await CancelAllScheduledMissions(missionRun.Robot.Id); }
                 catch (RobotNotFoundException) { logger.LogError("Failed to cancel scheduled missions for robot {RobotId}", missionRun.Robot.Id); }
 
-                try { await returnToHomeService.ScheduleReturnToHomeMissionRunIfRobotIsNotHome(missionRun.Robot.Id); }
+                try { await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(missionRun.Robot.Id); }
                 catch (ReturnToHomeMissionFailedToScheduleException)
                 {
                     logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", missionRun.Robot.Id);
@@ -414,6 +414,12 @@ namespace Api.Services
         {
             bool ongoingMission = await OngoingMission(robotId);
 
+            if (ongoingMission)
+            {
+                logger.LogInformation("Mission run {MissionRunId} was not started as there is already an ongoing mission", missionRunId);
+                return false;
+            }
+
             var robot = await robotService.ReadById(robotId);
             if (robot is null)
             {
@@ -436,11 +442,6 @@ namespace Api.Services
                 return false;
             }
 
-            if (ongoingMission)
-            {
-                logger.LogInformation("Mission run {MissionRunId} was not started as there is already an ongoing mission", missionRun.Id);
-                return false;
-            }
             if (robot.Status is not RobotStatus.Available)
             {
                 logger.LogInformation("Mission run {MissionRunId} was not started as the robot is not available", missionRun.Id);
