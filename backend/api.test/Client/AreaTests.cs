@@ -146,7 +146,7 @@ namespace Api.Test
             Assert.True(robotResponse.IsSuccessStatusCode);
             var robots = await robotResponse.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
             Assert.True(robots != null);
-            var robot = robots[0];
+            var robot = robots.Where(robot => robot.Name == "Shockwave").First();
             string robotId = robot.Id;
 
             // Installation
