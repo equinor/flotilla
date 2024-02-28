@@ -36,6 +36,8 @@ namespace Api.Services
 
         public Task<bool> OngoingLocalizationMissionRunExists(string robotId);
 
+        public Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId);
+
         public Task<MissionRun> Update(MissionRun mission);
 
         public Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
@@ -182,6 +184,25 @@ namespace Api.Services
                 if (ongoingMissionRun.IsLocalizationMission()) { return true; }
             }
             return false;
+        }
+
+        public async Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId)
+        {
+            var pendingMissionRuns = await ReadMissionRunQueue(robotId);
+            foreach (MissionRun pendingMissionRun in pendingMissionRuns)
+            {
+                if (pendingMissionRun.IsDriveToMission()) { return true; }
+            }
+            var ongoingMissionRuns = await GetMissionRunsWithSubModels()
+                .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing)
+                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .ToListAsync();
+            foreach (MissionRun ongoingMissionRun in ongoingMissionRuns)
+            {
+                if (ongoingMissionRun.IsDriveToMission()) { return true; }
+            }
+            return false;
+
         }
 
         public async Task<MissionRun> Update(MissionRun missionRun)

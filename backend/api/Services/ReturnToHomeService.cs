@@ -4,14 +4,22 @@ namespace Api.Services
 {
     public interface IReturnToHomeService
     {
-        public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfRobotIsNotHome(string robotId);
+        public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(string robotId);
+
     }
 
     public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService, IMapService mapService) : IReturnToHomeService
     {
-        public async Task<MissionRun?> ScheduleReturnToHomeMissionRunIfRobotIsNotHome(string robotId)
+        public async Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(string robotId)
         {
-            logger.LogInformation("Scheduling return to home mission if not home for robot {RobotId}", robotId);
+            logger.LogInformation("Scheduling return to home mission if not already scheduled or the robot is home for robot {RobotId}", robotId);
+
+            if (await IsReturnToHomeMissionAlreadyScheduled(robotId))
+            {
+                logger.LogInformation("ReturnToHomeMission is already scheduled for Robot {RobotId}", robotId);
+                return null;
+            }
+
             if (await IsRobotHome(robotId))
             {
                 logger.LogInformation("Robot {RobotId} is home, setting current area to null", robotId);
@@ -37,8 +45,11 @@ namespace Api.Services
                 return false;
             }
 
-            // The robot is only home if the last mission run was successful, right?
             return lastExecutedMissionRun.IsDriveToMission();
+        }
+        private async Task<bool> IsReturnToHomeMissionAlreadyScheduled(string robotId)
+        {
+            return await missionRunService.PendingOrOngoingReturnToHomeMissionRunExists(robotId);
         }
         private async Task<MissionRun> ScheduleReturnToHomeMissionRun(string robotId)
         {
