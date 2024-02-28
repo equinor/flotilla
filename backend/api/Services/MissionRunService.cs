@@ -166,7 +166,7 @@ namespace Api.Services
         public async Task<bool> PendingLocalizationMissionRunExists(string robotId)
         {
             var pendingMissionRuns = await ReadMissionRunQueue(robotId);
-            foreach (MissionRun pendingMissionRun in pendingMissionRuns)
+            foreach (var pendingMissionRun in pendingMissionRuns)
             {
                 if (pendingMissionRun.IsLocalizationMission()) { return true; }
             }
@@ -179,7 +179,7 @@ namespace Api.Services
                 .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing)
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
-            foreach (MissionRun ongoingMissionRun in ongoingMissionRuns)
+            foreach (var ongoingMissionRun in ongoingMissionRuns)
             {
                 if (ongoingMissionRun.IsLocalizationMission()) { return true; }
             }
@@ -189,7 +189,7 @@ namespace Api.Services
         public async Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId)
         {
             var pendingMissionRuns = await ReadMissionRunQueue(robotId);
-            foreach (MissionRun pendingMissionRun in pendingMissionRuns)
+            foreach (var pendingMissionRun in pendingMissionRuns)
             {
                 if (pendingMissionRun.IsDriveToMission()) { return true; }
             }
@@ -197,7 +197,7 @@ namespace Api.Services
                 .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing)
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
-            foreach (MissionRun ongoingMissionRun in ongoingMissionRuns)
+            foreach (var ongoingMissionRun in ongoingMissionRuns)
             {
                 if (ongoingMissionRun.IsDriveToMission()) { return true; }
             }
