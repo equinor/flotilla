@@ -67,7 +67,7 @@ namespace Api.Test.EventHandlers
             var localizationService = new LocalizationService(localizationServiceLogger, robotService, _missionRunService, installationService, areaService, mapService);
             var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, robotService, _missionRunService, mapService);
             var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, robotService, areaService,
-                isarServiceMock, localizationService, returnToHomeService);
+                isarServiceMock, localizationService, returnToHomeService, signalRService);
 
             _databaseUtilities = new DatabaseUtilities(context);
 

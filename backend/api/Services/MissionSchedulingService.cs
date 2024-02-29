@@ -30,7 +30,7 @@ namespace Api.Services
     }
 
     public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
-            IAreaService areaService, IIsarService isarService, ILocalizationService localizationService, IReturnToHomeService returnToHomeService) : IMissionSchedulingService
+            IAreaService areaService, IIsarService isarService, ILocalizationService localizationService, IReturnToHomeService returnToHomeService, ISignalRService signalRService) : IMissionSchedulingService
     {
         public async Task StartNextMissionRunIfSystemIsAvailable(string robotId)
         {
@@ -58,6 +58,7 @@ namespace Api.Services
                 try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
                 catch (ReturnToHomeMissionFailedToScheduleException)
                 {
+                    signalRService.ReportFailureToSignalR(robot, $"Failed to schedule return to home for robot {robot.Id}");
                     logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
                     await robotService.UpdateCurrentArea(robot.Id, null);
                 }
