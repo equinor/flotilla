@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-namespace Api.Controllers.Models
+namespace Api.Services.Models
 {
     [method: JsonConstructor]
     public class AlertResponse(string code, string name, string message, string installationCode, string? robotId)

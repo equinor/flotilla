@@ -17,5 +17,11 @@ namespace Api.Services
         {
             await Task.CompletedTask;
         }
+
+        public void ReportFailureToSignalR(Robot robot, string message)
+        {
+            return;
+        }
+
     }
 }
