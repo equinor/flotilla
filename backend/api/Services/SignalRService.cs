@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text.Json;
 using Api.Database.Models;
+using Api.Services.Models;
 using Api.SignalRHubs;
 using Microsoft.AspNetCore.SignalR;
 namespace Api.Services
@@ -9,6 +10,7 @@ namespace Api.Services
     {
         public Task SendMessageAsync<T>(string label, Installation? installation, T messageObject);
         public Task SendMessageAsync(string label, Installation? installation, string message);
+        public void ReportFailureToSignalR(Robot robot, string message);
     }
 
     public class SignalRService(IHubContext<SignalRHub> signalRHub) : ISignalRService
@@ -44,5 +46,14 @@ namespace Api.Services
 
             await Task.CompletedTask;
         }
+
+        public void ReportFailureToSignalR(Robot robot, string message)
+        {
+            _ = SendMessageAsync(
+                "Alert",
+                robot.CurrentInstallation,
+                new AlertResponse("safezoneFailure", "Safezone failure", message, robot.CurrentInstallation.InstallationCode, robot.Id));
+        }
+
     }
 }

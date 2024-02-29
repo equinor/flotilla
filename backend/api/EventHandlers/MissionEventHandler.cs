@@ -1,5 +1,4 @@
-﻿using Api.Controllers.Models;
-using Api.Database.Models;
+﻿using Api.Database.Models;
 using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
@@ -140,14 +139,6 @@ namespace Api.EventHandlers
             finally { _startMissionSemaphore.Release(); }
         }
 
-        private void ReportFailureToSignalR(Robot robot, string message)
-        {
-            _ = SignalRService.SendMessageAsync(
-                "Alert",
-                robot.CurrentInstallation,
-                new AlertResponse("safezoneFailure", "Safezone failure", message, robot.CurrentInstallation.InstallationCode, robot.Id));
-        }
-
         private async void OnEmergencyButtonPressedForRobot(object? sender, EmergencyButtonPressedForRobotEventArgs e)
         {
             _logger.LogInformation("Triggered EmergencyButtonPressed event for robot ID: {RobotId}", e.RobotId);
@@ -162,7 +153,7 @@ namespace Api.EventHandlers
             if (area == null)
             {
                 _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
-                ReportFailureToSignalR(robot, $"Robot {robot.Name} was not correctly localised. Could not find area {robot.CurrentArea.Name}");
+                SignalRService.ReportFailureToSignalR(robot, $"Robot {robot.Name} was not correctly localised. Could not find area {robot.CurrentArea.Name}");
                 return;
             }
 
@@ -173,7 +164,7 @@ namespace Api.EventHandlers
             catch (SafeZoneException ex)
             {
                 _logger.LogError(ex, "Failed to schedule return to safe zone mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
-                ReportFailureToSignalR(robot, $"Failed to send {robot.Name} to a safe zone");
+                SignalRService.ReportFailureToSignalR(robot, $"Failed to send {robot.Name} to a safe zone");
                 try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
                 catch (RobotNotFoundException) { return; }
             }
@@ -190,14 +181,14 @@ namespace Api.EventHandlers
                 if (ex.IsarStatusCode != StatusCodes.Status409Conflict)
                 {
                     _logger.LogError(ex, "Failed to stop the current mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
-                    ReportFailureToSignalR(robot, $"Failed to stop current mission for robot {robot.Name}");
+                    SignalRService.ReportFailureToSignalR(robot, $"Failed to stop current mission for robot {robot.Name}");
                     return;
                 }
             }
             catch (Exception ex)
             {
                 const string Message = "Error in ISAR while stopping current mission, cannot drive to safe position";
-                ReportFailureToSignalR(robot, $"Robot {robot.Name} failed to drive to safe position");
+                SignalRService.ReportFailureToSignalR(robot, $"Robot {robot.Name} failed to drive to safe position");
                 _logger.LogError(ex, "{Message}", Message);
                 return;
             }
@@ -219,7 +210,7 @@ namespace Api.EventHandlers
             if (area == null)
             {
                 _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
-                ReportFailureToSignalR(robot, $"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised");
+                SignalRService.ReportFailureToSignalR(robot, $"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised");
             }
 
             try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
