@@ -256,6 +256,7 @@ namespace Api.EventHandlers
             }
 
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, flotillaMissionRun.Id);
+            missionSchedulingService.TriggerMissionCompleted(new MissionCompletedEventArgs(robot.Id));
 
             if (flotillaMissionRun.MissionId == null)
             {
@@ -271,8 +272,6 @@ namespace Api.EventHandlers
             }
 
             await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
-
-            missionSchedulingService.TriggerMissionCompleted(new MissionCompletedEventArgs(robot.Id));
         }
 
         private async void OnIsarTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)

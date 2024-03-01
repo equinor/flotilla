@@ -10,6 +10,7 @@ using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Options;
 using Api.Services;
+using Api.Services.ActionServices;
 using Api.Test.Database;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Builder;
@@ -43,6 +44,8 @@ namespace Api.Test.EventHandlers
             var mapServiceLogger = new Mock<ILogger<MapService>>().Object;
             var mapBlobOptions = new Mock<IOptions<MapBlobOptions>>().Object;
             var returnToHomeServiceLogger = new Mock<ILogger<ReturnToHomeService>>().Object;
+            var missionDefinitionServiceLogger = new Mock<ILogger<MissionDefinitionService>>().Object;
+            var lastMissionRunServiceLogger = new Mock<ILogger<LastMissionRunService>>().Object;
 
             var configuration = WebApplication.CreateBuilder().Configuration;
 
@@ -54,7 +57,12 @@ namespace Api.Test.EventHandlers
             _mqttService = new MqttService(mqttServiceLogger, configuration);
             _missionRunService = new MissionRunService(context, signalRService, missionLogger, accessRoleService);
 
+            var echoServiceMock = new MockEchoService();
+            var stidServiceMock = new MockStidService(context);
+            var customMissionServiceMock = new MockCustomMissionService();
+            var missionDefinitionService = new MissionDefinitionService(context, echoServiceMock, stidServiceMock, customMissionServiceMock, signalRService, accessRoleService, missionDefinitionServiceLogger);
             var robotModelService = new RobotModelService(context);
+            var taskDurationServiceMock = new MockTaskDurationService();
             var isarServiceMock = new MockIsarService();
             var installationService = new InstallationService(context, accessRoleService);
             var defaultLocalizationPoseService = new DefaultLocalizationPoseService(context);
@@ -67,6 +75,7 @@ namespace Api.Test.EventHandlers
             var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, robotService, _missionRunService, mapServiceMock);
             var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, robotService, areaService,
                 isarServiceMock, localizationService, returnToHomeService, signalRService);
+            var lastMissionRunService = new LastMissionRunService(lastMissionRunServiceLogger, missionDefinitionService, _missionRunService);
 
             _databaseUtilities = new DatabaseUtilities(context);
 
@@ -94,6 +103,12 @@ namespace Api.Test.EventHandlers
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IMapService)))
                 .Returns(mapServiceMock);
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(ITaskDurationService)))
+                .Returns(taskDurationServiceMock);
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(ILastMissionRunService)))
+                .Returns(lastMissionRunService);
 
             // Mock service injector
             var mockScope = new Mock<IServiceScope>();
@@ -266,6 +281,39 @@ namespace Api.Test.EventHandlers
             var postStartMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
             Assert.NotNull(postStartMissionRunTwo);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
+        }
+
+        [Fact]
+        public async void QueuedMissionsAreCancelledWhenLocalizationFails()
+        {
+            // Arrange
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
+            var localizationMissionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunPriority.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString());
+            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
+
+            Thread.Sleep(100);
+
+            var mqttEventArgs = new MqttReceivedArgs(
+                new IsarMissionMessage
+                {
+                    RobotName = robot.Name,
+                    IsarId = robot.IsarId,
+                    MissionId = localizationMissionRun.IsarMissionId,
+                    Status = "failed",
+                    Timestamp = DateTime.UtcNow
+                });
+
+            // Act
+            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarMissionReceived), mqttEventArgs);
+            Thread.Sleep(500);
+
+            // Assert
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun1.Id);
+            Assert.Equal(MissionStatus.Cancelled, postTestMissionRun!.Status);
         }
 
     }
