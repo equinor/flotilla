@@ -39,7 +39,10 @@ namespace Api.Test.Database
             string installationCode,
             Robot robot,
             Area area,
-            bool writeToDatabase = true
+            bool writeToDatabase = false,
+            MissionRunPriority missionRunPriority = MissionRunPriority.Normal,
+            MissionStatus missionStatus = MissionStatus.Pending,
+            string? isarMissionId = null
         )
         {
             var missionRun = new MissionRun
@@ -47,17 +50,25 @@ namespace Api.Test.Database
                 Name = "testMission",
                 Robot = robot,
                 MissionId = null,
-                MissionRunPriority = MissionRunPriority.Normal,
-                Status = MissionStatus.Pending,
+                IsarMissionId = isarMissionId,
+                MissionRunPriority = missionRunPriority,
+                Status = missionStatus,
                 DesiredStartTime = DateTime.Now,
                 Area = area,
                 Tasks = [],
                 Map = new MapMetadata(),
                 InstallationCode = installationCode
             };
+            if (missionRunPriority == MissionRunPriority.Localization)
+            {
+                missionRun.Tasks = new List<MissionTask>
+                {
+                    new(new Pose(), MissionTaskType.Localization)
+                };
+            }
             if (writeToDatabase)
             {
-                return await _missionRunService.Create(missionRun);
+                return await _missionRunService.Create(missionRun, false);
             }
             return missionRun;
         }
