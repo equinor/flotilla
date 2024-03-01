@@ -91,7 +91,8 @@ namespace Api.Test.Database
             {
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
-                Name = "testDeck"
+                Name = "testDeck",
+                DefaultLocalizationPose = new Pose()
             };
 
             return await _deckService.Create(createDeckQuery);

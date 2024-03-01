@@ -56,16 +56,15 @@ namespace Api.Test.EventHandlers
 
             var robotModelService = new RobotModelService(context);
             var isarServiceMock = new MockIsarService();
-            var blobServiceMock = new MockBlobService();
             var installationService = new InstallationService(context, accessRoleService);
             var defaultLocalizationPoseService = new DefaultLocalizationPoseService(context);
             var plantService = new PlantService(context, installationService, accessRoleService);
             var deckService = new DeckService(context, defaultLocalizationPoseService, installationService, plantService, accessRoleService, signalRService);
             var areaService = new AreaService(context, installationService, plantService, deckService, defaultLocalizationPoseService, accessRoleService);
             var robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService, _missionRunService);
-            var mapService = new MapService(mapServiceLogger, mapBlobOptions, blobServiceMock);
-            var localizationService = new LocalizationService(localizationServiceLogger, robotService, _missionRunService, installationService, areaService, mapService);
-            var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, robotService, _missionRunService, mapService);
+            var mapServiceMock = new MockMapService();
+            var localizationService = new LocalizationService(localizationServiceLogger, robotService, _missionRunService, installationService, areaService, mapServiceMock);
+            var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, robotService, _missionRunService, mapServiceMock);
             var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, robotService, areaService,
                 isarServiceMock, localizationService, returnToHomeService, signalRService);
 
@@ -92,6 +91,9 @@ namespace Api.Test.EventHandlers
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IReturnToHomeService)))
                 .Returns(returnToHomeService);
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(IMapService)))
+                .Returns(mapServiceMock);
 
             // Mock service injector
             var mockScope = new Mock<IServiceScope>();
@@ -194,14 +196,14 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void NoMissionIsStartedIfQueueIsEmptyWhenRobotBecomesAvailable()
+        public async void ReturnToHomeMissionIsStartedIfQueueIsEmptyWhenRobotBecomesAvailable()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
             var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
 
             var mqttEventArgs = new MqttReceivedArgs(
                 new IsarRobotStatusMessage
@@ -221,6 +223,7 @@ namespace Api.Test.EventHandlers
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarRobotStatusReceived), mqttEventArgs);
 
             // Assert
+            Thread.Sleep(1000);
             var ongoingMission = await _missionRunService.ReadAll(
                 new MissionRunQueryStringParameters
                 {
@@ -264,7 +267,6 @@ namespace Api.Test.EventHandlers
             Assert.NotNull(postStartMissionRunTwo);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
         }
-
 
     }
 }
