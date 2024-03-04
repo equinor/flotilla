@@ -38,7 +38,7 @@ namespace Api.Services
         }
         private async Task<bool> IsRobotHome(string robotId)
         {
-            var lastExecutedMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robotId);
+            var lastExecutedMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobotWithoutTracking(robotId);
             if (lastExecutedMissionRun is null)
             {
                 logger.LogInformation("Could not find last executed mission run for robot {RobotId}, can not guarantee that the robot is in its home", robotId);
