@@ -146,8 +146,6 @@ namespace Api.Services
 
         public async Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId)
         {
-            var test = GetMissionRunsWithSubModels().OrderBy(m => m.DesiredStartTime).ToList();
-
             return await GetMissionRunsWithSubModels()
                 .Where(m => m.MissionId == missionId && m.EndTime == null)
                 .OrderBy(m => m.DesiredStartTime)
