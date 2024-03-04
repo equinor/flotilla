@@ -30,7 +30,7 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId);
 
-        public Task<MissionRun?> ReadLastExecutedMissionRunByRobot(string robotId);
+        public Task<MissionRun?> ReadLastExecutedMissionRunByRobotWithoutTracking(string robotId);
 
         public Task<bool> PendingLocalizationMissionRunExists(string robotId);
 
@@ -152,12 +152,13 @@ namespace Api.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<MissionRun?> ReadLastExecutedMissionRunByRobot(string robotId)
+        public async Task<MissionRun?> ReadLastExecutedMissionRunByRobotWithoutTracking(string robotId)
         {
             return await GetMissionRunsWithSubModels()
                 .Where(m => m.Robot.Id == robotId)
                 .Where(m => m.EndTime != null)
                 .OrderByDescending(m => m.EndTime)
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
 
