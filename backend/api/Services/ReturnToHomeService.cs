@@ -4,24 +4,54 @@ namespace Api.Services
 {
     public interface IReturnToHomeService
     {
-        public Task<bool> IsRobotHome(string robotId);
-        public Task<MissionRun?> ScheduleReturnToHomeMissionRun(string robotId);
+        public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(string robotId);
+
     }
 
-    public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService) : IReturnToHomeService
+    public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService, IMapService mapService) : IReturnToHomeService
     {
-        public async Task<bool> IsRobotHome(string robotId)
+        public async Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(string robotId)
         {
-            var lastExecutedMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robotId);
+            logger.LogInformation("Scheduling return to home mission if not already scheduled or the robot is home for robot {RobotId}", robotId);
+
+            if (await IsReturnToHomeMissionAlreadyScheduled(robotId))
+            {
+                logger.LogInformation("ReturnToHomeMission is already scheduled for Robot {RobotId}", robotId);
+                return null;
+            }
+
+            if (await IsRobotHome(robotId))
+            {
+                logger.LogInformation("Robot {RobotId} is home, setting current area to null", robotId);
+                await robotService.UpdateCurrentArea(robotId, null);
+                return null;
+            }
+
+            MissionRun missionRun;
+            try { missionRun = await ScheduleReturnToHomeMissionRun(robotId); }
+            catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException)
+            {
+                throw new ReturnToHomeMissionFailedToScheduleException(ex.Message);
+            }
+
+            return missionRun;
+        }
+        private async Task<bool> IsRobotHome(string robotId)
+        {
+            var lastExecutedMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobotWithoutTracking(robotId);
             if (lastExecutedMissionRun is null)
             {
                 logger.LogInformation("Could not find last executed mission run for robot {RobotId}, can not guarantee that the robot is in its home", robotId);
                 return false;
             }
 
-            return lastExecutedMissionRun.IsDriveToMission();
+            return lastExecutedMissionRun.IsReturnHomeMission();
         }
-        public async Task<MissionRun?> ScheduleReturnToHomeMissionRun(string robotId)
+        private async Task<bool> IsReturnToHomeMissionAlreadyScheduled(string robotId)
+        {
+            return await missionRunService.PendingOrOngoingReturnToHomeMissionRunExists(robotId);
+        }
+        private async Task<MissionRun> ScheduleReturnToHomeMissionRun(string robotId)
         {
             var robot = await robotService.ReadById(robotId);
             if (robot is null)
@@ -68,12 +98,13 @@ namespace Api.Services
                 DesiredStartTime = DateTime.UtcNow,
                 Tasks = new List<MissionTask>
                 {
-                    new(robot.CurrentArea.Deck.DefaultLocalizationPose.Pose, MissionTaskType.DriveTo)
+                    new(new Pose(robot.CurrentArea.Deck.DefaultLocalizationPose.Pose), MissionTaskType.ReturnHome)
                 },
                 Map = new MapMetadata()
             };
+            await mapService.AssignMapToMission(returnToHomeMissionRun);
 
-            var missionRun = await missionRunService.Create(returnToHomeMissionRun);
+            var missionRun = await missionRunService.Create(returnToHomeMissionRun, false);
             logger.LogInformation(
                 "Scheduled a mission for the robot {RobotName} to return to home location on deck {DeckName}",
                 robot.Name, robot.CurrentArea.Deck.Name);

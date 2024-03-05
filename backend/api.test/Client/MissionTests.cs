@@ -234,7 +234,7 @@ namespace Api.Test
             Assert.True(response.IsSuccessStatusCode, $"Failed to get robot from path: {robotUrl}, with status code {response.StatusCode}");
             var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
             Assert.True(robots != null);
-            var robot = robots[0]; // We do not care which robot is used
+            var robot = robots.Where(robot => robot.Name == "Shockwave").First();
             string robotId = robot.Id;
 
             // Arrange - Area
@@ -281,7 +281,7 @@ namespace Api.Test
             Assert.True(robotResponse.IsSuccessStatusCode);
             var robots = await robotResponse.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
             Assert.True(robots != null);
-            var robot = robots[0];
+            var robot = robots.Where(robot => robot.Name == "Shockwave").First();
             string robotId = robot.Id;
 
             // Arrange - Area
@@ -624,7 +624,7 @@ namespace Api.Test
             Assert.True(response.IsSuccessStatusCode);
             var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
             Assert.True(robots != null);
-            var robot = robots[0];
+            var robot = robots.Where(robot => robot.Name == "Shockwave").First();
             string robotId = robot.Id;
             int echoMissionId = 1; // Corresponds to mock in EchoServiceMock.cs
 

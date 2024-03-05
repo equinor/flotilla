@@ -8,7 +8,7 @@ namespace Api.Services
 {
     public interface IMissionSchedulingService
     {
-        public Task StartMissionRunIfSystemIsAvailable(string missionRunId);
+        public Task StartNextMissionRunIfSystemIsAvailable(string robotId);
 
         public Task<bool> OngoingMission(string robotId);
 
@@ -25,24 +25,74 @@ namespace Api.Services
         public bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue);
 
         public void TriggerRobotAvailable(RobotAvailableEventArgs e);
+
+        public void TriggerMissionCompleted(MissionCompletedEventArgs e);
     }
 
     public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
-            IAreaService areaService, IIsarService isarService) : IMissionSchedulingService
+            IAreaService areaService, IIsarService isarService, ILocalizationService localizationService, IReturnToHomeService returnToHomeService, ISignalRService signalRService) : IMissionSchedulingService
     {
-        public async Task StartMissionRunIfSystemIsAvailable(string missionRunId)
+        public async Task StartNextMissionRunIfSystemIsAvailable(string robotId)
         {
-            var missionRun = await missionRunService.ReadById(missionRunId);
-            if (missionRun is null)
+            logger.LogInformation("Starting next mission run if system is available for robot ID: {RobotId}", robotId);
+            var robot = await robotService.ReadById(robotId);
+            if (robot == null)
             {
-                string errorMessage = $"Mission run with Id {missionRunId} was not found";
-                logger.LogError("{Message}", errorMessage);
-                throw new MissionRunNotFoundException(errorMessage);
+                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                return;
             }
 
-            if (!await TheSystemIsAvailableToRunAMission(missionRun.Robot.Id, missionRun.Id))
+            MissionRun? missionRun;
+            try { missionRun = await SelectNextMissionRun(robot.Id); }
+            catch (RobotNotFoundException)
+            {
+                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                return;
+            }
+
+            if (missionRun == null)
+            {
+                logger.LogInformation("The robot was ready to start mission, but no mission is scheduled");
+                if (robot.MissionQueueFrozen) { return; }
+
+                try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
+                catch (ReturnToHomeMissionFailedToScheduleException)
+                {
+                    signalRService.ReportFailureToSignalR(robot, $"Failed to schedule return to home for robot {robot.Id}");
+                    logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
+                    await robotService.UpdateCurrentArea(robot.Id, null);
+                }
+                if (missionRun == null) { return; }  // The robot is already home
+            }
+
+            if (!await TheSystemIsAvailableToRunAMission(robot.Id, missionRun.Id))
             {
                 logger.LogInformation("Mission {MissionRunId} was put on the queue as the system may not start a mission now", missionRun.Id);
+                return;
+            }
+
+
+            // Verify that localization is fine
+            if (!await localizationService.RobotIsLocalized(robot.Id) && !missionRun.IsLocalizationMission())
+            {
+                logger.LogError("Tried to schedule mission {MissionRunId} on robot {RobotId} before the robot was localized, scheduled missions will be canceled", missionRun.Id, robot.Id);
+                try { await CancelAllScheduledMissions(robot.Id); }
+                catch (RobotNotFoundException) { logger.LogError("Failed to cancel scheduled missions for robot {RobotId}", robot.Id); }
+                return;
+            }
+
+            if (!missionRun.IsLocalizationMission() && !await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
+            {
+                logger.LogError("Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Cancelling all mission runs", robot.Id, missionRun.Id);
+                try { await CancelAllScheduledMissions(robot.Id); }
+                catch (RobotNotFoundException) { logger.LogError("Failed to cancel scheduled missions for robot {RobotId}", robot.Id); }
+
+                try { await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
+                catch (ReturnToHomeMissionFailedToScheduleException)
+                {
+                    logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
+                    await robotService.UpdateCurrentArea(robot.Id, null);
+                }
                 return;
             }
 
@@ -214,6 +264,26 @@ namespace Api.Services
             OnRobotAvailable(e);
         }
 
+        public void TriggerMissionCompleted(MissionCompletedEventArgs e)
+        {
+            OnMissionCompleted(e);
+        }
+
+        private async Task<MissionRun?> SelectNextMissionRun(string robotId)
+        {
+            var robot = await robotService.ReadById(robotId);
+            if (robot == null)
+            {
+                string errorMessage = $"Could not find robot with id {robotId}";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
+            }
+
+            var missionRun = await missionRunService.ReadNextScheduledLocalizationMissionRun(robot.Id) ?? await missionRunService.ReadNextScheduledEmergencyMissionRun(robot.Id);
+            if (robot.MissionQueueFrozen == false && missionRun == null) { missionRun = await missionRunService.ReadNextScheduledMissionRun(robot.Id); }
+            return missionRun;
+        }
+
         private async Task MoveInterruptedMissionsToQueue(IEnumerable<string> interruptedMissionRunIds)
         {
             foreach (string missionRunId in interruptedMissionRunIds)
@@ -344,6 +414,12 @@ namespace Api.Services
         {
             bool ongoingMission = await OngoingMission(robotId);
 
+            if (ongoingMission)
+            {
+                logger.LogInformation("Mission run {MissionRunId} was not started as there is already an ongoing mission", missionRunId);
+                return false;
+            }
+
             var robot = await robotService.ReadById(robotId);
             if (robot is null)
             {
@@ -366,11 +442,6 @@ namespace Api.Services
                 return false;
             }
 
-            if (ongoingMission)
-            {
-                logger.LogInformation("Mission run {MissionRunId} was not started as there is already an ongoing mission", missionRun.Id);
-                return false;
-            }
             if (robot.Status is not RobotStatus.Available)
             {
                 logger.LogInformation("Mission run {MissionRunId} was not started as the robot is not available", missionRun.Id);
@@ -379,6 +450,11 @@ namespace Api.Services
             if (!robot.Enabled)
             {
                 logger.LogWarning("Mission run {MissionRunId} was not started as the robot {RobotId} is not enabled", missionRun.Id, robot.Id);
+                return false;
+            }
+            if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id))
+            {
+                logger.LogInformation("Mission run {MissionRunId} was not started as there is an ongoing localization mission", missionRun.Id);
                 return false;
             }
             return true;
@@ -393,5 +469,7 @@ namespace Api.Services
 
         protected virtual void OnRobotAvailable(RobotAvailableEventArgs e) { RobotAvailable?.Invoke(this, e); }
         public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
+        protected virtual void OnMissionCompleted(MissionCompletedEventArgs e) { MissionCompleted?.Invoke(this, e); }
+        public static event EventHandler<MissionCompletedEventArgs>? MissionCompleted;
     }
 }

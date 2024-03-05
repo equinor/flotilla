@@ -38,24 +38,24 @@ namespace Api.EventHandlers
         {
             MqttService.MqttIsarRobotStatusReceived += OnIsarRobotStatus;
             MqttService.MqttIsarRobotInfoReceived += OnIsarRobotInfo;
-            MqttService.MqttIsarMissionReceived += OnMissionUpdate;
-            MqttService.MqttIsarTaskReceived += OnTaskUpdate;
-            MqttService.MqttIsarStepReceived += OnStepUpdate;
-            MqttService.MqttIsarBatteryReceived += OnBatteryUpdate;
-            MqttService.MqttIsarPressureReceived += OnPressureUpdate;
-            MqttService.MqttIsarPoseReceived += OnPoseUpdate;
+            MqttService.MqttIsarMissionReceived += OnIsarMissionUpdate;
+            MqttService.MqttIsarTaskReceived += OnIsarTaskUpdate;
+            MqttService.MqttIsarStepReceived += OnIsarStepUpdate;
+            MqttService.MqttIsarBatteryReceived += OnIsarBatteryUpdate;
+            MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
+            MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
         }
 
         public override void Unsubscribe()
         {
             MqttService.MqttIsarRobotStatusReceived -= OnIsarRobotStatus;
             MqttService.MqttIsarRobotInfoReceived -= OnIsarRobotInfo;
-            MqttService.MqttIsarMissionReceived -= OnMissionUpdate;
-            MqttService.MqttIsarTaskReceived -= OnTaskUpdate;
-            MqttService.MqttIsarStepReceived -= OnStepUpdate;
-            MqttService.MqttIsarBatteryReceived -= OnBatteryUpdate;
-            MqttService.MqttIsarPressureReceived -= OnPressureUpdate;
-            MqttService.MqttIsarPoseReceived -= OnPoseUpdate;
+            MqttService.MqttIsarMissionReceived -= OnIsarMissionUpdate;
+            MqttService.MqttIsarTaskReceived -= OnIsarTaskUpdate;
+            MqttService.MqttIsarStepReceived -= OnIsarStepUpdate;
+            MqttService.MqttIsarBatteryReceived -= OnIsarBatteryUpdate;
+            MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
+            MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken) { await stoppingToken; }
@@ -148,8 +148,6 @@ namespace Api.EventHandlers
                 if (isarRobotInfo.CurrentInstallation is not null) UpdateCurrentInstallationIfChanged(installation, ref robot, ref updatedFields);
                 if (updatedFields.IsNullOrEmpty()) return;
 
-                // TODO: why do we not update status? If it is idle then the mission is clearly done
-
                 robot = await robotService.Update(robot);
                 _logger.LogInformation("Updated robot '{Id}' ('{RobotName}') in database: {Updates}", robot.Id, robot.Name, updatedFields);
 
@@ -207,13 +205,14 @@ namespace Api.EventHandlers
             robot.CurrentInstallation = newCurrentInstallation;
         }
 
-        private async void OnMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
             var missionRunService = provider.GetRequiredService<IMissionRunService>();
             var robotService = provider.GetRequiredService<IRobotService>();
             var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
             var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
+            var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
 
@@ -243,6 +242,12 @@ namespace Api.EventHandlers
                 return;
             }
 
+            if (flotillaMissionRun.IsLocalizationMission())
+            {
+                if (flotillaMissionRun.Status != MissionStatus.Successful) { await robotService.UpdateCurrentArea(robot.Id, null); }
+                else { await robotService.UpdateCurrentArea(robot.Id, flotillaMissionRun.Area); }
+            }
+
             try { await robotService.UpdateCurrentMissionId(robot.Id, null); }
             catch (RobotNotFoundException)
             {
@@ -251,6 +256,7 @@ namespace Api.EventHandlers
             }
 
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, flotillaMissionRun.Id);
+            missionSchedulingService.TriggerMissionCompleted(new MissionCompletedEventArgs(robot.Id));
 
             if (flotillaMissionRun.MissionId == null)
             {
@@ -268,7 +274,7 @@ namespace Api.EventHandlers
             await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
         }
 
-        private async void OnTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
             var missionRunService = provider.GetRequiredService<IMissionRunService>();
@@ -296,7 +302,7 @@ namespace Api.EventHandlers
                 "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", task.TaskId, task.Status, task.RobotName, task.IsarId);
         }
 
-        private async void OnStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
             var missionRunService = provider.GetRequiredService<IMissionRunService>();
@@ -329,7 +335,7 @@ namespace Api.EventHandlers
                 "Inspection '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", step.StepId, step.Status, step.RobotName, step.IsarId);
         }
 
-        private async void OnBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
             var batteryTimeseriesService = provider.GetRequiredService<IBatteryTimeseriesService>();
@@ -338,7 +344,7 @@ namespace Api.EventHandlers
             await batteryTimeseriesService.AddBatteryEntry(batteryStatus.BatteryLevel, batteryStatus.IsarId);
         }
 
-        private async void OnPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
             var pressureTimeseriesService = provider.GetRequiredService<IPressureTimeseriesService>();
@@ -347,7 +353,7 @@ namespace Api.EventHandlers
             await pressureTimeseriesService.AddPressureEntry(pressureStatus.PressureLevel, pressureStatus.IsarId);
         }
 
-        private async void OnPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
             var poseTimeseriesService = provider.GetRequiredService<IPoseTimeseriesService>();

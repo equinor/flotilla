@@ -30,7 +30,13 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId);
 
-        public Task<MissionRun?> ReadLastExecutedMissionRunByRobot(string robotId);
+        public Task<MissionRun?> ReadLastExecutedMissionRunByRobotWithoutTracking(string robotId);
+
+        public Task<bool> PendingLocalizationMissionRunExists(string robotId);
+
+        public Task<bool> OngoingLocalizationMissionRunExists(string robotId);
+
+        public Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId);
 
         public Task<MissionRun> Update(MissionRun mission);
 
@@ -140,21 +146,62 @@ namespace Api.Services
 
         public async Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId)
         {
-            var test = GetMissionRunsWithSubModels().OrderBy(m => m.DesiredStartTime).ToList();
-
             return await GetMissionRunsWithSubModels()
                 .Where(m => m.MissionId == missionId && m.EndTime == null)
                 .OrderBy(m => m.DesiredStartTime)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<MissionRun?> ReadLastExecutedMissionRunByRobot(string robotId)
+        public async Task<MissionRun?> ReadLastExecutedMissionRunByRobotWithoutTracking(string robotId)
         {
             return await GetMissionRunsWithSubModels()
                 .Where(m => m.Robot.Id == robotId)
                 .Where(m => m.EndTime != null)
                 .OrderByDescending(m => m.EndTime)
+                .AsNoTracking()
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> PendingLocalizationMissionRunExists(string robotId)
+        {
+            var pendingMissionRuns = await ReadMissionRunQueue(robotId);
+            foreach (var pendingMissionRun in pendingMissionRuns)
+            {
+                if (pendingMissionRun.IsLocalizationMission()) { return true; }
+            }
+            return false;
+        }
+
+        public async Task<bool> OngoingLocalizationMissionRunExists(string robotId)
+        {
+            var ongoingMissionRuns = await GetMissionRunsWithSubModels()
+                .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing)
+                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .ToListAsync();
+            foreach (var ongoingMissionRun in ongoingMissionRuns)
+            {
+                if (ongoingMissionRun.IsLocalizationMission()) { return true; }
+            }
+            return false;
+        }
+
+        public async Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId)
+        {
+            var pendingMissionRuns = await ReadMissionRunQueue(robotId);
+            foreach (var pendingMissionRun in pendingMissionRuns)
+            {
+                if (pendingMissionRun.IsReturnHomeMission()) { return true; }
+            }
+            var ongoingMissionRuns = await GetMissionRunsWithSubModels()
+                .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing)
+                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .ToListAsync();
+            foreach (var ongoingMissionRun in ongoingMissionRuns)
+            {
+                if (ongoingMissionRun.IsReturnHomeMission()) { return true; }
+            }
+            return false;
+
         }
 
         public async Task<MissionRun> Update(MissionRun missionRun)
@@ -350,7 +397,7 @@ namespace Api.Services
 
             Expression<Func<MissionRun, bool>> returnTohomeFilter = !parameters.ExcludeReturnToHome
                 ? missionRun => true
-                : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.DriveTo));
+                : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.ReturnHome));
 
             var minStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinStartTime);
             var maxStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxStartTime);
