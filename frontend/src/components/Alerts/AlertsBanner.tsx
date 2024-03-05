@@ -6,9 +6,9 @@ import { Icons } from 'utils/icons'
 
 const StyledCard = styled(Card)`
     display: flex;
-    width: 100%;
+    width: auto;
     padding: 7px 15px;
-    gap: 0.2rem;
+    margin: 0px 8px 8px 8px;
 `
 
 const Horizontal = styled.div`
