@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useIsAuthenticated } from '@azure/msal-react'
 import { useMsal } from '@azure/msal-react'
 import { loginRequest } from 'api/AuthConfig'
-import { Autocomplete, Button, TopBar, CircularProgress, Typography, Checkbox } from '@equinor/eds-core-react'
+import { Autocomplete, Button, CircularProgress, Typography, Checkbox } from '@equinor/eds-core-react'
 import { IPublicClientApplication } from '@azure/msal-browser'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -16,12 +16,7 @@ const Centered = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-`
-const StyledTopBarContent = styled(TopBar.CustomContent)`
-    display: grid;
-    grid-template-columns: minmax(50px, 265px) auto;
-    gap: 0px 3rem;
-    align-items: center;
+    margin-top: 5rem;
 `
 const BlockLevelContainer = styled.div`
     & > * {
@@ -30,12 +25,10 @@ const BlockLevelContainer = styled.div`
 `
 const StyledCheckbox = styled(Checkbox)`
     margin-left: -14px;
-`
-const RowContainer = styled.div`
     display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: flex-start;
+    align-items: center;
+`
+const StyledButton = styled(Button)`
     margin-top: 50px;
 `
 
@@ -61,11 +54,7 @@ export const AssetSelectionPage = () => {
                 <>
                     <Header page={'root'} />
                     <Centered>
-                        <RowContainer>
-                            <StyledTopBarContent>
-                                <InstallationPicker />
-                            </StyledTopBarContent>
-                        </RowContainer>
+                        <InstallationPicker />
                         {/* TODO! ADD image here*/}
                     </Centered>
                 </>
@@ -138,14 +127,14 @@ const InstallationPicker = () => {
                     onChange={(e) => setShowActivePlants(e.target.checked)}
                     crossOrigin={undefined}
                 />
+                <StyledButton
+                    onClick={() => switchInstallation(selectedInstallation)}
+                    disabled={!selectedInstallation}
+                    href={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
+                >
+                    {TranslateText('Confirm installation')}
+                </StyledButton>
             </BlockLevelContainer>
-            <Button
-                onClick={() => switchInstallation(selectedInstallation)}
-                disabled={!selectedInstallation}
-                href={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
-            >
-                {TranslateText('Confirm installation')}
-            </Button>
         </>
     )
 }
