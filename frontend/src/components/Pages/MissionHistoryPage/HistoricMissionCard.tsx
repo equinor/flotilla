@@ -1,12 +1,23 @@
 import { Table, Typography } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { Mission } from 'models/Mission'
-import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
+import { MissionStatusDisplay, MissionStatusDisplayShort } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
 import { TaskStatus } from 'models/Task'
 import { useNavigate } from 'react-router-dom'
 import { TextAlignedButton } from 'components/Styles/StyledComponents'
 import { formatDateTime } from 'utils/StringFormatting'
+
+enum InspectionTableColumns {
+    StatusShort = 'StatusShort',
+    Status = 'Status',
+    Name = 'Name',
+    Area = 'Area',
+    Robot = 'Robot',
+    CompletionTime = 'CompletionTime',
+    Rerun = 'RerunMission',
+}
+
 
 interface IndexedMissionProps {
     index: number
@@ -41,27 +52,31 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
     )
 
     return (
-        <Table.Row key={index}>
-            <Table.Cell>
-                <MissionStatusDisplay status={mission.status} />
-            </Table.Cell>
-            <Table.Cell>
-                <TextAlignedButton variant="ghost" onClick={routeChange}>
-                    {mission.name}
-                </TextAlignedButton>
-            </Table.Cell>
-            <Table.Cell>
-                <Typography>{mission.area?.areaName}</Typography>
-            </Table.Cell>
-            <Table.Cell>
-                <Typography>{mission.robot.name}</Typography>
-            </Table.Cell>
-            <Table.Cell>
-                <MissionEndTimeDisplay mission={mission} />
-            </Table.Cell>
-            <Table.Cell>
-                <MissionRestartButton mission={mission} hasFailedTasks={missionHasFailedTasks} />
-            </Table.Cell>
-        </Table.Row>
+            <Table.Row key={index}>
+                <Table.Cell id={InspectionTableColumns.StatusShort}> 
+                    <MissionStatusDisplayShort status={mission.status} />
+                </Table.Cell>
+                <Table.Cell id={InspectionTableColumns.Status}>
+                    <MissionStatusDisplay status={mission.status} />
+                </Table.Cell>
+                <Table.Cell id={InspectionTableColumns.Name}>
+                    <TextAlignedButton variant="ghost" onClick={routeChange}>
+                        {mission.name}
+                    </TextAlignedButton>
+                </Table.Cell>
+                <Table.Cell id={InspectionTableColumns.Area}>
+                    <Typography>{mission.area?.areaName}</Typography>
+                </Table.Cell>
+                <Table.Cell id={InspectionTableColumns.Robot}>
+                    <Typography>{mission.robot.name}</Typography>
+                </Table.Cell>
+                <Table.Cell id={InspectionTableColumns.CompletionTime}>
+                    <MissionEndTimeDisplay mission={mission} />
+                </Table.Cell>
+                <Table.Cell id={InspectionTableColumns.Rerun}>
+                    <MissionRestartButton mission={mission} hasFailedTasks={missionHasFailedTasks} />
+                </Table.Cell>
+            </Table.Row>
+
     )
 }
