@@ -12,13 +12,6 @@ const StyledTopBar = styled(TopBar)`
     margin-bottom: 2rem;
     align-items: center;
     box-shadow: none;
-
-    @media (max-width: 700px) {
-        display: flex;
-        justify-self: start;
-        flex-direction: column;
-        height: 90px;
-    }
 `
 
 const StyledWrapper = styled.div`
@@ -27,19 +20,11 @@ const StyledWrapper = styled.div`
     align-items: center;
 `
 
-const IconStyle = styled.div`
-    display: flex;
-    align-items: center;
-    flex-direction: row-reverse;
-    > * {
-        margin-left: 1rem;
-    }
-`
 const HandPointer = styled.div`
     cursor: pointer;
 `
 const SelectLanguageWrapper = styled.div`
-    margin-left: 1.5rem;
+    margin-left: 1rem;
 `
 const StyledAlertList = styled.div`
     display: grid;
@@ -68,25 +53,14 @@ export const Header = ({ page }: { page: string }) => {
                     <Typography> {installationName}</Typography>
                 </StyledWrapper>
                 <TopBar.Actions>
-                    <IconStyle>
-                        <Button variant="ghost_icon" onClick={() => console.log('Clicked account icon')}>
-                            <Icon name={Icons.Account} size={24} title="user" />
-                        </Button>
-                        <Button variant="ghost_icon" onClick={() => console.log('Clicked accessibility icon')}>
-                            <Icon name={Icons.Accessible} size={24} />
-                        </Button>
-                        <Button variant="ghost_icon" onClick={() => console.log('Clicked notification icon')}>
-                            <Icon name={Icons.Notifications} size={24} />
-                        </Button>
-                        <Button
-                            variant="ghost_icon"
-                            onClick={() => {
-                                window.location.href = `${config.FRONTEND_BASE_ROUTE}/`
-                            }}
-                        >
-                            <Icon name={Icons.Platform} size={24} title="Change Asset" />
-                        </Button>
-                    </IconStyle>
+                    <Button
+                        variant="ghost_icon"
+                        onClick={() => {
+                            window.location.href = `${config.FRONTEND_BASE_ROUTE}/`
+                        }}
+                    >
+                        <Icon name={Icons.Platform} size={24} title="Change Asset" />
+                    </Button>
                     <SelectLanguageWrapper>{SelectLanguage()}</SelectLanguageWrapper>
                 </TopBar.Actions>
             </StyledTopBar>
