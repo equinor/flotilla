@@ -18,9 +18,14 @@ import { InspectionType } from 'models/Inspection'
 import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'
 
 const StyledHeader = styled.div`
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
     grid-template-columns: auto 100px 150px;
     gap: 1rem;
+`
+
+const StyledSearch = styled(Search)`
+    max-width: 600px;
 `
 
 const StyledDialogHeader = styled.div`
@@ -67,7 +72,7 @@ export const FilterSection = () => {
     return (
         <>
             <StyledHeader>
-                <Search
+                <StyledSearch
                     value={filterState.missionName ?? ''}
                     placeholder={TranslateText('Search for missions')}
                     onChange={(changes: ChangeEvent<HTMLInputElement>) => {
