@@ -52,6 +52,14 @@ export const MissionStatusDisplay = ({ status }: StatusProps) => {
     )
 }
 
+export const MissionStatusDisplayShort = ({ status }: StatusProps) => {
+    return (
+        <StyledStatusIcon>
+            <MissionStatusIcon status={status} />
+        </StyledStatusIcon>
+    )
+}
+
 export const MissionStatusDisplayWithHeader = ({ status }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
     return (
