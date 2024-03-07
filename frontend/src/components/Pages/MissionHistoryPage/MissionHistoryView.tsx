@@ -12,6 +12,36 @@ import { FilterSection } from './FilterSection'
 import { InspectionType } from 'models/Inspection'
 import { tokens } from '@equinor/eds-tokens'
 
+enum InspectionTableColumns {
+    StatusShort = 'StatusShort',
+    Status = 'Status',
+    Name = 'Name',
+    Area = 'Area',
+    Robot = 'Robot',
+    CompletionTime = 'CompletionTime',
+    Rerun = 'RerunMission',
+}
+
+const HideColumnsOnSmallScreen = styled.div`
+    @media (max-width: 730px) {
+        #${InspectionTableColumns.Status} {
+            display: none;
+        }
+        #${InspectionTableColumns.Robot} {
+            display: none;
+        }
+        #${InspectionTableColumns.CompletionTime} {
+            display: none;
+        }
+    }
+    @media (min-width: 730px) {
+        #${InspectionTableColumns.StatusShort} {
+            display: none;
+        }
+    }
+
+`
+
 const TableWithHeader = styled.div`
     display: grid;
     grid-columns: auto;
@@ -178,32 +208,35 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
             )}
             {filterError && <FilterErrorDialog />}
             <StyledTable>
-                <Table>
-                    {isLoading && (
+                <HideColumnsOnSmallScreen>
+                    <Table>
+                        {isLoading && (
+                            <Table.Caption captionSide={'bottom'}>
+                                <StyledLoading>
+                                    <CircularProgress />
+                                </StyledLoading>
+                            </Table.Caption>
+                        )}
                         <Table.Caption captionSide={'bottom'}>
-                            <StyledLoading>
-                                <CircularProgress />
-                            </StyledLoading>
+                            {paginationDetails &&
+                                paginationDetails.TotalPages > 1 &&
+                                !isResettingPage &&
+                                PaginationComponent()}
                         </Table.Caption>
-                    )}
-                    <Table.Caption captionSide={'bottom'}>
-                        {paginationDetails &&
-                            paginationDetails.TotalPages > 1 &&
-                            !isResettingPage &&
-                            PaginationComponent()}
-                    </Table.Caption>
-                    <Table.Head sticky>
-                        <Table.Row>
-                            <Table.Cell>{TranslateText('Status')}</Table.Cell>
-                            <Table.Cell>{TranslateText('Name')}</Table.Cell>
-                            <Table.Cell>{TranslateText('Area')}</Table.Cell>
-                            <Table.Cell>{TranslateText('Robot')}</Table.Cell>
-                            <Table.Cell>{TranslateText('Completion Time')}</Table.Cell>
-                            <Table.Cell>{TranslateText('Rerun mission')}</Table.Cell>
-                        </Table.Row>
-                    </Table.Head>
-                    {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
-                </Table>
+                        <Table.Head sticky>
+                            <Table.Row>
+                                <Table.Cell id={InspectionTableColumns.StatusShort}>{TranslateText('Status')}</Table.Cell>
+                                <Table.Cell id={InspectionTableColumns.Status}>{TranslateText('Status')}</Table.Cell>
+                                <Table.Cell id={InspectionTableColumns.Name}>{TranslateText('Name')}</Table.Cell>
+                                <Table.Cell id={InspectionTableColumns.Area}>{TranslateText('Area')}</Table.Cell>
+                                <Table.Cell id={InspectionTableColumns.Robot}>{TranslateText('Robot')}</Table.Cell>
+                                <Table.Cell id={InspectionTableColumns.CompletionTime}>{TranslateText('Completion Time')}</Table.Cell>
+                                <Table.Cell id={InspectionTableColumns.Rerun}>{TranslateText('Rerun mission')}</Table.Cell>
+                            </Table.Row>
+                        </Table.Head>
+                        {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
+                    </Table>
+                </HideColumnsOnSmallScreen>
             </StyledTable>
         </TableWithHeader>
     )
