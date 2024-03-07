@@ -436,4 +436,15 @@ export class BackendAPICaller {
         const result = await this.POST<unknown, unknown>(path, body).catch(BackendAPICaller.handleError('POST', path))
         return result.content
     }
+
+    static async returnRobotToHome(robotId: string) {
+        const path: string = `return-to-home/schedule-return-to-home/` + robotId
+        const body = {}
+
+        const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch((e) => {
+            console.error(`Failed to POST /${path}: ` + e)
+            throw e
+        })
+        return result.content
+    }
 }

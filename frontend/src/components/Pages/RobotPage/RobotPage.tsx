@@ -1,4 +1,4 @@
-import { Typography } from '@equinor/eds-core-react'
+import { Button, Typography } from '@equinor/eds-core-react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { BackButton } from 'utils/BackButton'
@@ -12,6 +12,7 @@ import { RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotType } from 'models/RobotModel'
 import { useRobotContext } from 'components/Contexts/RobotContext'
+import { BackendAPICaller } from 'api/ApiCaller'
 
 const StyledRobotPage = styled.div`
     display: flex;
@@ -46,6 +47,12 @@ export const RobotPage = () => {
     const { enabledRobots } = useRobotContext()
 
     const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
+
+    const returnRobotToHome = () => {
+        if (robotId) {
+            BackendAPICaller.returnRobotToHome(robotId)
+        }
+    }
 
     return (
         <>
@@ -82,6 +89,9 @@ export const RobotPage = () => {
                                     </>
                                 )}
                                 <RobotStatusChip status={selectedRobot.status} />
+                                <Button variant="outlined" onClick={returnRobotToHome}>
+                                    {TranslateText('Return robot to home')}
+                                </Button>
                             </VerticalContent>
                         </RobotInfo>
 
