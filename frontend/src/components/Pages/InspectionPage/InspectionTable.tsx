@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { SmallScreenInfoText } from 'utils/InfoText'
 
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -240,16 +241,6 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                 )}
             </Table.Cell>
         </Table.Row>
-    )
-}
-
-const SmallScreenInfoText = () => {
-    const { TranslateText } = useLanguageContext()
-    return (
-        <div id="SmallScreenInfoText">
-            <Icon name={Icons.Info} size={24}></Icon>
-            <Typography>{TranslateText('Small screen info text')}</Typography>
-        </div>
     )
 }
 

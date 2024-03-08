@@ -11,6 +11,7 @@ import { useMissionFilterContext, IFilterState } from 'components/Contexts/Missi
 import { FilterSection } from './FilterSection'
 import { InspectionType } from 'models/Inspection'
 import { tokens } from '@equinor/eds-tokens'
+import { SmallScreenInfoText } from 'utils/InfoText'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -23,8 +24,24 @@ enum InspectionTableColumns {
 }
 
 const HideColumnsOnSmallScreen = styled.div`
+    #SmallScreenInfoText {
+        display: none;
+    }
     @media (max-width: 730px) {
+        #SmallScreenInfoText {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 0.3em;
+            align-items: left;
+            padding-bottom: 1rem;
+            max-width: 400px;
+        }
+    }
+    @media (max-width: 600px) {
         #${InspectionTableColumns.Status} {
+            display: none;
+        }
+        #${InspectionTableColumns.Area} {
             display: none;
         }
         #${InspectionTableColumns.Robot} {
@@ -34,12 +51,11 @@ const HideColumnsOnSmallScreen = styled.div`
             display: none;
         }
     }
-    @media (min-width: 730px) {
+    @media (min-width: 601px) {
         #${InspectionTableColumns.StatusShort} {
             display: none;
         }
     }
-
 `
 
 const TableWithHeader = styled.div`
@@ -69,6 +85,8 @@ const ActiveFilterList = styled.div`
 
 const StyledTable = styled.div`
     display: grid;
+    overflow-x: auto;
+    overflow-y: hidden;
 `
 
 const flatten = (filters: IFilterState) => {
@@ -209,6 +227,7 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
             {filterError && <FilterErrorDialog />}
             <StyledTable>
                 <HideColumnsOnSmallScreen>
+                    <SmallScreenInfoText />
                     <Table>
                         {isLoading && (
                             <Table.Caption captionSide={'bottom'}>
@@ -225,13 +244,19 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                         </Table.Caption>
                         <Table.Head sticky>
                             <Table.Row>
-                                <Table.Cell id={InspectionTableColumns.StatusShort}>{TranslateText('Status')}</Table.Cell>
+                                <Table.Cell id={InspectionTableColumns.StatusShort}>
+                                    {TranslateText('Status')}
+                                </Table.Cell>
                                 <Table.Cell id={InspectionTableColumns.Status}>{TranslateText('Status')}</Table.Cell>
                                 <Table.Cell id={InspectionTableColumns.Name}>{TranslateText('Name')}</Table.Cell>
                                 <Table.Cell id={InspectionTableColumns.Area}>{TranslateText('Area')}</Table.Cell>
                                 <Table.Cell id={InspectionTableColumns.Robot}>{TranslateText('Robot')}</Table.Cell>
-                                <Table.Cell id={InspectionTableColumns.CompletionTime}>{TranslateText('Completion Time')}</Table.Cell>
-                                <Table.Cell id={InspectionTableColumns.Rerun}>{TranslateText('Rerun mission')}</Table.Cell>
+                                <Table.Cell id={InspectionTableColumns.CompletionTime}>
+                                    {TranslateText('Completion Time')}
+                                </Table.Cell>
+                                <Table.Cell id={InspectionTableColumns.Rerun}>
+                                    {TranslateText('Rerun mission')}
+                                </Table.Cell>
                             </Table.Row>
                         </Table.Head>
                         {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
