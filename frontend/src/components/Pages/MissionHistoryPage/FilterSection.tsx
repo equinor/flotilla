@@ -29,7 +29,7 @@ const StyledButtonDiv = styled.div`
 `
 
 const StyledSearch = styled(Search)`
-    max-width: 250px;
+    max-width: 280px;
 `
 
 const StyledDialogHeader = styled.div`
