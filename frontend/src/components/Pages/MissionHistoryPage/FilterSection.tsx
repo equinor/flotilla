@@ -20,12 +20,16 @@ import { useMissionFilterContext } from 'components/Contexts/MissionFilterContex
 const StyledHeader = styled.div`
     display: flex;
     flex-wrap: wrap;
-    grid-template-columns: auto 100px 150px;
+    gap: 1rem;
+`
+
+const StyledButtonDiv = styled.div`
+    display: flex;
     gap: 1rem;
 `
 
 const StyledSearch = styled(Search)`
-    max-width: 600px;
+    max-width: 250px;
 `
 
 const StyledDialogHeader = styled.div`
@@ -79,14 +83,16 @@ export const FilterSection = () => {
                         filterFunctions.switchMissionName(changes.target.value)
                     }}
                 />
-                <Button onClick={onClickFilterIcon}>
-                    <Icon name={Icons.Filter} size={32} />
-                    {TranslateText('Filter')}
-                </Button>
-                <Button variant="outlined" onClick={onClearFilters}>
-                    <Icon name={Icons.Clear} size={32} />
-                    {TranslateText('Clear all filters')}
-                </Button>
+                <StyledButtonDiv>
+                    <Button onClick={onClickFilterIcon}>
+                        <Icon name={Icons.Filter} size={32} />
+                        {TranslateText('Filter')}
+                    </Button>
+                    <Button variant="outlined" onClick={onClearFilters}>
+                        <Icon name={Icons.Clear} size={32} />
+                        {TranslateText('Clear all filters')}
+                    </Button>
+                </StyledButtonDiv>
             </StyledHeader>
             <Dialog open={isFilteringDialogOpen} isDismissable>
                 <StyledDialog>
