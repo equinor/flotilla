@@ -54,7 +54,9 @@ jobs:
       Environment: development
       Registry: ghcr.io
       ImageName: ${{ github.repository }}
-      Tag: ${{ needs.get-short-sha.outputs.tag }}
+      # Add quotation marks for the tags used in dev environment,
+      # due to the commit hash can be interpreted as an integer if only numbers
+      Tag: '${{ needs.get-short-sha.outputs.tag }}'
       AuthorEmail: ${{ github.event.head_commit.author.email }}
       AuthorName: ${{ github.event.head_commit.author.name }}
     secrets:
