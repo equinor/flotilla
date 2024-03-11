@@ -44,19 +44,19 @@ jobs:
         run: |
           COMPONENT=frontend
           TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
-          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: '${{ inputs.Tag }}'/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
+          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: ${{ inputs.Tag }}/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
 
       - name: Update backend in file
         run: |
           COMPONENT=backend
           TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
-          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: '${{ inputs.Tag }}'/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
+          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: ${{ inputs.Tag }}/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
 
       - name: Update broker in file
         run: |
           COMPONENT=broker
           TAG_LINE_NUMBER=$(($(grep -n "${{ inputs.Registry }}/${{ inputs.ImageName }}-${COMPONENT}" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml |  cut --delimiter=":" --fields=1)+1))
-          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: '${{ inputs.Tag }}'/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
+          sed -i "${TAG_LINE_NUMBER} s/newTag:.*/newTag: ${{ inputs.Tag }}/" k8s_kustomize/overlays/${{ inputs.Environment }}/kustomization.yaml
 
       - name: Update infrastructure in GitHub
         run: |
