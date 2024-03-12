@@ -19,13 +19,13 @@ const Indent = styled.div`
     padding: 0px 9px;
 `
 
-export const FailedSafeZoneAlertContent = ({ message }: { message: string }) => {
+export const FailedAlertContent = ({ title, message }: { title: string; message: string }) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledDiv>
             <StyledAlertTitle>
                 <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
-                <Typography>{TranslateText('Safe zone failure')}</Typography>
+                <Typography>{TranslateText(title)}</Typography>
             </StyledAlertTitle>
             <Indent>
                 <TextAlignedButton variant="ghost" color="secondary">

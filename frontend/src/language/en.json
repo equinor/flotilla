@@ -218,5 +218,7 @@
     "Please charge the robot": "Please charge the robot",
     "Please pressurize the robot": "Please pressurize the robot",
     "Please de-pressurize the robot": "Please release some pressure from the robot",
-    "Return robot to home": "Return robot to home"
+    "Return robot to home": "Return robot to home",
+    "Safe zone failure": "Safe zone failure",
+    "Failure to schedule": "Failure to schedule"
 }

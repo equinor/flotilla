@@ -10,7 +10,8 @@ namespace Api.Services
     {
         public Task SendMessageAsync<T>(string label, Installation? installation, T messageObject);
         public Task SendMessageAsync(string label, Installation? installation, string message);
-        public void ReportFailureToSignalR(Robot robot, string message);
+        public void ReportSafeZoneFailureToSignalR(Robot robot, string message);
+        public void ReportScheduleFailureToSignalR(Robot robot, string message);
     }
 
     public class SignalRService(IHubContext<SignalRHub> signalRHub) : ISignalRService
@@ -47,12 +48,20 @@ namespace Api.Services
             await Task.CompletedTask;
         }
 
-        public void ReportFailureToSignalR(Robot robot, string message)
+        public void ReportSafeZoneFailureToSignalR(Robot robot, string message)
         {
             _ = SendMessageAsync(
                 "Alert",
                 robot.CurrentInstallation,
-                new AlertResponse("safezoneFailure", "Safezone failure", message, robot.CurrentInstallation.InstallationCode, robot.Id));
+                new AlertResponse("safeZoneFailure", "Safe zone failure", message, robot.CurrentInstallation.InstallationCode, robot.Id));
+        }
+
+        public void ReportScheduleFailureToSignalR(Robot robot, string message)
+        {
+            _ = SendMessageAsync(
+                "Alert",
+                robot.CurrentInstallation,
+                new AlertResponse("scheduleFailure", "Failure to schedule", message, robot.CurrentInstallation.InstallationCode, robot.Id));
         }
 
     }

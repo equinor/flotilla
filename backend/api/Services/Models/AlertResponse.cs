@@ -2,10 +2,10 @@
 namespace Api.Services.Models
 {
     [method: JsonConstructor]
-    public class AlertResponse(string code, string name, string message, string installationCode, string? robotId)
+    public class AlertResponse(string code, string title, string message, string installationCode, string? robotId)
     {
         public string AlertCode { get; set; } = code;
-        public string AlertName { get; set; } = name;
+        public string AlertTitle { get; set; } = title;
         public string AlertMessage { get; set; } = message;
         public string InstallationCode { get; set; } = installationCode;
         public string? RobotId { get; set; } = robotId;

@@ -6,10 +6,10 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useInstallationContext } from './InstallationContext'
 import { Alert } from 'models/Alert'
-import { FailedSafeZoneAlertContent } from 'components/Alerts/FailedSafeZoneAlertContent'
 import { useRobotContext } from './RobotContext'
 import { BlockedRobotAlertContent } from 'components/Alerts/BlockedRobotAlert'
 import { RobotStatus } from 'models/Robot'
+import { FailedAlertContent } from 'components/Alerts/FailedAlertContent'
 
 type AlertDictionaryType = { [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void } }
 
@@ -21,7 +21,8 @@ export enum AlertType {
 }
 
 const alertTypeEnumMap: { [key: string]: AlertType } = {
-    safezoneFailure: AlertType.SafeZoneFail,
+    safeZoneFailure: AlertType.SafeZoneFail,
+    scheduleFailure: AlertType.RequestFail,
 }
 
 interface IAlertContext {
@@ -146,8 +147,10 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
                     // Here we could update the robot state manually, but this is best done on the backend
                 }
-
-                setAlert(alertType, <FailedSafeZoneAlertContent message={backendAlert.alertMessage} />)
+                setAlert(
+                    alertType,
+                    <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />
+                )
             })
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
