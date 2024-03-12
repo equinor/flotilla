@@ -58,7 +58,7 @@ namespace Api.Services
                 try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
                 catch (ReturnToHomeMissionFailedToScheduleException)
                 {
-                    signalRService.ReportFailureToSignalR(robot, $"Failed to schedule return to home for robot {robot.Id}");
+                    signalRService.ReportScheduleFailureToSignalR(robot, $"Failed to schedule return to home for robot {robot.Id}");
                     logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
                     await robotService.UpdateCurrentArea(robot.Id, null);
                 }

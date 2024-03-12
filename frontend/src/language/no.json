@@ -218,5 +218,7 @@
     "Please charge the robot": "Vennligst lad roboten",
     "Please pressurize the robot": "Vennligst trykk opp roboten",
     "Please de-pressurize the robot": "Vennligst slipp ut litt trykk fra roboten",
-    "Return robot to home": "Send roboten hjem"
+    "Return robot to home": "Send roboten hjem",
+    "Safe zone failure": "Trygg sone feilet",
+    "Failure to schedule": "Kunne ikke planlegge oppdrag"
 }
