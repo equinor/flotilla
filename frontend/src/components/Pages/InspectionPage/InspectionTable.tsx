@@ -9,7 +9,7 @@ import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { Inspection } from './InspectionSection'
 import { compareInspections } from './InspectionUtilities'
-import { getDeadlineInDays } from 'utils/StringFormatting'
+import { convertUTCDateToLocalDate, getDeadlineInDays } from 'utils/StringFormatting'
 import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { useEffect, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
@@ -204,7 +204,9 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
             <Table.Cell id={InspectionTableColumns.Area}>{mission.area ? mission.area.areaName : '-'}</Table.Cell>
             <Table.Cell id={InspectionTableColumns.LastCompleted}>{lastCompleted}</Table.Cell>
             <Table.Cell id={InspectionTableColumns.Deadline}>
-                {inspection.deadline ? formatDateString(inspection.deadline.toISOString()) : ''}
+                {inspection.deadline
+                    ? formatDateString(convertUTCDateToLocalDate(inspection.deadline).toISOString())
+                    : ''}
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.AddToQueue}>
                 {!isScheduled && (

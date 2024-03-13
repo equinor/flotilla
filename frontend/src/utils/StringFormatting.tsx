@@ -1,6 +1,11 @@
-const formatBackendDateTimeToDate = (date: Date) => {
-    return new Date(date.toString())
-}
+import { format } from 'date-fns'
+
+const millisecondsInADay = 8.64e7
+
+export const convertUTCDateToLocalDate = (date: Date): Date =>
+    new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000)
+
+const formatBackendDateTimeToDate = (date: Date) => new Date(date.toString())
 
 export const getInspectionDeadline = (
     inspectionFrequency: string | undefined,
@@ -21,7 +26,8 @@ export const getInspectionDeadline = (
     return deadline
 }
 
-export const getDeadlineInDays = (deadlineDate: Date) => {
-    // The magical number on the right is the number of milliseconds in a day
-    return new Date(deadlineDate.getTime() - new Date().getTime()).getTime() / 8.64e7
-}
+export const getDeadlineInDays = (deadlineDate: Date): number =>
+    new Date(deadlineDate.getTime() - new Date().getTime()).getTime() / millisecondsInADay
+
+export const formatDateTime = (dateTime: Date, dateFormat: string): string =>
+    format(convertUTCDateToLocalDate(new Date(dateTime)), dateFormat)

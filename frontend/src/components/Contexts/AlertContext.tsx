@@ -10,6 +10,7 @@ import { useRobotContext } from './RobotContext'
 import { BlockedRobotAlertContent } from 'components/Alerts/BlockedRobotAlert'
 import { RobotStatus } from 'models/Robot'
 import { FailedAlertContent } from 'components/Alerts/FailedAlertContent'
+import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 
 type AlertDictionaryType = { [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void } }
 
@@ -94,7 +95,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 (missions) => {
                     const newRecentFailedMissions = missions.content.filter(
                         (m) =>
-                            new Date(m.endTime!) > lastDismissTime &&
+                            convertUTCDateToLocalDate(new Date(m.endTime!)) > lastDismissTime &&
                             (!installationCode ||
                                 m.installationCode!.toLocaleLowerCase() !== installationCode.toLocaleLowerCase())
                     )
@@ -123,7 +124,8 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     )
                         return failedMissions // Ignore missions for other installations
                     // Ignore missions shortly after the user dismissed the last one
-                    if (new Date(newFailedMission.endTime!) <= lastDismissTime) return failedMissions
+                    if (convertUTCDateToLocalDate(new Date(newFailedMission.endTime!)) <= lastDismissTime)
+                        return failedMissions
                     let isDuplicate = failedMissions.filter((m) => m.id === newFailedMission.id).length > 0
                     if (isDuplicate) return failedMissions // Ignore duplicate failed missions
                     return [...failedMissions, newFailedMission]
