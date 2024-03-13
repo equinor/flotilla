@@ -127,7 +127,6 @@ builder.Services
         {
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-            options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
         }
     );
 
