@@ -1,4 +1,5 @@
-﻿using Api.Database.Models;
+﻿using Api.Controllers.Models;
+using Api.Database.Models;
 using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
@@ -150,16 +151,11 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var area = await AreaService.ReadById(robot.CurrentArea!.Id);
-            if (area == null)
-            {
-                _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
-                SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} was not correctly localised. Could not find area {robot.CurrentArea.Name}");
-                return;
-            }
-
             try { await MissionScheduling.FreezeMissionRunQueueForRobot(e.RobotId); }
             catch (RobotNotFoundException) { return; }
+
+            var area = await FindRobotArea(robot.Id);
+            if (area == null) { return; }
 
             try { await MissionScheduling.ScheduleMissionToReturnToSafePosition(e.RobotId, area.Id); }
             catch (SafeZoneException ex)
@@ -170,6 +166,7 @@ namespace Api.EventHandlers
                 catch (RobotNotFoundException) { return; }
             }
 
+            if (await MissionService.OngoingLocalizationMissionRunExists(e.RobotId)) { return; }
             try { await MissionScheduling.StopCurrentMissionRun(e.RobotId); }
             catch (RobotNotFoundException) { return; }
             catch (MissionRunNotFoundException)
@@ -207,6 +204,16 @@ namespace Api.EventHandlers
                 return;
             }
 
+            try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
+            catch (RobotNotFoundException) { return; }
+
+            if (!await LocalizationService.RobotIsLocalized(robot.Id))
+            {
+                _logger.LogError($"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised.");
+                SignalRService.ReportFailureToSignalR(robot, $"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised.");
+                return;
+            }
+
             var area = await AreaService.ReadById(robot.CurrentArea!.Id);
             if (area == null)
             {
@@ -214,15 +221,53 @@ namespace Api.EventHandlers
                 SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised");
             }
 
-            try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
-            catch (RobotNotFoundException) { return; }
-
             if (await MissionScheduling.OngoingMission(robot.Id))
             {
                 _logger.LogInformation("Robot {RobotName} was unfrozen but the mission to return to safe zone will be completed before further missions are started", robot.Id);
             }
 
             MissionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+        }
+
+        private async Task<Area?> FindRobotArea(string robotId)
+        {
+            var robot = await RobotService.ReadById(robotId);
+            if (robot == null)
+            {
+                _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                return null;
+            }
+
+            if (!await LocalizationService.RobotIsLocalized(robotId))
+            {
+
+                if (await MissionService.OngoingLocalizationMissionRunExists(robotId))
+                {
+                    var localizationMission = await MissionService.ReadAll(
+                        new MissionRunQueryStringParameters
+                        {
+                            Statuses = [MissionStatus.Ongoing],
+                            RobotId = robot.Id,
+                            OrderBy = "DesiredStartTime",
+                            PageSize = 100
+                        });
+
+                    return localizationMission.FirstOrDefault()?.Area ?? null;
+                }
+
+                _logger.LogError("Robot {RobotName} is not localized and no localization mission is ongoing.", robot.Name);
+                SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} has not been localised.");
+                return null;
+            }
+
+            var area = await AreaService.ReadById(robot.CurrentArea!.Id);
+            if (area == null)
+            {
+                _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
+                SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} was not correctly localised. Could not find area {robot.CurrentArea.Name}");
+            }
+            return area ?? null;
+
         }
     }
 }
