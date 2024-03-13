@@ -15,7 +15,7 @@ namespace Api.Services
         public Task<IEnumerable<string>> ReadAllActivePlants();
         public Task<Robot?> ReadById(string id);
         public Task<Robot?> ReadByIsarId(string isarId);
-        public Task<IList<Robot>> ReadLocalizedRobotsForInstallation(string installationCode);
+        public Task<IList<Robot>> ReadRobotsForInstallation(string installationCode);
         public Task<Robot> Update(Robot robot);
         public Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status);
         public Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel);
@@ -218,22 +218,7 @@ namespace Api.Services
 
         public async Task<Robot> UpdateCurrentArea(string robotId, Area? area) { return await UpdateRobotProperty(robotId, "CurrentArea", area); }
 
-        public async Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen)
-        {
-            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
-            var robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-
-            await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
-
-            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.MissionQueueFrozen, missionQueueFrozen));
-
-            robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-            NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-
-            return robot;
-        }
+        public async Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen) { return await UpdateRobotProperty(robotId, "MissionQueueFrozen", missionQueueFrozen); }
 
         public async Task<IEnumerable<Robot>> ReadAll() { return await GetRobotsWithSubModels().ToListAsync(); }
 
@@ -271,7 +256,7 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<IList<Robot>> ReadLocalizedRobotsForInstallation(string installationCode)
+        public async Task<IList<Robot>> ReadRobotsForInstallation(string installationCode)
         {
             return await GetRobotsWithSubModels()
                 .Where(robot =>
@@ -279,7 +264,7 @@ namespace Api.Services
                     robot.CurrentInstallation != null &&
                     robot.CurrentInstallation.InstallationCode.ToLower().Equals(installationCode.ToLower())
 #pragma warning restore CA1304
-                    && robot.CurrentArea != null)
+                    )
                 .ToListAsync();
         }
 
