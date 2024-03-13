@@ -1,7 +1,7 @@
 import { Card, Typography } from '@equinor/eds-core-react'
 import { MissionControlButtons } from 'components/Displays/MissionButtons/MissionControlButtons'
 import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
-import { format, differenceInMinutes } from 'date-fns'
+import { differenceInMinutes } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
@@ -9,6 +9,7 @@ import { useLanguageContext, TranslateTextWithContext } from 'components/Context
 import { StatusReason } from '../StatusReason'
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
 import { TaskStatus } from 'models/Task'
+import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormatting'
 
 const HeaderSection = styled(Card)`
     width: 100%;
@@ -100,19 +101,19 @@ const getStartUsedAndRemainingTime = (
 
     if (mission.endTime) {
         startTime = mission.startTime
-            ? format(new Date(mission.startTime), 'HH:mm')
-            : format(new Date(mission.endTime), 'HH:mm')
+            ? formatDateTime(new Date(mission.startTime), 'HH:mm')
+            : formatDateTime(new Date(mission.endTime), 'HH:mm')
         startDate = mission.startTime
-            ? format(new Date(mission.startTime), 'dd/MM/yyy')
-            : format(new Date(mission.endTime), 'dd/MM/yyy')
+            ? formatDateTime(new Date(mission.startTime), 'dd/MM/yyy')
+            : formatDateTime(new Date(mission.endTime), 'dd/MM/yyy')
         usedTimeInMinutes = mission.startTime
             ? differenceInMinutes(new Date(mission.endTime), new Date(mission.startTime))
             : 0
         remainingTime = 'N/A'
     } else if (mission.startTime) {
-        startTime = format(new Date(mission.startTime), 'HH:mm')
-        startDate = format(new Date(mission.startTime), 'dd/MM/yyy')
-        usedTimeInMinutes = differenceInMinutes(Date.now(), new Date(mission.startTime))
+        startTime = formatDateTime(new Date(mission.startTime), 'HH:mm')
+        startDate = formatDateTime(new Date(mission.startTime), 'dd/MM/yyy')
+        usedTimeInMinutes = differenceInMinutes(Date.now(), convertUTCDateToLocalDate(new Date(mission.startTime)))
         if (estimatedDurationInMinutes)
             remainingTime = Math.max(estimatedDurationInMinutes - usedTimeInMinutes, 0) + ' ' + translatedMinutes
         else remainingTime = 'N/A'

@@ -5,8 +5,8 @@ import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/Missio
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
 import { TaskStatus } from 'models/Task'
 import { useNavigate } from 'react-router-dom'
-import { format } from 'date-fns'
 import { TextAlignedButton } from 'components/Styles/StyledComponents'
+import { formatDateTime } from 'utils/StringFormatting'
 
 interface IndexedMissionProps {
     index: number
@@ -21,7 +21,7 @@ const MissionEndTimeDisplay = ({ mission }: MissionProps) => {
     return (
         <>
             {mission.endTime ? (
-                <Typography>{format(new Date(mission.endTime), 'HH:mm:ss - dd/MM/yy')}</Typography>
+                <Typography>{formatDateTime(new Date(mission.endTime), 'HH:mm:ss - dd/MM/yy')}</Typography>
             ) : (
                 <Typography>-</Typography>
             )}

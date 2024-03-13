@@ -19,8 +19,7 @@ namespace Api.Utilities
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            var localDateTime = value.ToLocalTime();
-            writer.WriteStringValue(localDateTime.ToString(DateFormat, CultureInfo.InvariantCulture));
+            writer.WriteStringValue(value.ToString(DateFormat, CultureInfo.InvariantCulture));
         }
     }
 }
