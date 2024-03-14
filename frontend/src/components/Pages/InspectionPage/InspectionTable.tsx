@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { FrontPageSectionId } from 'models/FrontPageSectionId'
 
 const StyledIcon = styled(Icon)`
     display: flex;
@@ -280,8 +281,8 @@ export const InspectionTable = ({ deck, inspections, scrollOnToggle, openDialog,
         ))
 
     useEffect(() => {
-        let inspectionTable = document.getElementById('inspectionTable')
-        let topBarHeight = document.getElementById('topBar')?.offsetHeight ?? 0
+        let inspectionTable = document.getElementById(FrontPageSectionId.InspectionTable)
+        let topBarHeight = document.getElementById(FrontPageSectionId.TopBar)?.offsetHeight ?? 0
 
         if (inspectionTable) {
             window.scroll({ top: inspectionTable.offsetTop - topBarHeight, behavior: 'smooth' })
@@ -289,7 +290,7 @@ export const InspectionTable = ({ deck, inspections, scrollOnToggle, openDialog,
     }, [scrollOnToggle])
 
     return (
-        <StyledTable id="inspectionTable">
+        <StyledTable id={FrontPageSectionId.InspectionTable}>
             <HideColumnsOnSmallScreen>
                 <Table>
                     <Table.Caption>

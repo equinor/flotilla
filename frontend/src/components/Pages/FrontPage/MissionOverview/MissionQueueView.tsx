@@ -10,6 +10,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FrontPageSectionId } from 'models/FrontPageSectionId'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -66,7 +67,7 @@ export const MissionQueueView = (): JSX.Element => {
     )
 
     return (
-        <StyledMissionView id="missionQueue">
+        <StyledMissionView id={FrontPageSectionId.MissionQueue}>
             <Typography variant="h1" color="resting">
                 {TranslateText('Mission Queue')}
             </Typography>
