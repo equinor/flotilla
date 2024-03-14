@@ -13,6 +13,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { ScheduleMissionWithConfirmDialogs } from 'components/Displays/ConfirmScheduleDialogs/ConfirmScheduleDialog'
+import { FrontPageSectionId } from 'models/FrontPageSectionId'
 
 interface IProps {
     selectedMissions: CondensedMissionDefinition[]
@@ -107,8 +108,8 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         })
 
         if (missionsToSchedule.length > 0) {
-            let missionQueue = document.getElementById('missionQueue')
-            let topBarHeight = document.getElementById('topBar')?.offsetHeight ?? 0
+            let missionQueue = document.getElementById(FrontPageSectionId.MissionQueue)
+            let topBarHeight = document.getElementById(FrontPageSectionId.TopBar)?.offsetHeight ?? 0
 
             if (missionQueue) {
                 window.scroll({ top: missionQueue.offsetTop - topBarHeight, behavior: 'smooth' })

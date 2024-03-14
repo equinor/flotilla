@@ -6,6 +6,7 @@ import { SelectLanguage } from './LanguageSelector'
 import { Icons } from 'utils/icons'
 import { useAlertContext } from 'components/Contexts/AlertContext'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
+import { FrontPageSectionId } from 'models/FrontPageSectionId'
 
 const StyledTopBar = styled(TopBar)`
     margin-bottom: 2rem;
@@ -51,7 +52,7 @@ export const Header = ({ page }: { page: string }) => {
     const { installationName } = useInstallationContext()
     return (
         <>
-            <StyledTopBar id="topBar">
+            <StyledTopBar id={FrontPageSectionId.TopBar}>
                 <StyledWrapper>
                     <HandPointer>
                         <TopBar.Header
