@@ -81,6 +81,11 @@ namespace Api.EventHandlers
                     _scheduleLocalizationSemaphore.Release();
                     return;
                 }
+                if (await MissionService.OngoingLocalizationMissionRunExists(missionRun.Robot.Id))
+                {
+                    _scheduleLocalizationSemaphore.Release();
+                    return;
+                }
                 try
                 {
                     var localizationMissionRun = await LocalizationService.CreateLocalizationMissionInArea(missionRun.Robot.Id, missionRun.Area.Id);
@@ -210,7 +215,7 @@ namespace Api.EventHandlers
             if (!await LocalizationService.RobotIsLocalized(robot.Id))
             {
                 _logger.LogError($"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised.");
-                SignalRService.ReportFailureToSignalR(robot, $"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised.");
+                SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised.");
                 return;
             }
 
