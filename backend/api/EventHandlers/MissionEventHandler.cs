@@ -270,9 +270,10 @@ namespace Api.EventHandlers
             {
                 _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
                 SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} was not correctly localised. Could not find area {robot.CurrentArea.Name}");
+                return null;
             }
-            return area ?? null;
 
+            return area;
         }
     }
 }
