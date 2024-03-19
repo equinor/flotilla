@@ -296,6 +296,12 @@ namespace Api.Services
                     continue;
                 }
 
+                if (missionRun.IsReturnHomeMission())
+                {
+                    logger.LogWarning("Return to home mission will not be added back to the queue.");
+                    return;
+                }
+
                 var newMissionRun = new MissionRun
                 {
                     Name = missionRun.Name,
@@ -305,7 +311,7 @@ namespace Api.Services
                     Area = missionRun.Area,
                     Status = MissionStatus.Pending,
                     DesiredStartTime = DateTime.UtcNow,
-                    Tasks = missionRun.Tasks,
+                    Tasks = missionRun.Tasks.Select(t => new MissionTask(t)).ToList(),
                     Map = new MapMetadata()
                 };
 
