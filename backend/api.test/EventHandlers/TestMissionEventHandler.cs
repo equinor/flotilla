@@ -284,7 +284,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void QueuedMissionsAreCancelledWhenLocalizationFails()
+        public async void QueuedMissionsAreAbortedWhenLocalizationFails()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -313,7 +313,7 @@ namespace Api.Test.EventHandlers
 
             // Assert
             var postTestMissionRun = await _missionRunService.ReadById(missionRun1.Id);
-            Assert.Equal(MissionStatus.Cancelled, postTestMissionRun!.Status);
+            Assert.Equal(MissionStatus.Aborted, postTestMissionRun!.Status);
         }
 
     }

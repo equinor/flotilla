@@ -813,7 +813,7 @@ namespace Api.Test
             Assert.True(missionByIdResponse.IsSuccessStatusCode);
             var missionRunAfterUpdate = await missionByIdResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
             Assert.NotNull(missionRunAfterUpdate);
-            Assert.True(missionRunAfterUpdate.Status == MissionStatus.Cancelled);
+            Assert.True(missionRunAfterUpdate.Status == MissionStatus.Aborted);
         }
 
     }
