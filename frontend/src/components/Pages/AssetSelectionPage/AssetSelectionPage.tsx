@@ -18,18 +18,16 @@ const Centered = styled.div`
     align-items: center;
     margin-top: 5rem;
 `
-const BlockLevelContainer = styled.div`
-    & > * {
-        display: block;
-    }
+const StyledAssetSelection = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 `
 const StyledCheckbox = styled(Checkbox)`
-    margin-left: -14px;
-    display: flex;
-    align-items: center;
+    padding-right: 14px;
 `
 const StyledButton = styled(Button)`
-    margin-top: 50px;
+    justify-content: center;
 `
 
 const handleLogin = (instance: IPublicClientApplication) => {
@@ -96,46 +94,44 @@ const InstallationPicker = () => {
     }, [showActivePlants, updateListOfActivePlants])
 
     return (
-        <>
-            <BlockLevelContainer>
-                <Autocomplete
-                    options={Array.from(mappedOptions.keys()).sort()}
-                    label=""
-                    initialSelectedOptions={[selectedInstallation]}
-                    selectedOptions={[selectedInstallation]}
-                    placeholder={TranslateText('Select installation')}
-                    onOptionsChange={({ selectedItems }) => {
-                        const selectedName = selectedItems[0]
-                        validateInstallation(selectedName)
-                            ? setSelectedInstallation(selectedName)
-                            : setSelectedInstallation('')
-                    }}
-                    onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        validateInstallation(e.target.value)
-                            ? setSelectedInstallation(e.target.value)
-                            : setSelectedInstallation('')
-                    }}
-                    autoWidth={true}
-                    onFocus={(e) => {
-                        e.preventDefault()
-                        setUpdateListOfActivePlants(!updateListOfActivePlants)
-                    }}
-                />
-                <StyledCheckbox
-                    label={TranslateText('Show only active installations')}
-                    checked={showActivePlants}
-                    onChange={(e) => setShowActivePlants(e.target.checked)}
-                    crossOrigin={undefined}
-                />
-                <StyledButton
-                    onClick={() => switchInstallation(selectedInstallation)}
-                    disabled={!selectedInstallation}
-                    href={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
-                >
-                    {TranslateText('Confirm installation')}
-                </StyledButton>
-            </BlockLevelContainer>
-        </>
+        <StyledAssetSelection>
+            <Autocomplete
+                options={Array.from(mappedOptions.keys()).sort()}
+                label=""
+                initialSelectedOptions={[selectedInstallation]}
+                selectedOptions={[selectedInstallation]}
+                placeholder={TranslateText('Select installation')}
+                onOptionsChange={({ selectedItems }) => {
+                    const selectedName = selectedItems[0]
+                    validateInstallation(selectedName)
+                        ? setSelectedInstallation(selectedName)
+                        : setSelectedInstallation('')
+                }}
+                onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    validateInstallation(e.target.value)
+                        ? setSelectedInstallation(e.target.value)
+                        : setSelectedInstallation('')
+                }}
+                autoWidth={true}
+                onFocus={(e) => {
+                    e.preventDefault()
+                    setUpdateListOfActivePlants(!updateListOfActivePlants)
+                }}
+            />
+            <StyledCheckbox
+                label={TranslateText('Show only active installations')}
+                checked={showActivePlants}
+                onChange={(e) => setShowActivePlants(e.target.checked)}
+                crossOrigin={undefined}
+            />
+            <StyledButton
+                onClick={() => switchInstallation(selectedInstallation)}
+                disabled={!selectedInstallation}
+                href={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
+            >
+                {TranslateText('Confirm installation')}
+            </StyledButton>
+        </StyledAssetSelection>
     )
 }
 
