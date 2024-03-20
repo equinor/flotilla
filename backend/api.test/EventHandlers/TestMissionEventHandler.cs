@@ -11,6 +11,7 @@ using Api.Mqtt.MessageModels;
 using Api.Options;
 using Api.Services;
 using Api.Services.ActionServices;
+using Api.Services.Events;
 using Api.Test.Database;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Builder;
@@ -31,6 +32,9 @@ namespace Api.Test.EventHandlers
         private readonly MqttEventHandler _mqttEventHandler;
         private readonly MqttService _mqttService;
         private readonly DatabaseUtilities _databaseUtilities;
+        private readonly RobotService _robotService;
+        private readonly LocalizationService _localizationService;
+        private readonly EmergencyActionService _emergencyActionService;
 
         public TestMissionEventHandler(DatabaseFixture fixture)
         {
@@ -57,6 +61,7 @@ namespace Api.Test.EventHandlers
             _mqttService = new MqttService(mqttServiceLogger, configuration);
             _missionRunService = new MissionRunService(context, signalRService, missionLogger, accessRoleService);
 
+
             var echoServiceMock = new MockEchoService();
             var stidServiceMock = new MockStidService(context);
             var customMissionServiceMock = new MockCustomMissionService();
@@ -69,15 +74,17 @@ namespace Api.Test.EventHandlers
             var plantService = new PlantService(context, installationService, accessRoleService);
             var deckService = new DeckService(context, defaultLocalizationPoseService, installationService, plantService, accessRoleService, signalRService);
             var areaService = new AreaService(context, installationService, plantService, deckService, defaultLocalizationPoseService, accessRoleService);
-            var robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService, _missionRunService);
             var mapServiceMock = new MockMapService();
-            var localizationService = new LocalizationService(localizationServiceLogger, robotService, _missionRunService, installationService, areaService, mapServiceMock);
-            var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, robotService, _missionRunService, mapServiceMock);
-            var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, robotService, areaService,
-                isarServiceMock, localizationService, returnToHomeService, signalRService);
+            _robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService, _missionRunService);
+            _localizationService = new LocalizationService(localizationServiceLogger, _robotService, _missionRunService, installationService, areaService, mapServiceMock);
+
+            var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, _robotService, _missionRunService, mapServiceMock);
+            var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, areaService,
+                isarServiceMock, _localizationService, returnToHomeService, signalRService);
             var lastMissionRunService = new LastMissionRunService(lastMissionRunServiceLogger, missionDefinitionService, _missionRunService);
 
             _databaseUtilities = new DatabaseUtilities(context);
+            _emergencyActionService = new EmergencyActionService();
 
             var mockServiceProvider = new Mock<IServiceProvider>();
 
@@ -87,7 +94,7 @@ namespace Api.Test.EventHandlers
                 .Returns(_missionRunService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IRobotService)))
-                .Returns(robotService);
+                .Returns(_robotService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IMissionSchedulingService)))
                 .Returns(missionSchedulingService);
@@ -96,7 +103,7 @@ namespace Api.Test.EventHandlers
                 .Returns(context);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(ILocalizationService)))
-                .Returns(localizationService);
+                .Returns(_localizationService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IReturnToHomeService)))
                 .Returns(returnToHomeService);
@@ -109,6 +116,16 @@ namespace Api.Test.EventHandlers
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(ILastMissionRunService)))
                 .Returns(lastMissionRunService);
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(IAreaService)))
+                .Returns(areaService);
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(ISignalRService)))
+                .Returns(signalRService);
+            mockServiceProvider
+                .Setup(p => p.GetService(typeof(IEmergencyActionService)))
+                .Returns(_emergencyActionService);
+
 
             // Mock service injector
             var mockScope = new Mock<IServiceScope>();
@@ -316,5 +333,31 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Aborted, postTestMissionRun!.Status);
         }
 
+        [Fact]
+        public async void LocalizationMissionCompletesAfterPressingSendToSafeZoneButton()
+        {
+            // Arrange
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
+            await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunPriority.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString());
+
+            Thread.Sleep(100);
+
+            // Act
+            var eventArgs = new EmergencyButtonPressedForRobotEventArgs(robot.Id);
+            _emergencyActionService.RaiseEvent(nameof(EmergencyActionService.EmergencyButtonPressedForRobot), eventArgs);
+
+            Thread.Sleep(1000);
+
+            // Assert 
+            var updatedRobot = await _robotService.ReadById(robot.Id);
+            Assert.True(updatedRobot?.MissionQueueFrozen);
+
+            bool isRobotLocalized = await _localizationService.RobotIsLocalized(robot.Id);
+            Assert.True(isRobotLocalized);
+        }
     }
 }
