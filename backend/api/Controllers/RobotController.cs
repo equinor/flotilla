@@ -641,10 +641,10 @@ namespace Api.Controllers
                 return NotFound(errorMessage);
             }
 
-            try { await missionSchedulingService.CancelAllScheduledMissions(robot.Id); }
+            try { await missionSchedulingService.AbortAllScheduledMissions(robot.Id); }
             catch (RobotNotFoundException)
             {
-                string errorMessage = $"Failed to cancel scheduled missions for robot with id {robotId}";
+                string errorMessage = $"Failed to abort scheduled missions for robot with id {robotId}";
                 logger.LogWarning("{Message}", errorMessage);
                 return NotFound(errorMessage);
             }

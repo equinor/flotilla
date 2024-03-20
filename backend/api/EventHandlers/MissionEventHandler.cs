@@ -93,8 +93,8 @@ namespace Api.EventHandlers
                     or IsarCommunicationException
                 )
                 {
-                    _logger.LogError("Mission run {MissionRunId} will be cancelled as robot {RobotId} was not correctly localized", missionRun.Id, missionRun.Robot.Id);
-                    missionRun.Status = MissionStatus.Cancelled;
+                    _logger.LogError("Mission run {MissionRunId} will be aborted as robot {RobotId} was not correctly localized", missionRun.Id, missionRun.Robot.Id);
+                    missionRun.Status = MissionStatus.Aborted;
                     await MissionService.Update(missionRun);
                     return;
                 }

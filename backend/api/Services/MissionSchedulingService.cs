@@ -16,7 +16,7 @@ namespace Api.Services
 
         public Task StopCurrentMissionRun(string robotId);
 
-        public Task CancelAllScheduledMissions(string robotId);
+        public Task AbortAllScheduledMissions(string robotId);
 
         public Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId);
 
@@ -75,17 +75,17 @@ namespace Api.Services
             // Verify that localization is fine
             if (!await localizationService.RobotIsLocalized(robot.Id) && !missionRun.IsLocalizationMission())
             {
-                logger.LogError("Tried to schedule mission {MissionRunId} on robot {RobotId} before the robot was localized, scheduled missions will be canceled", missionRun.Id, robot.Id);
-                try { await CancelAllScheduledMissions(robot.Id); }
-                catch (RobotNotFoundException) { logger.LogError("Failed to cancel scheduled missions for robot {RobotId}", robot.Id); }
+                logger.LogError("Tried to schedule mission {MissionRunId} on robot {RobotId} before the robot was localized, scheduled missions will be aborted", missionRun.Id, robot.Id);
+                try { await AbortAllScheduledMissions(robot.Id); }
+                catch (RobotNotFoundException) { logger.LogError("Failed to abort scheduled missions for robot {RobotId}", robot.Id); }
                 return;
             }
 
             if (!missionRun.IsLocalizationMission() && !await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
             {
-                logger.LogError("Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Cancelling all mission runs", robot.Id, missionRun.Id);
-                try { await CancelAllScheduledMissions(robot.Id); }
-                catch (RobotNotFoundException) { logger.LogError("Failed to cancel scheduled missions for robot {RobotId}", robot.Id); }
+                logger.LogError("Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Aborting all mission runs", robot.Id, missionRun.Id);
+                try { await AbortAllScheduledMissions(robot.Id); }
+                catch (RobotNotFoundException) { logger.LogError("Failed to abort scheduled missions for robot {RobotId}", robot.Id); }
 
                 try { await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
                 catch (ReturnToHomeMissionFailedToScheduleException)
@@ -184,7 +184,7 @@ namespace Api.Services
             catch (RobotNotFoundException) { }
         }
 
-        public async Task CancelAllScheduledMissions(string robotId)
+        public async Task AbortAllScheduledMissions(string robotId)
         {
             var robot = await robotService.ReadById(robotId);
             if (robot == null)
@@ -206,7 +206,7 @@ namespace Api.Services
 
             foreach (var pendingMissionRun in pendingMissionRuns)
             {
-                pendingMissionRun.Status = MissionStatus.Cancelled;
+                pendingMissionRun.Status = MissionStatus.Aborted;
                 await missionRunService.Update(pendingMissionRun);
             }
         }
