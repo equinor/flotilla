@@ -167,8 +167,6 @@ namespace Api.EventHandlers
             {
                 _logger.LogError(ex, "Failed to schedule return to safe zone mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
                 SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Failed to send {robot.Name} to a safe zone");
-                try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
-                catch (RobotNotFoundException) { return; }
             }
 
             if (await MissionService.OngoingLocalizationMissionRunExists(e.RobotId)) { return; }
