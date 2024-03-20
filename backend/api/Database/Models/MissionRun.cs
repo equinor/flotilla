@@ -26,12 +26,12 @@ namespace Api.Database.Models
                 _status = value;
                 if (IsCompleted && EndTime is null)
                 {
-                    EndTime = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                    EndTime = DateTime.UtcNow;
                 }
 
                 if (_status is MissionStatus.Ongoing && StartTime is null)
                 {
-                    StartTime = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified);
+                    StartTime = DateTime.UtcNow;
                 }
             }
         }
