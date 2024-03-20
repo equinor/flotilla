@@ -95,6 +95,7 @@ namespace Api.EventHandlers
                 {
                     _logger.LogError("Mission run {MissionRunId} will be aborted as robot {RobotId} was not correctly localized", missionRun.Id, missionRun.Robot.Id);
                     missionRun.Status = MissionStatus.Aborted;
+                    missionRun.StatusReason = "Aborted: Robot was not correctly localized";
                     await MissionService.Update(missionRun);
                     return;
                 }

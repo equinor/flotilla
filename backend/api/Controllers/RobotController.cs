@@ -641,7 +641,7 @@ namespace Api.Controllers
                 return NotFound(errorMessage);
             }
 
-            try { await missionSchedulingService.AbortAllScheduledMissions(robot.Id); }
+            try { await missionSchedulingService.AbortAllScheduledMissions(robot.Id, "Aborted: Robot was reset"); }
             catch (RobotNotFoundException)
             {
                 string errorMessage = $"Failed to abort scheduled missions for robot with id {robotId}";
