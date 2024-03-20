@@ -16,7 +16,7 @@ namespace Api.Services
 
         public Task StopCurrentMissionRun(string robotId);
 
-        public Task AbortAllScheduledMissions(string robotId);
+        public Task AbortAllScheduledMissions(string robotId, string? abortReason = null);
 
         public Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId);
 
@@ -76,7 +76,7 @@ namespace Api.Services
             if (!await localizationService.RobotIsLocalized(robot.Id) && !missionRun.IsLocalizationMission())
             {
                 logger.LogError("Tried to schedule mission {MissionRunId} on robot {RobotId} before the robot was localized, scheduled missions will be aborted", missionRun.Id, robot.Id);
-                try { await AbortAllScheduledMissions(robot.Id); }
+                try { await AbortAllScheduledMissions(robot.Id, "Aborted: Robot was not localized"); }
                 catch (RobotNotFoundException) { logger.LogError("Failed to abort scheduled missions for robot {RobotId}", robot.Id); }
                 return;
             }
@@ -84,7 +84,7 @@ namespace Api.Services
             if (!missionRun.IsLocalizationMission() && !await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
             {
                 logger.LogError("Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Aborting all mission runs", robot.Id, missionRun.Id);
-                try { await AbortAllScheduledMissions(robot.Id); }
+                try { await AbortAllScheduledMissions(robot.Id, "Aborted: Robot was at different deck"); }
                 catch (RobotNotFoundException) { logger.LogError("Failed to abort scheduled missions for robot {RobotId}", robot.Id); }
 
                 try { await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
@@ -184,7 +184,7 @@ namespace Api.Services
             catch (RobotNotFoundException) { }
         }
 
-        public async Task AbortAllScheduledMissions(string robotId)
+        public async Task AbortAllScheduledMissions(string robotId, string? abortReason)
         {
             var robot = await robotService.ReadById(robotId);
             if (robot == null)
@@ -197,7 +197,7 @@ namespace Api.Services
             var pendingMissionRuns = await missionRunService.ReadMissionRunQueue(robotId);
             if (pendingMissionRuns is null)
             {
-                string infoMessage = $"There were no mission runs in the queue to stop for robot {robotId}";
+                string infoMessage = $"There were no mission runs in the queue to abort for robot {robotId}";
                 logger.LogWarning("{Message}", infoMessage);
                 return;
             }
@@ -207,6 +207,7 @@ namespace Api.Services
             foreach (var pendingMissionRun in pendingMissionRuns)
             {
                 pendingMissionRun.Status = MissionStatus.Aborted;
+                pendingMissionRun.StatusReason = abortReason;
                 await missionRunService.Update(pendingMissionRun);
             }
         }
