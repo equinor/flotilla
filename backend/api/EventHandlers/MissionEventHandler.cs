@@ -159,17 +159,17 @@ namespace Api.EventHandlers
             try { await MissionScheduling.FreezeMissionRunQueueForRobot(e.RobotId); }
             catch (RobotNotFoundException) { return; }
 
-            var area = await FindRobotArea(robot.Id);
+            var area = await FindRelevantRobotAreaForSafePositionMission(robot.Id);
             if (area == null) { return; }
 
-            try { await MissionScheduling.ScheduleMissionToReturnToSafePosition(e.RobotId, area.Id); }
+            try { await MissionScheduling.ScheduleMissionToDriveToSafePosition(e.RobotId, area.Id); }
             catch (SafeZoneException ex)
             {
                 _logger.LogError(ex, "Failed to schedule return to safe zone mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
                 SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Failed to send {robot.Name} to a safe zone");
             }
 
-            if (await MissionService.OngoingLocalizationMissionRunExists(e.RobotId)) { return; }
+            if (await MissionService.PendingOrOngoingLocalizationMissionRunExists(e.RobotId)) { return; }
             try { await MissionScheduling.StopCurrentMissionRun(e.RobotId); }
             catch (RobotNotFoundException) { return; }
             catch (MissionRunNotFoundException)
@@ -194,7 +194,10 @@ namespace Api.EventHandlers
                 return;
             }
 
-            MissionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+            _startMissionSemaphore.WaitOne();
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
+            catch (MissionRunNotFoundException) { return; }
+            finally { _startMissionSemaphore.Release(); }
         }
 
         private async void OnEmergencyButtonDepressedForRobot(object? sender, EmergencyButtonPressedForRobotEventArgs e)
@@ -210,29 +213,13 @@ namespace Api.EventHandlers
             try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
             catch (RobotNotFoundException) { return; }
 
-            if (!await LocalizationService.RobotIsLocalized(robot.Id))
-            {
-                _logger.LogError($"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised.");
-                SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised.");
-                return;
-            }
-
-            var area = await AreaService.ReadById(robot.CurrentArea!.Id);
-            if (area == null)
-            {
-                _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
-                SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} could not be sent from safe zone as it is not correctly localised");
-            }
-
-            if (await MissionScheduling.OngoingMission(robot.Id))
-            {
-                _logger.LogInformation("Robot {RobotName} was unfrozen but the mission to return to safe zone will be completed before further missions are started", robot.Id);
-            }
-
-            MissionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+            _startMissionSemaphore.WaitOne();
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
+            catch (MissionRunNotFoundException) { return; }
+            finally { _startMissionSemaphore.Release(); }
         }
 
-        private async Task<Area?> FindRobotArea(string robotId)
+        private async Task<Area?> FindRelevantRobotAreaForSafePositionMission(string robotId)
         {
             var robot = await RobotService.ReadById(robotId);
             if (robot == null)
@@ -244,18 +231,20 @@ namespace Api.EventHandlers
             if (!await LocalizationService.RobotIsLocalized(robotId))
             {
 
-                if (await MissionService.OngoingLocalizationMissionRunExists(robotId))
+                if (await MissionService.PendingOrOngoingLocalizationMissionRunExists(robotId))
                 {
-                    var localizationMission = await MissionService.ReadAll(
+                    var missionRuns = await MissionService.ReadAll(
                         new MissionRunQueryStringParameters
                         {
-                            Statuses = [MissionStatus.Ongoing],
+                            Statuses = [MissionStatus.Ongoing, MissionStatus.Pending],
                             RobotId = robot.Id,
                             OrderBy = "DesiredStartTime",
                             PageSize = 100
                         });
 
-                    return localizationMission.FirstOrDefault()?.Area ?? null;
+                    var localizationMission = missionRuns.Find(missionRun => missionRun.IsLocalizationMission());
+
+                    return localizationMission?.Area ?? null;
                 }
 
                 _logger.LogError("Robot {RobotName} is not localized and no localization mission is ongoing.", robot.Name);
