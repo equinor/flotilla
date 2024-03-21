@@ -18,7 +18,7 @@ namespace Api.Services
 
         public Task AbortAllScheduledMissions(string robotId, string? abortReason = null);
 
-        public Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId);
+        public Task ScheduleMissionToDriveToSafePosition(string robotId, string areaId);
 
         public Task UnfreezeMissionRunQueueForRobot(string robotId);
 
@@ -212,7 +212,7 @@ namespace Api.Services
             }
         }
 
-        public async Task ScheduleMissionToReturnToSafePosition(string robotId, string areaId)
+        public async Task ScheduleMissionToDriveToSafePosition(string robotId, string areaId)
         {
             var area = await areaService.ReadById(areaId);
             if (area == null)
@@ -443,7 +443,7 @@ namespace Api.Services
                 throw new MissionRunNotFoundException(errorMessage);
             }
 
-            if (robot.MissionQueueFrozen && missionRun.MissionRunPriority != MissionRunPriority.Emergency)
+            if (robot.MissionQueueFrozen && missionRun.MissionRunPriority != MissionRunPriority.Emergency && missionRun.MissionRunPriority != MissionRunPriority.Localization)
             {
                 logger.LogInformation("Mission run {MissionRunId} was not started as the mission run queue for robot {RobotName} is frozen", missionRun.Id, robot.Name);
                 return false;
