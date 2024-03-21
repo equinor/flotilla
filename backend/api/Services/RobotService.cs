@@ -279,7 +279,7 @@ namespace Api.Services
                 var missionRun = await missionRunService.ReadById(robot.CurrentMissionId);
                 if (missionRun != null)
                 {
-                    missionRun.SetToFailed();
+                    missionRun.SetToFailed("Lost connection to ISAR during mission");
                     await missionRunService.Update(missionRun);
                     logger.LogWarning(
                         "Mission '{Id}' failed because ISAR could not be reached",
