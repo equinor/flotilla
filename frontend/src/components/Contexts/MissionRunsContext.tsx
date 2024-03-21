@@ -76,14 +76,10 @@ export const useMissionRuns = (): IMissionRunsContext => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.missionRunCreated, (username: string, message: string) => {
                 const newMission: Mission = JSON.parse(message)
-                if (!missionQueue.find((m) => m.id === newMission.id))
-                    setMissionQueue((oldQueue) => [...oldQueue, newMission])
-                else
-                    setMissionQueue((oldQueue) => {
-                        let missionQueueCopy = [...oldQueue]
-                        missionQueueCopy = upsertMissionList(missionQueueCopy, newMission)
-                        return [...missionQueueCopy]
-                    })
+                setMissionQueue((oldQueue) => {
+                    let missionQueueCopy = upsertMissionList(oldQueue, newMission)
+                    return [...missionQueueCopy]
+                })
             })
             registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
                 let updatedMission: Mission = JSON.parse(message)
