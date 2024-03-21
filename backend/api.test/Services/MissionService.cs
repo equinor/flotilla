@@ -12,7 +12,7 @@ using Xunit;
 namespace Api.Test.Services
 {
     [Collection("Database collection")]
-    public class MissionServiceTest : IDisposable
+    public class MissionServiceTest : IAsyncLifetime
     {
         private readonly FlotillaDbContext _context;
         private readonly DatabaseUtilities _databaseUtilities;
@@ -20,6 +20,8 @@ namespace Api.Test.Services
         private readonly MissionRunService _missionRunService;
         private readonly ISignalRService _signalRService;
         private readonly IAccessRoleService _accessRoleService;
+
+        private readonly Func<Task> _resetDatabase;
 
         public MissionServiceTest(DatabaseFixture fixture)
         {
@@ -29,12 +31,16 @@ namespace Api.Test.Services
             _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
             _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService);
             _databaseUtilities = new DatabaseUtilities(_context);
+
+            _resetDatabase = fixture.ResetDatabase;
         }
 
-        public void Dispose()
+        public Task InitializeAsync() => Task.CompletedTask;
+
+        public async Task DisposeAsync()
         {
-            _context.Dispose();
-            GC.SuppressFinalize(this);
+            await _resetDatabase();
+            await _context.DisposeAsync();
         }
 
         [Fact]

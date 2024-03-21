@@ -15,13 +15,13 @@ namespace Api.Test
 {
     public class TestWebApplicationFactory<TProgram>(string? databaseConnectionString) : WebApplicationFactory<Program> where TProgram : class
     {
-        private string? _databaseConnectionString = databaseConnectionString;
+        public IConfiguration? Configuration;
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             string projectDir = Directory.GetCurrentDirectory();
             string configPath = Path.Combine(projectDir, "appsettings.Test.json");
-            var configuration = new ConfigurationBuilder()
+            Configuration = new ConfigurationBuilder()
                             .AddJsonFile(configPath)
                             .Build();
             builder.UseEnvironment("Test");
@@ -41,7 +41,7 @@ namespace Api.Test
                     services.AddDbContext<FlotillaDbContext>(
                         options =>
                             options.UseNpgsql(
-                                _databaseConnectionString,
+                                databaseConnectionString,
                                 o =>
                                 {
                                     o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);

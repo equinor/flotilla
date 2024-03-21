@@ -1,63 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Api.Controllers.Models;
-using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Moq;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 namespace Api.Test.Services
 {
     [Collection("Database collection")]
-    public class RobotServiceTest : IAsyncLifetime
+    public class RobotServiceTest(DatabaseFixture fixture) : IAsyncLifetime
     {
-        private readonly FlotillaDbContext _context;
-        private readonly ILogger<RobotService> _logger;
-        private readonly RobotModelService _robotModelService;
-        private readonly ISignalRService _signalRService;
-        private readonly IAccessRoleService _accessRoleService;
-        private readonly IInstallationService _installationService;
-        private readonly IPlantService _plantService;
-        private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
-        private readonly IDeckService _deckService;
-        private readonly IAreaService _areaService;
-        private readonly IMissionRunService _missionRunService;
-        private readonly DatabaseUtilities _databaseUtilities;
+        private readonly DatabaseUtilities _databaseUtilities = new(fixture.Context);
+        private readonly IRobotService _robotService = fixture.ServiceProvider.GetRequiredService<IRobotService>();
 
-        private readonly IRobotService _robotService;
-
-        private readonly Func<Task> _resetDatabase;
-
-        public RobotServiceTest(DatabaseFixture fixture)
-        {
-            _context = fixture.Context;
-            _resetDatabase = fixture.ResetDatabase;
-            _logger = new Mock<ILogger<RobotService>>().Object;
-            _robotModelService = new RobotModelService(_context);
-            _signalRService = new MockSignalRService();
-            _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
-            _installationService = new InstallationService(_context, _accessRoleService);
-            _plantService = new PlantService(_context, _installationService, _accessRoleService);
-            _defaultLocalizationPoseService = new DefaultLocalizationPoseService(_context);
-            _deckService = new DeckService(_context, _defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService);
-            _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalizationPoseService, _accessRoleService);
-            _missionRunService = new MissionRunService(_context, _signalRService, new Mock<ILogger<MissionRunService>>().Object, _accessRoleService);
-            _databaseUtilities = new DatabaseUtilities(_context);
-
-            _robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
-        }
+        private readonly Func<Task> _resetDatabase = fixture.ResetDatabase;
 
         public Task InitializeAsync() => Task.CompletedTask;
 
         public async Task DisposeAsync()
         {
             await _resetDatabase();
-            GC.SuppressFinalize(this);
         }
 
         [Fact]
@@ -70,8 +33,7 @@ namespace Api.Test.Services
             var robotOne = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
             var robotTwo = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
 
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
-            var robots = await robotService.ReadAll();
+            var robots = await _robotService.ReadAll();
 
             Assert.Equal(2, robots.Count());
         }
@@ -85,17 +47,15 @@ namespace Api.Test.Services
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
 
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
-            var robotById = await robotService.ReadById(robot.Id);
+            var robotById = await _robotService.ReadById(robot.Id, noTracking: true);
 
-            Assert.Equal(robot, robotById);
+            Assert.Equal(robot.Id, robotById!.Id);
         }
 
         [Fact]
         public async Task CheckThatNullIsReturnedWhenInvalidIdIsProvided()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
-            var robot = await robotService.ReadById("invalid_id");
+            var robot = await _robotService.ReadById("invalid_id");
             Assert.Null(robot);
         }
 
@@ -108,10 +68,8 @@ namespace Api.Test.Services
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
 
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
-
-            var robotFromDatabase = await robotService.ReadById(robot.Id);
-            Assert.Equal(robot, robotFromDatabase);
+            var robotFromDatabase = await _robotService.ReadById(robot.Id);
+            Assert.Equal(robot.Id, robotFromDatabase!.Id);
         }
 
         [Fact]
@@ -129,7 +87,7 @@ namespace Api.Test.Services
             await _robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
 
             // Assert
-            var postTestRobot = await _robotService.ReadById(robot.Id);
+            var postTestRobot = await _robotService.ReadById(robot.Id, noTracking: true);
             Assert.Equal(RobotStatus.Busy, postTestRobot!.Status);
         }
     }

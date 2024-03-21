@@ -1,14 +1,19 @@
-﻿using System.Data.Common;
+﻿using System;
+using System.Data.Common;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Api.Database.Context;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Respawn;
-using SQLitePCL;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -17,12 +22,21 @@ namespace Api.Test
     // Class for building and disposing dbcontext
     public class DatabaseFixture : IAsyncLifetime
     {
-        public FlotillaDbContext Context => CreateContext(); //{ get; private set; }
+        public FlotillaDbContext Context => CreateContext();
+
+        public required TestWebApplicationFactory<Program> Factory;
+
+        public required IServiceProvider ServiceProvider;
+
+        public required HttpClient Client;
+
+        public required JsonSerializerOptions SerializerOptions;
 
         private readonly PostgreSqlContainer _container = new PostgreSqlBuilder().Build();
-        public string ConnectionString => _container.GetConnectionString();
+        private string ConnectionString => _container.GetConnectionString();
 
         private Respawner _respawner;
+
         private DbConnection _connection;
 
 
@@ -41,6 +55,28 @@ namespace Api.Test
             await _connection.OpenAsync();
 
             _respawner = await Respawner.CreateAsync(_connection, respawnerOptions);
+
+            Factory = new TestWebApplicationFactory<Program>(ConnectionString);
+
+            Client = Factory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false,
+                BaseAddress = new Uri("https://localhost:8000")
+            });
+            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                TestAuthHandler.AuthenticationScheme
+            );
+
+            ServiceProvider = Factory.Services;
+
+            SerializerOptions = new JsonSerializerOptions
+            {
+                Converters =
+                {
+                    new JsonStringEnumConverter()
+                },
+                PropertyNameCaseInsensitive = true
+            };
         }
 
         public async Task DisposeAsync()

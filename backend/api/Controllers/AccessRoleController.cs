@@ -78,7 +78,7 @@ namespace Api.Controllers
 
                 var newAccessRole = await accessRoleService.Create(installation, accessRoleQuery.RoleName, accessRoleQuery.AccessLevel);
                 logger.LogInformation(
-                    "Succesfully created new access role for installation '{installationCode}'",
+                    "Successfully created new access role for installation '{installationCode}'",
                     installation.InstallationCode
                 );
                 return newAccessRole;
