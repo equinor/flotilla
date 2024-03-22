@@ -250,6 +250,54 @@ namespace Api.Controllers
         }
 
         /// <summary>
+        ///     Updates deprecated field of a robot in the database
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        /// <response code="200"> The robot was successfully updated </response>
+        /// <response code="404"> There was no robot with the given ID in the database </response>
+        [HttpPut]
+        [Authorize(Roles = Role.Admin)]
+        [Route("{id}/deprecated/{deprecated}")]
+        [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<RobotResponse>> UpdateRobotDeprecated(
+            [FromRoute] string id,
+            [FromRoute] bool deprecated
+        )
+        {
+            logger.LogInformation("Updating deprecated on robot with id={Id} to deprecated={Deprecated}", id, deprecated);
+
+            try
+            {
+                var robot = await robotService.ReadById(id);
+                if (robot == null)
+                {
+                    string errorMessage = $"No robot with id: {id} could be found";
+                    logger.LogError("{Message}", errorMessage);
+                    return NotFound(errorMessage);
+                }
+
+                Robot updatedRobot;
+                updatedRobot = await robotService.UpdateDeprecated(id, deprecated);
+
+                var robotResponse = new RobotResponse(updatedRobot);
+                logger.LogInformation("Successful updated deprecated on robot to database");
+
+                return Ok(robotResponse);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error while updating robot with id={Id}", id);
+                throw;
+            }
+        }
+
+        /// <summary>
         ///     Deletes the robot with the specified id from the database
         /// </summary>
         [HttpDelete]

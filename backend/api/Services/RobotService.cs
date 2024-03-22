@@ -24,6 +24,7 @@ namespace Api.Services
         public Task<Robot> UpdateRobotIsarConnected(string robotId, bool isarConnected);
         public Task<Robot> UpdateCurrentMissionId(string robotId, string? missionId);
         public Task<Robot> UpdateCurrentArea(string robotId, Area? area);
+        public Task<Robot> UpdateDeprecated(string robotId, bool deprecated);
         public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
         public Task<Robot?> Delete(string id);
         public Task SetRobotToIsarDisconnected(string robotId);
@@ -217,6 +218,8 @@ namespace Api.Services
         }
 
         public async Task<Robot> UpdateCurrentArea(string robotId, Area? area) { return await UpdateRobotProperty(robotId, "CurrentArea", area); }
+
+        public async Task<Robot> UpdateDeprecated(string robotId, bool deprecated) { return await UpdateRobotProperty(robotId, "Deprecated", deprecated); }
 
         public async Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen) { return await UpdateRobotProperty(robotId, "MissionQueueFrozen", missionQueueFrozen); }
 
