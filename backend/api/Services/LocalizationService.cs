@@ -75,6 +75,12 @@ namespace Api.Services
                 logger.LogWarning("{Message}", errorMessage);
                 throw new RobotNotAvailableException(errorMessage);
             }
+            if (robot.Deprecated)
+            {
+                string errorMessage = $"Robot '{robot.Id}' is deprecated and cannot localize";
+                logger.LogWarning("{Message}", errorMessage);
+                throw new RobotNotAvailableException(errorMessage);
+            }
 
             var localizationMissionRun = new MissionRun
             {
