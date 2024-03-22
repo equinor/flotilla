@@ -26,6 +26,7 @@ export interface Robot {
     pose?: Pose
     status: RobotStatus
     isarConnected: boolean
+    deprecated: boolean
     host?: string
     logs?: string
     port?: number
@@ -40,4 +41,5 @@ export const placeholderRobot: Robot = {
     currentInstallation: placeholderInstallation,
     status: RobotStatus.Available,
     isarConnected: true,
+    deprecated: false,
 }

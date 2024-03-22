@@ -459,6 +459,11 @@ namespace Api.Services
                 logger.LogWarning("Mission run {MissionRunId} was not started as the robots {RobotId} isar instance is disconnected", missionRun.Id, robot.Id);
                 return false;
             }
+            if (robot.Deprecated)
+            {
+                logger.LogWarning("Mission run {MissionRunId} was not started as the robot {RobotId} is deprecated", missionRun.Id, robot.Id);
+                return false;
+            }
             if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id))
             {
                 logger.LogInformation("Mission run {MissionRunId} was not started as there is an ongoing localization mission", missionRun.Id);
