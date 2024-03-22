@@ -224,5 +224,7 @@
     "Safe zone failure": "Safe zone failure",
     "Failure to schedule": "Failure to schedule",
     "WARNING": "WARNING",
-    "INFO": "INFO"
+    "INFO": "INFO",
+    "Connection Issues": "Connection Issues",
+    "Safe Zone": "Safe Zone"
 }

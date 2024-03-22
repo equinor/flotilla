@@ -224,5 +224,7 @@
     "Safe zone failure": "Trygg sone feilet",
     "Failure to schedule": "Kunne ikke planlegge oppdrag",
     "WARNING": "ADVARSEL",
-    "INFO": "INFO"
+    "INFO": "INFO",
+    "Connection Issues": "Tilkoblingsproblemer",
+    "Safe Zone": "Trygg sone"
 }
