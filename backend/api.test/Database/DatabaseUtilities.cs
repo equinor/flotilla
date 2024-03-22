@@ -137,6 +137,7 @@ namespace Api.Test.Database
                 Host = "localhost",
                 Port = 3000,
                 IsarConnected = true,
+                Deprecated = false,
                 Status = status
             };
 
