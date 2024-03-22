@@ -71,7 +71,7 @@ export const RobotStatusCard = ({ robot }: RobotProps) => {
                 <HorizontalContent>
                     <VerticalContent $alignItems="start">
                         <Typography variant="caption">{robot.model.type}</Typography>
-                        <RobotStatusChip status={robot.status} />
+                        <RobotStatusChip status={robot.status} isarConnected={robot.isarConnected} />
                     </VerticalContent>
                     <VerticalContent $alignItems="end">
                         {robot.status !== RobotStatus.Offline ? (
@@ -110,7 +110,7 @@ export const RobotStatusCardPlaceholder = () => {
                 ----
             </Typography>
             <HorizontalContent>
-                <RobotStatusChip />
+                <RobotStatusChip isarConnected={true} />
             </HorizontalContent>
         </StyledCard>
     )
