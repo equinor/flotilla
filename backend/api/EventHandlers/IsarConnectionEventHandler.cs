@@ -135,7 +135,6 @@ namespace Api.EventHandlers
 
                 try
                 {
-                    await RobotService.UpdateRobotStatus(robot.Id, RobotStatus.Offline);
                     await RobotService.UpdateRobotIsarConnected(robot.Id, false);
                     await RobotService.UpdateCurrentMissionId(robot.Id, null);
                 }
