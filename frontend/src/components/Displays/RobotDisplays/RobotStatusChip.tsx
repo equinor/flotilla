@@ -6,6 +6,7 @@ import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
 
 interface StatusProps {
     status?: RobotStatus
+    isarConnected: boolean
 }
 
 enum StatusColors {
@@ -14,9 +15,10 @@ enum StatusColors {
     Busy = '#FFC67A',
     Blocked = '#FFC67A',
     SafeZone = '#FF0000',
+    ConnetionIssues = '#F7F7F7',
 }
 
-export const RobotStatusChip = ({ status }: StatusProps) => {
+export const RobotStatusChip = ({ status, isarConnected }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
     const { safeZoneStatus } = useSafeZoneContext()
 
@@ -41,7 +43,10 @@ export const RobotStatusChip = ({ status }: StatusProps) => {
         }
     }
 
-    if (safeZoneStatus) {
+    if (!isarConnected) {
+        chipColor = StatusColors.ConnetionIssues
+        status = RobotStatus.ConnectionIssues
+    } else if (safeZoneStatus) {
         chipColor = StatusColors.SafeZone
         status = RobotStatus.SafeZone
     }

@@ -11,6 +11,7 @@ export enum RobotStatus {
     Offline = 'Offline',
     Blocked = 'Blocked',
     SafeZone = 'Safe Zone',
+    ConnectionIssues = 'Connection Issues',
 }
 
 export interface Robot {
@@ -24,7 +25,7 @@ export interface Robot {
     pressureLevel?: number
     pose?: Pose
     status: RobotStatus
-    isarConnected?: boolean
+    isarConnected: boolean
     host?: string
     logs?: string
     port?: number
@@ -38,4 +39,5 @@ export const placeholderRobot: Robot = {
     model: placeholderRobotModel,
     currentInstallation: placeholderInstallation,
     status: RobotStatus.Available,
+    isarConnected: true,
 }

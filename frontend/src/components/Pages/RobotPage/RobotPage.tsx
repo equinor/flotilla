@@ -88,7 +88,10 @@ export const RobotPage = () => {
                                         )}
                                     </>
                                 )}
-                                <RobotStatusChip status={selectedRobot.status} />
+                                <RobotStatusChip
+                                    status={selectedRobot.status}
+                                    isarConnected={selectedRobot.isarConnected}
+                                />
                                 <Button variant="outlined" onClick={returnRobotToHome}>
                                     {TranslateText('Return robot to home')}
                                 </Button>
