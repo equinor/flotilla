@@ -28,7 +28,7 @@ namespace Api.Controllers.Models
 
         public int Port { get; set; }
 
-        public bool Enabled { get; set; }
+        public bool IsarConnected { get; set; }
 
         public bool MissionQueueFrozen { get; set; }
 
@@ -59,7 +59,7 @@ namespace Api.Controllers.Models
             VideoStreams = robot.VideoStreams;
             Host = robot.Host;
             Port = robot.Port;
-            Enabled = robot.Enabled;
+            IsarConnected = robot.IsarConnected;
             MissionQueueFrozen = robot.MissionQueueFrozen;
             Status = robot.Status;
             Pose = robot.Pose;

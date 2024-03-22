@@ -13,7 +13,7 @@ namespace Api.Database.Models
             Name = "defaultId";
             SerialNumber = "defaultSerialNumber";
             Status = RobotStatus.Offline;
-            Enabled = false;
+            IsarConnected = false;
             Host = "localhost";
             Port = 3000;
             Pose = new Pose();
@@ -41,7 +41,7 @@ namespace Api.Database.Models
             VideoStreams = videoStreams;
             Host = createQuery.Host;
             Port = createQuery.Port;
-            Enabled = createQuery.Enabled;
+            IsarConnected = createQuery.IsarConnected;
             Status = createQuery.Status;
             Pose = new Pose();
         }
@@ -93,7 +93,7 @@ namespace Api.Database.Models
         public int Port { get; set; }
 
         [Required]
-        public bool Enabled { get; set; }
+        public bool IsarConnected { get; set; }
 
         [Required]
         public bool MissionQueueFrozen { get; set; }

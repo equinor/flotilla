@@ -82,8 +82,8 @@ namespace Api.EventHandlers
 
             _isarConnectionTimers[robot.IsarId].Reset();
 
-            if (robot.Enabled) { return; }
-            await RobotService.UpdateRobotEnabled(robot.Id, true);
+            if (robot.IsarConnected) { return; }
+            await RobotService.UpdateRobotIsarConnected(robot.Id, true);
         }
 
         private void AddTimerForRobot(IsarRobotHeartbeatMessage isarRobotHeartbeat, Robot robot)
@@ -136,7 +136,7 @@ namespace Api.EventHandlers
                 try
                 {
                     await RobotService.UpdateRobotStatus(robot.Id, RobotStatus.Offline);
-                    await RobotService.UpdateRobotEnabled(robot.Id, false);
+                    await RobotService.UpdateRobotIsarConnected(robot.Id, false);
                     await RobotService.UpdateCurrentMissionId(robot.Id, null);
                 }
                 catch (RobotNotFoundException) { return; }

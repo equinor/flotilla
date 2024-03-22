@@ -22,7 +22,7 @@ namespace Api.Controllers.Models
 
         public int Port { get; set; }
 
-        public bool Enabled { get; set; }
+        public bool IsarConnected { get; set; }
 
         public RobotStatus Status { get; set; }
     }
