@@ -116,7 +116,7 @@ namespace Api.Test
                 SerialNumber = "GetNextRun",
                 RobotType = RobotType.Robot,
                 Status = RobotStatus.Available,
-                Enabled = true,
+                IsarConnected = true,
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallationCode = wrongInstallation.InstallationCode,

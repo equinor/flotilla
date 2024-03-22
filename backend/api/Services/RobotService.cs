@@ -21,12 +21,12 @@ namespace Api.Services
         public Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel);
         public Task<Robot> UpdateRobotPressureLevel(string robotId, float? pressureLevel);
         public Task<Robot> UpdateRobotPose(string robotId, Pose pose);
-        public Task<Robot> UpdateRobotEnabled(string robotId, bool enabled);
+        public Task<Robot> UpdateRobotIsarConnected(string robotId, bool isarConnected);
         public Task<Robot> UpdateCurrentMissionId(string robotId, string? missionId);
         public Task<Robot> UpdateCurrentArea(string robotId, Area? area);
         public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
         public Task<Robot?> Delete(string id);
-        public Task SetRobotOffline(string robotId);
+        public Task SetRobotToIsarDisconnected(string robotId);
     }
 
     [SuppressMessage(
@@ -182,7 +182,7 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<Robot> UpdateRobotEnabled(string robotId, bool enabled)
+        public async Task<Robot> UpdateRobotIsarConnected(string robotId, bool isarConnected)
         {
             var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
             var robot = await robotQuery.FirstOrDefaultAsync();
@@ -190,7 +190,7 @@ namespace Api.Services
 
             await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
 
-            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.Enabled, enabled));
+            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.IsarConnected, isarConnected));
 
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
@@ -232,7 +232,7 @@ namespace Api.Services
 
         public async Task<IEnumerable<string>> ReadAllActivePlants()
         {
-            return await GetRobotsWithSubModels().Where(r => r.Enabled && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
+            return await GetRobotsWithSubModels().Where(r => r.IsarConnected && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
         }
 
         public async Task<Robot> Update(Robot robot)
@@ -268,7 +268,7 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task SetRobotOffline(string robotId)
+        public async Task SetRobotToIsarDisconnected(string robotId)
         {
             var robot = await ReadById(robotId);
             if (robot == null)
@@ -295,7 +295,7 @@ namespace Api.Services
             {
                 await UpdateRobotStatus(robot.Id, RobotStatus.Offline);
                 await UpdateCurrentMissionId(robot.Id, null);
-                await UpdateRobotEnabled(robot.Id, false);
+                await UpdateRobotIsarConnected(robot.Id, false);
                 await UpdateCurrentArea(robot.Id, null);
             }
             catch (RobotNotFoundException) { }

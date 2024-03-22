@@ -161,7 +161,7 @@ namespace Api.Services
             {
                 const string Message = "Error connecting to ISAR while stopping mission";
                 logger.LogError(e, "{Message}", Message);
-                await robotService.SetRobotOffline(robot.Id);
+                await robotService.SetRobotToIsarDisconnected(robot.Id);
                 throw new MissionException(Message, (int)e.StatusCode!);
             }
             catch (MissionException e)
@@ -353,7 +353,7 @@ namespace Api.Services
             {
                 string errorMessage = $"Could not reach ISAR at {robot.IsarUri}";
                 logger.LogError(e, "{Message}", errorMessage);
-                await robotService.SetRobotOffline(robot.Id);
+                await robotService.SetRobotToIsarDisconnected(robot.Id);
                 throw new IsarCommunicationException(errorMessage);
             }
             catch (MissionException e)
@@ -454,9 +454,9 @@ namespace Api.Services
                 logger.LogInformation("Mission run {MissionRunId} was not started as the robot is not available", missionRun.Id);
                 return false;
             }
-            if (!robot.Enabled)
+            if (!robot.IsarConnected)
             {
-                logger.LogWarning("Mission run {MissionRunId} was not started as the robot {RobotId} is not enabled", missionRun.Id, robot.Id);
+                logger.LogWarning("Mission run {MissionRunId} was not started as the robots {RobotId} isar instance is disconnected", missionRun.Id, robot.Id);
                 return false;
             }
             if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id))

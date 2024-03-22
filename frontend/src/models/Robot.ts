@@ -24,7 +24,7 @@ export interface Robot {
     pressureLevel?: number
     pose?: Pose
     status: RobotStatus
-    enabled?: boolean
+    isarConnected?: boolean
     host?: string
     logs?: string
     port?: number

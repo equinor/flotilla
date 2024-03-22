@@ -136,7 +136,7 @@ namespace Api.Test.Database
                 VideoStreams = new List<CreateVideoStreamQuery>(),
                 Host = "localhost",
                 Port = 3000,
-                Enabled = true,
+                IsarConnected = true,
                 Status = status
             };
 

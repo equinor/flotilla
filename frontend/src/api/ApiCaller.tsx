@@ -134,7 +134,7 @@ export class BackendAPICaller {
     static async getEnabledRobots(): Promise<Robot[]> {
         const path: string = 'robots'
         const result = await BackendAPICaller.GET<Robot[]>(path).catch(BackendAPICaller.handleError('GET', path))
-        return result.content.filter((robot) => robot.enabled)
+        return result.content.filter((robot) => robot.isarConnected)
     }
 
     static async getRobotById(robotId: string): Promise<Robot> {
