@@ -24,6 +24,8 @@ namespace Api.Controllers.Models
 
         public bool IsarConnected { get; set; }
 
+        public bool Deprecated { get; set; }
+
         public RobotStatus Status { get; set; }
     }
 }

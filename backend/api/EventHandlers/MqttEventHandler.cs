@@ -129,7 +129,8 @@ namespace Api.EventHandlers
                         Host = isarRobotInfo.Host,
                         Port = isarRobotInfo.Port,
                         Status = RobotStatus.Available,
-                        IsarConnected = true
+                        IsarConnected = true,
+                        Deprecated = false
                     };
 
                     var newRobot = await robotService.CreateFromQuery(robotQuery);

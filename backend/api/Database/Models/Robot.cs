@@ -13,7 +13,7 @@ namespace Api.Database.Models
             Name = "defaultId";
             SerialNumber = "defaultSerialNumber";
             Status = RobotStatus.Offline;
-            IsarConnected = false;
+            Deprecated = false;
             Host = "localhost";
             Port = 3000;
             Pose = new Pose();
@@ -42,6 +42,7 @@ namespace Api.Database.Models
             Host = createQuery.Host;
             Port = createQuery.Port;
             IsarConnected = createQuery.IsarConnected;
+            Deprecated = createQuery.Deprecated;
             Status = createQuery.Status;
             Pose = new Pose();
         }
@@ -96,6 +97,9 @@ namespace Api.Database.Models
         public bool IsarConnected { get; set; }
 
         [Required]
+        public bool Deprecated { get; set; }
+
+        [Required]
         public bool MissionQueueFrozen { get; set; }
 
         [Required]
@@ -128,6 +132,5 @@ namespace Api.Database.Models
         Busy,
         Offline,
         Blocked,
-        Deprecated
     }
 }
