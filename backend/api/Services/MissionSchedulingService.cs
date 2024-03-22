@@ -339,6 +339,13 @@ namespace Api.Services
                 throw new RobotNotAvailableException(errorMessage);
             }
 
+            if (robot.Deprecated)
+            {
+                string errorMessage = $"Robot {robotId} is deprecated and cannot start mission";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotAvailableException(errorMessage);
+            }
+
             var missionRun = await missionRunService.ReadById(missionRunId);
             if (missionRun == null)
             {

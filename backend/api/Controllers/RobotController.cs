@@ -638,6 +638,14 @@ namespace Api.Controllers
                 logger.LogWarning("{Message}", errorMessage);
                 return Conflict(errorMessage);
             }
+
+            if (robot.Deprecated)
+            {
+                string errorMessage = $"Robot {robotId} is deprecated ({robot.Status}) and cannot run missions";
+                logger.LogWarning("{Message}", errorMessage);
+                return Conflict(errorMessage);
+            }
+
             try { await isarService.StartMoveArm(robot, armPosition); }
             catch (HttpRequestException e)
             {
