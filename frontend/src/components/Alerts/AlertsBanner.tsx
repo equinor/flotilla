@@ -1,14 +1,21 @@
-import { Button, Card, Icon } from '@equinor/eds-core-react'
+import { Button, Icon } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
 
-const StyledCard = styled(Card)`
+const StyledCard = styled.div`
     display: flex;
-    width: auto;
-    padding: 7px 15px;
-    margin: 0px 8px 8px 8px;
+    width: 100vw - 10px;
+    height: auto;
+    min-height: 65px;
+    padding: 6px 15px 2px 32px;
+    justify-content: space-between;
+    align-items: center;
+
+    @media(max-width:600px) {
+        padding: 6px 8px 2px 10px;
+    } 
 `
 
 const Horizontal = styled.div`
@@ -36,19 +43,22 @@ interface AlertProps {
 
 export const AlertBanner = ({ children, dismissAlert, alertCategory }: AlertProps) => {
     let bannerColor = tokens.colors.ui.background__danger.hex
+    let hoverColor = tokens.colors.ui.background__light.hex
 
-    if (alertCategory === AlertCategory.WARNING) bannerColor = tokens.colors.interactive.warning__resting.hex
-    if (alertCategory === AlertCategory.SUCCESS) bannerColor = tokens.colors.interactive.success__resting.hex
+    if (alertCategory === AlertCategory.WARNING) bannerColor = tokens.colors.interactive.warning__highlight.hex
+    if (alertCategory === AlertCategory.SUCCESS) bannerColor = tokens.colors.infographic.primary__mist_blue.hex
+
+    const [buttonBackgroundColor, setButtonBackgroundColor] = useState<string>(bannerColor)
 
     return (
         <>
-            <StyledCard style={{ boxShadow: tokens.elevation.raised, backgroundColor: bannerColor }}>
+            <StyledCard style={{backgroundColor: bannerColor}}>
                 <Horizontal>
                     <Center>{children}</Center>
-                    <Button variant="ghost_icon" onClick={dismissAlert}>
-                        <Icon name={Icons.Clear}></Icon>
-                    </Button>
                 </Horizontal>
+                <Button variant="ghost_icon" onClick={dismissAlert} style={{backgroundColor: buttonBackgroundColor}} onPointerEnter={() => setButtonBackgroundColor(hoverColor)} onPointerLeave={() =>setButtonBackgroundColor(bannerColor)}>
+                        <Icon name={Icons.Clear} style={{ color: tokens.colors.text.static_icons__default.hex}}></Icon>
+                </Button>
             </StyledCard>
         </>
     )

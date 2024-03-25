@@ -2,7 +2,7 @@ import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { useRobotContext } from './RobotContext'
 import { useInstallationContext } from './InstallationContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { SafeZoneBanner } from 'components/Pages/FrontPage/MissionOverview/SafeZoneBanner'
+import { SafeZoneAlertContent } from 'components/Alerts/SafeZoneAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 interface ISafeZoneContext {
@@ -40,7 +40,7 @@ export const SafeZoneProvider: FC<Props> = ({ children }) => {
             clearAlert(AlertType.DismissSafeZone)
             setAlert(
                 AlertType.RequestSafeZone,
-                <SafeZoneBanner alertCategory={AlertCategory.WARNING} />,
+                <SafeZoneAlertContent alertCategory={AlertCategory.WARNING} />,
                 AlertCategory.WARNING
             )
         } else if (missionQueueFozenStatus.length === 0 && safeZoneStatus === true) {
@@ -48,7 +48,7 @@ export const SafeZoneProvider: FC<Props> = ({ children }) => {
             clearAlert(AlertType.RequestSafeZone)
             setAlert(
                 AlertType.DismissSafeZone,
-                <SafeZoneBanner alertCategory={AlertCategory.SUCCESS} />,
+                <SafeZoneAlertContent alertCategory={AlertCategory.SUCCESS} />,
                 AlertCategory.SUCCESS
             )
         }
