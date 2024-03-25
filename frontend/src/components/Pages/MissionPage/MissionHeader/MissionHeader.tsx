@@ -5,7 +5,7 @@ import { differenceInMinutes } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
-import { useLanguageContext, TranslateTextWithContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { StatusReason } from '../StatusReason'
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
 import { TaskStatus } from 'models/Task'
@@ -81,7 +81,8 @@ const HeaderText = (title: string, text: string) => {
 }
 
 const getStartUsedAndRemainingTime = (
-    mission: Mission
+    mission: Mission,
+    translatedMinutes: string
 ): {
     startTime: string
     startDate: string
@@ -93,7 +94,6 @@ const getStartUsedAndRemainingTime = (
     var remainingTime: string
     var usedTimeInMinutes: number
     var estimatedDurationInMinutes: number | undefined
-    const translatedMinutes = TranslateTextWithContext('minutes')
     if (mission.estimatedDuration) {
         // Convert from seconds to minutes, rounding up
         estimatedDurationInMinutes = Math.ceil(mission.estimatedDuration / 60)
@@ -145,7 +145,8 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const translatedTasks = TranslateText('Completed Tasks')
     const translatedStatus = TranslateText('Status')
 
-    const { startTime, startDate, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission)
+    const translatedMinutes = TranslateText('minutes')
+    const { startTime, startDate, usedTime, remainingTime } = getStartUsedAndRemainingTime(mission, translatedMinutes)
     const isMissionActive = mission.status === MissionStatus.Ongoing || mission.status === MissionStatus.Paused
 
     const missionHasFailedTasks = mission.tasks.some(
