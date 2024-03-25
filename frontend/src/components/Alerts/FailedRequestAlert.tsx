@@ -18,7 +18,7 @@ const StyledButton = styled(Button)`
     text-align: left;
     height: auto;
     padding: 5px 5px;
-    background-color: '${tokens.colors.ui.background__danger.hex}'
+    background-color: '${tokens.colors.ui.background__danger.hex}';
 `
 
 export const FailedRequestAlertContent = ({ translatedMessage }: { translatedMessage: string }) => {

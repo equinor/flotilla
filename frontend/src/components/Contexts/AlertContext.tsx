@@ -12,6 +12,7 @@ import { RobotStatus } from 'models/Robot'
 import { FailedAlertContent } from 'components/Alerts/FailedAlertContent'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { SafeZoneAlertContent } from 'components/Alerts/SafeZoneAlert'
 
 export enum AlertType {
     MissionFail,
@@ -20,11 +21,13 @@ export enum AlertType {
     BlockedRobot,
     RequestSafeZone,
     DismissSafeZone,
+    SafeZoneSuccess,
 }
 
 const alertTypeEnumMap: { [key: string]: AlertType } = {
     safeZoneFailure: AlertType.SafeZoneFail,
     scheduleFailure: AlertType.RequestFail,
+    safeZoneSuccess: AlertType.SafeZoneSuccess,
 }
 
 type AlertDictionaryType = {
@@ -163,11 +166,21 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
                     // Here we could update the robot state manually, but this is best done on the backend
                 }
-                setAlert(
-                    alertType,
-                    <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
-                    AlertCategory.ERROR
-                )
+
+                if (alertType === AlertType.SafeZoneSuccess) {
+                    setAlert(
+                        alertType,
+                        <SafeZoneAlertContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
+                        AlertCategory.INFO
+                    )
+                    clearAlert(AlertType.RequestSafeZone)
+                } else {
+                    setAlert(
+                        alertType,
+                        <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                        AlertCategory.ERROR
+                    )
+                }
             })
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

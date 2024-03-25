@@ -140,6 +140,16 @@ namespace Api.EventHandlers
                 return;
             }
 
+            var lastMissionRun = await MissionService.ReadLastExecutedMissionRunByRobotWithoutTracking(robot.Id);
+            if (lastMissionRun != null)
+            {
+                if (lastMissionRun.MissionRunPriority == MissionRunPriority.Emergency & lastMissionRun.Status == MissionStatus.Successful)
+                {
+                    _logger.LogInformation("Return to safe zone mission on robot {RobotName} was successful.", robot.Name);
+                    SignalRService.ReportSafeZoneSuccessToSignalR(robot, $"Robot {robot.Name} is in the safe zone");
+                }
+            }
+
             _startMissionSemaphore.WaitOne();
             try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
             catch (MissionRunNotFoundException) { return; }

@@ -224,5 +224,7 @@
     "Safe zone failure": "Safe zone failure",
     "Failure to schedule": "Failure to schedule",
     "WARNING": "WARNING",
-    "INFO": "INFO"
+    "INFO": "INFO",
+    "Safe Zone": "Safe Zone",
+    "Safe Zone successful text": "The robots are in the safe zone and will not run missions. To continue the mission press the 'Safe to continue mission' button."
 }

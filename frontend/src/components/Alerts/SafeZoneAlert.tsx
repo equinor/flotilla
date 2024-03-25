@@ -1,6 +1,7 @@
 import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { AlertType } from 'components/Contexts/AlertContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
 
@@ -21,15 +22,17 @@ const StyledButton = styled(Button)`
 `
 
 interface SafeZoneBannerProps {
+    alertType: AlertType
     alertCategory: AlertCategory
 }
 
-export const SafeZoneAlertContent = ({ alertCategory }: SafeZoneBannerProps): JSX.Element => {
+export const SafeZoneAlertContent = ({ alertType, alertCategory }: SafeZoneBannerProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
-    const buttonBackgroundColor = alertCategory === AlertCategory.WARNING
-                    ? tokens.colors.interactive.warning__highlight.hex
-                    : tokens.colors.infographic.primary__mist_blue.hex
-   
+    const buttonBackgroundColor =
+        alertCategory === AlertCategory.WARNING
+            ? tokens.colors.interactive.warning__highlight.hex
+            : tokens.colors.infographic.primary__mist_blue.hex
+
     return (
         <StyledDiv>
             <StyledAlertTitle>
@@ -38,10 +41,14 @@ export const SafeZoneAlertContent = ({ alertCategory }: SafeZoneBannerProps): JS
                     {alertCategory === AlertCategory.WARNING ? TranslateText('WARNING') : TranslateText('INFO')}
                 </Typography>
             </StyledAlertTitle>
-            <StyledButton variant="ghost" color="secondary" style={{backgroundColor: buttonBackgroundColor}}>
-                {alertCategory === AlertCategory.WARNING
-                    ? TranslateText('Safe zone banner text')
-                    : TranslateText('Dismiss safe zone banner text')}
+            <StyledButton variant="ghost" color="secondary" style={{ backgroundColor: buttonBackgroundColor }}>
+                {alertCategory === AlertCategory.WARNING && TranslateText('Safe zone banner text')}
+                {alertCategory === AlertCategory.INFO &&
+                    alertType === AlertType.SafeZoneSuccess &&
+                    TranslateText('Safe Zone successful text')}
+                {alertCategory === AlertCategory.INFO &&
+                    alertType === AlertType.DismissSafeZone &&
+                    TranslateText('Dismiss safe zone banner text')}
             </StyledButton>
         </StyledDiv>
     )

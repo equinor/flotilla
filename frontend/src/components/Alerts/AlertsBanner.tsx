@@ -13,9 +13,9 @@ const StyledCard = styled.div`
     justify-content: space-between;
     align-items: center;
 
-    @media(max-width:600px) {
+    @media (max-width: 600px) {
         padding: 6px 8px 2px 10px;
-    } 
+    }
 `
 
 const Horizontal = styled.div`
@@ -32,7 +32,7 @@ const Center = styled.div`
 export enum AlertCategory {
     ERROR,
     WARNING,
-    SUCCESS,
+    INFO,
 }
 
 interface AlertProps {
@@ -46,18 +46,24 @@ export const AlertBanner = ({ children, dismissAlert, alertCategory }: AlertProp
     let hoverColor = tokens.colors.ui.background__light.hex
 
     if (alertCategory === AlertCategory.WARNING) bannerColor = tokens.colors.interactive.warning__highlight.hex
-    if (alertCategory === AlertCategory.SUCCESS) bannerColor = tokens.colors.infographic.primary__mist_blue.hex
+    if (alertCategory === AlertCategory.INFO) bannerColor = tokens.colors.infographic.primary__mist_blue.hex
 
     const [buttonBackgroundColor, setButtonBackgroundColor] = useState<string>(bannerColor)
 
     return (
         <>
-            <StyledCard style={{backgroundColor: bannerColor}}>
+            <StyledCard style={{ backgroundColor: bannerColor }}>
                 <Horizontal>
                     <Center>{children}</Center>
                 </Horizontal>
-                <Button variant="ghost_icon" onClick={dismissAlert} style={{backgroundColor: buttonBackgroundColor}} onPointerEnter={() => setButtonBackgroundColor(hoverColor)} onPointerLeave={() =>setButtonBackgroundColor(bannerColor)}>
-                        <Icon name={Icons.Clear} style={{ color: tokens.colors.text.static_icons__default.hex}}></Icon>
+                <Button
+                    variant="ghost_icon"
+                    onClick={dismissAlert}
+                    style={{ backgroundColor: buttonBackgroundColor }}
+                    onPointerEnter={() => setButtonBackgroundColor(hoverColor)}
+                    onPointerLeave={() => setButtonBackgroundColor(bannerColor)}
+                >
+                    <Icon name={Icons.Clear} style={{ color: tokens.colors.text.static_icons__default.hex }}></Icon>
                 </Button>
             </StyledCard>
         </>

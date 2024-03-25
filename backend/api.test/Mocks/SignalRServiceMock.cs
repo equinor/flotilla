@@ -27,5 +27,10 @@ namespace Api.Services
         {
             return;
         }
+
+        public void ReportSafeZoneSuccessToSignalR(Robot robot, string message)
+        {
+            return;
+        }
     }
 }
