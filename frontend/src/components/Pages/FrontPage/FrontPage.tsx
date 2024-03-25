@@ -10,7 +10,7 @@ const StyledFrontPage = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
     gap: 3rem;
-    margin: 8px;
+    margin: 15px 8px;
 `
 
 const HorizontalContent = styled.div`

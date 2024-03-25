@@ -21,14 +21,17 @@ const Indent = styled.div`
 
 export const FailedAlertContent = ({ title, message }: { title: string; message: string }) => {
     const { TranslateText } = useLanguageContext()
+    const iconColor = tokens.colors.interactive.danger__resting.rgba
+    const bannerColor = tokens.colors.ui.background__danger.hex
+
     return (
         <StyledDiv>
             <StyledAlertTitle>
-                <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.rgba }} />
+                <Icon name={Icons.Failed} style={{color: iconColor}} />
                 <Typography>{TranslateText(title)}</Typography>
             </StyledAlertTitle>
             <Indent>
-                <TextAlignedButton variant="ghost" color="secondary">
+                <TextAlignedButton variant="ghost" color="secondary" style={{backgroundColor: bannerColor}}>
                     {TranslateText(message)}
                 </TextAlignedButton>
             </Indent>
