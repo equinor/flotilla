@@ -40,16 +40,17 @@ export const SafeZoneProvider: FC<Props> = ({ children }) => {
             clearAlert(AlertType.DismissSafeZone)
             setAlert(
                 AlertType.RequestSafeZone,
-                <SafeZoneAlertContent alertCategory={AlertCategory.WARNING} />,
+                <SafeZoneAlertContent alertType={AlertType.RequestSafeZone} alertCategory={AlertCategory.WARNING} />,
                 AlertCategory.WARNING
             )
         } else if (missionQueueFozenStatus.length === 0 && safeZoneStatus === true) {
             setSafeZoneStatus((oldStatus) => !oldStatus)
             clearAlert(AlertType.RequestSafeZone)
+            clearAlert(AlertType.SafeZoneSuccess)
             setAlert(
                 AlertType.DismissSafeZone,
-                <SafeZoneAlertContent alertCategory={AlertCategory.SUCCESS} />,
-                AlertCategory.SUCCESS
+                <SafeZoneAlertContent alertType={AlertType.DismissSafeZone} alertCategory={AlertCategory.INFO} />,
+                AlertCategory.INFO
             )
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

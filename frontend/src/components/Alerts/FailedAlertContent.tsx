@@ -27,11 +27,11 @@ export const FailedAlertContent = ({ title, message }: { title: string; message:
     return (
         <StyledDiv>
             <StyledAlertTitle>
-                <Icon name={Icons.Failed} style={{color: iconColor}} />
+                <Icon name={Icons.Failed} style={{ color: iconColor }} />
                 <Typography>{TranslateText(title)}</Typography>
             </StyledAlertTitle>
             <Indent>
-                <TextAlignedButton variant="ghost" color="secondary" style={{backgroundColor: bannerColor}}>
+                <TextAlignedButton variant="ghost" color="secondary" style={{ backgroundColor: bannerColor }}>
                     {TranslateText(message)}
                 </TextAlignedButton>
             </Indent>

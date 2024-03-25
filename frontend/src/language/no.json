@@ -224,5 +224,7 @@
     "Safe zone failure": "Trygg sone feilet",
     "Failure to schedule": "Kunne ikke planlegge oppdrag",
     "WARNING": "ADVARSEL",
-    "INFO": "INFO"
+    "INFO": "INFO",
+    "Safe Zone": "Trygg sone",
+    "Safe Zone successful text": "Robotene er i sikker sone og vil ikke kjøre oppdrag. For å fortsette oppdrag trykk på knappen 'Trygt å fortsette oppdrag'."
 }
