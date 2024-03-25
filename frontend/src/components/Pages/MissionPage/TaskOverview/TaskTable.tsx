@@ -1,7 +1,7 @@
 import { Chip, Table, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
-import { useLanguageContext, TranslateTextWithContext } from 'components/Contexts/LanguageContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
@@ -103,19 +103,20 @@ const DescriptionDisplay = ({ task }: { task: Task }) => {
 }
 
 const InspectionTypesDisplay = ({ task }: { task: Task }) => {
+    const { TranslateText } = useLanguageContext()
     return (
         <>
             {task.inspections?.map((inspection) => {
                 if (inspection.inspectionUrl)
                     return (
                         <Typography key={task.id + inspection.id + 'insp'} link href={inspection.inspectionUrl}>
-                            {TranslateTextWithContext(inspection.inspectionType as string)}
+                            {TranslateText(inspection.inspectionType as string)}
                         </Typography>
                     )
                 else
                     return (
                         <Typography key={task.id + inspection.id + 'insp'}>
-                            {TranslateTextWithContext(inspection.inspectionType as string)}
+                            {TranslateText(inspection.inspectionType as string)}
                         </Typography>
                     )
             })}
