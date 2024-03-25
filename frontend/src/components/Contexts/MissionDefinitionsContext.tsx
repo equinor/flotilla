@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { CondensedMissionDefinition, SourceType } from 'models/MissionDefinition'
+import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { useInstallationContext } from './InstallationContext'
 
 interface IMissionDefinitionsContext {
@@ -18,20 +18,6 @@ const defaultMissionDefinitionsContext: IMissionDefinitionsContext = {
 
 export const MissionDefinitionsContext = createContext<IMissionDefinitionsContext>(defaultMissionDefinitionsContext)
 
-const upsertMissionDefinition = (
-    oldQueue: CondensedMissionDefinition[],
-    updatedMission: CondensedMissionDefinition
-) => {
-    const oldQueueCopy = [...oldQueue]
-    const existingIndex = oldQueueCopy.findIndex((m) => m.id === updatedMission.id)
-    if (existingIndex !== -1) {
-        oldQueueCopy[existingIndex] = updatedMission
-        return oldQueueCopy
-    } else {
-        return [...oldQueueCopy, updatedMission]
-    }
-}
-
 const fetchMissionDefinitions = (params: {
     installationCode: string
     pageSize: number
@@ -46,32 +32,9 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent(SignalREventLabels.missionDefinitionUpdated, (username: string, message: string) => {
-                const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
-                missionDefinition.sourceType =
-                    Object.values(SourceType)[missionDefinition.sourceType as unknown as number]
-                setMissionDefinitions((oldMissionDefinitions) =>
-                    upsertMissionDefinition(oldMissionDefinitions, missionDefinition)
-                )
-            })
-            registerEvent(SignalREventLabels.missionDefinitionCreated, (username: string, message: string) => {
-                const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
-                missionDefinition.sourceType =
-                    Object.values(SourceType)[missionDefinition.sourceType as unknown as number]
-                setMissionDefinitions((oldMissionDefinitions) =>
-                    upsertMissionDefinition(oldMissionDefinitions, missionDefinition)
-                )
-            })
-            registerEvent(SignalREventLabels.missionDefinitionDeleted, (username: string, message: string) => {
-                const mDef: CondensedMissionDefinition = JSON.parse(message)
-                if (!mDef.area) return
-                setMissionDefinitions((oldMissionDefs) => {
-                    const oldListCopy = [...oldMissionDefs]
-                    const queueIndex = oldListCopy.findIndex((m) => m.id === mDef.id)
-                    if (queueIndex !== -1) oldListCopy.splice(queueIndex, 1) // Remove deleted mission definition
-                    return oldListCopy
-                })
-            })
+            registerEvent(SignalREventLabels.missionDefinitionUpdated, (username: string, message: string) => {})
+            registerEvent(SignalREventLabels.missionDefinitionCreated, (username: string, message: string) => {})
+            registerEvent(SignalREventLabels.missionDefinitionDeleted, (username: string, message: string) => {})
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady])
@@ -87,7 +50,7 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
         }
         if (BackendAPICaller.accessToken) fetchAndUpdateMissionDefinitions()
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [BackendAPICaller.accessToken, installationCode])
+    }, [BackendAPICaller.accessToken, installationCode, registerEvent, connectionReady])
 
     return { missionDefinitions }
 }
