@@ -174,10 +174,10 @@ namespace Api.Database.Models
             }
         }
 
-        public void SetToFailed()
+        public void SetToFailed(string? failureReason = "")
         {
             Status = MissionStatus.Failed;
-            StatusReason = "Lost connection to ISAR during mission";
+            StatusReason = failureReason;
             foreach (var task in Tasks.Where(task => !task.IsCompleted))
             {
                 task.Status = TaskStatus.Failed;

@@ -128,7 +128,7 @@ namespace Api.EventHandlers
                             missionRun.Id,
                             missionRun.Name
                         );
-                        missionRun.SetToFailed();
+                        missionRun.SetToFailed("Lost connection to ISAR during mission");
                         await MissionRunService.Update(missionRun);
                     }
                 }
