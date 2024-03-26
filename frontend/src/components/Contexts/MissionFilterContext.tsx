@@ -139,9 +139,11 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                     (filterState.maxStartTime && newMinStartTime! > filterState.maxStartTime)
                 )
                     setFilterError(
-                        `${TranslateText('minStartTime')} ${TranslateText('cannot be greater than')} ${TranslateText(
-                            'minEndTime'
-                        ).toLowerCase()} ${TranslateText('or')} ${TranslateText('maxStartTime').toLowerCase()}`
+                        TranslateText('{0} cannot be greater than {1} or {2}', [
+                            TranslateText('minStartTime'),
+                            TranslateText('minEndTime'),
+                            TranslateText('maxStartTime').toLowerCase(),
+                        ])
                     )
                 else {
                     setFilterIsSet(true)
@@ -151,15 +153,17 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
             switchMaxStartTime: (newMaxStartTime: number | undefined) => {
                 if (filterState.maxEndTime && newMaxStartTime && newMaxStartTime > filterState.maxEndTime)
                     setFilterError(
-                        `${TranslateText('maxStartTime')} ${TranslateText('cannot be greater than')} ${TranslateText(
-                            'maxEndTime'
-                        ).toLowerCase()}`
+                        TranslateText('{0} cannot be greater than {1}', [
+                            TranslateText('maxStartTime'),
+                            TranslateText('maxEndTime').toLowerCase(),
+                        ])
                     )
                 else if (filterState.minStartTime && newMaxStartTime && newMaxStartTime < filterState.minStartTime)
                     setFilterError(
-                        `${TranslateText('maxStartTime')} ${TranslateText('cannot be less than')} ${TranslateText(
-                            'minStartTime'
-                        ).toLowerCase()}`
+                        TranslateText('{0} cannot be less than {1}', [
+                            TranslateText('maxStartTime'),
+                            TranslateText('minStartTime').toLowerCase(),
+                        ])
                     )
                 else {
                     setFilterIsSet(true)
@@ -169,15 +173,17 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
             switchMinEndTime: (newMinEndTime: number | undefined) => {
                 if (filterState.maxEndTime && newMinEndTime && newMinEndTime > filterState.maxEndTime)
                     setFilterError(
-                        `${TranslateText('minEndTime')} ${TranslateText('cannot be greater than')} ${TranslateText(
-                            'maxEndTime'
-                        ).toLowerCase()}`
+                        TranslateText('{0} cannot be greater than {1}', [
+                            TranslateText('minEndTime'),
+                            TranslateText('maxEndTime').toLowerCase(),
+                        ])
                     )
                 else if (filterState.minStartTime && newMinEndTime && newMinEndTime < filterState.minStartTime)
                     setFilterError(
-                        `${TranslateText('minEndTime')} ${TranslateText('cannot be less than')} ${TranslateText(
-                            'minStartTime'
-                        ).toLowerCase()}`
+                        TranslateText('{0} cannot be less than {1}', [
+                            TranslateText('minEndTime'),
+                            TranslateText('minStartTime').toLowerCase(),
+                        ])
                     )
                 else {
                     setFilterIsSet(true)
@@ -190,9 +196,11 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                     (filterState.minEndTime && newMaxEndTime! < filterState.minEndTime)
                 )
                     setFilterError(
-                        `${TranslateText('maxEndTime')} ${TranslateText('cannot be less than')} ${TranslateText(
-                            'minEndTime'
-                        ).toLowerCase()} ${TranslateText('or')} ${TranslateText('maxStartTime').toLowerCase()}`
+                        TranslateText('{0} cannot be less than {1} or {2}', [
+                            TranslateText('maxEndTime'),
+                            TranslateText('minEndTime'),
+                            TranslateText('maxStartTime').toLowerCase(),
+                        ])
                     )
                 else {
                     setFilterIsSet(true)

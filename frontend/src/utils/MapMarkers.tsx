@@ -36,13 +36,13 @@ export const placeTagsInMap = (
 }
 
 export const placeRobotInMap = (mapMetadata: MapMetadata, map: HTMLCanvasElement, robotPose: Pose) => {
-    const pixelPosition = calculateObjectPixelPosition(mapMetadata, robotPose.position)
-    const rad = calculateNavigatorAngle(robotPose)
+    const pixelPosition: [number, number] = calculateObjectPixelPosition(mapMetadata, robotPose.position)
+    const rad: number = calculateNavigatorAngle(robotPose)
     drawRobotMarker(pixelPosition[0], pixelPosition[1], map, 22)
     drawNavigator(pixelPosition[0], pixelPosition[1], map, rad)
 }
 
-const calculateObjectPixelPosition = (mapMetadata: MapMetadata, objectPosition: ObjectPosition) => {
+const calculateObjectPixelPosition = (mapMetadata: MapMetadata, objectPosition: ObjectPosition): [number, number] => {
     const x1 = objectPosition.x
     const x2 = objectPosition.y
 
@@ -73,7 +73,7 @@ const orderTasksByDrawOrder = (tasks: Task[], currentTaskOrder: number, maxTaskO
     return tasksWithDrawOrder.map((taskWithDrawOrder) => taskWithDrawOrder.task)
 }
 
-const calculateNavigatorAngle = (currentRobotPose: Pose) => {
+const calculateNavigatorAngle = (currentRobotPose: Pose): number => {
     let rad = 2 * Math.atan2(currentRobotPose.orientation.z, currentRobotPose.orientation.w)
     rad = -rad + Math.PI / 2
     return rad

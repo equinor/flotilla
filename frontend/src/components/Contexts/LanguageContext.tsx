@@ -5,7 +5,7 @@ interface ILanguageContext {
     language: string
     textDictionary: { [text: string]: string }
     switchLanguage: (newLanguage: string) => void
-    TranslateText: (str: string) => string
+    TranslateText: (str: string, args?: string[]) => string
 }
 
 interface Props {
@@ -33,12 +33,35 @@ export const LanguageProvider: FC<Props> = ({ children }) => {
         window.localStorage.setItem('flotilla-language', newLanguage)
     }
 
-    const TranslateText = (str: string): string => {
-        if (textDictionary[str]) {
-            return textDictionary[str]
+    const TranslateText = (str: string, args?: string[]): string => {
+        const translationText = textDictionary[str]
+        if (!translationText) {
+            console.warn(`Translation issue: "${str}" has no translation to language "${language}"`)
+            return str
         }
-        console.warn(`Translation issue: "${str}" has no translation to language "${language}"`)
-        return str
+
+        // This regex matches a pair of brackets with a number inside it. No number can start with 0, unless it is just 0
+        const bracketWithNumberRegex: RegExp = /\{[0]\}|\{[1-9][\d]*\}/g
+        const numberOfArgs = translationText.match(bracketWithNumberRegex)?.length ?? 0
+
+        if (numberOfArgs === 0) return translationText
+
+        if (!args) {
+            console.warn(`Translation issue: "${str}" requires "${numberOfArgs}" arguments but was provided none`)
+            return str
+        }
+
+        if (args.length !== numberOfArgs) {
+            console.warn(
+                `Translation issue: "${str}" requires "${numberOfArgs}" arguments but was provided "${args.length}"`
+            )
+            return str
+        }
+
+        return translationText.replaceAll(bracketWithNumberRegex, (match) => {
+            match = match.slice(1, match.length - 1) // Removes { and }
+            return args[+match]
+        })
     }
 
     return (
@@ -56,12 +79,3 @@ export const LanguageProvider: FC<Props> = ({ children }) => {
 }
 
 export const useLanguageContext = () => useContext(LanguageContext)
-
-export const TranslateTextWithContext = (id: string): string => {
-    const languageContext = useContext(LanguageContext)
-    if (languageContext.textDictionary[id]) {
-        return languageContext.textDictionary[id]
-    }
-    console.warn(`Translation issue: "${id}" has no translation to language "${languageContext.language}"`)
-    return id
-}
