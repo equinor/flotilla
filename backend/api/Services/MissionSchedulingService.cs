@@ -339,6 +339,13 @@ namespace Api.Services
                 throw new RobotNotAvailableException(errorMessage);
             }
 
+            if (robot.Deprecated)
+            {
+                string errorMessage = $"Robot {robotId} is deprecated and cannot start mission";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotAvailableException(errorMessage);
+            }
+
             var missionRun = await missionRunService.ReadById(missionRunId);
             if (missionRun == null)
             {
@@ -457,6 +464,11 @@ namespace Api.Services
             if (!robot.IsarConnected)
             {
                 logger.LogWarning("Mission run {MissionRunId} was not started as the robots {RobotId} isar instance is disconnected", missionRun.Id, robot.Id);
+                return false;
+            }
+            if (robot.Deprecated)
+            {
+                logger.LogWarning("Mission run {MissionRunId} was not started as the robot {RobotId} is deprecated", missionRun.Id, robot.Id);
                 return false;
             }
             if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id))
