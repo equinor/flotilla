@@ -1,9 +1,9 @@
 import { createContext, FC, useContext, useState } from 'react'
-import { defaultLanguage, allLanguageDictionaries, languageOptions, TranslationWithArgumentsType } from 'language'
+import { defaultLanguage, allLanguageDictionaries, languageOptions } from 'language'
 
 interface ILanguageContext {
     language: string
-    textDictionary: { [text: string]: TranslationWithArgumentsType }
+    textDictionary: { [text: string]: string }
     switchLanguage: (newLanguage: string) => void
     TranslateText: (str: string, args?: string[]) => string
 }
@@ -34,30 +34,31 @@ export const LanguageProvider: FC<Props> = ({ children }) => {
     }
 
     const TranslateText = (str: string, args?: string[]): string => {
-        const translationMapping = textDictionary[str]
-        if (!translationMapping) {
+        const translationText = textDictionary[str]
+        if (!translationText) {
             console.warn(`Translation issue: "${str}" has no translation to language "${language}"`)
             return str
         }
 
-        const translationText = translationMapping.text
-        const translationArgs = translationMapping.args
+        // This regex matches a pair of brackets with a number inside it. No number can start with 0, unless it is just 0
+        const bracketWithNumberRegex: RegExp = /\{[0]\}|\{[1-9][\d]*\}/g
+        const numberOfArgs = translationText.match(bracketWithNumberRegex)?.length ?? 0
 
-        if (translationArgs === 0) return translationText
+        if (numberOfArgs === 0) return translationText
 
         if (!args) {
-            console.warn(`Translation issue: "${str}" requires "${translationArgs}" arguments but was provided none`)
+            console.warn(`Translation issue: "${str}" requires "${numberOfArgs}" arguments but was provided none`)
             return str
         }
 
-        if (args.length !== translationArgs) {
+        if (args.length !== numberOfArgs) {
             console.warn(
-                `Translation issue: "${str}" requires "${translationArgs}" arguments but was provided "${args.length}"`
+                `Translation issue: "${str}" requires "${numberOfArgs}" arguments but was provided "${args.length}"`
             )
             return str
         }
 
-        return translationText.replaceAll(/\{\d\}/g, (match) => {
+        return translationText.replaceAll(bracketWithNumberRegex, (match) => {
             match = match.slice(1, match.length - 1) // Removes { and }
             return args[+match]
         })
