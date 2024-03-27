@@ -27,7 +27,7 @@ namespace Api.Services
         public Task<Robot> UpdateDeprecated(string robotId, bool deprecated);
         public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
         public Task<Robot?> Delete(string id);
-        public Task SetRobotToIsarDisconnected(string robotId);
+        public Task HandleLosingConnectionToIsar(string robotId);
     }
 
     [SuppressMessage(
@@ -271,15 +271,9 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task SetRobotToIsarDisconnected(string robotId)
+        public async Task UpdateCurrentRobotMissionToFailed(string robotId)
         {
-            var robot = await ReadById(robotId);
-            if (robot == null)
-            {
-                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-                return;
-            }
-
+            var robot = await ReadById(robotId) ?? throw new RobotNotFoundException($"Robot with ID: {robotId} was not found in the database");
             if (robot.CurrentMissionId != null)
             {
                 var missionRun = await missionRunService.ReadById(robot.CurrentMissionId);
@@ -293,15 +287,22 @@ namespace Api.Services
                     );
                 }
             }
+        }
 
+        public async Task HandleLosingConnectionToIsar(string robotId)
+        {
             try
             {
-                await UpdateRobotStatus(robot.Id, RobotStatus.Offline);
-                await UpdateCurrentMissionId(robot.Id, null);
-                await UpdateRobotIsarConnected(robot.Id, false);
-                await UpdateCurrentArea(robot.Id, null);
+                await UpdateCurrentRobotMissionToFailed(robotId);
+                await UpdateRobotStatus(robotId, RobotStatus.Offline);
+                await UpdateCurrentMissionId(robotId, null);
+                await UpdateRobotIsarConnected(robotId, false);
+                await UpdateCurrentArea(robotId, null);
             }
-            catch (RobotNotFoundException) { }
+            catch (RobotNotFoundException)
+            {
+                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+            }
         }
 
         private IQueryable<Robot> GetRobotsWithSubModels()
