@@ -161,7 +161,7 @@ namespace Api.Services
             {
                 const string Message = "Error connecting to ISAR while stopping mission";
                 logger.LogError(e, "{Message}", Message);
-                await robotService.SetRobotToIsarDisconnected(robot.Id);
+                await robotService.HandleLosingConnectionToIsar(robot.Id);
                 throw new MissionException(Message, (int)e.StatusCode!);
             }
             catch (MissionException e)
@@ -360,7 +360,7 @@ namespace Api.Services
             {
                 string errorMessage = $"Could not reach ISAR at {robot.IsarUri}";
                 logger.LogError(e, "{Message}", errorMessage);
-                await robotService.SetRobotToIsarDisconnected(robot.Id);
+                await robotService.HandleLosingConnectionToIsar(robot.Id);
                 throw new IsarCommunicationException(errorMessage);
             }
             catch (MissionException e)
