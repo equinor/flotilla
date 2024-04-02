@@ -13,6 +13,7 @@ namespace Api.Database.Models
             Name = "defaultId";
             SerialNumber = "defaultSerialNumber";
             Status = RobotStatus.Offline;
+            IsarConnected = true;
             Deprecated = false;
             Host = "localhost";
             Port = 3000;
@@ -41,8 +42,8 @@ namespace Api.Database.Models
             VideoStreams = videoStreams;
             Host = createQuery.Host;
             Port = createQuery.Port;
-            IsarConnected = createQuery.IsarConnected;
-            Deprecated = createQuery.Deprecated;
+            IsarConnected = true;
+            Deprecated = false;
             Status = createQuery.Status;
             Pose = new Pose();
         }
