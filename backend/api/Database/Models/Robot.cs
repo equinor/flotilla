@@ -44,6 +44,7 @@ namespace Api.Database.Models
             Port = createQuery.Port;
             IsarConnected = true;
             Deprecated = false;
+            RobotCapabilities = createQuery.RobotCapabilities;
             Status = createQuery.Status;
             Pose = new Pose();
         }
@@ -94,6 +95,8 @@ namespace Api.Database.Models
         [Required]
         public int Port { get; set; }
 
+        public IList<RobotCapabilitiesEnum>? RobotCapabilities { get; set; }
+
         [Required]
         public bool IsarConnected { get; set; }
 
@@ -133,5 +136,17 @@ namespace Api.Database.Models
         Busy,
         Offline,
         Blocked,
+    }
+
+    public enum RobotCapabilitiesEnum
+    {
+        take_thermal_image,
+        take_image,
+        take_video,
+        take_thermal_video,
+        drive_to_pose,
+        record_audio,
+        localize,
+        docking_procedure
     }
 }

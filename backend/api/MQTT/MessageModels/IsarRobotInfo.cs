@@ -31,6 +31,9 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("port")]
         public int Port { get; set; }
 
+        [JsonPropertyName("capabilities")]
+        public List<RobotCapabilitiesEnum> Capabilities { get; set; }
+
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }
     }

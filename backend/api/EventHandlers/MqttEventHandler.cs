@@ -128,6 +128,7 @@ namespace Api.EventHandlers
                         VideoStreams = isarRobotInfo.VideoStreamQueries,
                         Host = isarRobotInfo.Host,
                         Port = isarRobotInfo.Port,
+                        RobotCapabilities = isarRobotInfo.Capabilities,
                         Status = RobotStatus.Available,
                     };
 
@@ -145,6 +146,7 @@ namespace Api.EventHandlers
                 UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
 
                 if (isarRobotInfo.CurrentInstallation is not null) UpdateCurrentInstallationIfChanged(installation, ref robot, ref updatedFields);
+                if (isarRobotInfo.Capabilities is not null) UpdateRobotCapabilitiesIfChanged(isarRobotInfo.Capabilities, ref robot, ref updatedFields);
                 if (updatedFields.IsNullOrEmpty()) return;
 
                 robot = await robotService.Update(robot);
@@ -202,6 +204,14 @@ namespace Api.EventHandlers
 
             updatedFields.Add($"\nCurrentInstallation ({robot.CurrentInstallation} -> {newCurrentInstallation})\n");
             robot.CurrentInstallation = newCurrentInstallation;
+        }
+
+        public static void UpdateRobotCapabilitiesIfChanged(IList<RobotCapabilitiesEnum> newRobotCapabilities, ref Robot robot, ref List<string> updatedFields)
+        {
+            if (robot.RobotCapabilities != null && Enumerable.SequenceEqual(newRobotCapabilities, robot.RobotCapabilities)) return;
+
+            updatedFields.Add($"\nRobotCapabilities ({robot.RobotCapabilities} -> {newRobotCapabilities})\n");
+            robot.RobotCapabilities = newRobotCapabilities;
         }
 
         private async void OnIsarMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
