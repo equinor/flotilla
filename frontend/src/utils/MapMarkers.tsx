@@ -23,13 +23,13 @@ export const placeTagsInMap = (
         if (task.inspections.length === 0) {
             const pixelPosition = calculateObjectPixelPosition(mapMetadata, task.robotPose.position)
             // Workaround for current bug in echo
-            const order = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
+            const order = task.taskOrder + 1
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
         }
         task.inspections.forEach((inspection) => {
             const pixelPosition = calculateObjectPixelPosition(mapMetadata, inspection.inspectionTarget)
             // Workaround for current bug in echo
-            const order = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
+            const order = task.taskOrder + 1
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
         })
     })
