@@ -52,7 +52,7 @@ export const TaskTable = ({ tasks }: { tasks: Task[] | undefined }) => {
 const TaskTableRows = ({ tasks }: { tasks: Task[] }) => {
     const rows = tasks.map((task) => {
         // Workaround for current bug in echo
-        const order: number = task.taskOrder < 214748364 ? task.taskOrder + 1 : 1
+        const order: number = task.taskOrder + 1
         const rowStyle =
             task.status === TaskStatus.InProgress || task.status === TaskStatus.Paused
                 ? { background: tokens.colors.infographic.primary__mist_blue.hex }

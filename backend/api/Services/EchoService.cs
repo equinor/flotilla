@@ -88,8 +88,16 @@ namespace Api.Services
         {
             var tags = new List<EchoTag>();
 
-            foreach (var planItem in planItems)
+            var indices = new HashSet<int>();
+            bool inconsistentIndices = false;
+
+            for (int i = 0; i < planItems.Count; i++)
             {
+                var planItem = planItems[i];
+                if (planItem.SortingOrder < 0 || planItem.SortingOrder >= planItems.Count || indices.Contains(planItem.SortingOrder))
+                    inconsistentIndices = true;
+                indices.Add(planItem.SortingOrder);
+
                 if (planItem.PoseId is null)
                 {
                     string message = $"Invalid EchoMission {planItem.Tag} has no associated pose id";
@@ -120,6 +128,10 @@ namespace Api.Services
 
                 tags.Add(tag);
             }
+
+            if (inconsistentIndices)
+                for (int i = 0; i < tags.Count; i++)
+                    tags[i].PlanOrder = i;
 
             return tags;
         }
