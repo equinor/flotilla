@@ -39,7 +39,7 @@ export const BatteryStatusDisplay = ({
 
     const batteryIcon = batteryLevel ? getBatteryIcon(batteryLevel) : Icons.BatteryUnknown
 
-    const batteryValue = batteryLevel ? `${batteryLevel}%` : '---%'
+    const batteryValue = batteryLevel ? `${Math.round(batteryLevel)}%` : '---%'
 
     iconColor = batteryIcon === Icons.BatteryAlert ? tokens.colors.interactive.warning__resting.hex : iconColor
 
