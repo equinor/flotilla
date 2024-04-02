@@ -109,8 +109,6 @@ namespace Api.Test.Services
                 RobotType = RobotType.Robot,
                 Host = "",
                 Port = 1,
-                IsarConnected = true,
-                Deprecated = false,
                 Status = RobotStatus.Available
             };
 
