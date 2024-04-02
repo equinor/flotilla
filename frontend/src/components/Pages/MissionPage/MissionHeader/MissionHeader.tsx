@@ -155,6 +155,8 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
 
     const numberOfCompletedTasks = mission.tasks.filter((task) => task.isCompleted).length
 
+    const batteryValue = mission.robot.batteryLevel ? `${Math.round(mission.robot.batteryLevel)}%` : '---%'
+
     return (
         <>
             <HeaderSection>
@@ -199,7 +201,7 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                 </StyledCard>
                 <StyledCard>
                     {HeaderText(translatedRobot, `${mission.robot.name}`)}
-                    {!isMissionCompleted && HeaderText(translatedBatteryLevel, `${mission.robot.batteryLevel}%`)}
+                    {!isMissionCompleted && HeaderText(translatedBatteryLevel, batteryValue)}
                     {!isMissionCompleted &&
                         mission.robot.pressureLevel &&
                         HeaderText(
