@@ -22,6 +22,8 @@ namespace Api.Controllers.Models
 
         public int Port { get; set; }
 
+        public IList<RobotCapabilitiesEnum> RobotCapabilities { get; set; }
+
         public RobotStatus Status { get; set; }
     }
 }

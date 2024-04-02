@@ -427,6 +427,7 @@ namespace Api.Test
                 Port = 3000,
                 CurrentInstallationCode = installationCode,
                 CurrentAreaName = null,
+                RobotCapabilities = [],
                 VideoStreams = new List<CreateVideoStreamQuery>()
             };
 
@@ -509,6 +510,7 @@ namespace Api.Test
                 Port = 3000,
                 CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = areaName,
+                RobotCapabilities = [],
                 VideoStreams = new List<CreateVideoStreamQuery>()
             };
 
@@ -691,6 +693,7 @@ namespace Api.Test
                 Port = 3000,
                 CurrentInstallationCode = otherInstallation.InstallationCode,
                 CurrentAreaName = null,
+                RobotCapabilities = [],
                 VideoStreams = new List<CreateVideoStreamQuery>()
             };
 
@@ -758,6 +761,7 @@ namespace Api.Test
                 Port = 3000,
                 CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = null,
+                RobotCapabilities = [],
                 VideoStreams = new List<CreateVideoStreamQuery>()
             };
 

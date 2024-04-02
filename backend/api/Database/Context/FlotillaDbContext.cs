@@ -1,5 +1,6 @@
 ﻿using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Database.Context
@@ -49,6 +50,9 @@ namespace Api.Database.Context
                     }
                 );
             });
+
+            AddConverterForListOfEnums(modelBuilder.Entity<Robot>()
+                .Property(r => r.RobotCapabilities));
 
             modelBuilder.Entity<MissionDefinition>()
                 .Property(m => m.InspectionFrequency)
@@ -111,6 +115,22 @@ namespace Api.Database.Context
             {
                 entity.Property(property.Name).HasConversion(new DateTimeOffsetToBinaryConverter());
             }
+        }
+
+        private static void AddConverterForListOfEnums<T>(PropertyBuilder<IList<T>?> propertyBuilder)
+            where T : Enum
+        {
+#pragma warning disable IDE0305
+            var valueComparer = new ValueComparer<IList<T>?>(
+                    (c1, c2) => (c1 == null && c2 == null) || ((c1 != null == (c2 != null)) && c1!.SequenceEqual(c2!)),
+                    c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c == null ? null : (IList<T>?)c.ToList());
+#pragma warning restore IDE0305
+
+            propertyBuilder.HasConversion(
+                    r => r != null ? string.Join(';', r) : "",
+                    r => r.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(r => (T)Enum.Parse(typeof(T), r)).ToList())
+                .Metadata.SetValueComparer(valueComparer);
         }
     }
 }
