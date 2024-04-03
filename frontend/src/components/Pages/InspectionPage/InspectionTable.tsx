@@ -21,9 +21,8 @@ import { SmallScreenInfoText } from 'utils/InfoText'
 const StyledIcon = styled(Icon)`
     display: flex;
     justify-content: center;
-    height: 100%;
-    width: 100%;
-    scale: 50%;
+    height: 1.3rem;
+    width: 1.3rem;
 `
 
 const StyledTable = styled.div`
