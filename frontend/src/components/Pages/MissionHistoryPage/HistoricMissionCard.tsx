@@ -8,7 +8,6 @@ import {
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
 import { TaskStatus } from 'models/Task'
 import { useNavigate } from 'react-router-dom'
-import { TextAlignedButton } from 'components/Styles/StyledComponents'
 import { formatDateTime } from 'utils/StringFormatting'
 
 enum InspectionTableColumns {
@@ -62,9 +61,12 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
-                <TextAlignedButton variant="ghost" onClick={routeChange}>
+                <Typography
+                    link
+                    onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`)}
+                >
                     {mission.name}
-                </TextAlignedButton>
+                </Typography>
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Area}>
                 <Typography>{mission.area?.areaName}</Typography>

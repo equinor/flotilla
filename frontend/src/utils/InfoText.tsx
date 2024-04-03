@@ -1,13 +1,19 @@
 import { Typography, Icon } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
+import styled from 'styled-components'
+
+const StyledDiv = styled.div`
+    display: flex;
+    align-items: center;
+`
 
 export const SmallScreenInfoText = () => {
     const { TranslateText } = useLanguageContext()
     return (
-        <div id="SmallScreenInfoText">
-            <Icon name={Icons.Info} size={24}></Icon>
+        <StyledDiv id="SmallScreenInfoText">
+            <Icon name={Icons.Info}> </Icon>
             <Typography>{TranslateText('Small screen info text')}</Typography>
-        </div>
+        </StyledDiv>
     )
 }
