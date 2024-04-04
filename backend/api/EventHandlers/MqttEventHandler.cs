@@ -222,6 +222,7 @@ namespace Api.EventHandlers
             var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
             var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
             var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
+            var signalRService = provider.GetRequiredService<ISignalRService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
 
@@ -236,6 +237,8 @@ namespace Api.EventHandlers
             MissionRun flotillaMissionRun;
             try { flotillaMissionRun = await missionRunService.UpdateMissionRunStatusByIsarMissionId(isarMission.MissionId, status); }
             catch (MissionRunNotFoundException) { return; }
+
+            _ = signalRService.SendMessageAsync("Mission run updated", flotillaMissionRun.Area.Installation, new MissionRunResponse(flotillaMissionRun));
 
             _logger.LogInformation(
                 "Mission '{Id}' (ISARMissionID='{IsarMissionId}') status updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'",
