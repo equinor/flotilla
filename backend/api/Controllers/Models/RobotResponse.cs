@@ -42,6 +42,8 @@ namespace Api.Controllers.Models
 
         public string IsarUri { get; set; }
 
+        public IList<RobotCapabilitiesEnum>? RobotCapabilities { get; set; }
+
         [JsonConstructor]
 #nullable disable
         public RobotResponse() { }
@@ -68,6 +70,7 @@ namespace Api.Controllers.Models
             Pose = robot.Pose;
             CurrentMissionId = robot.CurrentMissionId;
             IsarUri = robot.IsarUri;
+            RobotCapabilities = robot.RobotCapabilities;
         }
     }
 }
