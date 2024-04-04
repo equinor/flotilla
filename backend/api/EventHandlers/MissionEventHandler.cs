@@ -75,37 +75,41 @@ namespace Api.EventHandlers
 
             if (!await LocalizationService.RobotIsLocalized(missionRun.Robot.Id))
             {
-                _scheduleLocalizationSemaphore.WaitOne();
-                if (await MissionService.PendingLocalizationMissionRunExists(missionRun.Robot.Id))
+                if (missionRun.Robot.RobotCapabilities != null && !missionRun.Robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.localize))
                 {
-                    _scheduleLocalizationSemaphore.Release();
-                    return;
+                    await RobotService.UpdateCurrentArea(missionRun.Robot.Id, missionRun.Area);
                 }
-                if (await MissionService.OngoingLocalizationMissionRunExists(missionRun.Robot.Id))
+                else
                 {
-                    _scheduleLocalizationSemaphore.Release();
-                    return;
+                    _scheduleLocalizationSemaphore.WaitOne();
+                    if (await MissionService.PendingLocalizationMissionRunExists(missionRun.Robot.Id)
+                        || await MissionService.OngoingLocalizationMissionRunExists(missionRun.Robot.Id))
+                    {
+                        _scheduleLocalizationSemaphore.Release();
+                        return;
+                    }
+
+                    try
+                    {
+                        var localizationMissionRun = await LocalizationService.CreateLocalizationMissionInArea(missionRun.Robot.Id, missionRun.Area.Id);
+                        _logger.LogInformation("{Message}", $"Created localization mission run with ID {localizationMissionRun.Id}");
+                    }
+                    catch (Exception ex) when (
+                        ex is AreaNotFoundException
+                        or DeckNotFoundException
+                        or RobotNotAvailableException
+                        or RobotNotFoundException
+                        or IsarCommunicationException
+                    )
+                    {
+                        _logger.LogError("Mission run {MissionRunId} will be aborted as robot {RobotId} was not correctly localized", missionRun.Id, missionRun.Robot.Id);
+                        missionRun.Status = MissionStatus.Aborted;
+                        missionRun.StatusReason = "Aborted: Robot was not correctly localized";
+                        await MissionService.Update(missionRun);
+                        return;
+                    }
+                    finally { _scheduleLocalizationSemaphore.Release(); }
                 }
-                try
-                {
-                    var localizationMissionRun = await LocalizationService.CreateLocalizationMissionInArea(missionRun.Robot.Id, missionRun.Area.Id);
-                    _logger.LogInformation("{Message}", $"Created localization mission run with ID {localizationMissionRun.Id}");
-                }
-                catch (Exception ex) when (
-                    ex is AreaNotFoundException
-                    or DeckNotFoundException
-                    or RobotNotAvailableException
-                    or RobotNotFoundException
-                    or IsarCommunicationException
-                )
-                {
-                    _logger.LogError("Mission run {MissionRunId} will be aborted as robot {RobotId} was not correctly localized", missionRun.Id, missionRun.Robot.Id);
-                    missionRun.Status = MissionStatus.Aborted;
-                    missionRun.StatusReason = "Aborted: Robot was not correctly localized";
-                    await MissionService.Update(missionRun);
-                    return;
-                }
-                finally { _scheduleLocalizationSemaphore.Release(); }
             }
 
             _startMissionSemaphore.WaitOne();
