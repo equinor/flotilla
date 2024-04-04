@@ -2,7 +2,6 @@ import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { translateSignalRMission } from 'utils/EnumTranslations'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
     let newMissionList = [...list]
@@ -83,7 +82,6 @@ export const useMissionRuns = (): IMissionRunsContext => {
             })
             registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
                 let updatedMission: Mission = JSON.parse(message)
-                updatedMission = translateSignalRMission(updatedMission)
 
                 setMissionQueue((oldQueue) => {
                     const oldQueueCopy = [...oldQueue]

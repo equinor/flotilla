@@ -11,7 +11,6 @@ import { MissionMapView } from './MapPosition/MissionMapView'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Header } from 'components/Header/Header'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
-import { translateSignalRMission } from 'utils/EnumTranslations'
 
 const StyledMissionPage = styled.div`
     display: flex;
@@ -44,7 +43,6 @@ export const MissionPage = () => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
                 let updatedMission: Mission = JSON.parse(message)
-                updatedMission = translateSignalRMission(updatedMission)
                 setSelectedMission((oldMission) => (updatedMission.id === oldMission?.id ? updatedMission : oldMission))
             })
         }
