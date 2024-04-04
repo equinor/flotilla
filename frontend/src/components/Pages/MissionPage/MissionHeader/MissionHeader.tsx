@@ -20,10 +20,6 @@ const HeaderSection = styled(Card)`
     top: 60px;
     position: sticky;
     z-index: 1;
-
-    @media (max-width: 700px) {
-        top: 80px;
-    }
 `
 
 const TitleSection = styled.div`
