@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { CondensedMissionDefinition, SourceType } from 'models/MissionDefinition'
+import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { useInstallationContext } from './InstallationContext'
 
 interface IMissionDefinitionsContext {
@@ -48,16 +48,12 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.missionDefinitionUpdated, (username: string, message: string) => {
                 const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
-                missionDefinition.sourceType =
-                    Object.values(SourceType)[missionDefinition.sourceType as unknown as number]
                 setMissionDefinitions((oldMissionDefinitions) =>
                     upsertMissionDefinition(oldMissionDefinitions, missionDefinition)
                 )
             })
             registerEvent(SignalREventLabels.missionDefinitionCreated, (username: string, message: string) => {
                 const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
-                missionDefinition.sourceType =
-                    Object.values(SourceType)[missionDefinition.sourceType as unknown as number]
                 setMissionDefinitions((oldMissionDefinitions) =>
                     upsertMissionDefinition(oldMissionDefinitions, missionDefinition)
                 )

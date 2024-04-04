@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Api.Database.Models;
 using Api.Services.Models;
 using Api.SignalRHubs;
@@ -15,9 +16,17 @@ namespace Api.Services
         public void ReportSafeZoneSuccessToSignalR(Robot robot, string message);
     }
 
-    public class SignalRService(IHubContext<SignalRHub> signalRHub) : ISignalRService
+    public class SignalRService : ISignalRService
     {
-        private readonly JsonSerializerOptions _serializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        private readonly JsonSerializerOptions _serializerOptions;
+        private readonly IHubContext<SignalRHub> _signalRHub;
+
+        public SignalRService(IHubContext<SignalRHub> signalRHub)
+        {
+            _signalRHub = signalRHub;
+            _serializerOptions = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            _serializerOptions.Converters.Add(new JsonStringEnumConverter());
+        }
 
         public async Task SendMessageAsync<T>(string label, Installation? installation, T messageObject)
         {
@@ -33,16 +42,16 @@ namespace Api.Services
                 if (localDevUser is null || localDevUser.Equals("", StringComparison.Ordinal)) return;
 
                 if (installation != null)
-                    await signalRHub.Clients.Group(localDevUser + installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)).SendAsync(label, "all", message);
+                    await _signalRHub.Clients.Group(localDevUser + installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)).SendAsync(label, "all", message);
                 else
-                    await signalRHub.Clients.Group(localDevUser).SendAsync(label, "all", message);
+                    await _signalRHub.Clients.Group(localDevUser).SendAsync(label, "all", message);
             }
             else
             {
                 if (installation != null)
-                    await signalRHub.Clients.Group(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)).SendAsync(label, "all", message);
+                    await _signalRHub.Clients.Group(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)).SendAsync(label, "all", message);
                 else
-                    await signalRHub.Clients.All.SendAsync(label, "all", message);
+                    await _signalRHub.Clients.All.SendAsync(label, "all", message);
             }
 
 

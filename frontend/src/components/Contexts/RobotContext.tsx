@@ -1,9 +1,7 @@
 import { createContext, useContext, useState, FC, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { Robot, RobotStatus } from 'models/Robot'
+import { Robot } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { BatteryStatus } from 'models/Battery'
-import { RobotType } from 'models/RobotModel'
 
 const upsertRobotList = (list: Robot[], mission: Robot) => {
     let newList = [...list]
@@ -35,15 +33,6 @@ export const RobotProvider: FC<Props> = ({ children }) => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.robotAdded, (username: string, message: string) => {
                 let updatedRobot: Robot = JSON.parse(message)
-                updatedRobot = {
-                    ...updatedRobot,
-                    status: Object.values(RobotStatus)[updatedRobot.status as unknown as number],
-                    batteryStatus: Object.values(BatteryStatus)[updatedRobot.batteryStatus as unknown as number],
-                    model: {
-                        ...updatedRobot.model,
-                        type: Object.values(RobotType)[updatedRobot.model.type as unknown as number],
-                    },
-                }
                 setEnabledRobots((oldRobotList) => {
                     let oldRobotListCopy = [...oldRobotList]
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
@@ -52,15 +41,6 @@ export const RobotProvider: FC<Props> = ({ children }) => {
             })
             registerEvent(SignalREventLabels.robotUpdated, (username: string, message: string) => {
                 let updatedRobot: Robot = JSON.parse(message)
-                updatedRobot = {
-                    ...updatedRobot,
-                    status: Object.values(RobotStatus)[updatedRobot.status as unknown as number],
-                    batteryStatus: Object.values(BatteryStatus)[updatedRobot.batteryStatus as unknown as number],
-                    model: {
-                        ...updatedRobot.model,
-                        type: Object.values(RobotType)[updatedRobot.model.type as unknown as number],
-                    },
-                }
                 setEnabledRobots((oldRobotList) => {
                     let oldRobotListCopy = [...oldRobotList]
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
@@ -69,15 +49,6 @@ export const RobotProvider: FC<Props> = ({ children }) => {
             })
             registerEvent(SignalREventLabels.robotDeleted, (username: string, message: string) => {
                 let updatedRobot: Robot = JSON.parse(message)
-                updatedRobot = {
-                    ...updatedRobot,
-                    status: Object.values(RobotStatus)[updatedRobot.status as unknown as number],
-                    batteryStatus: Object.values(BatteryStatus)[updatedRobot.batteryStatus as unknown as number],
-                    model: {
-                        ...updatedRobot.model,
-                        type: Object.values(RobotType)[updatedRobot.model.type as unknown as number],
-                    },
-                }
                 setEnabledRobots((oldRobotList) => {
                     let newRobotList = [...oldRobotList]
                     const index = newRobotList.findIndex((r) => r.id === updatedRobot.id)
