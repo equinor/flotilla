@@ -165,7 +165,7 @@ namespace Api.Database.Context
                 Deck = decks[0],
                 Plant = decks[0].Plant,
                 Installation = decks[0].Plant!.Installation,
-                Name = "AP320",
+                Name = "testArea",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
                 SafePositions = new List<SafePosition>(new[] { new SafePosition() })
@@ -177,7 +177,7 @@ namespace Api.Database.Context
                 Deck = decks[0],
                 Plant = decks[0].Plant,
                 Installation = decks[0].Plant!.Installation,
-                Name = "AP330",
+                Name = "testArea2",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
                 SafePositions = new List<SafePosition>(new[] { new SafePosition() })
@@ -189,7 +189,7 @@ namespace Api.Database.Context
                 Deck = decks[0],
                 Plant = decks[0].Plant,
                 Installation = decks[0].Plant!.Installation,
-                Name = "testArea",
+                Name = "testArea3",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
                 SafePositions = new List<SafePosition>(new[] { new SafePosition() })
@@ -201,7 +201,7 @@ namespace Api.Database.Context
                 Deck = decks[1],
                 Plant = decks[1].Plant,
                 Installation = decks[1].Plant.Installation,
-                Name = "testArea2",
+                Name = "testArea4",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
                 SafePositions = new List<SafePosition>(new[] { new SafePosition() })
@@ -213,7 +213,7 @@ namespace Api.Database.Context
                 Deck = decks[2],
                 Plant = decks[2].Plant,
                 Installation = decks[2].Plant.Installation,
-                Name = "testArea3",
+                Name = "testArea5",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
                 SafePositions = new List<SafePosition>(new[] { new SafePosition() })
@@ -225,7 +225,7 @@ namespace Api.Database.Context
                 Deck = decks[3],
                 Plant = decks[3].Plant,
                 Installation = decks[3].Plant.Installation,
-                Name = "testArea4",
+                Name = "testArea6",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
                 SafePositions = new List<SafePosition>(new[] { new SafePosition() })

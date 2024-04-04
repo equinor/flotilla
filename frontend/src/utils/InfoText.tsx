@@ -12,7 +12,7 @@ export const SmallScreenInfoText = () => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledDiv id="SmallScreenInfoText">
-            <Icon name={Icons.Info}> </Icon>
+            <Icon name={Icons.Info} />
             <Typography>{TranslateText('Small screen info text')}</Typography>
         </StyledDiv>
     )

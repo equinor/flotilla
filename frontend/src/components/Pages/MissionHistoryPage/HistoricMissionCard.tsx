@@ -43,10 +43,6 @@ const MissionEndTimeDisplay = ({ mission }: MissionProps) => {
 
 export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => {
     let navigate = useNavigate()
-    const routeChange = () => {
-        const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
-        navigate(path)
-    }
 
     const missionHasFailedTasks = mission.tasks.some(
         (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
@@ -61,10 +57,7 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
                 <MissionStatusDisplay status={mission.status} />
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Name}>
-                <Typography
-                    link
-                    onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`)}
-                >
+                <Typography link onClick={() => navigate(`${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`)}>
                     {mission.name}
                 </Typography>
             </Table.Cell>
