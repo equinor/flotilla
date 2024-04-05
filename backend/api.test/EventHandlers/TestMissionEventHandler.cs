@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Data.Common;
 using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers;
 using Api.Controllers.Models;
+using Api.Database.Context;
 using Api.Database.Models;
 using Api.Mqtt;
 using Api.Mqtt.Events;
@@ -15,45 +19,72 @@ using Api.Test.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Api.Test.EventHandlers
 {
-    [Collection("Database collection")]
     public class TestMissionEventHandler : IAsyncLifetime
     {
-        private readonly IMissionRunService _missionRunService;
-        private readonly MqttService _mqttService;
-        private readonly IRobotService _robotService;
-        private readonly ILocalizationService _localizationService;
-        private readonly IEmergencyActionService _emergencyActionService;
-        private readonly DatabaseUtilities _databaseUtilities;
-        private readonly EmergencyActionController _emergencyActionController;
+        private FlotillaDbContext Context => CreateContext();
+        private TestWebApplicationFactory<Program> _factory;
+        private IServiceProvider _serviceProvider;
+        private HttpClient _client;
+        private PostgreSqlContainer _container;
+        private string _connectionString;
+        private DbConnection _connection;
+        private DatabaseUtilities _databaseUtilities;
+        private JsonSerializerOptions _serializerOptions;
 
-        private readonly Func<Task> _resetDatabase;
+        private IMissionRunService _missionRunService;
+        private IMissionDefinitionService _missionDefinitionService;
+        private MqttService _mqttService;
+        private IRobotService _robotService;
+        private ILocalizationService _localizationService;
+        private IEmergencyActionService _emergencyActionService;
+        private EmergencyActionController _emergencyActionController;
 
-        public TestMissionEventHandler(DatabaseFixture fixture)
+
+        public async Task InitializeAsync()
         {
-            var factory = fixture.Factory;
-            var serviceProvider = fixture.ServiceProvider;
+            (var container, string connectionString, var connection) =
+                await TestSetupHelpers.ConfigurePostgreSqlContainer();
+            _container = container;
+            _connectionString = connectionString;
+            _connection = connection;
 
-            _missionRunService = serviceProvider.GetRequiredService<IMissionRunService>();
-            _robotService = serviceProvider.GetRequiredService<IRobotService>();
-            _localizationService = serviceProvider.GetRequiredService<ILocalizationService>();
-            _emergencyActionService = serviceProvider.GetRequiredService<IEmergencyActionService>();
+            _databaseUtilities = new DatabaseUtilities(Context);
 
-            _emergencyActionController = serviceProvider.GetRequiredService<EmergencyActionController>();
+            _factory = TestSetupHelpers.ConfigureWebApplicationFactory(_connectionString);
+            _client = TestSetupHelpers.ConfigureHttpClient(_factory);
 
-            _databaseUtilities = new DatabaseUtilities(fixture.Context);
-            _resetDatabase = fixture.ResetDatabase;
+            _serviceProvider = TestSetupHelpers.ConfigureServiceProvider(_factory);
+            _serializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
+
+            _missionRunService = _serviceProvider.GetRequiredService<IMissionRunService>();
+            _missionDefinitionService = _serviceProvider.GetRequiredService<IMissionDefinitionService>();
+            _robotService = _serviceProvider.GetRequiredService<IRobotService>();
+            _localizationService = _serviceProvider.GetRequiredService<ILocalizationService>();
+            _emergencyActionService = _serviceProvider.GetRequiredService<IEmergencyActionService>();
+
+            _emergencyActionController = _serviceProvider.GetRequiredService<EmergencyActionController>();
 
             var mqttServiceLogger = new Mock<ILogger<MqttService>>().Object;
-            _mqttService = new MqttService(mqttServiceLogger, factory.Configuration!);
+            _mqttService = new MqttService(mqttServiceLogger, _factory.Configuration!);
         }
 
-        public Task InitializeAsync() => Task.CompletedTask;
+        public async Task DisposeAsync()
+        {
+            await Context.DisposeAsync();
+            await _connection.CloseAsync();
+            await _container.DisposeAsync();
+            await _factory.DisposeAsync();
+        }
 
-        public async Task DisposeAsync() { await _resetDatabase(); }
+        private FlotillaDbContext CreateContext()
+        {
+            return TestSetupHelpers.ConfigureFlotillaDbContext(_connectionString);
+        }
 
         [Fact]
         public async void ScheduledMissionStartedWhenSystemIsAvailable()
@@ -137,7 +168,7 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
-        [Fact(Skip = "Test")]
+        [Fact]
         public async void NoMissionIsStartedIfQueueIsEmptyWhenRobotBecomesAvailable()
         {
             // Arrange
