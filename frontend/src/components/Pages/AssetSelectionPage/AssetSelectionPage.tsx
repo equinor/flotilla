@@ -122,7 +122,6 @@ const InstallationPicker = () => {
                 label={TranslateText('Show only active installations')}
                 checked={showActivePlants}
                 onChange={(e) => setShowActivePlants(e.target.checked)}
-                crossOrigin={undefined}
             />
             <StyledButton
                 onClick={() => switchInstallation(selectedInstallation)}
