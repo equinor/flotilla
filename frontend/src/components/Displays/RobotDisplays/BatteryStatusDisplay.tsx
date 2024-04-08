@@ -24,22 +24,23 @@ export const BatteryStatusDisplay = ({
 }: BatteryStatusDisplayProps): JSX.Element => {
     let iconColor: string = tokens.colors.interactive.primary__resting.hex
 
-    const getBatteryIcon = (batteryLevel: number) => {
+    const getBatteryIcon = (batteryLevel?: number) => {
         switch (true) {
-            case !batteryLevel:
+            case batteryLevel === null || batteryLevel === undefined:
                 return Icons.BatteryUnknown
-            case !batteryWarningLimit || batteryLevel > batteryWarningLimit:
+            case !batteryWarningLimit || batteryLevel! > batteryWarningLimit:
                 return Icons.Battery
-            case batteryWarningLimit && batteryLevel <= batteryWarningLimit:
+            case batteryWarningLimit && batteryLevel! <= batteryWarningLimit:
                 return Icons.BatteryAlert
             default:
                 return Icons.BatteryUnknown
         }
     }
 
-    const batteryIcon = batteryLevel ? getBatteryIcon(batteryLevel) : Icons.BatteryUnknown
+    const batteryIcon =
+        batteryLevel !== null && batteryLevel !== undefined ? getBatteryIcon(batteryLevel) : Icons.BatteryUnknown
 
-    const batteryValue = batteryLevel ? `${Math.round(batteryLevel)}%` : '---%'
+    const batteryValue = batteryLevel !== null && batteryLevel !== undefined ? `${Math.round(batteryLevel)}%` : '---%'
 
     iconColor = batteryIcon === Icons.BatteryAlert ? tokens.colors.interactive.warning__resting.hex : iconColor
 
