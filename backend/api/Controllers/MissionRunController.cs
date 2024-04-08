@@ -96,7 +96,7 @@ namespace Api.Controllers
         ///     Deletes the mission run with the specified id from the database.
         /// </summary>
         [HttpDelete]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Roles = Role.User)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MissionRunResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -116,4 +116,3 @@ namespace Api.Controllers
         }
     }
 }
-
