@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -56,7 +57,58 @@ namespace Api.Test
             return responseObject;
         }
 
-        private async Task VerifyNonDuplicateAreaDbNames(string installationCode, string plantCode, string deckName, string areaName)
+        private async Task<Installation?> GetInstallation(string installationCode)
+        {
+            string installationUrl = "/installations";
+            var installationResponse = await _client.GetAsync(installationUrl);
+            Assert.True(installationResponse.IsSuccessStatusCode);
+            var installationResponses = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
+            Assert.True(installationResponses != null);
+            return installationResponses.Where((i) => i.InstallationCode.Equals(installationCode, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+        }
+
+        private async Task<Plant?> GetPlant(string installationCode, string plantCode)
+        {
+            string installationUrl = "/installations";
+            var installationResponse = await _client.GetAsync(installationUrl);
+            Assert.True(installationResponse.IsSuccessStatusCode);
+            var installationResponses = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
+            Assert.True(installationResponses != null);
+            if (!installationResponses.Where((i) => i.InstallationCode.Equals(installationCode, StringComparison.OrdinalIgnoreCase)).Any()) return null;
+
+            string plantUrl = "/plants";
+            var plantResponse = await _client.GetAsync(plantUrl);
+            Assert.True(plantResponse.IsSuccessStatusCode);
+            var plantResponses = await plantResponse.Content.ReadFromJsonAsync<List<Plant>>(_serializerOptions);
+            Assert.True(plantResponses != null);
+            return plantResponses.Where((p) => p.PlantCode.Equals(plantCode, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+        }
+
+        private async Task<DeckResponse?> GetDeck(string installationCode, string plantCode, string deckName)
+        {
+            string installationUrl = "/installations";
+            var installationResponse = await _client.GetAsync(installationUrl);
+            Assert.True(installationResponse.IsSuccessStatusCode);
+            var installationResponses = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
+            Assert.True(installationResponses != null);
+            if (!installationResponses.Where((i) => i.InstallationCode.Equals(installationCode.ToLower(CultureInfo.CurrentCulture), StringComparison.OrdinalIgnoreCase)).Any()) return null;
+
+            string plantUrl = "/plants";
+            var plantResponse = await _client.GetAsync(plantUrl);
+            Assert.True(plantResponse.IsSuccessStatusCode);
+            var plantResponses = await plantResponse.Content.ReadFromJsonAsync<List<Plant>>(_serializerOptions);
+            Assert.True(plantResponses != null);
+            if (!plantResponses.Where((p) => p.PlantCode.Equals(plantCode.ToLower(CultureInfo.CurrentCulture), StringComparison.OrdinalIgnoreCase)).Any()) return null;
+
+            string deckUrl = "/decks";
+            var deckResponse = await _client.GetAsync(deckUrl);
+            Assert.True(deckResponse.IsSuccessStatusCode);
+            var deckResponses = await deckResponse.Content.ReadFromJsonAsync<List<DeckResponse>>(_serializerOptions);
+            Assert.True(deckResponses != null);
+            return deckResponses.Where((d) => d.DeckName.Equals(deckName.ToLower(CultureInfo.CurrentCulture), StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+        }
+
+        private async Task VerifyNonDuplicateAreaDbNames(string areaName)
         {
             string areaUrl = "/areas";
             var areaResponse = await _client.GetAsync(areaUrl);
@@ -64,27 +116,6 @@ namespace Api.Test
             var areaResponses = await areaResponse.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
             Assert.True(areaResponses != null);
             Assert.False(areaResponses.Where((a) => a.AreaName == areaName).Any(), $"Duplicate area name detected: {areaName}");
-
-            string deckUrl = "/decks";
-            var deckResponse = await _client.GetAsync(deckUrl);
-            Assert.True(deckResponse.IsSuccessStatusCode);
-            var deckResponses = await deckResponse.Content.ReadFromJsonAsync<List<DeckResponse>>(_serializerOptions);
-            Assert.True(deckResponses != null);
-            Assert.False(deckResponses.Where((d) => d.DeckName == deckName).Any(), $"Duplicate deck name detected: {deckName}");
-
-            string plantUrl = "/plants";
-            var plantResponse = await _client.GetAsync(plantUrl);
-            Assert.True(plantResponse.IsSuccessStatusCode);
-            var plantResponses = await plantResponse.Content.ReadFromJsonAsync<List<Plant>>(_serializerOptions);
-            Assert.True(plantResponses != null);
-            Assert.False(plantResponses.Where((p) => p.PlantCode == plantCode).Any(), $"Duplicate plant code detected: {plantCode}");
-
-            string installationUrl = "/installations";
-            var installationResponse = await _client.GetAsync(installationUrl);
-            Assert.True(installationResponse.IsSuccessStatusCode);
-            var installationResponses = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
-            Assert.True(installationResponses != null);
-            Assert.False(installationResponses.Where((i) => i.InstallationCode == installationCode).Any(), $"Duplicate installation name detected: {installationCode}");
         }
 
         private async Task VerifyNonDuplicateInstallationDbName(string installationCode)
@@ -184,7 +215,7 @@ namespace Api.Test
 
         private async Task<(Installation installation, Plant plant, DeckResponse deck, AreaResponse area)> PostAssetInformationToDb(string installationCode, string plantCode, string deckName, string areaName)
         {
-            await VerifyNonDuplicateAreaDbNames(installationCode, plantCode, deckName, areaName);
+            await VerifyNonDuplicateAreaDbNames(areaName);
 
             string installationUrl = "/installations";
             string plantUrl = "/plants";
@@ -193,9 +224,9 @@ namespace Api.Test
 
             (var installationContent, var plantContent, var deckContent, var areaContent) = ArrangeAreaPostQueries(installationCode, plantCode, deckName, areaName);
 
-            var installation = await PostToDb<Installation>(installationUrl, installationContent);
-            var plant = await PostToDb<Plant>(plantUrl, plantContent);
-            var deck = await PostToDb<DeckResponse>(deckUrl, deckContent);
+            var installation = await GetInstallation(installationCode) ?? await PostToDb<Installation>(installationUrl, installationContent);
+            var plant = await GetPlant(installation.InstallationCode, plantCode) ?? await PostToDb<Plant>(plantUrl, plantContent);
+            var deck = await GetDeck(installation.InstallationCode, plant.PlantCode, deckName) ?? await PostToDb<DeckResponse>(deckUrl, deckContent);
             var area = await PostToDb<AreaResponse>(areaUrl, areaContent);
 
             return (installation, plant, deck, area);
@@ -743,9 +774,12 @@ namespace Api.Test
             // Arrange - Initialise area
             string installationCode = "installationMissionFailsIfRobotIsNotInSameDeckAsMission";
             string plantCode = "plantMissionFailsIfRobotIsNotInSameDeckAsMission";
-            string deckName = "deckMissionFailsIfRobotIsNotInSameDeckAsMission";
-            string areaName = "areaMissionFailsIfRobotIsNotInSameDeckAsMission";
-            (var installation, _, _, var area) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
+            string deckName1 = "deckMissionFailsIfRobotIsNotInSameDeckAsMission1";
+            string areaName1 = "areaMissionFailsIfRobotIsNotInSameDeckAsMission1";
+            string deckName2 = "deckMissionFailsIfRobotIsNotInSameDeckAsMission2";
+            string areaName2 = "areaMissionFailsIfRobotIsNotInSameDeckAsMission2";
+            (var installation, _, _, var area1) = await PostAssetInformationToDb(installationCode, plantCode, deckName1, areaName1);
+            (_, _, _, var area2) = await PostAssetInformationToDb(installationCode, plantCode, deckName2, areaName2);
 
             string testMissionName = "testMissionFailsIfRobotIsNotInSameDeckAsMission";
 
@@ -760,7 +794,7 @@ namespace Api.Test
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallationCode = installation.InstallationCode,
-                CurrentAreaName = null,
+                CurrentAreaName = area1.AreaName,
                 RobotCapabilities = [],
                 VideoStreams = new List<CreateVideoStreamQuery>()
             };
@@ -774,7 +808,7 @@ namespace Api.Test
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                AreaName = area.AreaName,
+                AreaName = area2.AreaName,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
