@@ -380,6 +380,7 @@ namespace Api.EventHandlers
             var provider = GetServiceProvider();
             var signalRService = provider.GetRequiredService<ISignalRService>();
             var robotService = provider.GetRequiredService<IRobotService>();
+            var teamsMessageService = provider.GetRequiredService<ITeamsMessageService>();
 
             var cloudHealthStatus = (IsarCloudHealthMessage)mqttArgs.Message;
 
@@ -394,7 +395,8 @@ namespace Api.EventHandlers
             string message = $"Failed telemetry request for robot {cloudHealthStatus.RobotName}.";
             signalRService.ReporGeneralFailToSignalR(robot, messageTitle, message);
 
-            _logger.LogInformation("Received isar topic");
+            teamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
+
         }
     }
 }

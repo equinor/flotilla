@@ -90,6 +90,7 @@ builder.Services.AddScoped<IReturnToHomeService, ReturnToHomeService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
 builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
 builder.Services.AddScoped<IEmergencyActionService, EmergencyActionService>();
+builder.Services.AddScoped<ITeamsMessageService, TeamsMessageService>();
 
 builder.Services.AddScoped<IBatteryTimeseriesService, BatteryTimeseriesService>();
 builder.Services.AddScoped<IPressureTimeseriesService, PressureTimeseriesService>();
@@ -115,6 +116,7 @@ builder.Services.AddHostedService<MqttEventHandler>();
 builder.Services.AddHostedService<MissionEventHandler>();
 builder.Services.AddHostedService<MqttService>();
 builder.Services.AddHostedService<IsarConnectionEventHandler>();
+builder.Services.AddHostedService<TeamsMessageEventHandler>();
 
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));
 builder.Services.Configure<MapBlobOptions>(builder.Configuration.GetSection("Maps"));
