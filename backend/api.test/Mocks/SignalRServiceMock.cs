@@ -23,12 +23,13 @@ namespace Api.Services
             return;
         }
 
-        public void ReportScheduleFailureToSignalR(Robot robot, string message)
+
+        public void ReportSafeZoneSuccessToSignalR(Robot robot, string message)
         {
             return;
         }
 
-        public void ReportSafeZoneSuccessToSignalR(Robot robot, string message)
+        public void ReporGeneralFailToSignalR(Robot robot, string title, string message)
         {
             return;
         }
