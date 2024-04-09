@@ -119,6 +119,7 @@ const InstallationPicker = () => {
                 }}
             />
             <StyledCheckbox
+                crossOrigin={undefined}
                 label={TranslateText('Show only active installations')}
                 checked={showActivePlants}
                 onChange={(e) => setShowActivePlants(e.target.checked)}
