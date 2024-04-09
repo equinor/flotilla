@@ -120,4 +120,8 @@
     public class RobotCurrentAreaMissingException(string message) : Exception(message)
     {
     }
+
+    public class UnsupportedRobotCapabilityException(string message) : Exception(message)
+    {
+    }
 }

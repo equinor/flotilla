@@ -131,6 +131,19 @@ namespace Api.Database.Models
                     )
             };
         }
+
+        public bool IsSupportedInspectionType(IList<RobotCapabilitiesEnum> capabilities)
+        {
+            return InspectionType switch
+            {
+                InspectionType.Image => capabilities.Contains(RobotCapabilitiesEnum.take_image),
+                InspectionType.ThermalImage => capabilities.Contains(RobotCapabilitiesEnum.take_thermal_image),
+                InspectionType.Video => capabilities.Contains(RobotCapabilitiesEnum.take_video),
+                InspectionType.ThermalVideo => capabilities.Contains(RobotCapabilitiesEnum.take_thermal_video),
+                InspectionType.Audio => capabilities.Contains(RobotCapabilitiesEnum.record_audio),
+                _ => false,
+            };
+        }
     }
 
     public enum InspectionStatus
