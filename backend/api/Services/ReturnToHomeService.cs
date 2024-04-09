@@ -29,8 +29,9 @@ namespace Api.Services
 
             MissionRun missionRun;
             try { missionRun = await ScheduleReturnToHomeMissionRun(robotId); }
-            catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException)
+            catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException or UnsupportedRobotCapabilityException)
             {
+                // TODO: if we make ISAR aware of return to home missions, we can avoid scheduling them when the robot does not need them
                 throw new ReturnToHomeMissionFailedToScheduleException(ex.Message);
             }
 

@@ -99,8 +99,15 @@ namespace Api.Services
             };
             await mapService.AssignMapToMission(localizationMissionRun);
 
-            logger.LogWarning("Starting localization mission");
-            await missionRunService.Create(localizationMissionRun, triggerCreatedMissionRunEvent: false);
+            try
+            {
+                logger.LogWarning("Starting localization mission");
+                await missionRunService.Create(localizationMissionRun, triggerCreatedMissionRunEvent: false);
+            }
+            catch (UnsupportedRobotCapabilityException)
+            {
+                logger.LogError($"Unsupported robot capability detected when starting localisation mission for robot {localizationMissionRun.Robot.Name}. This should not happen.");
+            }
             return localizationMissionRun;
         }
 

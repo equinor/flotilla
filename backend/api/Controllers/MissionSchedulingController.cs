@@ -94,7 +94,15 @@ namespace Api.Controllers
 
             // Compare with GetTasksFromSource
 
-            newMissionRun = await missionRunService.Create(newMissionRun);
+            try
+            {
+                newMissionRun = await missionRunService.Create(newMissionRun);
+            }
+            catch (UnsupportedRobotCapabilityException)
+            {
+                return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission.");
+            }
+
 
             return CreatedAtAction(nameof(Rerun), new
             {
@@ -171,7 +179,15 @@ namespace Api.Controllers
                 missionRun.CalculateEstimatedDuration();
             }
 
-            var newMissionRun = await missionRunService.Create(missionRun);
+            MissionRun newMissionRun;
+            try
+            {
+                newMissionRun = await missionRunService.Create(missionRun);
+            }
+            catch (UnsupportedRobotCapabilityException)
+            {
+                return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission.");
+            }
 
             return CreatedAtAction(nameof(Schedule), new
             {
@@ -337,7 +353,15 @@ namespace Api.Controllers
                 await missionDefinitionService.Create(scheduledMissionDefinition);
             }
 
-            var newMissionRun = await missionRunService.Create(missionRun);
+            MissionRun newMissionRun;
+            try
+            {
+                newMissionRun = await missionRunService.Create(missionRun);
+            }
+            catch (UnsupportedRobotCapabilityException)
+            {
+                return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission.");
+            }
 
             return CreatedAtAction(nameof(Create), new
             {
@@ -393,8 +417,9 @@ namespace Api.Controllers
 
             MissionRun? newMissionRun;
             try { newMissionRun = await customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
-            catch (Exception e) when (e is RobotPressureTooLowException or RobotBatteryLevelTooLowException) { return BadRequest(e.Message); }
+            catch (Exception e) when (e is RobotPressureTooLowException or RobotBatteryLevelTooLowException or UnsupportedRobotCapabilityException) { return BadRequest(e.Message); }
             catch (Exception e) when (e is RobotNotFoundException or MissionNotFoundException) { return NotFound(e.Message); }
+            catch (Exception e) when (e is UnsupportedRobotCapabilityException) { return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission."); }
 
             return CreatedAtAction(nameof(Create), new
             {

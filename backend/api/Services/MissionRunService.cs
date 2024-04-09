@@ -40,6 +40,8 @@ namespace Api.Services
 
         public Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId);
 
+        public bool IncludesUnsupportedInspectionType(MissionRun missionRun);
+
         public Task<MissionRun> Update(MissionRun mission);
 
         public Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
@@ -73,6 +75,11 @@ namespace Api.Services
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
             // Making sure database does not try to create new robot
             context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+
+            if (IncludesUnsupportedInspectionType(missionRun))
+            {
+                throw new UnsupportedRobotCapabilityException($"Mission {missionRun.Name} contains inspection types not supported by robot: {missionRun.Robot.Name}.");
+            }
 
             if (missionRun.Area is not null) { context.Entry(missionRun.Area).State = EntityState.Unchanged; }
             await context.MissionRuns.AddAsync(missionRun);
@@ -222,6 +229,17 @@ namespace Api.Services
             }
             return false;
 
+        }
+
+        public bool IncludesUnsupportedInspectionType(MissionRun missionRun)
+        {
+            if (missionRun.Robot.RobotCapabilities == null) return false;
+
+            foreach (var task in missionRun.Tasks)
+                foreach (var inspection in task.Inspections)
+                    if (!inspection.IsSupportedInspectionType(missionRun.Robot.RobotCapabilities))
+                        return true;
+            return false;
         }
 
         public async Task<MissionRun> Update(MissionRun missionRun)

@@ -252,7 +252,14 @@ namespace Api.Services
                 Map = new MapMetadata()
             };
 
-            await missionRunService.Create(missionRun);
+            try
+            {
+                await missionRunService.Create(missionRun);
+            }
+            catch (UnsupportedRobotCapabilityException)
+            {
+                logger.LogError($"Unsupported robot capability detected when driving to safe position for robot {missionRun.Robot.Name}. This should not happen.");
+            }
         }
 
         public bool MissionRunQueueIsEmpty(IList<MissionRun> missionRunQueue)
@@ -315,7 +322,14 @@ namespace Api.Services
                     Map = new MapMetadata()
                 };
 
-                await missionRunService.Create(newMissionRun);
+                try
+                {
+                    await missionRunService.Create(missionRun);
+                }
+                catch (UnsupportedRobotCapabilityException)
+                {
+                    logger.LogError($"Unsupported robot capability detected when restarting interrupted missions for robot {missionRun.Robot.Name}. This should not happen.");
+                }
             }
         }
 
