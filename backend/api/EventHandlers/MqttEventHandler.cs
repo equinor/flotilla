@@ -44,6 +44,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarBatteryReceived += OnIsarBatteryUpdate;
             MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
+            MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
         }
 
         public override void Unsubscribe()
@@ -56,6 +57,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarBatteryReceived -= OnIsarBatteryUpdate;
             MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
+            MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken) { await stoppingToken; }
@@ -371,6 +373,28 @@ namespace Api.EventHandlers
             var pose = new Pose(poseStatus.Pose);
 
             await poseTimeseriesService.AddPoseEntry(pose, poseStatus.IsarId);
+        }
+
+        private async void OnIsarCloudHealthUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var provider = GetServiceProvider();
+            var signalRService = provider.GetRequiredService<ISignalRService>();
+            var robotService = provider.GetRequiredService<IRobotService>();
+
+            var cloudHealthStatus = (IsarCloudHealthMessage)mqttArgs.Message;
+
+            var robot = await robotService.ReadByIsarId(cloudHealthStatus.IsarId);
+            if (robot == null)
+            {
+                _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", cloudHealthStatus.IsarId, cloudHealthStatus.RobotName);
+                return;
+            }
+
+            string messageTitle = "Failed Telemetry";
+            string message = $"Failed telemetry request for robot {cloudHealthStatus.RobotName}.";
+            signalRService.ReporGeneralFailToSignalR(robot, messageTitle, message);
+
+            _logger.LogInformation("Received isar topic");
         }
     }
 }

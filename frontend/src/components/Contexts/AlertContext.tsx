@@ -26,7 +26,7 @@ export enum AlertType {
 
 const alertTypeEnumMap: { [key: string]: AlertType } = {
     safeZoneFailure: AlertType.SafeZoneFail,
-    scheduleFailure: AlertType.RequestFail,
+    generalFailure: AlertType.RequestFail,
     safeZoneSuccess: AlertType.SafeZoneSuccess,
 }
 

@@ -39,6 +39,9 @@ namespace Api.Mqtt
                 },
                 {
                     "isar/+/pose", typeof(IsarPoseMessage)
+                },
+                {
+                    "isar/+/cloud_health", typeof(IsarCloudHealthMessage)
                 }
             };
 

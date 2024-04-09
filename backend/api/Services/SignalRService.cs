@@ -12,8 +12,8 @@ namespace Api.Services
         public Task SendMessageAsync<T>(string label, Installation? installation, T messageObject);
         public Task SendMessageAsync(string label, Installation? installation, string message);
         public void ReportSafeZoneFailureToSignalR(Robot robot, string message);
-        public void ReportScheduleFailureToSignalR(Robot robot, string message);
         public void ReportSafeZoneSuccessToSignalR(Robot robot, string message);
+        public void ReporGeneralFailToSignalR(Robot robot, string title, string message);
     }
 
     public class SignalRService : ISignalRService
@@ -66,20 +66,19 @@ namespace Api.Services
                 new AlertResponse("safeZoneFailure", "Safe zone failure", message, robot.CurrentInstallation.InstallationCode, robot.Id));
         }
 
-        public void ReportScheduleFailureToSignalR(Robot robot, string message)
-        {
-            _ = SendMessageAsync(
-                "Alert",
-                robot.CurrentInstallation,
-                new AlertResponse("scheduleFailure", "Failure to schedule", message, robot.CurrentInstallation.InstallationCode, robot.Id));
-        }
-
         public void ReportSafeZoneSuccessToSignalR(Robot robot, string message)
         {
             _ = SendMessageAsync(
                "Alert",
                robot.CurrentInstallation,
                new AlertResponse("safeZoneSuccess", "Successful drive to safe zone", message, robot.CurrentInstallation.InstallationCode, robot.Id));
+        }
+
+        public void ReporGeneralFailToSignalR(Robot robot, string title, string message)
+        {
+            _ = SendMessageAsync("Alert",
+                robot.CurrentInstallation,
+                new AlertResponse("generalFailure", title, message, robot.CurrentInstallation.InstallationCode, robot.Id));
         }
 
     }
