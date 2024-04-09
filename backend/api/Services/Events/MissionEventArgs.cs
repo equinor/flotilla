@@ -18,4 +18,9 @@
     {
         public string RobotId { get; } = robotId;
     }
+
+    public class TeamsMessageEventArgs(string teamsMessage) : EventArgs
+    {
+        public string TeamsMessage { get; } = teamsMessage;
+    }
 }
