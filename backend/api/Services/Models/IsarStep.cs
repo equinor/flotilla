@@ -36,6 +36,7 @@
                 "TakeThermalImage" => IsarStepType.TakeThermalImage,
                 "TakeThermalVideo" => IsarStepType.TakeThermalVideo,
                 "Localize" => IsarStepType.Localize,
+                "ReturnToHome" => IsarStepType.ReturnToHome,
                 "MoveArm" => IsarStepType.MoveArm,
                 _
                   => throw new ArgumentException(
@@ -58,6 +59,7 @@
     {
         DriveToPose,
         Localize,
+        ReturnToHome,
         TakeImage,
         TakeVideo,
         TakeThermalImage,
