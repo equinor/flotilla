@@ -329,9 +329,9 @@ namespace Api.EventHandlers
 
             var step = (IsarStepMessage)mqttArgs.Message;
 
-            // Flotilla does not care about DriveTo, Localization or MoveArm steps
+            // Flotilla does not care about DriveTo, Localization, MoveArm or ReturnToHome steps
             var stepType = IsarStep.StepTypeFromString(step.StepType);
-            if (stepType is IsarStepType.DriveToPose or IsarStepType.Localize or IsarStepType.MoveArm) return;
+            if (stepType is IsarStepType.DriveToPose or IsarStepType.Localize or IsarStepType.MoveArm or IsarStepType.ReturnToHome) return;
 
             IsarStepStatus status;
             try { status = IsarStep.StatusFromString(step.Status); }

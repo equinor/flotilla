@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
 using Api.Controllers.Models;
 using Api.Services.Models;
 using Api.Utilities;
@@ -175,8 +174,14 @@ namespace Api.Database.Models
 
         public static string ConvertMissionTaskTypeToIsarTaskType(MissionTaskType missionTaskType)
         {
-            if (missionTaskType == MissionTaskType.ReturnHome) { return "drive_to"; }
-            else { return missionTaskType.ToString().ToLower(CultureInfo.CurrentCulture); }
+            return missionTaskType switch
+            {
+                MissionTaskType.ReturnHome => "return_to_home",
+                MissionTaskType.Localization => "localization",
+                MissionTaskType.Inspection => "inspection",
+                _ => throw new ArgumentException($"ISAR Mission task type '{missionTaskType}' not supported"),
+            };
+            ;
         }
     }
 
