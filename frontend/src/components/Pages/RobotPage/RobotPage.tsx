@@ -22,7 +22,7 @@ const StyledRobotPage = styled.div`
     gap: 1rem;
     margin: 2rem;
 `
-const StyledButtons = styled.div`
+const RobotArmMovementSection = styled.div`
     display: flex;
     flex-direction: row;
     gap: 1rem;
@@ -32,6 +32,9 @@ const RobotInfo = styled.div`
     align-items: start;
     gap: 1rem;
     width: calc(80vw);
+    @media (max-width: 800px) {
+        flex-direction: column;
+    }
 `
 const VerticalContent = styled.div<{ $alignItems?: string }>`
     display: flex;
@@ -100,8 +103,8 @@ export const RobotPage = () => {
 
                         {selectedRobot.model.type === RobotType.TaurobInspector && (
                             <>
-                                <Typography variant="h2">{TranslateText('Move robot arm')}</Typography>
-                                <StyledButtons>
+                                <Typography variant="h4">{TranslateText('Set robot arm to ')}</Typography>
+                                <RobotArmMovementSection>
                                     <MoveRobotArm
                                         robot={selectedRobot}
                                         armPosition="battery_change"
@@ -117,7 +120,7 @@ export const RobotPage = () => {
                                         armPosition="lookout"
                                         isRobotAvailable={selectedRobot.status === RobotStatus.Available}
                                     />
-                                </StyledButtons>
+                                </RobotArmMovementSection>
                             </>
                         )}
                     </>
