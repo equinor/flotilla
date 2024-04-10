@@ -24,6 +24,8 @@ const LimitWidthStyle = styled.div`
 
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
+    padding: 8px;
+    width: 8rem;
 `
 
 export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProps) => {
@@ -89,7 +91,7 @@ export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProp
                 onClick={!usable ? openPopover : onClickMoveArm}
                 ref={anchorRef}
             >
-                {TranslateText('Set robot arm to ') + '"' + TranslateText(armPosition) + '"'}
+                {TranslateText(armPosition)}
             </StyledTextButton>
             <StyledDialog open={feedback !== ''}>
                 {feedback}
