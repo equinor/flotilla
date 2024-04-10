@@ -80,7 +80,7 @@
     "East": "East",
     "South": "South",
     "West": "West",
-    "Stop button pressed warning text": "You are about to stop the entire mission and the robot will be sent back to the charging station. The robot will start from the begining if you run the mission again.",
+    "Stop button pressed warning text": "You are about to stop the entire mission. If there are no more missions in the queue, the robot will return to the start position.",
     "Stop button pressed confirmation text": "Are you sure you want to stop the mission?",
     "Stop mission": "Stop mission",
     "Search for missions": "Search for missions",
@@ -228,5 +228,8 @@
     "INFO": "INFO",
     "Safe Zone": "Safe Zone",
     "Safe Zone successful text": "The robots are in the safe zone and will not run missions. To continue the mission press the 'Safe to continue mission' button.",
-    "Connection Issues": "Connection Issues"
+    "Connection Issues": "Connection Issues",
+    "Stop button pressed during return home warning text": "You are about to stop a mission that will send the robot back to the start position. You must manually drive the robot to the start position to start a new mission.",
+    "Failed Telemetry": "Failed Telemetry",
+    "Stop button pressed during localization warning text": "You are about to stop a mission that localizes the robot. You will not be able to run an inspection mission until you have successfully localized the robot."
 }
