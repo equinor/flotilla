@@ -7,16 +7,19 @@ import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { StopMissionDialog, MissionStatusRequest } from 'components/Pages/FrontPage/MissionOverview/StopDialogs'
+import { TaskType } from 'models/Task'
 
 interface MissionControlButtonsProps {
     missionName: string
     robotId: string
     missionStatus: MissionStatus
+    missionTaskType: TaskType
 }
 
 interface MissionProps {
     missionName: string
     robotId: string
+    missionTaskType: TaskType
 }
 
 const ButtonStyle = styled.div`
@@ -31,7 +34,12 @@ const ButtonText = styled.div`
     align-items: center;
 `
 
-export const MissionControlButtons = ({ missionName, robotId, missionStatus }: MissionControlButtonsProps) => {
+export const MissionControlButtons = ({
+    missionName,
+    robotId,
+    missionStatus,
+    missionTaskType,
+}: MissionControlButtonsProps) => {
     const { missionControlState } = useMissionControlContext()
 
     return (
@@ -41,10 +49,18 @@ export const MissionControlButtons = ({ missionName, robotId, missionStatus }: M
             ) : (
                 <>
                     {missionStatus === MissionStatus.Ongoing && (
-                        <OngoingMissionButton missionName={missionName} robotId={robotId} />
+                        <OngoingMissionButton
+                            missionName={missionName}
+                            robotId={robotId}
+                            missionTaskType={missionTaskType}
+                        />
                     )}
                     {missionStatus === MissionStatus.Paused && (
-                        <PausedMissionButton missionName={missionName} robotId={robotId} />
+                        <PausedMissionButton
+                            missionName={missionName}
+                            robotId={robotId}
+                            missionTaskType={missionTaskType}
+                        />
                     )}
                 </>
             )}
@@ -52,7 +68,7 @@ export const MissionControlButtons = ({ missionName, robotId, missionStatus }: M
     )
 }
 
-const OngoingMissionButton = ({ missionName, robotId }: MissionProps) => {
+const OngoingMissionButton = ({ missionName, robotId, missionTaskType }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { updateRobotMissionState } = useMissionControlContext()
 
@@ -60,7 +76,7 @@ const OngoingMissionButton = ({ missionName, robotId }: MissionProps) => {
         <>
             <ButtonStyle>
                 <ButtonText>
-                    <StopMissionDialog missionName={missionName} robotId={robotId} />
+                    <StopMissionDialog missionName={missionName} robotId={robotId} missionTaskType={missionTaskType} />
                     <Typography variant="caption">{TranslateText('Stop')}</Typography>
                 </ButtonText>
                 <ButtonText>
@@ -81,7 +97,7 @@ const OngoingMissionButton = ({ missionName, robotId }: MissionProps) => {
     )
 }
 
-const PausedMissionButton = ({ missionName, robotId }: MissionProps) => {
+const PausedMissionButton = ({ missionName, robotId, missionTaskType }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { updateRobotMissionState } = useMissionControlContext()
 
@@ -89,7 +105,7 @@ const PausedMissionButton = ({ missionName, robotId }: MissionProps) => {
         <>
             <ButtonStyle>
                 <ButtonText>
-                    <StopMissionDialog missionName={missionName} robotId={robotId} />
+                    <StopMissionDialog missionName={missionName} robotId={robotId} missionTaskType={missionTaskType} />
                     <Typography variant="caption">{TranslateText('Stop')}</Typography>
                 </ButtonText>
                 <ButtonText>

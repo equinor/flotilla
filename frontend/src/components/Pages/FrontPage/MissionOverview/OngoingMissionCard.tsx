@@ -10,6 +10,7 @@ import { MissionControlButtons } from 'components/Displays/MissionButtons/Missio
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import { MissionRobotDisplay } from 'components/Displays/MissionDisplays/MissionRobotDisplay'
 import { useRobotContext } from 'components/Contexts/RobotContext'
+import { TaskType } from 'models/Task'
 
 interface MissionProps {
     mission: Mission
@@ -52,6 +53,10 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
 
     const robot = enabledRobots.find((robot) => mission.robot.id === robot.id)
 
+    let missionTaskType = TaskType.Inspection
+    if (mission.tasks.every((task) => task.type === TaskType.ReturnHome)) missionTaskType = TaskType.ReturnHome
+    if (mission.tasks.every((task) => task.type === TaskType.Localization)) missionTaskType = TaskType.Localization
+
     return (
         <StyledMissionCard style={{ boxShadow: tokens.elevation.raised }}>
             <TopContent>
@@ -62,6 +67,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                 </StyledTitle>
                 <MissionControlButtons
                     missionName={mission.name}
+                    missionTaskType={missionTaskType}
                     robotId={mission.robot.id}
                     missionStatus={mission.status}
                 />

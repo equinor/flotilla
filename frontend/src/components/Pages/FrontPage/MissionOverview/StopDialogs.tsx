@@ -8,6 +8,7 @@ import { useMissionControlContext } from 'components/Contexts/MissionControlCont
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
+import { TaskType } from 'models/Task'
 
 const StyledDisplayButtons = styled.div`
     display: flex;
@@ -42,6 +43,7 @@ const Square = styled.div`
 interface MissionProps {
     missionName: string
     robotId: string
+    missionTaskType: TaskType
 }
 
 export enum MissionStatusRequest {
@@ -50,7 +52,44 @@ export enum MissionStatusRequest {
     Resume,
 }
 
-export const StopMissionDialog = ({ missionName, robotId }: MissionProps): JSX.Element => {
+const DialogContent = ({ missionTaskType }: { missionTaskType: TaskType }) => {
+    const { TranslateText } = useLanguageContext()
+    switch (missionTaskType) {
+        case TaskType.Localization:
+            return (
+                <StyledText>
+                    <Typography variant="body_long">
+                        {TranslateText('Stop button pressed during localization warning text')}
+                    </Typography>
+                    <Typography variant="body_long">
+                        {TranslateText('Stop button pressed confirmation text')}
+                    </Typography>
+                </StyledText>
+            )
+        case TaskType.ReturnHome:
+            return (
+                <StyledText>
+                    <Typography variant="body_long">
+                        {TranslateText('Stop button pressed during return home warning text')}
+                    </Typography>
+                    <Typography variant="body_long">
+                        {TranslateText('Stop button pressed confirmation text')}
+                    </Typography>
+                </StyledText>
+            )
+        default:
+            return (
+                <StyledText>
+                    <Typography variant="body_long">{TranslateText('Stop button pressed warning text')}</Typography>
+                    <Typography variant="body_long">
+                        {TranslateText('Stop button pressed confirmation text')}
+                    </Typography>
+                </StyledText>
+            )
+    }
+}
+
+export const StopMissionDialog = ({ missionName, robotId, missionTaskType }: MissionProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const [isStopMissionDialogOpen, setIsStopMissionDialogOpen] = useState<boolean>(false)
     const { updateRobotMissionState } = useMissionControlContext()
@@ -74,12 +113,7 @@ export const StopMissionDialog = ({ missionName, robotId }: MissionProps): JSX.E
                     </Dialog.Title>
                 </Dialog.Header>
                 <Dialog.CustomContent>
-                    <StyledText>
-                        <Typography variant="body_long">{TranslateText('Stop button pressed warning text')}</Typography>
-                        <Typography variant="body_long">
-                            {TranslateText('Stop button pressed confirmation text')}
-                        </Typography>
-                    </StyledText>
+                    <DialogContent missionTaskType={missionTaskType} />
                 </Dialog.CustomContent>
                 <Dialog.Actions>
                     <StyledDisplayButtons>
