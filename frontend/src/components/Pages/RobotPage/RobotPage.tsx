@@ -1,4 +1,4 @@
-import { Button, Typography } from '@equinor/eds-core-react'
+import { Typography } from '@equinor/eds-core-react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { BackButton } from 'utils/BackButton'
@@ -13,6 +13,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotType } from 'models/RobotModel'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { BackendAPICaller } from 'api/ApiCaller'
+import { StyledButton } from 'components/Styles/StyledComponents'
 
 const StyledRobotPage = styled.div`
     display: flex;
@@ -26,22 +27,34 @@ const RobotArmMovementSection = styled.div`
     display: flex;
     flex-direction: row;
     gap: 1rem;
+    @media (max-width: 800px) {
+        flex-direction: column;
+    }
+`
+const StyledTextButton = styled(StyledButton)`
+    text-align: left;
+    max-width: 12rem;
 `
 const RobotInfo = styled.div`
     display: flex;
-    align-items: start;
-    gap: 1rem;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 3rem;
     width: calc(80vw);
     @media (max-width: 800px) {
         flex-direction: column;
     }
 `
-const VerticalContent = styled.div<{ $alignItems?: string }>`
+const StatusContent = styled.div<{ $alignItems?: string }>`
     display: flex;
     flex-direction: column;
     align-items: ${(props) => props.$alignItems};
     justify-content: flex-end;
     gap: 2rem;
+    @media (max-width: 800px) {
+        flex-direction: row;
+        align-items: flex-end;
+    }
 `
 
 export const RobotPage = () => {
@@ -69,7 +82,12 @@ export const RobotPage = () => {
                         </Typography>
                         <RobotInfo>
                             <RobotImage height="350px" robotType={selectedRobot.model.type} />
-                            <VerticalContent $alignItems="start">
+                            <StatusContent $alignItems="start">
+                                <RobotStatusChip
+                                    status={selectedRobot.status}
+                                    isarConnected={selectedRobot.isarConnected}
+                                />
+
                                 {selectedRobot.status !== RobotStatus.Offline && (
                                     <>
                                         <BatteryStatusDisplay
@@ -91,15 +109,13 @@ export const RobotPage = () => {
                                         )}
                                     </>
                                 )}
-                                <RobotStatusChip
-                                    status={selectedRobot.status}
-                                    isarConnected={selectedRobot.isarConnected}
-                                />
-                                <Button variant="outlined" onClick={returnRobotToHome}>
-                                    {TranslateText('Return robot to home')}
-                                </Button>
-                            </VerticalContent>
+                            </StatusContent>
                         </RobotInfo>
+                        <Typography variant="h2">{TranslateText('Actions')}</Typography>
+
+                        <StyledTextButton variant="outlined" onClick={returnRobotToHome}>
+                            {TranslateText('Return robot to home')}
+                        </StyledTextButton>
 
                         {selectedRobot.model.type === RobotType.TaurobInspector && (
                             <>
