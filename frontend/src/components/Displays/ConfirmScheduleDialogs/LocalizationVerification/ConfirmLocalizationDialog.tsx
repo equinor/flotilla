@@ -44,7 +44,6 @@ export const ConfirmLocalizationDialog = ({
                     )}
                     <HorizontalContent>
                         <Checkbox
-                            crossOrigin={undefined}
                             onChange={(e: ChangeEvent<HTMLInputElement>) => setIsCheckboxClicked(e.target.checked)}
                         />
                         <Typography>
