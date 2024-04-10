@@ -1,9 +1,11 @@
-﻿using System.Net;
+﻿using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Api.EventHandlers
 {
@@ -40,22 +42,35 @@ namespace Api.EventHandlers
 
         private async void OnTeamsMessageReceived(object? sender, TeamsMessageEventArgs e)
         {
-            string url = InspectionFindingEventHandler.GetWebhookURL(_configuration, "TeamsInspectionFindingsWebhook");
+            string url = InspectionFindingEventHandler.GetWebhookURL(_configuration, "TeamsSystemStatusNotification");
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var content = new StringContent(e.TeamsMessage, Encoding.UTF8, "application/json");
+            var content = CreateTeamsMessageCard(e.TeamsMessage);
 
             var response = await client.PostAsync(url, content);
-            if (response.StatusCode == HttpStatusCode.OK)
+            if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Post request via teams incomming webhook was successful, Status Code: {response.StatusCode}", response.StatusCode);
+                return;
             }
-            else
-            {
-                string errorBody = await response.Content.ReadAsStringAsync();
-                _logger.LogError($"Webhook request failed with status code {response.StatusCode}. Response body: {errorBody}");
-            }
+
+            string errorBody = await response.Content.ReadAsStringAsync();
+            _logger.LogError($"Webhook request failed with status code {response.StatusCode}. Response body: {errorBody}");
+
+        }
+
+        private static StringContent CreateTeamsMessageCard(string message)
+        {
+            string jsonMessage = new JObject(
+                new JProperty("title", "System Status:"),
+                new JProperty("text", message),
+                new JProperty("sections", new JArray(new JObject(new JProperty("activitySubtitle", $"Generated on: {DateTime.UtcNow.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture)}"))))
+                ).ToString(Formatting.Indented);
+
+            var content = new StringContent(jsonMessage, Encoding.UTF8, "application/json");
+
+            return content;
         }
     }
 }
