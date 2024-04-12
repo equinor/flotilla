@@ -2,8 +2,13 @@ import { format } from 'date-fns'
 
 const millisecondsInADay = 8.64e7
 
-export const convertUTCDateToLocalDate = (date: Date): Date =>
-    new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000)
+export const convertUTCDateToLocalDate = (date: Date): Date => {
+    // If lastChar is Z, typescript assumes the date to be UTC
+    const lastChar = date.toString().slice(-1)
+    if (lastChar === 'Z') return new Date(date)
+    // If not, typescript assumes the date to be local time
+    return new Date(new Date(date).getTime() - new Date(date).getTimezoneOffset() * 60 * 1000)
+}
 
 const formatBackendDateTimeToDate = (date: Date) => new Date(date.toString())
 
@@ -30,4 +35,4 @@ export const getDeadlineInDays = (deadlineDate: Date): number =>
     new Date(deadlineDate.getTime() - new Date().getTime()).getTime() / millisecondsInADay
 
 export const formatDateTime = (dateTime: Date, dateFormat: string): string =>
-    format(convertUTCDateToLocalDate(new Date(dateTime)), dateFormat)
+    format(convertUTCDateToLocalDate(dateTime), dateFormat)

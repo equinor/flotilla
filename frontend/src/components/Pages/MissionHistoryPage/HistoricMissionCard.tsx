@@ -33,7 +33,7 @@ const MissionEndTimeDisplay = ({ mission }: MissionProps) => {
     return (
         <>
             {mission.endTime ? (
-                <Typography>{formatDateTime(new Date(mission.endTime), 'HH:mm:ss - dd/MM/yy')}</Typography>
+                <Typography>{formatDateTime(mission.endTime, 'HH:mm:ss - dd/MM/yy')}</Typography>
             ) : (
                 <Typography>-</Typography>
             )}
