@@ -55,7 +55,7 @@ namespace Api.Database.Models
         }
 
         [Required]
-        public MissionRunPriority MissionRunPriority { get; set; }
+        public MissionRunType MissionRunType { get; set; }
 
         [MaxLength(200)]
         public string? IsarMissionId { get; set; }
@@ -207,10 +207,10 @@ namespace Api.Database.Models
         PartiallySuccessful
     }
 
-    public enum MissionRunPriority
+    public enum MissionRunType
     {
         Normal,
-        Response,
+        ReturnHome,
         Emergency,
         Localization
     }

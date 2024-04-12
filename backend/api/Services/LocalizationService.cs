@@ -86,7 +86,7 @@ namespace Api.Services
             {
                 Name = "Localization mission",
                 Robot = robot,
-                MissionRunPriority = MissionRunPriority.Localization,
+                MissionRunType = MissionRunType.Localization,
                 InstallationCode = area.Installation.InstallationCode,
                 Area = area,
                 Status = MissionStatus.Pending,

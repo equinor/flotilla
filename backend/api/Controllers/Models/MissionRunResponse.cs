@@ -40,7 +40,7 @@ namespace Api.Controllers.Models
 
         public MapMetadata? Map { get; set; }
 
-        public MissionRunPriority MissionRunPriority { get; set; }
+        public MissionRunType MissionRunType { get; set; }
 
         [JsonConstructor]
 #nullable disable
@@ -67,7 +67,7 @@ namespace Api.Controllers.Models
             EstimatedDuration = mission.EstimatedDuration;
             Tasks = mission.Tasks;
             Map = mission.Map;
-            MissionRunPriority = mission.MissionRunPriority;
+            MissionRunType = mission.MissionRunType;
         }
 
     }
