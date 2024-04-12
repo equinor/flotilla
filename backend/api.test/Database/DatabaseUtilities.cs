@@ -40,7 +40,7 @@ namespace Api.Test.Database
             Robot robot,
             Area area,
             bool writeToDatabase = false,
-            MissionRunPriority missionRunPriority = MissionRunPriority.Normal,
+            MissionRunType missionRunType = MissionRunType.Normal,
             MissionStatus missionStatus = MissionStatus.Pending,
             string? isarMissionId = null
         )
@@ -51,7 +51,7 @@ namespace Api.Test.Database
                 Robot = robot,
                 MissionId = null,
                 IsarMissionId = isarMissionId,
-                MissionRunPriority = missionRunPriority,
+                MissionRunType = missionRunType,
                 Status = missionStatus,
                 DesiredStartTime = DateTime.Now,
                 Area = area,
@@ -59,7 +59,7 @@ namespace Api.Test.Database
                 Map = new MapMetadata(),
                 InstallationCode = installationCode
             };
-            if (missionRunPriority == MissionRunPriority.Localization)
+            if (missionRunType == MissionRunType.Localization)
             {
                 missionRun.Tasks = new List<MissionTask>
                 {

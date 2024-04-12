@@ -240,7 +240,7 @@ namespace Api.Services
             {
                 Name = "Drive to Safe Position",
                 Robot = robot,
-                MissionRunPriority = MissionRunPriority.Emergency,
+                MissionRunType = MissionRunType.Emergency,
                 InstallationCode = area.Installation.InstallationCode,
                 Area = area,
                 Status = MissionStatus.Pending,
@@ -306,7 +306,7 @@ namespace Api.Services
                 {
                     Name = missionRun.Name,
                     Robot = missionRun.Robot,
-                    MissionRunPriority = missionRun.MissionRunPriority,
+                    MissionRunType = missionRun.MissionRunType,
                     InstallationCode = missionRun.Area!.Installation.InstallationCode,
                     Area = missionRun.Area,
                     Status = MissionStatus.Pending,
@@ -450,7 +450,7 @@ namespace Api.Services
                 throw new MissionRunNotFoundException(errorMessage);
             }
 
-            if (robot.MissionQueueFrozen && missionRun.MissionRunPriority != MissionRunPriority.Emergency && missionRun.MissionRunPriority != MissionRunPriority.Localization)
+            if (robot.MissionQueueFrozen && missionRun.MissionRunType != MissionRunType.Emergency && missionRun.MissionRunType != MissionRunType.Localization)
             {
                 logger.LogInformation("Mission run {MissionRunId} was not started as the mission run queue for robot {RobotName} is frozen", missionRun.Id, robot.Name);
                 return false;

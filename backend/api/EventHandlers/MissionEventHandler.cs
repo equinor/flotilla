@@ -163,7 +163,7 @@ namespace Api.EventHandlers
             var lastMissionRun = await MissionService.ReadLastExecutedMissionRunByRobotWithoutTracking(robot.Id);
             if (lastMissionRun != null)
             {
-                if (lastMissionRun.MissionRunPriority == MissionRunPriority.Emergency & lastMissionRun.Status == MissionStatus.Successful)
+                if (lastMissionRun.MissionRunType == MissionRunType.Emergency & lastMissionRun.Status == MissionStatus.Successful)
                 {
                     _logger.LogInformation("Return to safe zone mission on robot {RobotName} was successful.", robot.Name);
                     SignalRService.ReportSafeZoneSuccessToSignalR(robot, $"Robot {robot.Name} is in the safe zone");

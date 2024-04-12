@@ -134,14 +134,14 @@ namespace Api.Services
             return await GetMissionRunsWithSubModels()
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .FirstOrDefaultAsync(missionRun =>
-                    missionRun.Robot.Id == robotId && missionRun.MissionRunPriority == MissionRunPriority.Emergency && missionRun.Status == MissionStatus.Pending);
+                    missionRun.Robot.Id == robotId && missionRun.MissionRunType == MissionRunType.Emergency && missionRun.Status == MissionStatus.Pending);
         }
 
         public async Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId)
         {
             var nextScheduledMissionRun = await GetMissionRunsWithSubModels()
                     .OrderBy(missionRun => missionRun.DesiredStartTime)
-                    .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending && missionRun.MissionRunPriority == MissionRunPriority.Localization);
+                    .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending && missionRun.MissionRunType == MissionRunType.Localization);
 
             return nextScheduledMissionRun;
         }
