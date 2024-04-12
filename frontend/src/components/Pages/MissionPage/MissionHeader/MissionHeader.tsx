@@ -97,19 +97,23 @@ const getStartUsedAndRemainingTime = (
 
     if (mission.endTime) {
         startTime = mission.startTime
-            ? formatDateTime(new Date(mission.startTime), 'HH:mm')
-            : formatDateTime(new Date(mission.endTime), 'HH:mm')
+            ? formatDateTime(mission.startTime, 'HH:mm')
+            : formatDateTime(mission.endTime, 'HH:mm')
+
         startDate = mission.startTime
-            ? formatDateTime(new Date(mission.startTime), 'dd/MM/yyy')
-            : formatDateTime(new Date(mission.endTime), 'dd/MM/yyy')
+            ? formatDateTime(mission.startTime, 'dd/MM/yyy')
+            : formatDateTime(mission.endTime, 'dd/MM/yyy')
         usedTimeInMinutes = mission.startTime
-            ? differenceInMinutes(new Date(mission.endTime), new Date(mission.startTime))
+            ? differenceInMinutes(
+                  convertUTCDateToLocalDate(mission.endTime),
+                  convertUTCDateToLocalDate(mission.startTime)
+              )
             : 0
         remainingTime = 'N/A'
     } else if (mission.startTime) {
-        startTime = formatDateTime(new Date(mission.startTime), 'HH:mm')
-        startDate = formatDateTime(new Date(mission.startTime), 'dd/MM/yyy')
-        usedTimeInMinutes = differenceInMinutes(Date.now(), convertUTCDateToLocalDate(new Date(mission.startTime)))
+        startTime = formatDateTime(mission.startTime, 'HH:mm')
+        startDate = formatDateTime(mission.startTime, 'dd/MM/yyy')
+        usedTimeInMinutes = differenceInMinutes(Date.now(), convertUTCDateToLocalDate(mission.startTime))
         if (estimatedDurationInMinutes)
             remainingTime = Math.max(estimatedDurationInMinutes - usedTimeInMinutes, 0) + ' ' + translatedMinutes
         else remainingTime = 'N/A'
