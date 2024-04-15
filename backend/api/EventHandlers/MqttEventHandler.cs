@@ -224,6 +224,7 @@ namespace Api.EventHandlers
             var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
             var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
             var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
+            var signalRService = provider.GetRequiredService<ISignalRService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
 
@@ -255,7 +256,13 @@ namespace Api.EventHandlers
 
             if (flotillaMissionRun.IsLocalizationMission())
             {
-                if (flotillaMissionRun.Status != MissionStatus.Successful) { await robotService.UpdateCurrentArea(robot.Id, null); }
+                if (flotillaMissionRun.Status != MissionStatus.Successful)
+                {
+                    await robotService.UpdateCurrentArea(robot.Id, null);
+
+                    signalRService.ReportGeneralFailToSignalR(robot, "Failed Localization Mission", $"Failed localization mission for robot {robot.Name}.");
+                    _logger.LogError("Localization mission for robot '{RobotName}' failed.", isarMission.RobotName);
+                }
                 else { await robotService.UpdateCurrentArea(robot.Id, flotillaMissionRun.Area); }
             }
 
@@ -393,7 +400,7 @@ namespace Api.EventHandlers
 
             string messageTitle = "Failed Telemetry";
             string message = $"Failed telemetry request for robot {cloudHealthStatus.RobotName}.";
-            signalRService.ReporGeneralFailToSignalR(robot, messageTitle, message);
+            signalRService.ReportGeneralFailToSignalR(robot, messageTitle, message);
 
             teamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
 
