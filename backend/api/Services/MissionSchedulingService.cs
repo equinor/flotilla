@@ -55,6 +55,13 @@ namespace Api.Services
                 logger.LogInformation("The robot was ready to start mission, but no mission is scheduled");
                 if (robot.MissionQueueFrozen) { return; }
 
+                if (!await localizationService.RobotIsLocalized(robotId))
+                {
+                    string infoMessage = $"Not scheduling a return to home mission as the robot {robotId} is not localized.";
+                    logger.LogInformation("{Message}", infoMessage);
+                    return;
+                }
+
                 try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
                 catch (ReturnToHomeMissionFailedToScheduleException)
                 {
@@ -70,7 +77,6 @@ namespace Api.Services
                 logger.LogInformation("Mission {MissionRunId} was put on the queue as the system may not start a mission now", missionRun.Id);
                 return;
             }
-
 
             // Verify that localization is fine
             if (!await localizationService.RobotIsLocalized(robot.Id) && !missionRun.IsLocalizationMission())

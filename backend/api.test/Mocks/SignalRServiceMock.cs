@@ -29,7 +29,7 @@ namespace Api.Services
             return;
         }
 
-        public void ReporGeneralFailToSignalR(Robot robot, string title, string message)
+        public void ReportGeneralFailToSignalR(Robot robot, string title, string message)
         {
             return;
         }

@@ -64,7 +64,7 @@ namespace Api.Services
 
             if (robot.CurrentArea is null)
             {
-                string errorMessage = $"Unable to schedule a return to home mission as the robot {robot.Id} is not linked to an area";
+                string errorMessage = $"Unable to schedule a return to home mission as the robot {robot.Id} is not localized.";
                 logger.LogError("{Message}", errorMessage);
                 throw new AreaNotFoundException(errorMessage);
             }
