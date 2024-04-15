@@ -13,7 +13,7 @@ namespace Api.Services
         public Task SendMessageAsync(string label, Installation? installation, string message);
         public void ReportSafeZoneFailureToSignalR(Robot robot, string message);
         public void ReportSafeZoneSuccessToSignalR(Robot robot, string message);
-        public void ReporGeneralFailToSignalR(Robot robot, string title, string message);
+        public void ReportGeneralFailToSignalR(Robot robot, string title, string message);
     }
 
     public class SignalRService : ISignalRService
@@ -74,7 +74,7 @@ namespace Api.Services
                new AlertResponse("safeZoneSuccess", "Successful drive to safe zone", message, robot.CurrentInstallation.InstallationCode, robot.Id));
         }
 
-        public void ReporGeneralFailToSignalR(Robot robot, string title, string message)
+        public void ReportGeneralFailToSignalR(Robot robot, string title, string message)
         {
             _ = SendMessageAsync("Alert",
                 robot.CurrentInstallation,
