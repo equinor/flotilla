@@ -30,6 +30,8 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId);
 
+        public Task<MissionRun?> ReadReturnToHomeMissionRuns(string robotId, IList<MissionStatus>? filterStatuses = null);
+
         public Task<MissionRun?> ReadLastExecutedMissionRunByRobotWithoutTracking(string robotId);
 
         public Task<bool> PendingLocalizationMissionRunExists(string robotId);
@@ -48,9 +50,7 @@ namespace Api.Services
             string isarMissionId,
             MissionStatus missionStatus
         );
-
         public Task<MissionRun?> Delete(string id);
-
         public Task<bool> OngoingMission(string robotId);
     }
 
@@ -151,6 +151,26 @@ namespace Api.Services
                     .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending && missionRun.MissionRunType == MissionRunType.Localization);
 
             return nextScheduledMissionRun;
+        }
+
+        public async Task<MissionRun?> ReadReturnToHomeMissionRuns(string robotId, IList<MissionStatus>? filterStatuses = null)
+        {
+            var missionFilter = ConstructFilter(new MissionRunQueryStringParameters
+            {
+                Statuses = filterStatuses as List<MissionStatus> ?? new List<MissionStatus>([]),
+                RobotId = robotId,
+                PageSize = 100
+            });
+
+            var missionRuns = await GetMissionRunsWithSubModels()
+                .Where(missionFilter)
+                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .ToListAsync();
+            foreach (var missionRun in missionRuns)
+            {
+                if (missionRun.IsReturnHomeMission()) { return missionRun; }
+            }
+            return null;
         }
 
         public async Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId)

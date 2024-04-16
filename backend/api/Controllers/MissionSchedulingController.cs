@@ -14,6 +14,7 @@ namespace Api.Controllers
             IMissionDefinitionService missionDefinitionService,
             ICustomMissionSchedulingService customMissionSchedulingService,
             IMissionRunService missionRunService,
+            IMissionSchedulingService missionSchedulingService,
             IInstallationService installationService,
             IRobotService robotService,
             IEchoService echoService,
@@ -102,7 +103,6 @@ namespace Api.Controllers
                 return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission.");
             }
 
-
             return CreatedAtAction(nameof(Rerun), new
             {
                 id = newMissionRun.Id
@@ -174,6 +174,23 @@ namespace Api.Controllers
             if (missionRun.Tasks.Any())
             {
                 missionRun.CalculateEstimatedDuration();
+            }
+
+            IList<MissionStatus> missionStatuses = [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused];
+            var returnToHomeMission = await missionRunService.ReadReturnToHomeMissionRuns(robot.Id, missionStatuses);
+            if (returnToHomeMission != null)
+            {
+                if (!await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
+                {
+                    return BadRequest($"The robot {robot.Name} is localized on a different deck so the mission was not scheduled.");
+                }
+
+                try { await missionSchedulingService.StopCurrentMissionRun(robot.Id); }
+                catch (RobotNotFoundException e) { logger.LogError("{Message}", e); }
+                catch (MissionRunNotFoundException e) { logger.LogWarning("{Message}", e); }
+
+                returnToHomeMission.Status = MissionStatus.Cancelled;
+                await missionRunService.Update(returnToHomeMission);
             }
 
             MissionRun newMissionRun;
@@ -351,6 +368,23 @@ namespace Api.Controllers
             if (existingMissionDefinition == null)
             {
                 await missionDefinitionService.Create(scheduledMissionDefinition);
+            }
+
+            IList<MissionStatus> missionStatuses = [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused];
+            var returnToHomeMission = await missionRunService.ReadReturnToHomeMissionRuns(robot.Id, missionStatuses);
+            if (returnToHomeMission != null)
+            {
+                if (!await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
+                {
+                    return BadRequest($"The robot {robot.Name} is localized on a different deck so the mission was not scheduled.");
+                }
+
+                try { await missionSchedulingService.StopCurrentMissionRun(robot.Id); }
+                catch (RobotNotFoundException e) { logger.LogError("{Message}", e); }
+                catch (MissionRunNotFoundException e) { logger.LogWarning("{Message}", e); }
+
+                returnToHomeMission.Status = MissionStatus.Cancelled;
+                await missionRunService.Update(returnToHomeMission);
             }
 
             MissionRun newMissionRun;
