@@ -49,12 +49,11 @@ namespace Api.Controllers
 
             if (!robot.IsRobotPressureHighEnoughToStartMission())
             {
-                return BadRequest($"The robot pressure on {robot.Name} is too low to start a mission");
+                return BadRequest($"Low pressure value for robot {robot.Name}, Pressure value is too low to start a mission.");
             }
-
             if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
             {
-                return BadRequest($"The robot battery level on {robot.Name} is too low to start a mission");
+                return BadRequest($"Low battery value for robot {robot.Name}. Battery value is too low to start a mission.");
             }
 
             var missionRun = await missionRunService.ReadById(missionRunId);
@@ -134,15 +133,13 @@ namespace Api.Controllers
             {
                 return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
             }
-
             if (!robot.IsRobotPressureHighEnoughToStartMission())
             {
-                return BadRequest($"The robot pressure on {robot.Name} is too low to start a mission");
+                return BadRequest($"Low pressure value for robot {robot.Name}, Pressure value is too low to start a mission.");
             }
-
             if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
             {
-                return BadRequest($"The robot battery level on {robot.Name} is too low to start a mission");
+                return BadRequest($"Low battery value for robot {robot.Name}. Battery value is too low to start a mission.");
             }
 
             var missionDefinition = await missionDefinitionService.ReadById(missionDefinitionId);
@@ -221,12 +218,11 @@ namespace Api.Controllers
 
             if (!robot.IsRobotPressureHighEnoughToStartMission())
             {
-                return BadRequest($"The robot pressure on {robot.Name} is too low to start a mission");
+                return BadRequest($"Low pressure value for robot {robot.Name}, Pressure value is too low to start a mission.");
             }
-
             if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
             {
-                return BadRequest($"The robot battery level on {robot.Name} is too low to start a mission");
+                return BadRequest($"Low battery value for robot {robot.Name}. Battery value is too low to start a mission.");
             }
 
             EchoMission? echoMission;
@@ -394,12 +390,11 @@ namespace Api.Controllers
 
             if (!robot.IsRobotPressureHighEnoughToStartMission())
             {
-                return BadRequest($"The robot pressure on {robot.Name} is too low to start a mission");
+                return BadRequest($"Low pressure value for robot {robot.Name}, Pressure value is too low to start a mission.");
             }
-
             if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
             {
-                return BadRequest($"The robot battery level on {robot.Name} is too low to start a mission");
+                return BadRequest($"Low battery value for robot {robot.Name}. Battery value is too low to start a mission.");
             }
 
             var installation = await installationService.ReadByName(customMissionQuery.InstallationCode);
