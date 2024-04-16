@@ -373,5 +373,6 @@ namespace Api.Services
         {
             _ = signalRService.SendMessageAsync("Robot updated", installation, robot != null ? new RobotResponse(robot) : null);
         }
+
     }
 }

@@ -102,6 +102,12 @@ namespace Api.Services
                 return;
             }
 
+            if ((!robot.IsRobotPressureHighEnoughToStartMission() || !robot.IsRobotBatteryLevelHighEnoughToStartMissions()) && !missionRun.IsReturnHomeMission())
+            {
+                missionRun = await HandleBatteryAndPressureLevel(robot);
+                if (missionRun == null) { return; }
+            }
+
             try { await StartMissionRun(missionRun); }
             catch (Exception ex) when (
                 ex is MissionException
@@ -121,6 +127,33 @@ namespace Api.Services
                 missionRun.StatusReason = $"Failed to start: '{ex.Message}'";
                 await missionRunService.Update(missionRun);
             }
+        }
+
+        public async Task<MissionRun?> HandleBatteryAndPressureLevel(Robot robot)
+        {
+            if (!robot.IsRobotPressureHighEnoughToStartMission())
+            {
+                logger.LogError("Robot with ID: {RobotId} cannot start missions because pressure value is too low.", robot.Id);
+                signalRService.ReportGeneralFailToSignalR(robot, $"Low pressure value for robot {robot.Name}", "Pressure value is too low to start a mission.");
+            }
+            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
+            {
+                logger.LogError("Robot with ID: {RobotId} cannot start missions because battery value is too low.", robot.Id);
+                signalRService.ReportGeneralFailToSignalR(robot, $"Low battery value for robot {robot.Name}", "Battery value is too low to start a mission.");
+            }
+
+            try { await AbortAllScheduledMissions(robot.Id, "Aborted: Robot pressure or battery values are too low."); }
+            catch (RobotNotFoundException) { logger.LogError("Failed to abort scheduled missions for robot {RobotId}", robot.Id); }
+
+            MissionRun? missionRun;
+            try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
+            catch (ReturnToHomeMissionFailedToScheduleException)
+            {
+                logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
+                await robotService.UpdateCurrentArea(robot.Id, null);
+                return null;
+            }
+            return missionRun;
         }
 
         public async Task<bool> OngoingMission(string robotId)
