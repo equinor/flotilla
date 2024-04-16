@@ -66,6 +66,13 @@ namespace Api.Test.Database
                     new(new Pose(), MissionTaskType.Localization)
                 };
             }
+            if (missionRunType == MissionRunType.ReturnHome)
+            {
+                missionRun.Tasks = new List<MissionTask>
+                {
+                    new(new Pose(), MissionTaskType.ReturnHome)
+                };
+            }
             if (writeToDatabase)
             {
                 return await _missionRunService.Create(missionRun, false);

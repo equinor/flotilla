@@ -164,7 +164,8 @@ namespace Api.Test
             {
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
-                Name = deckName
+                Name = deckName,
+                DefaultLocalizationPose = testPose
             };
 
             var areaQuery = new CreateAreaQuery
@@ -849,6 +850,5 @@ namespace Api.Test
             Assert.NotNull(missionRunAfterUpdate);
             Assert.True(missionRunAfterUpdate.Status == MissionStatus.Aborted);
         }
-
     }
 }
