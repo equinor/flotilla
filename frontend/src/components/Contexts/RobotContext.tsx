@@ -3,11 +3,11 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 
-const upsertRobotList = (list: Robot[], mission: Robot) => {
+const upsertRobotList = (list: Robot[], robot: Robot) => {
     let newList = [...list]
-    const i = newList.findIndex((e) => e.id === mission.id)
-    if (i > -1) newList[i] = mission
-    else newList.push(mission)
+    const i = newList.findIndex((e) => e.id === robot.id)
+    if (i > -1) newList[i] = robot
+    else newList.push(robot)
     return newList
 }
 

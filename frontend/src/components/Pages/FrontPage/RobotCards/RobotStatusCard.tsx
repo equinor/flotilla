@@ -64,37 +64,47 @@ export const RobotStatusCard = ({ robot }: RobotProps) => {
         navigate(path)
     }
     return (
-        <HoverableStyledCard style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
-            <StyledPadding>
-                <RobotImage robotType={robot.model.type} height="200px" />
-                <LongTypography variant="h5">{robot.name}</LongTypography>
-                <HorizontalContent>
-                    <VerticalContent $alignItems="start">
-                        <Typography variant="caption">{robot.model.type}</Typography>
-                        <RobotStatusChip status={robot.status} isarConnected={robot.isarConnected} />
-                    </VerticalContent>
-                    <VerticalContent $alignItems="end">
-                        {robot.status !== RobotStatus.Offline ? (
-                            <>
-                                {robot.pressureLevel && (
-                                    <PressureStatusDisplay
-                                        pressure={robot.pressureLevel}
-                                        upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
-                                        lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
-                                    />
-                                )}
-                                <BatteryStatusDisplay
-                                    batteryLevel={robot.batteryLevel}
-                                    batteryWarningLimit={robot.model.batteryWarningThreshold}
-                                />
-                            </>
-                        ) : (
-                            <></>
-                        )}
-                    </VerticalContent>
-                </HorizontalContent>
-            </StyledPadding>
-        </HoverableStyledCard>
+        <div>
+            {robot != null && (
+                <div>
+                    <HoverableStyledCard style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
+                        <StyledPadding>
+                            <RobotImage robotType={robot.model.type} height="200px" />
+                            <LongTypography variant="h5">{robot.name}</LongTypography>
+                            <HorizontalContent>
+                                <VerticalContent $alignItems="start">
+                                    <Typography variant="caption">{robot.model.type}</Typography>
+                                    <RobotStatusChip status={robot.status} isarConnected={robot.isarConnected} />
+                                </VerticalContent>
+                                <VerticalContent $alignItems="end">
+                                    {robot.status !== RobotStatus.Offline ? (
+                                        <>
+                                            {robot.pressureLevel && (
+                                                <PressureStatusDisplay
+                                                    pressure={robot.pressureLevel}
+                                                    upperPressureWarningThreshold={
+                                                        robot.model.upperPressureWarningThreshold
+                                                    }
+                                                    lowerPressureWarningThreshold={
+                                                        robot.model.lowerPressureWarningThreshold
+                                                    }
+                                                />
+                                            )}
+                                            <BatteryStatusDisplay
+                                                batteryLevel={robot.batteryLevel}
+                                                batteryWarningLimit={robot.model.batteryWarningThreshold}
+                                            />
+                                        </>
+                                    ) : (
+                                        <></>
+                                    )}
+                                </VerticalContent>
+                            </HorizontalContent>
+                        </StyledPadding>
+                    </HoverableStyledCard>
+                </div>
+            )}
+        </div>
     )
 }
 
