@@ -95,18 +95,19 @@ export const RobotPage = () => {
                                             batteryLevel={selectedRobot.batteryLevel}
                                             batteryWarningLimit={selectedRobot.model.batteryWarningThreshold}
                                         />
-                                        {selectedRobot.pressureLevel && (
-                                            <PressureStatusDisplay
-                                                itemSize={48}
-                                                pressure={selectedRobot.pressureLevel}
-                                                upperPressureWarningThreshold={
-                                                    selectedRobot.model.upperPressureWarningThreshold
-                                                }
-                                                lowerPressureWarningThreshold={
-                                                    selectedRobot.model.lowerPressureWarningThreshold
-                                                }
-                                            />
-                                        )}
+                                        {selectedRobot.pressureLevel !== null &&
+                                            selectedRobot.pressureLevel !== undefined && (
+                                                <PressureStatusDisplay
+                                                    itemSize={48}
+                                                    pressure={selectedRobot.pressureLevel}
+                                                    upperPressureWarningThreshold={
+                                                        selectedRobot.model.upperPressureWarningThreshold
+                                                    }
+                                                    lowerPressureWarningThreshold={
+                                                        selectedRobot.model.lowerPressureWarningThreshold
+                                                    }
+                                                />
+                                            )}
                                     </>
                                 )}
                             </StatusContent>
