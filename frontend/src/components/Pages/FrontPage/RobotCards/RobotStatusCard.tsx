@@ -76,7 +76,7 @@ export const RobotStatusCard = ({ robot }: RobotProps) => {
                     <VerticalContent $alignItems="end">
                         {robot.status !== RobotStatus.Offline ? (
                             <>
-                                {robot.pressureLevel && (
+                                {robot.pressureLevel !== undefined && robot.pressureLevel !== null && (
                                     <PressureStatusDisplay
                                         pressure={robot.pressureLevel}
                                         upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
