@@ -2,6 +2,7 @@ import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { Mission, MissionStatus } from 'models/Mission'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
+import { TaskStatus } from 'models/Task'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
     let newMissionList = [...list]
@@ -40,6 +41,9 @@ const updateQueueIfMissionAlreadyQueued = (oldQueue: Mission[], updatedMission: 
     return oldQueue
 }
 
+const anyRemainingTasks = (mission: Mission) =>
+    !mission.tasks.every((t) => t.status !== TaskStatus.InProgress && t.status !== TaskStatus.NotStarted)
+
 const updateOngoingMissionsWithUpdatedMission = (oldMissionList: Mission[], updatedMission: Mission) => {
     const existingMissionIndex = oldMissionList.findIndex((m) => m.id === updatedMission.id)
     if (updatedMission.status === MissionStatus.Ongoing || updatedMission.status === MissionStatus.Paused) {
@@ -48,7 +52,9 @@ const updateOngoingMissionsWithUpdatedMission = (oldMissionList: Mission[], upda
             oldMissionList[existingMissionIndex] = updatedMission
         } else {
             // Mission is ongoing and not in the queue
-            return [...oldMissionList, updatedMission]
+            if (anyRemainingTasks(updatedMission))
+                // Do not add missions with no remaining tasks
+                return [...oldMissionList, updatedMission]
         }
     } else {
         if (existingMissionIndex !== -1) {
