@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Database.Context;
 using Api.Services;
 using Api.Test.Mocks;
@@ -80,6 +82,12 @@ namespace Api.Test
                         );
                 }
             );
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            Console.WriteLine("Test");
+            await base.DisposeAsync();
         }
     }
 }

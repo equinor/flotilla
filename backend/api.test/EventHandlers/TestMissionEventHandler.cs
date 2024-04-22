@@ -21,10 +21,11 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Testcontainers.PostgreSql;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Api.Test.EventHandlers
 {
-    public class TestMissionEventHandler : IAsyncLifetime
+    public class TestMissionEventHandler(ITestOutputHelper outputHelper) : IAsyncLifetime
     {
         private FlotillaDbContext Context => CreateContext();
         private TestWebApplicationFactory<Program> _factory;
@@ -49,6 +50,8 @@ namespace Api.Test.EventHandlers
         {
             (var container, string connectionString, var connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlContainer();
+            outputHelper.WriteLine($"Connection string is {connectionString}");
+
             _container = container;
             _connectionString = connectionString;
             _connection = connection;
@@ -75,10 +78,11 @@ namespace Api.Test.EventHandlers
 
         public async Task DisposeAsync()
         {
-            await Context.DisposeAsync();
-            await _connection.CloseAsync();
-            await _container.DisposeAsync();
+            await Task.CompletedTask;
+            //await Context.DisposeAsync();
+            //await _connection.CloseAsync();
             await _factory.DisposeAsync();
+            await _container.DisposeAsync();
         }
 
         private FlotillaDbContext CreateContext()

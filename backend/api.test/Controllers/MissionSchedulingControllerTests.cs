@@ -15,9 +15,11 @@ using Api.Test.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using Xunit;
+using Xunit.Abstractions;
+
 namespace Api.Test.Controllers;
 
-public class MissionSchedulingControllerTests : IAsyncLifetime
+public class MissionSchedulingControllerTests(ITestOutputHelper outputHelper) : IAsyncLifetime
 {
     private FlotillaDbContext Context => CreateContext();
     private TestWebApplicationFactory<Program> _factory;
@@ -39,6 +41,8 @@ public class MissionSchedulingControllerTests : IAsyncLifetime
         _connectionString = connectionString;
         _connection = connection;
 
+        outputHelper.WriteLine($"Connection string is {connectionString}");
+
         _databaseUtilities = new DatabaseUtilities(Context);
 
         _factory = TestSetupHelpers.ConfigureWebApplicationFactory(_connectionString);
@@ -53,10 +57,13 @@ public class MissionSchedulingControllerTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await Context.DisposeAsync();
-        await _connection.CloseAsync();
-        await _container.DisposeAsync();
+        //await Task.CompletedTask;
+        //await Context.DisposeAsync();
+        //await _connection.CloseAsync();
         await _factory.DisposeAsync();
+        await _container.DisposeAsync();
+
+        //await Task.Delay(5000);
     }
 
     private FlotillaDbContext CreateContext()
