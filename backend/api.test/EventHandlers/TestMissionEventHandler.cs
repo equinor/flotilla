@@ -359,5 +359,27 @@ namespace Api.Test.EventHandlers
             bool isRobotLocalized = await _localizationService.RobotIsLocalized(robot.Id);
             Assert.True(isRobotLocalized);
         }
+
+        [Fact]
+        public async void ReturnHomeMissionNotScheduledIfRobotIsNotLocalized()
+        {
+            // Arrange
+            var installation = await _databaseUtilities.NewInstallation();
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, null);
+
+            Thread.Sleep(100);
+
+            // Act
+            var eventArgs = new RobotAvailableEventArgs(robot.Id);
+            _missionEventHandler.RaiseEvent(nameof(MissionSchedulingService.RobotAvailable), eventArgs);
+
+            Thread.Sleep(100);
+
+            // Assert 
+            bool isRobotLocalized = await _localizationService.RobotIsLocalized(robot.Id);
+            Assert.False(isRobotLocalized);
+            Assert.False(await _missionRunService.PendingOrOngoingReturnToHomeMissionRunExists(robot.Id));
+
+        }
     }
 }
