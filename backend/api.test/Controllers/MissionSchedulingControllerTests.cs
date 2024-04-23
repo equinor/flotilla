@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Context;
@@ -35,13 +36,10 @@ public class MissionSchedulingControllerTests(ITestOutputHelper outputHelper) : 
 
     public async Task InitializeAsync()
     {
-        (var container, string connectionString, var connection) =
+        (_container, _connectionString, _connection) =
             await TestSetupHelpers.ConfigurePostgreSqlContainer();
-        _container = container;
-        _connectionString = connectionString;
-        _connection = connection;
 
-        outputHelper.WriteLine($"Connection string is {connectionString}");
+        outputHelper.WriteLine($"Connection string is {_connectionString}");
 
         _databaseUtilities = new DatabaseUtilities(Context);
 
@@ -57,13 +55,10 @@ public class MissionSchedulingControllerTests(ITestOutputHelper outputHelper) : 
 
     public async Task DisposeAsync()
     {
-        //await Task.CompletedTask;
         //await Context.DisposeAsync();
         //await _connection.CloseAsync();
         await _factory.DisposeAsync();
         await _container.DisposeAsync();
-
-        //await Task.Delay(5000);
     }
 
     private FlotillaDbContext CreateContext()

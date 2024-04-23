@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Api.Database.Context;
+using Api.EventHandlers;
+using Api.Mqtt;
 using Api.Services;
 using Api.Test.Mocks;
 using Api.Test.Utilities;
@@ -87,6 +90,13 @@ namespace Api.Test
         public override async ValueTask DisposeAsync()
         {
             Console.WriteLine("Test");
+            //var token = new CancellationToken(true);
+            //await this.Services.GetRequiredService<MissionEventHandler>().StopAsync(token);
+            //await this.Services.GetRequiredService<MqttEventHandler>().StopAsync(token);
+            //await this.Services.GetRequiredService<InspectionFindingEventHandler>().StopAsync(token);
+            //await this.Services.GetRequiredService<MqttService>().StopAsync(token);
+            //await this.Services.GetRequiredService<IsarConnectionEventHandler>().StopAsync(token);
+
             await base.DisposeAsync();
         }
     }

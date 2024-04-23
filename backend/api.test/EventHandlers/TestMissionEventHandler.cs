@@ -48,13 +48,9 @@ namespace Api.Test.EventHandlers
 
         public async Task InitializeAsync()
         {
-            (var container, string connectionString, var connection) =
+            (_container, _connectionString, _connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlContainer();
-            outputHelper.WriteLine($"Connection string is {connectionString}");
-
-            _container = container;
-            _connectionString = connectionString;
-            _connection = connection;
+            outputHelper.WriteLine($"Connection string is {_connectionString}");
 
             _databaseUtilities = new DatabaseUtilities(Context);
 

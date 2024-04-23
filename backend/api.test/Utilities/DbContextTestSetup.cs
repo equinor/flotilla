@@ -37,18 +37,12 @@ namespace Api.Test.Utilities
 
         public async Task InitializeAsync()
         {
-            (var container, string connectionString, var connection) =
+            (Container, ConnectionString, Connection) =
                 await TestSetupHelpers.ConfigurePostgreSqlContainer();
-            Container = container;
-            ConnectionString = connectionString;
-            Connection = connection;
-
             Respawner = await TestSetupHelpers.ConfigureDatabaseRespawner(Connection);
-
             Factory = TestSetupHelpers.ConfigureWebApplicationFactory(ConnectionString);
             Client = TestSetupHelpers.ConfigureHttpClient(Factory);
             ServiceProvider = TestSetupHelpers.ConfigureServiceProvider(Factory);
-
             SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
         }
 
