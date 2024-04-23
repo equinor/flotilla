@@ -147,6 +147,7 @@ namespace Api.Database.Models
         drive_to_pose,
         record_audio,
         localize,
-        docking_procedure
+        docking_procedure,
+        return_to_home,
     }
 }
