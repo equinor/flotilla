@@ -94,10 +94,17 @@ namespace Api.EventHandlers
                         var localizationMissionRun = await LocalizationService.CreateLocalizationMissionInArea(missionRun.Robot.Id, missionRun.Area.Id);
                         _logger.LogInformation("{Message}", $"Created localization mission run with ID {localizationMissionRun.Id}");
                     }
+                    catch (RobotNotAvailableException)
+                    {
+                        _logger.LogError("Mission run {MissionRunId} will be aborted as robot {RobotId} was not available", missionRun.Id, missionRun.Robot.Id);
+                        missionRun.Status = MissionStatus.Aborted;
+                        missionRun.StatusReason = "Aborted: Robot was not available";
+                        await MissionService.Update(missionRun);
+                        return;
+                    }
                     catch (Exception ex) when (
                         ex is AreaNotFoundException
                         or DeckNotFoundException
-                        or RobotNotAvailableException
                         or RobotNotFoundException
                         or IsarCommunicationException
                     )
