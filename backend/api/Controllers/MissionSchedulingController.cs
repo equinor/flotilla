@@ -285,7 +285,8 @@ namespace Api.Controllers
             {
                 missionDeck ??= missionArea.Deck;
 
-                if (missionDeck != missionArea.Deck) { return BadRequest("The mission spans multiple decks"); }
+                if (missionDeck != missionArea.Deck)
+                    logger.LogWarning($"Mission {echoMission.Name} has tags in both deck {missionDeck.Name} and {missionArea.Deck.Name}.");
             }
 
             Area? area = null;
