@@ -231,5 +231,13 @@
     "Connection Issues": "Tilkoblingsproblemer",
     "Stop button pressed during return home warning text": "Du er i ferd med å stoppe et oppdrag som sender roboten tilbake til startposisjonen. Du må kjøre roboten manuelt til startposisjonen for å starte et nytt oppdrag.",
     "Failed Telemetry": "Mislykket telemetri",
-    "Stop button pressed during localization warning text": "Du er i ferd med å stoppe et oppdrag som lokaliserer roboten. Du vil ikke kunne kjøre et inspeksjonsoppdrag før du har lokalisert roboten."
+    "Stop button pressed during localization warning text": "Du er i ferd med å stoppe et oppdrag som lokaliserer roboten. Du vil ikke kunne kjøre et inspeksjonsoppdrag før du har lokalisert roboten.",
+    "HighHigh": "HøyHøy",
+    "High": "Høy",
+    "Ok": "Ok",
+    "Low": "Lav",
+    "LowLow": "LavLav",
+    "Recommended pressure": "Anbefalt trykk er 67 mBar.",
+    "Pressure": "Trykk",
+    "Pressure limit": "Trykkgrenser [mBar]"
 }

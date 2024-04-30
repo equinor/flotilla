@@ -5,6 +5,7 @@ import { BackButton } from 'utils/BackButton'
 import { Header } from 'components/Header/Header'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
 import { MoveRobotArm } from './RobotArmMovement'
+import { PressureTable } from './PressureTable'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusChip'
@@ -44,6 +45,7 @@ const RobotInfo = styled.div`
     @media (max-width: 800px) {
         flex-direction: column;
     }
+    margin: 0rem 0rem 2rem 0rem;
 `
 const StatusContent = styled.div<{ $alignItems?: string }>`
     display: flex;
@@ -112,6 +114,7 @@ export const RobotPage = () => {
                                 )}
                             </StatusContent>
                         </RobotInfo>
+                        {selectedRobot.model.type === RobotType.TaurobInspector && <PressureTable />}
                         <Typography variant="h2">{TranslateText('Actions')}</Typography>
 
                         <StyledTextButton variant="outlined" onClick={returnRobotToHome}>
