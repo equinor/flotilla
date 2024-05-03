@@ -36,7 +36,7 @@ namespace Api.EventHandlers
 
         public override void Subscribe()
         {
-            MqttService.MqttIsarRobotStatusReceived += OnIsarRobotStatus;
+            MqttService.MqttIsarStatusReceived += OnIsarStatus;
             MqttService.MqttIsarRobotInfoReceived += OnIsarRobotInfo;
             MqttService.MqttIsarMissionReceived += OnIsarMissionUpdate;
             MqttService.MqttIsarTaskReceived += OnIsarTaskUpdate;
@@ -49,7 +49,7 @@ namespace Api.EventHandlers
 
         public override void Unsubscribe()
         {
-            MqttService.MqttIsarRobotStatusReceived -= OnIsarRobotStatus;
+            MqttService.MqttIsarStatusReceived -= OnIsarStatus;
             MqttService.MqttIsarRobotInfoReceived -= OnIsarRobotInfo;
             MqttService.MqttIsarMissionReceived -= OnIsarMissionUpdate;
             MqttService.MqttIsarTaskReceived -= OnIsarTaskUpdate;
@@ -63,33 +63,29 @@ namespace Api.EventHandlers
         protected override async Task ExecuteAsync(CancellationToken stoppingToken) { await stoppingToken; }
 
 
-        private async void OnIsarRobotStatus(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarStatus(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
             var robotService = provider.GetRequiredService<IRobotService>();
             var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
 
-            var isarRobotStatus = (IsarRobotStatusMessage)mqttArgs.Message;
+            var isarStatus = (IsarStatusMessage)mqttArgs.Message;
 
-            var robot = await robotService.ReadByIsarId(isarRobotStatus.IsarId);
+            var robot = await robotService.ReadByIsarId(isarStatus.IsarId);
 
             if (robot == null)
             {
-                _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", isarRobotStatus.IsarId, isarRobotStatus.RobotName);
+                _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", isarStatus.IsarId, isarStatus.RobotName);
                 return;
             }
 
-            if (robot.Status == isarRobotStatus.RobotStatus)
-            {
-                _logger.LogInformation("Robot {robotName} received a new isar robot status {isarRobotStatus}, but the robot status was already the same", robot.Name, isarRobotStatus.RobotStatus);
-                return;
-            }
+            if (robot.Status == isarStatus.Status) { return; }
 
-            robot.Status = isarRobotStatus.RobotStatus;
+            robot.Status = isarStatus.Status;
             await robotService.Update(robot);
-            _logger.LogInformation("Updated status for robot {Name} to {Status}", robot.Name, isarRobotStatus.RobotStatus);
+            _logger.LogInformation("Updated status for robot {Name} to {Status}", robot.Name, isarStatus.Status);
 
-            if (isarRobotStatus.RobotStatus == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+            if (isarStatus.Status == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
         }
 
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)

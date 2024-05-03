@@ -81,7 +81,7 @@ namespace Api.Mqtt
             var topics = mqttConfig.GetSection("Topics").Get<List<string>>() ?? [];
             SubscribeToTopics(topics);
         }
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotStatusReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarStatusReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotInfoReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotHeartbeatReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarMissionReceived;
@@ -122,8 +122,8 @@ namespace Api.Mqtt
 
             switch (messageType)
             {
-                case Type type when type == typeof(IsarRobotStatusMessage):
-                    OnIsarTopicReceived<IsarRobotStatusMessage>(content);
+                case Type type when type == typeof(IsarStatusMessage):
+                    OnIsarTopicReceived<IsarStatusMessage>(content);
                     break;
                 case Type type when type == typeof(IsarRobotInfoMessage):
                     OnIsarTopicReceived<IsarRobotInfoMessage>(content);
@@ -291,7 +291,7 @@ namespace Api.Mqtt
             {
                 var raiseEvent = type switch
                 {
-                    _ when type == typeof(IsarRobotStatusMessage) => MqttIsarRobotStatusReceived,
+                    _ when type == typeof(IsarStatusMessage) => MqttIsarStatusReceived,
                     _ when type == typeof(IsarRobotInfoMessage) => MqttIsarRobotInfoReceived,
                     _ when type == typeof(IsarRobotHeartbeatMessage) => MqttIsarRobotHeartbeatReceived,
                     _ when type == typeof(IsarMissionMessage) => MqttIsarMissionReceived,
