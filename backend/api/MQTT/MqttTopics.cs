@@ -14,7 +14,7 @@ namespace Api.Mqtt
             new()
             {
                 {
-                    "isar/+/robot_status", typeof(IsarRobotStatusMessage)
+                    "isar/+/status", typeof(IsarStatusMessage)
                 },
                 {
                     "isar/+/robot_info", typeof(IsarRobotInfoMessage)

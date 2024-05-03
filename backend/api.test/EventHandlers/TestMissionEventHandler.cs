@@ -205,21 +205,16 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             var mqttEventArgs = new MqttReceivedArgs(
-                new IsarRobotStatusMessage
+                new IsarStatusMessage
                 {
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
-                    RobotStatus = RobotStatus.Available,
-                    PreviousRobotStatus = RobotStatus.Busy,
-                    CurrentState = "idle",
-                    CurrentMissionId = "",
-                    CurrentTaskId = "",
-                    CurrentStepId = "",
+                    Status = RobotStatus.Available,
                     Timestamp = DateTime.UtcNow
                 });
 
             // Act
-            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarRobotStatusReceived), mqttEventArgs);
+            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
             Thread.Sleep(500);
 
             // Assert
@@ -238,21 +233,16 @@ namespace Api.Test.EventHandlers
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
 
             var mqttEventArgs = new MqttReceivedArgs(
-                new IsarRobotStatusMessage
+                new IsarStatusMessage
                 {
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
-                    RobotStatus = RobotStatus.Available,
-                    PreviousRobotStatus = RobotStatus.Busy,
-                    CurrentState = "idle",
-                    CurrentMissionId = "",
-                    CurrentTaskId = "",
-                    CurrentStepId = "",
+                    Status = RobotStatus.Available,
                     Timestamp = DateTime.UtcNow
                 });
 
             // Act
-            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarRobotStatusReceived), mqttEventArgs);
+            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
 
             // Assert
             Thread.Sleep(1000);
