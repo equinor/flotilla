@@ -274,7 +274,10 @@ namespace Api.Controllers
                     .Select(t => stidService.GetTagArea(t.TagId, scheduledMissionQuery.InstallationCode).Result)
                     .ToList();
             }
-            catch (AreaNotFoundException) { return NotFound("Area not found"); }
+            catch (Exception e) when (e.InnerException is AreaNotFoundException)
+            {
+                return NotFound(e.InnerException.Message);
+            }
 
             Deck? missionDeck = null;
             foreach (var missionArea in missionAreas)
