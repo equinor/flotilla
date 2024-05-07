@@ -65,7 +65,7 @@ namespace Api.Test.EventHandlers
             var echoServiceMock = new MockEchoService();
             var stidServiceMock = new MockStidService(context);
             var customMissionServiceMock = new MockCustomMissionService();
-            var missionDefinitionService = new MissionDefinitionService(context, echoServiceMock, stidServiceMock, customMissionServiceMock, signalRService, accessRoleService, missionDefinitionServiceLogger);
+            var missionDefinitionService = new MissionDefinitionService(context, echoServiceMock, customMissionServiceMock, signalRService, accessRoleService, missionDefinitionServiceLogger);
             var robotModelService = new RobotModelService(context);
             var taskDurationServiceMock = new MockTaskDurationService();
             var isarServiceMock = new MockIsarService();

@@ -12,16 +12,6 @@ namespace Api.Services
     {
         public const string ServiceName = "StidApi";
 
-        public async Task<Position> GetTagPosition(string tag, string installationCode)
-        {
-            await Task.CompletedTask;
-            return new Position(
-                x: 0,
-                y: 0,
-                z: 0
-            );
-        }
-
         public virtual async Task<Area> GetTagArea(string tag, string installationCode)
         {
             await Task.CompletedTask;

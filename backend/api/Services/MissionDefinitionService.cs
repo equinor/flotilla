@@ -41,7 +41,6 @@ namespace Api.Services
     )]
     public class MissionDefinitionService(FlotillaDbContext context,
             IEchoService echoService,
-            IStidService stidService,
             ICustomMissionService customMissionService,
             ISignalRService signalRService,
             IAccessRoleService accessRoleService,
@@ -138,9 +137,6 @@ namespace Api.Services
                             .Select(
                                 t =>
                                 {
-                                    var tagPosition = stidService
-                                        .GetTagPosition(t.TagId, installationCode)
-                                        .Result;
                                     return new MissionTask(t);
                                 }
                             )

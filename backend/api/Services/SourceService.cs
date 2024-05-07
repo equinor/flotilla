@@ -39,8 +39,7 @@ namespace Api.Services
     public class SourceService(
         FlotillaDbContext context,
         ICustomMissionService customMissionService,
-        IEchoService echoService,
-        IStidService stidService) : ISourceService
+        IEchoService echoService) : ISourceService
     {
         public async Task<Source> Create(Source source)
         {
@@ -95,9 +94,6 @@ namespace Api.Services
                     var mission = await echoService.GetMissionById(int.Parse(source.SourceId, new CultureInfo("en-US")));
                     var tasks = mission.Tags.Select(t =>
                     {
-                        var tagPosition = stidService
-                            .GetTagPosition(t.TagId, installationCode)
-                            .Result;
                         return new MissionTask(t);
                     }).ToList();
                     return new SourceResponse(source, tasks);
