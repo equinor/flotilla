@@ -44,7 +44,7 @@ export const MissionControlButtons = ({
 
     return (
         <>
-            {missionControlState.isWaitingForResponse ? (
+            {missionControlState.isRobotMissionWaitingForResponseDict[robotId] ? (
                 <CircularProgress size={32} />
             ) : (
                 <>
