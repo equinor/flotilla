@@ -61,8 +61,14 @@ namespace Api.Controllers.Models
         public List<InspectionType>? InspectionTypes { get; set; }
 
         /// <summary>
+        /// Filter for a mission run type in the mission equal to any of MissionRunType
+        /// </summary>
+        public MissionRunType? MissionRunType { get; set; }
+
+        /// <summary>
         /// Filter for whether the result should exclude localization missions. The default is false
         /// </summary>
+        /// 
         public bool ExcludeLocalization { get; set; }
 
         /// <summary>

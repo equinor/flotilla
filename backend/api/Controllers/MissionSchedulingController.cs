@@ -177,12 +177,16 @@ namespace Api.Controllers
             }
 
             IList<MissionStatus> missionStatuses = [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused];
-            var returnToHomeMission = await missionRunService.ReadReturnToHomeMissionRuns(robot.Id, missionStatuses);
-            if (returnToHomeMission != null)
+            var missionRunType = MissionRunType.ReturnHome;
+            var missionRuns = await missionRunService.ReadMissionRuns(robot.Id, missionRunType, missionStatuses);
+
+            if (missionRuns.Count != 0)
             {
+                var returnToHomeMission = missionRuns[0];
+
                 if (!await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
                 {
-                    return BadRequest($"The robot {robot.Name} is localized on a different deck so the mission was not scheduled.");
+                    return Conflict($"The robot {robot.Name} is localized on a different deck so the mission was not scheduled.");
                 }
 
                 try { await missionSchedulingService.StopCurrentMissionRun(robot.Id); }
@@ -223,6 +227,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<MissionRun>> Create(
             [FromBody] ScheduledMissionQuery scheduledMissionQuery
         )
@@ -371,12 +376,15 @@ namespace Api.Controllers
             }
 
             IList<MissionStatus> missionStatuses = [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused];
-            var returnToHomeMission = await missionRunService.ReadReturnToHomeMissionRuns(robot.Id, missionStatuses);
-            if (returnToHomeMission != null)
+            var missionRunType = MissionRunType.ReturnHome;
+            var missionRuns = await missionRunService.ReadMissionRuns(robot.Id, missionRunType, missionStatuses);
+
+            if (missionRuns.Count != 0)
             {
+                var returnToHomeMission = missionRuns[0];
                 if (!await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
                 {
-                    return BadRequest($"The robot {robot.Name} is localized on a different deck so the mission was not scheduled.");
+                    return Conflict($"The robot {robot.Name} is localized on a different deck so the mission was not scheduled.");
                 }
 
                 try { await missionSchedulingService.StopCurrentMissionRun(robot.Id); }
