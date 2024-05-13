@@ -30,7 +30,7 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId);
 
-        public Task<MissionRun?> ReadReturnToHomeMissionRuns(string robotId, IList<MissionStatus>? filterStatuses = null);
+        public Task<IList<MissionRun>> ReadMissionRuns(string robotId, MissionRunType? missionRunType, IList<MissionStatus>? filterStatuses = null);
 
         public Task<MissionRun?> ReadLastExecutedMissionRunByRobotWithoutTracking(string robotId);
 
@@ -153,12 +153,13 @@ namespace Api.Services
             return nextScheduledMissionRun;
         }
 
-        public async Task<MissionRun?> ReadReturnToHomeMissionRuns(string robotId, IList<MissionStatus>? filterStatuses = null)
+        public async Task<IList<MissionRun>> ReadMissionRuns(string robotId, MissionRunType? missionRunType, IList<MissionStatus>? filterStatuses = null)
         {
             var missionFilter = ConstructFilter(new MissionRunQueryStringParameters
             {
-                Statuses = filterStatuses as List<MissionStatus> ?? new List<MissionStatus>([]),
+                Statuses = filterStatuses as List<MissionStatus> ?? null,
                 RobotId = robotId,
+                MissionRunType = missionRunType,
                 PageSize = 100
             });
 
@@ -166,11 +167,8 @@ namespace Api.Services
                 .Where(missionFilter)
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
-            foreach (var missionRun in missionRuns)
-            {
-                if (missionRun.IsReturnHomeMission()) { return missionRun; }
-            }
-            return null;
+
+            return missionRuns;
         }
 
         public async Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId)
@@ -440,6 +438,10 @@ namespace Api.Services
                 ? missionRun => true
                 : missionRun => missionRun.MissionId != null && missionRun.MissionId.Equals(parameters.MissionId);
 
+            Expression<Func<MissionRun, bool>> missionTypeFilter = parameters.MissionRunType is null
+                ? missionRun => true
+                : missionRun => missionRun.MissionRunType.Equals(parameters.MissionRunType);
+
             Expression<Func<MissionRun, bool>> inspectionTypeFilter = parameters.InspectionTypes is null
                 ? mission => true
                 : mission => mission.Tasks.Any(
@@ -490,18 +492,21 @@ namespace Api.Services
                         Expression.AndAlso(
                             Expression.Invoke(missionIdFilter, missionRun),
                             Expression.AndAlso(
-                                Expression.Invoke(inspectionTypeFilter, missionRun),
+                                Expression.Invoke(missionTypeFilter, missionRun),
                                 Expression.AndAlso(
-                                    Expression.Invoke(localizationFilter, missionRun),
+                                    Expression.Invoke(inspectionTypeFilter, missionRun),
                                     Expression.AndAlso(
-                                        Expression.Invoke(returnTohomeFilter, missionRun),
+                                        Expression.Invoke(localizationFilter, missionRun),
                                         Expression.AndAlso(
-                                            Expression.Invoke(desiredStartTimeFilter, missionRun),
+                                            Expression.Invoke(returnTohomeFilter, missionRun),
                                             Expression.AndAlso(
-                                                Expression.Invoke(startTimeFilter, missionRun),
+                                                Expression.Invoke(desiredStartTimeFilter, missionRun),
                                                 Expression.AndAlso(
-                                                    Expression.Invoke(endTimeFilter, missionRun),
-                                                    Expression.Invoke(robotTypeFilter, missionRun)
+                                                    Expression.Invoke(startTimeFilter, missionRun),
+                                                    Expression.AndAlso(
+                                                        Expression.Invoke(endTimeFilter, missionRun),
+                                                        Expression.Invoke(robotTypeFilter, missionRun)
+                                                    )
                                                 )
                                             )
                                         )
