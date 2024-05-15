@@ -85,7 +85,8 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await robotService.UpdateRobotStatus(robot.Id, isarRobotStatus.RobotStatus);
+            robot.Status = isarRobotStatus.RobotStatus;
+            await robotService.Update(robot);
             _logger.LogInformation("Updated status for robot {Name} to {Status}", robot.Name, isarRobotStatus.RobotStatus);
 
             if (isarRobotStatus.RobotStatus == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));

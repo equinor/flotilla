@@ -35,6 +35,7 @@ namespace Api.Test.EventHandlers
         private readonly RobotService _robotService;
         private readonly LocalizationService _localizationService;
         private readonly EmergencyActionService _emergencyActionService;
+        private readonly MissionSchedulingService _missionSchedulingService;
 
         public TestMissionEventHandler(DatabaseFixture fixture)
         {
@@ -79,7 +80,7 @@ namespace Api.Test.EventHandlers
             _localizationService = new LocalizationService(localizationServiceLogger, _robotService, _missionRunService, installationService, areaService, mapServiceMock);
 
             var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, _robotService, _missionRunService, mapServiceMock);
-            var missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, areaService,
+            _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, areaService,
                 isarServiceMock, _localizationService, returnToHomeService, signalRService);
             var lastMissionRunService = new LastMissionRunService(lastMissionRunServiceLogger, missionDefinitionService, _missionRunService);
 
@@ -97,7 +98,7 @@ namespace Api.Test.EventHandlers
                 .Returns(_robotService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IMissionSchedulingService)))
-                .Returns(missionSchedulingService);
+                .Returns(_missionSchedulingService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(FlotillaDbContext)))
                 .Returns(context);
@@ -265,7 +266,7 @@ namespace Api.Test.EventHandlers
                     OrderBy = "DesiredStartTime",
                     PageSize = 100
                 });
-            Assert.False(ongoingMission.Any());
+            Assert.True(ongoingMission.Any());
         }
 
         [Fact]
@@ -371,7 +372,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             var eventArgs = new RobotAvailableEventArgs(robot.Id);
-            _missionEventHandler.RaiseEvent(nameof(MissionSchedulingService.RobotAvailable), eventArgs);
+            _missionSchedulingService.RaiseEvent(nameof(MissionSchedulingService.RobotAvailable), eventArgs);
 
             Thread.Sleep(100);
 
@@ -380,6 +381,59 @@ namespace Api.Test.EventHandlers
             Assert.False(isRobotLocalized);
             Assert.False(await _missionRunService.PendingOrOngoingReturnToHomeMissionRunExists(robot.Id));
 
+        }
+
+        [Fact]
+        public async void ReturnHomeMissionCancelledIfNewMissionScheduled()
+        {
+            // Arrange
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
+            var returnToHomeMission = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.ReturnHome, MissionStatus.Ongoing, Guid.NewGuid().ToString());
+            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Normal, MissionStatus.Pending, Guid.NewGuid().ToString());
+
+            Thread.Sleep(100);
+
+            // Act
+            var eventArgs = new MissionRunCreatedEventArgs(missionRun.Id);
+            _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), eventArgs);
+
+            Thread.Sleep(500);
+
+            // Assert 
+            var updatedReturnHomeMission = await _missionRunService.ReadById(returnToHomeMission.Id);
+            Assert.True(updatedReturnHomeMission?.Status.Equals(MissionStatus.Cancelled));
+            Assert.True(updatedReturnHomeMission?.Tasks.FirstOrDefault()?.Status.Equals(TaskStatus.Cancelled));
+        }
+
+        [Fact]
+        public async void ReturnHomeMissionNotCancelledIfNewMissionScheduledInDifferentDeck()
+        {
+            // Arrange
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck1 = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area1 = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck1.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area1);
+            var deck2 = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode, "testDeck2");
+            var area2 = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck2.Name);
+            var returnToHomeMission = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area1, true, MissionRunType.ReturnHome, MissionStatus.Ongoing, Guid.NewGuid().ToString());
+            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area2, true, MissionRunType.Normal, MissionStatus.Pending, Guid.NewGuid().ToString());
+
+            Thread.Sleep(100);
+
+            // Act
+            var eventArgs = new MissionRunCreatedEventArgs(missionRun.Id);
+            _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), eventArgs);
+
+            Thread.Sleep(500);
+
+            // Assert 
+            var updatedReturnHomeMission = await _missionRunService.ReadById(returnToHomeMission.Id);
+            Assert.True(updatedReturnHomeMission?.Status.Equals(MissionStatus.Ongoing));
         }
     }
 }
