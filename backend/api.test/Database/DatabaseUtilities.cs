@@ -103,13 +103,13 @@ namespace Api.Test.Database
             return await _plantService.Create(createPlantQuery);
         }
 
-        public async Task<Deck> NewDeck(string installationCode, string plantCode)
+        public async Task<Deck> NewDeck(string installationCode, string plantCode, string deckName = "testDeck")
         {
             var createDeckQuery = new CreateDeckQuery
             {
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
-                Name = "testDeck",
+                Name = deckName,
                 DefaultLocalizationPose = new Pose()
             };
 
