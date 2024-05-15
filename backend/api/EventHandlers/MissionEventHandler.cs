@@ -119,6 +119,8 @@ namespace Api.EventHandlers
                 }
             }
 
+            await CancellReturnToHomeOnNewMissionSchedule(missionRun);
+
             _startMissionSemaphore.WaitOne();
             try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot.Id); }
             catch (MissionRunNotFoundException) { return; }
@@ -298,6 +300,43 @@ namespace Api.EventHandlers
             }
 
             return area;
+        }
+
+        public async Task CancellReturnToHomeOnNewMissionSchedule(MissionRun missionRun)
+        {
+            IList<MissionStatus> missionStatuses = [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused];
+            var existingReturnToHomeMissions = await MissionService.ReadMissionRuns(missionRun.Robot.Id, MissionRunType.ReturnHome, missionStatuses);
+
+            if (existingReturnToHomeMissions.Count == 1 && existingReturnToHomeMissions[0].Id != missionRun.Id)
+            {
+                var returnToHomeMission = existingReturnToHomeMissions[0];
+
+                if (!await LocalizationService.RobotIsOnSameDeckAsMission(missionRun.Robot.Id, missionRun.Area.Id))
+                {
+                    _logger.LogWarning($"The robot {missionRun.Robot.Name} is localized on a different deck so the mission was not scheduled.");
+                    return;
+                }
+
+                if (returnToHomeMission.Status != MissionStatus.Pending)
+                {
+                    try { await MissionScheduling.StopCurrentMissionRun(missionRun.Robot.Id); }
+                    catch (RobotNotFoundException) { return; }
+                    catch (MissionRunNotFoundException) { return; }
+                }
+
+                var missionTask = returnToHomeMission.Tasks.FirstOrDefault();
+                if (missionTask != null)
+                {
+                    missionTask.Status = Database.Models.TaskStatus.Cancelled;
+                }
+                returnToHomeMission.Status = MissionStatus.Cancelled;
+                await MissionService.Update(returnToHomeMission);
+            }
+
+            if (existingReturnToHomeMissions.Count > 1)
+            {
+                _logger.LogError($"Two Return to Home missions should not be queued or ongoing simoultaneously for robot {missionRun.Robot.Name}.");
+            }
         }
     }
 }
