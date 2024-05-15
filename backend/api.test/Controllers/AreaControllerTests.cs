@@ -73,7 +73,7 @@ public class AreaControllerTests(DatabaseFixture fixture) : IAsyncLifetime
         Assert.Equal(query.AreaName, area!.Name);
     }
 
-    [Fact(Skip = "Reason")]
+    [Fact]
     public async Task CheckThatMissionDefinitionIsCreatedInAreaWhenSchedulingACustomMissionRun()
     {
         // Arrange
