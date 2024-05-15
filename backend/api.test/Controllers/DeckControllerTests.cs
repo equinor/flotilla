@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
+using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
 using Api.Test.Utilities;
@@ -57,5 +60,24 @@ public class DeckControllerTests(DatabaseFixture fixture) : IAsyncLifetime
 
         Assert.True(response.IsSuccessStatusCode);
         Assert.Equal(query.Name, deck!.Name);
+    }
+
+    [Fact]
+    public async Task CheckThatMapMetadataIsFoundForDeck()
+    {
+        // Arrange
+        var installation = await _databaseUtilities.NewInstallation();
+        var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+        var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+        var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+
+        // Act
+        string url = $"/decks/{deck.Id}/map-metadata";
+        var response = await _client.GetAsync(url);
+        var mapMetadata = await response.Content.ReadFromJsonAsync<MapMetadata>(_serializerOptions);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(mapMetadata);
     }
 }

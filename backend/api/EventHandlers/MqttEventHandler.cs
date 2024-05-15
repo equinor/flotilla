@@ -259,7 +259,7 @@ namespace Api.EventHandlers
 
             if (flotillaMissionRun.MissionId == null)
             {
-                _logger.LogInformation("Mission run {missionRunId} does not have a mission definition assosiated with it", flotillaMissionRun.Id);
+                _logger.LogInformation("Mission run {missionRunId} does not have a mission definition associated with it", flotillaMissionRun.Id);
                 return;
             }
 

@@ -18,7 +18,7 @@ namespace Api.Services
 
         public Task<Area?> ReadByInstallationAndName(string installationCode, string areaName);
 
-        public Task<Area> Create(CreateAreaQuery newArea);
+        public Task<Area> Create(CreateAreaQuery newArea, IList<Pose>? safePositions = null);
 
         public Task<Area> Update(Area area);
 
@@ -82,10 +82,10 @@ namespace Api.Services
 
             return await GetAreas().Where(a => a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
-        public async Task<Area> Create(CreateAreaQuery newAreaQuery, List<Pose> positions)
+        public async Task<Area> Create(CreateAreaQuery newAreaQuery, IList<Pose>? positions = null)
         {
             var safePositions = new List<SafePosition>();
-            foreach (var pose in positions)
+            foreach (var pose in positions ?? [])
             {
                 safePositions.Add(new SafePosition(pose));
             }
@@ -132,12 +132,6 @@ namespace Api.Services
             await context.Areas.AddAsync(newArea);
             await ApplyDatabaseUpdate(installation);
             return newArea;
-        }
-
-        public async Task<Area> Create(CreateAreaQuery newArea)
-        {
-            var area = await Create(newArea, []);
-            return area;
         }
 
         public async Task<Area?> AddSafePosition(string installationCode, string areaName, SafePosition safePosition)

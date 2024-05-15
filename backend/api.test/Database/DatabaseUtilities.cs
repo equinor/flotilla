@@ -42,8 +42,9 @@ namespace Api.Test.Database
             bool writeToDatabase = false,
             MissionRunPriority missionRunPriority = MissionRunPriority.Normal,
             MissionStatus missionStatus = MissionStatus.Pending,
-            string? isarMissionId = null
-        )
+            string? isarMissionId = null,
+            IList<MissionTask>? tasks = null
+            )
         {
             var missionRun = new MissionRun
             {
@@ -55,7 +56,7 @@ namespace Api.Test.Database
                 Status = missionStatus,
                 DesiredStartTime = DateTime.UtcNow,
                 Area = area,
-                Tasks = [],
+                Tasks = tasks ?? [],
                 Map = new MapMetadata(),
                 InstallationCode = installationCode
             };
@@ -120,7 +121,9 @@ namespace Api.Test.Database
                 DefaultLocalizationPose = new Pose()
             };
 
-            return await _areaService.Create(createAreaQuery);
+            var safePositions = new List<Pose> { new() };
+
+            return await _areaService.Create(createAreaQuery, safePositions);
         }
 
         public async Task<Robot> NewRobot(RobotStatus status, Installation installation, Area? area = null)

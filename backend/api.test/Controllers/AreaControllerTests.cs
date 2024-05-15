@@ -185,26 +185,6 @@ public class AreaControllerTests(DatabaseFixture fixture) : IAsyncLifetime
         await Task.Delay(5000);
     }
 
-    [Fact(Skip = "Something to fix in this one")]
-    public async Task CheckThatMapMetadataIsFoundForArea()
-    {
-        // Arrange
-        var installation = await _databaseUtilities.NewInstallation();
-        var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-        var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-        var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-
-        // Act
-        string url = $"/areas/{area.Id}/map-metadata";
-        var response = await _client.GetAsync(url);
-        var mapMetadata = await response.Content.ReadFromJsonAsync<MapMetadata>(_serializerOptions);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.NotNull(mapMetadata);
-    }
-
-
     [Fact]
     public async Task CheckThatMapMetadataIsNotFoundForInvalidArea()
     {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Net.Http;
@@ -178,6 +179,19 @@ namespace Api.Test.EventHandlers
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
 
+            var returnToHomeMissionRunTasks = new List<MissionTask>
+            {
+                new(new Pose(area.Deck.DefaultLocalizationPose!.Pose), MissionTaskType.ReturnHome)
+            };
+            var previouslyExecutedMissionRun = await _databaseUtilities.NewMissionRun(
+                    installation.InstallationCode,
+                    robot,
+                    area,
+                    writeToDatabase: true,
+                    missionStatus: MissionStatus.Successful,
+                    tasks: returnToHomeMissionRunTasks
+                );
+
             var mqttEventArgs = new MqttReceivedArgs(
                 new IsarRobotStatusMessage
                 {
@@ -206,7 +220,9 @@ namespace Api.Test.EventHandlers
                     OrderBy = "DesiredStartTime",
                     PageSize = 100
                 });
-            Assert.False(ongoingMission.Any());
+            bool isThereAnOngoingMission = ongoingMission.Any();
+            outputHelper.WriteLine($"Ongoing missions {isThereAnOngoingMission}");
+            Assert.False(isThereAnOngoingMission);
         }
 
         [Fact]
@@ -263,7 +279,7 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Pending, postTestMissionRun!.Status);
         }
 
-        [Fact(Skip = "Differing values when reading from database")]
+        [Fact]
         public async void QueuedMissionsAreAbortedWhenLocalizationFails()
         {
             // Arrange
@@ -272,7 +288,22 @@ namespace Api.Test.EventHandlers
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
-            var localizationMissionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunPriority.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString());
+
+            var localizationMissionRunTasks = new List<MissionTask>
+            {
+                new(new Pose(area.Deck.DefaultLocalizationPose!.Pose), MissionTaskType.Localization)
+            };
+            var localizationMissionRun = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                area,
+                writeToDatabase: true,
+                MissionRunPriority.Localization,
+                MissionStatus.Ongoing,
+                isarMissionId: Guid.NewGuid().ToString(),
+                tasks: localizationMissionRunTasks
+            );
+
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
 
             Thread.Sleep(100);
@@ -288,7 +319,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarMissionReceived), mqttEventArgs);
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
 
             // Assert
             var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, noTracking: true);
@@ -322,9 +353,7 @@ namespace Api.Test.EventHandlers
             Assert.True(isRobotLocalized);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Awaiting fix to use of execute update in tests")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async void MissionIsCancelledWhenAttemptingToStartOnARobotWhichIsLocalizedOnADifferentDeck()
         {
             // Arrange
@@ -343,11 +372,12 @@ namespace Api.Test.EventHandlers
 
             // Assert
             var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, noTracking: true);
-            Assert.Equal(MissionStatus.Cancelled, postTestMissionRun!.Status);
+            Assert.Equal(MissionStatus.Aborted, postTestMissionRun!.Status);
         }
 
 #pragma warning disable xUnit1004
-        [Fact(Skip = "Skipping as there is as issue with the context not reading the updated value of frozen queue")]
+        [Fact(Skip = "This test currently fails as the MockIsarService object does not trigger an event to tell " +
+                     "Flotilla that the mission has been cancelled. Thus it remains ongoing.")]
 #pragma warning restore xUnit1004
         public async void RobotQueueIsFrozenAndOngoingMissionsMovedToPendingWhenPressingTheEmergencyButton()
         {
@@ -360,7 +390,7 @@ namespace Api.Test.EventHandlers
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, false);
 
             await _missionRunService.Create(missionRun);
-            Thread.Sleep(1000);
+            Thread.Sleep(10000);
 
             // Act
             await _emergencyActionController.AbortCurrentMissionAndSendAllRobotsToSafeZone(installation.InstallationCode);

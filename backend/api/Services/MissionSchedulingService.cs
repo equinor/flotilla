@@ -315,7 +315,7 @@ namespace Api.Services
                     Map = new MapMetadata()
                 };
 
-                await missionRunService.Create(newMissionRun);
+                await missionRunService.Create(newMissionRun, triggerCreatedMissionRunEvent: false);
             }
         }
 

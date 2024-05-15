@@ -47,7 +47,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var missionRun = await _missionRunService.ReadById("some_id_that_does_not_exist");
+            var missionRun = await _missionRunService.ReadById("some_id_that_does_not_exist", noTracking: true);
             Assert.Null(missionRun);
         }
 
