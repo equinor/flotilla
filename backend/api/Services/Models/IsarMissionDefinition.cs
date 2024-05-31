@@ -17,6 +17,9 @@ namespace Api.Services.Models
         [JsonPropertyName("tasks")]
         public List<IsarTaskDefinition> Tasks { get; set; }
 
+        [JsonPropertyName("start_pose")]
+        public IsarPose? StartPose { get; set; } = null;
+
         public IsarMissionDefinition(List<IsarTaskDefinition> tasks)
         {
             Id = null;
@@ -29,6 +32,7 @@ namespace Api.Services.Models
             Id = missionRun.IsarMissionId;
             Name = missionRun.Name;
             Tasks = missionRun.Tasks.Select(task => new IsarTaskDefinition(task, missionRun)).ToList();
+            StartPose = missionRun.Area.DefaultLocalizationPose != null ? new IsarPose(missionRun.Area.DefaultLocalizationPose.Pose) : null;
         }
     }
 
