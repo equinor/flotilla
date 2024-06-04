@@ -26,7 +26,6 @@ namespace Api.Controllers
             ISourceService sourceService
         ) : ControllerBase
 
-
     {
         /// <summary>
         ///     Rerun a mission run, running only the parts that did not previously complete
@@ -48,7 +47,7 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await missionSchedulingService.MissionPreCheck(scheduledMissionQuery.RobotId); }
+            try { robot = await missionSchedulingService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
@@ -124,7 +123,7 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await missionSchedulingService.MissionPreCheck(scheduledMissionQuery.RobotId); }
+            try { robot = await missionSchedulingService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
@@ -198,7 +197,7 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await missionSchedulingService.MissionPreCheck(scheduledMissionQuery.RobotId); }
+            try { robot = await missionSchedulingService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
@@ -371,7 +370,7 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await missionSchedulingService.MissionPreCheck(customMissionQuery.RobotId); }
+            try { robot = await missionSchedulingService.GetRobotWithPreCheck(customMissionQuery.RobotId); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
