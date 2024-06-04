@@ -4,6 +4,7 @@ using Api.Database.Models;
 using Api.Services.Events;
 using Api.Services.Models;
 using Api.Utilities;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 namespace Api.Services
 {
     public interface IMissionSchedulingService
@@ -27,6 +28,9 @@ namespace Api.Services
         public void TriggerRobotAvailable(RobotAvailableEventArgs e);
 
         public void TriggerMissionCompleted(MissionCompletedEventArgs e);
+
+        public Task<Robot> MissionPreCheck(string robotId);
+
     }
 
     public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
@@ -543,5 +547,33 @@ namespace Api.Services
         public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
         protected virtual void OnMissionCompleted(MissionCompletedEventArgs e) { MissionCompleted?.Invoke(this, e); }
         public static event EventHandler<MissionCompletedEventArgs>? MissionCompleted;
+
+        public async Task<Robot> MissionPreCheck(string robotId)
+        {
+            var robot = await robotService.ReadById(robotId);
+
+            if (robot is null)
+            {
+                string errorMessage = $"The robot with ID {robotId} could not be found";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
+            }
+
+            if (!robot.IsRobotPressureHighEnoughToStartMission())
+            {
+                string errorMessage = $"The robot pressure on {robot.Name} is too low to start a mission";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotPreCheckFailedException(errorMessage);
+            }
+
+            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
+            {
+                string errorMessage = $"The robot battery level on {robot.Name} is too low to start a mission";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotPreCheckFailedException(errorMessage);
+            }
+
+            return robot;
+        }
     }
 }
