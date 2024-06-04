@@ -18,7 +18,6 @@ namespace Api.Controllers
             ICustomMissionSchedulingService customMissionSchedulingService,
             IMissionRunService missionRunService,
             IInstallationService installationService,
-            IRobotService robotService,
             IEchoService echoService,
             ILogger<MissionSchedulingController> logger,
             IMapService mapService,
@@ -371,17 +370,10 @@ namespace Api.Controllers
             [FromBody] CustomMissionQuery customMissionQuery
         )
         {
-            var robot = await robotService.ReadById(customMissionQuery.RobotId);
-            if (robot is null) { return NotFound($"Could not find robot with id {customMissionQuery.RobotId}"); }
-
-            if (!robot.IsRobotPressureHighEnoughToStartMission())
-            {
-                return BadRequest($"Low pressure value for robot {robot.Name}, Pressure value is too low to start a mission.");
-            }
-            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
-            {
-                return BadRequest($"Low battery value for robot {robot.Name}. Battery value is too low to start a mission.");
-            }
+            Robot robot;
+            try { robot = await missionSchedulingService.MissionPreCheck(customMissionQuery.RobotId); }
+            catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
+            catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
             var installation = await installationService.ReadByName(customMissionQuery.InstallationCode);
             if (installation == null) { return NotFound($"Could not find installation with name {customMissionQuery.InstallationCode}"); }
@@ -398,9 +390,9 @@ namespace Api.Controllers
             catch (RobotNotInSameInstallationAsMissionException e) { return Conflict(e.Message); }
 
             MissionRun? newMissionRun;
-            try { newMissionRun = await customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
-            catch (Exception e) when (e is RobotPressureTooLowException or RobotBatteryLevelTooLowException or UnsupportedRobotCapabilityException) { return BadRequest(e.Message); }
-            catch (Exception e) when (e is RobotNotFoundException or MissionNotFoundException) { return NotFound(e.Message); }
+            try { newMissionRun = await customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot, missionTasks); }
+            catch (Exception e) when (e is UnsupportedRobotCapabilityException) { return BadRequest(e.Message); }
+            catch (Exception e) when (e is MissionNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is UnsupportedRobotCapabilityException) { return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission."); }
 
             return CreatedAtAction(nameof(Create), new

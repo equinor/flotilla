@@ -70,15 +70,7 @@
     {
     }
 
-    public class RobotPressureTooLowException(string message) : Exception(message)
-    {
-    }
-
     public class RobotPreCheckFailedException(string message) : Exception(message)
-    {
-    }
-
-    public class RobotBatteryLevelTooLowException(string message) : Exception(message)
     {
     }
 

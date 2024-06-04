@@ -7,7 +7,7 @@ namespace Api.Services.ActionServices
     {
         public Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks);
 
-        public Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, string robotId, IList<MissionTask> missionTasks);
+        public Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, Robot robot, IList<MissionTask> missionTasks);
     }
 
     public class CustomMissionSchedulingService(
@@ -17,7 +17,6 @@ namespace Api.Services.ActionServices
             ISourceService sourceService,
             IMissionDefinitionService missionDefinitionService,
             IMissionRunService missionRunService,
-            IRobotService robotService,
             IMapService mapService
         ) : ICustomMissionSchedulingService
     {
@@ -77,7 +76,7 @@ namespace Api.Services.ActionServices
             return customMissionDefinition;
         }
 
-        public async Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, string robotId, IList<MissionTask> missionTasks)
+        public async Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, Robot robot, IList<MissionTask> missionTasks)
         {
             var missionDefinition = await missionDefinitionService.ReadById(missionDefinitionId);
             if (missionDefinition is null)
@@ -85,24 +84,6 @@ namespace Api.Services.ActionServices
                 string errorMessage = $"The mission definition with ID {missionDefinition} could not be found";
                 logger.LogError("{Message}", errorMessage);
                 throw new MissionNotFoundException(errorMessage);
-            }
-
-            var robot = await robotService.ReadById(robotId);
-            if (robot is null)
-            {
-                string errorMessage = $"The robot with ID {robotId} could not be found";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            if (!robot.IsRobotPressureHighEnoughToStartMission())
-            {
-                throw new RobotPressureTooLowException($"The robot pressure on {robot.Name} is too low to start a mission");
-            }
-
-            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
-            {
-                throw new RobotBatteryLevelTooLowException($"The robot battery level on {robot.Name} is too low to start a mission");
             }
 
             var scheduledMission = new MissionRun
