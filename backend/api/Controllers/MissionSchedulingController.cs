@@ -6,12 +6,15 @@ using Api.Services.ActionServices;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+
 namespace Api.Controllers
 {
     [ApiController]
     [Route("missions")]
     public class MissionSchedulingController(
             IMissionDefinitionService missionDefinitionService,
+            IMissionSchedulingService missionSchedulingService,
             ICustomMissionSchedulingService customMissionSchedulingService,
             IMissionRunService missionRunService,
             IInstallationService installationService,
@@ -23,8 +26,9 @@ namespace Api.Controllers
             ILocalizationService localizationService,
             ISourceService sourceService
         ) : ControllerBase
-    {
 
+
+    {
         /// <summary>
         ///     Rerun a mission run, running only the parts that did not previously complete
         /// </summary>
@@ -44,17 +48,10 @@ namespace Api.Controllers
             [FromBody] ScheduleMissionQuery scheduledMissionQuery
         )
         {
-            var robot = await robotService.ReadById(scheduledMissionQuery.RobotId);
-            if (robot is null) return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
-
-            if (!robot.IsRobotPressureHighEnoughToStartMission())
-            {
-                return BadRequest($"Low pressure value for robot {robot.Name}, Pressure value is too low to start a mission.");
-            }
-            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
-            {
-                return BadRequest($"Low battery value for robot {robot.Name}. Battery value is too low to start a mission.");
-            }
+            Robot robot;
+            try { robot = await missionSchedulingService.MissionPreCheck(scheduledMissionQuery.RobotId); }
+            catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
+            catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
             var missionRun = await missionRunService.ReadById(missionRunId);
             if (missionRun == null) return NotFound("Mission run not found");
@@ -127,19 +124,10 @@ namespace Api.Controllers
             [FromBody] ScheduleMissionQuery scheduledMissionQuery
         )
         {
-            var robot = await robotService.ReadById(scheduledMissionQuery.RobotId);
-            if (robot is null)
-            {
-                return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
-            }
-            if (!robot.IsRobotPressureHighEnoughToStartMission())
-            {
-                return BadRequest($"Low pressure value for robot {robot.Name}, Pressure value is too low to start a mission.");
-            }
-            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
-            {
-                return BadRequest($"Low battery value for robot {robot.Name}. Battery value is too low to start a mission.");
-            }
+            Robot robot;
+            try { robot = await missionSchedulingService.MissionPreCheck(scheduledMissionQuery.RobotId); }
+            catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
+            catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
             var missionDefinition = await missionDefinitionService.ReadById(missionDefinitionId);
             if (missionDefinition == null)
@@ -210,20 +198,10 @@ namespace Api.Controllers
             [FromBody] ScheduledMissionQuery scheduledMissionQuery
         )
         {
-            var robot = await robotService.ReadById(scheduledMissionQuery.RobotId);
-            if (robot is null)
-            {
-                return NotFound($"Could not find robot with id {scheduledMissionQuery.RobotId}");
-            }
-
-            if (!robot.IsRobotPressureHighEnoughToStartMission())
-            {
-                return BadRequest($"Low pressure value for robot {robot.Name}, Pressure value is too low to start a mission.");
-            }
-            if (!robot.IsRobotBatteryLevelHighEnoughToStartMissions())
-            {
-                return BadRequest($"Low battery value for robot {robot.Name}. Battery value is too low to start a mission.");
-            }
+            Robot robot;
+            try { robot = await missionSchedulingService.MissionPreCheck(scheduledMissionQuery.RobotId); }
+            catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
+            catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
             EchoMission? echoMission;
             try
