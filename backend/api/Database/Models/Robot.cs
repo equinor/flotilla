@@ -76,12 +76,17 @@ namespace Api.Database.Models
 
         public float? PressureLevel { get; set; }
 
-        public bool IsRobotPressureHighEnoughToStartMission()
+        public bool IsRobotPressureTooLow()
         {
             return Model.LowerPressureWarningThreshold == null || PressureLevel == null || Model.LowerPressureWarningThreshold <= PressureLevel;
         }
 
-        public bool IsRobotBatteryLevelHighEnoughToStartMissions()
+        public bool IsRobotPressureTooHigh()
+        {
+            return Model.UpperPressureWarningThreshold == null || PressureLevel == null || Model.UpperPressureWarningThreshold >= PressureLevel;
+        }
+
+        public bool IsRobotBatteryTooLow()
         {
             return Model.BatteryWarningThreshold == null || Model.BatteryWarningThreshold <= BatteryLevel;
         }
