@@ -28,7 +28,7 @@ namespace Api.Services
 
         public void TriggerMissionCompleted(MissionCompletedEventArgs e);
 
-        public Task<Robot> MissionPreCheck(string robotId);
+        public Task<Robot> GetRobotWithPreCheck(string robotId);
 
     }
 
@@ -547,7 +547,7 @@ namespace Api.Services
         protected virtual void OnMissionCompleted(MissionCompletedEventArgs e) { MissionCompleted?.Invoke(this, e); }
         public static event EventHandler<MissionCompletedEventArgs>? MissionCompleted;
 
-        public async Task<Robot> MissionPreCheck(string robotId)
+        public async Task<Robot> GetRobotWithPreCheck(string robotId)
         {
             var robot = await robotService.ReadById(robotId);
 
