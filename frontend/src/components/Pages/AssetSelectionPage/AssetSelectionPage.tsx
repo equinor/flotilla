@@ -98,6 +98,7 @@ const InstallationPicker = () => {
             <Autocomplete
                 options={Array.from(mappedOptions.keys()).sort()}
                 label=""
+                dropdownHeight={200}
                 initialSelectedOptions={[selectedInstallation]}
                 selectedOptions={[selectedInstallation]}
                 placeholder={TranslateText('Select installation')}
