@@ -146,6 +146,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                         )}
                         <StyledAutoComplete>
                             <Autocomplete
+                                dropdownHeight={200}
                                 optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
                                 options={robotOptions}
                                 label={TranslateText('Select robot')}

@@ -123,6 +123,7 @@ const SelectMissionsComponent = memo(
 
         return (
             <Autocomplete
+                dropdownHeight={200}
                 optionLabel={(m) => m.echoMissionId + ': ' + m.name}
                 options={missions}
                 onOptionsChange={(changes) => setSelectedMissions(changes.selectedItems)}
