@@ -2,7 +2,6 @@ import {
     Autocomplete,
     AutocompleteChanges,
     Button,
-    Card,
     Dialog,
     Icon,
     Search,
@@ -32,16 +31,15 @@ const StyledSearch = styled(Search)`
     max-width: 280px;
 `
 
-const StyledDialogHeader = styled.div`
-    display: flex;
-    justify-content: space-between;
+const StyledDialog = styled(Dialog)`
+    width: calc(100vw * 0.9);
+    max-width: 700px;
 `
-
-const StyledDialog = styled(Card)`
+const StyledDialogContent = styled.div`
     display: flex;
-    padding: 1rem;
-    width: 600px;
-    right: 175px;
+    flex-direction: column;
+    padding: 20px;
+    gap: 1rem;
 `
 
 export const FilterSection = () => {
@@ -94,14 +92,14 @@ export const FilterSection = () => {
                     </Button>
                 </StyledButtonDiv>
             </StyledHeader>
-            <Dialog open={isFilteringDialogOpen} isDismissable>
-                <StyledDialog>
-                    <StyledDialogHeader>
+            <StyledDialog open={isFilteringDialogOpen} isDismissable>
+                <StyledDialogContent>
+                    <Dialog.Header>
                         <Typography variant="h2">{TranslateText('Filter')}</Typography>
                         <Button variant="ghost_icon" onClick={onFilterClose}>
                             <Icon name={Icons.Clear} size={32} />
                         </Button>
-                    </StyledDialogHeader>
+                    </Dialog.Header>
                     <Autocomplete
                         options={Array.from(missionStatusTranslationMap.keys())}
                         onOptionsChange={(changes: AutocompleteChanges<string>) => {
@@ -204,8 +202,8 @@ export const FilterSection = () => {
                             filterFunctions.switchMaxEndTime(filterFunctions.dateTimeStringToInt(changes.target.value))
                         }}
                     />
-                </StyledDialog>
-            </Dialog>
+                </StyledDialogContent>
+            </StyledDialog>
         </>
     )
 }
