@@ -13,6 +13,7 @@ import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledDict } from './MissionDefinitionStyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
+import { StyledPage } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 
 const StyledDictCard = styled(StyledDict.Card)`
@@ -259,11 +260,11 @@ export const MissionDefinitionPage = () => {
         <>
             <Header page={'mission'} />
             {selectedMissionDefinition !== undefined && (
-                <StyledDict.MissionDefinitionPage>
+                <StyledPage>
                     <BackButton />
                     <MissionDefinitionHeader missionDefinition={selectedMissionDefinition} />
                     <MissionDefinitionPageBody missionDefinition={selectedMissionDefinition} />
-                </StyledDict.MissionDefinitionPage>
+                </StyledPage>
             )}
         </>
     )

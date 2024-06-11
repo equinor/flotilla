@@ -21,7 +21,6 @@ export const StyledDict = {
         max-width: 1000px;
         min-width: 270px;
         gap: 10px 20px;
-        margin: 1rem;
         @media (min-width: 800px) {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -43,15 +42,6 @@ export const StyledDict = {
         padding: 1rem;
         width: auto;
         min-width: 300px;
-    `,
-
-    MissionDefinitionPage: styled.div`
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: start;
-        flex-direction: column;
-        gap: 1rem;
-        margin: 2rem;
     `,
 
     Button: styled(Button)`

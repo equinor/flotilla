@@ -27,3 +27,14 @@ export const TextAlignedButton = styled(Button)`
     text-align: left;
     height: auto;
 `
+export const StyledPage = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: start;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 2rem;
+    @media (max-width: 600px) {
+        margin: 0.7rem;
+    }
+`
