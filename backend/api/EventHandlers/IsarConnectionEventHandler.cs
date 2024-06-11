@@ -83,7 +83,20 @@ namespace Api.EventHandlers
             _isarConnectionTimers[robot.IsarId].Reset();
 
             if (robot.IsarConnected) { return; }
-            await RobotService.UpdateRobotIsarConnected(robot.Id, true);
+            try
+            {
+                await RobotService.UpdateRobotIsarConnected(robot.Id, true);
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(
+                    "Failed to set robot to ISAR connected for ISAR ID '{IsarId}' ('{RobotName}')'. Exception: {Message} ",
+                    isarRobotHeartbeat.IsarId,
+                    isarRobotHeartbeat.RobotName,
+                    e.Message
+                );
+                return;
+            }
         }
 
         private void AddTimerForRobot(IsarRobotHeartbeatMessage isarRobotHeartbeat, Robot robot)

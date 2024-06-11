@@ -17,7 +17,16 @@ namespace Api.Services.ActionServices
                 return;
             }
 
-            await robotService.UpdateRobotPose(robot.Id, pose);
+            try
+            {
+                await robotService.UpdateRobotPose(robot.Id, pose);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning("Failed to update robot pose value for robot with ID '{isarId}'. Exception: {message}", isarId, e.Message);
+                return;
+            }
+
             logger.LogDebug("Updated pose on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
         }
     }

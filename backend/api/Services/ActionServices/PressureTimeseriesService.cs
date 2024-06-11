@@ -18,7 +18,15 @@
                 return;
             }
 
-            if (robot.PressureLevel is null || Math.Abs(pressureLevel - (float)robot.PressureLevel) > Tolerance) await robotService.UpdateRobotPressureLevel(robot.Id, pressureLevel);
+            try
+            {
+                if (robot.PressureLevel is null || Math.Abs(pressureLevel - (float)robot.PressureLevel) > Tolerance) await robotService.UpdateRobotPressureLevel(robot.Id, pressureLevel);
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning("Failed to update robot pressure value for robot with ID '{isarId}'. Exception: {message}", isarId, e.Message);
+                return;
+            }
 
             logger.LogDebug("Updated pressure on robot '{RobotName}' with ISAR id '{IsarId}'", robot.Name, robot.IsarId);
         }

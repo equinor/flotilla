@@ -119,7 +119,7 @@ namespace Api.EventHandlers
                 }
             }
 
-            await CancellReturnToHomeOnNewMissionSchedule(missionRun);
+            await CancelReturnToHomeOnNewMissionSchedule(missionRun);
 
             _startMissionSemaphore.WaitOne();
             try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot.Id); }
@@ -198,7 +198,21 @@ namespace Api.EventHandlers
             try { await MissionScheduling.FreezeMissionRunQueueForRobot(e.RobotId); }
             catch (RobotNotFoundException) { return; }
 
-            var area = await FindRelevantRobotAreaForSafePositionMission(robot.Id);
+
+            Area? area;
+            try
+            {
+                area = await FindRelevantRobotAreaForSafePositionMission(robot.Id);
+            }
+            catch (RobotNotFoundException)
+            {
+                _logger.LogWarning(
+                    "Failed to see if robot was localised. Could not find robot with ID '{RobotId}'",
+                    e.RobotId
+                );
+                return;
+            }
+
             if (area == null) { return; }
 
             try { await MissionScheduling.ScheduleMissionToDriveToSafePosition(e.RobotId, area.Id); }
@@ -302,7 +316,7 @@ namespace Api.EventHandlers
             return area;
         }
 
-        public async Task CancellReturnToHomeOnNewMissionSchedule(MissionRun missionRun)
+        public async Task CancelReturnToHomeOnNewMissionSchedule(MissionRun missionRun)
         {
             IList<MissionStatus> missionStatuses = [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused];
             var existingReturnToHomeMissions = await MissionService.ReadMissionRuns(missionRun.Robot.Id, MissionRunType.ReturnHome, missionStatuses);
@@ -311,11 +325,33 @@ namespace Api.EventHandlers
             {
                 var returnToHomeMission = existingReturnToHomeMissions[0];
 
-                if (!await LocalizationService.RobotIsOnSameDeckAsMission(missionRun.Robot.Id, missionRun.Area.Id))
+                try
                 {
-                    _logger.LogWarning($"The robot {missionRun.Robot.Name} is localized on a different deck so the mission was not scheduled.");
+                    if (!await LocalizationService.RobotIsOnSameDeckAsMission(missionRun.Robot.Id, missionRun.Area.Id))
+                    {
+                        _logger.LogWarning($"The robot {missionRun.Robot.Name} is localized on a different deck so the mission was not scheduled.");
+                        return;
+                    }
+                }
+                catch (RobotNotFoundException)
+                {
+                    string errorMessage = $"Could not cancel return to home mission on new mission schedule since {missionRun.Robot.Id} was not found";
+                    _logger.LogWarning("{Message}", errorMessage);
                     return;
                 }
+                catch (RobotCurrentAreaMissingException)
+                {
+                    string errorMessage = $"Could not cancel return to home mission on new mission schedule since {missionRun.Robot.Id} did not have an Area associated with it";
+                    _logger.LogWarning("{Message}", errorMessage);
+                    return;
+                }
+                catch (AreaNotFoundException)
+                {
+                    string errorMessage = $"Could not cancel return to home mission on new mission schedule since {missionRun.Robot.Id} had Area with ID {missionRun.Area.Id} which could not be found";
+                    _logger.LogWarning("{Message}", errorMessage);
+                    return;
+                }
+
 
                 if (returnToHomeMission.Status != MissionStatus.Pending)
                 {
