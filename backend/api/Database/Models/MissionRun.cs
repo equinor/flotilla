@@ -114,7 +114,7 @@ namespace Api.Database.Models
             );
         }
 
-        public static MissionStatus MissionStatusFromString(string status)
+        public static MissionStatus GetMissionStatusFromString(string status)
         {
             return status switch
             {

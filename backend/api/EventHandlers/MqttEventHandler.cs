@@ -131,8 +131,16 @@ namespace Api.EventHandlers
                         Status = RobotStatus.Available,
                     };
 
-                    var newRobot = await robotService.CreateFromQuery(robotQuery);
-                    _logger.LogInformation("Added robot '{RobotName}' with ISAR id '{IsarId}' to database", newRobot.Name, newRobot.IsarId);
+                    try
+                    {
+                        var newRobot = await robotService.CreateFromQuery(robotQuery);
+                        _logger.LogInformation("Added robot '{RobotName}' with ISAR id '{IsarId}' to database", newRobot.Name, newRobot.IsarId);
+                    }
+                    catch (DbUpdateException)
+                    {
+                        _logger.LogError($"Failed to add robot {robotQuery.Name} with to the database");
+                        return;
+                    }
 
                     return;
                 }
@@ -226,7 +234,7 @@ namespace Api.EventHandlers
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
 
             MissionStatus status;
-            try { status = MissionRun.MissionStatusFromString(isarMission.Status); }
+            try { status = MissionRun.GetMissionStatusFromString(isarMission.Status); }
             catch (ArgumentException e)
             {
                 _logger.LogError(e, "Failed to parse mission status from MQTT message. Mission with ISARMissionId '{IsarMissionId}' was not updated", isarMission.MissionId);
@@ -255,12 +263,31 @@ namespace Api.EventHandlers
             {
                 if (flotillaMissionRun.Status != MissionStatus.Successful)
                 {
-                    await robotService.UpdateCurrentArea(robot.Id, null);
+                    try
+                    {
+                        await robotService.UpdateCurrentArea(robot.Id, null);
+                    }
+                    catch (RobotNotFoundException)
+                    {
+                        _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
+                        return;
+                    }
 
                     signalRService.ReportGeneralFailToSignalR(robot, "Failed Localization Mission", $"Failed localization mission for robot {robot.Name}.");
                     _logger.LogError("Localization mission for robot '{RobotName}' failed.", isarMission.RobotName);
                 }
-                else { await robotService.UpdateCurrentArea(robot.Id, flotillaMissionRun.Area); }
+                else
+                {
+                    try
+                    {
+                        await robotService.UpdateCurrentArea(robot.Id, flotillaMissionRun.Area);
+                    }
+                    catch (RobotNotFoundException)
+                    {
+                        _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
+                        return;
+                    }
+                }
             }
 
             try { await robotService.UpdateCurrentMissionId(robot.Id, null); }
@@ -400,7 +427,6 @@ namespace Api.EventHandlers
             signalRService.ReportGeneralFailToSignalR(robot, messageTitle, message);
 
             teamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
-
         }
     }
 }
