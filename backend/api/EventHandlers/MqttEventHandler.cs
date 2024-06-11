@@ -229,7 +229,7 @@ namespace Api.EventHandlers
             var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
             var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
             var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
-            var signalRService = provider.GetRequiredService<ISignalRService>();
+            _ = provider.GetRequiredService<ISignalRService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
 
@@ -259,34 +259,28 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (flotillaMissionRun.IsLocalizationMission())
+            if (flotillaMissionRun.Status != MissionStatus.Successful)
             {
-                if (flotillaMissionRun.Status != MissionStatus.Successful)
+                try
                 {
-                    try
-                    {
-                        await robotService.UpdateCurrentArea(robot.Id, null);
-                    }
-                    catch (RobotNotFoundException)
-                    {
-                        _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
-                        return;
-                    }
-
-                    signalRService.ReportGeneralFailToSignalR(robot, "Failed Localization Mission", $"Failed localization mission for robot {robot.Name}.");
-                    _logger.LogError("Localization mission for robot '{RobotName}' failed.", isarMission.RobotName);
+                    await robotService.UpdateCurrentArea(robot.Id, null);
                 }
-                else
+                catch (RobotNotFoundException)
                 {
-                    try
-                    {
-                        await robotService.UpdateCurrentArea(robot.Id, flotillaMissionRun.Area);
-                    }
-                    catch (RobotNotFoundException)
-                    {
-                        _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
-                        return;
-                    }
+                    _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
+                    return;
+                }
+            }
+            else
+            {
+                try
+                {
+                    await robotService.UpdateCurrentArea(robot.Id, flotillaMissionRun.Area);
+                }
+                catch (RobotNotFoundException)
+                {
+                    _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
+                    return;
                 }
             }
 

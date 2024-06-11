@@ -1,5 +1,4 @@
-﻿using Api.Controllers.Models;
-using Api.Database.Models;
+﻿using Api.Database.Models;
 using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
@@ -12,7 +11,6 @@ namespace Api.EventHandlers
 
         // The mutex is used to ensure multiple missions aren't attempted scheduled simultaneously whenever multiple mission runs are created
         private readonly Semaphore _startMissionSemaphore = new(1, 1);
-        private readonly Semaphore _scheduleLocalizationSemaphore = new(1, 1);
 
         private readonly IServiceScopeFactory _scopeFactory;
 
@@ -70,53 +68,6 @@ namespace Api.EventHandlers
             {
                 _logger.LogError("Mission run with ID: {MissionRunId} was not found in the database", e.MissionRunId);
                 return;
-            }
-
-
-            if (!await LocalizationService.RobotIsLocalized(missionRun.Robot.Id))
-            {
-                if (missionRun.Robot.RobotCapabilities != null && !missionRun.Robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.localize))
-                {
-                    await RobotService.UpdateCurrentArea(missionRun.Robot.Id, missionRun.Area);
-                }
-                else
-                {
-                    _scheduleLocalizationSemaphore.WaitOne();
-                    if (await MissionService.PendingLocalizationMissionRunExists(missionRun.Robot.Id)
-                        || await MissionService.OngoingLocalizationMissionRunExists(missionRun.Robot.Id))
-                    {
-                        _scheduleLocalizationSemaphore.Release();
-                        return;
-                    }
-
-                    try
-                    {
-                        var localizationMissionRun = await LocalizationService.CreateLocalizationMissionInArea(missionRun.Robot.Id, missionRun.Area.Id);
-                        _logger.LogInformation("{Message}", $"Created localization mission run with ID {localizationMissionRun.Id}");
-                    }
-                    catch (RobotNotAvailableException)
-                    {
-                        _logger.LogError("Mission run {MissionRunId} will be aborted as robot {RobotId} was not available", missionRun.Id, missionRun.Robot.Id);
-                        missionRun.Status = MissionStatus.Aborted;
-                        missionRun.StatusReason = "Aborted: Robot was not available";
-                        await MissionService.Update(missionRun);
-                        return;
-                    }
-                    catch (Exception ex) when (
-                        ex is AreaNotFoundException
-                        or DeckNotFoundException
-                        or RobotNotFoundException
-                        or IsarCommunicationException
-                    )
-                    {
-                        _logger.LogError("Mission run {MissionRunId} will be aborted as robot {RobotId} was not correctly localized", missionRun.Id, missionRun.Robot.Id);
-                        missionRun.Status = MissionStatus.Aborted;
-                        missionRun.StatusReason = "Aborted: Robot was not correctly localized";
-                        await MissionService.Update(missionRun);
-                        return;
-                    }
-                    finally { _scheduleLocalizationSemaphore.Release(); }
-                }
             }
 
             await CancelReturnToHomeOnNewMissionSchedule(missionRun);
@@ -222,7 +173,6 @@ namespace Api.EventHandlers
                 SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Failed to send {robot.Name} to a safe zone");
             }
 
-            if (await MissionService.PendingOrOngoingLocalizationMissionRunExists(e.RobotId)) { return; }
             try { await MissionScheduling.StopCurrentMissionRun(e.RobotId); }
             catch (RobotNotFoundException) { return; }
             catch (MissionRunNotFoundException)
@@ -283,24 +233,7 @@ namespace Api.EventHandlers
 
             if (!await LocalizationService.RobotIsLocalized(robotId))
             {
-
-                if (await MissionService.PendingOrOngoingLocalizationMissionRunExists(robotId))
-                {
-                    var missionRuns = await MissionService.ReadAll(
-                        new MissionRunQueryStringParameters
-                        {
-                            Statuses = [MissionStatus.Ongoing, MissionStatus.Pending],
-                            RobotId = robot.Id,
-                            OrderBy = "DesiredStartTime",
-                            PageSize = 100
-                        });
-
-                    var localizationMission = missionRuns.Find(missionRun => missionRun.IsLocalizationMission());
-
-                    return localizationMission?.Area ?? null;
-                }
-
-                _logger.LogError("Robot {RobotName} is not localized and no localization mission is ongoing.", robot.Name);
+                _logger.LogError("Robot {RobotName} is not localized.", robot.Name);
                 SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} has not been localised.");
                 return null;
             }
@@ -351,7 +284,7 @@ namespace Api.EventHandlers
                     _logger.LogWarning("{Message}", errorMessage);
                     return;
                 }
-                
+
 
                 if (returnToHomeMission.Status != MissionStatus.Pending)
                 {

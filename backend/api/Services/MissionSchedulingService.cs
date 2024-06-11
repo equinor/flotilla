@@ -79,16 +79,7 @@ namespace Api.Services
                 return;
             }
 
-            // Verify that localization is fine
-            if (!await localizationService.RobotIsLocalized(robot.Id) && !missionRun.IsLocalizationMission())
-            {
-                logger.LogError("Tried to schedule mission {MissionRunId} on robot {RobotId} before the robot was localized, scheduled missions will be aborted", missionRun.Id, robot.Id);
-                try { await AbortAllScheduledMissions(robot.Id, "Aborted: Robot was not localized"); }
-                catch (RobotNotFoundException) { logger.LogError("Failed to abort scheduled missions for robot {RobotId}", robot.Id); }
-                return;
-            }
-
-            if (!missionRun.IsLocalizationMission() && !await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
+            if (!await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
             {
                 logger.LogError("Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Aborting all mission runs", robot.Id, missionRun.Id);
                 try { await AbortAllScheduledMissions(robot.Id, "Aborted: Robot was at different deck"); }
@@ -327,7 +318,7 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            var missionRun = await missionRunService.ReadNextScheduledLocalizationMissionRun(robot.Id) ?? await missionRunService.ReadNextScheduledEmergencyMissionRun(robot.Id);
+            var missionRun = await missionRunService.ReadNextScheduledEmergencyMissionRun(robot.Id);
             if (robot.MissionQueueFrozen == false && missionRun == null) { missionRun = await missionRunService.ReadNextScheduledMissionRun(robot.Id); }
             return missionRun;
         }
@@ -504,7 +495,7 @@ namespace Api.Services
                 throw new MissionRunNotFoundException(errorMessage);
             }
 
-            if (robot.MissionQueueFrozen && missionRun.MissionRunType != MissionRunType.Emergency && missionRun.MissionRunType != MissionRunType.Localization)
+            if (robot.MissionQueueFrozen && missionRun.MissionRunType != MissionRunType.Emergency)
             {
                 logger.LogInformation("Mission run {MissionRunId} was not started as the mission run queue for robot {RobotName} is frozen", missionRun.Id, robot.Name);
                 return false;
@@ -523,11 +514,6 @@ namespace Api.Services
             if (robot.Deprecated)
             {
                 logger.LogWarning("Mission run {MissionRunId} was not started as the robot {RobotId} is deprecated", missionRun.Id, robot.Id);
-                return false;
-            }
-            if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id))
-            {
-                logger.LogInformation("Mission run {MissionRunId} was not started as there is an ongoing localization mission", missionRun.Id);
                 return false;
             }
             return true;

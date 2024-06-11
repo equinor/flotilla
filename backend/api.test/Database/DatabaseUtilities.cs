@@ -59,13 +59,6 @@ namespace Api.Test.Database
                 Map = new MapMetadata(),
                 InstallationCode = installationCode
             };
-            if (missionRunType == MissionRunType.Localization)
-            {
-                missionRun.Tasks = new List<MissionTask>
-                {
-                    new(new Pose(), MissionTaskType.Localization)
-                };
-            }
             if (missionRunType == MissionRunType.ReturnHome)
             {
                 missionRun.Tasks = new List<MissionTask>
