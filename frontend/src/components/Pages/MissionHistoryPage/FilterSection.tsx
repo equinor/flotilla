@@ -20,15 +20,14 @@ const StyledHeader = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
+    @media (max-width: 730px) {
+        max-width: 300px;
+    }
 `
 
 const StyledButtonDiv = styled.div`
     display: flex;
     gap: 1rem;
-`
-
-const StyledSearch = styled(Search)`
-    max-width: 280px;
 `
 
 const StyledDialog = styled(Dialog)`
@@ -74,7 +73,7 @@ export const FilterSection = () => {
     return (
         <>
             <StyledHeader>
-                <StyledSearch
+                <Search
                     value={filterState.missionName ?? ''}
                     placeholder={TranslateText('Search for missions')}
                     onChange={(changes: ChangeEvent<HTMLInputElement>) => {

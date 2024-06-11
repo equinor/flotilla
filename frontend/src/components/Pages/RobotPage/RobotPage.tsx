@@ -14,21 +14,13 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotType } from 'models/RobotModel'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { StyledButton } from 'components/Styles/StyledComponents'
+import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 
-const StyledRobotPage = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    flex-direction: column;
-    gap: 1rem;
-    margin: 2rem;
-`
 const RobotArmMovementSection = styled.div`
     display: flex;
     flex-direction: row;
     gap: 1rem;
-    @media (max-width: 800px) {
+    @media (max-width: 600px) {
         flex-direction: column;
     }
 `
@@ -42,7 +34,7 @@ const RobotInfo = styled.div`
     align-items: flex-start;
     gap: 3rem;
     width: calc(80vw);
-    @media (max-width: 800px) {
+    @media (max-width: 600px) {
         flex-direction: column;
     }
     margin: 0rem 0rem 2rem 0rem;
@@ -53,7 +45,7 @@ const StatusContent = styled.div<{ $alignItems?: string }>`
     align-items: ${(props) => props.$alignItems};
     justify-content: flex-end;
     gap: 2rem;
-    @media (max-width: 800px) {
+    @media (max-width: 600px) {
         flex-direction: row;
         align-items: flex-end;
     }
@@ -75,7 +67,7 @@ export const RobotPage = () => {
     return (
         <>
             <Header page={'robot'} />
-            <StyledRobotPage>
+            <StyledPage>
                 <BackButton />
                 {selectedRobot && (
                     <>
@@ -145,7 +137,7 @@ export const RobotPage = () => {
                         )}
                     </>
                 )}
-            </StyledRobotPage>
+            </StyledPage>
         </>
     )
 }
