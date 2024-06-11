@@ -14,9 +14,6 @@ const StyledButton = styled(TextAlignedButton)`
     :hover {
         background-color: #ff9797;
     }
-    text-align: left;
-    height: auto;
-    padding: 5px 5px;
 `
 
 interface MissionsProps {

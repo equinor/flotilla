@@ -1,6 +1,7 @@
-import { Button, Icon, Typography } from '@equinor/eds-core-react'
+import { Icon, Typography } from '@equinor/eds-core-react'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { TextAlignedButton } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 
 const StyledDiv = styled.div`
@@ -11,12 +12,6 @@ const StyledAlertTitle = styled.div`
     display: flex;
     gap: 0.3em;
     align-items: flex-end;
-`
-
-const StyledButton = styled(Button)`
-    text-align: left;
-    height: auto;
-    padding: 5px 5px;
 `
 
 interface SafeZoneBannerProps {
@@ -34,11 +29,11 @@ export const SafeZoneBanner = ({ alertCategory }: SafeZoneBannerProps): JSX.Elem
                     {alertCategory === AlertCategory.WARNING ? TranslateText('WARNING') : TranslateText('INFO')}
                 </Typography>
             </StyledAlertTitle>
-            <StyledButton variant="ghost" color="secondary">
+            <TextAlignedButton variant="ghost" color="secondary">
                 {alertCategory === AlertCategory.WARNING
                     ? TranslateText('Safe zone banner text')
                     : TranslateText('Dismiss safe zone banner text')}
-            </StyledButton>
+            </TextAlignedButton>
         </StyledDiv>
     )
 }

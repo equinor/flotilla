@@ -1,8 +1,9 @@
-import { Button, Icon, Typography } from '@equinor/eds-core-react'
+import { Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
+import { TextAlignedButton } from 'components/Styles/StyledComponents'
 
 const StyledDiv = styled.div`
     flex-direction: column;
@@ -14,10 +15,7 @@ const StyledAlertTitle = styled.div`
     align-items: flex-end;
 `
 
-const StyledButton = styled(Button)`
-    text-align: left;
-    height: auto;
-    padding: 5px 5px;
+const StyledButton = styled(TextAlignedButton)`
     background-color: '${tokens.colors.ui.background__danger.hex}';
 `
 
