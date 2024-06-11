@@ -26,6 +26,7 @@ export const StyledButton = styled(Button)`
 export const TextAlignedButton = styled(Button)`
     text-align: left;
     height: auto;
+    padding: 5px 5px;
 `
 export const StyledPage = styled.div`
     display: flex;
