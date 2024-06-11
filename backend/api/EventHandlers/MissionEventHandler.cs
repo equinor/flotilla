@@ -351,7 +351,7 @@ namespace Api.EventHandlers
                     _logger.LogWarning("{Message}", errorMessage);
                     return;
                 }
-
+                
 
                 if (returnToHomeMission.Status != MissionStatus.Pending)
                 {
