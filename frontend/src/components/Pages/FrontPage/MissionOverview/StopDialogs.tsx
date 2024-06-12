@@ -166,7 +166,7 @@ export const StopRobotDialog = (): JSX.Element => {
                     {!safeZoneStatus ? (
                         <>
                             <Square style={{ background: tokens.colors.interactive.danger__resting.hex }} />
-                            {TranslateText('Send robots to safe zone')}
+                            {TranslateText('Send robots home')}
                         </>
                     ) : (
                         <>
@@ -181,8 +181,8 @@ export const StopRobotDialog = (): JSX.Element => {
                     <Dialog.Title>
                         <Typography variant="h5">
                             {!safeZoneStatus
-                                ? TranslateText('Send robots to safe zone') + '?'
-                                : TranslateText('Dismiss robots from safe zone') + '?'}
+                                ? TranslateText('Send robots home') + '?'
+                                : TranslateText('Dismiss robots from home') + '?'}
                         </Typography>
                     </Dialog.Title>
                 </Dialog.Header>
@@ -190,13 +190,13 @@ export const StopRobotDialog = (): JSX.Element => {
                     <StyledText>
                         <Typography variant="body_long">
                             {!safeZoneStatus
-                                ? TranslateText('Send robots to safe zone long text')
-                                : TranslateText('Dismiss robots from safe zone long text')}
+                                ? TranslateText('Send robots home long text')
+                                : TranslateText('Dismiss robots from home long text')}
                         </Typography>
                         <Typography variant="body_long">
                             {!safeZoneStatus
-                                ? TranslateText('Send robots to safe confirmation text')
-                                : TranslateText('Dismiss robots from safe confirmation text')}
+                                ? TranslateText('Send robots home confirmation text')
+                                : TranslateText('Dismiss robots from home confirmation text')}
                         </Typography>
                     </StyledText>
                 </Dialog.CustomContent>
@@ -213,7 +213,7 @@ export const StopRobotDialog = (): JSX.Element => {
                         </Button>
                         {!safeZoneStatus ? (
                             <Button variant="contained" color="danger" onClick={stopAll}>
-                                {TranslateText('Send robots to safe zone')}
+                                {TranslateText('Send robots home')}
                             </Button>
                         ) : (
                             <Button variant="contained" color="danger" onClick={resetRobots}>
