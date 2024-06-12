@@ -75,6 +75,7 @@ namespace Api.EventHandlers
             _startMissionSemaphore.WaitOne();
             try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot.Id); }
             catch (MissionRunNotFoundException) { return; }
+            catch (RobotCurrentAreaMissingException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
 

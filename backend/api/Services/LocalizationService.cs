@@ -56,6 +56,7 @@ namespace Api.Services
 
             if (robot.CurrentArea is null)
             {
+                // TODO: if area is null then just set it. Use another variable for failed localisation or whatever. We can't detect the robot being moved anyways
                 const string ErrorMessage = "The robot is not associated with an area and a mission may not be started";
                 logger.LogError("{Message}", ErrorMessage);
                 throw new RobotCurrentAreaMissingException(ErrorMessage);

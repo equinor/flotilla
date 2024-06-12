@@ -263,7 +263,7 @@ namespace Api.EventHandlers
             {
                 try
                 {
-                    await robotService.UpdateCurrentArea(robot.Id, null);
+                    await robotService.UpdateCurrentArea(robot.Id, null); // TODO: don't ever set area to null, and if it is null, then just set it when you receive a mission
                 }
                 catch (RobotNotFoundException)
                 {
