@@ -1,4 +1,4 @@
-import { Typography } from '@equinor/eds-core-react'
+import { Typography, Icon } from '@equinor/eds-core-react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { BackButton } from 'utils/BackButton'
@@ -19,6 +19,23 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
+import { StyledButton } from 'components/Styles/StyledComponents'
+import { Icons } from 'utils/icons'
+import { tokens } from '@equinor/eds-tokens'
+
+const StyledRobotPage = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 3rem;
+    margin: 2rem;
+`
+const ActionSection = styled.div`
+    display: flex;
+    flex-direction: column;    
+    gap: 1rem;
+`
 const RobotArmMovementSection = styled.div`
     display: flex;
     flex-direction: row;
@@ -27,6 +44,24 @@ const RobotArmMovementSection = styled.div`
         flex-direction: column;
     }
 `
+const DocumentSection = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+`
+const Info = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 7rem;
+`
+const DocumentRow = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+`
+
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
     max-width: 12rem;
@@ -86,68 +121,90 @@ export const RobotPage = () => {
                         <Typography variant="h1">
                             {selectedRobot.name + ' (' + selectedRobot.model.type + ')'}
                         </Typography>
-                        <RobotInfo>
-                            <RobotImage height="350px" robotType={selectedRobot.model.type} />
-                            <StatusContent $alignItems="start">
-                                <RobotStatusChip
-                                    status={selectedRobot.status}
-                                    flotillaStatus={selectedRobot.flotillaStatus}
-                                    isarConnected={selectedRobot.isarConnected}
-                                />
 
-                                {selectedRobot.status !== RobotStatus.Offline && (
+                        <div>
+                            <RobotInfo>
+                                <RobotImage height="350px" robotType={selectedRobot.model.type} />
+                                <StatusContent $alignItems="start">
+                                    <RobotStatusChip
+                                        status={selectedRobot.status}
+                                    flotillaStatus={selectedRobot.flotillaStatus}
+                                        isarConnected={selectedRobot.isarConnected}
+                                    />
+
+                                    {selectedRobot.status !== RobotStatus.Offline && (
+                                        <>
+                                            <BatteryStatusDisplay
+                                                itemSize={48}
+                                                batteryLevel={selectedRobot.batteryLevel}
+                                                batteryWarningLimit={selectedRobot.model.batteryWarningThreshold}
+                                            />
+                                            {selectedRobot.pressureLevel !== null &&
+                                                selectedRobot.pressureLevel !== undefined && (
+                                                    <PressureStatusDisplay
+                                                        itemSize={48}
+                                                        pressure={selectedRobot.pressureLevel}
+                                                        upperPressureWarningThreshold={
+                                                            selectedRobot.model.upperPressureWarningThreshold
+                                                        }
+                                                        lowerPressureWarningThreshold={
+                                                            selectedRobot.model.lowerPressureWarningThreshold
+                                                        }
+                                                    />
+                                                )}
+                                        </>
+                                    )}
+                                </StatusContent>
+                            </RobotInfo>
+                        </div>
+                        <Info>
+                            <div>
+                                {selectedRobot.model.type === RobotType.TaurobInspector && <PressureTable />}
+                            </div>
+
+                            <ActionSection>
+                                <Typography variant="h2">{TranslateText('Actions')}</Typography>
+
+                                <StyledTextButton variant="outlined" onClick={returnRobotToHome}>
+                                    {TranslateText('Return robot to home')}
+                                </StyledTextButton>
+
+                                {selectedRobot.model.type === RobotType.TaurobInspector && (
                                     <>
-                                        <BatteryStatusDisplay
-                                            itemSize={48}
-                                            batteryLevel={selectedRobot.batteryLevel}
-                                            batteryWarningLimit={selectedRobot.model.batteryWarningThreshold}
-                                        />
-                                        {selectedRobot.pressureLevel !== null &&
-                                            selectedRobot.pressureLevel !== undefined && (
-                                                <PressureStatusDisplay
-                                                    itemSize={48}
-                                                    pressure={selectedRobot.pressureLevel}
-                                                    upperPressureWarningThreshold={
-                                                        selectedRobot.model.upperPressureWarningThreshold
-                                                    }
-                                                    lowerPressureWarningThreshold={
-                                                        selectedRobot.model.lowerPressureWarningThreshold
-                                                    }
-                                                />
-                                            )}
+                                        <Typography variant="h4">{TranslateText('Set robot arm to ')}</Typography>
+                                        <RobotArmMovementSection>
+                                            <MoveRobotArm
+                                                robot={selectedRobot}
+                                                armPosition="battery_change"
+                                                isRobotAvailable={selectedRobot.status === RobotStatus.Available}
+                                            />
+                                            <MoveRobotArm
+                                                robot={selectedRobot}
+                                                armPosition="transport"
+                                                isRobotAvailable={selectedRobot.status === RobotStatus.Available}
+                                            />
+                                            <MoveRobotArm
+                                                robot={selectedRobot}
+                                                armPosition="lookout"
+                                                isRobotAvailable={selectedRobot.status === RobotStatus.Available}
+                                            />
+                                        </RobotArmMovementSection>
                                     </>
                                 )}
-                            </StatusContent>
-                        </RobotInfo>
-                        {selectedRobot.model.type === RobotType.TaurobInspector && <PressureTable />}
-                        <Typography variant="h2">{TranslateText('Actions')}</Typography>
-
-                        <StyledTextButton variant="outlined" onClick={returnRobotToHome}>
-                            {TranslateText('Return robot to home')}
-                        </StyledTextButton>
-
-                        {selectedRobot.model.type === RobotType.TaurobInspector && (
-                            <>
-                                <Typography variant="h4">{TranslateText('Set robot arm to ')}</Typography>
-                                <RobotArmMovementSection>
-                                    <MoveRobotArm
-                                        robot={selectedRobot}
-                                        armPosition="battery_change"
-                                        isRobotAvailable={selectedRobot.status === RobotStatus.Available}
-                                    />
-                                    <MoveRobotArm
-                                        robot={selectedRobot}
-                                        armPosition="transport"
-                                        isRobotAvailable={selectedRobot.status === RobotStatus.Available}
-                                    />
-                                    <MoveRobotArm
-                                        robot={selectedRobot}
-                                        armPosition="lookout"
-                                        isRobotAvailable={selectedRobot.status === RobotStatus.Available}
-                                    />
-                                </RobotArmMovementSection>
-                            </>
-                        )}
+                            </ActionSection>
+                            
+                            <DocumentSection>
+                            <Typography variant="h2">{TranslateText('Documents')}</Typography>
+                            {selectedRobot.model.type === RobotType.TaurobInspector && (
+                                <DocumentRow>
+                                    <Icon name={Icons.LibraryPdf} color={tokens.colors.interactive.primary__resting.hex} size={24}  />
+                                    <Typography variant="h4">
+                                        <a href="https://example.com"> {TranslateText('Drifts of vedlikeholdsmanual')}</a>
+                                    </Typography>
+                                </DocumentRow>
+                            )}
+                            </DocumentSection>
+                        </Info>
                     </>
                 )}
             </StyledPage>
