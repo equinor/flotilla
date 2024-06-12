@@ -15,16 +15,13 @@ interface DeckProps {
 }
 
 const StyledMap = styled.canvas`
-    object-fit: contain;
-    max-height: 100%;
+    max-height: 50vh;
     max-width: 90%;
     margin: auto;
 `
 
 const StyledMapLimits = styled.div`
     display: flex;
-    max-height: 600px;
-    max-width: 600px;
     padding-left: 30px;
     justify-content: center;
 `

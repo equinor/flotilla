@@ -7,6 +7,7 @@ export const StyledDialog = styled(Dialog)`
     padding: 1rem;
     width: calc(100vw * 0.7);
     max-width: 500px;
+    max-height: 90vh;
 `
 
 export const HorizontalContent = styled.div`
