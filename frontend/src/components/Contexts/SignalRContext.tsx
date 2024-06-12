@@ -81,7 +81,14 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
     }, [accessToken])
 
     const registerEvent = (eventName: string, onMessageReceived: (username: string, message: string) => void) => {
-        if (connection) connection.on(eventName, (username, message) => onMessageReceived(username, message))
+        if (connection)
+            connection.on(eventName, (username, message) => {
+                if (message === 'null') {
+                    console.warn(`Received signalR message for event ${eventName} is 'null'`)
+                    return
+                }
+                onMessageReceived(username, message)
+            })
     }
 
     return (
