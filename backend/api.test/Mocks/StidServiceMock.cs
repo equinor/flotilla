@@ -12,7 +12,7 @@ namespace Api.Services
     {
         public const string ServiceName = "StidApi";
 
-        public virtual async Task<Area> GetTagArea(string tag, string installationCode)
+        public virtual async Task<Area?> GetTagArea(string tag, string installationCode)
         {
             await Task.CompletedTask;
             string testAreaName = "StidServiceMockArea";
