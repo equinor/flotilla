@@ -243,21 +243,15 @@ namespace Api.Controllers
                 )
                 .ToList();
 
-            List<Area>? missionAreas;
-            try
-            {
-                missionAreas = echoMission.Tags
-                    .Select(t => stidService.GetTagArea(t.TagId, scheduledMissionQuery.InstallationCode).Result)
-                    .ToList();
-            }
-            catch (Exception e) when (e.InnerException is AreaNotFoundException)
-            {
-                return NotFound(e.InnerException.Message);
-            }
+            List<Area?> missionAreas;
+            missionAreas = echoMission.Tags
+                .Select(t => stidService.GetTagArea(t.TagId, scheduledMissionQuery.InstallationCode).Result)
+                .ToList();
 
             Deck? missionDeck = null;
             foreach (var missionArea in missionAreas)
             {
+                if (missionArea == null) continue;
                 missionDeck ??= missionArea.Deck;
 
                 if (missionDeck != missionArea.Deck)

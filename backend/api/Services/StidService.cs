@@ -8,14 +8,14 @@ namespace Api.Services
 {
     public interface IStidService
     {
-        public abstract Task<Area> GetTagArea(string tag, string installationCode);
+        public abstract Task<Area?> GetTagArea(string tag, string installationCode);
     }
 
     public class StidService(ILogger<StidService> logger, IDownstreamApi stidApi, IAreaService areaService) : IStidService
     {
         public const string ServiceName = "StidApi";
 
-        public async Task<Area> GetTagArea(string tag, string installationCode)
+        public async Task<Area?> GetTagArea(string tag, string installationCode)
         {
             string relativePath = $"{installationCode}/tag?tagNo={tag}";
 
@@ -36,7 +36,7 @@ namespace Api.Services
             {
                 string errorMessage = $"Could not get area name from STID for tag {tag}";
                 logger.LogError("{Message}", errorMessage);
-                throw new AreaNotFoundException(errorMessage);
+                return null;
             }
 
             var area = await areaService.ReadByInstallationAndName(installationCode, stidTagAreaResponse.LocationCode);
@@ -45,7 +45,7 @@ namespace Api.Services
             {
                 string errorMessage = $"Could not find area for area name {stidTagAreaResponse.LocationCode}";
                 logger.LogError("{Message}", errorMessage);
-                throw new AreaNotFoundException(errorMessage);
+                return null;
             }
 
             return area;
