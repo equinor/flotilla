@@ -24,6 +24,8 @@ namespace Api.Services
 
         public Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
 
+        public Task<MissionDefinition> UpdateLastSuccessfulMissionRun(string missionRunId, string missionDefinitionId);
+
         public Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
         public Task<MissionDefinition?> Delete(string id);
@@ -44,7 +46,8 @@ namespace Api.Services
             ICustomMissionService customMissionService,
             ISignalRService signalRService,
             IAccessRoleService accessRoleService,
-            ILogger<IMissionDefinitionService> logger) : IMissionDefinitionService
+            ILogger<IMissionDefinitionService> logger,
+            IMissionRunService missionRunService) : IMissionDefinitionService
     {
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
         {
@@ -98,6 +101,25 @@ namespace Api.Services
         {
             return await GetMissionDefinitionsWithSubModels().Where(
                 m => m.IsDeprecated == false && m.Area != null && m.Area.Deck != null && m.Area.Deck.Id == deckId).ToListAsync();
+        }
+
+        public async Task<MissionDefinition> UpdateLastSuccessfulMissionRun(string missionRunId, string missionDefinitionId)
+        {
+            var missionRun = await missionRunService.ReadById(missionRunId);
+            if (missionRun is null)
+            {
+                string errorMessage = $"Mission run {missionRunId} was not found";
+                logger.LogWarning("{Message}", errorMessage);
+                throw new MissionNotFoundException(errorMessage);
+            }
+            var missionDefinition = await ReadById(missionDefinitionId);
+            if (missionDefinition == null)
+            {
+                string errorMessage = $"Mission definition {missionDefinitionId} was not found";
+                logger.LogWarning("{Message}", errorMessage);
+                throw new MissionNotFoundException(errorMessage);
+            }
+            return await Update(missionDefinition);
         }
 
         public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)
