@@ -66,7 +66,7 @@ namespace Api.Test.EventHandlers
             var echoServiceMock = new MockEchoService();
             var stidServiceMock = new MockStidService(context);
             var customMissionServiceMock = new MockCustomMissionService();
-            var missionDefinitionService = new MissionDefinitionService(context, echoServiceMock, customMissionServiceMock, signalRService, accessRoleService, missionDefinitionServiceLogger);
+            var missionDefinitionService = new MissionDefinitionService(context, echoServiceMock, customMissionServiceMock, signalRService, accessRoleService, missionDefinitionServiceLogger, _missionRunService);
             var robotModelService = new RobotModelService(context);
             var taskDurationServiceMock = new MockTaskDurationService();
             var isarServiceMock = new MockIsarService();
@@ -82,7 +82,7 @@ namespace Api.Test.EventHandlers
             var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, _robotService, _missionRunService, mapServiceMock);
             _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, areaService,
                 isarServiceMock, _localizationService, returnToHomeService, signalRService);
-            var lastMissionRunService = new LastMissionRunService(lastMissionRunServiceLogger, missionDefinitionService, _missionRunService);
+            var lastMissionRunService = new LastMissionRunService(missionDefinitionService);
 
             _databaseUtilities = new DatabaseUtilities(context);
             _emergencyActionService = new EmergencyActionService();
