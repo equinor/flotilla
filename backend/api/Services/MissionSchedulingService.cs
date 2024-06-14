@@ -105,7 +105,7 @@ namespace Api.Services
                 return;
             }
 
-            if ((!robot.IsRobotPressureTooLow() || !robot.IsRobotBatteryTooLow()) && !missionRun.IsReturnHomeMission())
+            if ((robot.IsRobotPressureTooLow() || robot.IsRobotBatteryTooLow()) && !missionRun.IsReturnHomeMission())
             {
                 missionRun = await HandleBatteryAndPressureLevel(robot);
                 if (missionRun == null) { return; }
@@ -134,12 +134,12 @@ namespace Api.Services
 
         public async Task<MissionRun?> HandleBatteryAndPressureLevel(Robot robot)
         {
-            if (!robot.IsRobotPressureTooLow())
+            if (robot.IsRobotPressureTooLow())
             {
                 logger.LogError("Robot with ID: {RobotId} cannot start missions because pressure value is too low.", robot.Id);
                 signalRService.ReportGeneralFailToSignalR(robot, $"Low pressure value for robot {robot.Name}", "Pressure value is too low to start a mission.");
             }
-            if (!robot.IsRobotBatteryTooLow())
+            if (robot.IsRobotBatteryTooLow())
             {
                 logger.LogError("Robot with ID: {RobotId} cannot start missions because battery value is too low.", robot.Id);
                 signalRService.ReportGeneralFailToSignalR(robot, $"Low battery value for robot {robot.Name}", "Battery value is too low to start a mission.");
@@ -558,7 +558,7 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            if (!robot.IsRobotPressureTooLow())
+            if (robot.IsRobotPressureTooLow())
             {
                 string errorMessage = $"The robot pressure on {robot.Name} is too low to start a mission";
                 logger.LogError("{Message}", errorMessage);
@@ -572,7 +572,7 @@ namespace Api.Services
                 throw new RobotPreCheckFailedException(errorMessage);
             }
 
-            if (!robot.IsRobotBatteryTooLow())
+            if (robot.IsRobotBatteryTooLow())
             {
                 string errorMessage = $"The robot battery level on {robot.Name} is too low to start a mission";
                 logger.LogError("{Message}", errorMessage);
