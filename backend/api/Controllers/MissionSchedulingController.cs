@@ -248,14 +248,11 @@ namespace Api.Controllers
                 .Select(t => stidService.GetTagArea(t.TagId, scheduledMissionQuery.InstallationCode).Result)
                 .ToList();
 
-            Deck? missionDeck = null;
-            foreach (var missionArea in missionAreas)
+            var missionDeckNames = missionAreas.Where(a => a != null).Select(a => a!.Deck.Name).Distinct().ToList();
+            if (missionDeckNames.Count > 1)
             {
-                if (missionArea == null) continue;
-                missionDeck ??= missionArea.Deck;
-
-                if (missionDeck != missionArea.Deck)
-                    logger.LogWarning($"Mission {echoMission.Name} has tags in both deck {missionDeck.Name} and {missionArea.Deck.Name}.");
+                string joinedMissionDeckNames = string.Join(", ", [.. missionDeckNames]);
+                logger.LogWarning($"Mission {echoMission.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}.");
             }
 
             Area? area = null;
@@ -263,7 +260,7 @@ namespace Api.Controllers
 
             if (area == null)
             {
-                return NotFound($"No area with name {scheduledMissionQuery.AreaName} in installation {scheduledMissionQuery.InstallationCode} was found");
+                return NotFound($"No area found for echo mission '{echoMission.Name}'.");
             }
 
             var source = await sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId);
