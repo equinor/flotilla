@@ -107,6 +107,20 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
+            if (robot.Status == RobotStatus.Offline)
+            {
+                string errorMessage = $"The robot with ID {robotId} is Offline";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotPreCheckFailedException(errorMessage);
+            }
+
+            if (robot.IsarConnected == false)
+            {
+                string errorMessage = $"The robot with ID {robotId} has connection issues. Isar not connected.";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotPreCheckFailedException(errorMessage);
+            }
+
             if (robot.IsRobotPressureTooLow())
             {
                 string errorMessage = $"The robot pressure on {robot.Name} is too low to start a mission";
