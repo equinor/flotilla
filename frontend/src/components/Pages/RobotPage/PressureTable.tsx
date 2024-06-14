@@ -7,7 +7,6 @@ const TableWithHeader = styled.div`
     display: grid;
     grid-columns: auto;
     gap: 1rem;
-    margin: 2rem 0rem;
     max-width: 25rem;
 `
 

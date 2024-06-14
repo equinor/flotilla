@@ -18,19 +18,10 @@ import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-
-import { StyledButton } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 
-const StyledRobotPage = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    flex-direction: column;
-    gap: 3rem;
-    margin: 2rem;
-`
+
 const ActionSection = styled.div`
     display: flex;
     flex-direction: column;    
@@ -194,14 +185,26 @@ export const RobotPage = () => {
                             </ActionSection>
                             
                             <DocumentSection>
-                            <Typography variant="h2">{TranslateText('Documents')}</Typography>
+                            <Typography variant="h2">{TranslateText('STID Documents')}</Typography>
                             {selectedRobot.model.type === RobotType.TaurobInspector && (
-                                <DocumentRow>
-                                    <Icon name={Icons.LibraryPdf} color={tokens.colors.interactive.primary__resting.hex} size={24}  />
-                                    <Typography variant="h4">
-                                        <a href="https://example.com"> {TranslateText('Drifts of vedlikeholdsmanual')}</a>
-                                    </Typography>
-                                </DocumentRow>
+                                <>
+                                    <DocumentRow>
+                                        <Icon name={Icons.FileDescription} color={tokens.colors.interactive.primary__resting.hex} size={24}  />
+                                        <Typography variant="h4" color={tokens.colors.interactive.primary__resting.hex}>
+                                            <a href="https://stid.equinor.com/JSV/file/8ac6f817-97d6-4ff9-bab7-d84437c8637d.pdf?docNo=C151-EQ-J-MB-00001&revNo=01">
+                                                {TranslateText('Drifts of vedlikeholdsmanual')}
+                                            </a>                                    
+                                        </Typography>
+                                    </DocumentRow>
+                                    <DocumentRow>
+                                        <Icon name={Icons.FileDescription} color={tokens.colors.interactive.primary__resting.hex} size={24}  />
+                                        <Typography variant="h4" color={tokens.colors.interactive.primary__resting.hex}>
+                                            <a href="https://stid.equinor.com/JSV/file/32144945-731f-4ee6-93d9-ba3fbeefe06c.pdf?docNo=C151-EQ-J-MB-00002&revNo=01">
+                                                {TranslateText('Roles and responsibilities')}
+                                            </a>                                    
+                                        </Typography>
+                                    </DocumentRow>
+                                </>
                             )}
                             </DocumentSection>
                         </Info>

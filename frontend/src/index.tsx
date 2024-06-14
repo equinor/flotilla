@@ -22,7 +22,9 @@ const root = ReactDOM.createRoot(rootElement)
 root.render(
     <React.StrictMode>
         <MsalProvider instance={msalInstance}>
+        <div style={{backgroundColor: '#f7f7f7'}}>
             <App />
+        </div>
         </MsalProvider>
     </React.StrictMode>
 )
