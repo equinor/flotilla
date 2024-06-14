@@ -348,7 +348,8 @@ namespace Api.Services
                 }
             }
 
-            robot = await Update(robot);
+            try { robot = await Update(robot); }
+            catch (InvalidOperationException e) { logger.LogError(e, "Failed to update {robotName}", robot.Name); };
             return robot;
         }
 
