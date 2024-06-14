@@ -78,7 +78,7 @@ namespace Api.Database.Models
 
         public bool IsRobotPressureTooLow()
         {
-            return Model.LowerPressureWarningThreshold == null || PressureLevel == null || Model.LowerPressureWarningThreshold <= PressureLevel;
+            return Model.LowerPressureWarningThreshold == null || PressureLevel == null || Model.LowerPressureWarningThreshold >= PressureLevel;
         }
 
         public bool IsRobotPressureTooHigh()
@@ -88,7 +88,7 @@ namespace Api.Database.Models
 
         public bool IsRobotBatteryTooLow()
         {
-            return Model.BatteryWarningThreshold == null || Model.BatteryWarningThreshold <= BatteryLevel;
+            return Model.BatteryWarningThreshold == null || Model.BatteryWarningThreshold >= BatteryLevel;
         }
 
         public IList<VideoStream> VideoStreams { get; set; }
