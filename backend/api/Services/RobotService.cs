@@ -11,6 +11,8 @@ namespace Api.Services
     {
         public Task<Robot> Create(Robot newRobot);
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
+
+        public Task<Robot> GetRobotWithPreCheck(string robotId);
         public Task<IEnumerable<Robot>> ReadAll();
         public Task<IEnumerable<string>> ReadAllActivePlants();
         public Task<Robot?> ReadById(string id);
@@ -92,6 +94,41 @@ namespace Api.Services
                 return newRobot!;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
+        }
+
+        public async Task<Robot> GetRobotWithPreCheck(string robotId)
+        {
+            var robot = await ReadById(robotId);
+
+            if (robot is null)
+            {
+                string errorMessage = $"The robot with ID {robotId} could not be found";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
+            }
+
+            if (robot.IsRobotPressureTooLow())
+            {
+                string errorMessage = $"The robot pressure on {robot.Name} is too low to start a mission";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotPreCheckFailedException(errorMessage);
+            }
+
+            if (!robot.IsRobotPressureTooHigh())
+            {
+                string errorMessage = $"The robot pressure on {robot.Name} is too high to start a mission";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotPreCheckFailedException(errorMessage);
+            }
+
+            if (robot.IsRobotBatteryTooLow())
+            {
+                string errorMessage = $"The robot battery level on {robot.Name} is too low to start a mission";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotPreCheckFailedException(errorMessage);
+            }
+
+            return robot;
         }
 
         public async Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status)

@@ -28,8 +28,6 @@ namespace Api.Services
 
         public void TriggerMissionCompleted(MissionCompletedEventArgs e);
 
-        public Task<Robot> GetRobotWithPreCheck(string robotId);
-
     }
 
     public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
@@ -546,40 +544,5 @@ namespace Api.Services
         public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
         protected virtual void OnMissionCompleted(MissionCompletedEventArgs e) { MissionCompleted?.Invoke(this, e); }
         public static event EventHandler<MissionCompletedEventArgs>? MissionCompleted;
-
-        public async Task<Robot> GetRobotWithPreCheck(string robotId)
-        {
-            var robot = await robotService.ReadById(robotId);
-
-            if (robot is null)
-            {
-                string errorMessage = $"The robot with ID {robotId} could not be found";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            if (robot.IsRobotPressureTooLow())
-            {
-                string errorMessage = $"The robot pressure on {robot.Name} is too low to start a mission";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotPreCheckFailedException(errorMessage);
-            }
-
-            if (!robot.IsRobotPressureTooHigh())
-            {
-                string errorMessage = $"The robot pressure on {robot.Name} is too high to start a mission";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotPreCheckFailedException(errorMessage);
-            }
-
-            if (robot.IsRobotBatteryTooLow())
-            {
-                string errorMessage = $"The robot battery level on {robot.Name} is too low to start a mission";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotPreCheckFailedException(errorMessage);
-            }
-
-            return robot;
-        }
     }
 }
