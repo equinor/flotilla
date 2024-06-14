@@ -7,13 +7,14 @@ namespace Api.Services.ActionServices
     {
         public Task<MissionDefinition> FindExistingOrCreateCustomMissionDefinition(CustomMissionQuery customMissionQuery, List<MissionTask> missionTasks);
 
-        public Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, Robot robot, IList<MissionTask> missionTasks);
+        public Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, string robotId, IList<MissionTask> missionTasks);
     }
 
     public class CustomMissionSchedulingService(
             ILogger<CustomMissionSchedulingService> logger,
             ICustomMissionService customMissionService,
             IAreaService areaService,
+            IRobotService robotService,
             ISourceService sourceService,
             IMissionDefinitionService missionDefinitionService,
             IMissionRunService missionRunService,
@@ -76,8 +77,16 @@ namespace Api.Services.ActionServices
             return customMissionDefinition;
         }
 
-        public async Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, Robot robot, IList<MissionTask> missionTasks)
+        public async Task<MissionRun> QueueCustomMissionRun(CustomMissionQuery customMissionQuery, string missionDefinitionId, string robotId, IList<MissionTask> missionTasks)
         {
+            var robot = await robotService.ReadById(robotId);
+            if (robot is null)
+            {
+                string errorMessage = $"The robot with ID {robotId} could not be found";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotFoundException(errorMessage);
+            }
+
             var missionDefinition = await missionDefinitionService.ReadById(missionDefinitionId);
             if (missionDefinition is null)
             {

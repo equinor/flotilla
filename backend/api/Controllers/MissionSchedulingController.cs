@@ -389,9 +389,10 @@ namespace Api.Controllers
             catch (RobotNotInSameInstallationAsMissionException e) { return Conflict(e.Message); }
 
             MissionRun? newMissionRun;
-            try { newMissionRun = await customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot, missionTasks); }
+            try { newMissionRun = await customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
             catch (Exception e) when (e is UnsupportedRobotCapabilityException) { return BadRequest(e.Message); }
             catch (Exception e) when (e is MissionNotFoundException) { return NotFound(e.Message); }
+            catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is UnsupportedRobotCapabilityException) { return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission."); }
 
             return CreatedAtAction(nameof(Create), new
