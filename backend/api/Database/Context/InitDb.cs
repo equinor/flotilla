@@ -287,8 +287,7 @@ namespace Api.Database.Context
                 Port = 3000,
                 CurrentInstallation = installations[0],
                 VideoStreams = new List<VideoStream>(),
-                Pose = new Pose(),
-                PressureLevel = 0.001f
+                Pose = new Pose()
             };
 
             var robot2 = new Robot
@@ -690,9 +689,9 @@ namespace Api.Database.Context
                     new()
                     {
                         Type = type,
-                        BatteryWarningThreshold = 0f,
-                        LowerPressureWarningThreshold = 0.01f,
-                        UpperPressureWarningThreshold = 0.08f
+                        BatteryWarningThreshold = null,
+                        LowerPressureWarningThreshold = null,
+                        UpperPressureWarningThreshold = null
                     };
                 context.Add(model);
             }
