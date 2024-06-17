@@ -78,17 +78,20 @@ namespace Api.Database.Models
 
         public bool IsRobotPressureTooLow()
         {
-            return Model.LowerPressureWarningThreshold == null || PressureLevel == null || Model.LowerPressureWarningThreshold >= PressureLevel;
+            if (Model.LowerPressureWarningThreshold == null) { return false; }
+            return PressureLevel == null || Model.LowerPressureWarningThreshold >= PressureLevel;
         }
 
         public bool IsRobotPressureTooHigh()
         {
-            return Model.UpperPressureWarningThreshold == null || PressureLevel == null || Model.UpperPressureWarningThreshold >= PressureLevel;
+            if (Model.UpperPressureWarningThreshold == null) { return false; }
+            return PressureLevel == null || Model.UpperPressureWarningThreshold <= PressureLevel;
         }
 
         public bool IsRobotBatteryTooLow()
         {
-            return Model.BatteryWarningThreshold == null || Model.BatteryWarningThreshold >= BatteryLevel;
+            if (Model.BatteryWarningThreshold == null) { return false; }
+            return Model.BatteryWarningThreshold >= BatteryLevel;
         }
 
         public IList<VideoStream> VideoStreams { get; set; }
