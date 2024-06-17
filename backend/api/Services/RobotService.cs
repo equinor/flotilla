@@ -114,7 +114,7 @@ namespace Api.Services
                 throw new RobotPreCheckFailedException(errorMessage);
             }
 
-            if (!robot.IsRobotPressureTooHigh())
+            if (robot.IsRobotPressureTooHigh())
             {
                 string errorMessage = $"The robot pressure on {robot.Name} is too high to start a mission";
                 logger.LogError("{Message}", errorMessage);
