@@ -27,12 +27,12 @@ namespace Api.Services.Models
             Tasks = tasks;
         }
 
-        public IsarMissionDefinition(MissionRun missionRun)
+        public IsarMissionDefinition(MissionRun missionRun, bool includeStartPose = false)
         {
             Id = missionRun.IsarMissionId;
             Name = missionRun.Name;
             Tasks = missionRun.Tasks.Select(task => new IsarTaskDefinition(task, missionRun)).ToList();
-            StartPose = missionRun.Area.DefaultLocalizationPose != null ? new IsarPose(missionRun.Area.DefaultLocalizationPose.Pose) : null;
+            StartPose = includeStartPose && missionRun.Area.DefaultLocalizationPose != null ? new IsarPose(missionRun.Area.DefaultLocalizationPose.Pose) : null;
         }
     }
 

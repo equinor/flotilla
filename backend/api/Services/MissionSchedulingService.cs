@@ -8,7 +8,7 @@ namespace Api.Services
 {
     public interface IMissionSchedulingService
     {
-        public Task StartNextMissionRunIfSystemIsAvailable(string robotId);
+        public Task StartNextMissionRunIfSystemIsAvailable(string robotId, bool isFirstMissionInQueue = false);
 
         public Task<bool> OngoingMission(string robotId);
 
@@ -33,7 +33,7 @@ namespace Api.Services
     public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
             IAreaService areaService, IIsarService isarService, ILocalizationService localizationService, IReturnToHomeService returnToHomeService, ISignalRService signalRService) : IMissionSchedulingService
     {
-        public async Task StartNextMissionRunIfSystemIsAvailable(string robotId)
+        public async Task StartNextMissionRunIfSystemIsAvailable(string robotId, bool isFirstMissionInQueue = false)
         {
             logger.LogInformation("Starting next mission run if system is available for robot ID: {RobotId}", robotId);
             var robot = await robotService.ReadById(robotId);
@@ -109,7 +109,7 @@ namespace Api.Services
                 if (missionRun == null) { return; }
             }
 
-            try { await StartMissionRun(missionRun); }
+            try { await StartMissionRun(missionRun, isFirstMissionInQueue: isFirstMissionInQueue); }
             catch (Exception ex) when (
                 ex is MissionException
                     or RobotNotFoundException
@@ -373,7 +373,7 @@ namespace Api.Services
             }
         }
 
-        private async Task StartMissionRun(MissionRun queuedMissionRun)
+        private async Task StartMissionRun(MissionRun queuedMissionRun, bool isFirstMissionInQueue = false)
         {
             string robotId = queuedMissionRun.Robot.Id;
             string missionRunId = queuedMissionRun.Id;
@@ -409,7 +409,7 @@ namespace Api.Services
             }
 
             IsarMission isarMission;
-            try { isarMission = await isarService.StartMission(robot, missionRun); }
+            try { isarMission = await isarService.StartMission(robot, missionRun, isFirstMissionInQueue: isFirstMissionInQueue); }
             catch (HttpRequestException e)
             {
                 string errorMessage = $"Could not reach ISAR at {robot.IsarUri}";

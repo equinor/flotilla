@@ -72,9 +72,11 @@ namespace Api.EventHandlers
                 return;
             }
 
+            bool isFirstMissionInQueue = false;
 
             if (!await LocalizationService.RobotIsLocalized(missionRun.Robot.Id))
             {
+                isFirstMissionInQueue = true;
                 if (missionRun.Robot.RobotCapabilities != null && !missionRun.Robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.localize))
                 {
                     await RobotService.UpdateCurrentArea(missionRun.Robot.Id, missionRun.Area);
@@ -122,7 +124,7 @@ namespace Api.EventHandlers
             await CancelReturnToHomeOnNewMissionSchedule(missionRun);
 
             _startMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot.Id); }
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot.Id, isFirstMissionInQueue: isFirstMissionInQueue); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
@@ -139,7 +141,7 @@ namespace Api.EventHandlers
 
             if (robot.CurrentMissionId != null)
             {
-                var stuckMission = await MissionService.ReadById(robot.CurrentMissionId);
+                var stuckMission = await MissionService.ReadById(robot.CurrentMissionId!);
                 if (stuckMission == null)
                 {
                     _logger.LogError("MissionRun with ID: {MissionId} was not found in the database", robot.CurrentMissionId);
@@ -153,8 +155,9 @@ namespace Api.EventHandlers
                 }
             }
 
+            bool isFirstMissionInQueue = robot.CurrentArea == null;
             _startMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id, isFirstMissionInQueue: isFirstMissionInQueue); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
@@ -267,7 +270,7 @@ namespace Api.EventHandlers
             catch (RobotNotFoundException) { return; }
 
             _startMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id, isFirstMissionInQueue: robot.CurrentArea == null); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
