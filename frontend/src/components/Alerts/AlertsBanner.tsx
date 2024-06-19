@@ -18,6 +18,15 @@ const StyledCard = styled.div`
     }
 `
 
+const StyledListItem = styled.div`
+    display: flex;
+    width: 300px;
+    height: auto;
+    padding: 3px 10px 2px 10px;
+    justify-content: space-between;
+    align-items: center;
+`
+
 const Horizontal = styled.div`
     display: flex;
     flex-direction: row;
@@ -66,6 +75,21 @@ export const AlertBanner = ({ children, dismissAlert, alertCategory }: AlertProp
                     <Icon name={Icons.Clear} style={{ color: tokens.colors.text.static_icons__default.hex }}></Icon>
                 </Button>
             </StyledCard>
+        </>
+    )
+}
+
+export const AlertListItem = ({ children, dismissAlert, alertCategory }: AlertProps) => {
+    return (
+        <>
+            <StyledListItem>
+                <Horizontal>
+                    <Center>{children}</Center>
+                </Horizontal>
+                <Button variant="ghost_icon" onClick={dismissAlert}>
+                    <Icon name={Icons.Clear} size={24}></Icon>
+                </Button>
+            </StyledListItem>
         </>
     )
 }
