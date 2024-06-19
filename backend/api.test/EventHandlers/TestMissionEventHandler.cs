@@ -77,7 +77,7 @@ namespace Api.Test.EventHandlers
             var areaService = new AreaService(context, installationService, plantService, deckService, defaultLocalizationPoseService, accessRoleService);
             var mapServiceMock = new MockMapService();
             _robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService, _missionRunService);
-            _localizationService = new LocalizationService(localizationServiceLogger, _robotService, _missionRunService, installationService, areaService, mapServiceMock);
+            _localizationService = new LocalizationService(localizationServiceLogger, _robotService, installationService, areaService);
 
             var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, _robotService, _missionRunService, mapServiceMock);
             _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, areaService,
@@ -289,66 +289,6 @@ namespace Api.Test.EventHandlers
             var postStartMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
             Assert.NotNull(postStartMissionRunTwo);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
-        }
-
-        [Fact]
-        public async void QueuedMissionsAreAbortedWhenLocalizationFails()
-        {
-            // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
-            var localizationMissionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString());
-            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
-
-            Thread.Sleep(100);
-
-            var mqttEventArgs = new MqttReceivedArgs(
-                new IsarMissionMessage
-                {
-                    RobotName = robot.Name,
-                    IsarId = robot.IsarId,
-                    MissionId = localizationMissionRun.IsarMissionId,
-                    Status = "failed",
-                    Timestamp = DateTime.UtcNow
-                });
-
-            // Act
-            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarMissionReceived), mqttEventArgs);
-            Thread.Sleep(500);
-
-            // Assert
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun1.Id);
-            Assert.Equal(MissionStatus.Aborted, postTestMissionRun!.Status);
-        }
-
-        [Fact]
-        public async void LocalizationMissionCompletesAfterPressingSendToSafeZoneButton()
-        {
-            // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
-            await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString());
-
-            Thread.Sleep(100);
-
-            // Act
-            var eventArgs = new EmergencyButtonPressedForRobotEventArgs(robot.Id);
-            _emergencyActionService.RaiseEvent(nameof(EmergencyActionService.EmergencyButtonPressedForRobot), eventArgs);
-
-            Thread.Sleep(1000);
-
-            // Assert 
-            var updatedRobot = await _robotService.ReadById(robot.Id);
-            Assert.True(updatedRobot?.MissionQueueFrozen);
-
-            bool isRobotLocalized = await _localizationService.RobotIsLocalized(robot.Id);
-            Assert.True(isRobotLocalized);
         }
 
         [Fact]

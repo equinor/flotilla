@@ -190,8 +190,6 @@ namespace Api.Database.Models
             }
         }
 
-        public bool IsLocalizationMission() { return Tasks is [{ Type: MissionTaskType.Localization }]; }
-
         public bool IsReturnHomeMission() { return Tasks is [{ Type: MissionTaskType.ReturnHome }]; }
     }
 
@@ -211,7 +209,6 @@ namespace Api.Database.Models
     {
         Normal,
         ReturnHome,
-        Emergency,
-        Localization
+        Emergency
     }
 }
