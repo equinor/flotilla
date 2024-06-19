@@ -86,6 +86,7 @@ namespace Api.EventHandlers
             _logger.LogInformation("Updated status for robot {Name} to {Status}", robot.Name, isarStatus.Status);
 
             if (isarStatus.Status == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+            else if (isarStatus.Status == RobotStatus.Offline) await robotService.UpdateCurrentArea(robot.Id, null);
         }
 
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
@@ -287,6 +288,19 @@ namespace Api.EventHandlers
                         _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
                         return;
                     }
+                }
+            }
+
+            if (flotillaMissionRun.IsReturnHomeMission() && (flotillaMissionRun.Status == MissionStatus.Cancelled || flotillaMissionRun.Status == MissionStatus.Failed))
+            {
+                try
+                {
+                    await robotService.UpdateCurrentArea(robot.Id, null);
+                }
+                catch (RobotNotFoundException)
+                {
+                    _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
+                    return;
                 }
             }
 
