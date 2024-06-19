@@ -150,6 +150,7 @@ namespace Api.EventHandlers
                 {
                     await RobotService.UpdateRobotIsarConnected(robot.Id, false);
                     await RobotService.UpdateCurrentMissionId(robot.Id, null);
+                    await RobotService.UpdateCurrentArea(robot.Id, null);
                 }
                 catch (RobotNotFoundException) { return; }
             }
