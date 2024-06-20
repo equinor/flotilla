@@ -410,6 +410,7 @@ namespace Api.Services
             }
 
             IsarMission isarMission;
+            isFirstMissionInQueue = !missionRun.IsReturnHomeMission() && isFirstMissionInQueue;
             try { isarMission = await isarService.StartMission(robot, missionRun, isFirstMissionInQueue: isFirstMissionInQueue); }
             catch (HttpRequestException e)
             {
