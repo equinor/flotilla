@@ -74,16 +74,17 @@ namespace Api.EventHandlers
 
             bool isFirstMissionInQueue = false;
 
+            _scheduleLocalizationSemaphore.WaitOne();
             if (!await LocalizationService.RobotIsLocalized(missionRun.Robot.Id))
             {
                 isFirstMissionInQueue = true;
                 if (missionRun.Robot.RobotCapabilities != null && !missionRun.Robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.localize))
                 {
                     await RobotService.UpdateCurrentArea(missionRun.Robot.Id, missionRun.Area);
+                    _logger.LogInformation("{Message}", $"Set robot with ID {missionRun.Robot.Id} to localised for mission run with ID {missionRun.Id}");
                 }
                 else
                 {
-                    _scheduleLocalizationSemaphore.WaitOne();
                     if (await MissionService.PendingLocalizationMissionRunExists(missionRun.Robot.Id)
                         || await MissionService.OngoingLocalizationMissionRunExists(missionRun.Robot.Id))
                     {
@@ -102,6 +103,7 @@ namespace Api.EventHandlers
                         missionRun.Status = MissionStatus.Aborted;
                         missionRun.StatusReason = "Aborted: Robot was not available";
                         await MissionService.Update(missionRun);
+                        _scheduleLocalizationSemaphore.Release();
                         return;
                     }
                     catch (Exception ex) when (
@@ -115,11 +117,12 @@ namespace Api.EventHandlers
                         missionRun.Status = MissionStatus.Aborted;
                         missionRun.StatusReason = "Aborted: Robot was not correctly localized";
                         await MissionService.Update(missionRun);
+                        _scheduleLocalizationSemaphore.Release();
                         return;
                     }
-                    finally { _scheduleLocalizationSemaphore.Release(); }
                 }
             }
+            _scheduleLocalizationSemaphore.Release();
 
             await CancelReturnToHomeOnNewMissionSchedule(missionRun);
 
