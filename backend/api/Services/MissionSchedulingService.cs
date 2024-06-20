@@ -71,6 +71,7 @@ namespace Api.Services
                     await robotService.UpdateCurrentArea(robot.Id, null);
                 }
                 if (missionRun == null) { return; }  // The robot is already home
+                isFirstMissionInQueue = false;
             }
 
             if (!await TheSystemIsAvailableToRunAMission(robot.Id, missionRun.Id))
