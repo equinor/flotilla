@@ -9,7 +9,7 @@
     {
         public string RobotId { get; } = robotId;
     }
-    public class MissionCompletedEventArgs(string robotId) : EventArgs
+    public class LocalizationMissionSuccessfulEventArgs(string robotId) : EventArgs
     {
         public string RobotId { get; } = robotId;
     }

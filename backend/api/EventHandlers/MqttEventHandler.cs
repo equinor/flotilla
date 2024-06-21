@@ -271,6 +271,9 @@ namespace Api.EventHandlers
                     try
                     {
                         await robotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, null);
+                        _logger.LogError("Localization mission run {MissionRunId} was unsuccessful on {RobotId}, scheduled missions will be aborted", flotillaMissionRun.Id, flotillaMissionRun.Robot.Id);
+                        try { await missionSchedulingService.AbortAllScheduledMissions(flotillaMissionRun.Robot.Id, "Aborted: Robot was not localized"); }
+                        catch (RobotNotFoundException) { _logger.LogError("Failed to abort scheduled missions for robot {RobotId}", flotillaMissionRun.Robot.Id); }
                     }
                     catch (RobotNotFoundException)
                     {
@@ -322,7 +325,11 @@ namespace Api.EventHandlers
             }
 
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, updatedFlotillaMissionRun.Id);
-            missionSchedulingService.TriggerMissionCompleted(new MissionCompletedEventArgs(robot.Id));
+
+            if (updatedFlotillaMissionRun.IsLocalizationMission() && (updatedFlotillaMissionRun.Status == MissionStatus.Successful || updatedFlotillaMissionRun.Status == MissionStatus.PartiallySuccessful))
+            {
+                missionSchedulingService.TriggerLocalizationMissionSuccessful(new LocalizationMissionSuccessfulEventArgs(robot.Id));
+            }
 
             if (updatedFlotillaMissionRun.MissionId == null)
             {
