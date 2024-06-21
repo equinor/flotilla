@@ -26,7 +26,7 @@ namespace Api.Services
 
         public void TriggerRobotAvailable(RobotAvailableEventArgs e);
 
-        public void TriggerMissionCompleted(MissionCompletedEventArgs e);
+        public void TriggerLocalizationMissionSuccessful(LocalizationMissionSuccessfulEventArgs e);
 
     }
 
@@ -312,9 +312,9 @@ namespace Api.Services
             OnRobotAvailable(e);
         }
 
-        public void TriggerMissionCompleted(MissionCompletedEventArgs e)
+        public void TriggerLocalizationMissionSuccessful(LocalizationMissionSuccessfulEventArgs e)
         {
-            OnMissionCompleted(e);
+            OnLocalizationMissionSuccessful(e);
         }
 
         private async Task<MissionRun?> SelectNextMissionRun(string robotId)
@@ -542,7 +542,7 @@ namespace Api.Services
 
         protected virtual void OnRobotAvailable(RobotAvailableEventArgs e) { RobotAvailable?.Invoke(this, e); }
         public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
-        protected virtual void OnMissionCompleted(MissionCompletedEventArgs e) { MissionCompleted?.Invoke(this, e); }
-        public static event EventHandler<MissionCompletedEventArgs>? MissionCompleted;
+        protected virtual void OnLocalizationMissionSuccessful(LocalizationMissionSuccessfulEventArgs e) { LocalizationMissionSuccessful?.Invoke(this, e); }
+        public static event EventHandler<LocalizationMissionSuccessfulEventArgs>? LocalizationMissionSuccessful;
     }
 }

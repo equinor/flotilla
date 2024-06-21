@@ -42,7 +42,7 @@ namespace Api.EventHandlers
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
             MissionSchedulingService.RobotAvailable += OnRobotAvailable;
-            MissionSchedulingService.MissionCompleted += OnMissionCompleted;
+            MissionSchedulingService.LocalizationMissionSuccessful += OnLocalizationMissionSuccessful;
             EmergencyActionService.EmergencyButtonPressedForRobot += OnEmergencyButtonPressedForRobot;
             EmergencyActionService.EmergencyButtonDepressedForRobot += OnEmergencyButtonDepressedForRobot;
         }
@@ -51,7 +51,7 @@ namespace Api.EventHandlers
         {
             MissionRunService.MissionRunCreated -= OnMissionRunCreated;
             MissionSchedulingService.RobotAvailable -= OnRobotAvailable;
-            MissionSchedulingService.MissionCompleted -= OnMissionCompleted;
+            MissionSchedulingService.LocalizationMissionSuccessful -= OnLocalizationMissionSuccessful;
             EmergencyActionService.EmergencyButtonPressedForRobot -= OnEmergencyButtonPressedForRobot;
             EmergencyActionService.EmergencyButtonDepressedForRobot -= OnEmergencyButtonDepressedForRobot;
         }
@@ -126,9 +126,9 @@ namespace Api.EventHandlers
             finally { _startMissionSemaphore.Release(); }
         }
 
-        private async void OnMissionCompleted(object? sender, MissionCompletedEventArgs e)
+        private async void OnLocalizationMissionSuccessful(object? sender, LocalizationMissionSuccessfulEventArgs e)
         {
-            _logger.LogInformation("Triggered MissionCompleted event for robot ID: {RobotId}", e.RobotId);
+            _logger.LogInformation("Triggered LocalizationMissionSuccessful event for robot ID: {RobotId}", e.RobotId);
             var robot = await RobotService.ReadById(e.RobotId);
             if (robot == null)
             {
