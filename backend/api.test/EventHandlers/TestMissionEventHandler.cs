@@ -325,6 +325,49 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
+        public async void QueuedMissionsAreNotAbortedWhenRobotAvailableHappensAtTheSameTimeAsOnIsarMissionCompleted()
+        {
+            // Arrange
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, null);
+            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
+            var missionRun2 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
+
+            Thread.Sleep(100);
+
+            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1.Id);
+            _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), missionRunCreatedEventArgs);
+
+            Thread.Sleep(100);
+
+            // Act
+            var mqttEventArgs = new MqttReceivedArgs(
+                new IsarMissionMessage
+                {
+                    RobotName = robot.Name,
+                    IsarId = robot.IsarId,
+                    MissionId = missionRun1.IsarMissionId,
+                    Status = "successful",
+                    Timestamp = DateTime.UtcNow
+                });
+            var robotAvailableEventArgs = new RobotAvailableEventArgs(robot.Id);
+
+            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarMissionReceived), mqttEventArgs);
+            _missionSchedulingService.RaiseEvent(nameof(MissionSchedulingService.RobotAvailable), robotAvailableEventArgs);
+            Thread.Sleep(500);
+
+            // Assert
+            var postTestMissionRun1 = await _missionRunService.ReadById(missionRun1.Id);
+            Assert.Equal(MissionRunType.Localization, postTestMissionRun1!.MissionRunType);
+            Assert.Equal(MissionStatus.Successful, postTestMissionRun1!.Status);
+            var postTestMissionRun2 = await _missionRunService.ReadById(missionRun2.Id);
+            Assert.Equal(MissionStatus.Ongoing, postTestMissionRun2!.Status);
+        }
+
+        [Fact]
         public async void LocalizationMissionCompletesAfterPressingSendToSafeZoneButton()
         {
             // Arrange

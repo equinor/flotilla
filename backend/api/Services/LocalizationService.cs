@@ -4,7 +4,6 @@ namespace Api.Services
 {
     public interface ILocalizationService
     {
-        public Task<MissionRun> CreateLocalizationMissionInArea(string robotId, string areaId);
         public Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition);
         public Task<bool> RobotIsLocalized(string robotId);
         public Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId);
@@ -43,72 +42,6 @@ namespace Api.Services
             }
 
             return robot.CurrentArea is not null;
-        }
-
-        public async Task<MissionRun> CreateLocalizationMissionInArea(string robotId, string areaId)
-        {
-            var robot = await robotService.ReadById(robotId);
-            if (robot is null)
-            {
-                string errorMessage = $"The robot with ID {robotId} was not found";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            var area = await areaService.ReadById(areaId);
-            if (area is null)
-            {
-                string errorMessage = $"The area with ID {areaId} was not found";
-                logger.LogError("{Message}", errorMessage);
-                throw new AreaNotFoundException(errorMessage);
-            }
-
-            if (area.Deck?.DefaultLocalizationPose?.Pose is null)
-            {
-                const string ErrorMessage = "The mission area is not associated with any deck or that deck does not have a localization pose";
-                logger.LogError("{Message}", ErrorMessage);
-                throw new DeckNotFoundException(ErrorMessage);
-            }
-            if (robot.Status is not RobotStatus.Available)
-            {
-                string errorMessage = $"Robot '{robot.Id}' is not available as the status is {robot.Status}";
-                logger.LogWarning("{Message}", errorMessage);
-                throw new RobotNotAvailableException(errorMessage);
-            }
-            if (robot.Deprecated)
-            {
-                string errorMessage = $"Robot '{robot.Id}' is deprecated and cannot localize";
-                logger.LogWarning("{Message}", errorMessage);
-                throw new RobotNotAvailableException(errorMessage);
-            }
-
-            var localizationMissionRun = new MissionRun
-            {
-                Name = "Localization mission",
-                Robot = robot,
-                MissionRunType = MissionRunType.Localization,
-                InstallationCode = area.Installation.InstallationCode,
-                Area = area,
-                Status = MissionStatus.Pending,
-                DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>
-                {
-                    new(new Pose(area.Deck.DefaultLocalizationPose.Pose), MissionTaskType.Localization)
-                },
-                Map = new MapMetadata()
-            };
-            await mapService.AssignMapToMission(localizationMissionRun);
-
-            try
-            {
-                logger.LogWarning("Starting localization mission");
-                await missionRunService.Create(localizationMissionRun, triggerCreatedMissionRunEvent: false);
-            }
-            catch (UnsupportedRobotCapabilityException)
-            {
-                logger.LogError($"Unsupported robot capability detected when starting localisation mission for robot {localizationMissionRun.Robot.Name}. This should not happen.");
-            }
-            return localizationMissionRun;
         }
 
         public async Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId)
