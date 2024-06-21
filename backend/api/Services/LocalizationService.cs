@@ -10,7 +10,7 @@ namespace Api.Services
         public Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId);
     }
 
-    public class LocalizationService(ILogger<LocalizationService> logger, IRobotService robotService, IMissionRunService missionRunService, IInstallationService installationService, IAreaService areaService, IMapService mapService) : ILocalizationService
+    public class LocalizationService(ILogger<LocalizationService> logger, IRobotService robotService, IInstallationService installationService, IAreaService areaService) : ILocalizationService
     {
 
         public async Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition)

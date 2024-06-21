@@ -72,62 +72,24 @@ namespace Api.EventHandlers
                 return;
             }
 
-            bool isFirstMissionInQueue = false;
-
             _scheduleLocalizationSemaphore.WaitOne();
             if (!await LocalizationService.RobotIsLocalized(missionRun.Robot.Id))
             {
-                isFirstMissionInQueue = true;
-                if (missionRun.Robot.RobotCapabilities != null && !missionRun.Robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.localize))
+                if (await MissionService.PendingLocalizationMissionRunExists(missionRun.Robot.Id)
+                    || await MissionService.OngoingLocalizationMissionRunExists(missionRun.Robot.Id))
                 {
-                    await RobotService.UpdateCurrentArea(missionRun.Robot.Id, missionRun.Area);
-                    _logger.LogInformation("{Message}", $"Set robot with ID {missionRun.Robot.Id} to localised for mission run with ID {missionRun.Id}");
+                    _scheduleLocalizationSemaphore.Release();
+                    return;
                 }
-                else
-                {
-                    if (await MissionService.PendingLocalizationMissionRunExists(missionRun.Robot.Id)
-                        || await MissionService.OngoingLocalizationMissionRunExists(missionRun.Robot.Id))
-                    {
-                        _scheduleLocalizationSemaphore.Release();
-                        return;
-                    }
-
-                    try
-                    {
-                        var localizationMissionRun = await LocalizationService.CreateLocalizationMissionInArea(missionRun.Robot.Id, missionRun.Area.Id);
-                        _logger.LogInformation("{Message}", $"Created localization mission run with ID {localizationMissionRun.Id}");
-                    }
-                    catch (RobotNotAvailableException)
-                    {
-                        _logger.LogError("Mission run {MissionRunId} will be aborted as robot {RobotId} was not available", missionRun.Id, missionRun.Robot.Id);
-                        missionRun.Status = MissionStatus.Aborted;
-                        missionRun.StatusReason = "Aborted: Robot was not available";
-                        await MissionService.Update(missionRun);
-                        _scheduleLocalizationSemaphore.Release();
-                        return;
-                    }
-                    catch (Exception ex) when (
-                        ex is AreaNotFoundException
-                        or DeckNotFoundException
-                        or RobotNotFoundException
-                        or IsarCommunicationException
-                    )
-                    {
-                        _logger.LogError("Mission run {MissionRunId} will be aborted as robot {RobotId} was not correctly localized", missionRun.Id, missionRun.Robot.Id);
-                        missionRun.Status = MissionStatus.Aborted;
-                        missionRun.StatusReason = "Aborted: Robot was not correctly localized";
-                        await MissionService.Update(missionRun);
-                        _scheduleLocalizationSemaphore.Release();
-                        return;
-                    }
-                }
+                _logger.LogInformation("{Message}", $"Changing mission run with ID {missionRun.Id} to localization type");
+                await MissionService.UpdateMissionRunType(missionRun.Id, MissionRunType.Localization);
             }
             _scheduleLocalizationSemaphore.Release();
 
             await CancelReturnToHomeOnNewMissionSchedule(missionRun);
 
             _startMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot.Id, isFirstMissionInQueue: isFirstMissionInQueue); }
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot.Id); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
@@ -158,9 +120,8 @@ namespace Api.EventHandlers
                 }
             }
 
-            bool isFirstMissionInQueue = robot.CurrentArea == null;
             _startMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id, isFirstMissionInQueue: isFirstMissionInQueue); }
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
@@ -273,7 +234,7 @@ namespace Api.EventHandlers
             catch (RobotNotFoundException) { return; }
 
             _startMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id, isFirstMissionInQueue: robot.CurrentArea == null); }
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }

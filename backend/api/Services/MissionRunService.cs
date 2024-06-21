@@ -46,6 +46,8 @@ namespace Api.Services
 
         public Task<MissionRun> Update(MissionRun mission);
 
+        public Task<MissionRun> UpdateMissionRunType(string missionRunId, MissionRunType missionRunType);
+
         public Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
             string isarMissionId,
             MissionStatus missionStatus
@@ -532,6 +534,22 @@ namespace Api.Services
                         missionRun.IsarMissionId != null && missionRun.IsarMissionId.Equals(isarMissionId)
                 );
         }
+
+        public async Task<MissionRun> UpdateMissionRunType(string missionRunId, MissionRunType missionRunType)
+        {
+            var missionRun = await ReadById(missionRunId);
+            if (missionRun is null)
+            {
+                string errorMessage = $"Mission with mission Id {missionRunId} was not found";
+                logger.LogError("{Message}", errorMessage);
+                throw new MissionRunNotFoundException(errorMessage);
+            }
+
+            missionRun.MissionRunType = missionRunType;
+
+            return await Update(missionRun);
+        }
+
 
         public async Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(string isarMissionId, MissionStatus missionStatus)
         {

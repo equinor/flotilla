@@ -9,7 +9,7 @@ namespace Api.Test.Mocks
 {
     public class MockIsarService : IIsarService
     {
-        public async Task<IsarMission> StartMission(Robot robot, MissionRun mission, bool isFirstMissionInQueue = false)
+        public async Task<IsarMission> StartMission(Robot robot, MissionRun mission)
         {
             await Task.Run(() => Thread.Sleep(1));
             var isarServiceMissionResponse = new IsarMission(

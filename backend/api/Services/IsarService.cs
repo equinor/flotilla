@@ -8,7 +8,7 @@ namespace Api.Services
 {
     public interface IIsarService
     {
-        public Task<IsarMission> StartMission(Robot robot, MissionRun missionRun, bool isFirstMissionInQueue = false);
+        public Task<IsarMission> StartMission(Robot robot, MissionRun missionRun);
 
         public Task<IsarControlMissionResponse> StopMission(Robot robot);
 
@@ -23,7 +23,7 @@ namespace Api.Services
     {
         public const string ServiceName = "IsarApi";
 
-        public async Task<IsarMission> StartMission(Robot robot, MissionRun missionRun, bool isFirstMissionInQueue = false)
+        public async Task<IsarMission> StartMission(Robot robot, MissionRun missionRun)
         {
             var response = await CallApi(
                 HttpMethod.Post,
@@ -31,7 +31,7 @@ namespace Api.Services
                 "schedule/start-mission",
                 new
                 {
-                    mission_definition = new IsarMissionDefinition(missionRun, includeStartPose: isFirstMissionInQueue)
+                    mission_definition = new IsarMissionDefinition(missionRun, includeStartPose: missionRun.MissionRunType == MissionRunType.Localization)
                 }
             );
 

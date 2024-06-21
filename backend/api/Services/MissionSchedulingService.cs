@@ -8,7 +8,7 @@ namespace Api.Services
 {
     public interface IMissionSchedulingService
     {
-        public Task StartNextMissionRunIfSystemIsAvailable(string robotId, bool isFirstMissionInQueue = false);
+        public Task StartNextMissionRunIfSystemIsAvailable(string robotId);
 
         public Task<bool> OngoingMission(string robotId);
 
@@ -33,7 +33,7 @@ namespace Api.Services
     public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
             IAreaService areaService, IIsarService isarService, ILocalizationService localizationService, IReturnToHomeService returnToHomeService, ISignalRService signalRService) : IMissionSchedulingService
     {
-        public async Task StartNextMissionRunIfSystemIsAvailable(string robotId, bool isFirstMissionInQueue = false)
+        public async Task StartNextMissionRunIfSystemIsAvailable(string robotId)
         {
             logger.LogInformation("Starting next mission run if system is available for robot ID: {RobotId}", robotId);
             var robot = await robotService.ReadById(robotId);
@@ -71,7 +71,6 @@ namespace Api.Services
                     await robotService.UpdateCurrentArea(robot.Id, null);
                 }
                 if (missionRun == null) { return; }  // The robot is already home
-                isFirstMissionInQueue = false;
             }
 
             if (!await TheSystemIsAvailableToRunAMission(robot.Id, missionRun.Id))
@@ -110,7 +109,7 @@ namespace Api.Services
                 if (missionRun == null) { return; }
             }
 
-            try { await StartMissionRun(missionRun, isFirstMissionInQueue: isFirstMissionInQueue); }
+            try { await StartMissionRun(missionRun); }
             catch (Exception ex) when (
                 ex is MissionException
                     or RobotNotFoundException
@@ -374,7 +373,7 @@ namespace Api.Services
             }
         }
 
-        private async Task StartMissionRun(MissionRun queuedMissionRun, bool isFirstMissionInQueue = false)
+        private async Task StartMissionRun(MissionRun queuedMissionRun)
         {
             string robotId = queuedMissionRun.Robot.Id;
             string missionRunId = queuedMissionRun.Id;
@@ -410,8 +409,7 @@ namespace Api.Services
             }
 
             IsarMission isarMission;
-            isFirstMissionInQueue = !missionRun.IsReturnHomeMission() && isFirstMissionInQueue;
-            try { isarMission = await isarService.StartMission(robot, missionRun, isFirstMissionInQueue: isFirstMissionInQueue); }
+            try { isarMission = await isarService.StartMission(robot, missionRun); }
             catch (HttpRequestException e)
             {
                 string errorMessage = $"Could not reach ISAR at {robot.IsarUri}";
