@@ -242,16 +242,57 @@ namespace Api.EventHandlers
                 return;
             }
 
-            MissionRun flotillaMissionRun;
-            try { flotillaMissionRun = await missionRunService.UpdateMissionRunStatusByIsarMissionId(isarMission.MissionId, status); }
+            var flotillaMissionRun = await missionRunService.ReadByIsarMissionId(isarMission.MissionId);
+            if (flotillaMissionRun is null)
+            {
+                string errorMessage = $"Mission with isar mission Id {isarMission.IsarId} was not found";
+                _logger.LogError("{Message}", errorMessage);
+                return;
+            }
+
+            if (flotillaMissionRun.Status == status) { return; }
+
+            if (flotillaMissionRun.IsLocalizationMission())
+            {
+                if (status == MissionStatus.Successful || status == MissionStatus.PartiallySuccessful)
+                {
+                    try
+                    {
+                        await robotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, flotillaMissionRun.Area);
+                    }
+                    catch (RobotNotFoundException)
+                    {
+                        _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", flotillaMissionRun.Robot.Name, flotillaMissionRun.Robot.Id);
+                        return;
+                    }
+                }
+                else if (status == MissionStatus.Aborted || status == MissionStatus.Cancelled || status == MissionStatus.Failed)
+                {
+                    try
+                    {
+                        await robotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, null);
+                    }
+                    catch (RobotNotFoundException)
+                    {
+                        _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", flotillaMissionRun.Robot.Name, flotillaMissionRun.Robot.Id);
+                        return;
+                    }
+
+                    signalRService.ReportGeneralFailToSignalR(flotillaMissionRun.Robot, "Failed Localization Mission", $"Failed localization mission for robot {flotillaMissionRun.Robot.Name}.");
+                    _logger.LogError("Localization mission for robot '{RobotName}' failed.", isarMission.RobotName);
+                }
+            }
+
+            MissionRun updatedFlotillaMissionRun;
+            try { updatedFlotillaMissionRun = await missionRunService.UpdateMissionRunStatusByIsarMissionId(isarMission.MissionId, status); }
             catch (MissionRunNotFoundException) { return; }
 
             _logger.LogInformation(
                 "Mission '{Id}' (ISARMissionID='{IsarMissionId}') status updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'",
-                flotillaMissionRun.Id, isarMission.MissionId, isarMission.Status, isarMission.RobotName, isarMission.IsarId
+                updatedFlotillaMissionRun.Id, isarMission.MissionId, isarMission.Status, isarMission.RobotName, isarMission.IsarId
             );
 
-            if (!flotillaMissionRun.IsCompleted) return;
+            if (!updatedFlotillaMissionRun.IsCompleted) return;
 
             var robot = await robotService.ReadByIsarId(isarMission.IsarId);
             if (robot is null)
@@ -260,38 +301,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (flotillaMissionRun.IsLocalizationMission())
-            {
-                if (flotillaMissionRun.Status != MissionStatus.Successful)
-                {
-                    try
-                    {
-                        await robotService.UpdateCurrentArea(robot.Id, null);
-                    }
-                    catch (RobotNotFoundException)
-                    {
-                        _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
-                        return;
-                    }
-
-                    signalRService.ReportGeneralFailToSignalR(robot, "Failed Localization Mission", $"Failed localization mission for robot {robot.Name}.");
-                    _logger.LogError("Localization mission for robot '{RobotName}' failed.", isarMission.RobotName);
-                }
-                else
-                {
-                    try
-                    {
-                        await robotService.UpdateCurrentArea(robot.Id, flotillaMissionRun.Area);
-                    }
-                    catch (RobotNotFoundException)
-                    {
-                        _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
-                        return;
-                    }
-                }
-            }
-
-            if (flotillaMissionRun.IsReturnHomeMission() && (flotillaMissionRun.Status == MissionStatus.Cancelled || flotillaMissionRun.Status == MissionStatus.Failed))
+            if (updatedFlotillaMissionRun.IsReturnHomeMission() && (updatedFlotillaMissionRun.Status == MissionStatus.Cancelled || updatedFlotillaMissionRun.Status == MissionStatus.Failed))
             {
                 try
                 {
@@ -311,19 +321,19 @@ namespace Api.EventHandlers
                 return;
             }
 
-            _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, flotillaMissionRun.Id);
+            _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, updatedFlotillaMissionRun.Id);
             missionSchedulingService.TriggerMissionCompleted(new MissionCompletedEventArgs(robot.Id));
 
-            if (flotillaMissionRun.MissionId == null)
+            if (updatedFlotillaMissionRun.MissionId == null)
             {
-                _logger.LogInformation("Mission run {missionRunId} does not have a mission definition assosiated with it", flotillaMissionRun.Id);
+                _logger.LogInformation("Mission run {missionRunId} does not have a mission definition assosiated with it", updatedFlotillaMissionRun.Id);
                 return;
             }
 
-            try { await lastMissionRunService.SetLastMissionRun(flotillaMissionRun.Id, flotillaMissionRun.MissionId); }
+            try { await lastMissionRunService.SetLastMissionRun(updatedFlotillaMissionRun.Id, updatedFlotillaMissionRun.MissionId); }
             catch (MissionNotFoundException)
             {
-                _logger.LogError("Mission not found when setting last mission run for mission definition {missionId}", flotillaMissionRun.MissionId);
+                _logger.LogError("Mission not found when setting last mission run for mission definition {missionId}", updatedFlotillaMissionRun.MissionId);
                 return;
             }
 
