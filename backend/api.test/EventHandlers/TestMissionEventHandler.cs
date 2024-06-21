@@ -77,7 +77,7 @@ namespace Api.Test.EventHandlers
             var areaService = new AreaService(context, installationService, plantService, deckService, defaultLocalizationPoseService, accessRoleService);
             var mapServiceMock = new MockMapService();
             _robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService, _missionRunService);
-            _localizationService = new LocalizationService(localizationServiceLogger, _robotService, _missionRunService, installationService, areaService, mapServiceMock);
+            _localizationService = new LocalizationService(localizationServiceLogger, _robotService, installationService, areaService);
 
             var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, _robotService, _missionRunService, mapServiceMock);
             _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, areaService,
