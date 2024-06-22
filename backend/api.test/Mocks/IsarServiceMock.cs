@@ -15,7 +15,7 @@ namespace Api.Test.Mocks
             var isarServiceMissionResponse = new IsarMission(
                 new IsarStartMissionResponse
                 {
-                    MissionId = "test",
+                    MissionId = System.Guid.NewGuid().ToString(),
                     Tasks = new List<IsarTaskResponse>()
                 }
             );
