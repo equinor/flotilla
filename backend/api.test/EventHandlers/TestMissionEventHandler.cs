@@ -334,6 +334,7 @@ namespace Api.Test.EventHandlers
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, null);
             var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
+            Thread.Sleep(100);
             var missionRun2 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
             Thread.Sleep(100);
 
