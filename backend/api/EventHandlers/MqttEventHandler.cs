@@ -304,6 +304,8 @@ namespace Api.EventHandlers
                 return;
             }
 
+            _logger.LogInformation("After mission run {missionRunId} was completed the robot {robotName} had status {robotStatus}", updatedFlotillaMissionRun.Id, robot.Name, robot.Status);
+
             if (updatedFlotillaMissionRun.IsReturnHomeMission() && (updatedFlotillaMissionRun.Status == MissionStatus.Cancelled || updatedFlotillaMissionRun.Status == MissionStatus.Failed))
             {
                 try
