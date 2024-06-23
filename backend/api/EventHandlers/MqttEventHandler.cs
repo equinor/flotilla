@@ -258,7 +258,6 @@ namespace Api.EventHandlers
                     try
                     {
                         var robotWithUpdatedArea = await robotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, flotillaMissionRun.Area);
-                        _logger.LogInformation("Localization succeeded for robot {robotName} and the robot status is {robotStatus}", robotWithUpdatedArea.Name, robotWithUpdatedArea.Status);
                     }
                     catch (RobotNotFoundException)
                     {
@@ -303,8 +302,6 @@ namespace Api.EventHandlers
                 _logger.LogError("Could not find robot '{RobotName}' with ISAR id '{IsarId}'", isarMission.RobotName, isarMission.IsarId);
                 return;
             }
-
-            _logger.LogInformation("After mission run {missionRunId} was completed the robot {robotName} had status {robotStatus}", updatedFlotillaMissionRun.Id, robot.Name, robot.Status);
 
             if (updatedFlotillaMissionRun.IsReturnHomeMission() && (updatedFlotillaMissionRun.Status == MissionStatus.Cancelled || updatedFlotillaMissionRun.Status == MissionStatus.Failed))
             {
