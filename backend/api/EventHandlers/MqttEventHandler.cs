@@ -20,7 +20,6 @@ namespace Api.EventHandlers
     public class MqttEventHandler : EventHandlerBase
     {
         private readonly ILogger<MqttEventHandler> _logger;
-        private readonly Semaphore _updateRobotSemaphore = new(1, 1);
         private readonly IServiceScopeFactory _scopeFactory;
 
         public MqttEventHandler(ILogger<MqttEventHandler> logger, IServiceScopeFactory scopeFactory)
@@ -82,18 +81,11 @@ namespace Api.EventHandlers
 
             if (robot.Status == isarStatus.Status) { return; }
 
-            _updateRobotSemaphore.WaitOne();
             var updatedRobot = await robotService.UpdateRobotStatus(robot.Id, isarStatus.Status);
-            _updateRobotSemaphore.Release();
             _logger.LogInformation("Updated status for robot {Name} to {Status}", updatedRobot.Name, updatedRobot.Status);
 
             if (isarStatus.Status == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
-            else if (isarStatus.Status == RobotStatus.Offline)
-            {
-                _updateRobotSemaphore.WaitOne();
-                await robotService.UpdateCurrentArea(robot.Id, null);
-                _updateRobotSemaphore.Release();
-            }
+            else if (isarStatus.Status == RobotStatus.Offline) await robotService.UpdateCurrentArea(robot.Id, null);
         }
 
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
@@ -265,9 +257,7 @@ namespace Api.EventHandlers
                 {
                     try
                     {
-                        _updateRobotSemaphore.WaitOne();
                         var robotWithUpdatedArea = await robotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, flotillaMissionRun.Area);
-                        _updateRobotSemaphore.Release();
                     }
                     catch (RobotNotFoundException)
                     {
@@ -279,9 +269,7 @@ namespace Api.EventHandlers
                 {
                     try
                     {
-                        _updateRobotSemaphore.WaitOne();
                         await robotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, null);
-                        _updateRobotSemaphore.Release();
                         _logger.LogError("Localization mission run {MissionRunId} was unsuccessful on {RobotId}, scheduled missions will be aborted", flotillaMissionRun.Id, flotillaMissionRun.Robot.Id);
                         try { await missionSchedulingService.AbortAllScheduledMissions(flotillaMissionRun.Robot.Id, "Aborted: Robot was not localized"); }
                         catch (RobotNotFoundException) { _logger.LogError("Failed to abort scheduled missions for robot {RobotId}", flotillaMissionRun.Robot.Id); }
@@ -319,9 +307,7 @@ namespace Api.EventHandlers
             {
                 try
                 {
-                    _updateRobotSemaphore.WaitOne();
                     await robotService.UpdateCurrentArea(robot.Id, null);
-                    _updateRobotSemaphore.Release();
                 }
                 catch (RobotNotFoundException)
                 {
@@ -330,12 +316,7 @@ namespace Api.EventHandlers
                 }
             }
 
-            try
-            {
-                _updateRobotSemaphore.WaitOne();
-                await robotService.UpdateCurrentMissionId(robot.Id, null);
-                _updateRobotSemaphore.Release();
-            }
+            try { await robotService.UpdateCurrentMissionId(robot.Id, null); }
             catch (RobotNotFoundException)
             {
                 _logger.LogError("Robot {robotName} not found when updating current mission id to null", robot.Name);
