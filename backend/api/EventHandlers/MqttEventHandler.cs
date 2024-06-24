@@ -83,9 +83,18 @@ namespace Api.EventHandlers
             if (robot.Status == isarStatus.Status) { return; }
 
             if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id)) Thread.Sleep(2000); // Give localization mission update time to complete
+            var preUpdatedRobot = await robotService.ReadByIsarId(isarStatus.IsarId);
+            if (preUpdatedRobot == null)
+            {
+                _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", isarStatus.IsarId, isarStatus.RobotName);
+                return;
+            }
+            _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current area {areaName}", preUpdatedRobot.Name, preUpdatedRobot.Status, preUpdatedRobot.CurrentArea?.Name);
 
             var updatedRobot = await robotService.UpdateRobotStatus(robot.Id, isarStatus.Status);
             _logger.LogInformation("Updated status for robot {Name} to {Status}", updatedRobot.Name, updatedRobot.Status);
+
+            _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current area {areaName}", updatedRobot.Name, updatedRobot.Status, updatedRobot.CurrentArea?.Name);
 
             if (isarStatus.Status == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
             else if (isarStatus.Status == RobotStatus.Offline) await robotService.UpdateCurrentArea(robot.Id, null);
