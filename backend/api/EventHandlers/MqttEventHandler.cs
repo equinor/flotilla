@@ -260,7 +260,7 @@ namespace Api.EventHandlers
                 {
                     try
                     {
-                        var robotWithUpdatedArea = await robotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, flotillaMissionRun.Area);
+                        var robotWithUpdatedArea = await robotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, flotillaMissionRun.Area.Id);
                     }
                     catch (RobotNotFoundException)
                     {
