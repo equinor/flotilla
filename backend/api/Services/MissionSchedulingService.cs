@@ -43,6 +43,8 @@ namespace Api.Services
                 return;
             }
 
+            logger.LogInformation("Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
+
             MissionRun? missionRun;
             try { missionRun = await SelectNextMissionRun(robot.Id); }
             catch (RobotNotFoundException)
