@@ -261,6 +261,7 @@ namespace Api.Services
 
         public async Task<Robot> UpdateCurrentArea(string robotId, string? areaId)
         {
+            logger.LogInformation("Updating current area for robot with Id {robotId} to area with Id {areaId}", robotId, areaId);
             if (areaId is null) { return await UpdateRobotProperty(robotId, "CurrentArea", null); }
             var area = await areaService.ReadById(areaId);
             if (area is null)
