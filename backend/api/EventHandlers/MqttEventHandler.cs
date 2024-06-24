@@ -330,6 +330,7 @@ namespace Api.EventHandlers
 
             if (updatedFlotillaMissionRun.IsLocalizationMission() && (updatedFlotillaMissionRun.Status == MissionStatus.Successful || updatedFlotillaMissionRun.Status == MissionStatus.PartiallySuccessful))
             {
+                _logger.LogInformation("Triggering localization mission successful. The robot {robotName} have status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
                 missionSchedulingService.TriggerLocalizationMissionSuccessful(new LocalizationMissionSuccessfulEventArgs(robot.Id));
             }
 
