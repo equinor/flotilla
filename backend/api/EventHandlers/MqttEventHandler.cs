@@ -68,6 +68,7 @@ namespace Api.EventHandlers
             var provider = GetServiceProvider();
             var robotService = provider.GetRequiredService<IRobotService>();
             var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
+            var missionRunService = provider.GetRequiredService<IMissionRunService>();
 
             var isarStatus = (IsarStatusMessage)mqttArgs.Message;
 
@@ -80,6 +81,8 @@ namespace Api.EventHandlers
             }
 
             if (robot.Status == isarStatus.Status) { return; }
+
+            if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id)) Thread.Sleep(2000); // Give localization mission update time to complete
 
             var updatedRobot = await robotService.UpdateRobotStatus(robot.Id, isarStatus.Status);
             _logger.LogInformation("Updated status for robot {Name} to {Status}", updatedRobot.Name, updatedRobot.Status);
