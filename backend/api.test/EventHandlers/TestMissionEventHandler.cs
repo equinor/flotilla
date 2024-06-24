@@ -406,7 +406,7 @@ namespace Api.Test.EventHandlers
 
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarMissionReceived), mqttIsarMissionEventArgs);
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttIsarStatusEventArgs);
-            Thread.Sleep(500);
+            Thread.Sleep(2500); // Accommodate for sleep in OnIsarStatus
 
             // Assert
             var postTestMissionRun1 = await _missionRunService.ReadById(missionRun1.Id);
