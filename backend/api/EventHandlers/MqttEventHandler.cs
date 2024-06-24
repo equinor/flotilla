@@ -82,7 +82,7 @@ namespace Api.EventHandlers
 
             if (robot.Status == isarStatus.Status) { return; }
 
-            if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id)) Thread.Sleep(2000); // Give localization mission update time to complete
+            if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id)) Thread.Sleep(5000); // Give localization mission update time to complete
             var preUpdatedRobot = await robotService.ReadByIsarId(isarStatus.IsarId);
             if (preUpdatedRobot == null)
             {
