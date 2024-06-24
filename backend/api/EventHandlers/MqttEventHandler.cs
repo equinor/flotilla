@@ -83,7 +83,10 @@ namespace Api.EventHandlers
             if (robot.Status == isarStatus.Status) { return; }
 
             if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id)) Thread.Sleep(5000); // Give localization mission update time to complete
-            var preUpdatedRobot = await robotService.ReadByIsarId(isarStatus.IsarId);
+            var newProvider = GetServiceProvider(); // To ensure that the robot updates the other values correctly, it needs to get a new provider and service
+            var newRobotService = newProvider.GetRequiredService<IRobotService>();
+
+            var preUpdatedRobot = await newRobotService.ReadByIsarId(isarStatus.IsarId);
             if (preUpdatedRobot == null)
             {
                 _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", isarStatus.IsarId, isarStatus.RobotName);
