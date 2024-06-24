@@ -25,7 +25,7 @@ namespace Api.Services
         public Task<Robot> UpdateRobotPose(string robotId, Pose pose);
         public Task<Robot> UpdateRobotIsarConnected(string robotId, bool isarConnected);
         public Task<Robot> UpdateCurrentMissionId(string robotId, string? missionId);
-        public Task<Robot> UpdateCurrentArea(string robotId, Area? area);
+        public Task<Robot> UpdateCurrentArea(string robotId, string? areaId);
         public Task<Robot> UpdateDeprecated(string robotId, bool deprecated);
         public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
         public Task<Robot?> Delete(string id);
@@ -259,7 +259,17 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<Robot> UpdateCurrentArea(string robotId, Area? area) { return await UpdateRobotProperty(robotId, "CurrentArea", area); }
+        public async Task<Robot> UpdateCurrentArea(string robotId, string? areaId)
+        {
+            if (areaId is null) { return await UpdateRobotProperty(robotId, "CurrentArea", null); }
+            var area = await areaService.ReadById(areaId);
+            if (area is null)
+            {
+                logger.LogError("Could not find area '{AreaId}' setting robot '{IsarId}' area to null", areaId, robotId);
+                return await UpdateRobotProperty(robotId, "CurrentArea", null);
+            }
+            return await UpdateRobotProperty(robotId, "CurrentArea", area);
+        }
 
         public async Task<Robot> UpdateDeprecated(string robotId, bool deprecated) { return await UpdateRobotProperty(robotId, "Deprecated", deprecated); }
 

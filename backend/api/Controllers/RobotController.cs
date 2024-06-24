@@ -223,7 +223,7 @@ namespace Api.Controllers
                         {
                             var area = await areaService.ReadById(query.AreaId);
                             if (area == null) return NotFound($"No area with ID {query.AreaId} was found");
-                            updatedRobot = await robotService.UpdateCurrentArea(id, area);
+                            updatedRobot = await robotService.UpdateCurrentArea(id, area.Id);
                         }
                         break;
                     case "pose":
