@@ -158,7 +158,6 @@ namespace Api.Services
             var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
             var robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
-            logger.LogInformation("UpdateRobotBatteryLevel pre update: Robot {robotName} has status {robotStatus} and current area {areaName}", robot!.Name, robot.Status, robot.CurrentArea?.Name);
 
             await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
 
@@ -167,7 +166,6 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-            logger.LogInformation("UpdateRobotBatteryLevel post update: Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
 
             return robot;
         }
@@ -177,7 +175,6 @@ namespace Api.Services
             var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
             var robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
-            logger.LogInformation("UpdateRobotPressureLevel pre update: Robot {robotName} has status {robotStatus} and current area {areaName}", robot!.Name, robot.Status, robot.CurrentArea?.Name);
 
             await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
 
@@ -186,7 +183,6 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-            logger.LogInformation("UpdateRobotPressureLevel post update: Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
 
             return robot;
         }
@@ -234,8 +230,6 @@ namespace Api.Services
             var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
             var robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
-            logger.LogInformation("UpdateRobotIsarConnected pre update: Robot {robotName} has status {robotStatus} and current area {areaName}", robot!.Name, robot.Status, robot.CurrentArea?.Name);
-
 
             await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
 
@@ -244,7 +238,6 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-            logger.LogInformation("UpdateRobotIsarConnected post update: Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
 
             return robot;
         }
@@ -254,8 +247,6 @@ namespace Api.Services
             var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
             var robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
-            logger.LogInformation("UpdateCurrentMissionId pre update: Robot {robotName} has status {robotStatus} and current area {areaName}", robot!.Name, robot.Status, robot.CurrentArea?.Name);
-
 
             await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
 
@@ -264,7 +255,6 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-            logger.LogInformation("UpdateCurrentMissionId post update: Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
 
             return robot;
         }
