@@ -58,7 +58,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks }: MissionProps) 
 
     return (
         <Centered>
-            <Tooltip title={TranslateText('Re-run the mission')} hidden={isOpen}>
+            <Tooltip title={TranslateText('Rerun the mission')} hidden={isOpen}>
                 <Button
                     ref={anchorRef}
                     variant="ghost_icon"
@@ -89,7 +89,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks }: MissionProps) 
                             setIsLocationVerificationOpen(true)
                         }}
                     >
-                        {TranslateText('Re-run full mission')}
+                        {TranslateText('Rerun full mission')}
                     </Menu.Item>
                     {hasFailedTasks && (
                         <Menu.Item
@@ -98,7 +98,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks }: MissionProps) 
                                 setIsLocationVerificationOpen(true)
                             }}
                         >
-                            {TranslateText('Re-run failed and cancelled tasks in the mission')}
+                            {TranslateText('Rerun failed and cancelled tasks in the mission')}
                         </Menu.Item>
                     )}
                 </Menu>
