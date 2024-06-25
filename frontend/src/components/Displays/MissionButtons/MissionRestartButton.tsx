@@ -1,6 +1,5 @@
-import { Button, EdsProvider, Icon, Menu, Tooltip } from '@equinor/eds-core-react'
+import { Button, EdsProvider, Icon, Menu } from '@equinor/eds-core-react'
 import { Icons } from 'utils/icons'
-import { tokens } from '@equinor/eds-tokens'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { config } from 'config'
 import { useNavigate } from 'react-router-dom'
@@ -58,23 +57,21 @@ export const MissionRestartButton = ({ mission, hasFailedTasks }: MissionProps) 
 
     return (
         <Centered>
-            <Tooltip title={TranslateText('Rerun the mission')} hidden={isOpen}>
-                <Button
-                    ref={anchorRef}
-                    variant="ghost_icon"
-                    id="anchor-default"
-                    aria-haspopup="true"
-                    aria-expanded={isOpen}
-                    aria-controls="menu-default"
-                    onClick={() => setIsOpen(!isOpen)}
-                >
-                    <Icon
-                        name={Icons.Replay}
-                        style={{ color: tokens.colors.interactive.primary__resting.hex }}
-                        size={24}
-                    />
-                </Button>
-            </Tooltip>
+            <Button
+                variant="outlined"
+                ref={anchorRef}
+                id="anchor-default"
+                aria-haspopup="true"
+                aria-expanded={isOpen}
+                aria-controls="menu-default"
+                onClick={() => {
+                    hasFailedTasks ? setIsOpen(!isOpen) : setSelectedRerunOption(ReRunOptions.ReRun)
+                    !hasFailedTasks && setIsLocationVerificationOpen(true)
+                }}
+            >
+                <Icon name={Icons.Replay} size={24} />
+                {TranslateText('Rerun mission')}
+            </Button>
             <EdsProvider density="compact">
                 <Menu
                     open={isOpen}
