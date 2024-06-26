@@ -259,6 +259,7 @@ namespace Api.EventHandlers
             var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
             var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
             var signalRService = provider.GetRequiredService<ISignalRService>();
+            var localizationService = provider.GetRequiredService<ILocalizationService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
 
@@ -282,7 +283,7 @@ namespace Api.EventHandlers
 
             if (flotillaMissionRun.IsLocalizationMission())
             {
-                if (status == MissionStatus.Successful || status == MissionStatus.PartiallySuccessful)
+                if ((status == MissionStatus.Successful || status == MissionStatus.PartiallySuccessful || status == MissionStatus.Ongoing) && !await localizationService.RobotIsLocalized(flotillaMissionRun.Robot.Id))
                 {
                     try
                     {
