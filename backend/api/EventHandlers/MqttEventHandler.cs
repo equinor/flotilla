@@ -342,7 +342,9 @@ namespace Api.EventHandlers
                 try
                 {
                     _updateRobotSemaphore.WaitOne();
-                    await robotService.UpdateCurrentArea(robot.Id, null);
+                    var newProviderToUpdateCurrentArea = GetServiceProvider(); // To ensure that the robot updates the other values correctly, it needs to get a new provider and service
+                    var newRobotServiceToUpdateCurrentArea = newProviderToUpdateCurrentArea.GetRequiredService<IRobotService>();
+                    await newRobotServiceToUpdateCurrentArea.UpdateCurrentArea(robot.Id, null);
                     _updateRobotSemaphore.Release();
                 }
                 catch (RobotNotFoundException)
@@ -355,7 +357,9 @@ namespace Api.EventHandlers
             try
             {
                 _updateRobotSemaphore.WaitOne();
-                await robotService.UpdateCurrentMissionId(robot.Id, null);
+                var newProviderToUpdateCurrentMissionId = GetServiceProvider(); // To ensure that the robot updates the other values correctly, it needs to get a new provider and service
+                var newRobotServiceToUpdateCurrentMissionId = newProviderToUpdateCurrentMissionId.GetRequiredService<IRobotService>();
+                await newRobotServiceToUpdateCurrentMissionId.UpdateCurrentMissionId(robot.Id, null);
                 _updateRobotSemaphore.Release();
             }
             catch (RobotNotFoundException)
