@@ -96,7 +96,7 @@ namespace Api.Services
             DefaultLocalizationPose? defaultLocalizationPose = null;
             if (newDeckQuery.DefaultLocalizationPose != null)
             {
-                defaultLocalizationPose = await defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newDeckQuery.DefaultLocalizationPose));
+                defaultLocalizationPose = await defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newDeckQuery.DefaultLocalizationPose.Value.Pose, newDeckQuery.DefaultLocalizationPose.Value.IsDockingStation));
             }
 
             var deck = new Deck
