@@ -165,7 +165,11 @@ namespace Api.Test
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
                 Name = deckName,
-                DefaultLocalizationPose = testPose
+                DefaultLocalizationPose = new CreateDefaultLocalizationPose()
+                {
+                    Pose = testPose,
+                    IsDockingStation = false
+                }
             };
 
             var areaQuery = new CreateAreaQuery
