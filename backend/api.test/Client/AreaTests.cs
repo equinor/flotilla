@@ -287,20 +287,23 @@ namespace Api.Test
             string deckId = deck.Id;
 
             string url = $"/decks/{deckId}/update-default-localization-pose";
-            var query = new Pose
+            var query = new CreateDefaultLocalizationPose
             {
-                Position = new Position
+                Pose = new Pose
                 {
-                    X = 1,
-                    Y = 2,
-                    Z = 3
-                },
-                Orientation = new Orientation
-                {
-                    X = 0,
-                    Y = 0,
-                    Z = 0,
-                    W = 1
+                    Position = new Position
+                    {
+                        X = 1,
+                        Y = 2,
+                        Z = 3
+                    },
+                    Orientation = new Orientation
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                        W = 1
+                    }
                 }
             };
             var content = new StringContent(
@@ -313,8 +316,8 @@ namespace Api.Test
             var putDeck = await putResponse.Content.ReadFromJsonAsync<DeckResponse>(_serializerOptions);
             Assert.True(putDeck != null);
             Assert.True(putDeck.DefaultLocalizationPose != null);
-            Assert.True(putDeck.DefaultLocalizationPose.Position.Z.Equals(query.Position.Z));
-            Assert.True(putDeck.DefaultLocalizationPose.Orientation.W.Equals(query.Orientation.W));
+            Assert.True(putDeck.DefaultLocalizationPose.Position.Z.Equals(query.Pose.Position.Z));
+            Assert.True(putDeck.DefaultLocalizationPose.Orientation.W.Equals(query.Pose.Orientation.W));
         }
     }
 }

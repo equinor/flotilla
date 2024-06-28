@@ -1,6 +1,4 @@
-﻿using Api.Database.Models;
-
-namespace Api.Controllers.Models
+﻿namespace Api.Controllers.Models
 {
     public struct CreateDeckQuery
     {
@@ -8,6 +6,6 @@ namespace Api.Controllers.Models
         public string PlantCode { get; set; }
         public string Name { get; set; }
 
-        public Pose? DefaultLocalizationPose { get; set; }
+        public CreateDefaultLocalizationPose? DefaultLocalizationPose { get; set; }
     }
 }

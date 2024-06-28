@@ -20,6 +20,12 @@ namespace Api.Services.Models
         [JsonPropertyName("start_pose")]
         public IsarPose? StartPose { get; set; } = null;
 
+        [JsonPropertyName("dock")]
+        public bool? Dock { get; set; } = null;
+
+        [JsonPropertyName("undock")]
+        public bool? Undock { get; set; } = null;
+
         public IsarMissionDefinition(List<IsarTaskDefinition> tasks)
         {
             Id = null;
@@ -33,6 +39,8 @@ namespace Api.Services.Models
             Name = missionRun.Name;
             Tasks = missionRun.Tasks.Select(task => new IsarTaskDefinition(task, missionRun)).ToList();
             StartPose = includeStartPose && missionRun.Area.Deck.DefaultLocalizationPose != null ? new IsarPose(missionRun.Area.Deck.DefaultLocalizationPose.Pose) : null;
+            Undock = includeStartPose && missionRun.Area.Deck.DefaultLocalizationPose != null && missionRun.Area.Deck.DefaultLocalizationPose.DockingEnabled;
+            Dock = missionRun.Area.Deck.DefaultLocalizationPose != null && missionRun.Area.Deck.DefaultLocalizationPose.DockingEnabled && missionRun.IsReturnHomeMission();
         }
     }
 

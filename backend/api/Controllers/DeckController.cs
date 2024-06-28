@@ -199,7 +199,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<DeckResponse>> UpdateDefaultLocalizationPose([FromRoute] string deckId, [FromBody] Pose newDefaultLocalizationPose)
+        public async Task<ActionResult<DeckResponse>> UpdateDefaultLocalizationPose([FromRoute] string deckId, [FromBody] CreateDefaultLocalizationPose newDefaultLocalizationPose)
         {
             logger.LogInformation("Updating default localization pose on deck '{deckId}'", deckId);
             try
@@ -213,15 +213,15 @@ namespace Api.Controllers
 
                 if (deck.DefaultLocalizationPose != null)
                 {
-                    deck.DefaultLocalizationPose.Pose = newDefaultLocalizationPose;
+                    deck.DefaultLocalizationPose.Pose = newDefaultLocalizationPose.Pose;
+                    deck.DefaultLocalizationPose.DockingEnabled = newDefaultLocalizationPose.IsDockingStation;
                     _ = await defaultLocalizationPoseService.Update(deck.DefaultLocalizationPose);
                 }
                 else
                 {
-                    deck.DefaultLocalizationPose = new DefaultLocalizationPose(newDefaultLocalizationPose);
+                    deck.DefaultLocalizationPose = new DefaultLocalizationPose(newDefaultLocalizationPose.Pose, newDefaultLocalizationPose.IsDockingStation);
                     deck = await deckService.Update(deck);
                 }
-
 
                 return Ok(new DeckResponse(deck));
             }
