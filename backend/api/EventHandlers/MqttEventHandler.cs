@@ -33,6 +33,7 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
+        private IBatteryTimeseriesService BatteryTimeseriesService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IBatteryTimeseriesService>();
         private IInstallationService InstallationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInstallationService>();
         private IInspectionService InspectionService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInspectionService>();
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
@@ -417,11 +418,8 @@ namespace Api.EventHandlers
 
         private async void OnIsarBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var provider = GetServiceProvider();
-            var batteryTimeseriesService = provider.GetRequiredService<IBatteryTimeseriesService>();
-
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
-            await batteryTimeseriesService.AddBatteryEntry(batteryStatus.BatteryLevel, batteryStatus.IsarId);
+            await BatteryTimeseriesService.AddBatteryEntry(batteryStatus.BatteryLevel, batteryStatus.IsarId);
         }
 
         private async void OnIsarPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
