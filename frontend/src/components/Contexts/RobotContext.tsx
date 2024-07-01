@@ -41,6 +41,10 @@ export const RobotProvider: FC<Props> = ({ children }) => {
             })
             registerEvent(SignalREventLabels.robotUpdated, (username: string, message: string) => {
                 let updatedRobot: Robot = JSON.parse(message)
+                if (updatedRobot.model.type == null) {
+                    console.warn('Received robot update with model type null')
+                    return
+                }
                 setEnabledRobots((oldRobotList) => {
                     let oldRobotListCopy = [...oldRobotList]
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
