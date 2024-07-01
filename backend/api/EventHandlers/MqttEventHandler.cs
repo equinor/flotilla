@@ -36,6 +36,7 @@ namespace Api.EventHandlers
         private IInstallationService InstallationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInstallationService>();
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
         private ITaskDurationService TaskDurationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
+        private ILastMissionRunService LastMissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ILastMissionRunService>();
         private IMissionRunService MissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
         private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
@@ -240,7 +241,6 @@ namespace Api.EventHandlers
         private async void OnIsarMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
             var signalRService = provider.GetRequiredService<ISignalRService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
@@ -353,7 +353,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            try { await lastMissionRunService.SetLastMissionRun(updatedFlotillaMissionRun.Id, updatedFlotillaMissionRun.MissionId); }
+            try { await LastMissionRunService.SetLastMissionRun(updatedFlotillaMissionRun.Id, updatedFlotillaMissionRun.MissionId); }
             catch (MissionNotFoundException)
             {
                 _logger.LogError("Mission not found when setting last mission run for mission definition {missionId}", updatedFlotillaMissionRun.MissionId);
