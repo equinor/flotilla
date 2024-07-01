@@ -34,6 +34,8 @@ namespace Api.EventHandlers
         }
 
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+        private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
+
         private IServiceProvider GetServiceProvider() { return _scopeFactory.CreateScope().ServiceProvider; }
 
         public override void Subscribe()
@@ -67,9 +69,6 @@ namespace Api.EventHandlers
 
         private async void OnIsarStatus(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var provider = GetServiceProvider();
-            var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
-
             var isarStatus = (IsarStatusMessage)mqttArgs.Message;
 
             var robot = await RobotService.ReadByIsarId(isarStatus.IsarId);
@@ -96,7 +95,7 @@ namespace Api.EventHandlers
 
             _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current area {areaName}", updatedRobot.Name, updatedRobot.Status, updatedRobot.CurrentArea?.Name);
 
-            if (isarStatus.Status == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+            if (isarStatus.Status == RobotStatus.Available) MissionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
             else if (isarStatus.Status == RobotStatus.Offline)
             {
                 await RobotService.UpdateCurrentArea(robot.Id, null);
@@ -244,7 +243,6 @@ namespace Api.EventHandlers
             var missionRunService = provider.GetRequiredService<IMissionRunService>();
             var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
             var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
-            var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
             var signalRService = provider.GetRequiredService<ISignalRService>();
 
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
@@ -288,7 +286,7 @@ namespace Api.EventHandlers
                         await RobotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, null);
 
                         _logger.LogError("Localization mission run {MissionRunId} was unsuccessful on {RobotId}, scheduled missions will be aborted", flotillaMissionRun.Id, flotillaMissionRun.Robot.Id);
-                        try { await missionSchedulingService.AbortAllScheduledMissions(flotillaMissionRun.Robot.Id, "Aborted: Robot was not localized"); }
+                        try { await MissionScheduling.AbortAllScheduledMissions(flotillaMissionRun.Robot.Id, "Aborted: Robot was not localized"); }
                         catch (RobotNotFoundException) { _logger.LogError("Failed to abort scheduled missions for robot {RobotId}", flotillaMissionRun.Robot.Id); }
                     }
                     catch (RobotNotFoundException)
@@ -348,7 +346,7 @@ namespace Api.EventHandlers
             if (updatedFlotillaMissionRun.IsLocalizationMission() && (updatedFlotillaMissionRun.Status == MissionStatus.Successful || updatedFlotillaMissionRun.Status == MissionStatus.PartiallySuccessful))
             {
                 _logger.LogInformation("Triggering localization mission successful. The robot {robotName} have status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
-                missionSchedulingService.TriggerLocalizationMissionSuccessful(new LocalizationMissionSuccessfulEventArgs(robot.Id));
+                MissionScheduling.TriggerLocalizationMissionSuccessful(new LocalizationMissionSuccessfulEventArgs(robot.Id));
             }
 
             if (updatedFlotillaMissionRun.MissionId == null)
