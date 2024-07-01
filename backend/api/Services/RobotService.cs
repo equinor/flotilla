@@ -149,7 +149,6 @@ namespace Api.Services
         {
             var robot = await UpdateRobotProperty(robotId, "Status", status);
             ThrowIfRobotIsNull(robot, robotId);
-            NotifySignalROfUpdatedRobot(robot, robot.CurrentInstallation!);
             return robot;
         }
 
