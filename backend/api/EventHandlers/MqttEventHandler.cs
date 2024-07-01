@@ -39,6 +39,7 @@ namespace Api.EventHandlers
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
         private ITaskDurationService TaskDurationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
         private ILastMissionRunService LastMissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ILastMissionRunService>();
+        private IPressureTimeseriesService PressureTimeseriesService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPressureTimeseriesService>();
         private ISignalRService SignalRService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
         private IMissionRunService MissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
         private IMissionTaskService MissionTaskService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionTaskService>();
@@ -424,11 +425,8 @@ namespace Api.EventHandlers
 
         private async void OnIsarPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var provider = GetServiceProvider();
-            var pressureTimeseriesService = provider.GetRequiredService<IPressureTimeseriesService>();
-
             var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
-            await pressureTimeseriesService.AddPressureEntry(pressureStatus.PressureLevel, pressureStatus.IsarId);
+            await PressureTimeseriesService.AddPressureEntry(pressureStatus.PressureLevel, pressureStatus.IsarId);
         }
 
         private async void OnIsarPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
