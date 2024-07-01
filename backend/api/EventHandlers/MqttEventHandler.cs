@@ -37,6 +37,7 @@ namespace Api.EventHandlers
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
         private ITaskDurationService TaskDurationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
         private ILastMissionRunService LastMissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ILastMissionRunService>();
+        private ISignalRService SignalRService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
         private IMissionRunService MissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
         private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
@@ -240,9 +241,6 @@ namespace Api.EventHandlers
 
         private async void OnIsarMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var provider = GetServiceProvider();
-            var signalRService = provider.GetRequiredService<ISignalRService>();
-
             var isarMission = (IsarMissionMessage)mqttArgs.Message;
 
             MissionStatus status;
@@ -293,7 +291,7 @@ namespace Api.EventHandlers
                         return;
                     }
 
-                    signalRService.ReportGeneralFailToSignalR(flotillaMissionRun.Robot, "Failed Localization Mission", $"Failed localization mission for robot {flotillaMissionRun.Robot.Name}.");
+                    SignalRService.ReportGeneralFailToSignalR(flotillaMissionRun.Robot, "Failed Localization Mission", $"Failed localization mission for robot {flotillaMissionRun.Robot.Name}.");
                     _logger.LogError("Localization mission for robot '{RobotName}' failed.", isarMission.RobotName);
                 }
             }
@@ -367,7 +365,6 @@ namespace Api.EventHandlers
         {
             var provider = GetServiceProvider();
             var missionTaskService = provider.GetRequiredService<IMissionTaskService>();
-            var signalRService = provider.GetRequiredService<ISignalRService>();
             var task = (IsarTaskMessage)mqttArgs.Message;
 
             IsarTaskStatus status;
@@ -384,7 +381,7 @@ namespace Api.EventHandlers
             var missionRun = await MissionRunService.ReadByIsarMissionId(task.MissionId);
             if (missionRun is null) _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId);
 
-            _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
+            _ = SignalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
 
             _logger.LogInformation(
                 "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", task.TaskId, task.Status, task.RobotName, task.IsarId);
@@ -394,7 +391,6 @@ namespace Api.EventHandlers
         {
             var provider = GetServiceProvider();
             var inspectionService = provider.GetRequiredService<IInspectionService>();
-            var signalRService = provider.GetRequiredService<ISignalRService>();
 
             var step = (IsarStepMessage)mqttArgs.Message;
 
@@ -416,7 +412,7 @@ namespace Api.EventHandlers
             var missionRun = await MissionRunService.ReadByIsarMissionId(step.MissionId);
             if (missionRun is null) _logger.LogWarning("Mission run with ID {Id} was not found", step.MissionId);
 
-            _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
+            _ = SignalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
 
             _logger.LogInformation(
                 "Inspection '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", step.StepId, step.Status, step.RobotName, step.IsarId);
@@ -454,7 +450,6 @@ namespace Api.EventHandlers
         private async void OnIsarCloudHealthUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var signalRService = provider.GetRequiredService<ISignalRService>();
             var teamsMessageService = provider.GetRequiredService<ITeamsMessageService>();
 
             var cloudHealthStatus = (IsarCloudHealthMessage)mqttArgs.Message;
@@ -468,7 +463,7 @@ namespace Api.EventHandlers
 
             string messageTitle = "Failed Telemetry";
             string message = $"Failed telemetry request for robot {cloudHealthStatus.RobotName}.";
-            signalRService.ReportGeneralFailToSignalR(robot, messageTitle, message);
+            SignalRService.ReportGeneralFailToSignalR(robot, messageTitle, message);
 
             teamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
         }
