@@ -34,20 +34,18 @@ namespace Api.EventHandlers
         }
 
         private IBatteryTimeseriesService BatteryTimeseriesService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IBatteryTimeseriesService>();
-        private IInstallationService InstallationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInstallationService>();
         private IInspectionService InspectionService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInspectionService>();
+        private IInstallationService InstallationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInstallationService>();
+        private ILastMissionRunService LastMissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ILastMissionRunService>();
+        private IMissionRunService MissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
+        private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
+        private IMissionTaskService MissionTaskService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionTaskService>();
+        private IPressureTimeseriesService PressureTimeseriesService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPressureTimeseriesService>();
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
         private IPoseTimeseriesService PoseTimeseriesService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPoseTimeseriesService>();
-        private ITaskDurationService TaskDurationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
-        private ILastMissionRunService LastMissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ILastMissionRunService>();
-        private IPressureTimeseriesService PressureTimeseriesService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPressureTimeseriesService>();
         private ISignalRService SignalRService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
-        private IMissionRunService MissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
+        private ITaskDurationService TaskDurationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
         private ITeamsMessageService TeamsMessageService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITeamsMessageService>();
-        private IMissionTaskService MissionTaskService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionTaskService>();
-        private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
-
-        private IServiceProvider GetServiceProvider() { return _scopeFactory.CreateScope().ServiceProvider; }
 
         public override void Subscribe()
         {
