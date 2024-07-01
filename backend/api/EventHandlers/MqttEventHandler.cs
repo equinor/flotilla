@@ -37,6 +37,7 @@ namespace Api.EventHandlers
         private IInstallationService InstallationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInstallationService>();
         private IInspectionService InspectionService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInspectionService>();
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+        private IPoseTimeseriesService PoseTimeseriesService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPoseTimeseriesService>();
         private ITaskDurationService TaskDurationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
         private ILastMissionRunService LastMissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ILastMissionRunService>();
         private IPressureTimeseriesService PressureTimeseriesService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPressureTimeseriesService>();
@@ -431,13 +432,10 @@ namespace Api.EventHandlers
 
         private async void OnIsarPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var provider = GetServiceProvider();
-            var poseTimeseriesService = provider.GetRequiredService<IPoseTimeseriesService>();
-
             var poseStatus = (IsarPoseMessage)mqttArgs.Message;
             var pose = new Pose(poseStatus.Pose);
 
-            await poseTimeseriesService.AddPoseEntry(pose, poseStatus.IsarId);
+            await PoseTimeseriesService.AddPoseEntry(pose, poseStatus.IsarId);
         }
 
         private async void OnIsarCloudHealthUpdate(object? sender, MqttReceivedArgs mqttArgs)
