@@ -39,6 +39,7 @@ namespace Api.EventHandlers
         private ILastMissionRunService LastMissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ILastMissionRunService>();
         private ISignalRService SignalRService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
         private IMissionRunService MissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
+        private IMissionTaskService MissionTaskService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionTaskService>();
         private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
         private IServiceProvider GetServiceProvider() { return _scopeFactory.CreateScope().ServiceProvider; }
@@ -363,8 +364,6 @@ namespace Api.EventHandlers
 
         private async void OnIsarTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var provider = GetServiceProvider();
-            var missionTaskService = provider.GetRequiredService<IMissionTaskService>();
             var task = (IsarTaskMessage)mqttArgs.Message;
 
             IsarTaskStatus status;
@@ -375,7 +374,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            try { await missionTaskService.UpdateMissionTaskStatus(task.TaskId, status); }
+            try { await MissionTaskService.UpdateMissionTaskStatus(task.TaskId, status); }
             catch (MissionTaskNotFoundException) { return; }
 
             var missionRun = await MissionRunService.ReadByIsarMissionId(task.MissionId);
