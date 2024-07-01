@@ -34,6 +34,7 @@ namespace Api.EventHandlers
         }
 
         private IInstallationService InstallationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInstallationService>();
+        private IInspectionService InspectionService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInspectionService>();
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
         private ITaskDurationService TaskDurationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
         private ILastMissionRunService LastMissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ILastMissionRunService>();
@@ -388,9 +389,6 @@ namespace Api.EventHandlers
 
         private async void OnIsarStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var provider = GetServiceProvider();
-            var inspectionService = provider.GetRequiredService<IInspectionService>();
-
             var step = (IsarStepMessage)mqttArgs.Message;
 
             // Flotilla does not care about DriveTo, Localization, MoveArm or ReturnToHome steps
@@ -405,7 +403,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            try { await inspectionService.UpdateInspectionStatus(step.StepId, status); }
+            try { await InspectionService.UpdateInspectionStatus(step.StepId, status); }
             catch (InspectionNotFoundException) { return; }
 
             var missionRun = await MissionRunService.ReadByIsarMissionId(step.MissionId);
