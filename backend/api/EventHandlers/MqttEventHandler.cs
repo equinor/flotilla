@@ -43,6 +43,7 @@ namespace Api.EventHandlers
         private IPressureTimeseriesService PressureTimeseriesService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPressureTimeseriesService>();
         private ISignalRService SignalRService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
         private IMissionRunService MissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
+        private ITeamsMessageService TeamsMessageService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITeamsMessageService>();
         private IMissionTaskService MissionTaskService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionTaskService>();
         private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
@@ -440,9 +441,6 @@ namespace Api.EventHandlers
 
         private async void OnIsarCloudHealthUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var provider = GetServiceProvider();
-            var teamsMessageService = provider.GetRequiredService<ITeamsMessageService>();
-
             var cloudHealthStatus = (IsarCloudHealthMessage)mqttArgs.Message;
 
             var robot = await RobotService.ReadByIsarId(cloudHealthStatus.IsarId);
@@ -456,7 +454,7 @@ namespace Api.EventHandlers
             string message = $"Failed telemetry request for robot {cloudHealthStatus.RobotName}.";
             SignalRService.ReportGeneralFailToSignalR(robot, messageTitle, message);
 
-            teamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
+            TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
         }
     }
 }
