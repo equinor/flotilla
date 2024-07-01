@@ -33,6 +33,7 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
+        private IInstallationService InstallationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInstallationService>();
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
         private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
@@ -104,12 +105,9 @@ namespace Api.EventHandlers
 
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var provider = GetServiceProvider();
-            var installationService = provider.GetRequiredService<IInstallationService>();
-
             var isarRobotInfo = (IsarRobotInfoMessage)mqttArgs.Message;
 
-            var installation = await installationService.ReadByName(isarRobotInfo.CurrentInstallation);
+            var installation = await InstallationService.ReadByName(isarRobotInfo.CurrentInstallation);
 
             if (installation is null)
             {
