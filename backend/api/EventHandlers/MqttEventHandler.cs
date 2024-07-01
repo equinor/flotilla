@@ -35,6 +35,7 @@ namespace Api.EventHandlers
 
         private IInstallationService InstallationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInstallationService>();
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+        private IMissionRunService MissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
         private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
         private IServiceProvider GetServiceProvider() { return _scopeFactory.CreateScope().ServiceProvider; }
@@ -238,7 +239,6 @@ namespace Api.EventHandlers
         private async void OnIsarMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var missionRunService = provider.GetRequiredService<IMissionRunService>();
             var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
             var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
             var signalRService = provider.GetRequiredService<ISignalRService>();
@@ -253,7 +253,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var flotillaMissionRun = await missionRunService.ReadByIsarMissionId(isarMission.MissionId);
+            var flotillaMissionRun = await MissionRunService.ReadByIsarMissionId(isarMission.MissionId);
             if (flotillaMissionRun is null)
             {
                 string errorMessage = $"Mission with isar mission Id {isarMission.IsarId} was not found";
@@ -299,7 +299,7 @@ namespace Api.EventHandlers
             }
 
             MissionRun updatedFlotillaMissionRun;
-            try { updatedFlotillaMissionRun = await missionRunService.UpdateMissionRunStatusByIsarMissionId(isarMission.MissionId, status); }
+            try { updatedFlotillaMissionRun = await MissionRunService.UpdateMissionRunStatusByIsarMissionId(isarMission.MissionId, status); }
             catch (MissionRunNotFoundException) { return; }
 
             _logger.LogInformation(
@@ -366,7 +366,6 @@ namespace Api.EventHandlers
         private async void OnIsarTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var missionRunService = provider.GetRequiredService<IMissionRunService>();
             var missionTaskService = provider.GetRequiredService<IMissionTaskService>();
             var signalRService = provider.GetRequiredService<ISignalRService>();
             var task = (IsarTaskMessage)mqttArgs.Message;
@@ -382,7 +381,7 @@ namespace Api.EventHandlers
             try { await missionTaskService.UpdateMissionTaskStatus(task.TaskId, status); }
             catch (MissionTaskNotFoundException) { return; }
 
-            var missionRun = await missionRunService.ReadByIsarMissionId(task.MissionId);
+            var missionRun = await MissionRunService.ReadByIsarMissionId(task.MissionId);
             if (missionRun is null) _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId);
 
             _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
@@ -394,7 +393,6 @@ namespace Api.EventHandlers
         private async void OnIsarStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var missionRunService = provider.GetRequiredService<IMissionRunService>();
             var inspectionService = provider.GetRequiredService<IInspectionService>();
             var signalRService = provider.GetRequiredService<ISignalRService>();
 
@@ -415,7 +413,7 @@ namespace Api.EventHandlers
             try { await inspectionService.UpdateInspectionStatus(step.StepId, status); }
             catch (InspectionNotFoundException) { return; }
 
-            var missionRun = await missionRunService.ReadByIsarMissionId(step.MissionId);
+            var missionRun = await MissionRunService.ReadByIsarMissionId(step.MissionId);
             if (missionRun is null) _logger.LogWarning("Mission run with ID {Id} was not found", step.MissionId);
 
             _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
