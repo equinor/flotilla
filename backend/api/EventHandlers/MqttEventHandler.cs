@@ -35,6 +35,7 @@ namespace Api.EventHandlers
 
         private IInstallationService InstallationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInstallationService>();
         private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
+        private ITaskDurationService TaskDurationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
         private IMissionRunService MissionRunService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
         private IMissionSchedulingService MissionScheduling => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
@@ -239,7 +240,6 @@ namespace Api.EventHandlers
         private async void OnIsarMissionUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
             var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
             var signalRService = provider.GetRequiredService<ISignalRService>();
 
@@ -360,7 +360,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            await taskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
+            await TaskDurationService.UpdateAverageDurationPerTask(robot.Model.Type);
         }
 
         private async void OnIsarTaskUpdate(object? sender, MqttReceivedArgs mqttArgs)
