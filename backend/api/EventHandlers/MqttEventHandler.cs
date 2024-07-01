@@ -34,7 +34,7 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
-
+        private IRobotService RobotService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
         private IServiceProvider GetServiceProvider() { return _scopeFactory.CreateScope().ServiceProvider; }
 
         public override void Subscribe()
@@ -69,13 +69,11 @@ namespace Api.EventHandlers
         private async void OnIsarStatus(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var robotService = provider.GetRequiredService<IRobotService>();
             var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
-            var missionRunService = provider.GetRequiredService<IMissionRunService>();
 
             var isarStatus = (IsarStatusMessage)mqttArgs.Message;
 
-            var robot = await robotService.ReadByIsarId(isarStatus.IsarId);
+            var robot = await RobotService.ReadByIsarId(isarStatus.IsarId);
 
             if (robot == null)
             {
@@ -85,11 +83,7 @@ namespace Api.EventHandlers
 
             if (robot.Status == isarStatus.Status) { return; }
 
-            if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id)) Thread.Sleep(5000); // Give localization mission update time to complete
-            var newProvider = GetServiceProvider(); // To ensure that the robot updates the other values correctly, it needs to get a new provider and service
-            var newRobotService = newProvider.GetRequiredService<IRobotService>();
-
-            var preUpdatedRobot = await newRobotService.ReadByIsarId(isarStatus.IsarId);
+            var preUpdatedRobot = await RobotService.ReadByIsarId(isarStatus.IsarId);
             if (preUpdatedRobot == null)
             {
                 _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", isarStatus.IsarId, isarStatus.RobotName);
@@ -98,7 +92,7 @@ namespace Api.EventHandlers
             _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current area {areaName}", preUpdatedRobot.Name, preUpdatedRobot.Status, preUpdatedRobot.CurrentArea?.Name);
 
             _updateRobotSemaphore.WaitOne();
-            var updatedRobot = await newRobotService.UpdateRobotStatus(robot.Id, isarStatus.Status);
+            var updatedRobot = await RobotService.UpdateRobotStatus(robot.Id, isarStatus.Status);
             _updateRobotSemaphore.Release();
             _logger.LogInformation("Updated status for robot {Name} to {Status}", updatedRobot.Name, updatedRobot.Status);
 
@@ -109,7 +103,7 @@ namespace Api.EventHandlers
             else if (isarStatus.Status == RobotStatus.Offline)
             {
                 _updateRobotSemaphore.WaitOne();
-                await newRobotService.UpdateCurrentArea(robot.Id, null);
+                await RobotService.UpdateCurrentArea(robot.Id, null);
                 _updateRobotSemaphore.Release();
             }
         }
@@ -117,7 +111,6 @@ namespace Api.EventHandlers
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
         {
             var provider = GetServiceProvider();
-            var robotService = provider.GetRequiredService<IRobotService>();
             var installationService = provider.GetRequiredService<IInstallationService>();
 
             var isarRobotInfo = (IsarRobotInfoMessage)mqttArgs.Message;
@@ -135,7 +128,7 @@ namespace Api.EventHandlers
 
             try
             {
-                var robot = await robotService.ReadByIsarId(isarRobotInfo.IsarId);
+                var robot = await RobotService.ReadByIsarId(isarRobotInfo.IsarId);
 
                 if (robot == null)
                 {
@@ -159,7 +152,7 @@ namespace Api.EventHandlers
 
                     try
                     {
-                        var newRobot = await robotService.CreateFromQuery(robotQuery);
+                        var newRobot = await RobotService.CreateFromQuery(robotQuery);
                         _logger.LogInformation("Added robot '{RobotName}' with ISAR id '{IsarId}' to database", newRobot.Name, newRobot.IsarId);
                     }
                     catch (DbUpdateException)
@@ -183,7 +176,7 @@ namespace Api.EventHandlers
                 if (updatedFields.IsNullOrEmpty()) return;
 
                 _updateRobotSemaphore.WaitOne();
-                robot = await robotService.Update(robot);
+                robot = await RobotService.Update(robot);
                 _updateRobotSemaphore.Release();
 
                 _logger.LogInformation("Updated robot '{Id}' ('{RobotName}') in database: {Updates}", robot.Id, robot.Name, updatedFields);
@@ -254,7 +247,6 @@ namespace Api.EventHandlers
         {
             var provider = GetServiceProvider();
             var missionRunService = provider.GetRequiredService<IMissionRunService>();
-            var robotService = provider.GetRequiredService<IRobotService>();
             var taskDurationService = provider.GetRequiredService<ITaskDurationService>();
             var lastMissionRunService = provider.GetRequiredService<ILastMissionRunService>();
             var missionSchedulingService = provider.GetRequiredService<IMissionSchedulingService>();
@@ -287,7 +279,7 @@ namespace Api.EventHandlers
                     try
                     {
                         _updateRobotSemaphore.WaitOne();
-                        var robotWithUpdatedArea = await robotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, flotillaMissionRun.Area.Id);
+                        var robotWithUpdatedArea = await RobotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, flotillaMissionRun.Area.Id);
                         _updateRobotSemaphore.Release();
                     }
                     catch (RobotNotFoundException)
@@ -301,7 +293,7 @@ namespace Api.EventHandlers
                     try
                     {
                         _updateRobotSemaphore.WaitOne();
-                        await robotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, null);
+                        await RobotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, null);
                         _updateRobotSemaphore.Release();
 
                         _logger.LogError("Localization mission run {MissionRunId} was unsuccessful on {RobotId}, scheduled missions will be aborted", flotillaMissionRun.Id, flotillaMissionRun.Robot.Id);
@@ -330,7 +322,7 @@ namespace Api.EventHandlers
 
             if (!updatedFlotillaMissionRun.IsCompleted) return;
 
-            var robot = await robotService.ReadByIsarId(isarMission.IsarId);
+            var robot = await RobotService.ReadByIsarId(isarMission.IsarId);
             if (robot is null)
             {
                 _logger.LogError("Could not find robot '{RobotName}' with ISAR id '{IsarId}'", isarMission.RobotName, isarMission.IsarId);
@@ -342,9 +334,7 @@ namespace Api.EventHandlers
                 try
                 {
                     _updateRobotSemaphore.WaitOne();
-                    var newProviderToUpdateCurrentArea = GetServiceProvider(); // To ensure that the robot updates the other values correctly, it needs to get a new provider and service
-                    var newRobotServiceToUpdateCurrentArea = newProviderToUpdateCurrentArea.GetRequiredService<IRobotService>();
-                    await newRobotServiceToUpdateCurrentArea.UpdateCurrentArea(robot.Id, null);
+                    await RobotService.UpdateCurrentArea(robot.Id, null);
                     _updateRobotSemaphore.Release();
                 }
                 catch (RobotNotFoundException)
@@ -357,9 +347,7 @@ namespace Api.EventHandlers
             try
             {
                 _updateRobotSemaphore.WaitOne();
-                var newProviderToUpdateCurrentMissionId = GetServiceProvider(); // To ensure that the robot updates the other values correctly, it needs to get a new provider and service
-                var newRobotServiceToUpdateCurrentMissionId = newProviderToUpdateCurrentMissionId.GetRequiredService<IRobotService>();
-                await newRobotServiceToUpdateCurrentMissionId.UpdateCurrentMissionId(robot.Id, null);
+                await RobotService.UpdateCurrentMissionId(robot.Id, null);
                 _updateRobotSemaphore.Release();
             }
             catch (RobotNotFoundException)
@@ -486,12 +474,11 @@ namespace Api.EventHandlers
         {
             var provider = GetServiceProvider();
             var signalRService = provider.GetRequiredService<ISignalRService>();
-            var robotService = provider.GetRequiredService<IRobotService>();
             var teamsMessageService = provider.GetRequiredService<ITeamsMessageService>();
 
             var cloudHealthStatus = (IsarCloudHealthMessage)mqttArgs.Message;
 
-            var robot = await robotService.ReadByIsarId(cloudHealthStatus.IsarId);
+            var robot = await RobotService.ReadByIsarId(cloudHealthStatus.IsarId);
             if (robot == null)
             {
                 _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", cloudHealthStatus.IsarId, cloudHealthStatus.RobotName);
