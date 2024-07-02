@@ -177,7 +177,11 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                     {mission.endTime &&
                         mission.tasks[0]?.type !== TaskType.ReturnHome &&
                         mission.tasks[0]?.type !== TaskType.Localization && (
-                            <MissionRestartButton mission={mission} hasFailedTasks={missionHasFailedTasks} />
+                            <MissionRestartButton
+                                mission={mission}
+                                hasFailedTasks={missionHasFailedTasks}
+                                smallButton={false}
+                            />
                         )}
                 </TitleSection>
                 <Typography

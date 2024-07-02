@@ -105,9 +105,9 @@
     "maxStartTime": "Maks starttid",
     "minEndTime": "Min sluttid",
     "maxEndTime": "Maks sluttid",
-    "Re-run the mission": "Kjør oppdraget på nytt",
-    "Re-run full mission": "Kjør hele oppdraget på nytt",
-    "Re-run failed and cancelled tasks in the mission": "Kjør feilet og kansellerte oppgaver i oppdraget på nytt",
+    "Rerun the mission": "Kjør oppdraget på nytt",
+    "Rerun full mission": "Kjør hele oppdraget på nytt",
+    "Rerun failed and cancelled tasks in the mission": "Kjør feilet og kansellerte oppgaver i oppdraget på nytt",
     "inspectionTypes": "Inspeksjonstyper",
     "missionName": "Oppdragsnavn",
     "None": "Ingen",
@@ -130,7 +130,7 @@
     "Up to date": "Oppdatert",
     "Due within two weeks": "Frist innen to uker",
     "No deck inspections available": "Ingen tilgjengelige dekkinspeksjoner",
-    "Queue mission": "Legg til oppdrag i køen",
+    "Queue mission": "Legg oppdraget i kø",
     "Inspection Missions": "Inspeksjonsoppdrag",
     "for": "for",
     "Edit": "Rediger",
@@ -239,5 +239,6 @@
     "LowLow": "LavLav",
     "Recommended pressure": "Anbefalt trykk er 67 mBar.",
     "Pressure": "Trykk",
-    "Pressure limit": "Trykkgrenser [mBar]"
+    "Pressure limit": "Trykkgrenser [mBar]",
+    "Add to queue": "Legg til i kø"
 }

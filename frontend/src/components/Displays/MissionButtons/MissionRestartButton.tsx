@@ -16,11 +16,13 @@ const Centered = styled.div`
     display: flex;
     align-content: center;
     align-items: center;
+    justify-content: center;
 `
 
 interface MissionProps {
     mission: Mission
     hasFailedTasks: boolean
+    smallButton: boolean
 }
 
 enum ReRunOptions {
@@ -28,7 +30,7 @@ enum ReRunOptions {
     ReRunFailed,
 }
 
-export const MissionRestartButton = ({ mission, hasFailedTasks }: MissionProps) => {
+export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { setAlert } = useAlertContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
@@ -58,7 +60,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks }: MissionProps) 
     return (
         <Centered>
             <Button
-                variant="outlined"
+                variant={smallButton ? 'ghost_icon' : 'outlined'}
                 ref={anchorRef}
                 id="anchor-default"
                 aria-haspopup="true"
@@ -69,8 +71,8 @@ export const MissionRestartButton = ({ mission, hasFailedTasks }: MissionProps) 
                     !hasFailedTasks && setIsLocationVerificationOpen(true)
                 }}
             >
-                <Icon name={Icons.Replay} size={24} />
-                {TranslateText('Rerun mission')}
+                <Icon name={smallButton ? Icons.AddOutlined : Icons.Add} size={24} />
+                {!smallButton && TranslateText('Queue mission')}
             </Button>
             <EdsProvider density="compact">
                 <Menu
