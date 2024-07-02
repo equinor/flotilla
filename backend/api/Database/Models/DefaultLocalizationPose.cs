@@ -13,6 +13,9 @@ namespace Api.Database.Models
         [Required]
         public Pose Pose { get; set; }
 
+        [Required]
+        public bool DockingEnabled { get; set; } = false;
+
         public DefaultLocalizationPose()
         {
             Pose = new Pose();
@@ -21,6 +24,12 @@ namespace Api.Database.Models
         public DefaultLocalizationPose(Pose pose)
         {
             Pose = pose;
+        }
+
+        public DefaultLocalizationPose(Pose pose, bool dockingEnabled)
+        {
+            Pose = pose;
+            DockingEnabled = dockingEnabled;
         }
     }
 }
