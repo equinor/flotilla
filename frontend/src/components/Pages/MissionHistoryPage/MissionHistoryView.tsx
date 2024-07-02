@@ -255,7 +255,7 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                                     {TranslateText('Completion Time')}
                                 </Table.Cell>
                                 <Table.Cell id={InspectionTableColumns.Rerun}>
-                                    {TranslateText('Rerun mission')}
+                                    {TranslateText('Add to queue')}
                                 </Table.Cell>
                             </Table.Row>
                         </Table.Head>

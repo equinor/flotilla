@@ -105,9 +105,9 @@
     "maxStartTime": "Max start time",
     "minEndTime": "Min end time",
     "maxEndTime": "Max end time",
-    "Re-run the mission": "Re-run the mission",
-    "Re-run full mission": "Re-run full mission",
-    "Re-run failed and cancelled tasks in the mission": "Re-run failed and cancelled tasks in the mission",
+    "Rerun the mission": "Rerun the mission",
+    "Rerun full mission": "Rerun full mission",
+    "Rerun failed and cancelled tasks in the mission": "Rerun failed and cancelled tasks in the mission",
     "inspectionTypes": "Inspection types",
     "missionName": "Mission name",
     "None": "None",
@@ -239,5 +239,6 @@
     "LowLow": "LowLow",
     "Recommended pressure": "Recommended pressure is 67 mBar.",
     "Pressure": "Pressure",
-    "Pressure limit": "Pressure limits [mBar]"
+    "Pressure limit": "Pressure limits [mBar]",
+    "Add to queue": "Add to queue"
 }
