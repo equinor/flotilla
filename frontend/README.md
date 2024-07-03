@@ -75,3 +75,11 @@ You can do this by going to `File` -> `Preferences` -> `Settings` and then searc
 
 The application reads custom environment variables from the `.env` file on startup. The files need to be prefixed `REACT_APP_` to be included in the application.
 These are parsed and defined in [config.ts](./src/config.ts).
+
+## Run locally with Staging and Prod Databases
+
+To run locally towards the databases follow the steps below:
+
+1. Change UseInMemoryDatabase to false on appsettings.Local and set ASPNETCORE_ENVIRONMENT to the correct environment on launchSettings.json.
+2. Update AZURE_CLIENT_ID and AZURE_CLIENT_SECRET in the .env located in backend/api folder.
+3. Update REACT_APP_BACKEND_API_SCOPE in the .env located in the frontend folder.
