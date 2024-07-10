@@ -282,6 +282,7 @@ namespace Api.Services
                 return null;
             }
 
+            context.Entry(missionRun.Status).State = EntityState.Unchanged;
             context.MissionRuns.Remove(missionRun);
             await ApplyDatabaseUpdate(missionRun.Area?.Installation);
             _ = signalRService.SendMessageAsync("Mission run deleted", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
