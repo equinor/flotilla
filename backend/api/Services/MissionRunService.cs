@@ -54,6 +54,8 @@ namespace Api.Services
         );
         public Task<MissionRun?> Delete(string id);
         public Task<bool> OngoingMission(string robotId);
+        public Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value);
+
     }
 
     [SuppressMessage(
@@ -282,9 +284,7 @@ namespace Api.Services
                 return null;
             }
 
-            context.Entry(missionRun.Status).State = EntityState.Unchanged;
-            context.MissionRuns.Remove(missionRun);
-            await ApplyDatabaseUpdate(missionRun.Area?.Installation);
+            await UpdateMissionRunProperty(missionRun.Id, "IsDeprecated", true);
             _ = signalRService.SendMessageAsync("Mission run deleted", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
 
             return missionRun;
@@ -325,7 +325,8 @@ namespace Api.Services
                 .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspections)
                 .ThenInclude(inspections => inspections.InspectionFindings)
-                .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper())); ;
+                .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()))
+                .Where((m) => m.IsDeprecated == false); ;
         }
 
         protected virtual void OnMissionRunCreated(MissionRunCreatedEventArgs e)
@@ -546,9 +547,7 @@ namespace Api.Services
                 throw new MissionRunNotFoundException(errorMessage);
             }
 
-            missionRun.MissionRunType = missionRunType;
-
-            return await Update(missionRun);
+            return await UpdateMissionRunProperty(missionRun.Id, "MissionRunType", missionRunType);
         }
 
 
@@ -564,7 +563,7 @@ namespace Api.Services
 
             missionRun.Status = missionStatus;
 
-            missionRun = await Update(missionRun);
+            missionRun = await UpdateMissionRunProperty(missionRun.Id, "MissionStatus", missionStatus);
 
             if (missionRun.Status == MissionStatus.Failed) { _ = signalRService.SendMessageAsync("Mission run failed", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null); }
             return missionRun!;
@@ -572,5 +571,29 @@ namespace Api.Services
 
         #endregion ISAR Specific methods
 
+
+        public async Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value)
+        {
+            var missionRun = await ReadById(missionRunId);
+            if (missionRun is null)
+            {
+                string errorMessage = $"Mission with ID {missionRunId} was not found in the database";
+                logger.LogError("{Message}", errorMessage);
+                throw new MissionRunNotFoundException(errorMessage);
+            }
+
+            foreach (var property in typeof(MissionRun).GetProperties())
+            {
+                if (property.Name == propertyName)
+                {
+                    logger.LogInformation("Setting {missionRunName} field {propertyName} from {oldValue} to {NewValue}", missionRun.Name, propertyName, property.GetValue(missionRun), value);
+                    property.SetValue(missionRun, value);
+                }
+            }
+
+            try { missionRun = await Update(missionRun); }
+            catch (InvalidOperationException e) { logger.LogError(e, "Failed to update {missionRunName}", missionRun.Name); };
+            return missionRun;
+        }
     }
 }

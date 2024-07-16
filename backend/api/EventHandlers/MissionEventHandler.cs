@@ -333,7 +333,7 @@ namespace Api.EventHandlers
                     missionTask.Status = Database.Models.TaskStatus.Cancelled;
                 }
                 returnToHomeMission.Status = MissionStatus.Cancelled;
-                await MissionService.Update(returnToHomeMission);
+                await MissionService.UpdateMissionRunProperty(returnToHomeMission.Id, "Status", MissionStatus.Cancelled);
             }
 
             if (existingReturnToHomeMissions.Count > 1)

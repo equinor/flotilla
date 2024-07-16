@@ -136,9 +136,8 @@ namespace Api.Services
                     missionRun.Id,
                     ex.Message
                 );
-                missionRun.Status = NewStatus;
-                missionRun.StatusReason = $"Failed to start: '{ex.Message}'";
-                await missionRunService.Update(missionRun);
+                await missionRunService.UpdateMissionRunProperty(missionRun.Id, "Status", NewStatus);
+                await missionRunService.UpdateMissionRunProperty(missionRun.Id, "StatusReason", ex.Message);
             }
         }
 
@@ -258,9 +257,8 @@ namespace Api.Services
 
             foreach (var pendingMissionRun in pendingMissionRuns)
             {
-                pendingMissionRun.Status = MissionStatus.Aborted;
-                pendingMissionRun.StatusReason = abortReason;
-                await missionRunService.Update(pendingMissionRun);
+                await missionRunService.UpdateMissionRunProperty(pendingMissionRun.Id, "Status", MissionStatus.Aborted);
+                await missionRunService.UpdateMissionRunProperty(pendingMissionRun.Id, "StatusReason", abortReason);
             }
         }
 
@@ -443,8 +441,7 @@ namespace Api.Services
             }
 
             missionRun.UpdateWithIsarInfo(isarMission);
-            missionRun.Status = MissionStatus.Ongoing;
-            await missionRunService.Update(missionRun);
+            await missionRunService.UpdateMissionRunProperty(missionRun.Id, "Status", MissionStatus.Ongoing);
 
             robot.Status = RobotStatus.Busy;
             await robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
