@@ -13,6 +13,8 @@ import { FailedAlertContent } from 'components/Alerts/FailedAlertContent'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { SafeZoneAlertContent } from 'components/Alerts/SafeZoneAlert'
+import { useLanguageContext } from './LanguageContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 
 export enum AlertType {
     MissionFail,
@@ -60,6 +62,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const [blockedRobotNames, setBlockedRobotNames] = useState<string[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installationCode } = useInstallationContext()
+    const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
 
     const pageSize: number = 100
@@ -108,8 +111,8 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         const updateRecentFailedMissions = () => {
             const lastDismissTime: Date = getLastDismissalTime()
-            BackendAPICaller.getMissionRuns({ statuses: [MissionStatus.Failed], pageSize: pageSize }).then(
-                (missions) => {
+            BackendAPICaller.getMissionRuns({ statuses: [MissionStatus.Failed], pageSize: pageSize })
+                .then((missions) => {
                     const newRecentFailedMissions = missions.content.filter(
                         (m) =>
                             convertUTCDateToLocalDate(new Date(m.endTime!)) > lastDismissTime &&
@@ -118,8 +121,16 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     )
                     if (newRecentFailedMissions.length > 0) setNewFailedMissions(newRecentFailedMissions)
                     setRecentFailedMissions(newRecentFailedMissions)
-                }
-            )
+                })
+                .catch((e) => {
+                    setAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertContent
+                            translatedMessage={TranslateText('Failed to retrieve failed missions')}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                })
         }
         if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
         // eslint-disable-next-line react-hooks/exhaustive-deps

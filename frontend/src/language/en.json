@@ -240,5 +240,21 @@
     "Recommended pressure": "Recommended pressure is 67 mBar.",
     "Pressure": "Pressure",
     "Pressure limit": "Pressure limits [mBar]",
-    "Add to queue": "Add to queue"
+    "Add to queue": "Add to queue",
+    "Failed to pause mission on {0}": "Failed to pause mission on robot {0}",
+    "Failed to resume mission on {0}": "Failed to resume mission on robot {0}",
+    "Failed to stop mission on {0}": "Failed to stop mission on robot {0}",
+    "Unable to find robot with ID {0}": "Unable to find robot with ID {0}",
+    "Failed to find mission with ID {0}": "Failed to find mission with ID {0}",
+    "Failed to retrieve failed missions": "Failed to retrieve failed missions",
+    "Failed to retrieve robots": "Failed to retrieve robots",
+    "Failed to retrieve inspection plans": "Failed to retrieve inspection plan",
+    "Failed to retrieve installations from Echo": "Failed to retrieve installations from Echo",
+    "Failed to retrieve mission runs": "Failed to retrieve mission runs",
+    "Failed to retrieve areas on deck {0}": "Failed to retrieve areas on deck {0}",
+    "Failed to retrieve decks on installation {0}": "Failed to retrieve decks on installation {0}",
+    "Failed to send robots to a safe zone": "Failed to send robots to a safe zone",
+    "Failed to release robots from safe zone": "Failed to release robots from safe zone",
+    "Failed to send robot {0} home": "Failed to send robot {0} to starting position",
+    "Failed to update inspection": "Failed to update inspection"
 }

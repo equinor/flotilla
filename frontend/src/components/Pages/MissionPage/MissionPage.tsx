@@ -11,6 +11,10 @@ import { MissionMapView } from './MapPosition/MissionMapView'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Header } from 'components/Header/Header'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const StyledMissionPage = styled.div`
     display: flex;
@@ -35,6 +39,8 @@ const VideoStreamSection = styled.div`
 
 export const MissionPage = () => {
     const { missionId } = useParams()
+    const { TranslateText } = useLanguageContext()
+    const { setAlert } = useAlertContext()
     const [videoStreams, setVideoStreams] = useState<VideoStream[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
@@ -51,13 +57,28 @@ export const MissionPage = () => {
 
     useEffect(() => {
         const updateVideoStreams = (mission: Mission) =>
-            BackendAPICaller.getVideoStreamsByRobotId(mission.robot.id).then((streams) => setVideoStreams(streams))
+            BackendAPICaller.getVideoStreamsByRobotId(mission.robot.id)
+                .then((streams) => setVideoStreams(streams))
+                .catch((e) => {
+                    console.warn(`Failed to get video stream with robot ID ${mission.robot.id}`)
+                })
 
         if (missionId)
-            BackendAPICaller.getMissionRunById(missionId).then((mission) => {
-                setSelectedMission(mission)
-                updateVideoStreams(mission)
-            })
+            BackendAPICaller.getMissionRunById(missionId)
+                .then((mission) => {
+                    setSelectedMission(mission)
+                    updateVideoStreams(mission)
+                })
+                .catch((e) => {
+                    setAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertContent
+                            translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionId])
 
     return (

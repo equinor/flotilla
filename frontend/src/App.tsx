@@ -28,15 +28,15 @@ if (config.AI_CONNECTION_STRING.length > 0) {
 
 const App = () => (
     <AuthProvider>
-        <SignalRProvider>
-            <InstallationProvider>
-                <MissionDefinitionsProvider>
-                    <RobotProvider>
-                        <MissionRunsProvider>
-                            <AlertProvider>
-                                <SafeZoneProvider>
-                                    <MissionRunsProvider>
-                                        <LanguageProvider>
+        <LanguageProvider>
+            <SignalRProvider>
+                <InstallationProvider>
+                    <MissionDefinitionsProvider>
+                        <RobotProvider>
+                            <MissionRunsProvider>
+                                <AlertProvider>
+                                    <SafeZoneProvider>
+                                        <MissionRunsProvider>
                                             <MissionControlProvider>
                                                 <UnauthenticatedTemplate>
                                                     <div className="sign-in-page">
@@ -49,15 +49,15 @@ const App = () => (
                                                     </MissionFilterProvider>
                                                 </AuthenticatedTemplate>
                                             </MissionControlProvider>
-                                        </LanguageProvider>
-                                    </MissionRunsProvider>
-                                </SafeZoneProvider>
-                            </AlertProvider>
-                        </MissionRunsProvider>
-                    </RobotProvider>
-                </MissionDefinitionsProvider>
-            </InstallationProvider>
-        </SignalRProvider>
+                                        </MissionRunsProvider>
+                                    </SafeZoneProvider>
+                                </AlertProvider>
+                            </MissionRunsProvider>
+                        </RobotProvider>
+                    </MissionDefinitionsProvider>
+                </InstallationProvider>
+            </SignalRProvider>
+        </LanguageProvider>
     </AuthProvider>
 )
 
