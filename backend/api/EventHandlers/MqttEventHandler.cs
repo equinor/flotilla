@@ -265,11 +265,9 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (flotillaMissionRun.Status == status) { return; }
-
             if (flotillaMissionRun.IsLocalizationMission())
             {
-                if (status == MissionStatus.Successful || status == MissionStatus.PartiallySuccessful)
+                if (flotillaMissionRun.Tasks.Any((task) => task.Status == Database.Models.TaskStatus.Successful || task.Status == Database.Models.TaskStatus.PartiallySuccessful))
                 {
                     try
                     {
@@ -281,7 +279,7 @@ namespace Api.EventHandlers
                         return;
                     }
                 }
-                else if (status == MissionStatus.Aborted || status == MissionStatus.Cancelled || status == MissionStatus.Failed)
+                else if (flotillaMissionRun.Tasks.All((task) => task.Status == Database.Models.TaskStatus.Cancelled || task.Status == Database.Models.TaskStatus.Failed) || flotillaMissionRun.Status == MissionStatus.Aborted)
                 {
                     try
                     {
@@ -301,6 +299,8 @@ namespace Api.EventHandlers
                     _logger.LogError("Localization mission for robot '{RobotName}' failed.", isarMission.RobotName);
                 }
             }
+
+            if (flotillaMissionRun.Status == status) { return; }
 
             MissionRun updatedFlotillaMissionRun;
             try { updatedFlotillaMissionRun = await MissionRunService.UpdateMissionRunStatusByIsarMissionId(isarMission.MissionId, status); }
