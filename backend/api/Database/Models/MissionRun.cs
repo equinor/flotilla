@@ -95,6 +95,8 @@ namespace Api.Database.Models
         [MaxLength(200)]
         public string Name { get; set; }
 
+        public bool IsDeprecated { get; set; }
+
         public void UpdateWithIsarInfo(IsarMission isarMission)
         {
             IsarMissionId = isarMission.IsarMissionId;
