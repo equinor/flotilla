@@ -3,6 +3,10 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { useInstallationContext } from './InstallationContext'
+import { useLanguageContext } from './LanguageContext'
+import { AlertType, useAlertContext } from './AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 interface IMissionDefinitionsContext {
     missionDefinitions: CondensedMissionDefinition[]
@@ -43,6 +47,8 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const [missionDefinitions, setMissionDefinitions] = useState<CondensedMissionDefinition[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installationCode } = useInstallationContext()
+    const { TranslateText } = useLanguageContext()
+    const { setAlert } = useAlertContext()
 
     useEffect(() => {
         if (connectionReady) {
@@ -78,8 +84,16 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
                 installationCode: installationCode,
                 pageSize: 100,
                 orderBy: 'InstallationCode installationCode',
+            }).catch((e) => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent
+                        translatedMessage={TranslateText('Failed to retrieve inspection plans')}
+                    />,
+                    AlertCategory.ERROR
+                )
             })
-            setMissionDefinitions(missionDefinitionsInInstallation)
+            setMissionDefinitions(missionDefinitionsInInstallation ?? [])
         }
         if (BackendAPICaller.accessToken) fetchAndUpdateMissionDefinitions()
         // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -2,6 +2,10 @@ import { createContext, useContext, useState, FC, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Robot } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
+import { useLanguageContext } from './LanguageContext'
+import { AlertType, useAlertContext } from './AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const upsertRobotList = (list: Robot[], mission: Robot) => {
     let newList = [...list]
@@ -28,6 +32,8 @@ export const RobotContext = createContext<IRobotContext>(defaultRobotState)
 export const RobotProvider: FC<Props> = ({ children }) => {
     const [enabledRobots, setEnabledRobots] = useState<Robot[]>(defaultRobotState.enabledRobots)
     const { registerEvent, connectionReady } = useSignalRContext()
+    const { TranslateText } = useLanguageContext()
+    const { setAlert } = useAlertContext()
 
     useEffect(() => {
         if (connectionReady) {
@@ -66,9 +72,17 @@ export const RobotProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (!enabledRobots || enabledRobots.length === 0)
-            BackendAPICaller.getEnabledRobots().then((robots) => {
-                setEnabledRobots(robots)
-            })
+            BackendAPICaller.getEnabledRobots()
+                .then((robots) => {
+                    setEnabledRobots(robots)
+                })
+                .catch((e) => {
+                    setAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve robots')} />,
+                        AlertCategory.ERROR
+                    )
+                })
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 

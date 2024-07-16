@@ -3,6 +3,10 @@ import { Mission, MissionStatus } from 'models/Mission'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { TaskStatus } from 'models/Task'
+import { useLanguageContext } from './LanguageContext'
+import { AlertType, useAlertContext } from './AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
     let newMissionList = [...list]
@@ -76,6 +80,8 @@ export const useMissionRuns = (): IMissionRunsContext => {
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
     const [loadingMissionSet, setLoadingMissionSet] = useState<Set<string>>(new Set())
     const { registerEvent, connectionReady } = useSignalRContext()
+    const { TranslateText } = useLanguageContext()
+    const { setAlert } = useAlertContext()
 
     useEffect(() => {
         if (connectionReady) {
@@ -123,15 +129,29 @@ export const useMissionRuns = (): IMissionRunsContext => {
                 statuses: [MissionStatus.Ongoing, MissionStatus.Paused],
                 pageSize: 100,
                 orderBy: 'StartTime desc',
+            }).catch((e) => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
+                    AlertCategory.ERROR
+                )
             })
-            setOngoingMissions(ongoing)
+
+            setOngoingMissions(ongoing ?? [])
 
             const queue = await fetchMissionRuns({
                 statuses: [MissionStatus.Pending],
                 pageSize: 100,
                 orderBy: 'DesiredStartTime',
+            }).catch((e) => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
+                    AlertCategory.ERROR
+                )
             })
-            setMissionQueue(queue)
+
+            setMissionQueue(queue ?? [])
         }
         if (BackendAPICaller.accessToken) fetchAndUpdateMissions()
         // eslint-disable-next-line react-hooks/exhaustive-deps

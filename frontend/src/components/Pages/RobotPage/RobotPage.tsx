@@ -15,6 +15,9 @@ import { RobotType } from 'models/RobotModel'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const RobotArmMovementSection = styled.div`
     display: flex;
@@ -53,6 +56,7 @@ const StatusContent = styled.div<{ $alignItems?: string }>`
 
 export const RobotPage = () => {
     const { TranslateText } = useLanguageContext()
+    const { setAlert } = useAlertContext()
     const { robotId } = useParams()
     const { enabledRobots } = useRobotContext()
 
@@ -60,7 +64,15 @@ export const RobotPage = () => {
 
     const returnRobotToHome = () => {
         if (robotId) {
-            BackendAPICaller.returnRobotToHome(robotId)
+            BackendAPICaller.returnRobotToHome(robotId).catch((e) => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent
+                        translatedMessage={TranslateText('Failed to send robot {0} home', [selectedRobot?.name ?? ''])}
+                    />,
+                    AlertCategory.ERROR
+                )
+            })
         }
     }
 

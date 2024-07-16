@@ -240,5 +240,21 @@
     "Recommended pressure": "Anbefalt trykk er 67 mBar.",
     "Pressure": "Trykk",
     "Pressure limit": "Trykkgrenser [mBar]",
-    "Add to queue": "Legg til i kø"
+    "Add to queue": "Legg til i kø",
+    "Failed to pause mission on {0}": "Kunne ikke pause oppdrag på robot {0}",
+    "Failed to resume mission on {0}": "Kunne ikke fortsette oppdrag på robot {0}",
+    "Failed to stop mission on {0}": "Kunne ikke stanse oppdrag på robot {0}",
+    "Unable to find robot with ID {0}": "Kunne ikke finne robot med ID {0}",
+    "Failed to find mission with ID {0}": "Kunne ikke finne oppdrag med ID {0}",
+    "Failed to retrieve failed missions": "Kunne ikke hente mislykkede oppdrag",
+    "Failed to retrieve robots": "Kunne ikke hente liste over roboter",
+    "Failed to retrieve inspection plans": "Kunne ikke hente inspeksjonsplanen",
+    "Failed to retrieve installations from Echo": "Kunne ikke hente installasjoner fra Echo",
+    "Failed to retrieve mission runs": "Kunne ikke hente oppdrag",
+    "Failed to retrieve areas on deck {0}": "Kunne ikke hente området på deck {0}",
+    "Failed to retrieve decks on installation {0}": "Kunne ikke hente deck på installasjon {0}",
+    "Failed to send robots to a safe zone": "Kunne ikke sende roboter til trygg sone",
+    "Failed to release robots from safe zone": "Kunne ikke slippe roboter ut av trygg sone",
+    "Failed to send robot {0} home": "Kunne ikke sende robot {0} til startposisjon",
+    "Failed to update inspection": "Kunne ikke oppdatere inspeksjon"
 }

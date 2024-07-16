@@ -12,6 +12,9 @@ import { FilterSection } from './FilterSection'
 import { InspectionType } from 'models/Inspection'
 import { tokens } from '@equinor/eds-tokens'
 import { SmallScreenInfoText } from 'utils/InfoText'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -101,6 +104,7 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
     const { TranslateText } = useLanguageContext()
     const { page, switchPage, filterState, filterIsSet, filterFunctions, filterError, clearFilterError } =
         useMissionFilterContext()
+    const { setAlert } = useAlertContext()
     const [filteredMissions, setFilteredMissions] = useState<Mission[]>([])
     const [paginationDetails, setPaginationDetails] = useState<PaginationHeader>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -161,15 +165,26 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
             pageSize: pageSize,
             pageNumber: page ?? 1,
             orderBy: 'EndTime desc, Name',
-        }).then((paginatedMissions) => {
-            setFilteredMissions(paginatedMissions.content)
-            setPaginationDetails(paginatedMissions.pagination)
-            if (page > paginatedMissions.pagination.TotalPages && paginatedMissions.pagination.TotalPages > 0) {
-                switchPage(paginatedMissions.pagination.TotalPages)
-                setIsResettingPage(true)
-            }
-            setIsLoading(false)
         })
+            .then((paginatedMissions) => {
+                setFilteredMissions(paginatedMissions.content)
+                setPaginationDetails(paginatedMissions.pagination)
+                if (page > paginatedMissions.pagination.TotalPages && paginatedMissions.pagination.TotalPages > 0) {
+                    switchPage(paginatedMissions.pagination.TotalPages)
+                    setIsResettingPage(true)
+                }
+                setIsLoading(false)
+            })
+            .catch((e) => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent
+                        translatedMessage={TranslateText('Failed to retrieve previous mission runs')}
+                    />,
+                    AlertCategory.ERROR
+                )
+            })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize, switchPage, filterFunctions])
 
     useEffect(() => {

@@ -15,6 +15,9 @@ import { StyledDict } from './MissionDefinitionStyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const StyledDictCard = styled(StyledDict.Card)`
     box-shadow: ${tokens.elevation.raised};
@@ -146,6 +149,7 @@ const MissionDefinitionEditDialog = ({
         isDeprecated: false,
     }
     const { TranslateText } = useLanguageContext()
+    const { setAlert } = useAlertContext()
     const navigate = useNavigate()
     const [form, setForm] = useState<MissionDefinitionUpdateForm>(defaultMissionDefinitionForm)
 
@@ -175,10 +179,18 @@ const MissionDefinitionEditDialog = ({
     const handleSubmit = () => {
         const daysAndHours = getDayAndHoursFromInspectionFrequency(form.inspectionFrequency)
         if (daysAndHours[0] === 0 && daysAndHours[1] === 0) form.inspectionFrequency = undefined
-        BackendAPICaller.updateMissionDefinition(missionDefinition.id, form).then((missionDefinition) => {
-            closeEditDialog()
-            if (missionDefinition.isDeprecated) navigate(`${config.FRONTEND_BASE_ROUTE}/FrontPage`)
-        })
+        BackendAPICaller.updateMissionDefinition(missionDefinition.id, form)
+            .then((missionDefinition) => {
+                closeEditDialog()
+                if (missionDefinition.isDeprecated) navigate(`${config.FRONTEND_BASE_ROUTE}/FrontPage`)
+            })
+            .catch((e) => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to update inspection')} />,
+                    AlertCategory.ERROR
+                )
+            })
     }
 
     const inspectionFrequency = getDayAndHoursFromInspectionFrequency(form.inspectionFrequency)

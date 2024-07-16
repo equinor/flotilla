@@ -4,6 +4,10 @@ import { EchoPlantInfo } from 'models/EchoMission'
 import { Deck } from 'models/Deck'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { Area } from 'models/Area'
+import { useLanguageContext } from './LanguageContext'
+import { AlertType, useAlertContext } from './AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 interface IInstallationContext {
     installationCode: string
@@ -37,6 +41,8 @@ export const InstallationContext = createContext<IInstallationContext>(defaultIn
 
 export const InstallationProvider: FC<Props> = ({ children }) => {
     const { registerEvent, connectionReady } = useSignalRContext()
+    const { TranslateText } = useLanguageContext()
+    const { setAlert } = useAlertContext()
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>(new Map())
     const [installationName, setInstallationName] = useState<string>(
         window.localStorage.getItem('installationName') || ''
@@ -47,31 +53,67 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
     const installationCode = (allPlantsMap.get(installationName) || '').toUpperCase()
 
     useEffect(() => {
-        BackendAPICaller.getEchoPlantInfo().then((response: EchoPlantInfo[]) => {
-            const mapping = mapInstallationCodeToName(response)
-            setAllPlantsMap(mapping)
-        })
+        BackendAPICaller.getEchoPlantInfo()
+            .then((response: EchoPlantInfo[]) => {
+                const mapping = mapInstallationCodeToName(response)
+                setAllPlantsMap(mapping)
+            })
+            .catch((e) => {
+                setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent
+                        translatedMessage={TranslateText('Failed to retrieve installations from Echo')}
+                    />,
+                    AlertCategory.ERROR
+                )
+            })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
         if (installationCode)
-            BackendAPICaller.getDecksByInstallationCode(installationCode).then((decks: Deck[]) => {
-                setInstallationDecks(decks)
-                decks.forEach((deck) =>
-                    BackendAPICaller.getAreasByDeckId(deck.id).then((areas) =>
-                        setInstallationAreas((oldAreas) => {
-                            let areasCopy = [...oldAreas]
-                            let newAreas: Area[] = []
-                            areas.forEach((area) => {
-                                const indexBeUpdated = areasCopy.findIndex((a) => a.id === area.id)
-                                if (indexBeUpdated === -1) newAreas = [...newAreas, area]
-                                else areasCopy[indexBeUpdated] = area
+            BackendAPICaller.getDecksByInstallationCode(installationCode)
+                .then((decks: Deck[]) => {
+                    setInstallationDecks(decks)
+                    decks.forEach((deck) =>
+                        BackendAPICaller.getAreasByDeckId(deck.id)
+                            .then((areas) =>
+                                setInstallationAreas((oldAreas) => {
+                                    let areasCopy = [...oldAreas]
+                                    let newAreas: Area[] = []
+                                    areas.forEach((area) => {
+                                        const indexBeUpdated = areasCopy.findIndex((a) => a.id === area.id)
+                                        if (indexBeUpdated === -1) newAreas = [...newAreas, area]
+                                        else areasCopy[indexBeUpdated] = area
+                                    })
+                                    return areasCopy.concat(newAreas)
+                                })
+                            )
+                            .catch((e) => {
+                                setAlert(
+                                    AlertType.RequestFail,
+                                    <FailedRequestAlertContent
+                                        translatedMessage={TranslateText('Failed to retrieve areas on deck {0}', [
+                                            deck.deckName,
+                                        ])}
+                                    />,
+                                    AlertCategory.ERROR
+                                )
                             })
-                            return areasCopy.concat(newAreas)
-                        })
                     )
-                )
-            })
+                })
+                .catch((e) => {
+                    setAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertContent
+                            translatedMessage={TranslateText('Failed to retrieve decks on installation {0}', [
+                                installationCode,
+                            ])}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [installationCode])
 
     useEffect(() => {

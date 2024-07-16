@@ -9,6 +9,9 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
 import { TaskType } from 'models/Task'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const StyledDisplayButtons = styled.div`
     display: flex;
@@ -139,6 +142,7 @@ export const StopRobotDialog = (): JSX.Element => {
     const { safeZoneStatus } = useSafeZoneContext()
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
+    const { setAlert } = useAlertContext()
 
     const openDialog = async () => {
         setIsStopRobotDialogOpen(true)
@@ -149,13 +153,27 @@ export const StopRobotDialog = (): JSX.Element => {
     }
 
     const stopAll = () => {
-        BackendAPICaller.sendRobotsToSafePosition(installationCode)
+        BackendAPICaller.sendRobotsToSafePosition(installationCode).catch((e) => {
+            setAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to send robots to a safe zone')} />,
+                AlertCategory.ERROR
+            )
+        })
         closeDialog()
         return
     }
 
     const resetRobots = () => {
-        BackendAPICaller.clearEmergencyState(installationCode)
+        BackendAPICaller.clearEmergencyState(installationCode).catch((e) => {
+            setAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertContent
+                    translatedMessage={TranslateText('Failed to release robots from safe zone')}
+                />,
+                AlertCategory.ERROR
+            )
+        })
         closeDialog()
     }
 

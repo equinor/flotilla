@@ -11,6 +11,9 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { EchoPlantInfo } from 'models/EchoMission'
 import { Header } from 'components/Header/Header'
 import { config } from 'config'
+import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
+import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const Centered = styled.div`
     display: flex;
@@ -71,6 +74,7 @@ export const AssetSelectionPage = () => {
 const InstallationPicker = () => {
     const { installationName, switchInstallation } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
+    const { setAlert } = useAlertContext()
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>(new Map())
     const [selectedInstallation, setSelectedInstallation] = useState<string>(installationName)
     const [showActivePlants, setShowActivePlants] = useState<boolean>(true)
@@ -86,11 +90,22 @@ const InstallationPicker = () => {
             const plantPromise = showActivePlants
                 ? BackendAPICaller.getActivePlants()
                 : BackendAPICaller.getEchoPlantInfo()
-            plantPromise.then(async (response: EchoPlantInfo[]) => {
-                const mapping = mapInstallationCodeToName(response)
-                setAllPlantsMap(mapping)
-            })
+            plantPromise
+                .then(async (response: EchoPlantInfo[]) => {
+                    const mapping = mapInstallationCodeToName(response)
+                    setAllPlantsMap(mapping)
+                })
+                .catch((e) => {
+                    setAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertContent
+                            translatedMessage={TranslateText('Failed to retrieve installations from Echo')}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                })
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showActivePlants, updateListOfActivePlants])
 
     return (
