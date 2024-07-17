@@ -42,7 +42,8 @@ namespace Api.Test.Database
             bool writeToDatabase = false,
             MissionRunType missionRunType = MissionRunType.Normal,
             MissionStatus missionStatus = MissionStatus.Pending,
-            string? isarMissionId = null
+            string? isarMissionId = null,
+            Api.Database.Models.TaskStatus taskStatus = Api.Database.Models.TaskStatus.Successful
         )
         {
             var missionRun = new MissionRun
@@ -65,12 +66,20 @@ namespace Api.Test.Database
                 {
                     new(new Pose(), MissionTaskType.Localization)
                 };
+                missionRun.Tasks[0].Status = taskStatus;
             }
-            if (missionRunType == MissionRunType.ReturnHome)
+            else if (missionRunType == MissionRunType.ReturnHome)
             {
                 missionRun.Tasks = new List<MissionTask>
                 {
                     new(new Pose(), MissionTaskType.ReturnHome)
+                };
+            }
+            else
+            {
+                missionRun.Tasks = new List<MissionTask>
+                {
+                    new(new Pose(), MissionTaskType.Inspection)
                 };
             }
             if (writeToDatabase)
