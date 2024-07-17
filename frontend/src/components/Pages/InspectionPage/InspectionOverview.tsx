@@ -7,7 +7,6 @@ import { AllInspectionsTable } from './InspectionTable'
 import { getInspectionDeadline } from 'utils/StringFormatting'
 import styled from 'styled-components'
 import { ScheduleMissionDialog } from '../FrontPage/MissionOverview/ScheduleMissionDialog/ScheduleMissionDialog'
-import { CreateEchoMissionButton } from 'components/Displays/MissionButtons/CreateEchoMissionButton'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -25,10 +24,8 @@ const StyledContent = styled.div`
     align-items: end;
 `
 
-const StyledButtons = styled.div`
+const StyledEchoMissionButton = styled.div`
     display: flex;
-    flex-direction: row;
-    gap: 8px;
     padding-bottom: 30px;
 `
 
@@ -115,7 +112,7 @@ export const InspectionOverviewSection = () => {
                 <Tabs.Panel>
                     <StyledView>
                         <StyledContent>
-                            <StyledButtons>
+                            <StyledEchoMissionButton>
                                 {isScheduleMissionDialogOpen && (
                                     <ScheduleMissionDialog
                                         isFetchingEchoMissions={isFetchingEchoMissions}
@@ -124,8 +121,7 @@ export const InspectionOverviewSection = () => {
                                     />
                                 )}
                                 <AddPredefinedMissionsButton />
-                                <CreateEchoMissionButton />
-                            </StyledButtons>
+                            </StyledEchoMissionButton>
                             {allInspections.length > 0 ? (
                                 <AllInspectionsTable inspections={allInspections} />
                             ) : (
