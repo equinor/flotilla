@@ -300,7 +300,7 @@ namespace Api.Test.EventHandlers
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
-            var localizationMissionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString());
+            var localizationMissionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString(), TaskStatus.Failed);
             var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
 
             Thread.Sleep(100);
@@ -311,7 +311,7 @@ namespace Api.Test.EventHandlers
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
                     MissionId = localizationMissionRun.IsarMissionId,
-                    Status = "failed",
+                    Status = "successful",
                     Timestamp = DateTime.UtcNow
                 });
 
@@ -376,7 +376,7 @@ namespace Api.Test.EventHandlers
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, null);
-            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
+            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString());
             var missionRun2 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
             Thread.Sleep(100);
 
@@ -411,7 +411,7 @@ namespace Api.Test.EventHandlers
             // Assert
             var postTestMissionRun1 = await _missionRunService.ReadById(missionRun1.Id);
             Assert.Equal(MissionRunType.Localization, postTestMissionRun1!.MissionRunType);
-            Assert.Equal(MissionStatus.Successful, postTestMissionRun1!.Status);
+            Assert.Equal(TaskStatus.Successful, postTestMissionRun1!.Tasks[0].Status);
             var postTestMissionRun2 = await _missionRunService.ReadById(missionRun2.Id);
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun2!.Status);
         }
