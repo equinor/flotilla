@@ -59,6 +59,7 @@ namespace Api.Services
                     Id = "",
                     IsarTaskId = ""
                 };
+                taskCopy.Inspections = taskCopy.Inspections.Select(i => new Inspection(i, useEmptyIDs: true)).ToList();
                 genericTasks.Add(taskCopy);
             }
 

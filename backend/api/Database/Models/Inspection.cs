@@ -34,10 +34,10 @@ namespace Api.Database.Models
         }
 
         // Creates a blank deepcopy of the provided inspection
-        public Inspection(Inspection copy, InspectionStatus? inspectionStatus = null)
+        public Inspection(Inspection copy, InspectionStatus? inspectionStatus = null, bool useEmptyIDs = false)
         {
-            Id = "";
-            IsarStepId = "";
+            Id = useEmptyIDs ? "" : Guid.NewGuid().ToString();
+            IsarStepId = useEmptyIDs ? "" : Guid.NewGuid().ToString();
             Status = inspectionStatus ?? copy.Status;
             InspectionType = copy.InspectionType;
             VideoDuration = copy.VideoDuration;

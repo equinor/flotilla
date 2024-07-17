@@ -37,7 +37,17 @@ namespace Api.Services
 
         public string CalculateHashFromTasks(IList<MissionTask> tasks)
         {
-            IList<MissionTask> genericTasks = tasks.Select(task => new MissionTask(task)).ToList();
+            var genericTasks = new List<MissionTask>();
+            foreach (var task in tasks)
+            {
+                var taskCopy = new MissionTask(task)
+                {
+                    Id = "",
+                    IsarTaskId = ""
+                };
+                taskCopy.Inspections = taskCopy.Inspections.Select(i => new Inspection(i, useEmptyIDs: true)).ToList();
+                genericTasks.Add(taskCopy);
+            }
 
             string json = JsonSerializer.Serialize(genericTasks);
             byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
