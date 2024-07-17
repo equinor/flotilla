@@ -76,12 +76,12 @@ namespace Api.Database.Models
             }
         }
 
-        // Creates a blank deepcopy of the provided task
+        // Creates a copy of the provided task
         public MissionTask(MissionTask copy, TaskStatus? status = null)
         {
             TaskOrder = copy.TaskOrder;
             TagId = copy.TagId;
-            IsarTaskId = status == null ? "" : null;
+            IsarTaskId = Guid.NewGuid().ToString();
             Description = copy.Description;
             EchoTagLink = copy.EchoTagLink;
             RobotPose = new Pose(copy.RobotPose);
