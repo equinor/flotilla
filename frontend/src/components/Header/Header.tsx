@@ -62,6 +62,13 @@ const Circle = styled.div`
     height: 9px;
     border-radius: 50%;
 `
+
+const StyledTopBarHeader = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+`
+
 export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
     const { installationName } = useInstallationContext()
