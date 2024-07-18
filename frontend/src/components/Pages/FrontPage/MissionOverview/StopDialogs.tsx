@@ -34,13 +34,9 @@ const StyledText = styled.div`
     gap: 1rem;
 `
 
-const StyledButton = styled.div`
-    width: 250px;
-`
-
-const Square = styled.div`
-    width: 12px;
-    height: 12px;
+const StyledButton = styled(Button)`
+    width: 210px;
+    background-color: white;
 `
 
 interface MissionProps {
@@ -179,20 +175,12 @@ export const StopRobotDialog = (): JSX.Element => {
 
     return (
         <>
-            <StyledButton>
-                <Button color="danger" variant="outlined" onClick={openDialog}>
-                    {!safeZoneStatus ? (
-                        <>
-                            <Square style={{ background: tokens.colors.interactive.danger__resting.hex }} />
-                            {TranslateText('Send robots to safe zone')}
-                        </>
-                    ) : (
-                        <>
-                            <Icon name={Icons.PlayTriangle} size={24} />
-                            {TranslateText('Dismiss robots from safe zone')}
-                        </>
-                    )}
-                </Button>
+            <StyledButton color="danger" variant="outlined" onClick={openDialog}>
+                {!safeZoneStatus ? (
+                    <>{TranslateText('Send robots to safe zone')}</>
+                ) : (
+                    <>{TranslateText('Dismiss robots from safe zone')}</>
+                )}
             </StyledButton>
             <StyledDialog open={isStopRobotDialogOpen} isDismissable>
                 <Dialog.Header>

@@ -22,7 +22,7 @@ const StyledCard = styled(Card)`
 const HoverableStyledCard = styled(Card)`
     width: 220px;
     :hover {
-        background-color: #deedee;
+        background-color: ${tokens.colors.interactive.primary__hover_alt.hex};
     }
 `
 

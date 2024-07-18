@@ -31,7 +31,7 @@ const StyledTable = styled.div`
     @media (max-width: 700px) {
         width: calc(100vw - 30px);
     }
-    max-width: 950px;
+    max-width: fit-content;
 `
 
 const StyledContent = styled.div`
@@ -79,6 +79,11 @@ const HideColumnsOnSmallScreen = styled.div`
             padding-bottom: 1rem;
         }
     }
+`
+
+const Centered = styled.div`
+    display: flex;
+    justify-content: center;
 `
 
 interface IProps {
@@ -209,39 +214,41 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                     : ''}
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.AddToQueue}>
-                {!isScheduled && (
-                    <Button
-                        variant="ghost_icon"
-                        disabled={isScheduleButtonDisabled}
-                        onClick={() => {
-                            openDialog()
-                            setMissions([mission])
-                        }}
-                    >
-                        <StyledIcon
-                            color={`${tokens.colors.interactive.focus.rgba}`}
-                            name={Icons.AddOutlined}
-                            size={24}
-                        />
-                        {isScheduleButtonDisabled && noRobotAvailableText}
-                    </Button>
-                )}
-                {isScheduled && (
-                    <Button
-                        variant="ghost_icon"
-                        disabled={enabledRobots.length === 0}
-                        onClick={() => {
-                            openScheduledDialog()
-                            setMissions([mission])
-                        }}
-                    >
-                        <StyledIcon
-                            color={`${tokens.colors.interactive.focus.hex}`}
-                            name={Icons.AddOutlined}
-                            size={24}
-                        />
-                    </Button>
-                )}
+                <Centered>
+                    {!isScheduled && (
+                        <Button
+                            variant="ghost_icon"
+                            disabled={isScheduleButtonDisabled}
+                            onClick={() => {
+                                openDialog()
+                                setMissions([mission])
+                            }}
+                        >
+                            <StyledIcon
+                                color={`${tokens.colors.interactive.focus.rgba}`}
+                                name={Icons.AddOutlined}
+                                size={24}
+                            />
+                            {isScheduleButtonDisabled && noRobotAvailableText}
+                        </Button>
+                    )}
+                    {isScheduled && (
+                        <Button
+                            variant="ghost_icon"
+                            disabled={enabledRobots.length === 0}
+                            onClick={() => {
+                                openScheduledDialog()
+                                setMissions([mission])
+                            }}
+                        >
+                            <StyledIcon
+                                color={`${tokens.colors.interactive.focus.hex}`}
+                                name={Icons.AddOutlined}
+                                size={24}
+                            />
+                        </Button>
+                    )}
+                </Centered>
             </Table.Cell>
         </Table.Row>
     )
@@ -294,13 +301,19 @@ export const InspectionTable = ({ deck, inspections, scrollOnToggle, openDialog,
                     <Table.Head sticky>
                         <Table.Row>
                             {Object.values(InspectionTableColumns).map((col) => (
-                                <Table.Cell id={col} key={col}>
+                                <Table.Cell
+                                    id={col}
+                                    key={col}
+                                    style={{ backgroundColor: tokens.colors.ui.background__default.hex }}
+                                >
                                     {TranslateText(col)}
                                 </Table.Cell>
                             ))}
                         </Table.Row>
                     </Table.Head>
-                    <Table.Body>{cellValues}</Table.Body>
+                    <Table.Body style={{ backgroundColor: tokens.colors.ui.background__light.hex }}>
+                        {cellValues}
+                    </Table.Body>
                 </Table>
             </HideColumnsOnSmallScreen>
             {isScheduledDialogOpen && (
@@ -375,13 +388,19 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
                     <Table.Head sticky>
                         <Table.Row>
                             {Object.values(InspectionTableColumns).map((col) => (
-                                <Table.Cell id={col} key={col}>
+                                <Table.Cell
+                                    id={col}
+                                    key={col}
+                                    style={{ backgroundColor: tokens.colors.ui.background__default.hex }}
+                                >
                                     {TranslateText(col)}
                                 </Table.Cell>
                             ))}
                         </Table.Row>
                     </Table.Head>
-                    <Table.Body>{cellValues}</Table.Body>
+                    <Table.Body style={{ backgroundColor: tokens.colors.ui.background__light.hex }}>
+                        {cellValues}
+                    </Table.Body>
                 </Table>
                 {isDialogOpen && (
                     <ScheduleMissionDialog

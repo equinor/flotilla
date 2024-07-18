@@ -26,6 +26,7 @@ export const StyledDict = {
     DeckCards: styled.div`
         display: grid;
         grid-template-columns: repeat(auto-fill, 450px);
+        grid-auto-rows: 1fr;
         gap: 24px;
     `,
     DeckText: styled.div`
@@ -50,7 +51,6 @@ export const StyledDict = {
             max-width: calc(100vw - 30px);
         }
         max-width: 450px;
-        flex: 1 0 0;
         border-radius: 6px;
         box-shadow:
             0px 3px 4px 0px rgba(0, 0, 0, 0.12),
