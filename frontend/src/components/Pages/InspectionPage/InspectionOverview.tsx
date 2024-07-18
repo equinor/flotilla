@@ -59,14 +59,16 @@ export const InspectionOverviewSection = () => {
 
     const anchorRef = useRef<HTMLButtonElement>(null)
 
-    const allInspections = missionDefinitions.map((m) => {
-        return {
-            missionDefinition: m,
-            deadline: m.lastSuccessfulRun
-                ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
-                : undefined,
-        }
-    })
+    const allInspections = missionDefinitions
+        .filter((m) => m.installationCode === installationCode)
+        .map((m) => {
+            return {
+                missionDefinition: m,
+                deadline: m.lastSuccessfulRun
+                    ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
+                    : undefined,
+            }
+        })
 
     const fetchEchoMissions = () => {
         setIsFetchingEchoMissions(true)
