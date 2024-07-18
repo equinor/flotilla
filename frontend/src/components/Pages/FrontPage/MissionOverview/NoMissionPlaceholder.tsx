@@ -9,6 +9,7 @@ const StyledPlaceholder = styled(Card)`
     padding: 24px;
     min-width: 250px;
     border: 1px solid ${tokens.colors.interactive.disabled__border.hex};
+    background-color: ${tokens.colors.ui.background__light.hex};
 `
 
 export const NoOngoingMissionsPlaceholder = (): JSX.Element => {

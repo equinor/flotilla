@@ -31,6 +31,13 @@ const StyledAlertList = styled.div`
     align-items: center;
     gap: 0.5rem;
 `
+
+const StyledTopBarHeader = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+`
+
 export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
     const { installationName } = useInstallationContext()
@@ -39,18 +46,26 @@ export const Header = ({ page }: { page: string }) => {
         <>
             <StyledTopBar id={FrontPageSectionId.TopBar}>
                 <StyledWrapper>
-                    <HandPointer>
-                        <TopBar.Header
-                            onClick={() => {
-                                window.location.href = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
-                            }}
-                        >
-                            <Typography variant="body_long_bold" color="primary">
-                                Flotilla
+                    <TopBar.Header
+                        onClick={() => {
+                            window.location.href = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
+                        }}
+                    >
+                        <StyledTopBarHeader>
+                            <HandPointer>
+                                <Typography variant="body_short_bold" color="text-primary">
+                                    Flotilla
+                                </Typography>
+                            </HandPointer>
+                            <Typography variant="body_short" color="text-primary">
+                                |
                             </Typography>
-                        </TopBar.Header>
-                    </HandPointer>
-                    <Typography> {installationName}</Typography>
+                            <Typography variant="body_short" color="text-primary">
+                                {' '}
+                                {installationName}
+                            </Typography>
+                        </StyledTopBarHeader>
+                    </TopBar.Header>
                 </StyledWrapper>
                 <TopBar.Actions>
                     <Button

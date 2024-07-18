@@ -5,12 +5,14 @@ import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
 import { InspectionOverviewSection } from 'components/Pages/InspectionPage/InspectionOverview'
 import { StopRobotDialog } from './MissionOverview/StopDialogs'
+import { tokens } from '@equinor/eds-tokens'
 
 const StyledFrontPage = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
     gap: 3rem;
-    margin: 15px 8px;
+    padding: 15px 8px;
+    background-color: ${tokens.colors.ui.background__light.hex};
 `
 
 const HorizontalContent = styled.div`

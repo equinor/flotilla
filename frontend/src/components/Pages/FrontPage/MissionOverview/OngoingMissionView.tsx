@@ -10,6 +10,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useEffect, useState } from 'react'
 import { Mission } from 'models/Mission'
+import { tokens } from '@equinor/eds-tokens'
 
 const StyledOngoingMissionView = styled.div`
     display: flex;
@@ -30,6 +31,12 @@ const OngoingMissionHeader = styled.div`
     display: grid;
     grid-direction: column;
     gap: 0.5rem;
+`
+const StyledButton = styled(Button)`
+    :hover {
+        background-color: ${tokens.colors.interactive.primary__hover.hex};
+    }
+    background-color: ${tokens.colors.ui.background__default.hex};
 `
 
 export const OngoingMissionView = (): JSX.Element => {
@@ -68,10 +75,10 @@ export const OngoingMissionView = (): JSX.Element => {
                 {ongingMissionsToDisplay.length === 0 && <NoOngoingMissionsPlaceholder />}
             </OngoingMissionSection>
             <ButtonStyle>
-                <Button variant="outlined" onClick={routeChange}>
+                <StyledButton variant="outlined" onClick={routeChange}>
                     <Icon name={Icons.Historic} />
                     {TranslateText('History')}
-                </Button>
+                </StyledButton>
             </ButtonStyle>
         </StyledOngoingMissionView>
     )
