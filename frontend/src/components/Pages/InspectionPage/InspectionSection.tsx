@@ -67,7 +67,9 @@ export const InspectionSection = () => {
 
     const deckMissions: DeckInspectionTuple[] =
         decks?.map(({ areas, deck }) => {
-            const missionDefinitionsInDeck = missionDefinitions.filter((m) => m.area?.deckName === deck.deckName)
+            const missionDefinitionsInDeck = missionDefinitions.filter(
+                (m) => m.area?.deckName === deck.deckName && m.installationCode === installationCode
+            )
             return {
                 inspections: missionDefinitionsInDeck.map((m) => {
                     return {
