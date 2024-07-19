@@ -65,24 +65,37 @@ namespace Api.Services
                     return;
                 }
 
-                try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
-                catch (ReturnToHomeMissionFailedToScheduleException)
+                if (robot.RobotCapabilities == null || !robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.return_to_home))
                 {
-                    signalRService.ReportGeneralFailToSignalR(robot, $"Failed to schedule return to home for robot {robot.Name}", "");
-                    logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
                     await robotService.UpdateCurrentArea(robot.Id, null);
-                }
-
-                if (missionRun == null) { return; }  // The robot is already home
-
-                var postReturnToHomeMissionCreatedRobot = await robotService.ReadById(missionRun.Robot.Id);
-                if (postReturnToHomeMissionCreatedRobot == null)
-                {
-                    logger.LogInformation("Could not find robot {Name}", missionRun.Robot.Name);
                     return;
                 }
+                else
+                {
+                    try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
+                    catch (ReturnToHomeMissionFailedToScheduleException)
+                    {
+                        signalRService.ReportGeneralFailToSignalR(robot, $"Failed to schedule return to home for robot {robot.Name}", "");
+                        logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
+                        await robotService.UpdateCurrentArea(robot.Id, null);
+                    }
 
-                logger.LogInformation("Post return to home mission created: Robot {robotName} has status {robotStatus} and current area {areaName}", postReturnToHomeMissionCreatedRobot.Name, postReturnToHomeMissionCreatedRobot.Status, postReturnToHomeMissionCreatedRobot.CurrentArea?.Name);
+                    if (missionRun == null) { return; }  // The robot is already home
+
+                    var postReturnToHomeMissionCreatedRobot = await robotService.ReadById(missionRun.Robot.Id);
+                    if (postReturnToHomeMissionCreatedRobot == null)
+                    {
+                        logger.LogInformation("Could not find robot {Name}", missionRun.Robot.Name);
+                        return;
+                    }
+
+                    logger.LogInformation(
+                        "Post return to home mission created: Robot {robotName} has status {robotStatus} and current area {areaName}",
+                        postReturnToHomeMissionCreatedRobot.Name,
+                        postReturnToHomeMissionCreatedRobot.Status,
+                        postReturnToHomeMissionCreatedRobot.CurrentArea?.Name
+                    );
+                }
             }
 
             if (!await TheSystemIsAvailableToRunAMission(robot.Id, missionRun.Id))
