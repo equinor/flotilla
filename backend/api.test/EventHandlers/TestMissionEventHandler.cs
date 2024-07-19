@@ -261,6 +261,43 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
+        public async Task ReturnToHomeMissionIsNotStartedIfReturnToHomeIsNotSupported()
+        {
+            // Arrange
+            var installation = await _databaseUtilities.NewInstallation();
+            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
+            robot.RobotCapabilities!.Remove(RobotCapabilitiesEnum.return_to_home);
+
+            var mqttEventArgs = new MqttReceivedArgs(
+                new IsarStatusMessage
+                {
+                    RobotName = robot.Name,
+                    IsarId = robot.IsarId,
+                    Status = RobotStatus.Available,
+                    Timestamp = DateTime.UtcNow
+                });
+
+            // Act
+            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
+
+            // Assert
+            Thread.Sleep(1000);
+            var ongoingMission = await _missionRunService.ReadAll(
+                new MissionRunQueryStringParameters
+                {
+                    Statuses = [
+                        MissionStatus.Ongoing
+                    ],
+                    OrderBy = "DesiredStartTime",
+                    PageSize = 100
+                });
+            Assert.False(ongoingMission.Any());
+        }
+
+        [Fact]
         public async Task MissionRunIsStartedForOtherAvailableRobotIfOneRobotHasAnOngoingMissionRun()
         {
             // Arrange

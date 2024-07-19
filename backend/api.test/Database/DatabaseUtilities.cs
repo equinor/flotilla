@@ -155,7 +155,8 @@ namespace Api.Test.Database
                 VideoStreams = new List<CreateVideoStreamQuery>(),
                 Host = "localhost",
                 Port = 3000,
-                Status = status
+                Status = status,
+                RobotCapabilities = [RobotCapabilitiesEnum.drive_to_pose, RobotCapabilitiesEnum.take_image, RobotCapabilitiesEnum.return_to_home, RobotCapabilitiesEnum.localize]
             };
 
             var robotModel = await _robotModelService.ReadByRobotType(createRobotQuery.RobotType);
