@@ -149,6 +149,7 @@ namespace Api.EventHandlers
             _startMissionSemaphore.WaitOne();
             try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
             catch (MissionRunNotFoundException) { return; }
+            catch (DatabaseUpdateException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
 

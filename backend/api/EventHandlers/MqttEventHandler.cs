@@ -382,7 +382,10 @@ namespace Api.EventHandlers
             catch (MissionTaskNotFoundException) { return; }
 
             var missionRun = await MissionRunService.ReadByIsarMissionId(task.MissionId);
-            if (missionRun is null) _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId);
+            if (missionRun is null)
+            {
+                _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId);
+            }
 
             _ = SignalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
 

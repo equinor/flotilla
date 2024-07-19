@@ -78,7 +78,15 @@ namespace Api.Services
         {
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
             // Making sure database does not try to create new robot
-            context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+            try
+            {
+                context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new DatabaseUpdateException($"Unable to create mission. {e}");
+            }
+
 
             if (IncludesUnsupportedInspectionType(missionRun))
             {
