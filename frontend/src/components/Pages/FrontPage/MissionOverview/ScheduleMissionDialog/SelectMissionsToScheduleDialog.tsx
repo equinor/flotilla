@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { memo, useState } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { Robot } from 'models/Robot'
+import { Robot, RobotStatus } from 'models/Robot'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { BackendAPICaller } from 'api/ApiCaller'
@@ -156,7 +156,9 @@ const SelectRobotComponent = memo(
                 options={enabledRobots.filter(
                     (r) =>
                         r.currentInstallation.installationCode.toLocaleLowerCase() ===
-                        installationCode.toLocaleLowerCase()
+                            installationCode.toLocaleLowerCase() &&
+                        (r.status === RobotStatus.Available || r.status === RobotStatus.Busy) &&
+                        r.isarConnected
                 )}
                 disabled={!enabledRobots}
                 selectedOptions={[selectedRobot]}
