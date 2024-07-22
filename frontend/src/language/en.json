@@ -256,5 +256,6 @@
     "Failed to send robots to a safe zone": "Failed to send robots to a safe zone",
     "Failed to release robots from safe zone": "Failed to release robots from safe zone",
     "Failed to send robot {0} home": "Failed to send robot {0} to starting position",
-    "Failed to update inspection": "Failed to update inspection"
+    "Failed to update inspection": "Failed to update inspection",
+    "Battery": "Battery"
 }

@@ -40,6 +40,8 @@ import {
     play,
     edit,
     info_circle,
+    blocked,
+    close_circle_outlined,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -83,6 +85,8 @@ Icon.add({
     play,
     edit,
     info_circle,
+    blocked,
+    close_circle_outlined,
 })
 
 export enum Icons {
@@ -126,4 +130,6 @@ export enum Icons {
     PlayTriangle = 'play',
     Edit = 'edit',
     Info = 'info_circle',
+    Blocked = 'blocked',
+    ClosedCircleOutlined = 'close_circle_outlined',
 }

@@ -17,6 +17,9 @@ const StyledImage = styled.img<{ $height?: string }>`
     object-fit: contain;
     max-height: ${(props) => props.$height};
     max-width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 12px 5px 12px 5px;
 `
 
 const StyledIcon = styled(Icon)`
