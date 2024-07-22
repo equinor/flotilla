@@ -14,12 +14,13 @@ import { config } from 'config'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import assetImage from 'mediaAssets/assetPage.jpg'
 
 const Centered = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 5rem;
+    padding-top: 10px;
 `
 const StyledAssetSelection = styled.div`
     display: flex;
@@ -31,6 +32,22 @@ const StyledCheckbox = styled(Checkbox)`
 `
 const StyledButton = styled(Button)`
     justify-content: center;
+`
+const StyledImage = styled.img`
+    width: 100vw;
+    object-fit: cover;
+    height: 500px;
+
+    @media (max-width: 500px) {
+        height: 400px;
+    }
+`
+const StyledContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 80px;
+    gap: 80px;
 `
 
 const handleLogin = (instance: IPublicClientApplication) => {
@@ -54,10 +71,10 @@ export const AssetSelectionPage = () => {
             {isAuthenticated ? (
                 <>
                     <Header page={'root'} />
-                    <Centered>
+                    <StyledContent>
                         <InstallationPicker />
-                        {/* TODO! ADD image here*/}
-                    </Centered>
+                        <StyledImage src={assetImage} />
+                    </StyledContent>
                 </>
             ) : (
                 <Centered>
