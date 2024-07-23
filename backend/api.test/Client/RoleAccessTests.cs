@@ -121,7 +121,7 @@ namespace Api.Test
             Assert.True(plantResponse.IsSuccessStatusCode);
 
             var plant = await plantResponse.Content.ReadFromJsonAsync<Plant>(_serializerOptions);
-            Assert.True(plant != null);
+            Assert.NotNull(plant);
 
             // Act
             string getPlantUrl = $"/plants/{plant.Id}";
@@ -244,7 +244,7 @@ namespace Api.Test
             Assert.True(deckResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
-            Assert.True(area != null);
+            Assert.NotNull(area);
 
             // Act
             string getAreaUrl = $"/areas/{area.Id}";
@@ -253,7 +253,7 @@ namespace Api.Test
             // Assert
             Assert.True(sameAreaResponse.IsSuccessStatusCode);
             var sameArea = await sameAreaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
-            Assert.True(sameArea != null);
+            Assert.NotNull(sameArea);
             Assert.Equal(sameArea.Id, area.Id);
         }
 
@@ -351,7 +351,7 @@ namespace Api.Test
             Assert.True(deckResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
-            Assert.True(area != null);
+            Assert.NotNull(area);
         }
     }
 }

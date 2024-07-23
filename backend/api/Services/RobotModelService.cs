@@ -1,7 +1,6 @@
 ﻿using Api.Database.Context;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Services
 {
@@ -33,7 +32,7 @@ namespace Api.Services
         {
             _context = context;
 
-            if (ReadAll().Result.IsNullOrEmpty())
+            if (!ReadAll().Result.Any())
             {
                 // If no models in database, add default ones
                 // Robot models are essentially database enums and should just be added to all databases

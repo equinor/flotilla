@@ -47,7 +47,7 @@ namespace Api.Test
             var response = await _client.GetAsync(url);
             var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(_serializerOptions);
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(robots != null);
+            Assert.NotNull(robots);
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace Api.Test
             var areaResponse = await _client.GetAsync(areaUrl);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var areas = await areaResponse.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
-            Assert.True(areas != null);
+            Assert.NotNull(areas);
             var area = areas[0];
 
             // Installation
@@ -106,7 +106,7 @@ namespace Api.Test
             var installationResponse = await _client.PostAsync(installationUrl, installationContent);
             Assert.True(installationResponse.IsSuccessStatusCode);
             var wrongInstallation = await installationResponse.Content.ReadFromJsonAsync<Installation>(_serializerOptions);
-            Assert.True(wrongInstallation != null);
+            Assert.NotNull(wrongInstallation);
 
             // Arrange - Create robot
             var robotQuery = new CreateRobotQuery

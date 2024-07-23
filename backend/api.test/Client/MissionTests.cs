@@ -63,7 +63,7 @@ namespace Api.Test
             var installationResponse = await _client.GetAsync(installationUrl);
             Assert.True(installationResponse.IsSuccessStatusCode);
             var installationResponses = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
-            Assert.True(installationResponses != null);
+            Assert.NotNull(installationResponses);
             return installationResponses.Where((i) => i.InstallationCode.Equals(installationCode, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
         }
 
@@ -73,14 +73,14 @@ namespace Api.Test
             var installationResponse = await _client.GetAsync(installationUrl);
             Assert.True(installationResponse.IsSuccessStatusCode);
             var installationResponses = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
-            Assert.True(installationResponses != null);
+            Assert.NotNull(installationResponses);
             if (!installationResponses.Where((i) => i.InstallationCode.Equals(installationCode, StringComparison.OrdinalIgnoreCase)).Any()) return null;
 
             string plantUrl = "/plants";
             var plantResponse = await _client.GetAsync(plantUrl);
             Assert.True(plantResponse.IsSuccessStatusCode);
             var plantResponses = await plantResponse.Content.ReadFromJsonAsync<List<Plant>>(_serializerOptions);
-            Assert.True(plantResponses != null);
+            Assert.NotNull(plantResponses);
             return plantResponses.Where((p) => p.PlantCode.Equals(plantCode, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
         }
 
@@ -90,21 +90,21 @@ namespace Api.Test
             var installationResponse = await _client.GetAsync(installationUrl);
             Assert.True(installationResponse.IsSuccessStatusCode);
             var installationResponses = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
-            Assert.True(installationResponses != null);
+            Assert.NotNull(installationResponses);
             if (!installationResponses.Where((i) => i.InstallationCode.Equals(installationCode.ToLower(CultureInfo.CurrentCulture), StringComparison.OrdinalIgnoreCase)).Any()) return null;
 
             string plantUrl = "/plants";
             var plantResponse = await _client.GetAsync(plantUrl);
             Assert.True(plantResponse.IsSuccessStatusCode);
             var plantResponses = await plantResponse.Content.ReadFromJsonAsync<List<Plant>>(_serializerOptions);
-            Assert.True(plantResponses != null);
+            Assert.NotNull(plantResponses);
             if (!plantResponses.Where((p) => p.PlantCode.Equals(plantCode.ToLower(CultureInfo.CurrentCulture), StringComparison.OrdinalIgnoreCase)).Any()) return null;
 
             string deckUrl = "/decks";
             var deckResponse = await _client.GetAsync(deckUrl);
             Assert.True(deckResponse.IsSuccessStatusCode);
             var deckResponses = await deckResponse.Content.ReadFromJsonAsync<List<DeckResponse>>(_serializerOptions);
-            Assert.True(deckResponses != null);
+            Assert.NotNull(deckResponses);
             return deckResponses.Where((d) => d.DeckName.Equals(deckName.ToLower(CultureInfo.CurrentCulture), StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
         }
 
@@ -114,7 +114,7 @@ namespace Api.Test
             var areaResponse = await _client.GetAsync(areaUrl);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var areaResponses = await areaResponse.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
-            Assert.True(areaResponses != null);
+            Assert.NotNull(areaResponses);
             Assert.False(areaResponses.Where((a) => a.AreaName == areaName).Any(), $"Duplicate area name detected: {areaName}");
         }
 
@@ -124,7 +124,7 @@ namespace Api.Test
             var installationResponse = await _client.GetAsync(installationUrl);
             Assert.True(installationResponse.IsSuccessStatusCode);
             var installationResponses = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
-            Assert.True(installationResponses != null);
+            Assert.NotNull(installationResponses);
             Assert.False(installationResponses.Where((i) => i.InstallationCode == installationCode).Any(), $"Duplicate installation name detected: {installationCode}");
         }
 
@@ -269,7 +269,7 @@ namespace Api.Test
             var response = await _client.GetAsync(robotUrl);
             Assert.True(response.IsSuccessStatusCode, $"Failed to get robot from path: {robotUrl}, with status code {response.StatusCode}");
             var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
-            Assert.True(robots != null);
+            Assert.NotNull(robots);
             var robot = robots.Where(robot => robot.Name == "Shockwave").First();
             string robotId = robot.Id;
 
@@ -302,9 +302,9 @@ namespace Api.Test
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            Assert.True(missionRun != null);
-            Assert.True(missionRun.Id != null);
-            Assert.True(missionRun.Status == MissionStatus.Pending);
+            Assert.NotNull(missionRun);
+            Assert.NotNull(missionRun.Id);
+            Assert.Equal(MissionStatus.Pending, missionRun.Status);
         }
 
         [Fact]
@@ -316,7 +316,7 @@ namespace Api.Test
             var robotResponse = await _client.GetAsync(robotUrl);
             Assert.True(robotResponse.IsSuccessStatusCode);
             var robots = await robotResponse.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
-            Assert.True(robots != null);
+            Assert.NotNull(robots);
             var robot = robots.Where(robot => robot.Name == "Shockwave").First();
             string robotId = robot.Id;
 
@@ -351,7 +351,7 @@ namespace Api.Test
                 _serializerOptions
             );
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(missionRuns != null);
+            Assert.NotNull(missionRuns);
             int missionRunsBefore = missionRuns.Count;
 
             response = await _client.PostAsync(missionsUrl, content);
@@ -362,17 +362,17 @@ namespace Api.Test
             response = await _client.PostAsync(missionsUrl, content);
             var missionRun1 = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(missionRun1 != null);
+            Assert.NotNull(missionRun1);
 
             response = await _client.PostAsync(missionsUrl, content);
             var missionRun2 = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(missionRun2 != null);
+            Assert.NotNull(missionRun2);
 
             response = await _client.PostAsync(missionsUrl, content);
             var missionRun3 = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(missionRun3 != null);
+            Assert.NotNull(missionRun3);
 
             response = await _client.GetAsync(urlMissionRuns);
             missionRuns = await response.Content.ReadFromJsonAsync<List<MissionRun>>(
@@ -381,10 +381,10 @@ namespace Api.Test
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.True(missionRuns != null);
-            Assert.True(missionRuns.Where((m) => m.Id == missionRun1.Id).ToList().Count == 1);
-            Assert.True(missionRuns.Where((m) => m.Id == missionRun2.Id).ToList().Count == 1);
-            Assert.True(missionRuns.Where((m) => m.Id == missionRun3.Id).ToList().Count == 1);
+            Assert.NotNull(missionRuns);
+            Assert.Single(missionRuns.Where((m) => m.Id == missionRun1.Id).ToList());
+            Assert.Single(missionRuns.Where((m) => m.Id == missionRun2.Id).ToList());
+            Assert.Single(missionRuns.Where((m) => m.Id == missionRun3.Id).ToList());
         }
 
         [Fact]
@@ -521,7 +521,7 @@ namespace Api.Test
             var missionDefinitionsResponse = await _client.GetAsync(missionDefinitionsUrl);
             var missionDefinitions = await missionDefinitionsResponse.Content.ReadFromJsonAsync<List<MissionDefinition>>(_serializerOptions);
             Assert.NotNull(missionDefinitions);
-            Assert.True(missionDefinitions.Where(m => m.Id == missionId1).Count() == 1);
+            Assert.Single(missionDefinitions.Where(m => m.Id == missionId1));
         }
 
         [Fact]
@@ -583,10 +583,10 @@ namespace Api.Test
             var response = await _client.PostAsync(customMissionsUrl, content);
             Assert.True(response.IsSuccessStatusCode);
             var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            Assert.True(missionRun != null);
-            Assert.True(missionRun.MissionId != null);
-            Assert.True(missionRun.Id != null);
-            Assert.True(missionRun.Status == MissionStatus.Pending);
+            Assert.NotNull(missionRun);
+            Assert.NotNull(missionRun.MissionId);
+            Assert.NotNull(missionRun.Id);
+            Assert.Equal(MissionStatus.Pending, missionRun.Status);
 
             // Arrange - Schedule missions from mission definition
             var scheduleQuery1 = new ScheduleMissionQuery
@@ -659,7 +659,7 @@ namespace Api.Test
             var response = await _client.GetAsync(robotUrl);
             Assert.True(response.IsSuccessStatusCode);
             var robots = await response.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
-            Assert.True(robots != null);
+            Assert.NotNull(robots);
             var robot = robots.Where(robot => robot.Name == "Shockwave").First();
             string robotId = robot.Id;
             int echoMissionId = 1; // Corresponds to mock in EchoServiceMock.cs
@@ -770,7 +770,7 @@ namespace Api.Test
             // Act
             string customMissionsUrl = "/missions/custom";
             var response = await _client.PostAsync(customMissionsUrl, content);
-            Assert.True(response.StatusCode == HttpStatusCode.Conflict);
+            Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
 
         [Fact]
@@ -844,7 +844,7 @@ namespace Api.Test
             Assert.True(missionResponse.IsSuccessStatusCode);
             var missionRun = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
             Assert.NotNull(missionRun);
-            Assert.True(missionRun.Status == MissionStatus.Pending);
+            Assert.Equal(MissionStatus.Pending, missionRun.Status);
 
             await Task.Delay(2000);
             string missionRunByIdUrl = $"/missions/runs/{missionRun.Id}";
@@ -852,7 +852,7 @@ namespace Api.Test
             Assert.True(missionByIdResponse.IsSuccessStatusCode);
             var missionRunAfterUpdate = await missionByIdResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
             Assert.NotNull(missionRunAfterUpdate);
-            Assert.True(missionRunAfterUpdate.Status == MissionStatus.Aborted);
+            Assert.Equal(MissionStatus.Aborted, missionRunAfterUpdate.Status);
         }
     }
 }
