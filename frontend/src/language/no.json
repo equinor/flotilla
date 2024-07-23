@@ -257,5 +257,6 @@
     "Failed to release robots from safe zone": "Kunne ikke slippe roboter ut av trygg sone",
     "Failed to send robot {0} home": "Kunne ikke sende robot {0} til startposisjon",
     "Failed to update inspection": "Kunne ikke oppdatere inspeksjon",
-    "Battery": "Batteri"
+    "Battery": "Batteri",
+    "Recharging": "Lader"
 }

@@ -11,6 +11,7 @@ export enum RobotStatus {
     Offline = 'Offline',
     Blocked = 'Blocked',
     SafeZone = 'Safe Zone',
+    Recharging = 'Recharging',
     ConnectionIssues = 'Connection Issues',
 }
 

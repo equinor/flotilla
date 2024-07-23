@@ -91,6 +91,7 @@ export const RobotPage = () => {
                             <StatusContent $alignItems="start">
                                 <RobotStatusChip
                                     status={selectedRobot.status}
+                                    flotillaStatus={selectedRobot.flotillaStatus}
                                     isarConnected={selectedRobot.isarConnected}
                                 />
 
