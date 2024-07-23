@@ -14,6 +14,12 @@ export enum RobotStatus {
     ConnectionIssues = 'Connection Issues',
 }
 
+export enum RobotFlotillaStatus {
+    Normal = 'Normal',
+    SafeZone = 'SafeZone',
+    Recharging = 'Recharging',
+}
+
 export interface Robot {
     id: string
     name?: string
@@ -33,7 +39,7 @@ export interface Robot {
     videoStreams?: VideoStream[]
     isarUri?: string
     currentArea?: Area
-    missionQueueFrozen?: boolean
+    flotillaStatus?: RobotFlotillaStatus
 }
 export const placeholderRobot: Robot = {
     id: 'placeholderRobotId',

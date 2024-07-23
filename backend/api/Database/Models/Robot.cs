@@ -118,6 +118,9 @@ namespace Api.Database.Models
         public RobotStatus Status { get; set; }
 
         [Required]
+        public RobotFlotillaStatus FlotillaStatus { get; set; } = RobotFlotillaStatus.Normal;
+
+        [Required]
         public Pose Pose { get; set; }
 
         public string? CurrentMissionId { get; set; }
@@ -144,6 +147,13 @@ namespace Api.Database.Models
         Busy,
         Offline,
         Blocked,
+    }
+
+    public enum RobotFlotillaStatus
+    {
+        Normal,
+        SafeZone,
+        Recharging,
     }
 
     public enum RobotCapabilitiesEnum
