@@ -3,9 +3,9 @@ namespace Api.Services
 {
     public interface IEmergencyActionService
     {
-        public void TriggerEmergencyButtonPressedForRobot(EmergencyButtonPressedForRobotEventArgs e);
+        public void SendRobotToSafezone(RobotEmergencyEventArgs e);
 
-        public void TriggerEmergencyButtonDepressedForRobot(EmergencyButtonPressedForRobotEventArgs e);
+        public void ReleaseRobotFromSafezone(RobotEmergencyEventArgs e);
     }
 
     public class EmergencyActionService : IEmergencyActionService
@@ -15,28 +15,29 @@ namespace Api.Services
         {
         }
 
-        public void TriggerEmergencyButtonPressedForRobot(EmergencyButtonPressedForRobotEventArgs e)
+        public void SendRobotToSafezone(RobotEmergencyEventArgs e)
         {
-            OnEmergencyButtonPressedForRobot(e);
+            OnSendRobotToSafezoneTriggered(e);
         }
 
-        public void TriggerEmergencyButtonDepressedForRobot(EmergencyButtonPressedForRobotEventArgs e)
+        public void ReleaseRobotFromSafezone(RobotEmergencyEventArgs e)
         {
-            OnEmergencyButtonDepressedForRobot(e);
+            OnReleaseRobotFromSafezoneTriggered(e);
         }
 
-        public static event EventHandler<EmergencyButtonPressedForRobotEventArgs>? EmergencyButtonPressedForRobot;
+        public static event EventHandler<RobotEmergencyEventArgs>? SendRobotToSafezoneTriggered;
 
-        protected virtual void OnEmergencyButtonPressedForRobot(EmergencyButtonPressedForRobotEventArgs e)
+        protected virtual void OnSendRobotToSafezoneTriggered(RobotEmergencyEventArgs e)
         {
-            EmergencyButtonPressedForRobot?.Invoke(this, e);
+            SendRobotToSafezoneTriggered?.Invoke(this, e);
         }
 
-        public static event EventHandler<EmergencyButtonPressedForRobotEventArgs>? EmergencyButtonDepressedForRobot;
+        public static event EventHandler<RobotEmergencyEventArgs>? ReleaseRobotFromSafezoneTriggered;
 
-        protected virtual void OnEmergencyButtonDepressedForRobot(EmergencyButtonPressedForRobotEventArgs e)
+        protected virtual void OnReleaseRobotFromSafezoneTriggered(RobotEmergencyEventArgs e)
         {
-            EmergencyButtonDepressedForRobot?.Invoke(this, e);
+            ReleaseRobotFromSafezoneTriggered?.Invoke(this, e);
         }
+
     }
 }

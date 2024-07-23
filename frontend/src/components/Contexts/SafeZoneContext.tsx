@@ -4,6 +4,7 @@ import { useInstallationContext } from './InstallationContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { SafeZoneAlertContent } from 'components/Alerts/SafeZoneAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { RobotFlotillaStatus } from 'models/Robot'
 
 interface ISafeZoneContext {
     safeZoneStatus: boolean
@@ -32,8 +33,7 @@ export const SafeZoneProvider: FC<Props> = ({ children }) => {
                     robot.currentInstallation.installationCode.toLocaleLowerCase() ===
                     installationCode.toLocaleLowerCase()
             )
-            .map((robot) => robot.missionQueueFrozen)
-            .filter((status) => status === true)
+            .filter((robot) => robot.flotillaStatus === RobotFlotillaStatus.SafeZone)
 
         if (missionQueueFozenStatus.length > 0 && safeZoneStatus === false) {
             setSafeZoneStatus((oldStatus) => !oldStatus)

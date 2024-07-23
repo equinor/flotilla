@@ -468,8 +468,8 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             // Act
-            var eventArgs = new EmergencyButtonPressedForRobotEventArgs(robot.Id);
-            _emergencyActionService.RaiseEvent(nameof(EmergencyActionService.EmergencyButtonPressedForRobot), eventArgs);
+            var eventArgs = new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.SafeZone);
+            _emergencyActionService.RaiseEvent(nameof(EmergencyActionService.SendRobotToSafezoneTriggered), eventArgs);
 
             Thread.Sleep(1000);
 

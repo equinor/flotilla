@@ -34,7 +34,7 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                emergencyActionService.TriggerEmergencyButtonPressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id));
+                emergencyActionService.SendRobotToSafezone(new RobotEmergencyEventArgs(robot.Id, Database.Models.RobotFlotillaStatus.SafeZone));
 
             }
 
@@ -62,7 +62,7 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                emergencyActionService.TriggerEmergencyButtonDepressedForRobot(new EmergencyButtonPressedForRobotEventArgs(robot.Id));
+                emergencyActionService.ReleaseRobotFromSafezone(new RobotEmergencyEventArgs(robot.Id, Database.Models.RobotFlotillaStatus.Normal));
             }
 
             return NoContent();

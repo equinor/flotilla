@@ -32,7 +32,7 @@ namespace Api.Controllers.Models
 
         public bool Deprecated { get; set; }
 
-        public bool MissionQueueFrozen { get; set; }
+        public RobotFlotillaStatus FlotillaStatus { get; set; }
 
         public RobotStatus Status { get; set; }
 
@@ -65,7 +65,7 @@ namespace Api.Controllers.Models
             Port = robot.Port;
             IsarConnected = robot.IsarConnected;
             Deprecated = robot.Deprecated;
-            MissionQueueFrozen = robot.MissionQueueFrozen;
+            FlotillaStatus = robot.FlotillaStatus;
             Status = robot.Status;
             Pose = robot.Pose;
             CurrentMissionId = robot.CurrentMissionId;

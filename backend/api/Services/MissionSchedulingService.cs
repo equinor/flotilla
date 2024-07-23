@@ -128,7 +128,7 @@ namespace Api.Services
                 return;
             }
 
-            if ((robot.IsRobotPressureTooLow() || robot.IsRobotBatteryTooLow()) && !missionRun.IsReturnHomeMission())
+            if ((robot.IsRobotPressureTooLow() || robot.IsRobotBatteryTooLow()) && !(missionRun.IsReturnHomeMission() || missionRun.IsEmergencyMission()))
             {
                 missionRun = await HandleBatteryAndPressureLevel(robot);
                 if (missionRun == null) { return; }
@@ -381,13 +381,17 @@ namespace Api.Services
                     Area = missionRun.Area,
                     Status = MissionStatus.Pending,
                     DesiredStartTime = DateTime.UtcNow,
-                    Tasks = missionRun.Tasks.Select(t => new MissionTask(t)).ToList(),
+                    Tasks = missionRun.Tasks
+                        .Where(t => !new List<Database.Models.TaskStatus>
+                            {Database.Models.TaskStatus.Successful, Database.Models.TaskStatus.Failed}
+                            .Contains(t.Status))
+                        .Select(t => new MissionTask(t)).ToList(),
                     Map = new MapMetadata()
                 };
 
                 try
                 {
-                    await missionRunService.Create(missionRun);
+                    await missionRunService.Create(newMissionRun, triggerCreatedMissionRunEvent: false);
                 }
                 catch (UnsupportedRobotCapabilityException)
                 {

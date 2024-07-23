@@ -43,8 +43,8 @@ namespace Api.EventHandlers
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
             MissionSchedulingService.RobotAvailable += OnRobotAvailable;
             MissionSchedulingService.LocalizationMissionSuccessful += OnLocalizationMissionSuccessful;
-            EmergencyActionService.EmergencyButtonPressedForRobot += OnEmergencyButtonPressedForRobot;
-            EmergencyActionService.EmergencyButtonDepressedForRobot += OnEmergencyButtonDepressedForRobot;
+            EmergencyActionService.SendRobotToSafezoneTriggered += OnSendRobotToSafezoneTriggered;
+            EmergencyActionService.ReleaseRobotFromSafezoneTriggered += OnReleaseRobotFromSafezoneTriggered;
         }
 
         public override void Unsubscribe()
@@ -52,8 +52,8 @@ namespace Api.EventHandlers
             MissionRunService.MissionRunCreated -= OnMissionRunCreated;
             MissionSchedulingService.RobotAvailable -= OnRobotAvailable;
             MissionSchedulingService.LocalizationMissionSuccessful -= OnLocalizationMissionSuccessful;
-            EmergencyActionService.EmergencyButtonPressedForRobot -= OnEmergencyButtonPressedForRobot;
-            EmergencyActionService.EmergencyButtonDepressedForRobot -= OnEmergencyButtonDepressedForRobot;
+            EmergencyActionService.SendRobotToSafezoneTriggered -= OnSendRobotToSafezoneTriggered;
+            EmergencyActionService.ReleaseRobotFromSafezoneTriggered -= OnReleaseRobotFromSafezoneTriggered;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -153,13 +153,26 @@ namespace Api.EventHandlers
             finally { _startMissionSemaphore.Release(); }
         }
 
-        private async void OnEmergencyButtonPressedForRobot(object? sender, EmergencyButtonPressedForRobotEventArgs e)
+        private async void OnSendRobotToSafezoneTriggered(object? sender, RobotEmergencyEventArgs e)
         {
             _logger.LogInformation("Triggered EmergencyButtonPressed event for robot ID: {RobotId}", e.RobotId);
             var robot = await RobotService.ReadById(e.RobotId);
             if (robot == null)
             {
                 _logger.LogError("Robot with ID: {RobotId} was not found in the database", e.RobotId);
+                return;
+            }
+
+            if (robot.FlotillaStatus == e.RobotFlotillaStatus)
+            {
+                _logger.LogInformation("Did not send robot to safezone since robot {RobotId} was already in the correct state", e.RobotId);
+                return;
+            }
+
+            try { await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus ?? RobotFlotillaStatus.Normal); }
+            catch (Exception ex)
+            {
+                _logger.LogError("Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}", e.RobotId, ex.Message);
                 return;
             }
 
@@ -221,7 +234,7 @@ namespace Api.EventHandlers
             finally { _startMissionSemaphore.Release(); }
         }
 
-        private async void OnEmergencyButtonDepressedForRobot(object? sender, EmergencyButtonPressedForRobotEventArgs e)
+        private async void OnReleaseRobotFromSafezoneTriggered(object? sender, RobotEmergencyEventArgs e)
         {
             _logger.LogInformation("Triggered EmergencyButtonPressed event for robot ID: {RobotId}", e.RobotId);
             var robot = await RobotService.ReadById(e.RobotId);
@@ -231,8 +244,21 @@ namespace Api.EventHandlers
                 return;
             }
 
+            if (robot.FlotillaStatus == e.RobotFlotillaStatus)
+            {
+                _logger.LogInformation("Did not release robot from safezone since robot {RobotId} was already in the correct state", e.RobotId);
+                return;
+            }
+
             try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
             catch (RobotNotFoundException) { return; }
+
+            try { await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus ?? RobotFlotillaStatus.Normal); }
+            catch (Exception ex)
+            {
+                _logger.LogError("Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}", e.RobotId, ex.Message);
+                return;
+            }
 
             _startMissionSemaphore.WaitOne();
             try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
@@ -268,8 +294,6 @@ namespace Api.EventHandlers
                     return localizationMission?.Area ?? null;
                 }
 
-                _logger.LogError("Robot {RobotName} is not localized and no localization mission is ongoing.", robot.Name);
-                SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} has not been localised.");
                 return null;
             }
 

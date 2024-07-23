@@ -45,6 +45,7 @@ namespace Api.EventHandlers
         private ISignalRService SignalRService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
         private ITaskDurationService TaskDurationService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITaskDurationService>();
         private ITeamsMessageService TeamsMessageService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ITeamsMessageService>();
+        private IEmergencyActionService EmergencyActionService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IEmergencyActionService>();
 
         public override void Subscribe()
         {
@@ -424,13 +425,39 @@ namespace Api.EventHandlers
         private async void OnIsarBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var batteryStatus = (IsarBatteryMessage)mqttArgs.Message;
-            await BatteryTimeseriesService.AddBatteryEntry(batteryStatus.BatteryLevel, batteryStatus.IsarId);
+            var robot = await BatteryTimeseriesService.AddBatteryEntry(batteryStatus.BatteryLevel, batteryStatus.IsarId);
+            if (robot == null) return;
+            robot.BatteryLevel = batteryStatus.BatteryLevel;
+
+            if (robot.FlotillaStatus == RobotFlotillaStatus.Normal && robot.IsRobotBatteryTooLow())
+            {
+                _logger.LogInformation("Sending robot '{RobotName}' to its safe zone as its battery level is too low.", robot.Name);
+                EmergencyActionService.SendRobotToSafezone(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Recharging));
+            }
+            else if (robot.FlotillaStatus == RobotFlotillaStatus.Recharging && !(robot.IsRobotBatteryTooLow() || robot.IsRobotPressureTooHigh() || robot.IsRobotPressureTooLow()))
+            {
+                _logger.LogInformation("Releasing robot '{RobotName}' from its safe zone as its battery and pressure levels are good enough to run missions.", robot.Name);
+                EmergencyActionService.ReleaseRobotFromSafezone(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Normal));
+            }
         }
 
         private async void OnIsarPressureUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
             var pressureStatus = (IsarPressureMessage)mqttArgs.Message;
-            await PressureTimeseriesService.AddPressureEntry(pressureStatus.PressureLevel, pressureStatus.IsarId);
+            var robot = await PressureTimeseriesService.AddPressureEntry(pressureStatus.PressureLevel, pressureStatus.IsarId);
+            if (robot == null) return;
+            robot.PressureLevel = pressureStatus.PressureLevel;
+
+            if (robot.FlotillaStatus == RobotFlotillaStatus.Normal && (robot.IsRobotPressureTooLow() || robot.IsRobotPressureTooHigh()))
+            {
+                _logger.LogInformation("Sending robot '{RobotName}' to its safe zone as its pressure is too low or high.", robot.Name);
+                EmergencyActionService.SendRobotToSafezone(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Recharging));
+            }
+            else if (robot.FlotillaStatus == RobotFlotillaStatus.Recharging && !(robot.IsRobotBatteryTooLow() || robot.IsRobotPressureTooHigh() || robot.IsRobotPressureTooLow()))
+            {
+                _logger.LogInformation("Releasing robot '{RobotName}' from its safe zone as its battery and pressure levels are good enough to run missions.", robot.Name);
+                EmergencyActionService.ReleaseRobotFromSafezone(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Normal));
+            }
         }
 
         private async void OnIsarPoseUpdate(object? sender, MqttReceivedArgs mqttArgs)

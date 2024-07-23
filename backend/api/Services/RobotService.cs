@@ -28,6 +28,7 @@ namespace Api.Services
         public Task<Robot> UpdateCurrentArea(string robotId, string? areaId);
         public Task<Robot> UpdateDeprecated(string robotId, bool deprecated);
         public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
+        public Task<Robot> UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status);
         public Task<Robot?> Delete(string id);
         public Task HandleLosingConnectionToIsar(string robotId);
     }
@@ -274,6 +275,13 @@ namespace Api.Services
         public async Task<Robot> UpdateDeprecated(string robotId, bool deprecated) { return await UpdateRobotProperty(robotId, "Deprecated", deprecated); }
 
         public async Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen) { return await UpdateRobotProperty(robotId, "MissionQueueFrozen", missionQueueFrozen); }
+
+        public async Task<Robot> UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status)
+        {
+            var robot = await UpdateRobotProperty(robotId, "FlotillaStatus", status);
+            ThrowIfRobotIsNull(robot, robotId);
+            return robot;
+        }
 
         public async Task<IEnumerable<Robot>> ReadAll() { return await GetRobotsWithSubModels().ToListAsync(); }
 
