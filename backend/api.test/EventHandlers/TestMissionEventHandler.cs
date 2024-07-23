@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -146,7 +147,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void ScheduledMissionStartedWhenSystemIsAvailable()
+        public async Task ScheduledMissionStartedWhenSystemIsAvailable()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -166,7 +167,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void SecondScheduledMissionQueuedIfRobotIsBusy()
+        public async Task SecondScheduledMissionQueuedIfRobotIsBusy()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -192,7 +193,7 @@ namespace Api.Test.EventHandlers
 #pragma warning disable xUnit1004
         [Fact(Skip = "Skipping until a solution has been found for ExecuteUpdate in tests")]
 #pragma warning restore xUnit1004
-        public async void NewMissionIsStartedWhenRobotBecomesAvailable()
+        public async Task NewMissionIsStartedWhenRobotBecomesAvailable()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -224,7 +225,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void ReturnToHomeMissionIsStartedIfQueueIsEmptyWhenRobotBecomesAvailable()
+        public async Task ReturnToHomeMissionIsStartedIfQueueIsEmptyWhenRobotBecomesAvailable()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -260,7 +261,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void MissionRunIsStartedForOtherAvailableRobotIfOneRobotHasAnOngoingMissionRun()
+        public async Task MissionRunIsStartedForOtherAvailableRobotIfOneRobotHasAnOngoingMissionRun()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -292,7 +293,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void QueuedMissionsAreAbortedWhenLocalizationFails()
+        public async Task QueuedMissionsAreAbortedWhenLocalizationFails()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -300,7 +301,7 @@ namespace Api.Test.EventHandlers
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
-            var localizationMissionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString(), TaskStatus.Failed);
+            var localizationMissionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString(), Api.Database.Models.TaskStatus.Failed);
             var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
 
             Thread.Sleep(100);
@@ -325,7 +326,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void QueuedMissionsAreNotAbortedWhenRobotAvailableHappensAtTheSameTimeAsOnIsarMissionCompleted()
+        public async Task QueuedMissionsAreNotAbortedWhenRobotAvailableHappensAtTheSameTimeAsOnIsarMissionCompleted()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -368,7 +369,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void QueuedContinuesWhenOnIsarStatusHappensAtTheSameTimeAsOnIsarMissionCompleted()
+        public async Task QueuedContinuesWhenOnIsarStatusHappensAtTheSameTimeAsOnIsarMissionCompleted()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -411,13 +412,13 @@ namespace Api.Test.EventHandlers
             // Assert
             var postTestMissionRun1 = await _missionRunService.ReadById(missionRun1.Id);
             Assert.Equal(MissionRunType.Localization, postTestMissionRun1!.MissionRunType);
-            Assert.Equal(TaskStatus.Successful, postTestMissionRun1!.Tasks[0].Status);
+            Assert.Equal(Api.Database.Models.TaskStatus.Successful, postTestMissionRun1!.Tasks[0].Status);
             var postTestMissionRun2 = await _missionRunService.ReadById(missionRun2.Id);
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun2!.Status);
         }
 
         [Fact]
-        public async void LocalizationMissionCompletesAfterPressingSendToSafeZoneButton()
+        public async Task LocalizationMissionCompletesAfterPressingSendToSafeZoneButton()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -435,7 +436,7 @@ namespace Api.Test.EventHandlers
 
             Thread.Sleep(1000);
 
-            // Assert 
+            // Assert
             var updatedRobot = await _robotService.ReadById(robot.Id);
             Assert.True(updatedRobot?.MissionQueueFrozen);
 
@@ -444,7 +445,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void ReturnHomeMissionNotScheduledIfRobotIsNotLocalized()
+        public async Task ReturnHomeMissionNotScheduledIfRobotIsNotLocalized()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -458,7 +459,7 @@ namespace Api.Test.EventHandlers
 
             Thread.Sleep(100);
 
-            // Assert 
+            // Assert
             bool isRobotLocalized = await _localizationService.RobotIsLocalized(robot.Id);
             Assert.False(isRobotLocalized);
             Assert.False(await _missionRunService.PendingOrOngoingReturnToHomeMissionRunExists(robot.Id));
@@ -466,7 +467,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async void ReturnHomeMissionCancelledIfNewMissionScheduled()
+        public async Task ReturnHomeMissionCancelledIfNewMissionScheduled()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -485,14 +486,14 @@ namespace Api.Test.EventHandlers
 
             Thread.Sleep(500);
 
-            // Assert 
+            // Assert
             var updatedReturnHomeMission = await _missionRunService.ReadById(returnToHomeMission.Id);
             Assert.True(updatedReturnHomeMission?.Status.Equals(MissionStatus.Cancelled));
-            Assert.True(updatedReturnHomeMission?.Tasks.FirstOrDefault()?.Status.Equals(TaskStatus.Cancelled));
+            Assert.True(updatedReturnHomeMission?.Tasks.FirstOrDefault()?.Status.Equals(Api.Database.Models.TaskStatus.Cancelled));
         }
 
         [Fact]
-        public async void ReturnHomeMissionNotCancelledIfNewMissionScheduledInDifferentDeck()
+        public async Task ReturnHomeMissionNotCancelledIfNewMissionScheduledInDifferentDeck()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -513,7 +514,7 @@ namespace Api.Test.EventHandlers
 
             Thread.Sleep(500);
 
-            // Assert 
+            // Assert
             var updatedReturnHomeMission = await _missionRunService.ReadById(returnToHomeMission.Id);
             Assert.True(updatedReturnHomeMission?.Status.Equals(MissionStatus.Ongoing));
         }

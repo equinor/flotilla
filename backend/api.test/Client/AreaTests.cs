@@ -133,7 +133,7 @@ namespace Api.Test
             Assert.True(deckResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
-            Assert.True(area != null);
+            Assert.NotNull(area);
         }
 
         [Fact]
@@ -145,7 +145,7 @@ namespace Api.Test
             var robotResponse = await _client.GetAsync(robotUrl);
             Assert.True(robotResponse.IsSuccessStatusCode);
             var robots = await robotResponse.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
-            Assert.True(robots != null);
+            Assert.NotNull(robots);
             var robot = robots.Where(robot => robot.Name == "Shockwave").First();
             string robotId = robot.Id;
 
@@ -154,7 +154,7 @@ namespace Api.Test
             var installationResponse = await _client.GetAsync(installationUrl);
             Assert.True(installationResponse.IsSuccessStatusCode);
             var installations = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
-            Assert.True(installations != null);
+            Assert.NotNull(installations);
             var installation = installations.Where(installation => installation.InstallationCode == robot.CurrentInstallation?.InstallationCode).First();
 
             // Area
@@ -162,7 +162,7 @@ namespace Api.Test
             var areaResponse = await _client.GetAsync(areaUrl);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var areas = await areaResponse.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
-            Assert.True(areas != null);
+            Assert.NotNull(areas);
             var area = areas.Where(area => area.InstallationCode == installation.InstallationCode).First();
             string areaId = area.Id;
 
@@ -229,7 +229,7 @@ namespace Api.Test
             var areaResponse = await _client.GetAsync(areaUrl);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var areaResponses = await areaResponse.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
-            Assert.True(areaResponses != null);
+            Assert.NotNull(areaResponses);
             var area = areaResponses[0];
             string areaName = area.AreaName;
             string installationCode = area.InstallationCode;
@@ -261,7 +261,7 @@ namespace Api.Test
             areaResponse = await _client.PostAsync(addSafePositionUrl, content);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var areaContent = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
-            Assert.True(areaContent != null);
+            Assert.NotNull(areaContent);
 
             // Act
             string goToSafePositionUrl = $"/emergency-action/{installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone";
@@ -282,7 +282,7 @@ namespace Api.Test
             var deckResponse = await _client.GetAsync(deckUrl);
             Assert.True(deckResponse.IsSuccessStatusCode);
             var decks = await deckResponse.Content.ReadFromJsonAsync<List<DeckResponse>>(_serializerOptions);
-            Assert.True(decks != null);
+            Assert.NotNull(decks);
             var deck = decks[0];
             string deckId = deck.Id;
 
@@ -314,8 +314,8 @@ namespace Api.Test
             var putResponse = await _client.PutAsync(url, content);
             Assert.True(putResponse.IsSuccessStatusCode);
             var putDeck = await putResponse.Content.ReadFromJsonAsync<DeckResponse>(_serializerOptions);
-            Assert.True(putDeck != null);
-            Assert.True(putDeck.DefaultLocalizationPose != null);
+            Assert.NotNull(putDeck);
+            Assert.NotNull(putDeck.DefaultLocalizationPose);
             Assert.True(putDeck.DefaultLocalizationPose.Position.Z.Equals(query.Pose.Position.Z));
             Assert.True(putDeck.DefaultLocalizationPose.Orientation.W.Equals(query.Pose.Orientation.W));
         }

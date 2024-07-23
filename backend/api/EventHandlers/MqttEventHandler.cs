@@ -10,7 +10,6 @@ using Api.Services.Events;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Api.EventHandlers
 {
@@ -175,7 +174,7 @@ namespace Api.EventHandlers
 
                 if (isarRobotInfo.CurrentInstallation is not null) UpdateCurrentInstallationIfChanged(installation, ref robot, ref updatedFields);
                 if (isarRobotInfo.Capabilities is not null) UpdateRobotCapabilitiesIfChanged(isarRobotInfo.Capabilities, ref robot, ref updatedFields);
-                if (updatedFields.IsNullOrEmpty()) return;
+                if (updatedFields.Count < 1) return;
 
 
                 robot = await RobotService.Update(robot);

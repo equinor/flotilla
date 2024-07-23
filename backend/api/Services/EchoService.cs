@@ -3,7 +3,6 @@ using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.Identity.Abstractions;
-using Microsoft.IdentityModel.Tokens;
 namespace Api.Services
 {
     public interface IEchoService
@@ -121,7 +120,7 @@ namespace Api.Services
                         .Select(sensor => new EchoInspection(sensor, planItem.InspectionPoint.EnuPosition.ToPosition())).Distinct(new EchoInspectionComparer()).ToList()
                 };
 
-                if (tag.Inspections.IsNullOrEmpty())
+                if (tag.Inspections.Count < 1)
                 {
                     tag.Inspections.Add(new EchoInspection());
                 }
