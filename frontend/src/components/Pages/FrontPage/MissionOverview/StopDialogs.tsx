@@ -7,11 +7,12 @@ import { tokens } from '@equinor/eds-tokens'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { useSafeZoneContext } from 'components/Contexts/SafeZoneContext'
 import { TaskType } from 'models/Task'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useRobotContext } from 'components/Contexts/RobotContext'
+import { RobotFlotillaStatus } from 'models/Robot'
 
 const StyledDisplayButtons = styled.div`
     display: flex;
@@ -135,10 +136,17 @@ export const StopMissionDialog = ({ missionName, robotId, missionTaskType }: Mis
 
 export const StopRobotDialog = (): JSX.Element => {
     const [isStopRobotDialogOpen, setIsStopRobotDialogOpen] = useState<boolean>(false)
-    const { safeZoneStatus } = useSafeZoneContext()
+    const { enabledRobots } = useRobotContext()
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const { setAlert } = useAlertContext()
+
+    const safeZoneActivated =
+        enabledRobots.find(
+            (r) =>
+                r.currentInstallation.installationCode === installationCode &&
+                r.flotillaStatus === RobotFlotillaStatus.SafeZone
+        ) !== undefined
 
     const openDialog = async () => {
         setIsStopRobotDialogOpen(true)
@@ -176,7 +184,7 @@ export const StopRobotDialog = (): JSX.Element => {
     return (
         <>
             <StyledButton color="danger" variant="outlined" onClick={openDialog}>
-                {!safeZoneStatus ? (
+                {!safeZoneActivated ? (
                     <>{TranslateText('Send robots to safe zone')}</>
                 ) : (
                     <>{TranslateText('Dismiss robots from safe zone')}</>
@@ -186,7 +194,7 @@ export const StopRobotDialog = (): JSX.Element => {
                 <Dialog.Header>
                     <Dialog.Title>
                         <Typography variant="h5">
-                            {!safeZoneStatus
+                            {!safeZoneActivated
                                 ? TranslateText('Send robots to safe zone') + '?'
                                 : TranslateText('Dismiss robots from safe zone') + '?'}
                         </Typography>
@@ -195,12 +203,12 @@ export const StopRobotDialog = (): JSX.Element => {
                 <Dialog.CustomContent>
                     <StyledText>
                         <Typography variant="body_long">
-                            {!safeZoneStatus
+                            {!safeZoneActivated
                                 ? TranslateText('Send robots to safe zone long text')
                                 : TranslateText('Dismiss robots from safe zone long text')}
                         </Typography>
                         <Typography variant="body_long">
-                            {!safeZoneStatus
+                            {!safeZoneActivated
                                 ? TranslateText('Send robots to safe confirmation text')
                                 : TranslateText('Dismiss robots from safe confirmation text')}
                         </Typography>
@@ -217,7 +225,7 @@ export const StopRobotDialog = (): JSX.Element => {
                         >
                             {TranslateText('Cancel')}
                         </Button>
-                        {!safeZoneStatus ? (
+                        {!safeZoneActivated ? (
                             <Button variant="contained" color="danger" onClick={stopAll}>
                                 {TranslateText('Send robots to safe zone')}
                             </Button>
