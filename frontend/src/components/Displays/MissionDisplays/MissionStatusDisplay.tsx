@@ -21,25 +21,38 @@ const StyledStatusIcon = styled.div`
     align-items: center;
 `
 
+const StyledIcon = styled(Icon)`
+    width: 20px;
+    height: 20px;
+`
+
 const MissionStatusIcon = ({ status }: StatusProps) => {
     switch (status) {
         case MissionStatus.Pending: {
-            return <Icon name={Icons.Pending} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
+            return (
+                <StyledIcon
+                    name={Icons.Pending}
+                    style={{ color: tokens.colors.text.static_icons__secondary.hex }}
+                    size={18}
+                />
+            )
         }
         case MissionStatus.Ongoing: {
-            return <Icon name={Icons.Ongoing} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
+            return <StyledIcon name={Icons.Ongoing} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
         }
         case MissionStatus.Failed: {
-            return <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
+            return <StyledIcon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
         }
         case MissionStatus.Successful: {
-            return <Icon name={Icons.Successful} style={{ color: tokens.colors.interactive.success__resting.hex }} />
+            return (
+                <StyledIcon name={Icons.Successful} style={{ color: tokens.colors.interactive.success__resting.hex }} />
+            )
         }
         case MissionStatus.PartiallySuccessful: {
-            return <Icon name={Icons.Warning} style={{ color: tokens.colors.interactive.warning__resting.hex }} />
+            return <StyledIcon name={Icons.Warning} style={{ color: tokens.colors.interactive.warning__resting.hex }} />
         }
     }
-    return <Icon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
+    return <StyledIcon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
 }
 
 export const MissionStatusDisplay = ({ status }: StatusProps) => {

@@ -12,13 +12,11 @@ const StyledTopBar = styled(TopBar)`
     align-items: center;
     box-shadow: none;
 `
-
 const StyledWrapper = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
 `
-
 const HandPointer = styled.div`
     cursor: pointer;
 `
@@ -31,7 +29,6 @@ const StyledAlertList = styled.div`
     align-items: center;
     gap: 0.5rem;
 `
-
 const StyledTopBarHeader = styled.div`
     display: flex;
     flex-direction: row;

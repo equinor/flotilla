@@ -17,12 +17,10 @@ export const StyledAutoComplete = styled.div`
     gap: 25px;
     box-shadow: none;
 `
-
 export const StyledButton = styled(Button)`
     height: auto;
     min-height: ${tokens.shape.button.minHeight};
 `
-
 export const TextAlignedButton = styled(Button)`
     text-align: left;
     height: auto;
@@ -34,8 +32,9 @@ export const StyledPage = styled.div`
     justify-content: start;
     flex-direction: column;
     gap: 1rem;
-    margin: 2rem;
+    padding: 2rem;
     @media (max-width: 600px) {
-        margin: 0.7rem;
+        padding: 0.7rem;
     }
+    min-height: calc(100vh - 65px);
 `
