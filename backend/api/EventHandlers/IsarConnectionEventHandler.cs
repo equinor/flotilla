@@ -4,6 +4,7 @@ using Api.Mqtt;
 using Api.Mqtt.Events;
 using Api.Mqtt.MessageModels;
 using Api.Services;
+using Api.Services.Events;
 using Api.Utilities;
 using Timer = System.Timers.Timer;
 namespace Api.EventHandlers
@@ -41,6 +42,9 @@ namespace Api.EventHandlers
 
         private IMissionRunService MissionRunService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
+
+        private IMissionSchedulingService MissionSchedulingService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
         public override void Subscribe()
         {
@@ -97,6 +101,10 @@ namespace Api.EventHandlers
                 );
                 return;
             }
+
+            // If the robot became available while the connection was not active, then this will not be triggered
+            // It will however be triggered if the robot lost connection while restarting or while idle
+            if (robot.Status == RobotStatus.Available) MissionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
         }
 
         private void AddTimerForRobot(IsarRobotHeartbeatMessage isarRobotHeartbeat, Robot robot)
