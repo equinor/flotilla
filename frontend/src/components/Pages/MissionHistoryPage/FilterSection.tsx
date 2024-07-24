@@ -90,14 +90,14 @@ export const FilterSection = () => {
                     placeholder={TranslateText('Search for missions')}
                     onChange={(changes: ChangeEvent<HTMLInputElement>) => {
                         filterFunctions.switchMissionName(changes.target.value)
-                    }} 
+                    }}
                 />
                 <StyledButtonDiv>
-                    <Button onClick={onClickFilterIcon} variant='ghost'>
+                    <Button onClick={onClickFilterIcon} variant="ghost">
                         <Icon name={Icons.Filter} size={24} />
                         {TranslateText('Filter')}
                     </Button>
-                    <Button variant='ghost' onClick={onClearFilters}>
+                    <Button variant="ghost" onClick={onClearFilters}>
                         <Icon name={Icons.Clear} size={24} />
                         {TranslateText('Clear all filters')}
                     </Button>
