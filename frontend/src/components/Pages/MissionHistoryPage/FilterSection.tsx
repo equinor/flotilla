@@ -120,15 +120,14 @@ export const FilterSection = () => {
                                 })
                             )
                         }}
-                        placeholder={`${filterState.statuses ? filterState.statuses.length : 0}/${
-                            Array.from(missionStatusTranslationMap.keys()).length
-                        } ${TranslateText('selected')}`}
+                        placeholder={`${filterState.statuses ? filterState.statuses.length : 0}/${Array.from(missionStatusTranslationMap.keys()).length
+                            } ${TranslateText('selected')}`}
                         label={TranslateText('Mission status')}
                         initialSelectedOptions={
                             filterState.statuses
                                 ? filterState.statuses.map((status) => {
-                                      return TranslateText(status)
-                                  })
+                                    return TranslateText(status)
+                                })
                                 : []
                         }
                         multiple
@@ -144,15 +143,14 @@ export const FilterSection = () => {
                                 })
                             )
                         }}
-                        placeholder={`${filterState.inspectionTypes ? filterState.inspectionTypes.length : 0}/${
-                            Array.from(inspectionTypeTranslationMap.keys()).length
-                        } ${TranslateText('selected')}`}
+                        placeholder={`${filterState.inspectionTypes ? filterState.inspectionTypes.length : 0}/${Array.from(inspectionTypeTranslationMap.keys()).length
+                            } ${TranslateText('selected')}`}
                         label={TranslateText('Inspection type')}
                         initialSelectedOptions={
                             filterState.inspectionTypes
                                 ? filterState.inspectionTypes.map((inspectionType) => {
-                                      return TranslateText(inspectionType)
-                                  })
+                                    return TranslateText(inspectionType)
+                                })
                                 : []
                         }
                         multiple

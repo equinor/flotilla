@@ -39,6 +39,7 @@ const StyledAlertList = styled.div`
     align-items: center;
     gap: 0.5rem;
 `
+
 const StyledTopBarHeader = styled.div`
     display: flex;
     flex-direction: row;
@@ -61,12 +62,6 @@ const Circle = styled.div`
     width: 9px;
     height: 9px;
     border-radius: 50%;
-`
-
-const StyledTopBarHeader = styled.div`
-    display: flex;
-    flex-direction: row;
-    gap: 4px;
 `
 
 export const Header = ({ page }: { page: string }) => {
