@@ -26,16 +26,19 @@ const HoverableStyledCard = styled(Card)`
     gap: 0px;
     background-color: ${tokens.colors.ui.background__default.hex};
     cursor: pointer;
-    :hover + #bottomcard {
+
+    :hover {
+        background-color: ${tokens.colors.infographic.primary__mist_blue.hex};
+    }
+
+    :hover + #buttoncard {
         background-color: ${tokens.colors.infographic.primary__mist_blue.hex};
     }
 `
-
 const ButtonCard = styled.div`
     background-color: ${tokens.colors.ui.background__light.hex};
     padding: 10px;
     border-radius: 0px 0px 6px 6px;
-    pointer-events: auto;
 `
 const HorizontalContent = styled.div`
     display: flex;
@@ -80,7 +83,7 @@ export const RobotStatusCard = ({ robot }: RobotProps) => {
     return (
         <HoverableStyledCard style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
             <RobotImage robotType={robot.model.type} height="180px" />
-            <ButtonCard id="bottomcard">
+            <ButtonCard id="buttoncard">
                 <LongTypography variant="h5">
                     {robot.name}
                     {' ('}
