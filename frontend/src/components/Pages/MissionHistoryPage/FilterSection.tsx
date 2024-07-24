@@ -15,14 +15,26 @@ import { ChangeEvent, useState } from 'react'
 import { Icons } from 'utils/icons'
 import { InspectionType } from 'models/Inspection'
 import { useMissionFilterContext } from 'components/Contexts/MissionFilterContext'
+import { tokens } from '@equinor/eds-tokens'
 
 const StyledHeader = styled.div`
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
     gap: 1rem;
     @media (max-width: 730px) {
         max-width: 300px;
     }
+`
+
+const StyledSerach = styled(Search)`
+    display: flex;
+    width: 288px;
+    height: 36px;
+    align-items: center;
+    gap: 8px;
+    border-bottom: none;
+    border: 1px solid ${tokens.colors.ui.background__medium.hex};
+    --eds-input-background: white;
 `
 
 const StyledButtonDiv = styled.div`
@@ -73,20 +85,20 @@ export const FilterSection = () => {
     return (
         <>
             <StyledHeader>
-                <Search
+                <StyledSerach
                     value={filterState.missionName ?? ''}
                     placeholder={TranslateText('Search for missions')}
                     onChange={(changes: ChangeEvent<HTMLInputElement>) => {
                         filterFunctions.switchMissionName(changes.target.value)
-                    }}
+                    }} 
                 />
                 <StyledButtonDiv>
-                    <Button onClick={onClickFilterIcon}>
-                        <Icon name={Icons.Filter} size={32} />
+                    <Button onClick={onClickFilterIcon} variant='ghost'>
+                        <Icon name={Icons.Filter} size={24} />
                         {TranslateText('Filter')}
                     </Button>
-                    <Button variant="outlined" onClick={onClearFilters}>
-                        <Icon name={Icons.Clear} size={32} />
+                    <Button variant='ghost' onClick={onClearFilters}>
+                        <Icon name={Icons.Clear} size={24} />
                         {TranslateText('Clear all filters')}
                     </Button>
                 </StyledButtonDiv>

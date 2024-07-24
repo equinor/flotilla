@@ -60,7 +60,6 @@ const HideColumnsOnSmallScreen = styled.div`
         }
     }
 `
-
 const TableWithHeader = styled.div`
     display: grid;
     grid-columns: auto;
@@ -74,22 +73,40 @@ const StyledLoading = styled.div`
     padding-bottom: 1rem;
     gap: 1rem;
 `
-
 const ActiveFilterList = styled.div`
     display: flex;
     gap: 0.7rem;
     align-items: center;
-    margin-left: var(--page-margin);
-    margin-right: var(--page-margin);
-    margin-top: 8px;
+    padding-left: var(--page-margin);
+    padding-right: var(--page-margin);
     flex-wrap: wrap;
     min-height: 24px;
 `
-
 const StyledTable = styled.div`
     display: grid;
     overflow-x: auto;
     overflow-y: hidden;
+`
+const StyledTableCell = styled(Table.Cell)`
+    background-color: ${tokens.colors.ui.background__default.hex};
+`
+const StyledTableBody = styled(Table.Body)`
+    background-color: ${tokens.colors.ui.background__light.hex};
+`
+const StyledTableCaption = styled(Table.Caption)`
+    background-color: ${tokens.colors.ui.background__default.hex};
+`
+const StyledPagination = styled(Pagination)`
+    display: flex;
+    height: 48px;
+    padding: 0px 8px 0px 16px;
+    background-color: ${tokens.colors.ui.background__default.hex};
+`
+const StyledActiveFilterList = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
 `
 
 const flatten = (filters: IFilterState) => {
@@ -111,7 +128,8 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
     const [isResettingPage, setIsResettingPage] = useState<boolean>(false)
     const pageSize: number = 10
     const checkBoxBackgroundColour = tokens.colors.ui.background__info.hex
-    const checkBoxBorderColour = tokens.colors.interactive.primary__resting.hex
+    const checkBoxBorderColour = tokens.colors.ui.background__info.hex
+    const checkBoxWhiteBackgroundColor = tokens.colors.ui.background__default.hex
 
     const FilterErrorDialog = () => {
         return (
@@ -205,13 +223,13 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
 
     const PaginationComponent = () => {
         return (
-            <Pagination
+            <StyledPagination
                 totalItems={paginationDetails!.TotalCount}
                 itemsPerPage={paginationDetails!.PageSize}
                 withItemIndicator
                 defaultPage={page}
                 onChange={(_, newPage) => onPageChange(newPage)}
-            ></Pagination>
+            ></StyledPagination>
         )
     }
 
@@ -225,19 +243,30 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
             <Typography variant="h1">{TranslateText('Mission History')}</Typography>
             <FilterSection />
             {filterIsSet && (
-                <ActiveFilterList>
-                    {flatten(filterState)
-                        .filter((filter) => !filterFunctions.isSet(filter.name, filter.value))
-                        .map((filter) => (
-                            <Chip
-                                style={{ borderColor: checkBoxBorderColour, height: '2rem', paddingLeft: '6px' }}
-                                key={filter.name}
-                                onDelete={() => filterFunctions.removeFilter(filter.name)}
-                            >
-                                {TranslateText(filter.name)}: {toDisplayValue(filter.name, filter.value!)}
-                            </Chip>
-                        ))}
-                </ActiveFilterList>
+                <StyledActiveFilterList>
+                    <Typography variant="caption" color="gray">
+                        {TranslateText('Active Filters')}
+                        {':'}
+                    </Typography>
+                    <ActiveFilterList>
+                        {flatten(filterState)
+                            .filter((filter) => !filterFunctions.isSet(filter.name, filter.value))
+                            .map((filter) => (
+                                <Chip
+                                    style={{
+                                        backgroundColor: checkBoxWhiteBackgroundColor,
+                                        borderColor: checkBoxBorderColour,
+                                        height: '2rem',
+                                        paddingLeft: '10px',
+                                    }}
+                                    key={filter.name}
+                                    onDelete={() => filterFunctions.removeFilter(filter.name)}
+                                >
+                                    {TranslateText(filter.name)}: {toDisplayValue(filter.name, filter.value!)}
+                                </Chip>
+                            ))}
+                    </ActiveFilterList>
+                </StyledActiveFilterList>
             )}
             {filterError && <FilterErrorDialog />}
             <StyledTable>
@@ -245,36 +274,44 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                     <SmallScreenInfoText />
                     <Table>
                         {isLoading && (
-                            <Table.Caption captionSide={'bottom'}>
+                            <StyledTableCaption captionSide={'bottom'}>
                                 <StyledLoading>
                                     <CircularProgress />
                                 </StyledLoading>
-                            </Table.Caption>
+                            </StyledTableCaption>
                         )}
-                        <Table.Caption captionSide={'bottom'}>
+                        <StyledTableCaption captionSide={'bottom'}>
                             {paginationDetails &&
                                 paginationDetails.TotalPages > 1 &&
                                 !isResettingPage &&
                                 PaginationComponent()}
-                        </Table.Caption>
+                        </StyledTableCaption>
                         <Table.Head sticky>
                             <Table.Row>
-                                <Table.Cell id={InspectionTableColumns.StatusShort}>
+                                <StyledTableCell id={InspectionTableColumns.StatusShort}>
                                     {TranslateText('Status')}
-                                </Table.Cell>
-                                <Table.Cell id={InspectionTableColumns.Status}>{TranslateText('Status')}</Table.Cell>
-                                <Table.Cell id={InspectionTableColumns.Name}>{TranslateText('Name')}</Table.Cell>
-                                <Table.Cell id={InspectionTableColumns.Area}>{TranslateText('Area')}</Table.Cell>
-                                <Table.Cell id={InspectionTableColumns.Robot}>{TranslateText('Robot')}</Table.Cell>
-                                <Table.Cell id={InspectionTableColumns.CompletionTime}>
+                                </StyledTableCell>
+                                <StyledTableCell id={InspectionTableColumns.Status}>
+                                    {TranslateText('Status')}
+                                </StyledTableCell>
+                                <StyledTableCell id={InspectionTableColumns.Name}>
+                                    {TranslateText('Name')}
+                                </StyledTableCell>
+                                <StyledTableCell id={InspectionTableColumns.Area}>
+                                    {TranslateText('Area')}
+                                </StyledTableCell>
+                                <StyledTableCell id={InspectionTableColumns.Robot}>
+                                    {TranslateText('Robot')}
+                                </StyledTableCell>
+                                <StyledTableCell id={InspectionTableColumns.CompletionTime}>
                                     {TranslateText('Completion Time')}
-                                </Table.Cell>
-                                <Table.Cell id={InspectionTableColumns.Rerun}>
+                                </StyledTableCell>
+                                <StyledTableCell id={InspectionTableColumns.Rerun}>
                                     {TranslateText('Add to queue')}
-                                </Table.Cell>
+                                </StyledTableCell>
                             </Table.Row>
                         </Table.Head>
-                        {!isLoading && <Table.Body>{missionsDisplay}</Table.Body>}
+                        {!isLoading && <StyledTableBody>{missionsDisplay}</StyledTableBody>}
                     </Table>
                 </HideColumnsOnSmallScreen>
             </StyledTable>
