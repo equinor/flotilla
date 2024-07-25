@@ -120,7 +120,6 @@ builder.Services.AddHostedService<TeamsMessageEventHandler>();
 
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));
 builder.Services.Configure<MapBlobOptions>(builder.Configuration.GetSection("Maps"));
-builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Blob"));
 
 builder.Services
     .AddControllers()
