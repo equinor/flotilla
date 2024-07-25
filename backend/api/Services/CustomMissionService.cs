@@ -2,51 +2,64 @@
 using System.Text;
 using System.Text.Json;
 using Api.Database.Models;
-using Api.Options;
-using Microsoft.Extensions.Options;
 namespace Api.Services
 {
 
     public interface ICustomMissionService
     {
-        Task<string> UploadSource(List<MissionTask> tasks);
+        Task<Source> CreateSourceIfOneDoesNotExist(List<MissionTask> tasks);
 
         Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
 
         string CalculateHashFromTasks(IList<MissionTask> tasks);
     }
 
-    public class CustomMissionService(IOptions<StorageOptions> storageOptions, IBlobService blobService) : ICustomMissionService
+    public class CustomMissionService(ILogger<CustomMissionService> logger, ISourceService sourceService) : ICustomMissionService
     {
-        public async Task<string> UploadSource(List<MissionTask> tasks)
+        public async Task<Source> CreateSourceIfOneDoesNotExist(List<MissionTask> tasks)
         {
             string json = JsonSerializer.Serialize(tasks);
             string hash = CalculateHashFromTasks(tasks);
-            await blobService.UploadJsonToBlob(json, hash, storageOptions.Value.CustomMissionContainerName, storageOptions.Value.AccountName, false);
 
-            return hash;
+            var existingSource = await sourceService.ReadById(hash);
+
+            if (existingSource != null) return existingSource;
+
+            var newSource = await sourceService.Create(
+                new Source
+                {
+                    SourceId = hash,
+                    Type = MissionSourceType.Custom,
+                    CustomMissionTasks = json
+                }
+            );
+
+            return newSource;
         }
 
         public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id)
         {
-            List<MissionTask>? content;
+            var existingSource = await sourceService.ReadById(id);
+            if (existingSource == null || existingSource.CustomMissionTasks == null) return null;
+
             try
             {
-                byte[] rawContent = await blobService.DownloadBlob(id, storageOptions.Value.CustomMissionContainerName, storageOptions.Value.AccountName);
-                var rawBinaryContent = new BinaryData(rawContent);
-                content = rawBinaryContent.ToObjectFromJson<List<MissionTask>>();
+                var content = JsonSerializer.Deserialize<List<MissionTask>>(existingSource.CustomMissionTasks);
+
+                if (content == null) return null;
+
                 foreach (var task in content)
                 {
                     task.Id = Guid.NewGuid().ToString(); // This is needed as tasks are owned by mission runs
                     task.IsarTaskId = Guid.NewGuid().ToString(); // This is needed to update the tasks for the correct mission run
                 }
+                return content;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                logger.LogWarning("Unable to deserialize custom mission tasks with ID {Id}. {ErrorMessage}", id, e);
                 return null;
             }
-
-            return content;
         }
 
         public string CalculateHashFromTasks(IList<MissionTask> tasks)

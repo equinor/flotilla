@@ -38,14 +38,7 @@ namespace Api.Services.ActionServices
             {
                 try
                 {
-                    string sourceUrl = await customMissionService.UploadSource(missionTasks);
-                    source = await sourceService.Create(
-                        new Source
-                        {
-                            SourceId = sourceUrl,
-                            Type = MissionSourceType.Custom
-                        }
-                    );
+                    source = await customMissionService.CreateSourceIfOneDoesNotExist(missionTasks);
                 }
                 catch (Exception e)
                 {

@@ -15,6 +15,8 @@ namespace Api.Database.Models
 
         [Required]
         public MissionSourceType Type { get; set; }
+
+        public string? CustomMissionTasks { get; set; }
     }
 
     public enum MissionSourceType
