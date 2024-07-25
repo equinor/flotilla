@@ -27,7 +27,7 @@ const HoverableStyledCard = styled(Card)`
     background-color: ${tokens.colors.ui.background__default.hex};
     cursor: pointer;
 
-    :hover {
+    #buttoncard:hover {
         background-color: ${tokens.colors.infographic.primary__mist_blue.hex};
     }
 
