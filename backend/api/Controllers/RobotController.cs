@@ -2,6 +2,7 @@
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Services.Events;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -359,6 +360,8 @@ namespace Api.Controllers
                 logger.LogInformation("Successfully updated robot {RobotId}", updatedRobot.Id);
 
                 var robotResponse = new RobotResponse(updatedRobot);
+
+                if (robotStatus == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
 
                 return Ok(robotResponse);
             }
