@@ -169,14 +169,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 const backendAlert: Alert = JSON.parse(message)
                 const alertType = alertTypeEnumMap[backendAlert.alertCode]
 
-                if (backendAlert.robotId !== null) {
-                    const relevantRobots = enabledRobots.filter((r) => r.id === backendAlert.robotId)
-                    if (!relevantRobots) return
-                    const relevantRobot = relevantRobots[0]
-                    if (relevantRobot.currentInstallation.installationCode !== installationCode) return
-
-                    // Here we could update the robot state manually, but this is best done on the backend
-                }
+                if (backendAlert.robotId !== null && !enabledRobots.filter((r) => r.id === backendAlert.robotId)) return
 
                 if (alertType === AlertType.SafeZoneSuccess) {
                     setAlert(
@@ -211,11 +204,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         const newBlockedRobotNames = enabledRobots
-            .filter(
-                (robot) =>
-                    robot.currentInstallation.installationCode.toLocaleLowerCase() ===
-                        installationCode.toLocaleLowerCase() && robot.status === RobotStatus.Blocked
-            )
+            .filter((robot) => robot.status === RobotStatus.Blocked)
             .map((robot) => robot.name!)
 
         const isBlockedRobotNamesModifyed =

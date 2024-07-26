@@ -7,9 +7,6 @@ import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { useEffect, useState } from 'react'
-import { Mission } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
 
 const StyledOngoingMissionView = styled.div`
@@ -42,8 +39,6 @@ const StyledButton = styled(Button)`
 export const OngoingMissionView = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
-    const { installationCode } = useInstallationContext()
-    const [ongingMissionsToDisplay, setOngoingMissionsToDisplay] = useState<Mission[]>([])
 
     let navigate = useNavigate()
     const routeChange = () => {
@@ -51,15 +46,7 @@ export const OngoingMissionView = (): JSX.Element => {
         navigate(path)
     }
 
-    useEffect(() => {
-        setOngoingMissionsToDisplay(
-            ongoingMissions.filter(
-                (m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
-            )
-        )
-    }, [ongoingMissions, installationCode])
-
-    const ongoingMissionCards = ongingMissionsToDisplay.map((mission, index) => (
+    const ongoingMissionCards = ongoingMissions.map((mission, index) => (
         <OngoingMissionCard key={index} mission={mission} />
     ))
 
@@ -71,8 +58,8 @@ export const OngoingMissionView = (): JSX.Element => {
                 </Typography>
             </OngoingMissionHeader>
             <OngoingMissionSection>
-                {ongingMissionsToDisplay.length > 0 && ongoingMissionCards}
-                {ongingMissionsToDisplay.length === 0 && <NoOngoingMissionsPlaceholder />}
+                {ongoingMissions.length > 0 && ongoingMissionCards}
+                {ongoingMissions.length === 0 && <NoOngoingMissionsPlaceholder />}
             </OngoingMissionSection>
             <ButtonStyle>
                 <StyledButton variant="outlined" onClick={routeChange}>

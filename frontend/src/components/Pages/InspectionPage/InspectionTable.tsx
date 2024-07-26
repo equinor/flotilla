@@ -14,7 +14,6 @@ import { AlreadyScheduledMissionDialog, ScheduleMissionDialog } from './Schedule
 import { useEffect, useState } from 'react'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { SmallScreenInfoText } from 'utils/InfoText'
 
@@ -133,7 +132,6 @@ interface IInspectionRowProps {
 const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialog }: IInspectionRowProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
-    const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
     const navigate = useNavigate()
     const mission = inspection.missionDefinition
@@ -142,9 +140,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
     const isScheduled = missionQueue.map((m) => m.missionId).includes(mission.id)
     const isOngoing = ongoingMissions.map((m) => m.missionId).includes(mission.id)
 
-    const isScheduleButtonDisabled =
-        enabledRobots.filter((r) => r.currentInstallation.installationCode === installationCode).length === 0 ||
-        installationCode === ''
+    const isScheduleButtonDisabled = enabledRobots.length === 0
 
     if (isOngoing) {
         status = (

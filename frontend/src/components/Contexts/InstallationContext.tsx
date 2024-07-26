@@ -163,13 +163,21 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
         window.localStorage.setItem('installationCode', derivedCode)
     }
 
+    const [filteredInstallationDecks, setFilteredInstallationDecks] = useState<Deck[]>([])
+    const [filteredInstallationAreas, setFilteredInstallationAreas] = useState<Area[]>([])
+    useEffect(() => {
+        setFilteredInstallationDecks(installationDecks.filter((d) => d.installationCode === installationCode))
+        setFilteredInstallationAreas(installationAreas.filter((a) => a.installationCode === installationCode))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [installationCode, installationDecks, installationAreas])
+
     return (
         <InstallationContext.Provider
             value={{
                 installationCode,
                 installationName,
-                installationDecks,
-                installationAreas,
+                installationDecks: filteredInstallationDecks,
+                installationAreas: filteredInstallationAreas,
                 switchInstallation,
             }}
         >

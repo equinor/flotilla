@@ -53,22 +53,18 @@ export const InspectionOverviewSection = () => {
     const [echoMissions, setEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [activeTab, setActiveTab] = useState(0)
 
-    const isScheduleButtonDisabled =
-        enabledRobots.filter((r) => r.currentInstallation.installationCode === installationCode).length === 0 ||
-        installationCode === ''
+    const isScheduleButtonDisabled = enabledRobots.length === 0 || installationCode === ''
 
     const anchorRef = useRef<HTMLButtonElement>(null)
 
-    const allInspections = missionDefinitions
-        .filter((m) => m.installationCode === installationCode)
-        .map((m) => {
-            return {
-                missionDefinition: m,
-                deadline: m.lastSuccessfulRun
-                    ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
-                    : undefined,
-            }
-        })
+    const allInspections = missionDefinitions.map((m) => {
+        return {
+            missionDefinition: m,
+            deadline: m.lastSuccessfulRun
+                ? getInspectionDeadline(m.inspectionFrequency, m.lastSuccessfulRun.endTime!)
+                : undefined,
+        }
+    })
 
     const fetchEchoMissions = () => {
         setIsFetchingEchoMissions(true)

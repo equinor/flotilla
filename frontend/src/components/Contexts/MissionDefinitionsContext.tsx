@@ -99,7 +99,16 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [BackendAPICaller.accessToken, installationCode])
 
-    return { missionDefinitions }
+    const [filteredMissionDefinitions, setFilteredMissionDefinitions] = useState<CondensedMissionDefinition[]>([])
+
+    useEffect(() => {
+        setFilteredMissionDefinitions(
+            missionDefinitions.filter((m) => m.installationCode.toLowerCase() === installationCode.toLowerCase())
+        )
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [installationCode, missionDefinitions])
+
+    return { missionDefinitions: filteredMissionDefinitions }
 }
 
 export const MissionDefinitionsProvider: FC<Props> = ({ children }) => {

@@ -148,17 +148,12 @@ const SelectRobotComponent = memo(
     }) => {
         const { enabledRobots } = useRobotContext()
         const { TranslateText } = useLanguageContext()
-        const { installationCode } = useInstallationContext()
 
         return (
             <Autocomplete
                 optionLabel={(r) => (r ? r.name + ' (' + r.model.type + ')' : '')}
                 options={enabledRobots.filter(
-                    (r) =>
-                        r.currentInstallation.installationCode.toLocaleLowerCase() ===
-                            installationCode.toLocaleLowerCase() &&
-                        (r.status === RobotStatus.Available || r.status === RobotStatus.Busy) &&
-                        r.isarConnected
+                    (r) => (r.status === RobotStatus.Available || r.status === RobotStatus.Busy) && r.isarConnected
                 )}
                 disabled={!enabledRobots}
                 selectedOptions={[selectedRobot]}

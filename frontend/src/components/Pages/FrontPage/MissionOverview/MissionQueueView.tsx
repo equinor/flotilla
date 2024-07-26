@@ -7,7 +7,6 @@ import { Mission, placeholderMission } from 'models/Mission'
 import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
@@ -30,11 +29,7 @@ const MissionTable = styled.div`
 export const MissionQueueView = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions, loadingMissionSet, setLoadingMissionSet } = useMissionsContext()
-    const { installationCode } = useInstallationContext()
     const { setAlert } = useAlertContext()
-    const localMissionQueue = missionQueue.filter(
-        (m) => m.installationCode?.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
-    )
 
     const onDeleteMission = (mission: Mission) =>
         BackendAPICaller.deleteMission(mission.id).catch((_) =>
@@ -55,7 +50,7 @@ export const MissionQueueView = (): JSX.Element => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionQueue, ongoingMissions])
 
-    const missionQueueDisplay = localMissionQueue.map((mission, index) => (
+    const missionQueueDisplay = missionQueue.map((mission, index) => (
         <MissionQueueCard key={index} order={index + 1} mission={mission} onDeleteMission={onDeleteMission} />
     ))
 
@@ -74,9 +69,9 @@ export const MissionQueueView = (): JSX.Element => {
                 {TranslateText('Mission Queue')}
             </Typography>
             <MissionTable>
-                {localMissionQueue.length > 0 && missionQueueDisplay}
+                {missionQueue.length > 0 && missionQueueDisplay}
                 {loadingMissionSet.size > 0 && loadingQueueDisplay}
-                {loadingMissionSet.size === 0 && localMissionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
+                {loadingMissionSet.size === 0 && missionQueue.length === 0 && <EmptyMissionQueuePlaceholder />}
             </MissionTable>
         </StyledMissionView>
     )

@@ -1,7 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 
@@ -18,23 +17,17 @@ const RobotView = styled.div`
 
 export const RobotStatusSection = () => {
     const { TranslateText } = useLanguageContext()
-    const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
 
-    const relevantRobots = enabledRobots
-        .filter(
-            (robot) =>
-                robot.currentInstallation.installationCode.toLocaleLowerCase() === installationCode.toLocaleLowerCase()
-        )
-        .sort((robot, robotToCompareWith) =>
-            robot.status! !== robotToCompareWith.status!
-                ? robot.status! > robotToCompareWith.status!
-                    ? 1
-                    : -1
-                : robot.name! > robotToCompareWith.name!
-                  ? 1
-                  : -1
-        )
+    const relevantRobots = enabledRobots.sort((robot, robotToCompareWith) =>
+        robot.status! !== robotToCompareWith.status!
+            ? robot.status! > robotToCompareWith.status!
+                ? 1
+                : -1
+            : robot.name! > robotToCompareWith.name!
+              ? 1
+              : -1
+    )
 
     const robotDisplay = relevantRobots.map((robot) => <RobotStatusCard key={robot.id} robot={robot} />)
 

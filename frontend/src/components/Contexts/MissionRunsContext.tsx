@@ -7,6 +7,7 @@ import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useInstallationContext } from './InstallationContext'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
     let newMissionList = [...list]
@@ -82,6 +83,7 @@ export const useMissionRuns = (): IMissionRunsContext => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert } = useAlertContext()
+    const { installationCode } = useInstallationContext()
 
     useEffect(() => {
         if (connectionReady) {
@@ -157,7 +159,20 @@ export const useMissionRuns = (): IMissionRunsContext => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [BackendAPICaller.accessToken])
 
-    return { ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet }
+    const [filteredMissionQueue, setFilteredMissionQueue] = useState<Mission[]>([])
+    const [filteredOngoingMissions, setFilteredOngoingMissions] = useState<Mission[]>([])
+    useEffect(() => {
+        setFilteredOngoingMissions(ongoingMissions.filter((m) => m.area?.installationCode === installationCode))
+        setFilteredMissionQueue(missionQueue.filter((m) => m.area?.installationCode === installationCode))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [installationCode, ongoingMissions, missionQueue])
+
+    return {
+        ongoingMissions: filteredOngoingMissions,
+        missionQueue: filteredMissionQueue,
+        loadingMissionSet,
+        setLoadingMissionSet,
+    }
 }
 
 export const MissionRunsProvider: FC<Props> = ({ children }) => {
