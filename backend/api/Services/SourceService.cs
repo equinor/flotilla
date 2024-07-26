@@ -1,6 +1,9 @@
 ﻿using System.Globalization;
 using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -25,6 +28,12 @@ namespace Api.Services
 
         public abstract Task<Source?> CheckForExistingCustomSource(IList<MissionTask> tasks);
 
+        public abstract Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
+
+        public abstract Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks);
+
+        public abstract string CalculateHashFromTasks(IList<MissionTask> tasks);
+
         public abstract Task<Source> Update(Source source);
 
         public abstract Task<Source?> Delete(string id);
@@ -38,8 +47,8 @@ namespace Api.Services
     )]
     public class SourceService(
         FlotillaDbContext context,
-        ICustomMissionService customMissionService,
-        IEchoService echoService) : ISourceService
+        IEchoService echoService,
+        ILogger<SourceService> logger) : ISourceService
     {
         public async Task<Source> Create(Source source)
         {
@@ -111,7 +120,7 @@ namespace Api.Services
             switch (source.Type)
             {
                 case MissionSourceType.Custom:
-                    var tasks = await customMissionService.GetMissionTasksFromSourceId(source.SourceId);
+                    var tasks = await GetMissionTasksFromSourceId(source.SourceId);
                     if (tasks == null) return null;
                     return new SourceResponse(source, tasks);
                 case MissionSourceType.Echo:
@@ -128,8 +137,73 @@ namespace Api.Services
 
         public async Task<Source?> CheckForExistingCustomSource(IList<MissionTask> tasks)
         {
-            string hash = customMissionService.CalculateHashFromTasks(tasks);
+            string hash = CalculateHashFromTasks(tasks);
             return await ReadBySourceId(hash);
+        }
+
+        public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id)
+        {
+            var existingSource = await ReadBySourceId(id);
+            if (existingSource == null || existingSource.CustomMissionTasks == null) return null;
+
+            try
+            {
+                var content = JsonSerializer.Deserialize<List<MissionTask>>(existingSource.CustomMissionTasks);
+
+                if (content == null) return null;
+
+                foreach (var task in content)
+                {
+                    task.Id = Guid.NewGuid().ToString(); // This is needed as tasks are owned by mission runs
+                    task.IsarTaskId = Guid.NewGuid().ToString(); // This is needed to update the tasks for the correct mission run
+                }
+                return content;
+            }
+            catch (Exception e)
+            {
+                logger.LogWarning("Unable to deserialize custom mission tasks with ID {Id}. {ErrorMessage}", id, e);
+                return null;
+            }
+        }
+
+        public async Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks)
+        {
+            string json = JsonSerializer.Serialize(tasks);
+            string hash = CalculateHashFromTasks(tasks);
+
+            var existingSource = await ReadById(hash);
+
+            if (existingSource != null) return existingSource;
+
+            var newSource = await Create(
+                new Source
+                {
+                    SourceId = hash,
+                    Type = MissionSourceType.Custom,
+                    CustomMissionTasks = json
+                }
+            );
+
+            return newSource;
+        }
+
+        public string CalculateHashFromTasks(IList<MissionTask> tasks)
+        {
+            var genericTasks = new List<MissionTask>();
+            foreach (var task in tasks)
+            {
+                var taskCopy = new MissionTask(task)
+                {
+                    Id = "",
+                    IsarTaskId = ""
+                };
+                taskCopy.Inspections = taskCopy.Inspections.Select(i => new Inspection(i, useEmptyIDs: true)).ToList();
+                genericTasks.Add(taskCopy);
+            }
+
+            string json = JsonSerializer.Serialize(genericTasks);
+            byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
+            return BitConverter.ToString(hash).Replace("-", "", StringComparison.CurrentCulture).ToUpperInvariant();
         }
 
         public async Task<Source> Update(Source source)

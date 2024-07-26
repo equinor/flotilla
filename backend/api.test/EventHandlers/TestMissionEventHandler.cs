@@ -52,6 +52,7 @@ namespace Api.Test.EventHandlers
             var returnToHomeServiceLogger = new Mock<ILogger<ReturnToHomeService>>().Object;
             var missionDefinitionServiceLogger = new Mock<ILogger<MissionDefinitionService>>().Object;
             var lastMissionRunServiceLogger = new Mock<ILogger<LastMissionRunService>>().Object;
+            var sourceServiceLogger = new Mock<ILogger<SourceService>>().Object;
 
             var configuration = WebApplication.CreateBuilder().Configuration;
 
@@ -66,8 +67,8 @@ namespace Api.Test.EventHandlers
 
             var echoServiceMock = new MockEchoService();
             var stidServiceMock = new MockStidService(context);
-            var customMissionServiceMock = new MockCustomMissionService();
-            var missionDefinitionService = new MissionDefinitionService(context, echoServiceMock, customMissionServiceMock, signalRService, accessRoleService, missionDefinitionServiceLogger, _missionRunService);
+            var sourceService = new SourceService(context, echoServiceMock, sourceServiceLogger);
+            var missionDefinitionService = new MissionDefinitionService(context, echoServiceMock, sourceService, signalRService, accessRoleService, missionDefinitionServiceLogger, _missionRunService);
             var robotModelService = new RobotModelService(context);
             var taskDurationServiceMock = new MockTaskDurationService();
             var isarServiceMock = new MockIsarService();
