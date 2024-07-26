@@ -1,8 +1,7 @@
 import { Autocomplete, Dialog, Typography, Icon } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { useState, useEffect } from 'react'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
+import { useState } from 'react'
 import { Robot } from 'models/Robot'
 import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
@@ -54,23 +53,14 @@ const StyledDangerContent = styled.div`
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
-    const { installationCode } = useInstallationContext()
     const { setLoadingMissionSet } = useMissionsContext()
     const { setAlert } = useAlertContext()
     const [isLocalizationVerificationDialogOpen, setIsLocalizationVerificationDialog] = useState<boolean>(false)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [missionsToSchedule, setMissionsToSchedule] = useState<CondensedMissionDefinition[]>()
-    const [robotOptions, setRobotOptions] = useState<Robot[]>([])
-
-    useEffect(() => {
-        const relevantRobots = [...enabledRobots].filter(
-            (robot) => robot.currentInstallation.installationCode.toLowerCase() === installationCode.toLowerCase()
-        )
-        setRobotOptions(relevantRobots)
-    }, [enabledRobots, installationCode])
 
     const onSelectedRobot = (selectedRobot: Robot) => {
-        if (robotOptions) setSelectedRobot(selectedRobot)
+        if (enabledRobots) setSelectedRobot(selectedRobot)
     }
 
     const onScheduleButtonPress = (missions: CondensedMissionDefinition[]) => () => {
@@ -148,7 +138,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                             <Autocomplete
                                 dropdownHeight={200}
                                 optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
-                                options={robotOptions}
+                                options={enabledRobots}
                                 label={TranslateText('Select robot')}
                                 onOptionsChange={(changes) => onSelectedRobot(changes.selectedItems[0])}
                                 autoWidth={true}

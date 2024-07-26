@@ -13,7 +13,6 @@ import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 interface IDeckCardProps {
     deckMissions: DeckInspectionTuple[]
@@ -33,12 +32,8 @@ const DeckCard = ({ deckData, onClickDeck, selectedDeck, handleScheduleAll }: De
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
     const { enabledRobots } = useRobotContext()
-    const { installationCode } = useInstallationContext()
 
-    const isScheduleMissionsDisabled =
-        enabledRobots.filter((r) => r.currentInstallation.installationCode === installationCode).length === 0 ||
-        installationCode === '' ||
-        deckData.inspections.length === 0
+    const isScheduleMissionsDisabled = enabledRobots.length === 0 || deckData.inspections.length === 0
 
     const getCardColorFromInspections = (inspections: Inspection[]): DeckCardColors => {
         if (inspections.length === 0) return DeckCardColors.Gray

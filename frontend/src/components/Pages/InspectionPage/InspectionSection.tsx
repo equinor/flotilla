@@ -28,7 +28,7 @@ interface DeckAreaTuple {
 }
 
 export const InspectionSection = () => {
-    const { installationCode, installationDecks, installationAreas } = useInstallationContext()
+    const { installationDecks, installationAreas } = useInstallationContext()
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
     const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
@@ -37,14 +37,12 @@ export const InspectionSection = () => {
     const { ongoingMissions, missionQueue } = useMissionsContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
 
-    const decks: DeckAreaTuple[] = installationDecks
-        .filter((deck) => deck.installationCode.toLowerCase() === installationCode.toLowerCase())
-        .map((deck) => {
-            return {
-                areas: installationAreas.filter((a) => a.deckName === deck.deckName),
-                deck: deck,
-            }
-        })
+    const decks: DeckAreaTuple[] = installationDecks.map((deck) => {
+        return {
+            areas: installationAreas.filter((a) => a.deckName === deck.deckName),
+            deck: deck,
+        }
+    })
 
     const closeDialog = () => {
         setIsAlreadyScheduled(false)
@@ -67,9 +65,7 @@ export const InspectionSection = () => {
 
     const deckMissions: DeckInspectionTuple[] =
         decks?.map(({ areas, deck }) => {
-            const missionDefinitionsInDeck = missionDefinitions.filter(
-                (m) => m.area?.deckName === deck.deckName && m.installationCode === installationCode
-            )
+            const missionDefinitionsInDeck = missionDefinitions.filter((m) => m.area?.deckName === deck.deckName)
             return {
                 inspections: missionDefinitionsInDeck.map((m) => {
                     return {

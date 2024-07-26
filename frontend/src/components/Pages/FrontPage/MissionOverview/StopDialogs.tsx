@@ -141,12 +141,7 @@ export const StopRobotDialog = (): JSX.Element => {
     const { installationCode } = useInstallationContext()
     const { setAlert } = useAlertContext()
 
-    const safeZoneActivated =
-        enabledRobots.find(
-            (r) =>
-                r.currentInstallation.installationCode === installationCode &&
-                r.flotillaStatus === RobotFlotillaStatus.SafeZone
-        ) !== undefined
+    const safeZoneActivated = enabledRobots.find((r) => r.flotillaStatus === RobotFlotillaStatus.SafeZone) !== undefined
 
     const openDialog = async () => {
         setIsStopRobotDialogOpen(true)

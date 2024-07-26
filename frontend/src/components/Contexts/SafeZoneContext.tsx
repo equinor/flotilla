@@ -1,6 +1,5 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { useRobotContext } from './RobotContext'
-import { useInstallationContext } from './InstallationContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { SafeZoneAlertContent } from 'components/Alerts/SafeZoneAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
@@ -23,17 +22,12 @@ export const SafeZoneContext = createContext<ISafeZoneContext>(defaultSafeZoneIn
 export const SafeZoneProvider: FC<Props> = ({ children }) => {
     const [safeZoneStatus, setSafeZoneStatus] = useState<boolean>(defaultSafeZoneInterface.safeZoneStatus)
     const { enabledRobots } = useRobotContext()
-    const { installationCode } = useInstallationContext()
     const { setAlert, clearAlert } = useAlertContext()
 
     useEffect(() => {
-        const missionQueueFozenStatus = enabledRobots
-            .filter(
-                (robot) =>
-                    robot.currentInstallation.installationCode.toLocaleLowerCase() ===
-                    installationCode.toLocaleLowerCase()
-            )
-            .filter((robot) => robot.flotillaStatus === RobotFlotillaStatus.SafeZone)
+        const missionQueueFozenStatus = enabledRobots.filter(
+            (robot) => robot.flotillaStatus === RobotFlotillaStatus.SafeZone
+        )
 
         if (missionQueueFozenStatus.length > 0 && safeZoneStatus === false) {
             setSafeZoneStatus((oldStatus) => !oldStatus)

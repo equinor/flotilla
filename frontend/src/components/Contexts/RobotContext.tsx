@@ -6,6 +6,7 @@ import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useInstallationContext } from './InstallationContext'
 
 const upsertRobotList = (list: Robot[], mission: Robot) => {
     let newList = [...list]
@@ -34,6 +35,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert } = useAlertContext()
+    const { installationCode } = useInstallationContext()
 
     useEffect(() => {
         if (connectionReady) {
@@ -86,10 +88,21 @@ export const RobotProvider: FC<Props> = ({ children }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    const [filteredRobots, setFilteredRobots] = useState<Robot[]>([])
+
+    useEffect(() => {
+        setFilteredRobots(
+            enabledRobots.filter(
+                (r) => r.currentInstallation.installationCode.toLowerCase() === installationCode.toLowerCase()
+            )
+        )
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [installationCode, enabledRobots])
+
     return (
         <RobotContext.Provider
             value={{
-                enabledRobots,
+                enabledRobots: filteredRobots,
             }}
         >
             {children}
