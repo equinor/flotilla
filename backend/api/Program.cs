@@ -70,7 +70,6 @@ builder.Services.AddScoped<IInspectionService, InspectionService>();
 builder.Services.AddScoped<ISourceService, SourceService>();
 
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
-builder.Services.AddScoped<ICustomMissionSchedulingService, CustomMissionSchedulingService>();
 
 builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
@@ -106,7 +105,6 @@ else
     builder.Services.AddScoped<ITimeseriesService, TimeseriesService>();
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
-builder.Services.AddScoped<ICustomMissionService, CustomMissionService>();
 builder.Services.AddScoped<InspectionFindingService>();
 
 builder.Services.AddTransient<ISignalRService, SignalRService>();

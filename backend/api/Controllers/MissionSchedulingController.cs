@@ -14,7 +14,6 @@ namespace Api.Controllers
     [Route("missions")]
     public class MissionSchedulingController(
             IMissionDefinitionService missionDefinitionService,
-            ICustomMissionSchedulingService customMissionSchedulingService,
             IMissionRunService missionRunService,
             IInstallationService installationService,
             IEchoService echoService,
@@ -23,7 +22,8 @@ namespace Api.Controllers
             IStidService stidService,
             ILocalizationService localizationService,
             IRobotService robotService,
-            ISourceService sourceService
+            ISourceService sourceService,
+            IAreaService areaService
         ) : ControllerBase
 
     {
@@ -371,7 +371,41 @@ namespace Api.Controllers
             var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
 
             MissionDefinition? customMissionDefinition;
-            try { customMissionDefinition = await customMissionSchedulingService.FindExistingOrCreateCustomMissionDefinition(customMissionQuery, missionTasks); }
+            try
+            {
+                Area? area = null;
+                if (customMissionQuery.AreaName != null) { area = await areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName); }
+
+                if (area == null)
+                {
+                    throw new AreaNotFoundException($"No area with name {customMissionQuery.AreaName} in installation {customMissionQuery.InstallationCode} was found");
+                }
+
+                var source = await sourceService.CheckForExistingCustomSource(missionTasks);
+
+                MissionDefinition? existingMissionDefinition = null;
+                if (source == null)
+                {
+                    source = await sourceService.CreateSourceIfDoesNotExist(missionTasks);
+                }
+                else
+                {
+                    var missionDefinitions = await missionDefinitionService.ReadBySourceId(source.SourceId);
+                    if (missionDefinitions.Count > 0) { existingMissionDefinition = missionDefinitions.First(); }
+                }
+
+                customMissionDefinition = existingMissionDefinition ?? new MissionDefinition
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Source = source,
+                    Name = customMissionQuery.Name,
+                    InspectionFrequency = customMissionQuery.InspectionFrequency,
+                    InstallationCode = customMissionQuery.InstallationCode,
+                    Area = area
+                };
+
+                if (existingMissionDefinition == null) { await missionDefinitionService.Create(customMissionDefinition); }
+            }
             catch (SourceException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
             catch (AreaNotFoundException) { return NotFound($"No area with name {customMissionQuery.AreaName} in installation {customMissionQuery.InstallationCode} was found"); }
 
@@ -380,7 +414,30 @@ namespace Api.Controllers
             catch (RobotNotInSameInstallationAsMissionException e) { return Conflict(e.Message); }
 
             MissionRun? newMissionRun;
-            try { newMissionRun = await customMissionSchedulingService.QueueCustomMissionRun(customMissionQuery, customMissionDefinition.Id, robot.Id, missionTasks); }
+            try
+            {
+                var scheduledMission = new MissionRun
+                {
+                    Name = customMissionQuery.Name,
+                    Description = customMissionQuery.Description,
+                    MissionId = customMissionDefinition.Id,
+                    Comment = customMissionQuery.Comment,
+                    Robot = robot,
+                    Status = MissionStatus.Pending,
+                    MissionRunType = MissionRunType.Normal,
+                    DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
+                    Tasks = missionTasks,
+                    InstallationCode = customMissionQuery.InstallationCode,
+                    Area = customMissionDefinition.Area,
+                    Map = new MapMetadata()
+                };
+
+                await mapService.AssignMapToMission(scheduledMission);
+
+                if (scheduledMission.Tasks.Any()) { scheduledMission.CalculateEstimatedDuration(); }
+
+                newMissionRun = await missionRunService.Create(scheduledMission);
+            }
             catch (Exception e) when (e is UnsupportedRobotCapabilityException) { return BadRequest(e.Message); }
             catch (Exception e) when (e is MissionNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }

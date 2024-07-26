@@ -43,7 +43,7 @@ namespace Api.Services
     )]
     public class MissionDefinitionService(FlotillaDbContext context,
             IEchoService echoService,
-            ICustomMissionService customMissionService,
+            ISourceService sourceService,
             ISignalRService signalRService,
             IAccessRoleService accessRoleService,
             ILogger<IMissionDefinitionService> logger,
@@ -161,15 +161,10 @@ namespace Api.Services
                         echoService.GetMissionById(
                                 int.Parse(source.SourceId, new CultureInfo("en-US"))
                             ).Result.Tags
-                            .Select(
-                                t =>
-                                {
-                                    return new MissionTask(t);
-                                }
-                            )
+                            .Select(t => new MissionTask(t))
                             .ToList(),
                     MissionSourceType.Custom =>
-                        await customMissionService.GetMissionTasksFromSourceId(source.SourceId),
+                        await sourceService.GetMissionTasksFromSourceId(source.SourceId),
                     _ =>
                         throw new MissionSourceTypeException($"Mission type {source.Type} is not accounted for")
                 };
