@@ -119,6 +119,11 @@ namespace Api.Services
                 logger.LogWarning("{Message}", errorMessage);
                 throw new MissionNotFoundException(errorMessage);
             }
+            if (missionRun.Status == MissionStatus.Successful)
+            {
+                missionDefinition.LastSuccessfulRun = missionRun;
+                logger.LogInformation($"Updated last successful mission run on mission definition {missionDefinitionId} to mission run {missionRunId}");
+            }
             return await Update(missionDefinition);
         }
 
