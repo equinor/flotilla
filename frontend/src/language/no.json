@@ -228,7 +228,7 @@
     "INFO": "INFO",
     "Safe Zone": "Trygg sone",
     "Safe Zone successful text": "Robotene er i sikker sone og vil ikke kjøre oppdrag. For å fortsette oppdrag trykk på knappen 'Trygt å fortsette oppdrag'.",
-    "Connection Issues": "Tilkoblingsproblemer",
+    "Connection Issues": "Tilkoblings\u00adproblemer",
     "Stop button pressed during return home warning text": "Du er i ferd med å stoppe et oppdrag som sender roboten tilbake til startposisjonen. Du må kjøre roboten manuelt til startposisjonen for å starte et nytt oppdrag.",
     "Failed Telemetry": "Mislykket telemetri",
     "Stop button pressed during localization warning text": "Du er i ferd med å stoppe et oppdrag som lokaliserer roboten. Du vil ikke kunne kjøre et inspeksjonsoppdrag før du har lokalisert roboten.",

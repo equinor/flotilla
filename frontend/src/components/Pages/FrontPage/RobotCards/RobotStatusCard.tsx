@@ -39,13 +39,15 @@ const ButtonCard = styled.div`
     background-color: ${tokens.colors.ui.background__light.hex};
     padding: 10px;
     border-radius: 0px 0px 6px 6px;
+    height: 100%;
 `
 const HorizontalContent = styled.div`
     display: flex;
     flex-direction: row;
-    align-content: end;
-    align-items: end;
+    align-content: start;
+    align-items: start;
     justify-content: space-between;
+    gap: 4px;
     padding-top: 2px;
 `
 const VerticalContent = styled.div`

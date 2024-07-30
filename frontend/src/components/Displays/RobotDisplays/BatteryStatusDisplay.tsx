@@ -5,7 +5,7 @@ import { Icons } from 'utils/icons'
 
 const BatteryAlignment = styled.div`
     display: flex;
-    align-items: end;
+    align-items: center;
 `
 
 const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
