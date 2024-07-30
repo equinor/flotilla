@@ -153,7 +153,11 @@ const SelectRobotComponent = memo(
             <Autocomplete
                 optionLabel={(r) => (r ? r.name + ' (' + r.model.type + ')' : '')}
                 options={enabledRobots.filter(
-                    (r) => (r.status === RobotStatus.Available || r.status === RobotStatus.Busy) && r.isarConnected
+                    (r) =>
+                        (r.status === RobotStatus.Available ||
+                            r.status === RobotStatus.Busy ||
+                            r.status === RobotStatus.Recharging) &&
+                        r.isarConnected
                 )}
                 disabled={!enabledRobots}
                 selectedOptions={[selectedRobot]}
