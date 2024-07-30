@@ -18,6 +18,8 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadById(string id);
 
+        public Task<MissionRun?> ReadByIdAsReadOnly(string id);
+
         public Task<MissionRun?> ReadByIsarMissionId(string isarMissionId);
 
         public Task<IList<MissionRun>> ReadMissionRunQueue(string robotId);
@@ -130,6 +132,12 @@ namespace Api.Services
         public async Task<MissionRun?> ReadById(string id)
         {
             return await GetMissionRunsWithSubModels()
+                .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
+        }
+
+        public async Task<MissionRun?> ReadByIdAsReadOnly(string id)
+        {
+            return await GetMissionRunsWithSubModels().AsNoTracking()
                 .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
         }
 
@@ -319,6 +327,9 @@ namespace Api.Services
                 .Include(missionRun => missionRun.Area)
                 .ThenInclude(area => area != null ? area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
+                .ThenInclude(plant => plant != null ? plant.Installation : null)
+                .Include(missionRun => missionRun.Area)
+                .ThenInclude(area => area != null ? area.Plant : null)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionRun => missionRun.Area)
                 .ThenInclude(area => area != null ? area.Installation : null)
