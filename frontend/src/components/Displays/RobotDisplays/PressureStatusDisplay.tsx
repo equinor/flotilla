@@ -7,9 +7,8 @@ import { PressureStatus } from 'models/Pressure'
 const PressureAlignment = styled.div`
     display: flex;
     gap: 7px;
-    align-items: end;
+    align-items: center;
 `
-
 const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
     font-size: ${(props) => props.$fontSize};
 `

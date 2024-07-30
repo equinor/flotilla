@@ -14,12 +14,21 @@ interface StatusProps {
 const StyledStatus = styled.div`
     display: flex;
     flex-direction: row;
-    align-items: end;
+    align-items: center;
     gap: 2px;
+`
+
+const LongTypography = styled(Typography)`
+    overflow: visible;
+    white-space: normal;
+    text-overflow: unset;
+    word-break: break-word;
+    hyphens: auto;
 `
 
 const StyledIcon = styled(Icon)`
     width: 24px;
+    min-width: 24px;
     height: 24px;
 `
 
@@ -69,7 +78,7 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected }: Statu
     return (
         <StyledStatus>
             <StyledIcon name={statusIcon} style={{ color: iconColor }} />
-            <Typography variant="body_short">{TranslateText(status)}</Typography>
+            <LongTypography variant="body_short">{TranslateText(status)}</LongTypography>
         </StyledStatus>
     )
 }
