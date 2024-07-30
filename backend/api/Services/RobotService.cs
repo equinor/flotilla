@@ -12,7 +12,7 @@ namespace Api.Services
         public Task<Robot> Create(Robot newRobot);
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
 
-        public Task<Robot> GetRobotWithPreCheck(string robotId);
+        public Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = false);
         public Task<IEnumerable<Robot>> ReadAll();
         public Task<IEnumerable<string>> ReadAllActivePlants();
         public Task<Robot?> ReadById(string id);
@@ -97,9 +97,9 @@ namespace Api.Services
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
         }
 
-        public async Task<Robot> GetRobotWithPreCheck(string robotId)
+        public async Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = false)
         {
-            var robot = await ReadById(robotId);
+            var robot = readOnly ? await ReadByIdAsReadOnly(robotId) : await ReadById(robotId);
 
             if (robot is null)
             {
@@ -286,6 +286,8 @@ namespace Api.Services
         public async Task<IEnumerable<Robot>> ReadAll() { return await GetRobotsWithSubModels().ToListAsync(); }
 
         public async Task<Robot?> ReadById(string id) { return await GetRobotsWithSubModels().FirstOrDefaultAsync(robot => robot.Id.Equals(id)); }
+
+        public async Task<Robot?> ReadByIdAsReadOnly(string id) { return await GetRobotsWithSubModels().AsNoTracking().FirstOrDefaultAsync(robot => robot.Id.Equals(id)); }
 
         public async Task<Robot?> ReadByIsarId(string isarId)
         {
