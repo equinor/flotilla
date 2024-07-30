@@ -43,6 +43,12 @@ namespace Api.Services
                 return;
             }
 
+            if (robot.MissionQueueFrozen)
+            {
+                logger.LogInformation("Robot {robotName} was ready to start a mission but its mission queue was frozen", robot.Name);
+                return;
+            }
+
             logger.LogInformation("Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
 
             MissionRun? missionRun;
@@ -56,7 +62,6 @@ namespace Api.Services
             if (missionRun == null)
             {
                 logger.LogInformation("The robot was ready to start mission, but no mission is scheduled");
-                if (robot.MissionQueueFrozen) { return; }
 
                 if (!await localizationService.RobotIsLocalized(robotId))
                 {
