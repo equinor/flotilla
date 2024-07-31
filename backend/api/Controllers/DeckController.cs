@@ -36,7 +36,7 @@ namespace Api.Controllers
         {
             try
             {
-                var decks = await deckService.ReadAll();
+                var decks = await deckService.ReadAll(readOnly: true);
                 var deckResponses = decks.Select(d => new DeckResponse(d)).ToList();
                 return Ok(deckResponses);
             }
@@ -64,7 +64,7 @@ namespace Api.Controllers
         {
             try
             {
-                var decks = await deckService.ReadByInstallation(installationCode);
+                var decks = await deckService.ReadByInstallation(installationCode, readOnly: true);
                 var deckResponses = decks.Select(d => new DeckResponse(d)).ToList();
                 return Ok(deckResponses);
             }
@@ -90,7 +90,7 @@ namespace Api.Controllers
         {
             try
             {
-                var deck = await deckService.ReadById(id);
+                var deck = await deckService.ReadById(id, readOnly: true);
                 if (deck == null)
                     return NotFound($"Could not find deck with id {id}");
                 return Ok(new DeckResponse(deck));
@@ -117,7 +117,7 @@ namespace Api.Controllers
         {
             try
             {
-                var deck = await deckService.ReadById(id);
+                var deck = await deckService.ReadById(id, readOnly: true);
                 if (deck == null)
                     return NotFound($"Could not find deck with id {id}");
 
@@ -160,7 +160,7 @@ namespace Api.Controllers
                 {
                     return NotFound($"Could not find plant with name {deck.PlantCode}");
                 }
-                var existingDeck = await deckService.ReadByInstallationAndPlantAndName(existingInstallation, existingPlant, deck.Name);
+                var existingDeck = await deckService.ReadByInstallationAndPlantAndName(existingInstallation, existingPlant, deck.Name, readOnly: true);
                 if (existingDeck != null)
                 {
                     logger.LogInformation("An deck for given name and deck already exists");
@@ -264,7 +264,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MapMetadata>> GetMapMetadata([FromRoute] string id)
         {
-            var deck = await deckService.ReadById(id);
+            var deck = await deckService.ReadById(id, readOnly: true);
             if (deck is null)
             {
                 string errorMessage = $"Deck not found for deck with ID {id}";

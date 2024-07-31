@@ -9,15 +9,15 @@ namespace Api.Services
 {
     public interface IDeckService
     {
-        public Task<IEnumerable<Deck>> ReadAll();
+        public Task<IEnumerable<Deck>> ReadAll(bool readOnly = false);
 
-        public Task<Deck?> ReadById(string id);
+        public Task<Deck?> ReadById(string id, bool readOnly = false);
 
-        public Task<IEnumerable<Deck>> ReadByInstallation(string installationCode);
+        public Task<IEnumerable<Deck>> ReadByInstallation(string installationCode, bool readOnly = false);
 
-        public Task<Deck?> ReadByName(string deckName);
+        public Task<Deck?> ReadByName(string deckName, bool readOnly = false);
 
-        public Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string deckName);
+        public Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string deckName, bool readOnly = false);
 
         public Task<Deck> Create(CreateDeckQuery newDeck);
 
@@ -44,36 +44,36 @@ namespace Api.Services
         IAccessRoleService accessRoleService,
         ISignalRService signalRService) : IDeckService
     {
-        public async Task<IEnumerable<Deck>> ReadAll()
+        public async Task<IEnumerable<Deck>> ReadAll(bool readOnly = false)
         {
-            return await GetDecks().ToListAsync();
+            return await GetDecks(readOnly: readOnly).ToListAsync();
         }
 
-        public async Task<Deck?> ReadById(string id)
+        public async Task<Deck?> ReadById(string id, bool readOnly = false)
         {
-            return await GetDecks()
+            return await GetDecks(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<IEnumerable<Deck>> ReadByInstallation(string installationCode)
+        public async Task<IEnumerable<Deck>> ReadByInstallation(string installationCode, bool readOnly = false)
         {
             var installation = await installationService.ReadByName(installationCode, readOnly: true);
             if (installation == null) { return new List<Deck>(); }
-            return await GetDecks().Where(a =>
+            return await GetDecks(readOnly: readOnly).Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
-        public async Task<Deck?> ReadByName(string deckName)
+        public async Task<Deck?> ReadByName(string deckName, bool readOnly = false)
         {
             if (deckName == null) { return null; }
-            return await GetDecks().Where(a =>
+            return await GetDecks(readOnly: readOnly).Where(a =>
                 a.Name.ToLower().Equals(deckName.ToLower())
             ).FirstOrDefaultAsync();
         }
 
-        public async Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string name)
+        public async Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string name, bool readOnly = false)
         {
-            return await GetDecks().Where(a =>
+            return await GetDecks(readOnly: readOnly).Where(a =>
                 a.Plant != null && a.Plant.Id.Equals(plant.Id) &&
                 a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                 a.Name.ToLower().Equals(name.ToLower())
@@ -141,11 +141,12 @@ namespace Api.Services
             return deck;
         }
 
-        private IQueryable<Deck> GetDecks()
+        private IQueryable<Deck> GetDecks(bool readOnly = false)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            return context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
+            var query = context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
                 .Where((d) => accessibleInstallationCodes.Result.Contains(d.Installation.InstallationCode.ToUpper()));
+            return readOnly ? query.AsNoTracking() : query;
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
