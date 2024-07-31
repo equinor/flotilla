@@ -9,15 +9,15 @@ namespace Api.Services
 {
     public interface IPlantService
     {
-        public Task<IEnumerable<Plant>> ReadAll();
+        public Task<IEnumerable<Plant>> ReadAll(bool readOnly = false);
 
-        public Task<Plant?> ReadById(string id);
+        public Task<Plant?> ReadById(string id, bool readOnly = false);
 
-        public Task<IEnumerable<Plant>> ReadByInstallation(string installationCode);
+        public Task<IEnumerable<Plant>> ReadByInstallation(string installationCode, bool readOnly = false);
 
-        public Task<Plant?> ReadByInstallationAndName(Installation installation, string plantCode);
+        public Task<Plant?> ReadByInstallationAndName(Installation installation, string plantCode, bool readOnly = false);
 
-        public Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode);
+        public Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode, bool readOnly = false);
 
         public Task<Plant> Create(CreatePlantQuery newPlant);
 
@@ -38,37 +38,37 @@ namespace Api.Services
     )]
     public class PlantService(FlotillaDbContext context, IInstallationService installationService, IAccessRoleService accessRoleService) : IPlantService
     {
-        public async Task<IEnumerable<Plant>> ReadAll()
+        public async Task<IEnumerable<Plant>> ReadAll(bool readOnly = false)
         {
-            return await GetPlants().ToListAsync();
+            return await GetPlants(readOnly: readOnly).ToListAsync();
         }
 
-        public async Task<Plant?> ReadById(string id)
+        public async Task<Plant?> ReadById(string id, bool readOnly = false)
         {
-            return await GetPlants()
+            return await GetPlants(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<IEnumerable<Plant>> ReadByInstallation(string installationCode)
+        public async Task<IEnumerable<Plant>> ReadByInstallation(string installationCode, bool readOnly = false)
         {
             var installation = await installationService.ReadByName(installationCode, readOnly: true);
             if (installation == null) { return new List<Plant>(); }
-            return await context.Plants.Where(a =>
+            return await GetPlants(readOnly: readOnly).Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
-        public async Task<Plant?> ReadByInstallationAndName(Installation installation, string plantCode)
+        public async Task<Plant?> ReadByInstallationAndName(Installation installation, string plantCode, bool readOnly = false)
         {
-            return await context.Plants.Where(a =>
+            return await GetPlants(readOnly: readOnly).Where(a =>
                 a.PlantCode.ToLower().Equals(plantCode.ToLower()) &&
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).FirstOrDefaultAsync();
         }
 
-        public async Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode)
+        public async Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode, bool readOnly = false)
         {
             var installation = await installationService.ReadByName(installationCode, readOnly: true);
             if (installation == null) { return null; }
-            return await context.Plants.Where(a =>
+            return await GetPlants(readOnly: readOnly).Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
                 a.PlantCode.ToLower().Equals(plantCode.ToLower())
             ).FirstOrDefaultAsync();
@@ -117,11 +117,12 @@ namespace Api.Services
             return plant;
         }
 
-        private IQueryable<Plant> GetPlants()
+        private IQueryable<Plant> GetPlants(bool readOnly = false)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            return context.Plants.Include(i => i.Installation)
+            var query = context.Plants.Include(i => i.Installation)
                 .Where((p) => accessibleInstallationCodes.Result.Contains(p.Installation.InstallationCode.ToUpper()));
+            return readOnly ? query.AsNoTracking() : query;
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
