@@ -165,15 +165,6 @@ export const Header = ({ page }: { page: string }) => {
                     )}
                 </Popover.Content>
             </Popover>
-            {Object.entries(alerts).length > 0 && installationName && page !== 'root' && (
-                <StyledAlertList>
-                    {Object.entries(alerts).map(([key, value]) => (
-                        <AlertBanner key={key} dismissAlert={value.dismissFunction} alertCategory={value.alertCategory}>
-                            {value.content}
-                        </AlertBanner>
-                    ))}
-                </StyledAlertList>
-            )}
         </>
     )
 }
