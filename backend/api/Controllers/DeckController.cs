@@ -155,7 +155,7 @@ namespace Api.Controllers
                 {
                     return NotFound($"Could not find installation with name {deck.InstallationCode}");
                 }
-                var existingPlant = await plantService.ReadByInstallationAndName(existingInstallation, deck.PlantCode);
+                var existingPlant = await plantService.ReadByInstallationAndName(existingInstallation, deck.PlantCode, readOnly: true);
                 if (existingPlant == null)
                 {
                     return NotFound($"Could not find plant with name {deck.PlantCode}");
