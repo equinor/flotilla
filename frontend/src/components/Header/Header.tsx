@@ -9,6 +9,7 @@ import { AlertBanner } from 'components/Alerts/AlertsBanner'
 import { AlertListItem } from 'components/Alerts/AlertsListItem'
 import { useState, useRef } from 'react'
 import { tokens } from '@equinor/eds-tokens'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;
@@ -67,6 +68,7 @@ const Circle = styled.div`
 export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
     const { installationName } = useInstallationContext()
+    const { TranslateText } = useLanguageContext()
 
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState<boolean>(false)
     const referenceElementNotifications = useRef<HTMLButtonElement>(null)
@@ -138,7 +140,7 @@ export const Header = ({ page }: { page: string }) => {
             >
                 <StyledAlertPopoverHeader>
                     <StyledAlertPopoverTitle>
-                        <span>System alerts</span>
+                        <span>{TranslateText('System Alerts')}</span>
                         <Button variant={'ghost_icon'} onClick={onAlertClose}>
                             <Icon name="close" size={24} />
                         </Button>
@@ -146,7 +148,7 @@ export const Header = ({ page }: { page: string }) => {
                 </StyledAlertPopoverHeader>
                 <Popover.Content>
                     {Object.entries(alerts).length === 0 && installationName && page !== 'root' && (
-                        <Typography variant="h6">No alerts</Typography>
+                        <Typography variant="h6">{TranslateText("No alerts")}</Typography>
                     )}
                     {Object.entries(alerts).length > 0 && installationName && page !== 'root' && (
                         <StyledAlertList>
