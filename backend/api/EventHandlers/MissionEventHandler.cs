@@ -297,7 +297,7 @@ namespace Api.EventHandlers
                 return null;
             }
 
-            var area = await AreaService.ReadById(robot.CurrentArea!.Id);
+            var area = await AreaService.ReadById(robot.CurrentArea!.Id, readOnly: true);
             if (area == null)
             {
                 _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);

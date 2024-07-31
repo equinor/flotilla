@@ -61,7 +61,7 @@ namespace Api.Services
                 throw new RobotCurrentAreaMissingException(ErrorMessage);
             }
 
-            var missionArea = await areaService.ReadById(areaId);
+            var missionArea = await areaService.ReadById(areaId, readOnly: true);
             if (missionArea is null)
             {
                 const string ErrorMessage = "The robot is not located on the same deck as the mission as the area has not been set";

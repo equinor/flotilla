@@ -10,13 +10,13 @@ namespace Api.Services
 {
     public interface IAreaService
     {
-        public Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters);
+        public Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters, bool readOnly = false);
 
-        public Task<Area?> ReadById(string id);
+        public Task<Area?> ReadById(string id, bool readOnly = false);
 
-        public Task<IEnumerable<Area?>> ReadByDeckId(string deckId);
+        public Task<IEnumerable<Area?>> ReadByDeckId(string deckId, bool readOnly = false);
 
-        public Task<Area?> ReadByInstallationAndName(string installationCode, string areaName);
+        public Task<Area?> ReadByInstallationAndName(string installationCode, string areaName, bool readOnly = false);
 
         public Task<Area> Create(CreateAreaQuery newArea);
 
@@ -41,9 +41,9 @@ namespace Api.Services
             FlotillaDbContext context, IInstallationService installationService, IPlantService plantService, IDeckService deckService,
             IDefaultLocalizationPoseService defaultLocalizationPoseService, IAccessRoleService accessRoleService) : IAreaService
     {
-        public async Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters)
+        public async Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters, bool readOnly = false)
         {
-            var query = GetAreasWithSubModels().OrderBy(a => a.Installation);
+            var query = GetAreasWithSubModels(readOnly: readOnly).OrderBy(a => a.Installation);
             var filter = ConstructFilter(parameters);
 
             query = (IOrderedQueryable<Area>)query.Where(filter);
@@ -55,24 +55,24 @@ namespace Api.Services
             );
         }
 
-        public async Task<Area?> ReadById(string id)
+        public async Task<Area?> ReadById(string id, bool readOnly = false)
         {
-            return await GetAreas()
+            return await GetAreas(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<IEnumerable<Area?>> ReadByDeckId(string deckId)
+        public async Task<IEnumerable<Area?>> ReadByDeckId(string deckId, bool readOnly = false)
         {
             if (deckId == null) { return new List<Area>(); }
-            return await GetAreas().Where(a => a.Deck != null && a.Deck.Id.Equals(deckId)).ToListAsync();
+            return await GetAreas(readOnly: readOnly).Where(a => a.Deck != null && a.Deck.Id.Equals(deckId)).ToListAsync();
         }
 
-        public async Task<Area?> ReadByInstallationAndName(string installationCode, string areaName)
+        public async Task<Area?> ReadByInstallationAndName(string installationCode, string areaName, bool readOnly = false)
         {
             var installation = await installationService.ReadByName(installationCode);
             if (installation == null) { return null; }
 
-            return await GetAreas().Where(a =>
+            return await GetAreas(readOnly: readOnly).Where(a =>
                 a.Installation.Id.Equals(installation.Id) && a.Name.ToLower().Equals(areaName.ToLower())).FirstOrDefaultAsync();
         }
         public async Task<IEnumerable<Area>> ReadByInstallation(string installationCode)
@@ -183,10 +183,10 @@ namespace Api.Services
                 throw new UnauthorizedAccessException($"User does not have permission to update area in installation {installation.Name}");
         }
 
-        private IQueryable<Area> GetAreas()
+        private IQueryable<Area> GetAreas(bool readOnly = false)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            return context.Areas
+            var query = context.Areas
                 .Include(area => area.SafePositions)
                 .Include(area => area.DefaultLocalizationPose)
                 .Include(area => area.Deck)
@@ -194,6 +194,25 @@ namespace Api.Services
                 .Include(area => area.Plant)
                 .Include(area => area.Installation)
                 .Where((area) => accessibleInstallationCodes.Result.Contains(area.Installation.InstallationCode.ToUpper()));
+            return readOnly ? query.AsNoTracking() : query;
+        }
+
+        private IQueryable<Area> GetAreasWithSubModels(bool readOnly = false)
+        {
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+
+            // Include related entities using the Include method
+            var query = context.Areas
+             .Include(a => a.SafePositions)
+             .Include(a => a.Deck)
+                 .ThenInclude(deck => deck != null ? deck.Plant : null)
+                 .ThenInclude(plant => plant != null ? plant.Installation : null)
+             .Include(a => a.Plant)
+                 .ThenInclude(plant => plant != null ? plant.Installation : null)
+             .Include(a => a.Installation)
+             .Include(a => a.DefaultLocalizationPose)
+             .Where(a => a.Installation != null && accessibleInstallationCodes.Result.Contains(a.Installation.InstallationCode.ToUpper()));
+            return readOnly ? query.AsNoTracking() : query;
         }
 
         public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName)
@@ -230,21 +249,6 @@ namespace Api.Services
             );
 
             return Expression.Lambda<Func<Area, bool>>(body, area);
-        }
-
-        private IQueryable<Area> GetAreasWithSubModels()
-        {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-
-            // Include related entities using the Include method
-            return context.Areas
-             .Include(a => a.SafePositions)
-             .Include(a => a.Deck)
-                 .ThenInclude(deck => deck != null ? deck.Plant : null)
-                 .ThenInclude(plant => plant != null ? plant.Installation : null)
-             .Include(a => a.Installation)
-             .Include(a => a.DefaultLocalizationPose)
-             .Where(a => a.Installation != null && accessibleInstallationCodes.Result.Contains(a.Installation.InstallationCode.ToUpper()));
         }
 
     }

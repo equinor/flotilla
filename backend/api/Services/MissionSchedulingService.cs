@@ -282,7 +282,7 @@ namespace Api.Services
 
         public async Task ScheduleMissionToDriveToSafePosition(string robotId, string areaId)
         {
-            var area = await areaService.ReadById(areaId);
+            var area = await areaService.ReadById(areaId, readOnly: true);
             if (area == null)
             {
                 logger.LogError("Could not find area with ID {AreaId}", areaId);

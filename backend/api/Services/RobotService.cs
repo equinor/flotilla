@@ -73,7 +73,7 @@ namespace Api.Services
                 Area? area = null;
                 if (robotQuery.CurrentAreaName is not null)
                 {
-                    area = await areaService.ReadByInstallationAndName(robotQuery.CurrentInstallationCode, robotQuery.CurrentAreaName);
+                    area = await areaService.ReadByInstallationAndName(robotQuery.CurrentInstallationCode, robotQuery.CurrentAreaName, readOnly: true);
                     if (area is null)
                     {
                         logger.LogError("Area '{AreaName}' does not exist in installation {CurrentInstallation}", robotQuery.CurrentAreaName, robotQuery.CurrentInstallationCode);
