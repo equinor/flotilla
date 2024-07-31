@@ -30,7 +30,7 @@ namespace Api.Controllers
         {
             try
             {
-                var installations = await installationService.ReadAll();
+                var installations = await installationService.ReadAll(readOnly: true);
                 return Ok(installations);
             }
             catch (Exception e)
@@ -55,7 +55,7 @@ namespace Api.Controllers
         {
             try
             {
-                var installation = await installationService.ReadById(id);
+                var installation = await installationService.ReadById(id, readOnly: true);
                 if (installation == null)
                     return NotFound($"Could not find installation with id {id}");
                 return Ok(installation);
@@ -86,7 +86,7 @@ namespace Api.Controllers
             logger.LogInformation("Creating new installation");
             try
             {
-                var existingInstallation = await installationService.ReadByName(installation.InstallationCode);
+                var existingInstallation = await installationService.ReadByName(installation.InstallationCode, readOnly: true);
                 if (existingInstallation != null)
                 {
                     logger.LogInformation("An installation for given name and installation already exists");

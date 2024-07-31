@@ -51,7 +51,7 @@ namespace Api.Services
 
         public async Task<IEnumerable<Plant>> ReadByInstallation(string installationCode)
         {
-            var installation = await installationService.ReadByName(installationCode);
+            var installation = await installationService.ReadByName(installationCode, readOnly: true);
             if (installation == null) { return new List<Plant>(); }
             return await context.Plants.Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
@@ -66,7 +66,7 @@ namespace Api.Services
 
         public async Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode)
         {
-            var installation = await installationService.ReadByName(installationCode);
+            var installation = await installationService.ReadByName(installationCode, readOnly: true);
             if (installation == null) { return null; }
             return await context.Plants.Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id) &&

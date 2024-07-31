@@ -14,7 +14,7 @@ namespace Api.Services
 
         public async Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition)
         {
-            var missionInstallation = await installationService.ReadByName(missionDefinition.InstallationCode);
+            var missionInstallation = await installationService.ReadByName(missionDefinition.InstallationCode, readOnly: true);
 
             if (missionInstallation is null)
             {
