@@ -177,9 +177,7 @@ namespace Api.EventHandlers
                 if (isarRobotInfo.Capabilities is not null) UpdateRobotCapabilitiesIfChanged(isarRobotInfo.Capabilities, ref robot, ref updatedFields);
                 if (updatedFields.Count < 1) return;
 
-
                 robot = await RobotService.Update(robot);
-
 
                 _logger.LogInformation("Updated robot '{Id}' ('{RobotName}') in database: {Updates}", robot.Id, robot.Name, updatedFields);
 
