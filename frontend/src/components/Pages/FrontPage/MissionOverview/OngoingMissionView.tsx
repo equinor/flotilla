@@ -7,9 +7,6 @@ import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { useEffect, useState } from 'react'
-import { Mission } from 'models/Mission'
 import { tokens } from '@equinor/eds-tokens'
 
 const StyledOngoingMissionView = styled.div`

@@ -7,7 +7,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
 import { useRef, useState } from 'react'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { Mission } from 'models/Mission'
 import { ScheduleMissionWithConfirmDialogs } from '../ConfirmScheduleDialogs/ConfirmScheduleDialog'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
@@ -50,7 +50,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
             .catch(() =>
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to rerun mission')} />,
+                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to rerun mission')} />,
                     AlertCategory.ERROR
                 )
             )

@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { useRobotContext } from './RobotContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { SafeZoneAlertContent } from 'components/Alerts/SafeZoneAlert'
+import { SafeZoneAlertListContent } from 'components/Alerts/SafeZoneAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { RobotFlotillaStatus } from 'models/Robot'
 
@@ -34,7 +34,7 @@ export const SafeZoneProvider: FC<Props> = ({ children }) => {
             clearAlert(AlertType.DismissSafeZone)
             setAlert(
                 AlertType.RequestSafeZone,
-                <SafeZoneAlertContent alertType={AlertType.RequestSafeZone} alertCategory={AlertCategory.WARNING} />,
+                <SafeZoneAlertListContent alertType={AlertType.RequestSafeZone} alertCategory={AlertCategory.WARNING} />,
                 AlertCategory.WARNING
             )
         } else if (missionQueueFozenStatus.length === 0 && safeZoneStatus === true) {
@@ -43,7 +43,7 @@ export const SafeZoneProvider: FC<Props> = ({ children }) => {
             clearAlert(AlertType.SafeZoneSuccess)
             setAlert(
                 AlertType.DismissSafeZone,
-                <SafeZoneAlertContent alertType={AlertType.DismissSafeZone} alertCategory={AlertCategory.INFO} />,
+                <SafeZoneAlertListContent alertType={AlertType.DismissSafeZone} alertCategory={AlertCategory.INFO} />,
                 AlertCategory.INFO
             )
         }

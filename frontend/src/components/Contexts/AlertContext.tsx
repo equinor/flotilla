@@ -1,20 +1,20 @@
 import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react'
 import { addMinutes, max } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
-import { FailedMissionAlertContent } from 'components/Alerts/FailedMissionAlert'
+import { FailedMissionAlertListContent } from 'components/Alerts/FailedMissionAlert'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useInstallationContext } from './InstallationContext'
 import { Alert } from 'models/Alert'
 import { useRobotContext } from './RobotContext'
-import { BlockedRobotAlertContent } from 'components/Alerts/BlockedRobotAlert'
+import { BlockedRobotAlertListContent } from 'components/Alerts/BlockedRobotAlert'
 import { RobotStatus } from 'models/Robot'
-import { FailedAlertContent } from 'components/Alerts/FailedAlertContent'
+import { FailedAlertListContent } from 'components/Alerts/FailedAlertContent'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { SafeZoneAlertContent } from 'components/Alerts/SafeZoneAlert'
+import { SafeZoneAlertListContent } from 'components/Alerts/SafeZoneAlert'
 import { useLanguageContext } from './LanguageContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 
 export enum AlertType {
     MissionFail,
@@ -49,9 +49,9 @@ interface Props {
 
 const defaultAlertInterface = {
     alerts: {},
-    setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => {},
-    clearAlerts: () => {},
-    clearAlert: (source: AlertType) => {},
+    setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => { },
+    clearAlerts: () => { },
+    clearAlert: (source: AlertType) => { },
 }
 
 export const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
@@ -125,7 +125,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 .catch((e) => {
                     setAlert(
                         AlertType.RequestFail,
-                        <FailedRequestAlertContent
+                        <FailedRequestAlertListContent
                             translatedMessage={TranslateText('Failed to retrieve failed missions')}
                         />,
                         AlertCategory.ERROR
@@ -148,7 +148,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                         installationCode &&
                         (!newFailedMission.installationCode ||
                             newFailedMission.installationCode.toLocaleLowerCase() !==
-                                installationCode.toLocaleLowerCase())
+                            installationCode.toLocaleLowerCase())
                     )
                         return failedMissions // Ignore missions for other installations
                     // Ignore missions shortly after the user dismissed the last one
@@ -174,14 +174,14 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 if (alertType === AlertType.SafeZoneSuccess) {
                     setAlert(
                         alertType,
-                        <SafeZoneAlertContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
+                        <SafeZoneAlertListContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
                         AlertCategory.INFO
                     )
                     clearAlert(AlertType.RequestSafeZone)
                 } else {
                     setAlert(
                         alertType,
-                        <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                        <FailedAlertListContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
                         AlertCategory.ERROR
                     )
                 }
@@ -194,7 +194,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         if (newFailedMissions.length > 0) {
             setAlert(
                 AlertType.MissionFail,
-                <FailedMissionAlertContent missions={newFailedMissions} />,
+                <FailedMissionAlertListContent missions={newFailedMissions} />,
                 AlertCategory.ERROR
             )
             setNewFailedMissions([])
@@ -204,7 +204,11 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         const newBlockedRobotNames = enabledRobots
-            .filter((robot) => robot.status === RobotStatus.Blocked)
+            .filter(
+                (robot) =>
+                    robot.currentInstallation.installationCode.toLocaleLowerCase() ===
+                    installationCode.toLocaleLowerCase() && robot.status === RobotStatus.Blocked
+            )
             .map((robot) => robot.name!)
 
         const isBlockedRobotNamesModifyed =
@@ -215,7 +219,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             if (newBlockedRobotNames.length > 0) {
                 setAlert(
                     AlertType.BlockedRobot,
-                    <BlockedRobotAlertContent robotNames={newBlockedRobotNames} />,
+                    <BlockedRobotAlertListContent robotNames={newBlockedRobotNames} />,
                     AlertCategory.WARNING
                 )
             } else {

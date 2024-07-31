@@ -4,6 +4,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { TextAlignedButton } from 'components/Styles/StyledComponents'
+import { AlertListContents } from './AlertsListItem'
 
 const StyledDiv = styled.div`
     flex-direction: column;
@@ -31,5 +32,12 @@ export const FailedRequestAlertContent = ({ translatedMessage }: { translatedMes
                 {translatedMessage}
             </StyledButton>
         </StyledDiv>
+    )
+}
+
+export const FailedRequestAlertListContent = ({ translatedMessage }: { translatedMessage: string }) => {
+    const { TranslateText } = useLanguageContext()
+    return (
+        <AlertListContents icon={Icons.Failed} alertTitle={translatedMessage} alertText={TranslateText('Request error')} iconColor={tokens.colors.interactive.danger__resting.rgba} />
     )
 }

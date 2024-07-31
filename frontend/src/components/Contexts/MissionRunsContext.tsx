@@ -5,7 +5,7 @@ import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { TaskStatus } from 'models/Task'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useInstallationContext } from './InstallationContext'
 
@@ -31,7 +31,7 @@ const defaultMissionRunsContext: IMissionRunsContext = {
     ongoingMissions: [],
     missionQueue: [],
     loadingMissionSet: new Set(),
-    setLoadingMissionSet: (newLoadingMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => {},
+    setLoadingMissionSet: (newLoadingMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => { },
 }
 
 export const MissionRunsContext = createContext<IMissionRunsContext>(defaultMissionRunsContext)
@@ -134,7 +134,7 @@ export const useMissionRuns = (): IMissionRunsContext => {
             }).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
+                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
                     AlertCategory.ERROR
                 )
             })
@@ -148,7 +148,7 @@ export const useMissionRuns = (): IMissionRunsContext => {
             }).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
+                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
                     AlertCategory.ERROR
                 )
             })

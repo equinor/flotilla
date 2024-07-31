@@ -6,7 +6,7 @@ import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { Area } from 'models/Area'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 interface IInstallationContext {
@@ -34,7 +34,7 @@ const defaultInstallation = {
     installationName: '',
     installationDecks: [],
     installationAreas: [],
-    switchInstallation: (selectedInstallation: string) => {},
+    switchInstallation: (selectedInstallation: string) => { },
 }
 
 export const InstallationContext = createContext<IInstallationContext>(defaultInstallation)
@@ -61,7 +61,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
             .catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent
+                    <FailedRequestAlertListContent
                         translatedMessage={TranslateText('Failed to retrieve installations from Echo')}
                     />,
                     AlertCategory.ERROR
@@ -92,7 +92,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                             .catch((e) => {
                                 setAlert(
                                     AlertType.RequestFail,
-                                    <FailedRequestAlertContent
+                                    <FailedRequestAlertListContent
                                         translatedMessage={TranslateText('Failed to retrieve areas on deck {0}', [
                                             deck.deckName,
                                         ])}
@@ -105,7 +105,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                 .catch((e) => {
                     setAlert(
                         AlertType.RequestFail,
-                        <FailedRequestAlertContent
+                        <FailedRequestAlertListContent
                             translatedMessage={TranslateText('Failed to retrieve decks on installation {0}', [
                                 installationCode,
                             ])}

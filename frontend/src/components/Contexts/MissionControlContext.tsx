@@ -2,7 +2,7 @@ import { createContext, useContext, useState, FC } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { MissionStatusRequest } from 'components/Pages/FrontPage/MissionOverview/StopDialogs'
 import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useLanguageContext } from './LanguageContext'
 import { useRobotContext } from './RobotContext'
@@ -22,7 +22,7 @@ export interface IMissionControlContext {
 
 const defaultMissionControlInterface = {
     missionControlState: { isRobotMissionWaitingForResponseDict: {} },
-    updateRobotMissionState: (newState: MissionStatusRequest, robotId: string) => {},
+    updateRobotMissionState: (newState: MissionStatusRequest, robotId: string) => { },
 }
 
 export const MissionControlContext = createContext<IMissionControlContext>(defaultMissionControlInterface)
@@ -47,7 +47,7 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
         if (!robot) {
             setAlert(
                 AlertType.RequestFail,
-                <FailedRequestAlertContent
+                <FailedRequestAlertListContent
                     translatedMessage={TranslateText('Unable to find robot with ID {0}', [robotId])}
                 />,
                 AlertCategory.ERROR
@@ -64,7 +64,7 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
                     .catch((_) =>
                         setAlert(
                             AlertType.RequestFail,
-                            <FailedRequestAlertContent
+                            <FailedRequestAlertListContent
                                 translatedMessage={TranslateText('Failed to pause mission on {0}', [robotName])}
                             />,
                             AlertCategory.ERROR
@@ -79,7 +79,7 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
                     .catch((_) =>
                         setAlert(
                             AlertType.RequestFail,
-                            <FailedRequestAlertContent
+                            <FailedRequestAlertListContent
                                 translatedMessage={TranslateText('Failed to resume mission on {0}', [robotName])}
                             />,
                             AlertCategory.ERROR
@@ -94,7 +94,7 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
                     .catch((_) =>
                         setAlert(
                             AlertType.RequestFail,
-                            <FailedRequestAlertContent
+                            <FailedRequestAlertListContent
                                 translatedMessage={TranslateText('Failed to stop mission on {0}', [robotName])}
                             />,
                             AlertCategory.ERROR

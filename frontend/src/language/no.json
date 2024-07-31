@@ -263,5 +263,6 @@
     "System": "System",
     "Alert": "Varsling",
     "Alerts": "Varsler",
-    "No alerts": "Ingen varsler"
+    "No alerts": "Ingen varsler",
+    "minutes ago": "minutter siden"
 }

@@ -263,5 +263,6 @@
     "System": "System",
     "Alert": "Alert",
     "Alerts": "Alerts",
-    "No alerts": "No alerts"
+    "No alerts": "No alerts",
+    "minutes ago": "minutes ago"
 }

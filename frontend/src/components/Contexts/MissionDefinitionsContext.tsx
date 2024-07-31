@@ -5,7 +5,7 @@ import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { useInstallationContext } from './InstallationContext'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 interface IMissionDefinitionsContext {
@@ -87,7 +87,7 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
             }).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent
+                    <FailedRequestAlertListContent
                         translatedMessage={TranslateText('Failed to retrieve inspection plans')}
                     />,
                     AlertCategory.ERROR
