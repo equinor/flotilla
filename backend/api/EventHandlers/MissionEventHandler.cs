@@ -136,7 +136,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var lastMissionRun = await MissionService.ReadLastExecutedMissionRunByRobotWithoutTracking(robot.Id);
+            var lastMissionRun = await MissionService.ReadLastExecutedMissionRunByRobot(robot.Id, readOnly: true);
             if (lastMissionRun != null)
             {
                 if (lastMissionRun.MissionRunType == MissionRunType.Emergency & lastMissionRun.Status == MissionStatus.Successful)
@@ -287,7 +287,7 @@ namespace Api.EventHandlers
                             RobotId = robot.Id,
                             OrderBy = "DesiredStartTime",
                             PageSize = 100
-                        });
+                        }, readOnly: true);
 
                     var localizationMission = missionRuns.Find(missionRun => missionRun.IsLocalizationMission());
 

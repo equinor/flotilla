@@ -23,8 +23,8 @@ namespace Api.Services.ActionServices
                     MinDesiredStartTime = minEpochTime,
                     RobotModelType = robotType,
                     PageSize = QueryStringParameters.MaxPageSize
-                }
-            );
+                },
+                readOnly: true);
 
             var model = await robotModelService.ReadByRobotType(robotType, readOnly: true);
             if (model is null)
