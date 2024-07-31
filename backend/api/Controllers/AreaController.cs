@@ -35,7 +35,7 @@ namespace Api.Controllers
             logger.LogInformation("Creating new area");
             try
             {
-                var existingArea = await areaService.ReadByInstallationAndName(area.InstallationCode, area.AreaName);
+                var existingArea = await areaService.ReadByInstallationAndName(area.InstallationCode, area.AreaName, readOnly: true);
                 if (existingArea != null)
                 {
                     logger.LogWarning("An area for given name and installation already exists");
@@ -206,7 +206,7 @@ namespace Api.Controllers
             PagedList<Area> areas;
             try
             {
-                areas = await areaService.ReadAll(parameters);
+                areas = await areaService.ReadAll(parameters, readOnly: true);
                 var response = areas.Select(area => new AreaResponse(area));
                 return Ok(response);
             }
@@ -232,7 +232,7 @@ namespace Api.Controllers
         {
             try
             {
-                var area = await areaService.ReadById(id);
+                var area = await areaService.ReadById(id, readOnly: true);
                 if (area == null)
                     return NotFound($"Could not find area with id {id}");
 
@@ -268,7 +268,7 @@ namespace Api.Controllers
         {
             try
             {
-                var areas = await areaService.ReadByDeckId(deckId);
+                var areas = await areaService.ReadByDeckId(deckId, readOnly: true);
                 if (!areas.Any())
                     return NotFound($"Could not find area for deck with id {deckId}");
 
@@ -297,7 +297,7 @@ namespace Api.Controllers
         {
             try
             {
-                var area = await areaService.ReadById(id);
+                var area = await areaService.ReadById(id, readOnly: true);
                 if (area == null)
                     return NotFound($"Could not find area with id {id}");
 
