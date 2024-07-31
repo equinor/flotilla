@@ -304,6 +304,8 @@ namespace Api.Services
         {
             if (robot.CurrentArea is not null) context.Entry(robot.CurrentArea).State = EntityState.Unchanged;
 
+            context.Entry(robot.Model).State = EntityState.Unchanged;
+
             var entry = context.Update(robot);
             await ApplyDatabaseUpdate(robot.CurrentInstallation);
             _ = signalRService.SendMessageAsync("Robot updated", robot?.CurrentInstallation, robot != null ? new RobotResponse(robot) : null);
