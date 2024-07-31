@@ -222,7 +222,7 @@ namespace Api.Controllers
                             updatedRobot = await robotService.UpdateCurrentArea(id, null);
                         else
                         {
-                            var area = await areaService.ReadById(query.AreaId);
+                            var area = await areaService.ReadById(query.AreaId, readOnly: true);
                             if (area == null) return NotFound($"No area with ID {query.AreaId} was found");
                             updatedRobot = await robotService.UpdateCurrentArea(id, area.Id);
                         }

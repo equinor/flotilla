@@ -39,7 +39,7 @@ namespace Api.Services
                 return null;
             }
 
-            var area = await areaService.ReadByInstallationAndName(installationCode, stidTagAreaResponse.LocationCode);
+            var area = await areaService.ReadByInstallationAndName(installationCode, stidTagAreaResponse.LocationCode, readOnly: true);
 
             if (area == null)
             {
