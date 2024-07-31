@@ -8,11 +8,11 @@ namespace Api.Services
 {
     public interface IInstallationService
     {
-        public abstract Task<IEnumerable<Installation>> ReadAll();
+        public abstract Task<IEnumerable<Installation>> ReadAll(bool readOnly = false);
 
-        public abstract Task<Installation?> ReadById(string id);
+        public abstract Task<Installation?> ReadById(string id, bool readOnly = false);
 
-        public abstract Task<Installation?> ReadByName(string installation);
+        public abstract Task<Installation?> ReadByName(string installation, bool readOnly = false);
 
         public abstract Task<Installation> Create(CreateInstallationQuery newInstallation);
 
@@ -34,16 +34,17 @@ namespace Api.Services
     )]
     public class InstallationService(FlotillaDbContext context, IAccessRoleService accessRoleService) : IInstallationService
     {
-        public async Task<IEnumerable<Installation>> ReadAll()
+        public async Task<IEnumerable<Installation>> ReadAll(bool readOnly = false)
         {
-            return await GetInstallations().ToListAsync();
+            return await GetInstallations(readOnly: readOnly).ToListAsync();
         }
 
-        private IQueryable<Installation> GetInstallations()
+        private IQueryable<Installation> GetInstallations(bool readOnly = false)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            return context.Installations
+            var query = context.Installations
                 .Where((i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper()));
+            return readOnly ? query.AsNoTracking() : query;
         }
 
         private async Task ApplyUnprotectedDatabaseUpdate()
@@ -60,24 +61,24 @@ namespace Api.Services
                 throw new UnauthorizedAccessException($"User does not have permission to update installation in installation {installation.Name}");
         }
 
-        public async Task<Installation?> ReadById(string id)
+        public async Task<Installation?> ReadById(string id, bool readOnly = false)
         {
-            return await GetInstallations()
+            return await GetInstallations(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<Installation?> ReadByName(string installationCode)
+        public async Task<Installation?> ReadByName(string installationCode, bool readOnly = false)
         {
             if (installationCode == null)
                 return null;
-            return await GetInstallations().Where(a =>
+            return await GetInstallations(readOnly: readOnly).Where(a =>
                 a.InstallationCode.ToLower().Equals(installationCode.ToLower())
             ).FirstOrDefaultAsync();
         }
 
         public async Task<Installation> Create(CreateInstallationQuery newInstallationQuery)
         {
-            var installation = await ReadByName(newInstallationQuery.InstallationCode);
+            var installation = await ReadByName(newInstallationQuery.InstallationCode, readOnly: true);
             if (installation == null)
             {
                 installation = new Installation
@@ -89,7 +90,7 @@ namespace Api.Services
                 await ApplyUnprotectedDatabaseUpdate();
             }
 
-            return installation!;
+            return installation;
         }
 
         public async Task<Installation> Update(Installation installation)
