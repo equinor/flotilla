@@ -30,7 +30,7 @@ public class RobotModelController(
     {
         try
         {
-            var robotModels = await robotModelService.ReadAll();
+            var robotModels = await robotModelService.ReadAll(readOnly: true);
             return Ok(robotModels);
         }
         catch (Exception e)
@@ -55,7 +55,7 @@ public class RobotModelController(
         [FromRoute] RobotType robotType
     )
     {
-        var robotModel = await robotModelService.ReadByRobotType(robotType);
+        var robotModel = await robotModelService.ReadByRobotType(robotType, readOnly: true);
         if (robotModel == null)
             return NotFound($"Could not find robotModel with robot type '{robotType}'");
         return Ok(robotModel);
@@ -74,7 +74,7 @@ public class RobotModelController(
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<RobotModel>> GetRobotModelById([FromRoute] string id)
     {
-        var robotModel = await robotModelService.ReadById(id);
+        var robotModel = await robotModelService.ReadById(id, readOnly: true);
         if (robotModel == null)
             return NotFound($"Could not find robotModel with id '{id}'");
         return Ok(robotModel);
@@ -101,7 +101,7 @@ public class RobotModelController(
 
         RobotModel robotModel = new(robotModelQuery);
 
-        if (robotModelService.ReadByRobotType(robotModel.Type).Result != null)
+        if (robotModelService.ReadByRobotType(robotModel.Type, readOnly: true).Result != null)
             return BadRequest($"A robot already exists with the robot type '{robotModel.Type}");
 
         try
