@@ -62,7 +62,7 @@ namespace Api.Controllers
                 if (accessRoleQuery.AccessLevel == RoleAccessLevel.ADMIN)
                     return Unauthorized("Cannot create admin roles using API endpoints");
 
-                var installation = await installationService.ReadByName(accessRoleQuery.InstallationCode);
+                var installation = await installationService.ReadByName(accessRoleQuery.InstallationCode, readOnly: true);
                 if (installation is null)
                 {
                     logger.LogInformation("Installation not found when creating new access roles");

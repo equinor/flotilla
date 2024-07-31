@@ -55,6 +55,8 @@ namespace Api.Services
                 throw new HttpRequestException("Cannot create admin roles using database services");
             ThrowExceptionIfNotAdmin();
 
+            context.Entry(installation).State = EntityState.Unchanged;
+
             var newAccessRole = new AccessRole()
             {
                 Installation = installation,

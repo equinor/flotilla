@@ -57,7 +57,7 @@ namespace Api.Services
 
         public async Task<IEnumerable<Deck>> ReadByInstallation(string installationCode)
         {
-            var installation = await installationService.ReadByName(installationCode);
+            var installation = await installationService.ReadByName(installationCode, readOnly: true);
             if (installation == null) { return new List<Deck>(); }
             return await GetDecks().Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();

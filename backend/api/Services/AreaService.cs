@@ -69,7 +69,7 @@ namespace Api.Services
 
         public async Task<Area?> ReadByInstallationAndName(string installationCode, string areaName, bool readOnly = false)
         {
-            var installation = await installationService.ReadByName(installationCode);
+            var installation = await installationService.ReadByName(installationCode, readOnly: true);
             if (installation == null) { return null; }
 
             return await GetAreas(readOnly: readOnly).Where(a =>
@@ -77,7 +77,7 @@ namespace Api.Services
         }
         public async Task<IEnumerable<Area>> ReadByInstallation(string installationCode)
         {
-            var installation = await installationService.ReadByName(installationCode);
+            var installation = await installationService.ReadByName(installationCode, readOnly: true);
             if (installation == null) { return new List<Area>(); }
 
             return await GetAreas().Where(a => a.Installation.Id.Equals(installation.Id)).ToListAsync();

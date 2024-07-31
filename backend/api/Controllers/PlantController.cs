@@ -87,7 +87,7 @@ namespace Api.Controllers
             logger.LogInformation("Creating new plant");
             try
             {
-                var existingInstallation = await installationService.ReadByName(plant.InstallationCode);
+                var existingInstallation = await installationService.ReadByName(plant.InstallationCode, readOnly: true);
                 if (existingInstallation == null)
                 {
                     return NotFound($"Installation with installation code {plant.InstallationCode} not found");
