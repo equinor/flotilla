@@ -13,11 +13,11 @@ namespace Api.Services
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
 
         public Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = false);
-        public Task<IEnumerable<Robot>> ReadAll();
+        public Task<IEnumerable<Robot>> ReadAll(bool readOnly = false);
         public Task<IEnumerable<string>> ReadAllActivePlants();
-        public Task<Robot?> ReadById(string id);
-        public Task<Robot?> ReadByIsarId(string isarId);
-        public Task<IList<Robot>> ReadRobotsForInstallation(string installationCode);
+        public Task<Robot?> ReadById(string id, bool readOnly = false);
+        public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = false);
+        public Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = false);
         public Task<Robot> Update(Robot robot);
         public Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status);
         public Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel);
@@ -99,7 +99,7 @@ namespace Api.Services
 
         public async Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = false)
         {
-            var robot = readOnly ? await ReadByIdAsReadOnly(robotId) : await ReadById(robotId);
+            var robot = await ReadById(robotId, readOnly: readOnly);
 
             if (robot is null)
             {
@@ -283,13 +283,11 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<IEnumerable<Robot>> ReadAll() { return await GetRobotsWithSubModels().ToListAsync(); }
+        public async Task<IEnumerable<Robot>> ReadAll(bool readOnly = false) { return await GetRobotsWithSubModels(readOnly: readOnly).ToListAsync(); }
 
-        public async Task<Robot?> ReadById(string id) { return await GetRobotsWithSubModels().FirstOrDefaultAsync(robot => robot.Id.Equals(id)); }
+        public async Task<Robot?> ReadById(string id, bool readOnly = false) { return await GetRobotsWithSubModels(readOnly: readOnly).FirstOrDefaultAsync(robot => robot.Id.Equals(id)); }
 
-        public async Task<Robot?> ReadByIdAsReadOnly(string id) { return await GetRobotsWithSubModels().AsNoTracking().FirstOrDefaultAsync(robot => robot.Id.Equals(id)); }
-
-        public async Task<Robot?> ReadByIsarId(string isarId)
+        public async Task<Robot?> ReadByIsarId(string isarId, bool readOnly = false)
         {
             return await GetRobotsWithSubModels()
                 .FirstOrDefaultAsync(robot => robot.IsarId.Equals(isarId));
@@ -323,9 +321,9 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<IList<Robot>> ReadRobotsForInstallation(string installationCode)
+        public async Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = false)
         {
-            return await GetRobotsWithSubModels()
+            return await GetRobotsWithSubModels(readOnly: readOnly)
                 .Where(robot =>
 #pragma warning disable CA1304
                     robot.CurrentInstallation != null &&
@@ -369,10 +367,10 @@ namespace Api.Services
             }
         }
 
-        private IQueryable<Robot> GetRobotsWithSubModels()
+        private IQueryable<Robot> GetRobotsWithSubModels(bool readOnly = false)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            return context.Robots
+            var query = context.Robots
                 .Include(r => r.VideoStreams)
                 .Include(r => r.Model)
                 .Include(r => r.CurrentInstallation)
@@ -391,6 +389,7 @@ namespace Api.Services
 #pragma warning disable CA1304
                 .Where((r) => r.CurrentInstallation == null || r.CurrentInstallation.InstallationCode == null || accessibleInstallationCodes.Result.Contains(r.CurrentInstallation.InstallationCode.ToUpper()));
 #pragma warning restore CA1304
+            return readOnly ? query.AsNoTracking() : query;
         }
 
         private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)
