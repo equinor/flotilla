@@ -101,7 +101,7 @@ namespace Api.Controllers
             logger.LogInformation("Creating new robot");
             try
             {
-                var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType);
+                var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType, readOnly: true);
                 if (robotModel == null)
                 {
                     return BadRequest(
