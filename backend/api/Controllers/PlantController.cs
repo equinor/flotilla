@@ -31,7 +31,7 @@ namespace Api.Controllers
         {
             try
             {
-                var plants = await plantService.ReadAll();
+                var plants = await plantService.ReadAll(readOnly: true);
                 return Ok(plants);
             }
             catch (Exception e)
@@ -56,7 +56,7 @@ namespace Api.Controllers
         {
             try
             {
-                var plant = await plantService.ReadById(id);
+                var plant = await plantService.ReadById(id, readOnly: true);
                 if (plant == null)
                     return NotFound($"Could not find plant with id {id}");
                 return Ok(plant);
@@ -92,7 +92,7 @@ namespace Api.Controllers
                 {
                     return NotFound($"Installation with installation code {plant.InstallationCode} not found");
                 }
-                var existingPlant = await plantService.ReadByInstallationAndName(existingInstallation, plant.PlantCode);
+                var existingPlant = await plantService.ReadByInstallationAndName(existingInstallation, plant.PlantCode, readOnly: true);
                 if (existingPlant != null)
                 {
                     logger.LogInformation("A plant for given name and plant already exists");
