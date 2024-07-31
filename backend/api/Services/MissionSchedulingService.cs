@@ -355,8 +355,8 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            var missionRun = await missionRunService.ReadNextScheduledLocalizationMissionRun(robot.Id) ?? await missionRunService.ReadNextScheduledEmergencyMissionRun(robot.Id);
-            if (robot.MissionQueueFrozen == false && missionRun == null) { missionRun = await missionRunService.ReadNextScheduledMissionRun(robot.Id); }
+            var missionRun = await missionRunService.ReadNextScheduledLocalizationMissionRun(robot.Id, readOnly: true) ?? await missionRunService.ReadNextScheduledEmergencyMissionRun(robot.Id, readOnly: true);
+            if (robot.MissionQueueFrozen == false && missionRun == null) { missionRun = await missionRunService.ReadNextScheduledMissionRun(robot.Id, readOnly: true); }
             return missionRun;
         }
 
@@ -364,7 +364,7 @@ namespace Api.Services
         {
             foreach (string missionRunId in interruptedMissionRunIds)
             {
-                var missionRun = await missionRunService.ReadById(missionRunId);
+                var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
                 if (missionRun is null)
                 {
                     logger.LogWarning("{Message}", $"Interrupted mission run with Id {missionRunId} could not be found");
@@ -504,7 +504,7 @@ namespace Api.Services
                     RobotId = robotId,
                     OrderBy = "DesiredStartTime",
                     PageSize = 100
-                });
+                }, readOnly: true);
 
             return ongoingMissions;
         }
@@ -527,7 +527,7 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            var missionRun = await missionRunService.ReadById(missionRunId);
+            var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
             if (missionRun is null)
             {
                 string errorMessage = $"Mission run with Id {missionRunId} was not found in the database";

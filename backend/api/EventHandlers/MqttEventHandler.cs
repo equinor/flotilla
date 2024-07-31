@@ -255,7 +255,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var flotillaMissionRun = await MissionRunService.ReadByIsarMissionId(isarMission.MissionId);
+            var flotillaMissionRun = await MissionRunService.ReadByIsarMissionId(isarMission.MissionId, readOnly: true);
             if (flotillaMissionRun is null)
             {
                 string errorMessage = $"Mission with isar mission Id {isarMission.IsarId} was not found";
@@ -380,7 +380,7 @@ namespace Api.EventHandlers
             try { await MissionTaskService.UpdateMissionTaskStatus(task.TaskId, status); }
             catch (MissionTaskNotFoundException) { return; }
 
-            var missionRun = await MissionRunService.ReadByIsarMissionId(task.MissionId);
+            var missionRun = await MissionRunService.ReadByIsarMissionId(task.MissionId, readOnly: true);
             if (missionRun is null)
             {
                 _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId);
@@ -411,7 +411,7 @@ namespace Api.EventHandlers
             try { await InspectionService.UpdateInspectionStatus(step.StepId, status); }
             catch (InspectionNotFoundException) { return; }
 
-            var missionRun = await MissionRunService.ReadByIsarMissionId(step.MissionId);
+            var missionRun = await MissionRunService.ReadByIsarMissionId(step.MissionId, readOnly: true);
             if (missionRun is null) _logger.LogWarning("Mission run with ID {Id} was not found", step.MissionId);
 
             _ = SignalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);

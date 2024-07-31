@@ -167,7 +167,7 @@ namespace Api.Controllers
             {
                 return NotFound($"Could not find mission definition with id {id}");
             }
-            var nextRun = await missionRunService.ReadNextScheduledRunByMissionId(id);
+            var nextRun = await missionRunService.ReadNextScheduledRunByMissionId(id, readOnly: true);
             return Ok(nextRun);
         }
 

@@ -44,7 +44,7 @@ namespace Api.Controllers
             PagedList<MissionRun> missionRuns;
             try
             {
-                missionRuns = await missionRunService.ReadAll(parameters);
+                missionRuns = await missionRunService.ReadAll(parameters, readOnly: true);
             }
             catch (InvalidDataException e)
             {
@@ -83,7 +83,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionRunResponse>> GetMissionRunById([FromRoute] string id)
         {
-            var missionRun = await missionRunService.ReadById(id);
+            var missionRun = await missionRunService.ReadById(id, readOnly: true);
             if (missionRun == null)
             {
                 return NotFound($"Could not find mission run with id {id}");

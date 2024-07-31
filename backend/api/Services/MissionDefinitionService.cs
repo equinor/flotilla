@@ -105,7 +105,7 @@ namespace Api.Services
 
         public async Task<MissionDefinition> UpdateLastSuccessfulMissionRun(string missionRunId, string missionDefinitionId)
         {
-            var missionRun = await missionRunService.ReadById(missionRunId);
+            var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
             if (missionRun is null)
             {
                 string errorMessage = $"Mission run {missionRunId} was not found";

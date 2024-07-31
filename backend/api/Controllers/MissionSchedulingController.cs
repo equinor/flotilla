@@ -50,7 +50,7 @@ namespace Api.Controllers
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
-            var missionRun = await missionRunService.ReadByIdAsReadOnly(missionRunId);
+            var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
             if (missionRun == null) return NotFound("Mission run not found");
 
             var missionTasks = missionRun.Tasks.Where((t) => t.Status != Database.Models.TaskStatus.Successful && t.Status != Database.Models.TaskStatus.PartiallySuccessful).Select((t) => new MissionTask(t, Database.Models.TaskStatus.NotStarted)).ToList();
