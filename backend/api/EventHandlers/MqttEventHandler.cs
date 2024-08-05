@@ -299,6 +299,7 @@ namespace Api.EventHandlers
             }
 
             if (flotillaMissionRun.Status == status) { return; }
+            if (flotillaMissionRun.Status == MissionStatus.Aborted && status == MissionStatus.Cancelled) { status = MissionStatus.Aborted; }
 
             MissionRun updatedFlotillaMissionRun;
             try { updatedFlotillaMissionRun = await MissionRunService.UpdateMissionRunStatusByIsarMissionId(isarMission.MissionId, status); }

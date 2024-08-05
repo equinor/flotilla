@@ -355,6 +355,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<MissionRun>> Create(
             [FromBody] CustomMissionQuery customMissionQuery
         )
@@ -434,6 +435,11 @@ namespace Api.Controllers
                 await mapService.AssignMapToMission(scheduledMission);
 
                 if (scheduledMission.Tasks.Any()) { scheduledMission.CalculateEstimatedDuration(); }
+
+                if (await localizationService.RobotIsLocalized(scheduledMission.Robot.Id) && !await localizationService.RobotIsOnSameDeckAsMission(scheduledMission.Robot.Id, scheduledMission.Area.Id))
+                {
+                    return Conflict($"The robot {scheduledMission.Robot.Name} is localized on a different deck so the mission was not scheduled.");
+                }
 
                 newMissionRun = await missionRunService.Create(scheduledMission);
             }

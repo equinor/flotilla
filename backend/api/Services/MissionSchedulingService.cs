@@ -28,6 +28,8 @@ namespace Api.Services
 
         public void TriggerLocalizationMissionSuccessful(LocalizationMissionSuccessfulEventArgs e);
 
+        public Task AbortActiveReturnToHomeMission(string robotId);
+
     }
 
     public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
@@ -562,6 +564,26 @@ namespace Api.Services
                 return false;
             }
             return true;
+        }
+
+        public async Task AbortActiveReturnToHomeMission(string robotId)
+        {
+            var activeReturnToHomeMission = await returnToHomeService.GetActiveReturnToHomeMissionRun(robotId);
+
+            if (activeReturnToHomeMission == null)
+            {
+                logger.LogWarning("Attempted to abort active Return to Home mission for robot with Id {RobotId} but none was found", robotId);
+                return;
+            }
+
+            try { await missionRunService.UpdateMissionRunProperty(activeReturnToHomeMission.Id, "Status", MissionStatus.Aborted); }
+            catch (MissionRunNotFoundException) { return; }
+
+            if (activeReturnToHomeMission.Status == MissionStatus.Pending) { return; }
+
+            try { await StopCurrentMissionRun(activeReturnToHomeMission.Robot.Id); }
+            catch (RobotNotFoundException) { return; }
+            catch (MissionRunNotFoundException) { return; }
         }
 
         private static float CalculateDistance(Pose pose1, Pose pose2)
