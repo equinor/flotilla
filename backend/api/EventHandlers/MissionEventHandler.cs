@@ -38,6 +38,9 @@ namespace Api.EventHandlers
 
         private ISignalRService SignalRService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
 
+        private IReturnToHomeService ReturnToHomeService => _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IReturnToHomeService>();
+
+
         public override void Subscribe()
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
@@ -86,9 +89,13 @@ namespace Api.EventHandlers
             }
             _scheduleLocalizationSemaphore.Release();
 
-            await CancelReturnToHomeOnNewMissionSchedule(missionRun);
-
             _startMissionSemaphore.WaitOne();
+
+            if (missionRun.MissionRunType != MissionRunType.ReturnHome && await ReturnToHomeService.GetActiveReturnToHomeMissionRun(missionRun.Robot.Id) != null)
+            {
+                await MissionScheduling.AbortActiveReturnToHomeMission(missionRun.Robot.Id);
+            }
+
             try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot.Id); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
@@ -308,63 +315,6 @@ namespace Api.EventHandlers
             return area;
         }
 
-        public async Task CancelReturnToHomeOnNewMissionSchedule(MissionRun missionRun)
-        {
-            IList<MissionStatus> missionStatuses = [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused];
-            var existingReturnToHomeMissions = await MissionService.ReadMissionRuns(missionRun.Robot.Id, MissionRunType.ReturnHome, missionStatuses);
 
-            if (existingReturnToHomeMissions.Count == 1 && existingReturnToHomeMissions[0].Id != missionRun.Id)
-            {
-                var returnToHomeMission = existingReturnToHomeMissions[0];
-
-                try
-                {
-                    if (!await LocalizationService.RobotIsOnSameDeckAsMission(missionRun.Robot.Id, missionRun.Area.Id))
-                    {
-                        _logger.LogWarning($"The robot {missionRun.Robot.Name} is localized on a different deck so the mission was not scheduled.");
-                        return;
-                    }
-                }
-                catch (RobotNotFoundException)
-                {
-                    string errorMessage = $"Could not cancel return to home mission on new mission schedule since {missionRun.Robot.Id} was not found";
-                    _logger.LogWarning("{Message}", errorMessage);
-                    return;
-                }
-                catch (RobotCurrentAreaMissingException)
-                {
-                    string errorMessage = $"Could not cancel return to home mission on new mission schedule since {missionRun.Robot.Id} did not have an Area associated with it";
-                    _logger.LogWarning("{Message}", errorMessage);
-                    return;
-                }
-                catch (AreaNotFoundException)
-                {
-                    string errorMessage = $"Could not cancel return to home mission on new mission schedule since {missionRun.Robot.Id} had Area with ID {missionRun.Area.Id} which could not be found";
-                    _logger.LogWarning("{Message}", errorMessage);
-                    return;
-                }
-
-
-                if (returnToHomeMission.Status != MissionStatus.Pending)
-                {
-                    try { await MissionScheduling.StopCurrentMissionRun(missionRun.Robot.Id); }
-                    catch (RobotNotFoundException) { return; }
-                    catch (MissionRunNotFoundException) { return; }
-                }
-
-                var missionTask = returnToHomeMission.Tasks.FirstOrDefault();
-                if (missionTask != null)
-                {
-                    missionTask.Status = Database.Models.TaskStatus.Cancelled;
-                }
-                returnToHomeMission.Status = MissionStatus.Cancelled;
-                await MissionService.UpdateMissionRunProperty(returnToHomeMission.Id, "Status", MissionStatus.Cancelled);
-            }
-
-            if (existingReturnToHomeMissions.Count > 1)
-            {
-                _logger.LogError($"Two Return to Home missions should not be queued or ongoing simoultaneously for robot {missionRun.Robot.Name}.");
-            }
-        }
     }
 }

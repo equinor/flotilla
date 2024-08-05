@@ -194,7 +194,7 @@ namespace Api.Database.Models
 
         public bool IsLocalizationMission() { return MissionRunType == MissionRunType.Localization; }
 
-        public bool IsReturnHomeMission() { return Tasks is [{ Type: MissionTaskType.ReturnHome }]; }
+        public bool IsReturnHomeMission() { return MissionRunType == MissionRunType.ReturnHome; }
 
         public bool IsEmergencyMission() { return MissionRunType == MissionRunType.Emergency; }
     }

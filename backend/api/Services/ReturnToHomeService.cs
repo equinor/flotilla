@@ -5,7 +5,7 @@ namespace Api.Services
     public interface IReturnToHomeService
     {
         public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(string robotId);
-
+        public Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId);
     }
 
     public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService, IMapService mapService) : IReturnToHomeService
@@ -110,6 +110,18 @@ namespace Api.Services
                 "Scheduled a mission for the robot {RobotName} to return to home location on deck {DeckName}",
                 robot.Name, robot.CurrentArea.Deck.Name);
             return missionRun;
+        }
+
+        public async Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId)
+        {
+            IList<MissionStatus> missionStatuses = [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused];
+            var activeReturnToHomeMissions = await missionRunService.ReadMissionRuns(robotId, MissionRunType.ReturnHome, missionStatuses);
+
+            if (activeReturnToHomeMissions.Count == 0) { return null; }
+
+            if (activeReturnToHomeMissions.Count > 1) { logger.LogError($"Two Return to Home missions should not be queued or ongoing simoultaneously for robot with Id {robotId}."); }
+
+            return activeReturnToHomeMissions.FirstOrDefault();
         }
     }
 }
