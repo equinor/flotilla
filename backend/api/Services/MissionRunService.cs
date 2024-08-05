@@ -36,7 +36,7 @@ namespace Api.Services
 
         public Task<bool> PendingLocalizationMissionRunExists(string robotId);
 
-        public Task<bool> OngoingLocalizationMissionRunExists(string robotId);
+        public Task<bool> OngoingOrPausedLocalizationMissionRunExists(string robotId);
 
         public Task<bool> PendingOrOngoingLocalizationMissionRunExists(string robotId);
 
@@ -203,10 +203,10 @@ namespace Api.Services
             return pendingMissionRuns.Any((m) => m.IsLocalizationMission());
         }
 
-        public async Task<bool> OngoingLocalizationMissionRunExists(string robotId)
+        public async Task<bool> OngoingOrPausedLocalizationMissionRunExists(string robotId)
         {
             var ongoingMissionRuns = await GetMissionRunsWithSubModels(readOnly: true)
-                .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing)
+                .Where(missionRun => missionRun.Robot.Id == robotId && (missionRun.Status == MissionStatus.Ongoing || missionRun.Status == MissionStatus.Paused))
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
             foreach (var ongoingMissionRun in ongoingMissionRuns)
