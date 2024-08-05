@@ -556,7 +556,7 @@ namespace Api.Services
                 logger.LogWarning("Mission run {MissionRunId} was not started as the robot {RobotId} is deprecated", missionRun.Id, robot.Id);
                 return false;
             }
-            if (await missionRunService.OngoingLocalizationMissionRunExists(robot.Id))
+            if (await missionRunService.OngoingOrPausedLocalizationMissionRunExists(robot.Id))
             {
                 logger.LogInformation("Mission run {MissionRunId} was not started as there is an ongoing localization mission", missionRun.Id);
                 return false;

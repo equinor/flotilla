@@ -76,7 +76,7 @@ namespace Api.EventHandlers
             if (!await LocalizationService.RobotIsLocalized(missionRun.Robot.Id))
             {
                 if (await MissionService.PendingLocalizationMissionRunExists(missionRun.Robot.Id)
-                    || await MissionService.OngoingLocalizationMissionRunExists(missionRun.Robot.Id))
+                    || await MissionService.OngoingOrPausedLocalizationMissionRunExists(missionRun.Robot.Id))
                 {
                     _scheduleLocalizationSemaphore.Release();
                     return;
