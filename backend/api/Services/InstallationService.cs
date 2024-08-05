@@ -8,11 +8,11 @@ namespace Api.Services
 {
     public interface IInstallationService
     {
-        public abstract Task<IEnumerable<Installation>> ReadAll(bool readOnly = false);
+        public abstract Task<IEnumerable<Installation>> ReadAll(bool readOnly = true);
 
-        public abstract Task<Installation?> ReadById(string id, bool readOnly = false);
+        public abstract Task<Installation?> ReadById(string id, bool readOnly = true);
 
-        public abstract Task<Installation?> ReadByName(string installation, bool readOnly = false);
+        public abstract Task<Installation?> ReadByName(string installation, bool readOnly = true);
 
         public abstract Task<Installation> Create(CreateInstallationQuery newInstallation);
 
@@ -34,17 +34,17 @@ namespace Api.Services
     )]
     public class InstallationService(FlotillaDbContext context, IAccessRoleService accessRoleService) : IInstallationService
     {
-        public async Task<IEnumerable<Installation>> ReadAll(bool readOnly = false)
+        public async Task<IEnumerable<Installation>> ReadAll(bool readOnly = true)
         {
             return await GetInstallations(readOnly: readOnly).ToListAsync();
         }
 
-        private IQueryable<Installation> GetInstallations(bool readOnly = false)
+        private IQueryable<Installation> GetInstallations(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Installations
                 .Where((i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper()));
-            return readOnly ? query.AsNoTracking() : query;
+            return readOnly ? query : query.AsTracking();
         }
 
         private async Task ApplyUnprotectedDatabaseUpdate()
@@ -61,13 +61,13 @@ namespace Api.Services
                 throw new UnauthorizedAccessException($"User does not have permission to update installation in installation {installation.Name}");
         }
 
-        public async Task<Installation?> ReadById(string id, bool readOnly = false)
+        public async Task<Installation?> ReadById(string id, bool readOnly = true)
         {
             return await GetInstallations(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<Installation?> ReadByName(string installationCode, bool readOnly = false)
+        public async Task<Installation?> ReadByName(string installationCode, bool readOnly = true)
         {
             if (installationCode == null)
                 return null;

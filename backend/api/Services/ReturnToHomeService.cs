@@ -54,7 +54,7 @@ namespace Api.Services
         }
         private async Task<MissionRun> ScheduleReturnToHomeMissionRun(string robotId)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: false);
             if (robot is null)
             {
                 string errorMessage = $"Robot with ID {robotId} could not be retrieved from the database";

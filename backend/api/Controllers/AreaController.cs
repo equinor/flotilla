@@ -131,7 +131,7 @@ namespace Api.Controllers
             logger.LogInformation("Updating default localization pose on area '{areaId}'", areaId);
             try
             {
-                var area = await areaService.ReadById(areaId);
+                var area = await areaService.ReadById(areaId, readOnly: false);
                 if (area is null)
                 {
                     logger.LogInformation("A area with id '{areaId}' does not exist", areaId);

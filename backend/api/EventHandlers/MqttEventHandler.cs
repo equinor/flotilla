@@ -80,7 +80,7 @@ namespace Api.EventHandlers
         {
             var isarStatus = (IsarStatusMessage)mqttArgs.Message;
 
-            var robot = await RobotService.ReadByIsarId(isarStatus.IsarId);
+            var robot = await RobotService.ReadByIsarId(isarStatus.IsarId, readOnly: true);
 
             if (robot == null)
             {
@@ -92,7 +92,7 @@ namespace Api.EventHandlers
 
             if (await MissionRunService.OngoingLocalizationMissionRunExists(robot.Id)) Thread.Sleep(5000); // Give localization mission update time to complete
 
-            var preUpdatedRobot = await RobotService.ReadByIsarId(isarStatus.IsarId);
+            var preUpdatedRobot = await RobotService.ReadByIsarId(isarStatus.IsarId, readOnly: true);
             if (preUpdatedRobot == null)
             {
                 _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", isarStatus.IsarId, isarStatus.RobotName);
@@ -130,7 +130,7 @@ namespace Api.EventHandlers
 
             try
             {
-                var robot = await RobotService.ReadByIsarId(isarRobotInfo.IsarId);
+                var robot = await RobotService.ReadByIsarId(isarRobotInfo.IsarId, readOnly: false);
 
                 if (robot == null)
                 {
@@ -311,7 +311,7 @@ namespace Api.EventHandlers
 
             if (!updatedFlotillaMissionRun.IsCompleted) return;
 
-            var robot = await RobotService.ReadByIsarId(isarMission.IsarId);
+            var robot = await RobotService.ReadByIsarId(isarMission.IsarId, readOnly: true);
             if (robot is null)
             {
                 _logger.LogError("Could not find robot '{RobotName}' with ISAR id '{IsarId}'", isarMission.RobotName, isarMission.IsarId);
@@ -470,7 +470,7 @@ namespace Api.EventHandlers
         {
             var cloudHealthStatus = (IsarCloudHealthMessage)mqttArgs.Message;
 
-            var robot = await RobotService.ReadByIsarId(cloudHealthStatus.IsarId);
+            var robot = await RobotService.ReadByIsarId(cloudHealthStatus.IsarId, readOnly: true);
             if (robot == null)
             {
                 _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", cloudHealthStatus.IsarId, cloudHealthStatus.RobotName);

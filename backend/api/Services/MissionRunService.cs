@@ -14,25 +14,25 @@ namespace Api.Services
     {
         public Task<MissionRun> Create(MissionRun missionRun, bool triggerCreatedMissionRunEvent = true);
 
-        public Task<PagedList<MissionRun>> ReadAll(MissionRunQueryStringParameters parameters, bool readOnly = false);
+        public Task<PagedList<MissionRun>> ReadAll(MissionRunQueryStringParameters parameters, bool readOnly = true);
 
-        public Task<MissionRun?> ReadById(string id, bool readOnly = false);
+        public Task<MissionRun?> ReadById(string id, bool readOnly = true);
 
-        public Task<MissionRun?> ReadByIsarMissionId(string isarMissionId, bool readOnly = false);
+        public Task<MissionRun?> ReadByIsarMissionId(string isarMissionId, bool readOnly = true);
 
-        public Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = false);
+        public Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = true);
 
-        public Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId, bool readOnly = false);
+        public Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId, bool readOnly = true);
 
-        public Task<MissionRun?> ReadNextScheduledMissionRun(string robotId, bool readOnly = false);
+        public Task<MissionRun?> ReadNextScheduledMissionRun(string robotId, bool readOnly = true);
 
-        public Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(string robotId, bool readOnly = false);
+        public Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(string robotId, bool readOnly = true);
 
-        public Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId, bool readOnly = false);
+        public Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId, bool readOnly = true);
 
-        public Task<IList<MissionRun>> ReadMissionRuns(string robotId, MissionRunType? missionRunType, IList<MissionStatus>? filterStatuses = null, bool readOnly = false);
+        public Task<IList<MissionRun>> ReadMissionRuns(string robotId, MissionRunType? missionRunType, IList<MissionStatus>? filterStatuses = null, bool readOnly = true);
 
-        public Task<MissionRun?> ReadLastExecutedMissionRunByRobot(string robotId, bool readOnly = false);
+        public Task<MissionRun?> ReadLastExecutedMissionRunByRobot(string robotId, bool readOnly = true);
 
         public Task<bool> PendingLocalizationMissionRunExists(string robotId);
 
@@ -107,7 +107,7 @@ namespace Api.Services
             return missionRun;
         }
 
-        public async Task<PagedList<MissionRun>> ReadAll(MissionRunQueryStringParameters parameters, bool readOnly = false)
+        public async Task<PagedList<MissionRun>> ReadAll(MissionRunQueryStringParameters parameters, bool readOnly = true)
         {
             var query = GetMissionRunsWithSubModels(readOnly: readOnly);
             var filter = ConstructFilter(parameters);
@@ -127,13 +127,13 @@ namespace Api.Services
             );
         }
 
-        public async Task<MissionRun?> ReadById(string id, bool readOnly = false)
+        public async Task<MissionRun?> ReadById(string id, bool readOnly = true)
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
         }
 
-        public async Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = false)
+        public async Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = true)
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending)
@@ -141,14 +141,14 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task<MissionRun?> ReadNextScheduledMissionRun(string robotId, bool readOnly = false)
+        public async Task<MissionRun?> ReadNextScheduledMissionRun(string robotId, bool readOnly = true)
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending);
         }
 
-        public async Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(string robotId, bool readOnly = false)
+        public async Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(string robotId, bool readOnly = true)
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
@@ -156,14 +156,14 @@ namespace Api.Services
                     missionRun.Robot.Id == robotId && missionRun.MissionRunType == MissionRunType.Emergency && missionRun.Status == MissionStatus.Pending);
         }
 
-        public async Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId, bool readOnly = false)
+        public async Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId, bool readOnly = true)
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                     .OrderBy(missionRun => missionRun.DesiredStartTime)
                     .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending && missionRun.MissionRunType == MissionRunType.Localization);
         }
 
-        public async Task<IList<MissionRun>> ReadMissionRuns(string robotId, MissionRunType? missionRunType, IList<MissionStatus>? filterStatuses = null, bool readOnly = false)
+        public async Task<IList<MissionRun>> ReadMissionRuns(string robotId, MissionRunType? missionRunType, IList<MissionStatus>? filterStatuses = null, bool readOnly = true)
         {
             var missionFilter = ConstructFilter(new MissionRunQueryStringParameters
             {
@@ -179,7 +179,7 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId, bool readOnly = false)
+        public async Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId, bool readOnly = true)
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(m => m.MissionId == missionId && m.EndTime == null)
@@ -187,13 +187,13 @@ namespace Api.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<MissionRun?> ReadLastExecutedMissionRunByRobot(string robotId, bool readOnly = false)
+        public async Task<MissionRun?> ReadLastExecutedMissionRunByRobot(string robotId, bool readOnly = true)
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(m => m.Robot.Id == robotId)
                 .Where(m => m.EndTime != null)
                 .OrderByDescending(m => m.EndTime)
-                .AsNoTracking()
+                .AsTracking()
                 .FirstOrDefaultAsync();
         }
 
@@ -299,12 +299,12 @@ namespace Api.Services
                     RobotId = robotId,
                     OrderBy = "DesiredStartTime",
                     PageSize = 100
-                });
+                }, readOnly: true);
 
             return ongoingMissions.Any();
         }
 
-        private IQueryable<MissionRun> GetMissionRunsWithSubModels(bool readOnly = false)
+        private IQueryable<MissionRun> GetMissionRunsWithSubModels(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.MissionRuns
@@ -330,7 +330,7 @@ namespace Api.Services
                 .ThenInclude(inspections => inspections.InspectionFindings)
                 .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()))
                 .Where((m) => m.IsDeprecated == false);
-            return readOnly ? query.AsNoTracking() : query;
+            return readOnly ? query : query.AsTracking();
         }
 
         protected virtual void OnMissionRunCreated(MissionRunCreatedEventArgs e)
@@ -532,7 +532,7 @@ namespace Api.Services
 
         #region ISAR Specific methods
 
-        public async Task<MissionRun?> ReadByIsarMissionId(string isarMissionId, bool readOnly = false)
+        public async Task<MissionRun?> ReadByIsarMissionId(string isarMissionId, bool readOnly = true)
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .FirstOrDefaultAsync(
@@ -543,7 +543,7 @@ namespace Api.Services
 
         public async Task<MissionRun> UpdateMissionRunType(string missionRunId, MissionRunType missionRunType)
         {
-            var missionRun = await ReadById(missionRunId);
+            var missionRun = await ReadById(missionRunId, readOnly: false);
             if (missionRun is null)
             {
                 string errorMessage = $"Mission with mission Id {missionRunId} was not found";
@@ -557,7 +557,7 @@ namespace Api.Services
 
         public async Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(string isarMissionId, MissionStatus missionStatus)
         {
-            var missionRun = await ReadByIsarMissionId(isarMissionId);
+            var missionRun = await ReadByIsarMissionId(isarMissionId, readOnly: false);
             if (missionRun is null)
             {
                 string errorMessage = $"Mission with isar mission Id {isarMissionId} was not found";
@@ -578,7 +578,7 @@ namespace Api.Services
 
         public async Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value)
         {
-            var missionRun = await ReadById(missionRunId);
+            var missionRun = await ReadById(missionRunId, readOnly: false);
             if (missionRun is null)
             {
                 string errorMessage = $"Mission with ID {missionRunId} was not found in the database";

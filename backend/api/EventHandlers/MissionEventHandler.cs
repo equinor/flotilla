@@ -65,7 +65,7 @@ namespace Api.EventHandlers
         {
             _logger.LogInformation("Triggered MissionRunCreated event for mission run ID: {MissionRunId}", e.MissionRunId);
 
-            var missionRun = await MissionService.ReadById(e.MissionRunId);
+            var missionRun = await MissionService.ReadById(e.MissionRunId, readOnly: false);
             if (missionRun == null)
             {
                 _logger.LogError("Mission run with ID: {MissionRunId} was not found in the database", e.MissionRunId);
@@ -97,7 +97,7 @@ namespace Api.EventHandlers
         private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
         {
             _logger.LogInformation("Triggered RobotAvailable event for robot ID: {RobotId}", e.RobotId);
-            var robot = await RobotService.ReadById(e.RobotId);
+            var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
             if (robot == null)
             {
                 _logger.LogError("Robot with ID: {RobotId} was not found in the database", e.RobotId);
@@ -106,7 +106,7 @@ namespace Api.EventHandlers
 
             if (robot.CurrentMissionId != null)
             {
-                var stuckMission = await MissionService.ReadById(robot.CurrentMissionId!);
+                var stuckMission = await MissionService.ReadById(robot.CurrentMissionId!, readOnly: false);
                 if (stuckMission == null)
                 {
                     _logger.LogError("MissionRun with ID: {MissionId} was not found in the database", robot.CurrentMissionId);
@@ -129,7 +129,7 @@ namespace Api.EventHandlers
         private async void OnLocalizationMissionSuccessful(object? sender, LocalizationMissionSuccessfulEventArgs e)
         {
             _logger.LogInformation("Triggered LocalizationMissionSuccessful event for robot ID: {RobotId}", e.RobotId);
-            var robot = await RobotService.ReadById(e.RobotId);
+            var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
             if (robot == null)
             {
                 _logger.LogError("Robot with ID: {RobotId} was not found in the database", e.RobotId);
@@ -156,7 +156,7 @@ namespace Api.EventHandlers
         private async void OnSendRobotToSafezoneTriggered(object? sender, RobotEmergencyEventArgs e)
         {
             _logger.LogInformation("Triggered EmergencyButtonPressed event for robot ID: {RobotId}", e.RobotId);
-            var robot = await RobotService.ReadById(e.RobotId);
+            var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
             if (robot == null)
             {
                 _logger.LogError("Robot with ID: {RobotId} was not found in the database", e.RobotId);
@@ -237,7 +237,7 @@ namespace Api.EventHandlers
         private async void OnReleaseRobotFromSafezoneTriggered(object? sender, RobotEmergencyEventArgs e)
         {
             _logger.LogInformation("Triggered EmergencyButtonPressed event for robot ID: {RobotId}", e.RobotId);
-            var robot = await RobotService.ReadById(e.RobotId);
+            var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
             if (robot == null)
             {
                 _logger.LogError("Robot with ID: {RobotId} was not found in the database", e.RobotId);
@@ -268,7 +268,7 @@ namespace Api.EventHandlers
 
         private async Task<Area?> FindRelevantRobotAreaForSafePositionMission(string robotId)
         {
-            var robot = await RobotService.ReadById(robotId);
+            var robot = await RobotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 _logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);

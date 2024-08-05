@@ -10,7 +10,7 @@ namespace Api.Services.ActionServices
     {
         public async Task AddPoseEntry(Pose pose, string isarId)
         {
-            var robot = await robotService.ReadByIsarId(isarId);
+            var robot = await robotService.ReadByIsarId(isarId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find corresponding robot for pose update on robot with ISAR id '{IsarId}'", isarId);

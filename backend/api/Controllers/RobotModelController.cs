@@ -149,7 +149,7 @@ public class RobotModelController(
         if (!ModelState.IsValid)
             return BadRequest("Invalid data.");
 
-        var robotModel = await robotModelService.ReadById(id);
+        var robotModel = await robotModelService.ReadById(id, readOnly: false);
         if (robotModel == null)
             return NotFound($"Could not find robot model with id '{id}'");
 
@@ -181,7 +181,7 @@ public class RobotModelController(
         if (!ModelState.IsValid)
             return BadRequest("Invalid data.");
 
-        var robotModel = await robotModelService.ReadByRobotType(robotType);
+        var robotModel = await robotModelService.ReadByRobotType(robotType, readOnly: false);
         if (robotModel == null)
             return NotFound($"Could not find robot model with robot type '{robotType}'");
 

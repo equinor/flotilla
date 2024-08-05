@@ -122,7 +122,7 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId); }
+            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId, readOnly: false); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
@@ -196,7 +196,7 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId); }
+            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId, readOnly: false); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
@@ -360,7 +360,7 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await robotService.GetRobotWithPreCheck(customMissionQuery.RobotId); }
+            try { robot = await robotService.GetRobotWithPreCheck(customMissionQuery.RobotId, readOnly: false); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 

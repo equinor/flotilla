@@ -36,7 +36,7 @@ namespace Api.Services
         public async Task StartNextMissionRunIfSystemIsAvailable(string robotId)
         {
             logger.LogInformation("Starting next mission run if system is available for robot ID: {RobotId}", robotId);
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
@@ -87,7 +87,7 @@ namespace Api.Services
 
                     if (missionRun == null) { return; }  // The robot is already home
 
-                    var postReturnToHomeMissionCreatedRobot = await robotService.ReadById(missionRun.Robot.Id);
+                    var postReturnToHomeMissionCreatedRobot = await robotService.ReadById(missionRun.Robot.Id, readOnly: true);
                     if (postReturnToHomeMissionCreatedRobot == null)
                     {
                         logger.LogInformation("Could not find robot {Name}", missionRun.Robot.Name);
@@ -207,7 +207,7 @@ namespace Api.Services
 
         public async Task StopCurrentMissionRun(string robotId)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 string errorMessage = $"Robot with ID: {robotId} was not found in the database";
@@ -255,7 +255,7 @@ namespace Api.Services
 
         public async Task AbortAllScheduledMissions(string robotId, string? abortReason)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 string errorMessage = $"Robot with ID: {robotId} was not found in the database";
@@ -263,7 +263,7 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            var pendingMissionRuns = await missionRunService.ReadMissionRunQueue(robotId);
+            var pendingMissionRuns = await missionRunService.ReadMissionRunQueue(robotId, readOnly: false);
             if (pendingMissionRuns is null)
             {
                 string infoMessage = $"There were no mission runs in the queue to abort for robot {robotId}";
@@ -288,7 +288,7 @@ namespace Api.Services
                 logger.LogError("Could not find area with ID {AreaId}", areaId);
                 return;
             }
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
@@ -347,7 +347,7 @@ namespace Api.Services
 
         private async Task<MissionRun?> SelectNextMissionRun(string robotId)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 string errorMessage = $"Could not find robot with id {robotId}";
@@ -410,7 +410,7 @@ namespace Api.Services
             string robotId = queuedMissionRun.Robot.Id;
             string missionRunId = queuedMissionRun.Id;
 
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 string errorMessage = $"Could not find robot with id {robotId}";
@@ -432,7 +432,7 @@ namespace Api.Services
                 throw new RobotNotAvailableException(errorMessage);
             }
 
-            var missionRun = await missionRunService.ReadById(missionRunId);
+            var missionRun = await missionRunService.ReadById(missionRunId, readOnly: false);
             if (missionRun == null)
             {
                 string errorMessage = $"Could not find mission run with id {missionRunId}";
@@ -519,7 +519,7 @@ namespace Api.Services
                 return false;
             }
 
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot is null)
             {
                 string errorMessage = $"Robot with ID: {robotId} was not found in the database";

@@ -204,7 +204,7 @@ namespace Api.Controllers
             logger.LogInformation("Updating default localization pose on deck '{deckId}'", deckId);
             try
             {
-                var deck = await deckService.ReadById(deckId);
+                var deck = await deckService.ReadById(deckId, readOnly: false);
                 if (deck is null)
                 {
                     logger.LogInformation("A deck with id '{deckId}' does not exist", deckId);

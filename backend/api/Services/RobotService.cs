@@ -11,13 +11,12 @@ namespace Api.Services
     {
         public Task<Robot> Create(Robot newRobot);
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
-
-        public Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = false);
-        public Task<IEnumerable<Robot>> ReadAll(bool readOnly = false);
-        public Task<IEnumerable<string>> ReadAllActivePlants();
-        public Task<Robot?> ReadById(string id, bool readOnly = false);
-        public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = false);
-        public Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = false);
+        public Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = true);
+        public Task<IEnumerable<Robot>> ReadAll(bool readOnly = true);
+        public Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = true);
+        public Task<Robot?> ReadById(string id, bool readOnly = true);
+        public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true);
+        public Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = true);
         public Task<Robot> Update(Robot robot);
         public Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status);
         public Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel);
@@ -60,7 +59,7 @@ namespace Api.Services
 
         public async Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery)
         {
-            var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType);
+            var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType, readOnly: false);
             if (robotModel != null)
             {
                 var installation = await installationService.ReadByName(robotQuery.CurrentInstallationCode, readOnly: true);
@@ -97,7 +96,7 @@ namespace Api.Services
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
         }
 
-        public async Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = false)
+        public async Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = true)
         {
             var robot = await ReadById(robotId, readOnly: readOnly);
 
@@ -263,7 +262,7 @@ namespace Api.Services
         {
             logger.LogInformation("Updating current area for robot with Id {robotId} to area with Id {areaId}", robotId, areaId);
             if (areaId is null) { return await UpdateRobotProperty(robotId, "CurrentArea", null); }
-            var area = await areaService.ReadById(areaId);
+            var area = await areaService.ReadById(areaId, readOnly: false);
             if (area is null)
             {
                 logger.LogError("Could not find area '{AreaId}' setting robot '{IsarId}' area to null", areaId, robotId);
@@ -283,19 +282,19 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<IEnumerable<Robot>> ReadAll(bool readOnly = false) { return await GetRobotsWithSubModels(readOnly: readOnly).ToListAsync(); }
+        public async Task<IEnumerable<Robot>> ReadAll(bool readOnly = true) { return await GetRobotsWithSubModels(readOnly: readOnly).ToListAsync(); }
 
-        public async Task<Robot?> ReadById(string id, bool readOnly = false) { return await GetRobotsWithSubModels(readOnly: readOnly).FirstOrDefaultAsync(robot => robot.Id.Equals(id)); }
+        public async Task<Robot?> ReadById(string id, bool readOnly = true) { return await GetRobotsWithSubModels(readOnly: readOnly).FirstOrDefaultAsync(robot => robot.Id.Equals(id)); }
 
-        public async Task<Robot?> ReadByIsarId(string isarId, bool readOnly = false)
+        public async Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true)
         {
-            return await GetRobotsWithSubModels()
+            return await GetRobotsWithSubModels(readOnly: readOnly)
                 .FirstOrDefaultAsync(robot => robot.IsarId.Equals(isarId));
         }
 
-        public async Task<IEnumerable<string>> ReadAllActivePlants()
+        public async Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = true)
         {
-            return await GetRobotsWithSubModels().Where(r => r.IsarConnected && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
+            return await GetRobotsWithSubModels(readOnly: readOnly).Where(r => r.IsarConnected && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
         }
 
         public async Task<Robot> Update(Robot robot)
@@ -321,7 +320,7 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = false)
+        public async Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = true)
         {
             return await GetRobotsWithSubModels(readOnly: readOnly)
                 .Where(robot =>
@@ -335,10 +334,10 @@ namespace Api.Services
 
         public async Task UpdateCurrentRobotMissionToFailed(string robotId)
         {
-            var robot = await ReadById(robotId) ?? throw new RobotNotFoundException($"Robot with ID: {robotId} was not found in the database");
+            var robot = await ReadById(robotId, readOnly: true) ?? throw new RobotNotFoundException($"Robot with ID: {robotId} was not found in the database");
             if (robot.CurrentMissionId != null)
             {
-                var missionRun = await missionRunService.ReadById(robot.CurrentMissionId);
+                var missionRun = await missionRunService.ReadById(robot.CurrentMissionId, readOnly: false);
                 if (missionRun != null)
                 {
                     missionRun.SetToFailed("Lost connection to ISAR during mission");
@@ -367,7 +366,7 @@ namespace Api.Services
             }
         }
 
-        private IQueryable<Robot> GetRobotsWithSubModels(bool readOnly = false)
+        private IQueryable<Robot> GetRobotsWithSubModels(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Robots
@@ -389,12 +388,12 @@ namespace Api.Services
 #pragma warning disable CA1304
                 .Where((r) => r.CurrentInstallation == null || r.CurrentInstallation.InstallationCode == null || accessibleInstallationCodes.Result.Contains(r.CurrentInstallation.InstallationCode.ToUpper()));
 #pragma warning restore CA1304
-            return readOnly ? query.AsNoTracking() : query;
+            return readOnly ? query : query.AsTracking();
         }
 
         private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)
         {
-            var robot = await ReadById(robotId);
+            var robot = await ReadById(robotId, readOnly: false);
             if (robot is null)
             {
                 string errorMessage = $"Robot with ID {robotId} was not found in the database";

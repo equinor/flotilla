@@ -26,7 +26,7 @@ namespace Api.Services.ActionServices
                 },
                 readOnly: true);
 
-            var model = await robotModelService.ReadByRobotType(robotType);
+            var model = await robotModelService.ReadByRobotType(robotType, readOnly: false);
             if (model is null)
             {
                 logger.LogWarning("Could not update average duration for robot model {RobotType} as the model was not found", robotType);

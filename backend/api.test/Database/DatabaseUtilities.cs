@@ -159,7 +159,7 @@ namespace Api.Test.Database
                 RobotCapabilities = [RobotCapabilitiesEnum.drive_to_pose, RobotCapabilitiesEnum.take_image, RobotCapabilitiesEnum.return_to_home, RobotCapabilitiesEnum.localize]
             };
 
-            var robotModel = await _robotModelService.ReadByRobotType(createRobotQuery.RobotType);
+            var robotModel = await _robotModelService.ReadByRobotType(createRobotQuery.RobotType, readOnly: false);
             var robot = new Robot(createRobotQuery, installation, area)
             {
                 Model = robotModel!
