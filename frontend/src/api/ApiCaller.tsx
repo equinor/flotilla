@@ -11,7 +11,7 @@ import { Area } from 'models/Area'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 import { MapMetadata } from 'models/MapMetadata'
-import { CondensedMissionDefinition, EchoMissionDefinition } from 'models/MissionDefinition'
+import { MissionDefinition, EchoMissionDefinition } from 'models/MissionDefinition'
 import { EchoMission } from 'models/EchoMission'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { Deck } from 'models/Deck'
@@ -203,7 +203,7 @@ export class BackendAPICaller {
 
     static async getMissionDefinitions(
         parameters: MissionDefinitionQueryParameters
-    ): Promise<PaginatedResponse<CondensedMissionDefinition>> {
+    ): Promise<PaginatedResponse<MissionDefinition>> {
         let path: string = 'missions/definitions/condensed?'
 
         // Always filter by currently selected installation
@@ -218,7 +218,7 @@ export class BackendAPICaller {
         if (parameters.nameSearch) path = path + 'NameSearch=' + parameters.nameSearch + '&'
         if (parameters.sourceType) path = path + 'SourceType=' + parameters.sourceType + '&'
 
-        const result = await BackendAPICaller.GET<CondensedMissionDefinition[]>(path).catch(
+        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)
         )
         if (!result.headers.has(PaginationHeaderName)) {
@@ -228,33 +228,29 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    static async getMissionDefinitionsInArea(area: Area): Promise<CondensedMissionDefinition[]> {
+    static async getMissionDefinitionsInArea(area: Area): Promise<MissionDefinition[]> {
         let path: string = 'areas/' + area.id + '/mission-definitions'
 
-        const result = await BackendAPICaller.GET<CondensedMissionDefinition[]>(path).catch(
+        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)
         )
         return result.content
     }
 
-    static async getMissionDefinitionsInDeck(deck: Deck): Promise<CondensedMissionDefinition[]> {
+    static async getMissionDefinitionsInDeck(deck: Deck): Promise<MissionDefinition[]> {
         let path: string = 'decks/' + deck.id + '/mission-definitions'
 
-        const result = await BackendAPICaller.GET<CondensedMissionDefinition[]>(path).catch(
+        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)
         )
         return result.content
     }
 
-    static async updateMissionDefinition(
-        id: string,
-        form: MissionDefinitionUpdateForm
-    ): Promise<CondensedMissionDefinition> {
+    static async updateMissionDefinition(id: string, form: MissionDefinitionUpdateForm): Promise<MissionDefinition> {
         const path: string = 'missions/definitions/' + id
-        const result = await BackendAPICaller.PUT<MissionDefinitionUpdateForm, CondensedMissionDefinition>(
-            path,
-            form
-        ).catch(BackendAPICaller.handleError('PUT', path))
+        const result = await BackendAPICaller.PUT<MissionDefinitionUpdateForm, MissionDefinition>(path, form).catch(
+            BackendAPICaller.handleError('PUT', path)
+        )
         return result.content
     }
 
@@ -263,9 +259,9 @@ export class BackendAPICaller {
         await BackendAPICaller.DELETE(path, '').catch(BackendAPICaller.handleError('DELETE', path))
     }
 
-    static async getMissionDefinitionById(missionId: string): Promise<CondensedMissionDefinition> {
+    static async getMissionDefinitionById(missionId: string): Promise<MissionDefinition> {
         const path: string = 'missions/definitions/' + missionId + '/condensed'
-        const result = await BackendAPICaller.GET<CondensedMissionDefinition>(path).catch(
+        const result = await BackendAPICaller.GET<MissionDefinition>(path).catch(
             BackendAPICaller.handleError('GET', path)
         )
         return result.content

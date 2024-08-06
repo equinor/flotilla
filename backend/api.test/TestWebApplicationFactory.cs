@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Api.Services;
+using Api.Services.MissionLoaders;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
@@ -32,10 +33,10 @@ namespace Api.Test
                     services.AddScoped<IAccessRoleService, AccessRoleService>();
                     services.AddScoped<IIsarService, MockIsarService>();
                     services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
-                    services.AddScoped<IEchoService, MockEchoService>();
                     services.AddScoped<IMapService, MockMapService>();
                     services.AddScoped<IBlobService, MockBlobService>();
                     services.AddScoped<IStidService, MockStidService>();
+                    services.AddScoped<IMissionLoader, MockMissionLoader>();
                     services.AddAuthorizationBuilder().AddFallbackPolicy(
                         TestAuthHandler.AuthenticationScheme, policy => policy.RequireAuthenticatedUser()
                     );

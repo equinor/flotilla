@@ -5,7 +5,7 @@ using Api.Services;
 
 namespace Api.Controllers.Models
 {
-    public class CondensedMissionDefinitionResponse
+    public class MissionDefinitionResponse
     {
         [JsonPropertyName("id")]
         public string Id { get; set; } = string.Empty;
@@ -31,13 +31,10 @@ namespace Api.Controllers.Models
         [JsonPropertyName("isDeprecated")]
         public bool IsDeprecated { get; set; }
 
-        [JsonPropertyName("sourceType")]
-        public MissionSourceType SourceType { get; set; }
-
         [JsonConstructor]
-        public CondensedMissionDefinitionResponse() { }
+        public MissionDefinitionResponse() { }
 
-        public CondensedMissionDefinitionResponse(MissionDefinition missionDefinition)
+        public MissionDefinitionResponse(MissionDefinition missionDefinition)
         {
             Id = missionDefinition.Id;
             Name = missionDefinition.Name;
@@ -47,17 +44,16 @@ namespace Api.Controllers.Models
             Area = missionDefinition.Area != null ? new AreaResponse(missionDefinition.Area) : null;
             LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
             IsDeprecated = missionDefinition.IsDeprecated;
-            SourceType = missionDefinition.Source.Type;
         }
     }
 
-    public class MissionDefinitionResponse(IMissionDefinitionService service, MissionDefinition missionDefinition)
+    public class MissionDefinitionWithTasksResponse(IMissionDefinitionService service, MissionDefinition missionDefinition)
     {
         [JsonPropertyName("id")]
         public string Id { get; } = missionDefinition.Id;
 
         [JsonPropertyName("tasks")]
-        public List<MissionTask> Tasks { get; } = service.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode).Result!;
+        public List<MissionTask> Tasks { get; } = service.GetTasksFromSource(missionDefinition.Source).Result!;
 
         [JsonPropertyName("name")]
         public string Name { get; } = missionDefinition.Name;
@@ -79,8 +75,5 @@ namespace Api.Controllers.Models
 
         [JsonPropertyName("isDeprecated")]
         public bool IsDeprecated { get; } = missionDefinition.IsDeprecated;
-
-        [JsonPropertyName("sourceType")]
-        public MissionSourceType SourceType { get; } = missionDefinition.Source.Type;
     }
 }

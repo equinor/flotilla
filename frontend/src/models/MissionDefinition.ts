@@ -11,7 +11,7 @@ export enum SourceType {
     Custom = 'Custom',
 }
 
-export interface CondensedMissionDefinition {
+export interface MissionDefinition {
     id: string
     name: string
     installationCode: string

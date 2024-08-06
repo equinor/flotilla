@@ -18,6 +18,9 @@ backend/*/obj
 backend/api/Database/Maps/*
 backend/backend.sln.DotSettings.user
 
-#Broker
+# Broker
 broker/mosquitto/config/certs/server-key.pem
 *.DS_Store
+
+# Local missions
+missions/

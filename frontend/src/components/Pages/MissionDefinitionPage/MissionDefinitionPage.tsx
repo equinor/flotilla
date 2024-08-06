@@ -4,7 +4,7 @@ import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefini
 import { BackButton } from '../../../utils/BackButton'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Header } from 'components/Header/Header'
-import { CondensedMissionDefinition } from 'models/MissionDefinition'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { Button, Typography, TextField, Icon } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
@@ -52,7 +52,7 @@ const MetadataItem = ({ title, content, onEdit }: { title: string; content: any;
     )
 }
 
-const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: CondensedMissionDefinition }) => {
+const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: MissionDefinition }) => {
     const { TranslateText } = useLanguageContext()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
     const [selectedField, setSelectedField] = useState<string>('')
@@ -132,7 +132,7 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: C
 }
 
 interface IMissionDefinitionEditDialogProps {
-    missionDefinition: CondensedMissionDefinition
+    missionDefinition: MissionDefinition
     fieldName: string
     closeEditDialog: () => void
 }

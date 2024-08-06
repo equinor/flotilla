@@ -7,7 +7,7 @@ namespace Api.Database.Models
     [Owned]
     public class TransformationMatrices
     {
-        // In order to get a pixel coordinate P={p1, p2} from an Echo coordinate E={e1, e2}, we need to
+        // In order to get a pixel coordinate P={p1, p2} from an asset coordinate E={e1, e2}, we need to
         // perform the transformation:
         // P = CE + D
         [Required]
