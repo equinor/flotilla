@@ -1,6 +1,6 @@
 import { createContext, FC, useContext, useState, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { EchoPlantInfo } from 'models/EchoMission'
+import { PlantInfo } from 'models/MissionDefinition'
 import { Deck } from 'models/Deck'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { Area } from 'models/Area'
@@ -17,10 +17,10 @@ interface IInstallationContext {
     switchInstallation: (selectedName: string) => void
 }
 
-const mapInstallationCodeToName = (echoPlantInfoArray: EchoPlantInfo[]): Map<string, string> => {
+const mapInstallationCodeToName = (plantInfoArray: PlantInfo[]): Map<string, string> => {
     var mapping = new Map<string, string>()
-    echoPlantInfoArray.forEach((echoPlantInfo: EchoPlantInfo) => {
-        mapping.set(echoPlantInfo.projectDescription, echoPlantInfo.plantCode)
+    plantInfoArray.forEach((plantInfo: PlantInfo) => {
+        mapping.set(plantInfo.projectDescription, plantInfo.plantCode)
     })
     return mapping
 }
@@ -53,17 +53,15 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
     const installationCode = (allPlantsMap.get(installationName) || '').toUpperCase()
 
     useEffect(() => {
-        BackendAPICaller.getEchoPlantInfo()
-            .then((response: EchoPlantInfo[]) => {
+        BackendAPICaller.getPlantInfo()
+            .then((response: PlantInfo[]) => {
                 const mapping = mapInstallationCodeToName(response)
                 setAllPlantsMap(mapping)
             })
             .catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent
-                        translatedMessage={TranslateText('Failed to retrieve installations from Echo')}
-                    />,
+                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve installations')} />,
                     AlertCategory.ERROR
                 )
                 setListAlert(

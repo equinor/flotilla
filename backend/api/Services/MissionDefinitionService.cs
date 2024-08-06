@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Services.MissionLoaders;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 namespace Api.Services
@@ -20,7 +21,7 @@ namespace Api.Services
 
         public Task<List<MissionDefinition>> ReadByDeckId(string deckId);
 
-        public Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCodes);
+        public Task<List<MissionTask>?> GetTasksFromSource(Source source);
 
         public Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
 
@@ -42,8 +43,7 @@ namespace Api.Services
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
     public class MissionDefinitionService(FlotillaDbContext context,
-            IEchoService echoService,
-            ISourceService sourceService,
+            IMissionLoader missionLoader,
             ISignalRService signalRService,
             IAccessRoleService accessRoleService,
             ILogger<IMissionDefinitionService> logger,
@@ -57,7 +57,7 @@ namespace Api.Services
 
             await context.MissionDefinitions.AddAsync(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.Area?.Installation);
-            _ = signalRService.SendMessageAsync("Mission definition created", missionDefinition.Area?.Installation, new CondensedMissionDefinitionResponse(missionDefinition));
+            _ = signalRService.SendMessageAsync("Mission definition created", missionDefinition.Area?.Installation, new MissionDefinitionResponse(missionDefinition));
             return missionDefinition;
         }
 
@@ -134,7 +134,7 @@ namespace Api.Services
 
             var entry = context.Update(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.Area?.Installation);
-            _ = signalRService.SendMessageAsync("Mission definition updated", missionDefinition?.Area?.Installation, missionDefinition != null ? new CondensedMissionDefinitionResponse(missionDefinition) : null);
+            _ = signalRService.SendMessageAsync("Mission definition updated", missionDefinition?.Area?.Installation, missionDefinition != null ? new MissionDefinitionResponse(missionDefinition) : null);
             return entry.Entity;
         }
 
@@ -150,30 +150,9 @@ namespace Api.Services
             return missionDefinition;
         }
 
-        public async Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCode)
+        public async Task<List<MissionTask>?> GetTasksFromSource(Source source)
         {
-            try
-            {
-                return source.Type switch
-                {
-                    MissionSourceType.Echo =>
-                        // CultureInfo is not important here since we are not using decimal points
-                        echoService.GetMissionById(
-                                int.Parse(source.SourceId, new CultureInfo("en-US"))
-                            ).Result.Tags
-                            .Select(t => new MissionTask(t))
-                            .ToList(),
-                    MissionSourceType.Custom =>
-                        await sourceService.GetMissionTasksFromSourceId(source.SourceId),
-                    _ =>
-                        throw new MissionSourceTypeException($"Mission type {source.Type} is not accounted for")
-                };
-            }
-            catch (FormatException)
-            {
-                logger.LogError("Echo source ID was not formatted correctly");
-                throw new FormatException("Echo source ID was not formatted correctly");
-            }
+            return await missionLoader.GetTasksForMission(source.SourceId);
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
@@ -222,7 +201,6 @@ namespace Api.Services
         ///     Filters by <see cref="MissionDefinitionQueryStringParameters.InstallationCode" />
         ///     and <see cref="MissionDefinitionQueryStringParameters.Area" />
         ///     and <see cref="MissionDefinitionQueryStringParameters.NameSearch" />
-        ///     and <see cref="MissionDefinitionQueryStringParameters.SourceType" />
         ///     <para>
         ///         Uses LINQ Expression trees (see
         ///         <seealso href="https://docs.microsoft.com/en-us/dotnet/csharp/expression-trees" />)
@@ -243,21 +221,13 @@ namespace Api.Services
                 : missionDefinition =>
                     missionDefinition.InstallationCode.ToLower().Equals(parameters.InstallationCode.Trim().ToLower());
 
-            Expression<Func<MissionDefinition, bool>> missionTypeFilter = parameters.SourceType is null
-                ? missionDefinition => true
-                : missionDefinition =>
-                    missionDefinition.Source.Type.Equals(parameters.SourceType);
-
             // The parameter of the filter expression
             var missionDefinitionExpression = Expression.Parameter(typeof(MissionDefinition));
 
             // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
             Expression body = Expression.AndAlso(
                 Expression.Invoke(installationFilter, missionDefinitionExpression),
-                Expression.AndAlso(
-                    Expression.Invoke(areaFilter, missionDefinitionExpression),
-                    Expression.Invoke(missionTypeFilter, missionDefinitionExpression)
-                )
+                Expression.Invoke(areaFilter, missionDefinitionExpression)
             );
 
             // Constructing the resulting lambda expression by combining parameter and body

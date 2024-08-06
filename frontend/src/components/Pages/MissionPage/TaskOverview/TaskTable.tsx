@@ -88,9 +88,9 @@ const TaskTableRows = ({ tasks }: { tasks: Task[] }) => {
 const TagIdDisplay = ({ task }: { task: Task }) => {
     if (!task.tagId) return <Typography key={task.id + 'tagId'}>{'N/A'}</Typography>
 
-    if (task.echoTagLink)
+    if (task.tagLink)
         return (
-            <Typography key={task.id + 'tagId'} link href={task.echoTagLink} target="_blank">
+            <Typography key={task.id + 'tagId'} link href={task.tagLink} target="_blank">
                 {task.tagId!}
             </Typography>
         )

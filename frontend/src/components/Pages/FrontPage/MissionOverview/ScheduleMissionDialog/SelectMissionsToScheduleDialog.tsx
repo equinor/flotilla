@@ -4,7 +4,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { memo, useState } from 'react'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Robot, RobotStatus } from 'models/Robot'
-import { EchoMissionDefinition } from 'models/MissionDefinition'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
@@ -36,23 +36,23 @@ const StyledDialog = styled(Dialog)`
 `
 
 interface ScheduleDialogProps {
-    echoMissionsList: EchoMissionDefinition[]
+    missionsList: MissionDefinition[]
     closeDialog: () => void
 }
 
-export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }: ScheduleDialogProps): JSX.Element => {
+export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: ScheduleDialogProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const { setAlert, setListAlert } = useAlertContext()
     const { setLoadingMissionSet } = useMissionsContext()
-    const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
+    const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(undefined)
 
     const onScheduleButtonPress = () => {
         if (!selectedRobot) return
 
-        selectedEchoMissions.forEach((mission: EchoMissionDefinition) => {
-            BackendAPICaller.postMission(mission.echoMissionId, selectedRobot.id, installationCode).catch((e) => {
+        selectedMissions.forEach((mission: MissionDefinition) => {
+            BackendAPICaller.postMission(mission.sourceId, selectedRobot.id, installationCode).catch((e) => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent
@@ -84,7 +84,7 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
             })
         })
 
-        setSelectedEchoMissions([])
+        setSelectedMissions([])
         setSelectedRobot(undefined)
         closeDialog()
     }
@@ -95,9 +95,9 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
                 <StyledAutoComplete>
                     <Typography variant="h3">{TranslateText('Add mission to the queue')}</Typography>
                     <SelectMissionsComponent
-                        missions={echoMissionsList}
-                        selectedMissions={selectedEchoMissions}
-                        setSelectedMissions={setSelectedEchoMissions}
+                        missions={missionsList}
+                        selectedMissions={selectedMissions}
+                        setSelectedMissions={setSelectedMissions}
                     />
                     <SelectRobotComponent selectedRobot={selectedRobot} setSelectedRobot={setSelectedRobot} />
                     <StyledMissionSection>
@@ -106,7 +106,7 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
                         </Button>
                         <Button
                             onClick={onScheduleButtonPress}
-                            disabled={!selectedRobot || selectedEchoMissions.length === 0}
+                            disabled={!selectedRobot || selectedMissions.length === 0}
                         >
                             {' '}
                             {TranslateText('Add mission to the queue')}
@@ -124,16 +124,16 @@ const SelectMissionsComponent = memo(
         selectedMissions,
         setSelectedMissions,
     }: {
-        missions: EchoMissionDefinition[]
-        selectedMissions: EchoMissionDefinition[]
-        setSelectedMissions: (missions: EchoMissionDefinition[]) => void
+        missions: MissionDefinition[]
+        selectedMissions: MissionDefinition[]
+        setSelectedMissions: (missions: MissionDefinition[]) => void
     }) => {
         const { TranslateText } = useLanguageContext()
 
         return (
             <Autocomplete
                 dropdownHeight={200}
-                optionLabel={(m) => m.echoMissionId + ': ' + m.name}
+                optionLabel={(m) => m.name}
                 options={missions}
                 onOptionsChange={(changes) => setSelectedMissions(changes.selectedItems)}
                 label={TranslateText('Select missions')}

@@ -1,26 +1,26 @@
-import { EchoMissionDefinition } from 'models/MissionDefinition'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { FetchingMissionsDialog } from './FetchingMissionsDialog'
 import { NoMissionsDialog } from './NoMissionsDialog'
 import { SelectMissionsToScheduleDialog } from './SelectMissionsToScheduleDialog'
 
 export const ScheduleMissionDialog = ({
     onClose,
-    echoMissions,
-    isFetchingEchoMissions,
+    missions,
+    isFetchingMissions,
 }: {
     onClose: () => void
-    echoMissions: EchoMissionDefinition[]
-    isFetchingEchoMissions: boolean
+    missions: MissionDefinition[]
+    isFetchingMissions: boolean
 }): JSX.Element => {
-    const isEmptyEchoMissionsDialogOpen = !isFetchingEchoMissions && echoMissions.length === 0
-    const isScheduleMissionDialogOpen = !isFetchingEchoMissions && echoMissions.length !== 0
+    const isEmptyMissionsDialogOpen = !isFetchingMissions && missions.length === 0
+    const isScheduleMissionDialogOpen = !isFetchingMissions && missions.length !== 0
 
     return (
         <>
-            {isFetchingEchoMissions && <FetchingMissionsDialog closeDialog={onClose} />}
-            {isEmptyEchoMissionsDialogOpen && <NoMissionsDialog closeDialog={onClose} />}
+            {isFetchingMissions && <FetchingMissionsDialog closeDialog={onClose} />}
+            {isEmptyMissionsDialogOpen && <NoMissionsDialog closeDialog={onClose} />}
             {isScheduleMissionDialogOpen && (
-                <SelectMissionsToScheduleDialog echoMissionsList={echoMissions} closeDialog={onClose} />
+                <SelectMissionsToScheduleDialog missionsList={missions} closeDialog={onClose} />
             )}
         </>
     )

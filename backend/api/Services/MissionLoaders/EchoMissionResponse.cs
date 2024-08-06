@@ -81,7 +81,7 @@ namespace Api.Controllers.Models
     public class EchoPose
     {
         [JsonPropertyName("poseId")]
-        public int PoseId { get; set; }
+        public int? PoseId { get; set; }
 
         [JsonPropertyName("installationCode")]
         public string InstallationCode { get; set; }

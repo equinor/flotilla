@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Deck } from 'models/Deck'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
-import { CondensedMissionDefinition } from 'models/MissionDefinition'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { getInspectionDeadline } from 'utils/StringFormatting'
 import { InspectionTable } from './InspectionTable'
@@ -12,7 +12,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 
 export interface Inspection {
-    missionDefinition: CondensedMissionDefinition
+    missionDefinition: MissionDefinition
     deadline: Date | undefined
 }
 
@@ -30,7 +30,7 @@ interface DeckAreaTuple {
 export const InspectionSection = () => {
     const { installationDecks, installationAreas } = useInstallationContext()
     const [selectedDeck, setSelectedDeck] = useState<Deck>()
-    const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
+    const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
     const [scrollOnToggle, setScrollOnToggle] = useState<boolean>(true)
@@ -50,10 +50,8 @@ export const InspectionSection = () => {
         setIsDialogOpen(false)
     }
 
-    const isScheduled = (mission: CondensedMissionDefinition) =>
-        missionQueue.map((m) => m.missionId).includes(mission.id)
-    const isOngoing = (mission: CondensedMissionDefinition) =>
-        ongoingMissions.map((m) => m.missionId).includes(mission.id)
+    const isScheduled = (mission: MissionDefinition) => missionQueue.map((m) => m.missionId).includes(mission.id)
+    const isOngoing = (mission: MissionDefinition) => ongoingMissions.map((m) => m.missionId).includes(mission.id)
 
     const unscheduledMissions = selectedMissions?.filter((m) => !isOngoing(m) && !isScheduled(m))
 

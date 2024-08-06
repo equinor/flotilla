@@ -16,12 +16,19 @@ namespace Api.Database.Models
             InspectionTarget = new Position();
         }
 
-        public Inspection(EchoInspection echoInspection)
+        public Inspection(
+            InspectionType inspectionType,
+            float? videoDuration,
+            Position inspectionTarget,
+            InspectionStatus status = InspectionStatus.NotStarted,
+            AnalysisType? analysisType = null
+            )
         {
-            InspectionType = echoInspection.InspectionType;
-            VideoDuration = echoInspection.TimeInSeconds;
-            Status = InspectionStatus.NotStarted;
-            InspectionTarget = echoInspection.InspectionPoint;
+            InspectionType = inspectionType;
+            VideoDuration = videoDuration;
+            InspectionTarget = inspectionTarget;
+            AnalysisType = analysisType;
+            Status = status;
         }
 
         public Inspection(CustomInspectionQuery inspectionQuery)

@@ -7,6 +7,7 @@ using Api.Mqtt;
 using Api.Options;
 using Api.Services;
 using Api.Services.ActionServices;
+using Api.Services.MissionLoaders;
 using Api.SignalRHubs;
 using Api.Utilities;
 using Azure.Identity;
@@ -15,7 +16,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Identity.Web;
-using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentName}'\n");
@@ -50,6 +50,8 @@ builder.ConfigureLogger();
 
 builder.Services.ConfigureDatabase(builder.Configuration);
 
+builder.Services.ConfigureMissionLoader(builder.Configuration);
+
 builder.Services.AddApplicationInsightsTelemetry();
 
 // Disable Application Insights Telemetry when debugging
@@ -72,7 +74,6 @@ builder.Services.AddScoped<ISourceService, SourceService>();
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
 
 builder.Services.AddScoped<IIsarService, IsarService>();
-builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<IStidService, StidService>();
 
 builder.Services.AddScoped<IMapService, MapService>();
@@ -138,7 +139,7 @@ builder.Services
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
     .EnableTokenAcquisitionToCallDownstreamApi()
     .AddInMemoryTokenCaches()
-    .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
+    .AddDownstreamApi(EchoMissionLoader.ServiceName, builder.Configuration.GetSection("Echo"))
     .AddDownstreamApi(StidService.ServiceName, builder.Configuration.GetSection("Stid"))
     .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
@@ -156,8 +157,8 @@ app.UseSwagger(
         c.PreSerializeFilters.Add(
             (swaggerDoc, httpReq) =>
             {
-                swaggerDoc.Servers = new List<OpenApiServer>
-                {
+                swaggerDoc.Servers =
+                [
                     new()
                     {
                         Url = $"https://{httpReq.Host.Value}{basePath}"
@@ -166,7 +167,7 @@ app.UseSwagger(
                     {
                         Url = $"http://{httpReq.Host.Value}{basePath}"
                     }
-                };
+                ];
             }
         );
     }

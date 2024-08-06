@@ -32,11 +32,11 @@ To set up the backend on **Windows/Mac**, install visual studio and include the 
 If you already have visual studio installed, you can open the "Visual Studio Installer" and modify your install to add the workload.
 
 To set up the backend on **Linux**, install .NET for linux
-[here](https://docs.microsoft.com/en-us/dotnet/core/install/linux).  
-You need to also install the dev certificate for local .NET development on linux.  
+[here](https://docs.microsoft.com/en-us/dotnet/core/install/linux).
+You need to also install the dev certificate for local .NET development on linux.
 Follow
 [this guide](https://learn.microsoft.com/en-us/aspnet/core/security/enforcing-ssl?view=aspnetcore-7.0&tabs=visual-studio%2Clinux-ubuntu#trust-https-certificate-on-linux),
-for each of the browser(s) you wish to trust it in.  
+for each of the browser(s) you wish to trust it in.
 **NB:** You probably need to run the commands with `sudo` prefixed to have permission to change them.
 
 For the configuration to be able to read secrets from the keyvault, you will need to have the client secret stored locally in your secret manager.
@@ -267,7 +267,7 @@ events and not receiving them, and all transmissions are sent using the SignalRS
 doing so it is important to make sure that the event name provided corresponds with the name expected
 in the frontend.
 
-It is also crucial that we do not await sending signalR messages in our code. Instead we ignore the 
+It is also crucial that we do not await sending signalR messages in our code. Instead we ignore the
 await warning. In the current version of the SignalR library, sending a message in an
 asynchronous thread may cause the thread to silently exit without returning an exception, which is
 avoided by letting the SignalR code run asynchronously after the current thread has executed.
@@ -279,6 +279,10 @@ to monitor the backend of our application.
 
 We have one application insight instance for each environment.
 The connection strings for the AI instances are stored in the keyvault.
+
+## Custom Mission Loaders
+
+You can create your own mission loader to fetch missions from some external system. The custom mission loader needs to fulfill the [IMissionLoader](api/Services/MissionLoaders/MissionLoaderInterface.cs) interface. If you mission loader is an external API you might need to add it as a downstreamapi in [Program.cs](api/Program.cs)
 
 ## Authorization
 
@@ -292,7 +296,7 @@ The access matrix looks like this:
 | Deck                       | Read          | Read     | CRUD      |
 | Plant                      | Read          | Read     | CRUD      |
 | Installation               | Read          | Read     | CRUD      |
-| Echo                       | Read          | Read     | CRUD      |
+| MissionLoader              | Read          | Read     | CRUD      |
 | Missions                   | Read          | Read     | CRUD      |
 | Robots                     | Read          | Read     | CRUD      |
 | Robot Models               | Read          | Read     | CRUD      |

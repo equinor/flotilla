@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Api.Database.Context;
+using Api.Services.MissionLoaders;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -122,6 +123,33 @@ namespace Api.Configurations
                 }
             );
 
+            return services;
+        }
+
+        public static IServiceCollection ConfigureMissionLoader(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
+        {
+            string? missionLoaderFileName = configuration["MissionLoader:FileName"];
+            if (missionLoaderFileName == null) return services;
+
+            try
+            {
+                var loaderType = Type.GetType(missionLoaderFileName);
+                if (loaderType != null && typeof(IMissionLoader).IsAssignableFrom(loaderType))
+                {
+                    services.AddScoped(typeof(IMissionLoader), loaderType);
+                }
+                else
+                {
+                    throw new InvalidOperationException("The specified class does not implement IMissionLoader or could not be found.");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
             return services;
         }
     }

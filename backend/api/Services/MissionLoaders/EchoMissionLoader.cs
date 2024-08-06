@@ -1,24 +1,20 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.Identity.Abstractions;
-namespace Api.Services
+namespace Api.Services.MissionLoaders
 {
-    public interface IEchoService
-    {
-        public Task<IList<CondensedEchoMissionDefinition>> GetAvailableMissions(string? installationCode);
-
-        public Task<EchoMission> GetMissionById(int missionId);
-
-        public Task<IList<EchoPlantInfo>> GetEchoPlantInfos();
-    }
-
-    public class EchoService(IDownstreamApi echoApi, ILogger<EchoService> logger) : IEchoService
+    public class EchoMissionLoader(
+        IDownstreamApi echoApi,
+        ISourceService sourceService,
+        IStidService stidService,
+        ILogger<EchoMissionLoader> logger) : IMissionLoader
     {
         public const string ServiceName = "EchoApi";
 
-        public async Task<IList<CondensedEchoMissionDefinition>> GetAvailableMissions(string? installationCode)
+        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(string? installationCode)
         {
             string relativePath = string.IsNullOrEmpty(installationCode)
                 ? "robots/robot-plan?Status=Ready"
@@ -38,14 +34,38 @@ namespace Api.Services
             var echoMissions = await response.Content.ReadFromJsonAsync<
                 List<EchoMissionResponse>
             >() ?? throw new JsonException("Failed to deserialize missions from Echo");
-            var availableMissions = ProcessAvailableEchoMission(echoMissions);
 
-            return availableMissions;
+            var availableMissions = new List<MissionDefinition>();
+
+            foreach (var echoMissionResponse in echoMissions)
+            {
+                var echoMission = ProcessEchoMission(echoMissionResponse);
+                if (echoMission == null)
+                {
+                    continue;
+                }
+                var missionDefinition = await EchoMissionToMissionDefinition(echoMission);
+                if (missionDefinition == null)
+                {
+                    continue;
+                }
+                availableMissions.Add(missionDefinition);
+            }
+
+            return availableMissions.AsQueryable();
         }
 
-        public async Task<EchoMission> GetMissionById(int missionId)
+        public async Task<MissionDefinition?> GetMissionById(string sourceMissionId)
         {
-            string relativePath = $"robots/robot-plan/{missionId}";
+            var echoMission = await GetEchoMission(sourceMissionId);
+
+            var mission = await EchoMissionToMissionDefinition(echoMission);
+            return mission;
+        }
+
+        private async Task<EchoMission> GetEchoMission(string echoMissionId)
+        {
+            string relativePath = $"robots/robot-plan/{echoMissionId}";
 
             var response = await echoApi.CallApiForUserAsync(
                 ServiceName,
@@ -59,11 +79,59 @@ namespace Api.Services
             response.EnsureSuccessStatusCode();
 
             var echoMission = await response.Content.ReadFromJsonAsync<EchoMissionResponse>() ?? throw new JsonException("Failed to deserialize mission from Echo");
-            var processedEchoMission = ProcessEchoMission(echoMission) ?? throw new InvalidDataException($"EchoMission with id: {missionId} is invalid");
+            var processedEchoMission = ProcessEchoMission(echoMission) ?? throw new InvalidDataException($"EchoMission with id: {echoMissionId} is invalid");
             return processedEchoMission;
         }
 
-        public async Task<IList<EchoPlantInfo>> GetEchoPlantInfos()
+        public async Task<List<MissionTask>> GetTasksForMission(string missionId)
+        {
+            var echoMission = await GetEchoMission(missionId);
+            var missionTasks = echoMission.Tags.Select(t => MissionTaskFromEchoTag(t)).ToList();
+            return missionTasks;
+        }
+
+        private async Task<MissionDefinition?> EchoMissionToMissionDefinition(EchoMission echoMission)
+        {
+            var source = await sourceService.CheckForExistingSource(echoMission.Id) ?? await sourceService.Create(
+                    new Source
+                    {
+                        SourceId = $"{echoMission.Id}",
+                    }
+                );
+            var missionTasks = echoMission.Tags;
+            List<Area?> missionAreas;
+            missionAreas = missionTasks
+                .Where(t => t.TagId != null)
+                .Select(t => stidService.GetTagArea(t.TagId, echoMission.InstallationCode).Result)
+                .ToList();
+
+            var missionDeckNames = missionAreas.Where(a => a != null).Select(a => a!.Deck.Name).Distinct().ToList();
+            if (missionDeckNames.Count > 1)
+            {
+                string joinedMissionDeckNames = string.Join(", ", [.. missionDeckNames]);
+                logger.LogWarning($"Mission {echoMission.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}.");
+            }
+
+            Area? area = null;
+            area = missionAreas.GroupBy(i => i).OrderByDescending(grp => grp.Count()).Select(grp => grp.Key).First();
+
+            if (area == null)
+            {
+                return null;
+            }
+
+            var missionDefinition = new MissionDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Source = source,
+                Name = echoMission.Name,
+                InstallationCode = echoMission.InstallationCode,
+                Area = area
+            };
+            return missionDefinition;
+        }
+
+        public async Task<List<PlantInfo>> GetPlantInfos()
         {
             string relativePath = "plantinfo";
             var response = await echoApi.CallApiForUserAsync(
@@ -135,38 +203,6 @@ namespace Api.Services
             return tags;
         }
 
-        private List<CondensedEchoMissionDefinition> ProcessAvailableEchoMission(List<EchoMissionResponse> echoMissions)
-        {
-            var availableMissions = new List<CondensedEchoMissionDefinition>();
-
-            foreach (var echoMission in echoMissions)
-            {
-                if (echoMission.PlanItems is null)
-                {
-                    continue;
-                }
-                try
-                {
-                    var condensedEchoMissionDefinition = new CondensedEchoMissionDefinition
-                    {
-                        EchoMissionId = echoMission.Id,
-                        Name = echoMission.Name,
-                        InstallationCode = echoMission.InstallationCode
-                    };
-                    availableMissions.Add(condensedEchoMissionDefinition);
-                }
-                catch (InvalidDataException e)
-                {
-                    logger.LogWarning(
-                        "Echo mission with ID '{Id}' is invalid: '{Message}'",
-                        echoMission.Id,
-                        e.Message
-                    );
-                }
-            }
-            return availableMissions;
-        }
-
         private EchoMission? ProcessEchoMission(EchoMissionResponse echoMission)
         {
             if (echoMission.PlanItems is null)
@@ -177,7 +213,7 @@ namespace Api.Services
             {
                 var mission = new EchoMission
                 {
-                    Id = echoMission.Id,
+                    Id = echoMission.Id.ToString(CultureInfo.CurrentCulture),
                     Name = echoMission.Name,
                     InstallationCode = echoMission.InstallationCode,
                     URL = new Uri($"https://echo.equinor.com/mp?editId={echoMission.Id}"),
@@ -196,11 +232,11 @@ namespace Api.Services
             }
         }
 
-        private static List<EchoPlantInfo> ProcessEchoPlantInfos(
+        private static List<PlantInfo> ProcessEchoPlantInfos(
             List<EchoPlantInfoResponse> echoPlantInfoResponse
         )
         {
-            var echoPlantInfos = new List<EchoPlantInfo>();
+            var echoPlantInfos = new List<PlantInfo>();
             foreach (var plant in echoPlantInfoResponse)
             {
                 if (plant.InstallationCode is null || plant.ProjectDescription is null)
@@ -208,7 +244,7 @@ namespace Api.Services
                     continue;
                 }
 
-                var echoPlantInfo = new EchoPlantInfo
+                var echoPlantInfo = new PlantInfo
                 {
                     PlantCode = plant.InstallationCode,
                     ProjectDescription = plant.ProjectDescription
@@ -217,6 +253,27 @@ namespace Api.Services
                 echoPlantInfos.Add(echoPlantInfo);
             }
             return echoPlantInfos;
+        }
+
+        public MissionTask MissionTaskFromEchoTag(EchoTag echoTag)
+        {
+            return new MissionTask
+            (
+                inspections: echoTag.Inspections
+                    .Select(inspection => new Inspection(
+                        inspectionType: inspection.InspectionType,
+                        videoDuration: inspection.TimeInSeconds,
+                        inspection.InspectionPoint,
+                        status: InspectionStatus.NotStarted))
+                    .ToList(),
+                tagLink: echoTag.URL,
+                tagId: echoTag.TagId,
+                robotPose: echoTag.Pose,
+                poseId: echoTag.PoseId,
+                taskOrder: echoTag.PlanOrder,
+                status: Database.Models.TaskStatus.NotStarted,
+                type: MissionTaskType.Inspection
+            );
         }
     }
 }

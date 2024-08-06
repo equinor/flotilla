@@ -1,5 +1,4 @@
 import { config } from 'config'
-import { EchoPlantInfo } from 'models/EchoMission'
 import { Mission } from 'models/Mission'
 import { Robot } from 'models/Robot'
 import { VideoStream } from 'models/VideoStream'
@@ -11,8 +10,7 @@ import { Area } from 'models/Area'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 import { MapMetadata } from 'models/MapMetadata'
-import { CondensedMissionDefinition, EchoMissionDefinition } from 'models/MissionDefinition'
-import { EchoMission } from 'models/EchoMission'
+import { MissionDefinition, PlantInfo } from 'models/MissionDefinition'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { Deck } from 'models/Deck'
 import { ApiError, isApiError } from './ApiError'
@@ -143,12 +141,6 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getAllEchoMissions(): Promise<EchoMission[]> {
-        const path: string = 'echo/missions'
-        const result = await BackendAPICaller.GET<EchoMission[]>(path).catch(BackendAPICaller.handleError('GET', path))
-        return result.content
-    }
-
     static async getMissionRuns(parameters: MissionRunQueryParameters): Promise<PaginatedResponse<Mission>> {
         let path: string = 'missions/runs?'
 
@@ -193,9 +185,9 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    static async getAvailableEchoMissions(installationCode: string = ''): Promise<EchoMissionDefinition[]> {
-        const path: string = 'echo/available-missions/' + installationCode
-        const result = await BackendAPICaller.GET<EchoMissionDefinition[]>(path).catch(
+    static async getAvailableMissions(installationCode: string = ''): Promise<MissionDefinition[]> {
+        const path: string = 'mission-loader/available-missions/' + installationCode
+        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)
         )
         return result.content
@@ -203,22 +195,21 @@ export class BackendAPICaller {
 
     static async getMissionDefinitions(
         parameters: MissionDefinitionQueryParameters
-    ): Promise<PaginatedResponse<CondensedMissionDefinition>> {
-        let path: string = 'missions/definitions/condensed?'
+    ): Promise<PaginatedResponse<MissionDefinition>> {
+        let path: string = 'missions/definitions?'
 
         // Always filter by currently selected installation
         const installationCode: string | null = BackendAPICaller.installationCode
         if (installationCode) path = path + 'InstallationCode=' + installationCode + '&'
 
         if (parameters.area) path = path + 'Area=' + parameters.area + '&'
-        if (parameters.sourceType) path = path + 'SourceType=' + parameters.sourceType + '&'
+        if (parameters.sourceId) path = path + 'SourceId=' + parameters.sourceId + '&'
         if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
         if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
         if (parameters.orderBy) path = path + 'OrderBy=' + parameters.orderBy + '&'
         if (parameters.nameSearch) path = path + 'NameSearch=' + parameters.nameSearch + '&'
-        if (parameters.sourceType) path = path + 'SourceType=' + parameters.sourceType + '&'
 
-        const result = await BackendAPICaller.GET<CondensedMissionDefinition[]>(path).catch(
+        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)
         )
         if (!result.headers.has(PaginationHeaderName)) {
@@ -228,33 +219,29 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    static async getMissionDefinitionsInArea(area: Area): Promise<CondensedMissionDefinition[]> {
+    static async getMissionDefinitionsInArea(area: Area): Promise<MissionDefinition[]> {
         let path: string = 'areas/' + area.id + '/mission-definitions'
 
-        const result = await BackendAPICaller.GET<CondensedMissionDefinition[]>(path).catch(
+        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)
         )
         return result.content
     }
 
-    static async getMissionDefinitionsInDeck(deck: Deck): Promise<CondensedMissionDefinition[]> {
+    static async getMissionDefinitionsInDeck(deck: Deck): Promise<MissionDefinition[]> {
         let path: string = 'decks/' + deck.id + '/mission-definitions'
 
-        const result = await BackendAPICaller.GET<CondensedMissionDefinition[]>(path).catch(
+        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)
         )
         return result.content
     }
 
-    static async updateMissionDefinition(
-        id: string,
-        form: MissionDefinitionUpdateForm
-    ): Promise<CondensedMissionDefinition> {
+    static async updateMissionDefinition(id: string, form: MissionDefinitionUpdateForm): Promise<MissionDefinition> {
         const path: string = 'missions/definitions/' + id
-        const result = await BackendAPICaller.PUT<MissionDefinitionUpdateForm, CondensedMissionDefinition>(
-            path,
-            form
-        ).catch(BackendAPICaller.handleError('PUT', path))
+        const result = await BackendAPICaller.PUT<MissionDefinitionUpdateForm, MissionDefinition>(path, form).catch(
+            BackendAPICaller.handleError('PUT', path)
+        )
         return result.content
     }
 
@@ -263,9 +250,9 @@ export class BackendAPICaller {
         await BackendAPICaller.DELETE(path, '').catch(BackendAPICaller.handleError('DELETE', path))
     }
 
-    static async getMissionDefinitionById(missionId: string): Promise<CondensedMissionDefinition> {
-        const path: string = 'missions/definitions/' + missionId + '/condensed'
-        const result = await BackendAPICaller.GET<CondensedMissionDefinition>(path).catch(
+    static async getMissionDefinitionById(missionId: string): Promise<MissionDefinition> {
+        const path: string = 'missions/definitions/' + missionId
+        const result = await BackendAPICaller.GET<MissionDefinition>(path).catch(
             BackendAPICaller.handleError('GET', path)
         )
         return result.content
@@ -283,29 +270,25 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getEchoPlantInfo(): Promise<EchoPlantInfo[]> {
-        const path: string = 'echo/plants'
-        const result = await BackendAPICaller.GET<EchoPlantInfo[]>(path).catch(
-            BackendAPICaller.handleError('GET', path)
-        )
+    static async getPlantInfo(): Promise<PlantInfo[]> {
+        const path: string = 'mission-loader/plants'
+        const result = await BackendAPICaller.GET<PlantInfo[]>(path).catch(BackendAPICaller.handleError('GET', path))
         return result.content
     }
 
-    static async getActivePlants(): Promise<EchoPlantInfo[]> {
-        const path: string = 'echo/active-plants'
-        const result = await BackendAPICaller.GET<EchoPlantInfo[]>(path).catch(
-            BackendAPICaller.handleError('GET', path)
-        )
+    static async getActivePlants(): Promise<PlantInfo[]> {
+        const path: string = 'mission-loader/active-plants'
+        const result = await BackendAPICaller.GET<PlantInfo[]>(path).catch(BackendAPICaller.handleError('GET', path))
         return result.content
     }
 
-    static async postMission(echoMissionId: number, robotId: string, installationCode: string | null) {
+    static async postMission(missionId: string, robotId: string, installationCode: string | null) {
         const path: string = 'missions'
         const robots: Robot[] = await BackendAPICaller.getEnabledRobots()
         const desiredRobot = filterRobots(robots, robotId)
         const body = {
             robotId: desiredRobot[0].id,
-            echoMissionId: echoMissionId,
+            missionId: missionId,
             installationCode: installationCode,
             areaName: '',
         }

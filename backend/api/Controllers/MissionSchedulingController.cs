@@ -1,7 +1,9 @@
-﻿using System.Text.Json;
+﻿using System.Globalization;
+using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Services.MissionLoaders;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +17,7 @@ namespace Api.Controllers
             IMissionDefinitionService missionDefinitionService,
             IMissionRunService missionRunService,
             IInstallationService installationService,
-            IEchoService echoService,
+            IMissionLoader missionLoader,
             ILogger<MissionSchedulingController> logger,
             IMapService mapService,
             IStidService stidService,
@@ -136,7 +138,7 @@ namespace Api.Controllers
             catch (InstallationNotFoundException e) { return NotFound(e.Message); }
             catch (RobotNotInSameInstallationAsMissionException e) { return Conflict(e.Message); }
 
-            var missionTasks = await missionDefinitionService.GetTasksFromSource(missionDefinition.Source, missionDefinition.InstallationCode);
+            var missionTasks = await missionLoader.GetTasksForMission(missionDefinition.Source.SourceId);
             if (missionTasks == null) return NotFound("No mission tasks were found for the requested mission");
 
             var missionRun = new MissionRun
@@ -177,10 +179,10 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Schedule a new echo mission
+        ///     Schedule a mission based on mission loader
         /// </summary>
         /// <remarks>
-        ///     <para> This query schedules a new echo mission and adds it to the database </para>
+        ///     <para> This query schedules a new mission and adds it to the database </para>
         /// </remarks>
         [HttpPost]
         [Authorize(Roles = Role.User)]
@@ -199,59 +201,58 @@ namespace Api.Controllers
             try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
-
-            EchoMission? echoMission;
+            string missionId = scheduledMissionQuery.MissionId.ToString(CultureInfo.CurrentCulture);
+            MissionDefinition? missionDefinition;
             try
             {
-                echoMission = await echoService.GetMissionById(scheduledMissionQuery.EchoMissionId);
+                missionDefinition = await missionLoader.GetMissionById(missionId);
+                if (missionDefinition == null)
+                {
+                    return NotFound("Mission not found");
+                }
             }
             catch (HttpRequestException e)
             {
                 if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
                 {
                     logger.LogWarning(
-                        "Could not find echo mission with id={Id}",
-                        scheduledMissionQuery.EchoMissionId
+                        "Could not find mission with id={Id}",
+                        missionId
                     );
-                    return NotFound("Echo mission not found");
+                    return NotFound("Mission not found");
                 }
 
-                logger.LogError(e, "Error getting mission from Echo");
+                logger.LogError(e, "Error getting mission from mission loader");
                 return StatusCode(StatusCodes.Status502BadGateway, $"{e.Message}");
             }
             catch (JsonException e)
             {
-                const string Message = "Error deserializing mission from Echo";
+                const string Message = "Error deserializing mission";
                 logger.LogError(e, "{Message}", Message);
                 return StatusCode(StatusCodes.Status500InternalServerError, Message);
             }
             catch (InvalidDataException e)
             {
                 const string Message =
-                    "Can not schedule mission because EchoMission is invalid. One or more tasks does not contain a robot pose";
+                    "Can not schedule mission because Mission is invalid. One or more tasks does not contain a robot pose";
                 logger.LogError(e, "Message: {errorMessage}", Message);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
 
-            var missionTasks = echoMission.Tags
-                .SelectMany(
-                    t =>
-                    {
-                        return t.Inspections.Select(i => new MissionTask(t)).ToList();
-                    }
-                )
-                .ToList();
+
+            var missionTasks = await missionLoader.GetTasksForMission(missionId);
 
             List<Area?> missionAreas;
-            missionAreas = echoMission.Tags
-                .Select(t => stidService.GetTagArea(t.TagId, scheduledMissionQuery.InstallationCode).Result)
+            missionAreas = missionTasks
+                .Where(t => t.TagId != null)
+                .Select(t => stidService.GetTagArea(t.TagId!, scheduledMissionQuery.InstallationCode).Result)
                 .ToList();
 
             var missionDeckNames = missionAreas.Where(a => a != null).Select(a => a!.Deck.Name).Distinct().ToList();
             if (missionDeckNames.Count > 1)
             {
                 string joinedMissionDeckNames = string.Join(", ", [.. missionDeckNames]);
-                logger.LogWarning($"Mission {echoMission.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}.");
+                logger.LogWarning($"Mission {missionDefinition.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}.");
             }
 
             Area? area = null;
@@ -259,18 +260,17 @@ namespace Api.Controllers
 
             if (area == null)
             {
-                return NotFound($"No area found for echo mission '{echoMission.Name}'.");
+                return NotFound($"No area found for mission '{missionDefinition.Name}'.");
             }
 
-            var source = await sourceService.CheckForExistingEchoSource(scheduledMissionQuery.EchoMissionId);
+            var source = await sourceService.CheckForExistingSource(scheduledMissionQuery.MissionId);
             MissionDefinition? existingMissionDefinition = null;
             if (source == null)
             {
                 source = await sourceService.Create(
                     new Source
                     {
-                        SourceId = $"{echoMission.Id}",
-                        Type = MissionSourceType.Echo
+                        SourceId = $"{missionDefinition.Id}",
                     }
                 );
             }
@@ -287,7 +287,7 @@ namespace Api.Controllers
             {
                 Id = Guid.NewGuid().ToString(),
                 Source = source,
-                Name = echoMission.Name,
+                Name = missionDefinition.Name,
                 InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
                 InstallationCode = scheduledMissionQuery.InstallationCode,
                 Area = area
@@ -295,7 +295,7 @@ namespace Api.Controllers
 
             var missionRun = new MissionRun
             {
-                Name = echoMission.Name,
+                Name = missionDefinition.Name,
                 Robot = robot,
                 MissionId = scheduledMissionDefinition.Id,
                 Status = MissionStatus.Pending,
@@ -381,7 +381,7 @@ namespace Api.Controllers
                     throw new AreaNotFoundException($"No area with name {customMissionQuery.AreaName} in installation {customMissionQuery.InstallationCode} was found");
                 }
 
-                var source = await sourceService.CheckForExistingCustomSource(missionTasks);
+                var source = await sourceService.CheckForExistingSourceFromTasks(missionTasks);
 
                 MissionDefinition? existingMissionDefinition = null;
                 if (source == null)

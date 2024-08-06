@@ -8,9 +8,9 @@ export interface Task {
     type: TaskType
     tagId?: string
     description?: string
-    echoTagLink?: string
+    tagLink?: string
     robotPose: Pose
-    echoPoseId?: number
+    poseId?: number
     status: TaskStatus
     isCompleted: boolean
     startTime?: Date

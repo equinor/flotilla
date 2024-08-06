@@ -8,7 +8,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { EchoPlantInfo } from 'models/EchoMission'
+import { PlantInfo } from 'models/MissionDefinition'
 import { Header } from 'components/Header/Header'
 import { config } from 'config'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
@@ -87,11 +87,9 @@ const InstallationPicker = () => {
 
     useEffect(() => {
         if (BackendAPICaller.accessToken) {
-            const plantPromise = showActivePlants
-                ? BackendAPICaller.getActivePlants()
-                : BackendAPICaller.getEchoPlantInfo()
+            const plantPromise = showActivePlants ? BackendAPICaller.getActivePlants() : BackendAPICaller.getPlantInfo()
             plantPromise
-                .then(async (response: EchoPlantInfo[]) => {
+                .then(async (response: PlantInfo[]) => {
                     const mapping = mapInstallationCodeToName(response)
                     setAllPlantsMap(mapping)
                 })
@@ -99,7 +97,7 @@ const InstallationPicker = () => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent
-                            translatedMessage={TranslateText('Failed to retrieve installations from Echo')}
+                            translatedMessage={TranslateText('Failed to retrieve installations')}
                         />,
                         AlertCategory.ERROR
                     )
@@ -157,10 +155,10 @@ const InstallationPicker = () => {
     )
 }
 
-const mapInstallationCodeToName = (echoPlantInfoArray: EchoPlantInfo[]): Map<string, string> => {
+const mapInstallationCodeToName = (plantInfoArray: PlantInfo[]): Map<string, string> => {
     var mapping = new Map<string, string>()
-    echoPlantInfoArray.forEach((echoPlantInfo: EchoPlantInfo) => {
-        mapping.set(echoPlantInfo.projectDescription, echoPlantInfo.plantCode)
+    plantInfoArray.forEach((plantInfo: PlantInfo) => {
+        mapping.set(plantInfo.projectDescription, plantInfo.plantCode)
     })
     return mapping
 }

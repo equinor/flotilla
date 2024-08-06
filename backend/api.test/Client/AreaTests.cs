@@ -216,7 +216,7 @@ namespace Api.Test
 
             // Assert
             Assert.True(areaMissionsResponse.IsSuccessStatusCode);
-            var missions = await areaMissionsResponse.Content.ReadFromJsonAsync<IList<CondensedMissionDefinitionResponse>>(_serializerOptions);
+            var missions = await areaMissionsResponse.Content.ReadFromJsonAsync<IList<MissionDefinitionResponse>>(_serializerOptions);
             Assert.NotNull(missions);
             Assert.Single(missions.Where(m => m.Id.Equals(mission.MissionId, StringComparison.Ordinal)));
         }

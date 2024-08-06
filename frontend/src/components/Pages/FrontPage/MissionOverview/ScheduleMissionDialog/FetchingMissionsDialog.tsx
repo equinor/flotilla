@@ -40,7 +40,7 @@ export const FetchingMissionsDialog = ({ closeDialog }: { closeDialog: () => voi
                 <StyledAutoComplete>
                     <StyledLoading>
                         <CircularProgress />
-                        <Typography>{TranslateText('Fetching missions from Echo') + '...'}</Typography>
+                        <Typography>{TranslateText('Fetching missions') + '...'}</Typography>
                     </StyledLoading>
                     <StyledMissionSection>
                         <Button onClick={closeDialog} variant="outlined">
