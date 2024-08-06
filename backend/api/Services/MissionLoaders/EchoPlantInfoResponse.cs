@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using System.Text.Json.Serialization;
 
-namespace Api.Controllers.Models
+namespace Api.Services.MissionLoaders
 {
     public class EchoPlantInfoResponse
     {

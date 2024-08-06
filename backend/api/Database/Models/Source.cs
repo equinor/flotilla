@@ -13,14 +13,6 @@ namespace Api.Database.Models
         [Required]
         public string SourceId { get; set; }
 
-        [Required]
-        public MissionSourceType Type { get; set; }
-
         public string? CustomMissionTasks { get; set; }
-    }
-
-    public enum MissionSourceType
-    {
-        Echo, Custom
     }
 }

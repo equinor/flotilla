@@ -1,5 +1,4 @@
-﻿using Api.Controllers.Models;
-using Api.Database.Models;
+﻿using Api.Database.Models;
 using TaskStatus = Api.Database.Models.TaskStatus;
 namespace Api.Database.Context
 {
@@ -254,25 +253,24 @@ namespace Api.Database.Context
             var source1 = new Source
             {
                 SourceId = "986",
-                Type = MissionSourceType.Echo
             };
 
             var source2 = new Source
             {
                 SourceId = "990",
-                Type = MissionSourceType.Echo
             };
 
             var source3 = new Source
             {
                 SourceId = "991",
-                Type = MissionSourceType.Echo
             };
 
-            return new List<Source>(new[]
-            {
-                source1, source2, source3
-            });
+            return new List<Source>(
+            [
+                source1,
+                source2,
+                source3
+            ]);
         }
 
         private static List<Robot> GetRobots()
@@ -316,10 +314,12 @@ namespace Api.Database.Context
                 Pose = new Pose()
             };
 
-            return new List<Robot>(new[]
-            {
-                robot1, robot2, robot3
-            });
+            return new List<Robot>(
+            [
+                robot1,
+                robot2,
+                robot3
+            ]);
         }
 
         private static List<MissionDefinition> GetMissionDefinitions()
@@ -399,153 +399,92 @@ namespace Api.Database.Context
                 LastSuccessfulRun = null
             };
 
-            return new List<MissionDefinition>(new[]
-            {
-                missionDefinition1, missionDefinition2, missionDefinition3, missionDefinition4, missionDefinition5, missionDefinition6
-            });
+            return new List<MissionDefinition>(
+            [
+                missionDefinition1,
+                missionDefinition2,
+                missionDefinition3,
+                missionDefinition4,
+                missionDefinition5,
+                missionDefinition6
+            ]);
         }
 
         private static List<MissionTask> GetMissionTasks()
         {
+            var inspections = new List<Inspection> { new() };
+            var url = new Uri(
+                    "https://stid.equinor.com/hua/tag?tagNo=ABCD"
+                );
             var task1 = new MissionTask(
-                new EchoTag
-                {
-                    Id = 2,
-                    TagId = "ABCD",
-                    PoseId = 2,
-                    PlanOrder = 0,
-                    Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                    URL = new Uri(
-                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
-                    ),
-                    Inspections = new List<EchoInspection>
-                    {
-                        new()
-                    }
-                })
-            {
-                Status = TaskStatus.Successful
-            };
+                inspections: inspections,
+                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                taskOrder: 0,
+                tagLink: url,
+                tagId: "ABCD",
+                poseId: 2,
+                status: TaskStatus.Successful
+            );
 
             var task2 = new MissionTask(
-                new EchoTag
-                {
-                    Id = 3,
-                    TagId = "ABCDE",
-                    PoseId = 2,
-                    PlanOrder = 0,
-                    Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                    URL = new Uri(
-                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
-                    ),
-                    Inspections = new List<EchoInspection>
-                    {
-                        new()
-                    }
-                })
-            {
-                Status = TaskStatus.Failed
-            };
+                inspections: inspections,
+                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                taskOrder: 0,
+                tagLink: url,
+                tagId: "ABCDE",
+                poseId: 2,
+                status: TaskStatus.Failed
+            );
 
             var task3 = new MissionTask(
-                new EchoTag
-                {
-                    Id = 4,
-                    TagId = "ABCDEF",
-                    PoseId = 2,
-                    PlanOrder = 0,
-                    Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                    URL = new Uri(
-                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
-                    ),
-                    Inspections = new List<EchoInspection>
-                    {
-                        new()
-                    }
-                })
-            {
-                Status = TaskStatus.PartiallySuccessful
-            };
+                inspections: inspections,
+                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                taskOrder: 0,
+                tagLink: url,
+                tagId: "ABCDEF",
+                poseId: 2,
+                status: TaskStatus.PartiallySuccessful
+            );
 
             var task4 = new MissionTask(
-                new EchoTag
-                {
-                    Id = 5,
-                    TagId = "ABCDEFG",
-                    PoseId = 2,
-                    PlanOrder = 0,
-                    Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                    URL = new Uri(
-                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
-                    ),
-                    Inspections = new List<EchoInspection>
-                    {
-                        new()
-                    }
-                })
-            {
-                Status = TaskStatus.Cancelled
-            };
+                inspections: inspections,
+                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                taskOrder: 0,
+                tagLink: url,
+                tagId: "ABCDEFG",
+                poseId: 2,
+                status: TaskStatus.Cancelled
+            );
 
             var task5 = new MissionTask(
-                new EchoTag
-                {
-                    Id = 6,
-                    TagId = "ABCDEFGH",
-                    PoseId = 2,
-                    PlanOrder = 0,
-                    Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                    URL = new Uri(
-                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
-                    ),
-                    Inspections = new List<EchoInspection>
-                    {
-                        new()
-                    }
-                })
-            {
-                Status = TaskStatus.Failed
-            };
+                inspections: inspections,
+                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                taskOrder: 0,
+                tagLink: url,
+                tagId: "ABCDEFGH",
+                poseId: 2,
+                status: TaskStatus.Failed
+            );
 
             var task6 = new MissionTask(
-                new EchoTag
-                {
-                    Id = 7,
-                    TagId = "ABCDEFGHI",
-                    PoseId = 2,
-                    PlanOrder = 0,
-                    Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                    URL = new Uri(
-                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
-                    ),
-                    Inspections = new List<EchoInspection>
-                    {
-                        new()
-                    }
-                })
-            {
-                Status = TaskStatus.Failed
-            };
+                inspections: inspections,
+                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                taskOrder: 0,
+                tagLink: url,
+                tagId: "ABCDEFGHI",
+                poseId: 2,
+                status: TaskStatus.Failed
+            );
 
             var task7 = new MissionTask(
-                new EchoTag
-                {
-                    Id = 8,
-                    TagId = "ABCDEFGHIJ",
-                    PoseId = 2,
-                    PlanOrder = 0,
-                    Pose = new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
-                    URL = new Uri(
-                        "https://stid.equinor.com/hua/tag?tagNo=ABCD"
-                    ),
-                    Inspections = new List<EchoInspection>
-                    {
-                        new()
-                    }
-                })
-            {
-                Status = TaskStatus.Failed
-            };
+                inspections: inspections,
+                robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
+                taskOrder: 0,
+                tagLink: url,
+                tagId: "ABCDEFGHIJ",
+                poseId: 2,
+                status: TaskStatus.Failed
+            );
 
             return [
                 task1,
@@ -596,7 +535,7 @@ namespace Api.Database.Context
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Successful,
                 DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>(),
+                Tasks = [],
                 Map = new MapMetadata()
             };
 
@@ -609,11 +548,11 @@ namespace Api.Database.Context
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Failed,
                 DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>
-                {
+                Tasks =
+                [
                     tasks[0],
                     tasks[1]
-                },
+                ],
                 Map = new MapMetadata()
             };
 
@@ -626,11 +565,11 @@ namespace Api.Database.Context
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.PartiallySuccessful,
                 DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>
-                {
+                Tasks =
+                [
                     tasks[0],
                     tasks[2]
-                },
+                ],
                 Map = new MapMetadata()
             };
 
@@ -643,11 +582,11 @@ namespace Api.Database.Context
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Cancelled,
                 DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>
-                {
+                Tasks =
+                [
                     tasks[0],
                     tasks[3]
-                },
+                ],
                 Map = new MapMetadata()
             };
 
@@ -660,8 +599,8 @@ namespace Api.Database.Context
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Failed,
                 DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>
-                {
+                Tasks =
+                [
                     tasks[0],
                     tasks[1],
                     tasks[2],
@@ -669,7 +608,7 @@ namespace Api.Database.Context
                     tasks[4],
                     tasks[5],
                     tasks[6]
-                },
+                ],
                 Map = new MapMetadata()
             };
 

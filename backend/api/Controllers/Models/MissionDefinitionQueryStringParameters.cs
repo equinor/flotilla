@@ -1,6 +1,4 @@
-﻿using Api.Database.Models;
-
-namespace Api.Controllers.Models
+﻿namespace Api.Controllers.Models
 {
     public class MissionDefinitionQueryStringParameters : QueryStringParameters
     {
@@ -26,8 +24,8 @@ namespace Api.Controllers.Models
         public string? NameSearch { get; set; }
 
         /// <summary>
-        /// The search parameter for the mission source type
+        /// The search parameter for the mission source id
         /// </summary>
-        public MissionSourceType? SourceType { get; set; }
+        public string? SourceId { get; set; }
     }
 }

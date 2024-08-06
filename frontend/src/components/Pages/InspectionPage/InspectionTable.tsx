@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Deck } from 'models/Deck'
 import { tokens } from '@equinor/eds-tokens'
-import { CondensedMissionDefinition } from 'models/MissionDefinition'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router-dom'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
@@ -90,7 +90,7 @@ interface IProps {
     inspections: Inspection[]
     scrollOnToggle: boolean
     openDialog: () => void
-    setSelectedMissions: (selectedMissions: CondensedMissionDefinition[]) => void
+    setSelectedMissions: (selectedMissions: MissionDefinition[]) => void
 }
 
 interface ITableProps {
@@ -125,7 +125,7 @@ const getStatusColorAndTextFromDeadline = (deadlineDate: Date): { statusColor: s
 interface IInspectionRowProps {
     inspection: Inspection
     openDialog: () => void
-    setMissions: (selectedMissions: CondensedMissionDefinition[]) => void
+    setMissions: (selectedMissions: MissionDefinition[]) => void
     openScheduledDialog: () => void
 }
 
@@ -322,10 +322,10 @@ export const InspectionTable = ({ deck, inspections, scrollOnToggle, openDialog,
 export const AllInspectionsTable = ({ inspections }: ITableProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions, missionQueue } = useMissionsContext()
-    const [selectedMissions, setSelectedMissions] = useState<CondensedMissionDefinition[]>()
+    const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
-    const [unscheduledMissions, setUnscheduledMissions] = useState<CondensedMissionDefinition[]>([])
+    const [unscheduledMissions, setUnscheduledMissions] = useState<MissionDefinition[]>([])
     const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
 
     const openDialog = () => {
@@ -348,11 +348,9 @@ export const AllInspectionsTable = ({ inspections }: ITableProps) => {
     }
 
     useEffect(() => {
-        const isScheduled = (mission: CondensedMissionDefinition) =>
-            missionQueue.map((m) => m.missionId).includes(mission.id)
-        const isOngoing = (mission: CondensedMissionDefinition) =>
-            ongoingMissions.map((m) => m.missionId).includes(mission.id)
-        let unscheduledMissions: CondensedMissionDefinition[] = []
+        const isScheduled = (mission: MissionDefinition) => missionQueue.map((m) => m.missionId).includes(mission.id)
+        const isOngoing = (mission: MissionDefinition) => ongoingMissions.map((m) => m.missionId).includes(mission.id)
+        let unscheduledMissions: MissionDefinition[] = []
         if (selectedMissions) {
             selectedMissions.forEach((mission) => {
                 if (isOngoing(mission) || isScheduled(mission)) setIsAlreadyScheduled(true)

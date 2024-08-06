@@ -1,10 +1,4 @@
-﻿using System.Globalization;
-using System.Linq.Dynamic.Core;
-using System.Linq.Expressions;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using Api.Controllers.Models;
+﻿using System.Text.Json;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
@@ -16,23 +10,15 @@ namespace Api.Services
     {
         public abstract Task<Source> Create(Source source);
 
-        public abstract Task<PagedList<Source>> ReadAll(SourceQueryStringParameters? parameters);
-
-        public abstract Task<SourceResponse?> ReadByIdAndInstallationWithTasks(string id, string installationCode);
-
-        public abstract Task<SourceResponse?> ReadByIdWithTasks(string id);
+        public abstract Task<List<Source>> ReadAll();
 
         public abstract Task<Source?> ReadById(string id);
 
-        public abstract Task<Source?> CheckForExistingEchoSource(int echoId);
+        public abstract Task<Source?> CheckForExistingSource(string sourceId);
 
-        public abstract Task<Source?> CheckForExistingCustomSource(IList<MissionTask> tasks);
-
-        public abstract Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
+        public abstract Task<Source?> CheckForExistingSourceFromTasks(IList<MissionTask> tasks);
 
         public abstract Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks);
-
-        public abstract string CalculateHashFromTasks(IList<MissionTask> tasks);
 
         public abstract Task<Source> Update(Source source);
 
@@ -47,7 +33,6 @@ namespace Api.Services
     )]
     public class SourceService(
         FlotillaDbContext context,
-        IEchoService echoService,
         ILogger<SourceService> logger) : ISourceService
     {
         public async Task<Source> Create(Source source)
@@ -57,19 +42,11 @@ namespace Api.Services
             return source;
         }
 
-        public async Task<PagedList<Source>> ReadAll(SourceQueryStringParameters? parameters)
+        public async Task<List<Source>> ReadAll()
         {
             var query = GetSources();
-            parameters ??= new SourceQueryStringParameters { };
-            var filter = ConstructFilter(parameters);
 
-            var filteredQuery = query.Where(filter);
-
-            return await PagedList<Source>.ToPagedListAsync(
-                filteredQuery,
-                parameters.PageNumber,
-                parameters.PageSize
-            );
+            return await query.ToListAsync();
         }
 
         private DbSet<Source> GetSources()
@@ -89,55 +66,14 @@ namespace Api.Services
                 .FirstOrDefaultAsync(s => s.SourceId.Equals(sourceId));
         }
 
-        public async Task<SourceResponse?> ReadByIdAndInstallationWithTasks(string id, string installationCode)
+        public async Task<Source?> CheckForExistingSource(string sourceId)
         {
-            var source = await GetSources()
-                .FirstOrDefaultAsync(s => s.Id.Equals(id));
-            if (source == null) return null;
-
-            switch (source.Type)
-            {
-                case MissionSourceType.Custom:
-                    throw new ArgumentException("Source is not of type Echo");
-                case MissionSourceType.Echo:
-                    var mission = await echoService.GetMissionById(int.Parse(source.SourceId, new CultureInfo("en-US")));
-                    var tasks = mission.Tags.Select(t =>
-                    {
-                        return new MissionTask(t);
-                    }).ToList();
-                    return new SourceResponse(source, tasks);
-                default:
-                    return null;
-            }
+            return await ReadBySourceId(sourceId);
         }
 
-        public async Task<SourceResponse?> ReadByIdWithTasks(string id)
+        public async Task<Source?> CheckForExistingSourceFromTasks(IList<MissionTask> tasks)
         {
-            var source = await GetSources()
-                .FirstOrDefaultAsync(s => s.Id.Equals(id));
-            if (source == null) return null;
-
-            switch (source.Type)
-            {
-                case MissionSourceType.Custom:
-                    var tasks = await GetMissionTasksFromSourceId(source.SourceId);
-                    if (tasks == null) return null;
-                    return new SourceResponse(source, tasks);
-                case MissionSourceType.Echo:
-                    throw new ArgumentException("Source is not of type Custom");
-                default:
-                    return null;
-            }
-        }
-
-        public async Task<Source?> CheckForExistingEchoSource(int echoId)
-        {
-            return await ReadBySourceId(echoId.ToString(CultureInfo.CurrentCulture));
-        }
-
-        public async Task<Source?> CheckForExistingCustomSource(IList<MissionTask> tasks)
-        {
-            string hash = CalculateHashFromTasks(tasks);
+            string hash = MissionTask.CalculateHashFromTasks(tasks);
             return await ReadBySourceId(hash);
         }
 
@@ -169,7 +105,7 @@ namespace Api.Services
         public async Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks)
         {
             string json = JsonSerializer.Serialize(tasks);
-            string hash = CalculateHashFromTasks(tasks);
+            string hash = MissionTask.CalculateHashFromTasks(tasks);
 
             var existingSource = await ReadById(hash);
 
@@ -179,31 +115,11 @@ namespace Api.Services
                 new Source
                 {
                     SourceId = hash,
-                    Type = MissionSourceType.Custom,
                     CustomMissionTasks = json
                 }
             );
 
             return newSource;
-        }
-
-        public string CalculateHashFromTasks(IList<MissionTask> tasks)
-        {
-            var genericTasks = new List<MissionTask>();
-            foreach (var task in tasks)
-            {
-                var taskCopy = new MissionTask(task)
-                {
-                    Id = "",
-                    IsarTaskId = ""
-                };
-                taskCopy.Inspections = taskCopy.Inspections.Select(i => new Inspection(i, useEmptyIDs: true)).ToList();
-                genericTasks.Add(taskCopy);
-            }
-
-            string json = JsonSerializer.Serialize(genericTasks);
-            byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
-            return BitConverter.ToString(hash).Replace("-", "", StringComparison.CurrentCulture).ToUpperInvariant();
         }
 
         public async Task<Source> Update(Source source)
@@ -226,25 +142,6 @@ namespace Api.Services
             await context.SaveChangesAsync();
 
             return source;
-        }
-
-        private static Expression<Func<Source, bool>> ConstructFilter(
-            SourceQueryStringParameters parameters
-        )
-        {
-            Expression<Func<Source, bool>> missionTypeFilter = parameters.Type is null
-                ? source => true
-                : source =>
-                    source.Type == parameters.Type;
-
-            // The parameter of the filter expression
-            var sourceExpression = Expression.Parameter(typeof(Source));
-
-            // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
-            Expression body = Expression.Invoke(missionTypeFilter, sourceExpression);
-
-            // Constructing the resulting lambda expression by combining parameter and body
-            return Expression.Lambda<Func<Source, bool>>(body, sourceExpression);
         }
     }
 }

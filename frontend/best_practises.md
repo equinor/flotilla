@@ -1,20 +1,20 @@
 # Flotilla frontend development best practises
 
-- [Flotilla frontend development best practises](#flotilla-frontend-development-best-practises)
-  - [Setup](#setup)
-    - [Prettier](#prettier)
-    - [ESLint](#eslint)
-  - [Folder structure](#folder-structure)
-  - [Components](#react-components)
-    - [React arguments](#react-arguments)
-    - [React functions](#react-state)
-    - [React state](#react-state)
-    - [Nesting](#nesting)
-  - [Contexts](#contexts)
-  - [SignalR](#signalr)
-  - [Functional programming](#functional-programming)
-  - [Declarative programming](#declarative-programming)
-    - [Input](#input)
+-   [Flotilla frontend development best practises](#flotilla-frontend-development-best-practises)
+    -   [Setup](#setup)
+        -   [Prettier](#prettier)
+        -   [ESLint](#eslint)
+    -   [Folder structure](#folder-structure)
+    -   [Components](#react-components)
+        -   [React arguments](#react-arguments)
+        -   [React functions](#react-state)
+        -   [React state](#react-state)
+        -   [Nesting](#nesting)
+    -   [Contexts](#contexts)
+    -   [SignalR](#signalr)
+    -   [Functional programming](#functional-programming)
+    -   [Declarative programming](#declarative-programming)
+        -   [Input](#input)
 
 ## Setup
 
@@ -22,29 +22,30 @@ See the [README](./README.md) for more information.
 
 ### Prettier
 
-We abide by the formatting provided by Prettier. To run it, type 
-    npx prettier --write [path to source]
+We abide by the formatting provided by Prettier. To run it, type
+npx prettier --write [path to source]
 
 ### ESLint
 
 We also avoid any warnings or errors from ESLint before we merge in any code. These warnings appear
 when compiling the code using
-    npm start
+npm start
 but can also be run with
-    npx eslint [path to src]
+npx eslint [path to src]
 
 ## Folder structure
 
 The frontend src folder is organised into 6 main folders.
-- Alerts contains code which displays alerts on the top of the page
-- Contexts contain react contexts (see [the context section for more information](#contexts))
-- Displays contain visual react component which are used on more than one page
-- Header contains code related to the page header
-- Pages contains the bulk of the code, as all the code related to the website pages are kept here, if there are no other relevant folders
-- Language contains translations between the supported languages for text on the Flotilla web page
-- MediaAssets contains the static image files displayed on the page
-- Models contains the data models
-- Utils contain utility functions which are relevant in several parts of the code
+
+-   Alerts contains code which displays alerts on the top of the page
+-   Contexts contain react contexts (see [the context section for more information](#contexts))
+-   Displays contain visual react component which are used on more than one page
+-   Header contains code related to the page header
+-   Pages contains the bulk of the code, as all the code related to the website pages are kept here, if there are no other relevant folders
+-   Language contains translations between the supported languages for text on the Flotilla web page
+-   MediaAssets contains the static image files displayed on the page
+-   Models contains the data models
+-   Utils contain utility functions which are relevant in several parts of the code
 
 ## Function syntax
 
@@ -69,6 +70,7 @@ The flotilla frontend is programmed in Typescript using the React framework. In 
 React arguments should be descriptively named in relation to the components name, so that someone would not need to investigate the parent component to learn what the data represents. If only parts of the provided data is utilised, then it is often better to only send the relevant data (eg only send mission name instead of the whole mission if only the name is used). Additionally, an interface should be utilised when there are many components, so as to make it easier to read. This interface should be placed just above, or at least nearby, the function itself.
 
 Good (although the interface is not strictly neccessary here):
+
 ```
 interface MissionTitleComponentProps {
     missionName: string
@@ -80,8 +82,9 @@ export const MissionTitleComponent = ({ missionName } : MissionTitleComponentPro
 ```
 
 Bad:
+
 ```
-export const RobotComponent = ({ mission, setColor } : {mission: CondensedMissionDefinition, setColor: (c: string) => void}) => {
+export const RobotComponent = ({ mission, setColor } : {mission: MissionDefinition, setColor: (c: string) => void}) => {
     ...
 }
 ```
@@ -104,7 +107,9 @@ const ExampleComponent = ({ x: number } : { x: number }) => {
     )
 }
 ```
-it can be simplified to 
+
+it can be simplified to
+
 ```
 const ExampleComponent = ({ x: number } : { x: number }) => {
     setNumberToDisplay = x + 1
@@ -113,12 +118,15 @@ const ExampleComponent = ({ x: number } : { x: number }) => {
     )
 }
 ```
+
 although in this contrived example it would be easier to give a more meaningful name to 'x' and then write
+
 ```
 const ExampleComponent = ({ x: number } : { x: number }) => <div>{x + 1}</div>
 ```
 
 It is also worth noting that calls to the update functions of react state are grouped together at the end of each render. So in the following code:
+
 ```
 const [x, setX] = useState<number>(0)
 
@@ -129,7 +137,9 @@ useEffect(() => {
     set(x + 1)
 }, [x])
 ```
+
 we do not yet see the updated value of x in the same render we updated it. Additionally, if we call setX several times in one render (ie. inside the same useEffect), they will overwrite each other. 'x' will be 1 at the end of this render, not 2. In order to prevent this overwriting we can instead pass a function to the set function which describes how to update the variable using its current value. This will be done in turn for each call to setX in this case, prevent updates from being overwritten.
+
 ```
 const [x, setX] = useState<number>(0)
 
@@ -138,6 +148,7 @@ useEffect(() => {
     setX((oldX) => oldX + 1)
 }, [x])
 ```
+
 At the end of the above code the value of 'x' will be 2, as the second update call will use the output from the first update call as the input to its function. This is important to keep in mind in event handlers, as the state inside for instance signalR event handlers is frozen when they are first registered.
 
 ### Nesting
@@ -152,10 +163,9 @@ React contexts are an important tool to maintain state across components. They w
 
 It is important to remember to include the provider in the top level of the program, and to remember that contexts cannot see other contexts whose providers are lower than them in the hierarchy.
 
-The main use of contexts is to store state which is used in more than one component. Any react state defined in the context can be imported in other components, and this state will be identical for each of them. This is vital to allow the state to remain the same whilst moving between pages, as the data in the react components would otherwise be reset each time they stop being rendered. 
+The main use of contexts is to store state which is used in more than one component. Any react state defined in the context can be imported in other components, and this state will be identical for each of them. This is vital to allow the state to remain the same whilst moving between pages, as the data in the react components would otherwise be reset each time they stop being rendered.
 
 Treating the contexts as data aggregates also simplifies each component as all the code related to fetching and formatting data from the backend can be moved to contexts. In particular it is ideal to move signalR event handlers to contexts as these can make components difficult to read otherwise. In effect we treat the contexts as light versions of redux stores, where we fetch the data from the context, and then the context can also expose functions which allow us to update the state in the context. This allows us to better control what data is visible and how it is possible to update it. A great example of this can be seen in [the mission filter context](./src/components/Contexts/MissionFilterContext.tsx) and in [the filter component where it's used](./src/components/Pages/MissionHistoryPage/FilterSection.tsx).
-
 
 ## SignalR
 
@@ -165,7 +175,7 @@ Information on the best practises related to SignalR can be found in [the signal
 
 Functional programming is a large field, but for the sake of this document we are interested in containing side effects within functions. This means that we do not want functions to change any state other that the arguments provided. The actual objects sent as arguments should also not be changed themselves, instead the result of performing manipulations on them should be returned as a new state at the end of the function. This form of self contained function is called a pure function.
 
-In react there are two main side-effects, updating react state using set functions, and sending/receiving data to/from the backend. This is not avoidable, but we can contain them to be done inside useEffects. In these useEffects the side-effects should be performed at the top level instead of inside nested calls. Functions calls can be made inside the useEffects for the sake of manipulation of the data and formatting, but the end result should be returned to the useEffect before a set call is made. In effect, no functions should have a 'void' return type when possible. Setting state inside event handlers is another avoidable situation, besides useEffects. 
+In react there are two main side-effects, updating react state using set functions, and sending/receiving data to/from the backend. This is not avoidable, but we can contain them to be done inside useEffects. In these useEffects the side-effects should be performed at the top level instead of inside nested calls. Functions calls can be made inside the useEffects for the sake of manipulation of the data and formatting, but the end result should be returned to the useEffect before a set call is made. In effect, no functions should have a 'void' return type when possible. Setting state inside event handlers is another avoidable situation, besides useEffects.
 
 Making the code as functional as possible does not only make it more readable, it also reduces the chances of errors being introduced as it forces us to make many simple functions which do isolated operations. Additionally it moves the state operations to one place, making any previous mistakes more obvious.
 
@@ -174,6 +184,7 @@ Using coding styles common in functional languages are also encouraged in Typesc
 In the following examples the functions are kept simple for the sake of demonstration.
 
 Bad (all updates are kept obfuscated inside the updateLists function):
+
 ```
 const [x, setX] = useState<number>(0)
 const [numberList, setNumberList] = useState<number[]>(0)
@@ -197,6 +208,7 @@ useEffect(() => {
 ```
 
 Better (the updates of each list is separated, and the number is passed as an argument):
+
 ```
 const [x, setX] = useState<number>(0)
 const [numberList, setNumberList] = useState<number[]>(0)
@@ -222,6 +234,7 @@ useEffect(() => {
 ```
 
 Best (The functions only manipulate the given arguments and does not access any react state directly, whilst all the state updates are being done in the useEffect on the top level):
+
 ```
 const [x, setX] = useState<number>(0)
 const [numberList, setNumberList] = useState<number[]>(0)
@@ -247,6 +260,7 @@ useEffect(() => {
 ```
 
 If we do the following then we also prevent any conflicts that would arise from having multiple updates to numberList and otherNumberList in the same render, but that is not the case in this simple example.
+
 ```
 useEffect(() => {
     setNumberList((oldList) => removeNumberFromList(x, oldList))
@@ -265,6 +279,7 @@ It is also good to not be afraid to define local small react components inside r
 Here are some examples for good and bad practises. 'getIndexDisplay' is small enough that it would not need to be separated from the react function return statement, but here it is just used as an example.
 
 Bad (A multiline function being called inside the HTML object):
+
 ```
 const FooComponent = ({ index }: { index: number }) => {
     const getIndexDisplay(x: number) => {
@@ -278,6 +293,7 @@ const FooComponent = ({ index }: { index: number }) => {
 ```
 
 Better (The function has been inlined so that it becomes a simple mapping from input to output):
+
 ```
 const FooComponent = ({ index }: { index: number }) => {
     const getIndexDisplay(x: number) => <p>{x + 1}</p>
@@ -289,6 +305,7 @@ const FooComponent = ({ index }: { index: number }) => {
 ```
 
 Good (The function has become a react component, so that it does not need to be excplicitly called):
+
 ```
 const FooComponent = ({ index }: { index: number }) => {
     const IndexDisplay({ x: number }: { x: number }) => <p>{x + 1}</p>
@@ -314,4 +331,5 @@ Here is an example of a controlled input component:
     }}
 />
 ```
+
 The filterFunctions.switchTagId function sets the state of filterState.tagId

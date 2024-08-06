@@ -3,7 +3,7 @@ using Api.Database.Models;
 using Api.Services.Models;
 using Xunit;
 
-namespace Api.Test.Services
+namespace Api.Test.Database
 {
     public class TestPose
     {
@@ -70,63 +70,6 @@ namespace Api.Test.Services
                 new Pose(mockAngleAxisParameters, mockAngle).Orientation.Z,
                 3.0
             );
-        }
-
-        [Fact]
-        public void AssertCoordinateConversion()
-        {
-            var pose = new Pose(
-                new Position(25.041F, 23.682F, 0),
-                new Orientation(0, 0, 0.8907533F, 0.4544871F)
-            );
-            var predefinedPosition = pose.Position;
-            var predefinedOrientation = pose.Orientation;
-            var echoPose = ConvertPredefinedPoseToEchoPose(
-                predefinedPosition,
-                predefinedOrientation
-            );
-
-            var flotillaPose = new Pose(echoPose.Position, echoPose.Orientation.Angle);
-            Assert.Equal(predefinedOrientation, flotillaPose.Orientation);
-        }
-
-        private static EchoPose ConvertPredefinedPoseToEchoPose(
-            Position position,
-            Orientation orientation
-        )
-        {
-            var enuPosition = new EnuPosition(position.X, position.Y, position.Z);
-            var axisAngle = ConvertOrientation(orientation);
-            return new EchoPose(enuPosition, axisAngle);
-        }
-
-        private static AxisAngle ConvertOrientation(Orientation orientation)
-        // This is the method used to convert predefined poses to the Angle-Axis representation used by Echo
-        {
-            float qw = orientation.W;
-            float angle = -2 * MathF.Acos(qw);
-            if (orientation.Z >= 0)
-                angle = 2 * MathF.Acos(qw);
-
-            angle = (450 * MathF.PI / 180) - angle;
-
-            angle %= 2F * MathF.PI;
-
-            if (angle < 0) angle += 2F * MathF.PI;
-
-            return new AxisAngle(new EnuPosition(0, 0, 1), angle);
-        }
-
-        public class AxisAngle(EnuPosition axis, float angle)
-        {
-            public EnuPosition Axis = axis;
-            public float Angle = angle;
-        }
-
-        public class EchoPose(EnuPosition position, AxisAngle orientation)
-        {
-            public EnuPosition Position = position;
-            public AxisAngle Orientation = orientation;
         }
     }
 }

@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { CondensedMissionDefinition } from 'models/MissionDefinition'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { useInstallationContext } from './InstallationContext'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
@@ -9,7 +9,7 @@ import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'compon
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 interface IMissionDefinitionsContext {
-    missionDefinitions: CondensedMissionDefinition[]
+    missionDefinitions: MissionDefinition[]
 }
 
 interface Props {
@@ -22,10 +22,7 @@ const defaultMissionDefinitionsContext: IMissionDefinitionsContext = {
 
 export const MissionDefinitionsContext = createContext<IMissionDefinitionsContext>(defaultMissionDefinitionsContext)
 
-const upsertMissionDefinition = (
-    oldQueue: CondensedMissionDefinition[],
-    updatedMission: CondensedMissionDefinition
-) => {
+const upsertMissionDefinition = (oldQueue: MissionDefinition[], updatedMission: MissionDefinition) => {
     const oldQueueCopy = [...oldQueue]
     const existingIndex = oldQueueCopy.findIndex((m) => m.id === updatedMission.id)
     if (existingIndex !== -1) {
@@ -40,11 +37,10 @@ const fetchMissionDefinitions = (params: {
     installationCode: string
     pageSize: number
     orderBy: string
-}): Promise<CondensedMissionDefinition[]> =>
-    BackendAPICaller.getMissionDefinitions(params).then((response) => response.content)
+}): Promise<MissionDefinition[]> => BackendAPICaller.getMissionDefinitions(params).then((response) => response.content)
 
 export const useMissionDefinitions = (): IMissionDefinitionsContext => {
-    const [missionDefinitions, setMissionDefinitions] = useState<CondensedMissionDefinition[]>([])
+    const [missionDefinitions, setMissionDefinitions] = useState<MissionDefinition[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installationCode } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
@@ -53,19 +49,19 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.missionDefinitionUpdated, (username: string, message: string) => {
-                const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
+                const missionDefinition: MissionDefinition = JSON.parse(message)
                 setMissionDefinitions((oldMissionDefinitions) =>
                     upsertMissionDefinition(oldMissionDefinitions, missionDefinition)
                 )
             })
             registerEvent(SignalREventLabels.missionDefinitionCreated, (username: string, message: string) => {
-                const missionDefinition: CondensedMissionDefinition = JSON.parse(message)
+                const missionDefinition: MissionDefinition = JSON.parse(message)
                 setMissionDefinitions((oldMissionDefinitions) =>
                     upsertMissionDefinition(oldMissionDefinitions, missionDefinition)
                 )
             })
             registerEvent(SignalREventLabels.missionDefinitionDeleted, (username: string, message: string) => {
-                const mDef: CondensedMissionDefinition = JSON.parse(message)
+                const mDef: MissionDefinition = JSON.parse(message)
                 if (!mDef.area) return
                 setMissionDefinitions((oldMissionDefs) => {
                     const oldListCopy = [...oldMissionDefs]
@@ -106,7 +102,7 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [BackendAPICaller.accessToken, installationCode])
 
-    const [filteredMissionDefinitions, setFilteredMissionDefinitions] = useState<CondensedMissionDefinition[]>([])
+    const [filteredMissionDefinitions, setFilteredMissionDefinitions] = useState<MissionDefinition[]>([])
 
     useEffect(() => {
         setFilteredMissionDefinitions(

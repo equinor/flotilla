@@ -1,9 +1,9 @@
 ﻿# nullable disable
-namespace Api.Controllers.Models
+namespace Api.Services.MissionLoaders
 {
     public class EchoMission
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         public string Name { get; set; }
 

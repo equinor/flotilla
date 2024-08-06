@@ -19,12 +19,12 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet("")]
         [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(IList<CondensedMissionDefinitionResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<CondensedMissionDefinitionResponse>>> GetMissionDefinitions(
+        public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetMissionDefinitions(
             [FromQuery] MissionDefinitionQueryStringParameters parameters
         )
         {
@@ -54,77 +54,8 @@ namespace Api.Controllers
                 JsonSerializer.Serialize(metadata)
             );
 
-            var missionDefinitionResponses = missionDefinitions.Select(m => new CondensedMissionDefinitionResponse(m));
+            var missionDefinitionResponses = missionDefinitions.Select(m => new MissionDefinitionResponse(m));
             return Ok(missionDefinitionResponses);
-        }
-
-        /// <summary>
-        ///     List all condensed mission definitions in the Flotilla database
-        /// </summary>
-        /// <remarks>
-        ///     <para> This query gets all condensed mission definitions </para>
-        /// </remarks>
-        [HttpGet("condensed")]
-        [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(IList<MissionDefinitionResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<CondensedMissionDefinitionResponse>>> GetCondensedMissionDefinitions(
-            [FromQuery] MissionDefinitionQueryStringParameters parameters
-        )
-        {
-            PagedList<MissionDefinition> missionDefinitions;
-            try
-            {
-                missionDefinitions = await missionDefinitionService.ReadAll(parameters);
-            }
-            catch (InvalidDataException e)
-            {
-                logger.LogError(e.Message);
-                return BadRequest(e.Message);
-            }
-
-            var metadata = new
-            {
-                missionDefinitions.TotalCount,
-                missionDefinitions.PageSize,
-                missionDefinitions.CurrentPage,
-                missionDefinitions.TotalPages,
-                missionDefinitions.HasNext,
-                missionDefinitions.HasPrevious
-            };
-
-            Response.Headers.Append(
-                QueryStringParameters.PaginationHeader,
-                JsonSerializer.Serialize(metadata)
-            );
-
-            var missionDefinitionResponses = missionDefinitions.Select(m => new CondensedMissionDefinitionResponse(m));
-            return Ok(missionDefinitionResponses);
-        }
-
-        /// <summary>
-        ///     Lookup mission definition by specified id.
-        /// </summary>
-        [HttpGet]
-        [Authorize(Roles = Role.Any)]
-        [Route("{id}/condensed")]
-        [ProducesResponseType(typeof(CondensedMissionDefinitionResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<CondensedMissionDefinitionResponse>> GetCondensedMissionDefinitionById([FromRoute] string id)
-        {
-            var missionDefinition = await missionDefinitionService.ReadById(id);
-            if (missionDefinition == null)
-            {
-                return NotFound($"Could not find mission definition with id {id}");
-            }
-            var missionDefinitionResponse = new CondensedMissionDefinitionResponse(missionDefinition);
-            return Ok(missionDefinitionResponse);
         }
 
         /// <summary>
@@ -138,14 +69,14 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinitionById([FromRoute] string id)
+        public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinitionWithTasksById([FromRoute] string id)
         {
             var missionDefinition = await missionDefinitionService.ReadById(id);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id {id}");
             }
-            var missionDefinitionResponse = new MissionDefinitionResponse(missionDefinitionService, missionDefinition);
+            var missionDefinitionResponse = new MissionDefinitionWithTasksResponse(missionDefinitionService, missionDefinition);
             return Ok(missionDefinitionResponse);
         }
 
@@ -180,13 +111,13 @@ namespace Api.Controllers
         [HttpPut]
         [Authorize(Roles = Role.Admin)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(CondensedMissionDefinitionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<CondensedMissionDefinitionResponse>> UpdateMissionDefinitionById(
+        public async Task<ActionResult<MissionDefinitionResponse>> UpdateMissionDefinitionById(
             [FromRoute] string id,
             [FromBody] UpdateMissionDefinitionQuery missionDefinitionQuery
         )
@@ -214,7 +145,7 @@ namespace Api.Controllers
             missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
 
             var newMissionDefinition = await missionDefinitionService.Update(missionDefinition);
-            return new CondensedMissionDefinitionResponse(newMissionDefinition);
+            return new MissionDefinitionResponse(newMissionDefinition);
         }
 
         /// <summary>
@@ -226,13 +157,13 @@ namespace Api.Controllers
         [HttpPut]
         [Authorize(Roles = Role.Admin)]
         [Route("{id}/is-deprecated")]
-        [ProducesResponseType(typeof(CondensedMissionDefinitionResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<CondensedMissionDefinitionResponse>> UpdateMissionDefinitionIsDeprecatedById(
+        public async Task<ActionResult<MissionDefinitionResponse>> UpdateMissionDefinitionIsDeprecatedById(
             [FromRoute] string id,
             [FromBody] UpdateMissionDefinitionIsDeprecatedQuery missionDefinitionIsDeprecatedQuery
         )
@@ -252,7 +183,7 @@ namespace Api.Controllers
             missionDefinition.IsDeprecated = missionDefinitionIsDeprecatedQuery.IsDeprecated;
 
             var newMissionDefinition = await missionDefinitionService.Update(missionDefinition);
-            return new CondensedMissionDefinitionResponse(newMissionDefinition);
+            return new MissionDefinitionResponse(newMissionDefinition);
         }
 
         /// <summary>
@@ -266,14 +197,14 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MissionDefinitionResponse>> DeleteMissionDefinition([FromRoute] string id)
+        public async Task<ActionResult<MissionDefinitionResponse>> DeleteMissionDefinitionWithTasks([FromRoute] string id)
         {
             var missionDefinition = await missionDefinitionService.Delete(id);
             if (missionDefinition is null)
             {
                 return NotFound($"Mission definition with id {id} not found");
             }
-            var missionDefinitionResponse = new MissionDefinitionResponse(missionDefinitionService, missionDefinition);
+            var missionDefinitionResponse = new MissionDefinitionWithTasksResponse(missionDefinitionService, missionDefinition);
             return Ok(missionDefinitionResponse);
         }
     }

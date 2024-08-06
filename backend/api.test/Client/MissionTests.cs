@@ -261,7 +261,7 @@ namespace Api.Test
         }
 
         [Fact]
-        public async Task ScheduleOneEchoMissionTest()
+        public async Task ScheduleOneMissionTest()
         {
             // Arrange - Robot
             string robotUrl = "/robots";
@@ -274,13 +274,13 @@ namespace Api.Test
             string robotId = robot.Id;
 
             // Arrange - Area
-            string installationCode = "installationScheduleOneEchoMissionTest";
-            string plantCode = "plantScheduleOneEchoMissionTest";
-            string deckName = "deckScheduleOneEchoMissionTest";
-            string areaName = "areaScheduleOneEchoMissionTest";
+            string installationCode = "installationScheduleOneMissionTest";
+            string plantCode = "plantScheduleOneMissionTest";
+            string deckName = "deckScheduleOneMissionTest";
+            string areaName = "areaScheduleOneMissionTest";
             (_, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
 
-            int echoMissionId = 95;
+            string missionId = "95";
 
             // Act
             var query = new ScheduledMissionQuery
@@ -288,7 +288,7 @@ namespace Api.Test
                 RobotId = robotId,
                 InstallationCode = installationCode,
                 AreaName = areaName,
-                EchoMissionId = echoMissionId,
+                MissionId = missionId,
                 DesiredStartTime = DateTime.UtcNow
             };
             var content = new StringContent(
@@ -308,7 +308,7 @@ namespace Api.Test
         }
 
         [Fact]
-        public async Task Schedule3EchoMissionsTest()
+        public async Task Schedule3MissionsTest()
         {
             // Arrange - Robot
             string robotUrl = "/robots";
@@ -321,13 +321,13 @@ namespace Api.Test
             string robotId = robot.Id;
 
             // Arrange - Area
-            string installationCode = "installationSchedule3EchoMissionsTest";
-            string plantCode = "plantSchedule3EchoMissionsTest";
-            string deckName = "deckSchedule3EchoMissionsTest";
-            string areaName = "areaSchedule3EchoMissionsTest";
+            string installationCode = "installationSchedule3MissionsTest";
+            string plantCode = "plantSchedule3MissionsTest";
+            string deckName = "deckSchedule3MissionsTest";
+            string areaName = "areaSchedule3MissionsTest";
             (_, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
 
-            int echoMissionId = 97;
+            string missionId = "97";
 
             // Act
             var query = new ScheduledMissionQuery
@@ -335,7 +335,7 @@ namespace Api.Test
                 RobotId = robotId,
                 InstallationCode = installationCode,
                 AreaName = areaName,
-                EchoMissionId = echoMissionId,
+                MissionId = missionId,
                 DesiredStartTime = DateTime.UtcNow
             };
             var content = new StringContent(
@@ -645,16 +645,16 @@ namespace Api.Test
         }
 
         [Fact]
-        public async Task ScheduleDuplicateEchoMissionDefinitions()
+        public async Task ScheduleDuplicatMissionDefinitions()
         {
             // Arrange - Initialise areas
-            string installationCode = "installationScheduleDuplicateEchoMissionDefinitions";
-            string plantCode = "plantScheduleDuplicateEchoMissionDefinitions";
-            string deckName = "deckScheduleDuplicateEchoMissionDefinitions";
-            string areaName = "areaScheduleDuplicateEchoMissionDefinitions";
+            string installationCode = "installationScheduleDuplicatMissionDefinitions";
+            string plantCode = "plantScheduleDuplicatMissionDefinitions";
+            string deckName = "deckScheduleDuplicatMissionDefinitions";
+            string areaName = "areaScheduleDuplicatMissionDefinitions";
             (_, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
 
-            // Arrange - Create echo mission definition
+            // Arrange - Create mission definition
             string robotUrl = "/robots";
             var response = await _client.GetAsync(robotUrl);
             Assert.True(response.IsSuccessStatusCode);
@@ -662,14 +662,14 @@ namespace Api.Test
             Assert.NotNull(robots);
             var robot = robots.Where(robot => robot.Name == "Shockwave").First();
             string robotId = robot.Id;
-            int echoMissionId = 1; // Corresponds to mock in EchoServiceMock.cs
+            string missionId = "986"; // Corresponds to mock in ServiceMock.cs
 
             var query = new ScheduledMissionQuery
             {
                 RobotId = robotId,
                 InstallationCode = installationCode,
                 AreaName = areaName,
-                EchoMissionId = echoMissionId,
+                MissionId = missionId,
                 DesiredStartTime = DateTime.UtcNow
             };
             var content = new StringContent(
@@ -679,9 +679,9 @@ namespace Api.Test
             );
 
             // Act
-            string echoMissionsUrl = "/missions";
-            var response1 = await _client.PostAsync(echoMissionsUrl, content);
-            var response2 = await _client.PostAsync(echoMissionsUrl, content);
+            string missionsUrl = "/missions";
+            var response1 = await _client.PostAsync(missionsUrl, content);
+            var response2 = await _client.PostAsync(missionsUrl, content);
 
             // Assert
             Assert.True(response1.IsSuccessStatusCode);
@@ -693,7 +693,6 @@ namespace Api.Test
             string? missionId1 = missionRun1.MissionId;
             string? missionId2 = missionRun2.MissionId;
             Assert.Equal(missionId1, missionId2);
-
             string missionDefinitionsUrl = "/missions/definitions?pageSize=50";
             var missionDefinitionsResponse = await _client.GetAsync(missionDefinitionsUrl);
             var missionDefinitions = await missionDefinitionsResponse.Content.ReadFromJsonAsync<List<MissionDefinition>>(_serializerOptions);

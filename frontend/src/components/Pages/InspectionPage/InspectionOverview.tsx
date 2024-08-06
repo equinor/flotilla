@@ -10,8 +10,8 @@ import { ScheduleMissionDialog } from '../FrontPage/MissionOverview/ScheduleMiss
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { EchoMissionDefinition } from 'models/MissionDefinition'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { StyledDict } from './InspectionUtilities'
 import { Icons } from 'utils/icons'
 import { StyledButton } from 'components/Styles/StyledComponents'
@@ -24,7 +24,7 @@ const StyledContent = styled.div`
     align-items: end;
 `
 
-const StyledEchoMissionButton = styled.div`
+const StyledMissionButton = styled.div`
     display: flex;
     padding-bottom: 30px;
 `
@@ -48,9 +48,9 @@ export const InspectionOverviewSection = () => {
     const { enabledRobots } = useRobotContext()
     const { setAlert, setListAlert } = useAlertContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
-    const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
+    const [isFetchingMissions, setIsFetchingMissions] = useState<boolean>(false)
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
-    const [echoMissions, setEchoMissions] = useState<EchoMissionDefinition[]>([])
+    const [missions, setMissions] = useState<MissionDefinition[]>([])
     const [activeTab, setActiveTab] = useState(0)
 
     const isScheduleButtonDisabled = enabledRobots.length === 0 || installationCode === ''
@@ -66,40 +66,38 @@ export const InspectionOverviewSection = () => {
         }
     })
 
-    const fetchEchoMissions = () => {
-        setIsFetchingEchoMissions(true)
-        BackendAPICaller.getAvailableEchoMissions(installationCode as string)
+    const fetchMissions = () => {
+        setIsFetchingMissions(true)
+        BackendAPICaller.getAvailableMissions(installationCode as string)
             .then((missions) => {
-                setEchoMissions(missions)
-                setIsFetchingEchoMissions(false)
+                setMissions(missions)
+                setIsFetchingMissions(false)
             })
             .catch((_) => {
                 setAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve Echo missions')} />,
+                    <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve missions')} />,
                     AlertCategory.ERROR
                 )
                 setListAlert(
                     AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to retrieve Echo missions')}
-                    />,
+                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to retrieve missions')} />,
                     AlertCategory.ERROR
                 )
-                setIsFetchingEchoMissions(false)
+                setIsFetchingMissions(false)
             })
     }
 
     const onClickScheduleMission = () => {
         setIsScheduleMissionDialogOpen(true)
-        fetchEchoMissions()
+        fetchMissions()
     }
 
     const AddPredefinedMissionsButton = () => (
         <Tooltip placement="top" title={isScheduleButtonDisabled ? TranslateText('No robot available') : ''}>
             <AlignedTextButton onClick={onClickScheduleMission} disabled={isScheduleButtonDisabled} ref={anchorRef}>
                 <Icon name={Icons.Add} size={16} />
-                {TranslateText('Add predefined Echo mission')}
+                {TranslateText('Add predefined mission')}
             </AlignedTextButton>
         </Tooltip>
     )
@@ -117,16 +115,16 @@ export const InspectionOverviewSection = () => {
                 <Tabs.Panel>
                     <StyledView>
                         <StyledContent>
-                            <StyledEchoMissionButton>
+                            <StyledMissionButton>
                                 {isScheduleMissionDialogOpen && (
                                     <ScheduleMissionDialog
-                                        isFetchingEchoMissions={isFetchingEchoMissions}
-                                        echoMissions={echoMissions}
+                                        isFetchingMissions={isFetchingMissions}
+                                        missions={missions}
                                         onClose={() => setIsScheduleMissionDialogOpen(false)}
                                     />
                                 )}
                                 <AddPredefinedMissionsButton />
-                            </StyledEchoMissionButton>
+                            </StyledMissionButton>
                             {allInspections.length > 0 ? (
                                 <AllInspectionsTable inspections={allInspections} />
                             ) : (

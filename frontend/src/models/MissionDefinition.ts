@@ -1,17 +1,7 @@
 import { Area } from './Area'
 import { Mission } from './Mission'
 
-export interface EchoMissionDefinition {
-    echoMissionId: number
-    name: string
-}
-
-export enum SourceType {
-    Echo = 'Echo',
-    Custom = 'Custom',
-}
-
-export interface CondensedMissionDefinition {
+export interface MissionDefinition {
     id: string
     name: string
     installationCode: string
@@ -20,5 +10,10 @@ export interface CondensedMissionDefinition {
     lastSuccessfulRun?: Mission
     area?: Area
     isDeprecated: boolean
-    sourceType: SourceType
+    sourceId: string
+}
+
+export interface PlantInfo {
+    plantCode: string
+    projectDescription: string
 }

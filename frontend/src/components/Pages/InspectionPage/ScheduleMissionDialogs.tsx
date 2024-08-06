@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useState } from 'react'
 import { Robot, RobotStatus } from 'models/Robot'
-import { CondensedMissionDefinition } from 'models/MissionDefinition'
+import { MissionDefinition } from 'models/MissionDefinition'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Icons } from 'utils/icons'
 import { useRobotContext } from 'components/Contexts/RobotContext'
@@ -16,10 +16,10 @@ import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 interface IProps {
-    selectedMissions: CondensedMissionDefinition[]
+    selectedMissions: MissionDefinition[]
     closeDialog: () => void
-    setMissions: (selectedMissions: CondensedMissionDefinition[] | undefined) => void
-    unscheduledMissions: CondensedMissionDefinition[]
+    setMissions: (selectedMissions: MissionDefinition[] | undefined) => void
+    unscheduledMissions: MissionDefinition[]
     isAlreadyScheduled: boolean
 }
 
@@ -57,7 +57,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { setAlert, setListAlert } = useAlertContext()
     const [isLocalizationVerificationDialogOpen, setIsLocalizationVerificationDialog] = useState<boolean>(false)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
-    const [missionsToSchedule, setMissionsToSchedule] = useState<CondensedMissionDefinition[]>()
+    const [missionsToSchedule, setMissionsToSchedule] = useState<MissionDefinition[]>()
     const filteredRobots = enabledRobots.filter(
         (r) =>
             (r.status === RobotStatus.Available ||
@@ -69,7 +69,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         if (filteredRobots) setSelectedRobot(selectedRobot)
     }
 
-    const onScheduleButtonPress = (missions: CondensedMissionDefinition[]) => () => {
+    const onScheduleButtonPress = (missions: MissionDefinition[]) => () => {
         if (!selectedRobot) return
 
         setMissionsToSchedule(missions)

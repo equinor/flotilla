@@ -1,7 +1,7 @@
 ﻿#nullable disable
 using Api.Database.Models;
 
-namespace Api.Controllers.Models
+namespace Api.Services.MissionLoaders
 {
     public class EchoTag
     {
@@ -11,7 +11,7 @@ namespace Api.Controllers.Models
 
         public int PlanOrder { get; set; }
 
-        public int PoseId { get; set; }
+        public int? PoseId { get; set; }
 
         public Pose Pose { get; set; }
 
