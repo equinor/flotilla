@@ -841,18 +841,7 @@ namespace Api.Test
             // Act
             string customMissionsUrl = "/missions/custom";
             var missionResponse = await _client.PostAsync(customMissionsUrl, content);
-            Assert.True(missionResponse.IsSuccessStatusCode);
-            var missionRun = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            Assert.NotNull(missionRun);
-            Assert.Equal(MissionStatus.Pending, missionRun.Status);
-
-            await Task.Delay(2000);
-            string missionRunByIdUrl = $"/missions/runs/{missionRun.Id}";
-            var missionByIdResponse = await _client.GetAsync(missionRunByIdUrl);
-            Assert.True(missionByIdResponse.IsSuccessStatusCode);
-            var missionRunAfterUpdate = await missionByIdResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            Assert.NotNull(missionRunAfterUpdate);
-            Assert.Equal(MissionStatus.Aborted, missionRunAfterUpdate.Status);
+            Assert.Equal(HttpStatusCode.Conflict, missionResponse.StatusCode);
         }
     }
 }
