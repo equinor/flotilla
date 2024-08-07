@@ -54,7 +54,7 @@ AZURE_CLIENT_SECRET
 Start Flotilla by running:
 
 ```
-docker compose up
+docker compose up --add-random-argument
 ```
 
 or
