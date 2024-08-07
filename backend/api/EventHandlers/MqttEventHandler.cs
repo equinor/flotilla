@@ -255,7 +255,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var flotillaMissionRun = await MissionRunService.ReadByIsarMissionId(isarMission.MissionId, readOnly: true);
+            var flotillaMissionRun = await MissionRunService.ReadByIsarMissionId(isarMission.MissionId);
             if (flotillaMissionRun is null)
             {
                 string errorMessage = $"Mission with isar mission Id {isarMission.IsarId} was not found";
