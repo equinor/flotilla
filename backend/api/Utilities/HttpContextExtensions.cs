@@ -16,6 +16,7 @@ namespace Api.Utilities
 
         public static List<System.Security.Claims.Claim> GetRequestedRoles(this HttpContext client)
         {
+
             string accessTokenBase64 = client.GetRequestToken();
 
             var handler = new JwtSecurityTokenHandler();
@@ -24,6 +25,7 @@ namespace Api.Utilities
             var claims = jwtSecurityToken.Claims;
             var roles = claims.Where((c) => c.Type == "roles" || c.Type.EndsWith("role", StringComparison.CurrentCulture)).ToList();
             return roles;
+
         }
 
         public static List<string> GetRequestedRoleNames(this HttpContext client)
@@ -31,5 +33,51 @@ namespace Api.Utilities
             var roleClaims = GetRequestedRoles(client);
             return roleClaims.Select((c) => c.Value).ToList();
         }
+
+        public static List<System.Security.Claims.Claim> GetRequestedClaims(this HttpContext client)
+        {
+            string accessTokenBase64 = client.GetRequestToken();
+            var handler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = handler.ReadJwtToken(accessTokenBase64);
+            return jwtSecurityToken.Claims.ToList();
+        }
+
+        public class UserInfo
+        {
+            public required string PreferredUsername { get; set; }
+            public required string Oid { get; set; }
+            public string? DummyId { get; set; }
+        }
+
+        public static List<UserInfo> GetRequestedUserInfo(this HttpContext client)
+        {
+            var objectIdToDummyIdMap = new Dictionary<string, string>();
+            var userInfoList = new List<UserInfo>();
+
+            var claims = client.GetRequestedClaims();
+            var preferredUsernameClaim = claims.FirstOrDefault(c => c.Type == "preferred_username");
+            if (preferredUsernameClaim != null)
+            {
+                var objectIdClaim = claims.FirstOrDefault(c => c.Type == "oid");
+                if (objectIdClaim != null)
+                {
+                    string objectId = objectIdClaim.Value;
+                    if (!objectIdToDummyIdMap.TryGetValue(objectId, out string? dummyId))
+                    {
+                        dummyId = Guid.NewGuid().ToString("N");
+                        objectIdToDummyIdMap[objectId] = dummyId;
+                    }
+                    var userInfo = new UserInfo
+                    {
+                        PreferredUsername = preferredUsernameClaim.Value,
+                        Oid = objectId,
+                        DummyId = dummyId
+                    };
+                    userInfoList.Add(userInfo);
+                }
+            }
+            return userInfoList;
+        }
+
     }
 }
