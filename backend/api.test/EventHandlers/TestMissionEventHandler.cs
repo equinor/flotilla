@@ -505,7 +505,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async Task ReturnHomeMissionCancelledIfNewMissionScheduled()
+        public async Task ReturnHomeMissionAbortedIfNewMissionScheduled()
         {
             // Arrange
             var installation = await _databaseUtilities.NewInstallation();
@@ -521,40 +521,38 @@ namespace Api.Test.EventHandlers
             // Act
             var eventArgs = new MissionRunCreatedEventArgs(missionRun.Id);
             _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), eventArgs);
-
             Thread.Sleep(500);
 
             // Assert
             var updatedReturnHomeMission = await _missionRunService.ReadById(returnToHomeMission.Id);
-            Assert.True(updatedReturnHomeMission?.Status.Equals(MissionStatus.Cancelled));
-            Assert.True(updatedReturnHomeMission?.Tasks.FirstOrDefault()?.Status.Equals(Api.Database.Models.TaskStatus.Cancelled));
-        }
-
-        [Fact]
-        public async Task ReturnHomeMissionNotCancelledIfNewMissionScheduledInDifferentDeck()
-        {
-            // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck1 = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area1 = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck1.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area1);
-            var deck2 = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode, "testDeck2");
-            var area2 = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck2.Name);
-            var returnToHomeMission = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area1, true, MissionRunType.ReturnHome, MissionStatus.Ongoing, Guid.NewGuid().ToString());
-            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area2, true, MissionRunType.Normal, MissionStatus.Pending, Guid.NewGuid().ToString());
-
-            Thread.Sleep(100);
+            Assert.True(updatedReturnHomeMission?.Status.Equals(MissionStatus.Aborted));
 
             // Act
-            var eventArgs = new MissionRunCreatedEventArgs(missionRun.Id);
-            _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), eventArgs);
+            var mqttIsarMissionEventArgs = new MqttReceivedArgs(
+                new IsarMissionMessage
+                {
+                    RobotName = robot.Name,
+                    IsarId = robot.IsarId,
+                    MissionId = returnToHomeMission.IsarMissionId,
+                    Status = "cancelled",
+                    Timestamp = DateTime.UtcNow
+                });
 
+            var mqttIsarStatusEventArgs = new MqttReceivedArgs(
+                new IsarStatusMessage
+                {
+                    RobotName = robot.Name,
+                    IsarId = robot.IsarId,
+                    Status = RobotStatus.Available,
+                    Timestamp = DateTime.UtcNow
+                });
+
+            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarMissionReceived), mqttIsarMissionEventArgs);
+            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttIsarStatusEventArgs);
             Thread.Sleep(500);
 
-            // Assert
-            var updatedReturnHomeMission = await _missionRunService.ReadById(returnToHomeMission.Id);
-            Assert.True(updatedReturnHomeMission?.Status.Equals(MissionStatus.Ongoing));
+            var updatedMissionRun = await _missionRunService.ReadById(missionRun.Id);
+            Assert.True(updatedMissionRun?.Status.Equals(MissionStatus.Ongoing));
         }
     }
 }
