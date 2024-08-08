@@ -11,12 +11,13 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { EchoMissionDefinition } from 'models/MissionDefinition'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { StyledDict } from './InspectionUtilities'
 import { Icons } from 'utils/icons'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertListContext } from 'components/Contexts/AlertListContext'
 
 const StyledContent = styled.div`
     display: flex;
@@ -47,6 +48,7 @@ export const InspectionOverviewSection = () => {
     const { installationCode } = useInstallationContext()
     const { enabledRobots } = useRobotContext()
     const { setAlert } = useAlertContext()
+    const { setListAlert } = useAlertListContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [isFetchingEchoMissions, setIsFetchingEchoMissions] = useState<boolean>(false)
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
@@ -77,6 +79,13 @@ export const InspectionOverviewSection = () => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve Echo missions')} />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent
+                        translatedMessage={TranslateText('Failed to retrieve Echo missions')}
+                    />,
                     AlertCategory.ERROR
                 )
                 setIsFetchingEchoMissions(false)

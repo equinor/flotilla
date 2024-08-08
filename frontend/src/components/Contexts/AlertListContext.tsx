@@ -1,20 +1,20 @@
 import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react'
 import { addMinutes, max } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
-import { FailedMissionAlertContent } from 'components/Alerts/FailedMissionAlert'
+import { FailedMissionAlertListContent } from 'components/Alerts/FailedMissionAlert'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useInstallationContext } from './InstallationContext'
 import { Alert } from 'models/Alert'
 import { useRobotContext } from './RobotContext'
-import { BlockedRobotAlertContent } from 'components/Alerts/BlockedRobotAlert'
+import { BlockedRobotAlertListContent } from 'components/Alerts/BlockedRobotAlert'
 import { RobotStatus } from 'models/Robot'
-import { FailedAlertContent } from 'components/Alerts/FailedAlertContent'
+import { FailedAlertListContent } from 'components/Alerts/FailedAlertContent'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { SafeZoneAlertContent } from 'components/Alerts/SafeZoneAlert'
+import { SafeZoneAlertListContent } from 'components/Alerts/SafeZoneAlert'
 import { useLanguageContext } from './LanguageContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 
 export enum AlertType {
     MissionFail,
@@ -36,11 +36,11 @@ type AlertDictionaryType = {
     [key in AlertType]?: { content: ReactNode | undefined; dismissFunction: () => void; alertCategory: AlertCategory }
 }
 
-interface IAlertContext {
-    alerts: AlertDictionaryType
-    setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => void
-    clearAlerts: () => void
-    clearAlert: (source: AlertType) => void
+interface IAlertListContext {
+    listAlerts: AlertDictionaryType
+    setListAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => void
+    clearListAlerts: () => void
+    clearListAlert: (source: AlertType) => void
 }
 
 interface Props {
@@ -48,16 +48,16 @@ interface Props {
 }
 
 const defaultAlertInterface = {
-    alerts: {},
-    setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => {},
-    clearAlerts: () => {},
-    clearAlert: (source: AlertType) => {},
+    listAlerts: {},
+    setListAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => {},
+    clearListAlerts: () => {},
+    clearListAlert: (source: AlertType) => {},
 }
 
-export const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
+export const AlertListContext = createContext<IAlertListContext>(defaultAlertInterface)
 
-export const AlertProvider: FC<Props> = ({ children }) => {
-    const [alerts, setAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.alerts)
+export const AlertListProvider: FC<Props> = ({ children }) => {
+    const [listAlerts, setListAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.listAlerts)
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
     const [blockedRobotNames, setBlockedRobotNames] = useState<string[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
@@ -72,22 +72,22 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const maxTimeInterval: number = 60
     const dismissMissionFailTimeKey: string = 'lastMissionFailDismissalTime'
 
-    const setAlert = (source: AlertType, alert: ReactNode, category: AlertCategory) => {
-        setAlerts((oldAlerts) => {
+    const setListAlert = (source: AlertType, alert: ReactNode, category: AlertCategory) => {
+        setListAlerts((oldAlerts) => {
             return {
                 ...oldAlerts,
-                [source]: { content: alert, dismissFunction: () => clearAlert(source), alertCategory: category },
+                [source]: { content: alert, dismissFunction: () => clearListAlert(source), alertCategory: category },
             }
         })
     }
 
-    const clearAlerts = () => setAlerts({})
+    const clearListAlerts = () => setListAlerts({})
 
-    const clearAlert = (source: AlertType) => {
+    const clearListAlert = (source: AlertType) => {
         if (source === AlertType.MissionFail)
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
 
-        setAlerts((oldAlerts) => {
+        setListAlerts((oldAlerts) => {
             let newAlerts = { ...oldAlerts }
             delete newAlerts[source]
             return newAlerts
@@ -123,9 +123,9 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     setRecentFailedMissions(newRecentFailedMissions)
                 })
                 .catch((e) => {
-                    setAlert(
+                    setListAlert(
                         AlertType.RequestFail,
-                        <FailedRequestAlertContent
+                        <FailedRequestAlertListContent
                             translatedMessage={TranslateText('Failed to retrieve failed missions')}
                         />,
                         AlertCategory.ERROR
@@ -172,16 +172,16 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 if (backendAlert.robotId !== null && !enabledRobots.filter((r) => r.id === backendAlert.robotId)) return
 
                 if (alertType === AlertType.SafeZoneSuccess) {
-                    setAlert(
+                    setListAlert(
                         alertType,
-                        <SafeZoneAlertContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
+                        <SafeZoneAlertListContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
                         AlertCategory.INFO
                     )
-                    clearAlert(AlertType.RequestSafeZone)
+                    clearListAlert(AlertType.RequestSafeZone)
                 } else {
-                    setAlert(
+                    setListAlert(
                         alertType,
-                        <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                        <FailedAlertListContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
                         AlertCategory.ERROR
                     )
                 }
@@ -192,9 +192,9 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (newFailedMissions.length > 0) {
-            setAlert(
+            setListAlert(
                 AlertType.MissionFail,
-                <FailedMissionAlertContent missions={newFailedMissions} />,
+                <FailedMissionAlertListContent missions={newFailedMissions} />,
                 AlertCategory.ERROR
             )
             setNewFailedMissions([])
@@ -217,13 +217,13 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
         if (isBlockedRobotNamesModifyed) {
             if (newBlockedRobotNames.length > 0) {
-                setAlert(
+                setListAlert(
                     AlertType.BlockedRobot,
-                    <BlockedRobotAlertContent robotNames={newBlockedRobotNames} />,
+                    <BlockedRobotAlertListContent robotNames={newBlockedRobotNames} />,
                     AlertCategory.WARNING
                 )
             } else {
-                clearAlert(AlertType.BlockedRobot)
+                clearListAlert(AlertType.BlockedRobot)
             }
         }
         setBlockedRobotNames(newBlockedRobotNames)
@@ -231,17 +231,17 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     }, [enabledRobots, installationCode])
 
     return (
-        <AlertContext.Provider
+        <AlertListContext.Provider
             value={{
-                alerts,
-                setAlert,
-                clearAlerts,
-                clearAlert,
+                listAlerts,
+                setListAlert,
+                clearListAlerts,
+                clearListAlert,
             }}
         >
             {children}
-        </AlertContext.Provider>
+        </AlertListContext.Provider>
     )
 }
 
-export const useAlertContext = () => useContext(AlertContext)
+export const useAlertListContext = () => useContext(AlertListContext)

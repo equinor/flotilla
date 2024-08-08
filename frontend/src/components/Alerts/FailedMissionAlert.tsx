@@ -5,6 +5,9 @@ import { MissionStatusDisplay } from 'components/Displays/MissionDisplays/Missio
 import { useNavigate } from 'react-router-dom'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { TextAlignedButton } from 'components/Styles/StyledComponents'
+import { AlertListContents } from './AlertsListItem'
+import { Icons } from 'utils/icons'
+import { tokens } from '@equinor/eds-tokens'
 
 const Indent = styled.div`
     padding: 0px 0px 0px 5px;
@@ -61,5 +64,31 @@ export const FailedMissionAlertContent = ({ missions }: MissionsProps) => {
             {missions.length === 1 && <FailedMission missions={missions} />}
             {missions.length > 1 && <SeveralFailedMissions missions={missions} />}
         </Indent>
+    )
+}
+
+export const FailedMissionAlertListContent = ({ missions }: MissionsProps) => {
+    const { TranslateText } = useLanguageContext()
+    const mission = missions[0]
+    let message = `${mission.name} ${TranslateText('failed on robot')} ${mission.robot.name}: ${mission.statusReason}`
+    if (mission.statusReason === null)
+        message = `${mission.name} ${TranslateText('failed on robot')} ${mission.robot.name}`
+    if (missions.length > 1)
+        message = `${missions.length.toString()} ${TranslateText("missions failed recently. See 'Mission History' for more information.")}.`
+    return missions.length === 1 ? (
+        <AlertListContents
+            icon={Icons.Failed}
+            alertTitle={TranslateText(MissionStatus.Failed)}
+            alertText={message}
+            iconColor={tokens.colors.interactive.danger__resting.rgba}
+            mission={mission}
+        />
+    ) : (
+        <AlertListContents
+            icon={Icons.Failed}
+            alertTitle={TranslateText(MissionStatus.Failed)}
+            alertText={message}
+            iconColor={tokens.colors.interactive.danger__resting.rgba}
+        />
     )
 }

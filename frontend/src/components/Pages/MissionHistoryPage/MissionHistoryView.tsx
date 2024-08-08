@@ -13,8 +13,9 @@ import { InspectionType } from 'models/Inspection'
 import { tokens } from '@equinor/eds-tokens'
 import { SmallScreenInfoText } from 'utils/InfoText'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertListContext } from 'components/Contexts/AlertListContext'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -122,6 +123,7 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
     const { page, switchPage, filterState, filterIsSet, filterFunctions, filterError, clearFilterError } =
         useMissionFilterContext()
     const { setAlert } = useAlertContext()
+    const { setListAlert } = useAlertListContext()
     const [filteredMissions, setFilteredMissions] = useState<Mission[]>([])
     const [paginationDetails, setPaginationDetails] = useState<PaginationHeader>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -197,6 +199,13 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent
+                        translatedMessage={TranslateText('Failed to retrieve previous mission runs')}
+                    />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent
                         translatedMessage={TranslateText('Failed to retrieve previous mission runs')}
                     />,
                     AlertCategory.ERROR

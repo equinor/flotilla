@@ -8,6 +8,7 @@ import { MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { MissionRunsProvider } from 'components/Contexts/MissionRunsContext'
 import { SafeZoneProvider } from 'components/Contexts/SafeZoneContext'
 import { AlertProvider } from 'components/Contexts/AlertContext'
+import { AlertListProvider } from 'components/Contexts/AlertListContext'
 import { InstallationProvider } from 'components/Contexts/InstallationContext'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
 import { SignalRProvider } from 'components/Contexts/SignalRContext'
@@ -35,22 +36,24 @@ const App = () => (
                         <RobotProvider>
                             <MissionRunsProvider>
                                 <AlertProvider>
-                                    <SafeZoneProvider>
-                                        <MissionRunsProvider>
-                                            <MissionControlProvider>
-                                                <UnauthenticatedTemplate>
-                                                    <div className="sign-in-page">
-                                                        <AssetSelectionPage></AssetSelectionPage>
-                                                    </div>
-                                                </UnauthenticatedTemplate>
-                                                <AuthenticatedTemplate>
-                                                    <MissionFilterProvider>
-                                                        <FlotillaSite />
-                                                    </MissionFilterProvider>
-                                                </AuthenticatedTemplate>
-                                            </MissionControlProvider>
-                                        </MissionRunsProvider>
-                                    </SafeZoneProvider>
+                                    <AlertListProvider>
+                                        <SafeZoneProvider>
+                                            <MissionRunsProvider>
+                                                <MissionControlProvider>
+                                                    <UnauthenticatedTemplate>
+                                                        <div className="sign-in-page">
+                                                            <AssetSelectionPage></AssetSelectionPage>
+                                                        </div>
+                                                    </UnauthenticatedTemplate>
+                                                    <AuthenticatedTemplate>
+                                                        <MissionFilterProvider>
+                                                            <FlotillaSite />
+                                                        </MissionFilterProvider>
+                                                    </AuthenticatedTemplate>
+                                                </MissionControlProvider>
+                                            </MissionRunsProvider>
+                                        </SafeZoneProvider>
+                                    </AlertListProvider>
                                 </AlertProvider>
                             </MissionRunsProvider>
                         </RobotProvider>

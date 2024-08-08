@@ -8,9 +8,10 @@ import { EmptyMissionQueuePlaceholder } from './NoMissionPlaceholder'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertListContext } from 'components/Contexts/AlertListContext'
 
 const StyledMissionView = styled.div`
     display: grid;
@@ -30,15 +31,23 @@ export const MissionQueueView = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { missionQueue, ongoingMissions, loadingMissionSet, setLoadingMissionSet } = useMissionsContext()
     const { setAlert } = useAlertContext()
+    const { setListAlert } = useAlertListContext()
 
     const onDeleteMission = (mission: Mission) =>
-        BackendAPICaller.deleteMission(mission.id).catch((_) =>
+        BackendAPICaller.deleteMission(mission.id).catch((_) => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent translatedMessage={TranslateText('Failed to delete mission from queue')} />,
                 AlertCategory.ERROR
             )
-        )
+            setListAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertListContent
+                    translatedMessage={TranslateText('Failed to delete mission from queue')}
+                />,
+                AlertCategory.ERROR
+            )
+        })
 
     useEffect(() => {
         setLoadingMissionSet((currentLoadingNames) => {
