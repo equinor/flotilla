@@ -5,7 +5,8 @@ import { CondensedMissionDefinition } from 'models/MissionDefinition'
 import { useInstallationContext } from './InstallationContext'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
+import { useAlertListContext } from 'components/Contexts/AlertListContext'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 interface IMissionDefinitionsContext {
@@ -49,6 +50,7 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const { installationCode } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert } = useAlertContext()
+    const { setListAlert } = useAlertListContext()
 
     useEffect(() => {
         if (connectionReady) {
@@ -86,6 +88,13 @@ export const useMissionDefinitions = (): IMissionDefinitionsContext => {
                 orderBy: 'InstallationCode installationCode',
             }).catch((e) => {
                 setAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertContent
+                        translatedMessage={TranslateText('Failed to retrieve inspection plans')}
+                    />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertListContent
                         translatedMessage={TranslateText('Failed to retrieve inspection plans')}

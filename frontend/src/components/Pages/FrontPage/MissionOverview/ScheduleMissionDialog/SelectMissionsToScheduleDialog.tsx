@@ -9,8 +9,9 @@ import { useRobotContext } from 'components/Contexts/RobotContext'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useAlertListContext } from 'components/Contexts/AlertListContext'
 
 const StyledMissionDialog = styled.div`
     display: flex;
@@ -44,6 +45,7 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const { setAlert } = useAlertContext()
+    const { setListAlert } = useAlertListContext()
     const { setLoadingMissionSet } = useMissionsContext()
     const [selectedEchoMissions, setSelectedEchoMissions] = useState<EchoMissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(undefined)
@@ -56,6 +58,15 @@ export const SelectMissionsToScheduleDialog = ({ echoMissionsList, closeDialog }
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent
+                        translatedMessage={
+                            TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`
+                        }
+                    />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent
                         translatedMessage={
                             TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`
                         }

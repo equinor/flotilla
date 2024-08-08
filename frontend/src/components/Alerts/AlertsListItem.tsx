@@ -31,7 +31,7 @@ const StyledListItem = styled(outline)`
     display: flex;
     flex-direction: column;
     align-items: left;
-    row-gap: 10px
+    row-gap: 10px;
 `
 
 const VerticalContent = styled.div`
@@ -55,9 +55,9 @@ const Horizontal = styled.div`
 `
 
 const Right = styled.div`
-     display: flex;
-     align-items: right;
-     justify-content: right;
+    display: flex;
+    align-items: right;
+    justify-content: right;
 `
 
 export enum AlertCategory {
@@ -82,33 +82,37 @@ interface AlertProps {
 
 export const AlertListContents = ({ icon, iconColor, alertTitle, alertText, mission }: AlertListInfo) => {
     let missionHasFailedTasks = false
-    if (mission !== undefined) missionHasFailedTasks = mission.tasks.some(
-        (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
-    )
+    if (mission !== undefined)
+        missionHasFailedTasks = mission.tasks.some(
+            (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful
+        )
     return (
         <>
             <StyledListContainer>
                 <StyledListHeading>
                     <VerticalContent>
                         <StyledIcon name={icon} style={{ color: iconColor }} />
-                        <Typography variant='h6'>{alertTitle}</Typography>
+                        <Typography variant="h6">{alertTitle}</Typography>
                     </VerticalContent>
                 </StyledListHeading>
                 <StyledListItem>
-                    <Typography variant='caption'>{alertText}</Typography>
+                    <Typography variant="caption">{alertText}</Typography>
                     <Right>
-                        {mission !== undefined && mission.tasks[0]?.type !== TaskType.ReturnHome && mission.tasks[0]?.type !== TaskType.Localization && (
-                            <MissionRestartButton mission={mission} hasFailedTasks={missionHasFailedTasks} smallButton={false} />
-                        )}
+                        {mission !== undefined &&
+                            mission.tasks[0]?.type !== TaskType.ReturnHome &&
+                            mission.tasks[0]?.type !== TaskType.Localization && (
+                                <MissionRestartButton
+                                    mission={mission}
+                                    hasFailedTasks={missionHasFailedTasks}
+                                    smallButton={false}
+                                />
+                            )}
                     </Right>
                 </StyledListItem>
             </StyledListContainer>
         </>
     )
 }
-
-
-
 
 export const AlertListItem = ({ children, dismissAlert }: AlertProps) => {
     return (

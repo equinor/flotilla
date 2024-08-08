@@ -264,5 +264,6 @@
     "Alert": "Varsling",
     "Alerts": "Varsler",
     "No alerts": "Ingen varsler",
-    "minutes ago": "minutter siden"
+    "minutes ago": "minutter siden",
+    "Failed to retrieve previous mission runs": "Kunne ikke hente tildigere oppdragskjøringer"
 }

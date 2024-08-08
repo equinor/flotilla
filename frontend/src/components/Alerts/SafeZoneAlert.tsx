@@ -50,7 +50,6 @@ export const SafeZoneAlertContent = ({ alertType, alertCategory }: SafeZoneBanne
     )
 }
 
-
 export const SafeZoneAlertListContent = ({ alertType, alertCategory }: SafeZoneBannerProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     let titleMessage = TranslateText('INFO')
@@ -58,10 +57,18 @@ export const SafeZoneAlertListContent = ({ alertType, alertCategory }: SafeZoneB
     let icon = Icons.Warning
     let iconColor = tokens.colors.interactive.danger__resting.rgba
     if (alertCategory === AlertCategory.WARNING) titleMessage = TranslateText('WARNING')
-    if (alertCategory === AlertCategory.INFO && alertType === AlertType.SafeZoneSuccess) [message, icon, iconColor] = [TranslateText('Safe Zone successful text'), Icons.Info, tokens.colors.text.static_icons__default.rgba]
-    if (alertCategory === AlertCategory.INFO && alertType === AlertType.DismissSafeZone) [message, icon, iconColor] = [TranslateText('Dismiss safe zone banner text'), Icons.Info, tokens.colors.text.static_icons__default.rgba]
+    if (alertCategory === AlertCategory.INFO && alertType === AlertType.SafeZoneSuccess)
+        [message, icon, iconColor] = [
+            TranslateText('Safe Zone successful text'),
+            Icons.Info,
+            tokens.colors.text.static_icons__default.rgba,
+        ]
+    if (alertCategory === AlertCategory.INFO && alertType === AlertType.DismissSafeZone)
+        [message, icon, iconColor] = [
+            TranslateText('Dismiss safe zone banner text'),
+            Icons.Info,
+            tokens.colors.text.static_icons__default.rgba,
+        ]
 
-    return (
-        <AlertListContents icon={icon} alertTitle={titleMessage} alertText={message} iconColor={iconColor} />
-    )
+    return <AlertListContents icon={icon} alertTitle={titleMessage} alertText={message} iconColor={iconColor} />
 }

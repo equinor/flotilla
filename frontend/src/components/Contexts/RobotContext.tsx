@@ -4,7 +4,8 @@ import { Robot } from 'models/Robot'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
+import { useAlertListContext } from 'components/Contexts/AlertListContext'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useInstallationContext } from './InstallationContext'
 
@@ -35,6 +36,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert } = useAlertContext()
+    const { setListAlert } = useAlertListContext()
     const { installationCode } = useInstallationContext()
 
     useEffect(() => {
@@ -81,7 +83,14 @@ export const RobotProvider: FC<Props> = ({ children }) => {
                 .catch((e) => {
                     setAlert(
                         AlertType.RequestFail,
-                        <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to retrieve robots')} />,
+                        <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve robots')} />,
+                        AlertCategory.ERROR
+                    )
+                    setListAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertListContent
+                            translatedMessage={TranslateText('Failed to retrieve robots')}
+                        />,
                         AlertCategory.ERROR
                     )
                 })

@@ -71,9 +71,24 @@ export const FailedMissionAlertListContent = ({ missions }: MissionsProps) => {
     const { TranslateText } = useLanguageContext()
     const mission = missions[0]
     let message = `${mission.name} ${TranslateText('failed on robot')} ${mission.robot.name}: ${mission.statusReason}`
-    if (mission.statusReason === null) message = `${mission.name} ${TranslateText('failed on robot')} ${mission.robot.name}`
-    if (missions.length > 1) message = `${missions.length.toString()} ${TranslateText("missions failed recently. See 'Mission History' for more information.")}.`
-    return (
-        <AlertListContents icon={Icons.Failed} alertTitle={TranslateText(MissionStatus.Failed)} alertText={message} iconColor={tokens.colors.interactive.danger__resting.rgba} mission={mission} />
+    if (mission.statusReason === null)
+        message = `${mission.name} ${TranslateText('failed on robot')} ${mission.robot.name}`
+    if (missions.length > 1)
+        message = `${missions.length.toString()} ${TranslateText("missions failed recently. See 'Mission History' for more information.")}.`
+    return missions.length === 1 ? (
+        <AlertListContents
+            icon={Icons.Failed}
+            alertTitle={TranslateText(MissionStatus.Failed)}
+            alertText={message}
+            iconColor={tokens.colors.interactive.danger__resting.rgba}
+            mission={mission}
+        />
+    ) : (
+        <AlertListContents
+            icon={Icons.Failed}
+            alertTitle={TranslateText(MissionStatus.Failed)}
+            alertText={message}
+            iconColor={tokens.colors.interactive.danger__resting.rgba}
+        />
     )
 }

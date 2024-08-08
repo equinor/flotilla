@@ -38,6 +38,11 @@ export const FailedRequestAlertContent = ({ translatedMessage }: { translatedMes
 export const FailedRequestAlertListContent = ({ translatedMessage }: { translatedMessage: string }) => {
     const { TranslateText } = useLanguageContext()
     return (
-        <AlertListContents icon={Icons.Failed} alertTitle={translatedMessage} alertText={TranslateText('Request error')} iconColor={tokens.colors.interactive.danger__resting.rgba} />
+        <AlertListContents
+            icon={Icons.Failed}
+            alertTitle={TranslateText('Request error')}
+            alertText={translatedMessage}
+            iconColor={tokens.colors.interactive.danger__resting.rgba}
+        />
     )
 }

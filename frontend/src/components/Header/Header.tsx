@@ -5,10 +5,12 @@ import styled from 'styled-components'
 import { SelectLanguage } from './LanguageSelector'
 import { Icons } from 'utils/icons'
 import { useAlertContext } from 'components/Contexts/AlertContext'
+import { useAlertListContext } from 'components/Contexts/AlertListContext'
 import { AlertListItem } from 'components/Alerts/AlertsListItem'
 import { useState, useRef } from 'react'
 import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { AlertBanner } from 'components/Alerts/AlertsBanner'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;
@@ -66,6 +68,7 @@ const Circle = styled.div`
 
 export const Header = ({ page }: { page: string }) => {
     const { alerts } = useAlertContext()
+    const { listAlerts } = useAlertListContext()
     const { installationName } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
 
@@ -113,7 +116,7 @@ export const Header = ({ page }: { page: string }) => {
                             ref={referenceElementNotifications}
                         >
                             <Icon name={Icons.Notifications} size={24} />
-                            {Object.entries(alerts).length !== 0 &&
+                            {Object.entries(listAlerts).length !== 0 &&
                                 installationName &&
                                 page !== 'root' && ( //Alert banners
                                     <Circle style={{ background: tokens.colors.interactive.danger__resting.hex }} />
@@ -139,19 +142,19 @@ export const Header = ({ page }: { page: string }) => {
             >
                 <StyledAlertPopoverHeader>
                     <StyledAlertPopoverTitle>
-                        <Typography variant='h6'>{TranslateText('Alerts')}</Typography>
+                        <Typography variant="h6">{TranslateText('Alerts')}</Typography>
                         <Button variant={'ghost_icon'} onClick={onAlertClose}>
                             <Icon name="close" size={24} />
                         </Button>
                     </StyledAlertPopoverTitle>
                 </StyledAlertPopoverHeader>
                 <Popover.Content>
-                    {Object.entries(alerts).length === 0 && installationName && page !== 'root' && (
-                        <Typography variant="h6">{TranslateText("No alerts")}</Typography>
+                    {Object.entries(listAlerts).length === 0 && installationName && page !== 'root' && (
+                        <Typography variant="h6">{TranslateText('No alerts')}</Typography>
                     )}
-                    {Object.entries(alerts).length > 0 && installationName && page !== 'root' && (
+                    {Object.entries(listAlerts).length > 0 && installationName && page !== 'root' && (
                         <StyledAlertList>
-                            {Object.entries(alerts).map(([key, value]) => (
+                            {Object.entries(listAlerts).map(([key, value]) => (
                                 <AlertListItem
                                     key={key}
                                     dismissAlert={value.dismissFunction}
@@ -164,6 +167,15 @@ export const Header = ({ page }: { page: string }) => {
                     )}
                 </Popover.Content>
             </Popover>
+            {Object.entries(alerts).length > 0 && installationName && page !== 'root' && (
+                <StyledAlertList>
+                    {Object.entries(alerts).map(([key, value]) => (
+                        <AlertBanner key={key} dismissAlert={value.dismissFunction} alertCategory={value.alertCategory}>
+                            {value.content}
+                        </AlertBanner>
+                    ))}
+                </StyledAlertList>
+            )}
         </>
     )
 }

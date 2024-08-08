@@ -20,10 +20,6 @@ const Indent = styled.div`
     padding: 0px 9px;
 `
 
-
-
-
-
 export const FailedAlertContent = ({ title, message }: { title: string; message: string }) => {
     const { TranslateText } = useLanguageContext()
     const iconColor = tokens.colors.interactive.danger__resting.rgba
@@ -44,10 +40,14 @@ export const FailedAlertContent = ({ title, message }: { title: string; message:
     )
 }
 
-
 export const FailedAlertListContent = ({ title, message }: { title: string; message: string }) => {
     const { TranslateText } = useLanguageContext()
     return (
-        <AlertListContents icon={Icons.Failed} iconColor={tokens.colors.interactive.danger__resting.rgba} alertTitle={TranslateText(title)} alertText={TranslateText(message)} />
+        <AlertListContents
+            icon={Icons.Failed}
+            iconColor={tokens.colors.interactive.danger__resting.rgba}
+            alertTitle={TranslateText(title)}
+            alertText={TranslateText(message)}
+        />
     )
 }
