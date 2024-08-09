@@ -72,7 +72,8 @@ namespace Api.Services
         FlotillaDbContext context,
         ISignalRService signalRService,
         ILogger<MissionRunService> logger,
-        IAccessRoleService accessRoleService) : IMissionRunService
+        IAccessRoleService accessRoleService,
+        IUserInfoService userInfoService) : IMissionRunService
     {
         public async Task<MissionRun> Create(MissionRun missionRun, bool triggerCreatedMissionRunEvent = true)
         {
@@ -102,6 +103,15 @@ namespace Api.Services
             {
                 var args = new MissionRunCreatedEventArgs(missionRun.Id);
                 OnMissionRunCreated(args);
+            }
+            if (missionRun.MissionRunType == MissionRunType.ReturnHome)
+            {
+                return missionRun;
+            }
+            var userInfo = await userInfoService.GetRequestedUserInfo();
+            if (userInfo != null)
+            {
+                logger.LogInformation($"Mission run created by user with Id {userInfo.Id}");
             }
 
             return missionRun;
