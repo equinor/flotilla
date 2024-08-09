@@ -258,5 +258,6 @@
     "Failed to send robot {0} home": "Kunne ikke sende robot {0} til startposisjon",
     "Failed to update inspection": "Kunne ikke oppdatere inspeksjon",
     "Battery": "Batteri",
-    "Recharging": "Lader"
+    "Recharging": "Lader",
+    "Active Filters": "Aktive filtre"
 }
