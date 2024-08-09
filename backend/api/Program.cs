@@ -106,7 +106,7 @@ else
 builder.Services.AddScoped<RobotController>();
 builder.Services.AddScoped<EmergencyActionController>();
 builder.Services.AddScoped<InspectionFindingService>();
-
+builder.Services.AddScoped<IUserInfoService, UserInfoService>();
 builder.Services.AddTransient<ISignalRService, SignalRService>();
 
 builder.Services.AddHostedService<InspectionFindingEventHandler>();

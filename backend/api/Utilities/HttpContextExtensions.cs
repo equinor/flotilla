@@ -24,12 +24,21 @@ namespace Api.Utilities
             var claims = jwtSecurityToken.Claims;
             var roles = claims.Where((c) => c.Type == "roles" || c.Type.EndsWith("role", StringComparison.CurrentCulture)).ToList();
             return roles;
+
         }
 
         public static List<string> GetRequestedRoleNames(this HttpContext client)
         {
             var roleClaims = GetRequestedRoles(client);
             return roleClaims.Select((c) => c.Value).ToList();
+        }
+
+        public static List<System.Security.Claims.Claim> GetRequestedClaims(this HttpContext client)
+        {
+            string accessTokenBase64 = client.GetRequestToken();
+            var handler = new JwtSecurityTokenHandler();
+            var jwtSecurityToken = handler.ReadJwtToken(accessTokenBase64);
+            return jwtSecurityToken.Claims.ToList();
         }
     }
 }
