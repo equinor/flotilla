@@ -36,6 +36,7 @@ namespace Api.Test
                     services.AddScoped<IMapService, MockMapService>();
                     services.AddScoped<IBlobService, MockBlobService>();
                     services.AddScoped<IStidService, MockStidService>();
+                    services.AddScoped<IErrorHandlingService, ErrorHandlingService>();
                     services.AddAuthorizationBuilder().AddFallbackPolicy(
                         TestAuthHandler.AuthenticationScheme, policy => policy.RequireAuthenticatedUser()
                     );

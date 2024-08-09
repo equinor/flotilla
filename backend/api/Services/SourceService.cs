@@ -16,19 +16,19 @@ namespace Api.Services
     {
         public abstract Task<Source> Create(Source source);
 
-        public abstract Task<PagedList<Source>> ReadAll(SourceQueryStringParameters? parameters);
+        public abstract Task<PagedList<Source>> ReadAll(SourceQueryStringParameters? parameters, bool readOnly = true);
 
-        public abstract Task<SourceResponse?> ReadByIdAndInstallationWithTasks(string id, string installationCode);
+        public abstract Task<SourceResponse?> ReadByIdAndInstallationWithTasks(string id, bool readOnly = true);
 
-        public abstract Task<SourceResponse?> ReadByIdWithTasks(string id);
+        public abstract Task<SourceResponse?> ReadByIdWithTasks(string id, bool readOnly = true);
 
-        public abstract Task<Source?> ReadById(string id);
+        public abstract Task<Source?> ReadById(string id, bool readOnly = true);
 
         public abstract Task<Source?> CheckForExistingEchoSource(int echoId);
 
         public abstract Task<Source?> CheckForExistingCustomSource(IList<MissionTask> tasks);
 
-        public abstract Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
+        public abstract Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id, bool readOnly = true);
 
         public abstract Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks);
 
@@ -38,6 +38,7 @@ namespace Api.Services
 
         public abstract Task<Source?> Delete(string id);
 
+        public void DetachTracking(Source source);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -57,9 +58,9 @@ namespace Api.Services
             return source;
         }
 
-        public async Task<PagedList<Source>> ReadAll(SourceQueryStringParameters? parameters)
+        public async Task<PagedList<Source>> ReadAll(SourceQueryStringParameters? parameters, bool readOnly = true)
         {
-            var query = GetSources();
+            var query = GetSources(readOnly: readOnly);
             parameters ??= new SourceQueryStringParameters { };
             var filter = ConstructFilter(parameters);
 
@@ -72,26 +73,26 @@ namespace Api.Services
             );
         }
 
-        private DbSet<Source> GetSources()
+        private IQueryable<Source> GetSources(bool readOnly = true)
         {
-            return context.Sources;
+            return readOnly ? context.Sources.AsNoTracking() : context.Sources.AsTracking();
         }
 
-        public async Task<Source?> ReadById(string id)
+        public async Task<Source?> ReadById(string id, bool readOnly = true)
         {
-            return await GetSources()
+            return await GetSources(readOnly: readOnly)
                 .FirstOrDefaultAsync(s => s.Id.Equals(id));
         }
 
-        public async Task<Source?> ReadBySourceId(string sourceId)
+        public async Task<Source?> ReadBySourceId(string sourceId, bool readOnly = true)
         {
-            return await GetSources()
+            return await GetSources(readOnly: readOnly)
                 .FirstOrDefaultAsync(s => s.SourceId.Equals(sourceId));
         }
 
-        public async Task<SourceResponse?> ReadByIdAndInstallationWithTasks(string id, string installationCode)
+        public async Task<SourceResponse?> ReadByIdAndInstallationWithTasks(string id, bool readOnly = true)
         {
-            var source = await GetSources()
+            var source = await GetSources(readOnly: readOnly)
                 .FirstOrDefaultAsync(s => s.Id.Equals(id));
             if (source == null) return null;
 
@@ -111,16 +112,16 @@ namespace Api.Services
             }
         }
 
-        public async Task<SourceResponse?> ReadByIdWithTasks(string id)
+        public async Task<SourceResponse?> ReadByIdWithTasks(string id, bool readOnly = true)
         {
-            var source = await GetSources()
+            var source = await GetSources(readOnly: readOnly)
                 .FirstOrDefaultAsync(s => s.Id.Equals(id));
             if (source == null) return null;
 
             switch (source.Type)
             {
                 case MissionSourceType.Custom:
-                    var tasks = await GetMissionTasksFromSourceId(source.SourceId);
+                    var tasks = await GetMissionTasksFromSourceId(source.SourceId, readOnly: readOnly);
                     if (tasks == null) return null;
                     return new SourceResponse(source, tasks);
                 case MissionSourceType.Echo:
@@ -132,18 +133,18 @@ namespace Api.Services
 
         public async Task<Source?> CheckForExistingEchoSource(int echoId)
         {
-            return await ReadBySourceId(echoId.ToString(CultureInfo.CurrentCulture));
+            return await ReadBySourceId(echoId.ToString(CultureInfo.CurrentCulture), readOnly: true);
         }
 
         public async Task<Source?> CheckForExistingCustomSource(IList<MissionTask> tasks)
         {
             string hash = CalculateHashFromTasks(tasks);
-            return await ReadBySourceId(hash);
+            return await ReadBySourceId(hash, readOnly: true);
         }
 
-        public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id)
+        public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id, bool readOnly = true)
         {
-            var existingSource = await ReadBySourceId(id);
+            var existingSource = await ReadBySourceId(id, readOnly: readOnly);
             if (existingSource == null || existingSource.CustomMissionTasks == null) return null;
 
             try
@@ -171,7 +172,7 @@ namespace Api.Services
             string json = JsonSerializer.Serialize(tasks);
             string hash = CalculateHashFromTasks(tasks);
 
-            var existingSource = await ReadById(hash);
+            var existingSource = await ReadById(hash, readOnly: true);
 
             if (existingSource != null) return existingSource;
 
@@ -184,6 +185,7 @@ namespace Api.Services
                 }
             );
 
+            DetachTracking(newSource);
             return newSource;
         }
 
@@ -215,7 +217,7 @@ namespace Api.Services
 
         public async Task<Source?> Delete(string id)
         {
-            var source = await GetSources()
+            var source = await GetSources(readOnly: false)
                 .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (source is null)
             {
@@ -245,6 +247,11 @@ namespace Api.Services
 
             // Constructing the resulting lambda expression by combining parameter and body
             return Expression.Lambda<Func<Source, bool>>(body, sourceExpression);
+        }
+
+        public void DetachTracking(Source source)
+        {
+            context.Entry(source).State = EntityState.Detached;
         }
     }
 }

@@ -83,6 +83,7 @@ builder.Services.AddScoped<IPlantService, PlantService>();
 builder.Services.AddScoped<IDeckService, DeckService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 
+builder.Services.AddScoped<IErrorHandlingService, ErrorHandlingService>();
 builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 builder.Services.AddScoped<IDefaultLocalizationPoseService, DefaultLocalizationPoseService>();
 builder.Services.AddScoped<IReturnToHomeService, ReturnToHomeService>();

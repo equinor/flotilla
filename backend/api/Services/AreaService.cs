@@ -25,6 +25,8 @@ namespace Api.Services
         public Task<Area?> AddSafePosition(string installationCode, string areaName, SafePosition safePosition);
 
         public Task<Area?> Delete(string id);
+
+        public void DetachTracking(Area area);
     }
 
     [SuppressMessage(
@@ -131,6 +133,8 @@ namespace Api.Services
 
             await context.Areas.AddAsync(newArea);
             await ApplyDatabaseUpdate(installation);
+
+            DetachTracking(newArea);
             return newArea;
         }
 
@@ -251,5 +255,13 @@ namespace Api.Services
             return Expression.Lambda<Func<Area, bool>>(body, area);
         }
 
+        public void DetachTracking(Area area)
+        {
+            if (area.Installation != null) installationService.DetachTracking(area.Installation);
+            if (area.Plant != null) plantService.DetachTracking(area.Plant);
+            if (area.Deck != null) deckService.DetachTracking(area.Deck);
+            if (area.DefaultLocalizationPose != null) defaultLocalizationPoseService.DetachTracking(area.DefaultLocalizationPose);
+            context.Entry(area).State = EntityState.Detached;
+        }
     }
 }

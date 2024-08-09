@@ -20,14 +20,29 @@ namespace Api.Test.Services
         private readonly MissionRunService _missionRunService;
         private readonly ISignalRService _signalRService;
         private readonly IAccessRoleService _accessRoleService;
+        private readonly IMissionTaskService _missionTaskService;
+        private readonly IAreaService _areaService;
+        private readonly IDeckService _deckService;
+        private readonly IInstallationService _installationService;
+        private readonly IPlantService _plantService;
+        private readonly IRobotModelService _robotModelService;
+        private readonly IRobotService _robotService;
 
         public MissionServiceTest(DatabaseFixture fixture)
         {
             _context = fixture.NewContext;
+            var defaultLocalizationPoseService = new DefaultLocalizationPoseService(_context);
             _logger = new Mock<ILogger<MissionRunService>>().Object;
             _signalRService = new MockSignalRService();
             _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
-            _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService);
+            _missionTaskService = new MissionTaskService(_context, new Mock<ILogger<MissionTaskService>>().Object);
+            _installationService = new InstallationService(_context, _accessRoleService);
+            _plantService = new PlantService(_context, _installationService, _accessRoleService);
+            _deckService = new DeckService(_context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, new MockSignalRService());
+            _areaService = new AreaService(_context, _installationService, _plantService, _deckService, defaultLocalizationPoseService, _accessRoleService);
+            _robotModelService = new RobotModelService(_context);
+            _robotService = new RobotService(_context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _areaService);
+            _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService, _missionTaskService, _areaService, _robotService);
             _databaseUtilities = new DatabaseUtilities(_context);
         }
 

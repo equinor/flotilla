@@ -31,7 +31,7 @@ namespace Api.Services
     }
 
     public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
-            IAreaService areaService, IIsarService isarService, ILocalizationService localizationService, IReturnToHomeService returnToHomeService, ISignalRService signalRService) : IMissionSchedulingService
+            IAreaService areaService, IIsarService isarService, ILocalizationService localizationService, IReturnToHomeService returnToHomeService, ISignalRService signalRService, IErrorHandlingService errorHandlingService) : IMissionSchedulingService
     {
         public async Task StartNextMissionRunIfSystemIsAvailable(string robotId)
         {
@@ -230,7 +230,7 @@ namespace Api.Services
             {
                 const string Message = "Error connecting to ISAR while stopping mission";
                 logger.LogError(e, "{Message}", Message);
-                await robotService.HandleLosingConnectionToIsar(robot.Id);
+                await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 throw new MissionException(Message, (int)e.StatusCode!);
             }
             catch (MissionException e)
@@ -446,7 +446,7 @@ namespace Api.Services
             {
                 string errorMessage = $"Could not reach ISAR at {robot.IsarUri}";
                 logger.LogError(e, "{Message}", errorMessage);
-                await robotService.HandleLosingConnectionToIsar(robot.Id);
+                await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 throw new IsarCommunicationException(errorMessage);
             }
             catch (MissionException e)

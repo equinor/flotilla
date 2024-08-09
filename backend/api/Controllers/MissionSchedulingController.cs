@@ -373,7 +373,7 @@ namespace Api.Controllers
             try
             {
                 Area? area = null;
-                if (customMissionQuery.AreaName != null) { area = await areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName, readOnly: false); }
+                if (customMissionQuery.AreaName != null) { area = await areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName, readOnly: true); }
 
                 if (area == null)
                 {

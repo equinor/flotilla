@@ -12,23 +12,25 @@ namespace Api.Services
     {
         public Task<MissionDefinition> Create(MissionDefinition missionDefinition);
 
-        public Task<MissionDefinition?> ReadById(string id);
+        public Task<MissionDefinition?> ReadById(string id, bool readOnly = true);
 
-        public Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters);
+        public Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters, bool readOnly = true);
 
-        public Task<List<MissionDefinition>> ReadByAreaId(string areaId);
+        public Task<List<MissionDefinition>> ReadByAreaId(string areaId, bool readOnly = true);
 
-        public Task<List<MissionDefinition>> ReadByDeckId(string deckId);
+        public Task<List<MissionDefinition>> ReadByDeckId(string deckId, bool readOnly = true);
 
-        public Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCodes);
+        public Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCodes, bool readOnly = true);
 
-        public Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
+        public Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = true);
 
         public Task<MissionDefinition> UpdateLastSuccessfulMissionRun(string missionRunId, string missionDefinitionId);
 
         public Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
         public Task<MissionDefinition?> Delete(string id);
+
+        public void DetachTracking(MissionDefinition missionDefinition);
     }
 
     [SuppressMessage(
@@ -61,15 +63,15 @@ namespace Api.Services
             return missionDefinition;
         }
 
-        public async Task<MissionDefinition?> ReadById(string id)
+        public async Task<MissionDefinition?> ReadById(string id, bool readOnly = true)
         {
-            return await GetMissionDefinitionsWithSubModels().Where(m => m.IsDeprecated == false)
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(m => m.IsDeprecated == false)
                 .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
         }
 
-        public async Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters)
+        public async Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters, bool readOnly = true)
         {
-            var query = GetMissionDefinitionsWithSubModels().Where(m => m.IsDeprecated == false);
+            var query = GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(m => m.IsDeprecated == false);
             var filter = ConstructFilter(parameters);
 
             query = query.Where(filter);
@@ -85,21 +87,21 @@ namespace Api.Services
             );
         }
 
-        public async Task<List<MissionDefinition>> ReadByAreaId(string areaId)
+        public async Task<List<MissionDefinition>> ReadByAreaId(string areaId, bool readOnly = true)
         {
-            return await GetMissionDefinitionsWithSubModels().Where(
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
                 m => m.IsDeprecated == false && m.Area != null && m.Area.Id == areaId).ToListAsync();
         }
 
-        public async Task<List<MissionDefinition>> ReadBySourceId(string sourceId)
+        public async Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = true)
         {
-            return await GetMissionDefinitionsWithSubModels().Where(
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
                 m => m.IsDeprecated == false && m.Source.SourceId != null && m.Source.SourceId == sourceId).ToListAsync();
         }
 
-        public async Task<List<MissionDefinition>> ReadByDeckId(string deckId)
+        public async Task<List<MissionDefinition>> ReadByDeckId(string deckId, bool readOnly = true)
         {
-            return await GetMissionDefinitionsWithSubModels().Where(
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
                 m => m.IsDeprecated == false && m.Area != null && m.Area.Deck != null && m.Area.Deck.Id == deckId).ToListAsync();
         }
 
@@ -150,7 +152,7 @@ namespace Api.Services
             return missionDefinition;
         }
 
-        public async Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCode)
+        public async Task<List<MissionTask>?> GetTasksFromSource(Source source, string installationCode, bool readOnly = true)
         {
             try
             {
@@ -164,7 +166,7 @@ namespace Api.Services
                             .Select(t => new MissionTask(t))
                             .ToList(),
                     MissionSourceType.Custom =>
-                        await sourceService.GetMissionTasksFromSourceId(source.SourceId),
+                        await sourceService.GetMissionTasksFromSourceId(source.SourceId, readOnly: readOnly),
                     _ =>
                         throw new MissionSourceTypeException($"Mission type {source.Type} is not accounted for")
                 };
@@ -186,14 +188,19 @@ namespace Api.Services
 
         }
 
-        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
+        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            return context.MissionDefinitions
+            return (readOnly ? context.MissionDefinitions.AsNoTracking() : context.MissionDefinitions.AsTracking())
                 .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionDefinition => missionDefinition.Area)
+                .ThenInclude(area => area != null ? area.Deck : null)
+                .Include(missionDefinition => missionDefinition.Area)
+                .ThenInclude(area => area != null ? area.Plant : null)
+                .Include(missionDefinition => missionDefinition.Area)
+                .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
@@ -260,6 +267,13 @@ namespace Api.Services
 
             // Constructing the resulting lambda expression by combining parameter and body
             return Expression.Lambda<Func<MissionDefinition, bool>>(body, missionDefinitionExpression);
+        }
+
+        public void DetachTracking(MissionDefinition missionDefinition)
+        {
+            if (missionDefinition.LastSuccessfulRun != null) missionRunService.DetachTracking(missionDefinition.LastSuccessfulRun);
+            if (missionDefinition.Source != null) sourceService.DetachTracking(missionDefinition.Source);
+            context.Entry(missionDefinition).State = EntityState.Detached;
         }
     }
 }

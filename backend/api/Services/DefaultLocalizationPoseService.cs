@@ -7,9 +7,9 @@ namespace Api.Services
 {
     public interface IDefaultLocalizationPoseService
     {
-        public abstract Task<IEnumerable<DefaultLocalizationPose>> ReadAll();
+        public abstract Task<IEnumerable<DefaultLocalizationPose>> ReadAll(bool readOnly = true);
 
-        public abstract Task<DefaultLocalizationPose?> ReadById(string id);
+        public abstract Task<DefaultLocalizationPose?> ReadById(string id, bool readOnly = true);
 
         public abstract Task<DefaultLocalizationPose> Create(DefaultLocalizationPose defaultLocalizationPose);
 
@@ -17,6 +17,7 @@ namespace Api.Services
 
         public abstract Task<DefaultLocalizationPose?> Delete(string id);
 
+        public void DetachTracking(DefaultLocalizationPose defaultLocalizationPose);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -26,19 +27,19 @@ namespace Api.Services
     )]
     public class DefaultLocalizationPoseService(FlotillaDbContext context) : IDefaultLocalizationPoseService
     {
-        public async Task<IEnumerable<DefaultLocalizationPose>> ReadAll()
+        public async Task<IEnumerable<DefaultLocalizationPose>> ReadAll(bool readOnly = true)
         {
-            return await GetDefaultLocalizationPoses().ToListAsync();
+            return await GetDefaultLocalizationPoses(readOnly: readOnly).ToListAsync();
         }
 
-        private DbSet<DefaultLocalizationPose> GetDefaultLocalizationPoses()
+        private IQueryable<DefaultLocalizationPose> GetDefaultLocalizationPoses(bool readOnly = true)
         {
-            return context.DefaultLocalizationPoses;
+            return readOnly ? context.DefaultLocalizationPoses.AsNoTracking() : context.DefaultLocalizationPoses.AsTracking();
         }
 
-        public async Task<DefaultLocalizationPose?> ReadById(string id)
+        public async Task<DefaultLocalizationPose?> ReadById(string id, bool readOnly = true)
         {
-            return await GetDefaultLocalizationPoses()
+            return await GetDefaultLocalizationPoses(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
@@ -47,7 +48,7 @@ namespace Api.Services
 
             await context.DefaultLocalizationPoses.AddAsync(defaultLocalizationPose);
             await context.SaveChangesAsync();
-
+            DetachTracking(defaultLocalizationPose);
             return defaultLocalizationPose;
         }
 
@@ -71,6 +72,11 @@ namespace Api.Services
             await context.SaveChangesAsync();
 
             return defaultLocalizationPose;
+        }
+
+        public void DetachTracking(DefaultLocalizationPose defaultLocalizationPose)
+        {
+            context.Entry(defaultLocalizationPose).State = EntityState.Detached;
         }
     }
 }

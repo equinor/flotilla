@@ -16,7 +16,8 @@ namespace Api.Controllers
             IIsarService isarService,
             IMissionSchedulingService missionSchedulingService,
             IRobotModelService robotModelService,
-            IAreaService areaService
+            IAreaService areaService,
+            IErrorHandlingService errorHandlingService
         ) : ControllerBase
     {
         /// <summary>
@@ -479,7 +480,7 @@ namespace Api.Controllers
             {
                 const string Message = "Error connecting to ISAR while stopping mission";
                 logger.LogError(e, "{Message}", Message);
-                await robotService.HandleLosingConnectionToIsar(robot.Id);
+                await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
             catch (MissionException e)
@@ -538,7 +539,7 @@ namespace Api.Controllers
             {
                 const string Message = "Error connecting to ISAR while pausing mission";
                 logger.LogError(e, "{Message}", Message);
-                await robotService.HandleLosingConnectionToIsar(robot.Id);
+                await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
             catch (MissionException e)
@@ -588,7 +589,7 @@ namespace Api.Controllers
             {
                 const string Message = "Error connecting to ISAR while resuming mission";
                 logger.LogError(e, "{Message}", Message);
-                await robotService.HandleLosingConnectionToIsar(robot.Id);
+                await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
             catch (MissionException e)
@@ -654,7 +655,7 @@ namespace Api.Controllers
             {
                 string errorMessage = $"Error connecting to ISAR at {robot.IsarUri}";
                 logger.LogError(e, "{Message}", errorMessage);
-                await robotService.HandleLosingConnectionToIsar(robot.Id);
+                await errorHandlingService.HandleLosingConnectionToIsar(robot.Id);
                 return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
             }
             catch (MissionException e)

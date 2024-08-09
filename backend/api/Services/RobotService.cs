@@ -29,7 +29,7 @@ namespace Api.Services
         public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
         public Task<Robot> UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status);
         public Task<Robot?> Delete(string id);
-        public Task HandleLosingConnectionToIsar(string robotId);
+        public void DetachTracking(Robot robot);
     }
 
     [SuppressMessage(
@@ -44,25 +44,26 @@ namespace Api.Services
         ISignalRService signalRService,
         IAccessRoleService accessRoleService,
         IInstallationService installationService,
-        IAreaService areaService,
-        IMissionRunService missionRunService) : IRobotService
+        IAreaService areaService) : IRobotService
     {
 
         public async Task<Robot> Create(Robot newRobot)
         {
             if (newRobot.CurrentArea is not null) context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged;
+            if (newRobot.CurrentInstallation is not null) context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
 
             await context.Robots.AddAsync(newRobot);
             await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
+            DetachTracking(newRobot);
             return newRobot;
         }
 
         public async Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery)
         {
-            var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType, readOnly: false);
+            var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType, readOnly: true);
             if (robotModel != null)
             {
-                var installation = await installationService.ReadByName(robotQuery.CurrentInstallationCode, readOnly: true);
+                var installation = await installationService.ReadByName(robotQuery.CurrentInstallationCode, readOnly: false);
                 if (installation is null)
                 {
                     logger.LogError("Installation {CurrentInstallation} does not exist", robotQuery.CurrentInstallationCode);
@@ -72,7 +73,7 @@ namespace Api.Services
                 Area? area = null;
                 if (robotQuery.CurrentAreaName is not null)
                 {
-                    area = await areaService.ReadByInstallationAndName(robotQuery.CurrentInstallationCode, robotQuery.CurrentAreaName, readOnly: true);
+                    area = await areaService.ReadByInstallationAndName(robotQuery.CurrentInstallationCode, robotQuery.CurrentAreaName, readOnly: false);
                     if (area is null)
                     {
                         logger.LogError("Area '{AreaName}' does not exist in installation {CurrentInstallation}", robotQuery.CurrentAreaName, robotQuery.CurrentInstallationCode);
@@ -84,13 +85,18 @@ namespace Api.Services
                 {
                     Model = robotModel
                 };
-                context.Entry(robotModel).State = EntityState.Unchanged;
+
                 if (newRobot.CurrentArea is not null) context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged;
                 if (newRobot.CurrentInstallation is not null) context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
 
                 await context.Robots.AddAsync(newRobot);
                 await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
+
                 _ = signalRService.SendMessageAsync("Robot added", newRobot!.CurrentInstallation, new RobotResponse(newRobot!));
+
+                DetachTracking(newRobot);
+                // DetachTracking(area)
+
                 return newRobot!;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
@@ -332,40 +338,6 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task UpdateCurrentRobotMissionToFailed(string robotId)
-        {
-            var robot = await ReadById(robotId, readOnly: true) ?? throw new RobotNotFoundException($"Robot with ID: {robotId} was not found in the database");
-            if (robot.CurrentMissionId != null)
-            {
-                var missionRun = await missionRunService.ReadById(robot.CurrentMissionId, readOnly: false);
-                if (missionRun != null)
-                {
-                    missionRun.SetToFailed("Lost connection to ISAR during mission");
-                    await missionRunService.Update(missionRun);
-                    logger.LogWarning(
-                        "Mission '{Id}' failed because ISAR could not be reached",
-                        missionRun.Id
-                    );
-                }
-            }
-        }
-
-        public async Task HandleLosingConnectionToIsar(string robotId)
-        {
-            try
-            {
-                await UpdateCurrentRobotMissionToFailed(robotId);
-                await UpdateRobotStatus(robotId, RobotStatus.Offline);
-                await UpdateCurrentMissionId(robotId, null);
-                await UpdateRobotIsarConnected(robotId, false);
-                await UpdateCurrentArea(robotId, null);
-            }
-            catch (RobotNotFoundException)
-            {
-                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-            }
-        }
-
         private IQueryable<Robot> GetRobotsWithSubModels(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
@@ -437,5 +409,12 @@ namespace Api.Services
             _ = signalRService.SendMessageAsync("Robot updated", installation, robot != null ? new RobotResponse(robot) : null);
         }
 
+        public void DetachTracking(Robot robot)
+        {
+            if (robot.CurrentInstallation != null) installationService.DetachTracking(robot.CurrentInstallation);
+            if (robot.CurrentArea != null) areaService.DetachTracking(robot.CurrentArea);
+            if (robot.Model != null) robotModelService.DetachTracking(robot.Model);
+            context.Entry(robot).State = EntityState.Detached;
+        }
     }
 }

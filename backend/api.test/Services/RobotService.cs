@@ -25,7 +25,6 @@ namespace Api.Test.Services
         private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
         private readonly IDeckService _deckService;
         private readonly IAreaService _areaService;
-        private readonly IMissionRunService _missionRunService;
 
         public RobotServiceTest(DatabaseFixture fixture)
         {
@@ -39,7 +38,6 @@ namespace Api.Test.Services
             _defaultLocalizationPoseService = new DefaultLocalizationPoseService(_context);
             _deckService = new DeckService(_context, _defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, _signalRService);
             _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalizationPoseService, _accessRoleService);
-            _missionRunService = new MissionRunService(_context, _signalRService, new Mock<ILogger<MissionRunService>>().Object, _accessRoleService);
         }
 
         public void Dispose()
@@ -51,7 +49,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadAll()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
             var robots = await robotService.ReadAll();
 
             Assert.True(robots.Any());
@@ -60,10 +58,10 @@ namespace Api.Test.Services
         [Fact]
         public async Task Read()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
-            var robots = await robotService.ReadAll();
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
+            var robots = await robotService.ReadAll(readOnly: false);
             var firstRobot = robots.First();
-            var robotById = await robotService.ReadById(firstRobot.Id);
+            var robotById = await robotService.ReadById(firstRobot.Id, readOnly: false);
 
             Assert.Equal(firstRobot, robotById);
         }
@@ -71,7 +69,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
             var robot = await robotService.ReadById("some_id_that_does_not_exist");
             Assert.Null(robot);
         }
@@ -79,7 +77,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task Create()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
             var installationService = new InstallationService(_context, _accessRoleService);
 
             var installation = await installationService.Create(new CreateInstallationQuery
@@ -112,11 +110,7 @@ namespace Api.Test.Services
                 Status = RobotStatus.Available
             };
 
-            var robot = new Robot(robotQuery, installation);
-            var robotModel = _context.RobotModels.First();
-            robot.Model = robotModel;
-
-            await robotService.Create(robot);
+            await robotService.CreateFromQuery(robotQuery);
             var robotsAfter = await robotService.ReadAll();
             int nRobotsAfter = robotsAfter.Count();
 

@@ -56,6 +56,9 @@ namespace Api.Services
         public Task<bool> OngoingMission(string robotId);
         public Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value);
 
+        public Task UpdateCurrentRobotMissionToFailed(string robotId);
+
+        public void DetachTracking(MissionRun missionRun);
     }
 
     [SuppressMessage(
@@ -72,28 +75,22 @@ namespace Api.Services
         FlotillaDbContext context,
         ISignalRService signalRService,
         ILogger<MissionRunService> logger,
-        IAccessRoleService accessRoleService) : IMissionRunService
+        IAccessRoleService accessRoleService,
+        IMissionTaskService missionTaskService,
+        IAreaService areaService,
+        IRobotService robotService) : IMissionRunService
     {
         public async Task<MissionRun> Create(MissionRun missionRun, bool triggerCreatedMissionRunEvent = true)
         {
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
             // Making sure database does not try to create new robot
-            try
-            {
-                context.Entry(missionRun.Robot).State = EntityState.Unchanged;
-            }
-            catch (InvalidOperationException e)
-            {
-                throw new DatabaseUpdateException($"Unable to create mission. {e}");
-            }
-
 
             if (IncludesUnsupportedInspectionType(missionRun))
             {
                 throw new UnsupportedRobotCapabilityException($"Mission {missionRun.Name} contains inspection types not supported by robot: {missionRun.Robot.Name}.");
             }
 
-            if (missionRun.Area is not null) { context.Entry(missionRun.Area).State = EntityState.Unchanged; }
+            //if (missionRun.Area is not null) { context.Entry(missionRun.Area).State = EntityState.Unchanged; }
             await context.MissionRuns.AddAsync(missionRun);
             await ApplyDatabaseUpdate(missionRun.Area?.Installation);
             _ = signalRService.SendMessageAsync("Mission run created", missionRun.Area?.Installation, new MissionRunResponse(missionRun));
@@ -104,6 +101,7 @@ namespace Api.Services
                 OnMissionRunCreated(args);
             }
 
+            DetachTracking(missionRun);
             return missionRun;
         }
 
@@ -568,7 +566,7 @@ namespace Api.Services
             missionRun.Status = missionStatus;
 
             missionRun = await UpdateMissionRunProperty(missionRun.Id, "MissionStatus", missionStatus);
-
+ 
             if (missionRun.Status == MissionStatus.Failed) { _ = signalRService.SendMessageAsync("Mission run failed", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null); }
             return missionRun!;
         }
@@ -598,6 +596,35 @@ namespace Api.Services
             try { missionRun = await Update(missionRun); }
             catch (InvalidOperationException e) { logger.LogError(e, "Failed to update {missionRunName}", missionRun.Name); };
             return missionRun;
+        }
+
+        public async Task UpdateCurrentRobotMissionToFailed(string robotId)
+        {
+            var robot = await robotService.ReadById(robotId, readOnly: true) ?? throw new RobotNotFoundException($"Robot with ID: {robotId} was not found in the database");
+            if (robot.CurrentMissionId != null)
+            {
+                var missionRun = await ReadById(robot.CurrentMissionId, readOnly: false);
+                if (missionRun != null)
+                {
+                    missionRun.SetToFailed("Lost connection to ISAR during mission");
+                    await Update(missionRun);
+                    logger.LogWarning(
+                        "Mission '{Id}' failed because ISAR could not be reached",
+                        missionRun.Id
+                    );
+                }
+            }
+        }
+
+        public void DetachTracking(MissionRun missionRun)
+        {
+            foreach (var task in missionRun.Tasks)
+            {
+                missionTaskService.DetachTracking(task);
+            }
+            if (missionRun.Area != null) areaService.DetachTracking(missionRun.Area);
+            if (missionRun.Robot != null) robotService.DetachTracking(missionRun.Robot);
+            context.Entry(missionRun).State = EntityState.Detached;
         }
     }
 }

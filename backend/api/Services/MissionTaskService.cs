@@ -9,6 +9,8 @@ namespace Api.Services
     public interface IMissionTaskService
     {
         public Task<MissionTask> UpdateMissionTaskStatus(string isarTaskId, IsarTaskStatus isarTaskStatus);
+
+        public void DetachTracking(MissionTask missionTask);
     }
 
     [SuppressMessage(
@@ -49,6 +51,11 @@ namespace Api.Services
         private IQueryable<MissionTask> GetMissionTasks()
         {
             return context.MissionTasks.Include(missionTask => missionTask.Inspections).ThenInclude(inspection => inspection.InspectionFindings);
+        }
+
+        public void DetachTracking(MissionTask missionTask)
+        {
+            context.Entry(missionTask).State = EntityState.Detached;
         }
     }
 }

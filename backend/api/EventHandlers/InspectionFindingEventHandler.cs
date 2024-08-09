@@ -39,7 +39,7 @@ namespace Api.EventHandlers
 
                 var lastReportingTime = DateTime.UtcNow - _timeSpan;
 
-                var inspectionFindings = await InspectionFindingService.RetrieveInspectionFindings(lastReportingTime);
+                var inspectionFindings = await InspectionFindingService.ReadAll(lastReportingTime, readOnly: true);
 
                 logger.LogInformation("Found {count} inspection findings in last {interval}", inspectionFindings.Count, _timeSpan);
 
@@ -78,8 +78,8 @@ namespace Api.EventHandlers
 
             foreach (var inspectionFinding in inspectionFindings)
             {
-                var missionRun = await InspectionFindingService.GetMissionRunByIsarStepId(inspectionFinding.IsarStepId);
-                var task = await InspectionFindingService.GetMissionTaskByIsarStepId(inspectionFinding.IsarStepId);
+                var missionRun = await InspectionFindingService.GetMissionRunByIsarStepId(inspectionFinding.IsarStepId, readOnly: true);
+                var task = await InspectionFindingService.GetMissionTaskByIsarStepId(inspectionFinding.IsarStepId, readOnly: true);
 
                 if (task != null && missionRun != null)
                 {
