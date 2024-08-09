@@ -66,34 +66,15 @@ public class SourceController(
     /// </summary>
     [HttpGet]
     [Authorize(Roles = Role.Any)]
-    [Route("custom/{id}")]
+    [Route("{id}")]
     [ProducesResponseType(typeof(SourceResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<SourceResponse>> GetCustomSourceById([FromRoute] string id)
+    public async Task<ActionResult<SourceResponse>> GetSourceById([FromRoute] string id)
     {
-        var source = await sourceService.ReadByIdWithTasks(id);
-        if (source == null)
-            return NotFound($"Could not find mission definition with id {id}");
-        return Ok(source);
-    }
-
-    /// <summary>
-    /// Lookup an echo source by specified id.
-    /// </summary>
-    [HttpGet]
-    [Authorize(Roles = Role.Any)]
-    [Route("echo/{id}/{installationCode}")]
-    [ProducesResponseType(typeof(SourceResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<SourceResponse>> GetEchoSourceById([FromRoute] string id, [FromRoute] string installationCode)
-    {
-        var source = await sourceService.ReadByIdAndInstallationWithTasks(id, installationCode);
+        var source = await sourceService.ReadById(id);
         if (source == null)
             return NotFound($"Could not find mission definition with id {id}");
         return Ok(source);

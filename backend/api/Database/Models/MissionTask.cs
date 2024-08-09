@@ -1,5 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Services.Models;
 using Api.Utilities;
@@ -15,21 +18,28 @@ namespace Api.Database.Models
         public MissionTask() { }
 
         // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
-        public MissionTask(EchoTag echoTag)
+        public MissionTask(
+            IList<Inspection> inspections,
+            Pose robotPose,
+            int taskOrder,
+            Uri? tagLink,
+            string? tagId,
+            int? poseId,
+            TaskStatus status = TaskStatus.NotStarted,
+            MissionTaskType type = MissionTaskType.Inspection)
         {
-            Inspections = echoTag.Inspections
+            Inspections = inspections
                 .Select(inspection => new Inspection(inspection))
                 .ToList();
-            EchoTagLink = echoTag.URL;
-            TagId = echoTag.TagId;
-            RobotPose = echoTag.Pose;
-            EchoPoseId = echoTag.PoseId;
-            TaskOrder = echoTag.PlanOrder;
-            Status = TaskStatus.NotStarted;
-            Type = MissionTaskType.Inspection;
+            TagLink = tagLink;
+            TagId = tagId;
+            RobotPose = robotPose;
+            PoseId = poseId;
+            TaskOrder = taskOrder;
+            Status = status;
+            Type = type;
         }
 
-        // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
         public MissionTask(CustomTaskQuery taskQuery)
         {
             Inspections = taskQuery.Inspections
@@ -83,9 +93,9 @@ namespace Api.Database.Models
             TagId = copy.TagId;
             IsarTaskId = Guid.NewGuid().ToString();
             Description = copy.Description;
-            EchoTagLink = copy.EchoTagLink;
+            TagLink = copy.TagLink;
             RobotPose = new Pose(copy.RobotPose);
-            EchoPoseId = copy.EchoPoseId;
+            PoseId = copy.PoseId;
             Status = status ?? copy.Status;
             Inspections = copy.Inspections.Select(i => new Inspection(i, InspectionStatus.NotStarted)).ToList();
         }
@@ -111,12 +121,12 @@ namespace Api.Database.Models
         public string? Description { get; set; }
 
         [MaxLength(200)]
-        public Uri? EchoTagLink { get; set; }
+        public Uri? TagLink { get; set; }
 
         [Required]
         public Pose RobotPose { get; set; }
 
-        public int? EchoPoseId { get; set; }
+        public int? PoseId { get; set; }
 
         [Required]
         public TaskStatus Status
@@ -190,6 +200,25 @@ namespace Api.Database.Models
                 _ => throw new ArgumentException($"ISAR Mission task type '{missionTaskType}' not supported"),
             };
             ;
+        }
+
+        public static string CalculateHashFromTasks(IList<MissionTask> tasks)
+        {
+            var genericTasks = new List<MissionTask>();
+            foreach (var task in tasks)
+            {
+                var taskCopy = new MissionTask(task)
+                {
+                    Id = "",
+                    IsarTaskId = ""
+                };
+                taskCopy.Inspections = taskCopy.Inspections.Select(i => new Inspection(i, useEmptyIDs: true)).ToList();
+                genericTasks.Add(taskCopy);
+            }
+
+            string json = JsonSerializer.Serialize(genericTasks);
+            byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
+            return BitConverter.ToString(hash).Replace("-", "", StringComparison.CurrentCulture).ToUpperInvariant();
         }
     }
 

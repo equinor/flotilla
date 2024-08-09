@@ -13,6 +13,7 @@ using Api.Options;
 using Api.Services;
 using Api.Services.ActionServices;
 using Api.Services.Events;
+using Api.Services.MissionLoaders;
 using Api.Test.Database;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Builder;
@@ -65,10 +66,9 @@ namespace Api.Test.EventHandlers
             _missionRunService = new MissionRunService(context, signalRService, missionLogger, accessRoleService);
 
 
-            var echoServiceMock = new MockEchoService();
+            var missionLoader = new MockMissionLoader();
             var stidServiceMock = new MockStidService(context);
-            var sourceService = new SourceService(context, echoServiceMock, sourceServiceLogger);
-            var missionDefinitionService = new MissionDefinitionService(context, echoServiceMock, sourceService, signalRService, accessRoleService, missionDefinitionServiceLogger, _missionRunService);
+            var missionDefinitionService = new MissionDefinitionService(context, missionLoader, signalRService, accessRoleService, missionDefinitionServiceLogger, _missionRunService);
             var robotModelService = new RobotModelService(context);
             var taskDurationServiceMock = new MockTaskDurationService();
             var isarServiceMock = new MockIsarService();

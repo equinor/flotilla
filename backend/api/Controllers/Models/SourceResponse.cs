@@ -6,8 +6,6 @@
 
         public string SourceId { get; } = source.SourceId;
 
-        public MissionSourceType Type { get; } = source.Type;
-
         public IList<MissionTask> Tasks = tasks;
     }
 }

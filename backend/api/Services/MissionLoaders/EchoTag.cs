@@ -1,7 +1,7 @@
 ﻿#nullable disable
 using Api.Database.Models;
 
-namespace Api.Controllers.Models
+namespace Api.Services.MissionLoaders
 {
     public class EchoTag
     {

@@ -50,6 +50,8 @@ builder.ConfigureLogger();
 
 builder.Services.ConfigureDatabase(builder.Configuration);
 
+builder.Services.ConfigureMissionLoader(builder.Configuration);
+
 builder.Services.AddApplicationInsightsTelemetry();
 
 // Disable Application Insights Telemetry when debugging
@@ -72,7 +74,6 @@ builder.Services.AddScoped<ISourceService, SourceService>();
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
 
 builder.Services.AddScoped<IIsarService, IsarService>();
-builder.Services.AddScoped<IEchoService, EchoService>();
 builder.Services.AddScoped<IStidService, StidService>();
 
 builder.Services.AddScoped<IMapService, MapService>();
@@ -138,7 +139,8 @@ builder.Services
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
     .EnableTokenAcquisitionToCallDownstreamApi()
     .AddInMemoryTokenCaches()
-    .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
+    // TODO FIX
+    // .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
     .AddDownstreamApi(StidService.ServiceName, builder.Configuration.GetSection("Stid"))
     .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
