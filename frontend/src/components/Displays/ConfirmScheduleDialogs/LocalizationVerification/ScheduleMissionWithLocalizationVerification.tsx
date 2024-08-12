@@ -4,6 +4,7 @@ import { ConfirmLocalizationDialog } from './ConfirmLocalizationDialog'
 import { ConflictingMissionDecksDialog, ConflictingRobotDeckDialog } from './ConflictingLocalizationDialog'
 import { UnknownDeckDialog } from './UnknownDeckDialog'
 import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
 interface IProps {
     scheduleMissions: () => void
@@ -29,10 +30,16 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
     const { enabledRobots } = useRobotContext()
     const [dialogToOpen, setDialogToOpen] = useState<DialogTypes>(DialogTypes.unknown)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
+    const { ongoingMissions } = useMissionsContext()
 
     const unikMissionDeckNames = missionDeckNames.filter(
         (deckName, index) => deckName !== '' && missionDeckNames.indexOf(deckName) === index
     )
+
+    const ongoingLocalizationMissionOnSameDeckExists =
+        ongoingMissions.filter(
+            (mission) => mission.robot?.id === selectedRobot?.id && mission.area?.deckName === unikMissionDeckNames[0]
+        ).length > 0
 
     useEffect(() => {
         setSelectedRobot(enabledRobots.find((robot) => robot.id === robotId))
@@ -42,9 +49,10 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
         if (!selectedRobot) return
 
         if (
-            unikMissionDeckNames.length === 1 &&
-            selectedRobot.currentArea?.deckName &&
-            unikMissionDeckNames[0] === selectedRobot?.currentArea?.deckName
+            (unikMissionDeckNames.length === 1 &&
+                selectedRobot.currentArea?.deckName &&
+                unikMissionDeckNames[0] === selectedRobot?.currentArea?.deckName) ||
+            ongoingLocalizationMissionOnSameDeckExists
         ) {
             scheduleMissions()
             return
@@ -60,7 +68,7 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
             return
         }
 
-        if (!selectedRobot.currentArea?.deckName) {
+        if (!selectedRobot.currentArea?.deckName && !ongoingLocalizationMissionOnSameDeckExists) {
             setDialogToOpen(DialogTypes.verifyDeck)
             return
         }
