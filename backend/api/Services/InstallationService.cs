@@ -44,7 +44,7 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Installations
                 .Where((i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper()));
-            return readOnly ? query.AsNoTracking() : query;
+            return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
         private async Task ApplyUnprotectedDatabaseUpdate()

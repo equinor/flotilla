@@ -146,7 +146,7 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
                 .Where((d) => accessibleInstallationCodes.Result.Contains(d.Installation.InstallationCode.ToUpper()));
-            return readOnly ? query.AsNoTracking() : query;
+            return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)

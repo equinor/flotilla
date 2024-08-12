@@ -206,7 +206,6 @@ namespace Api.Services
                 .Where(m => m.Robot.Id == robotId)
                 .Where(m => m.EndTime != null)
                 .OrderByDescending(m => m.EndTime)
-                .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
 
@@ -343,7 +342,7 @@ namespace Api.Services
                 .ThenInclude(inspections => inspections.InspectionFindings)
                 .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()))
                 .Where((m) => m.IsDeprecated == false);
-            return readOnly ? query.AsNoTracking() : query;
+            return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
         protected virtual void OnMissionRunCreated(MissionRunCreatedEventArgs e)
