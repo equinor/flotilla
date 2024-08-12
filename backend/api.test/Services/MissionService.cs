@@ -28,7 +28,7 @@ namespace Api.Test.Services
             _logger = new Mock<ILogger<MissionRunService>>().Object;
             _signalRService = new MockSignalRService();
             _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
-            _userInfoService = new UserInfoService(_context, new HttpContextAccessor());
+            _userInfoService = new UserInfoService(_context, new HttpContextAccessor(), new Mock<ILogger<UserInfoService>>().Object);
             _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService, _userInfoService);
             _databaseUtilities = new DatabaseUtilities(_context);
         }

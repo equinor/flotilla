@@ -104,10 +104,7 @@ namespace Api.Services
                 var args = new MissionRunCreatedEventArgs(missionRun.Id);
                 OnMissionRunCreated(args);
             }
-            if (missionRun.MissionRunType == MissionRunType.ReturnHome)
-            {
-                return missionRun;
-            }
+
             try
             {
                 var userInfo = await userInfoService.GetRequestedUserInfo();

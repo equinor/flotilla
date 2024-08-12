@@ -31,7 +31,7 @@ namespace Api.Test.Database
             _plantService = new PlantService(context, _installationService, _accessRoleService);
             _deckService = new DeckService(context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, new MockSignalRService());
             _areaService = new AreaService(context, _installationService, _plantService, _deckService, defaultLocalizationPoseService, _accessRoleService);
-            _userInfoService = new UserInfoService(context, new HttpContextAccessor());
+            _userInfoService = new UserInfoService(context, new HttpContextAccessor(), new Mock<ILogger<UserInfoService>>().Object);
             _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService, _userInfoService);
             _robotModelService = new RobotModelService(context);
             _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _areaService, _missionRunService);
