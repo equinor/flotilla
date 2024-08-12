@@ -48,7 +48,7 @@ namespace Api.Services
 
         private IQueryable<RobotModel> GetRobotModels(bool readOnly = false)
         {
-            return readOnly ? _context.RobotModels.AsNoTracking() : _context.RobotModels;
+            return readOnly ? _context.RobotModels.AsNoTracking() : _context.RobotModels.AsTracking();
         }
 
         public async Task<RobotModel?> ReadById(string id, bool readOnly = false)

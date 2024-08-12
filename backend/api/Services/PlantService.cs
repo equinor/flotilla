@@ -122,7 +122,7 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Plants.Include(i => i.Installation)
                 .Where((p) => accessibleInstallationCodes.Result.Contains(p.Installation.InstallationCode.ToUpper()));
-            return readOnly ? query.AsNoTracking() : query;
+            return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
