@@ -210,10 +210,12 @@ namespace Api.Services
             if (!missionDefinitions.Any() || string.IsNullOrWhiteSpace(name))
                 return;
 
+#pragma warning disable CA1862
             missionDefinitions = missionDefinitions.Where(
                 missionDefinition =>
-                    missionDefinition.Name != null && missionDefinition.Name.Contains(name.Trim(), StringComparison.OrdinalIgnoreCase)
+                    missionDefinition.Name != null && missionDefinition.Name.Contains(name.Trim())
             );
+#pragma warning restore CA1862
         }
 
         /// <summary>
