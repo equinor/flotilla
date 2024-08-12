@@ -11,7 +11,7 @@ namespace Api.Services
     public interface IInspectionService
     {
         public Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus);
-        public Task<Inspection?> ReadByIsarStepId(string id);
+        public Task<Inspection?> ReadByIsarStepId(string id, bool readOnly = false);
         public Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingsQuery, string isarStepId);
 
     }
@@ -25,7 +25,7 @@ namespace Api.Services
     {
         public async Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus)
         {
-            var inspection = await ReadByIsarStepId(isarStepId);
+            var inspection = await ReadByIsarStepId(isarStepId, readOnly: false);
             if (inspection is null)
             {
                 string errorMessage = $"Inspection with ID {isarStepId} could not be found";
@@ -54,7 +54,7 @@ namespace Api.Services
             var missionRun = await context.MissionRuns
                     .Include(missionRun => missionRun.Area).ThenInclude(area => area != null ? area.Installation : null)
                     .Include(missionRun => missionRun.Robot)
-                    .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspections.Any(i => i.Id == inspection.Id)))
+                    .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspections.Any(i => i.Id == inspection.Id))).AsNoTracking()
                     .FirstOrDefaultAsync();
             var installation = missionRun?.Area?.Installation;
 
@@ -63,22 +63,22 @@ namespace Api.Services
             return entry.Entity;
         }
 
-        public async Task<Inspection?> ReadByIsarStepId(string id)
+        public async Task<Inspection?> ReadByIsarStepId(string id, bool readOnly = false)
         {
-            return await GetInspections().FirstOrDefaultAsync(inspection => inspection.IsarStepId != null && inspection.IsarStepId.Equals(id));
+            return await GetInspections(readOnly: readOnly).FirstOrDefaultAsync(inspection => inspection.IsarStepId != null && inspection.IsarStepId.Equals(id));
         }
 
-        private IQueryable<Inspection> GetInspections()
+        private IQueryable<Inspection> GetInspections(bool readOnly = false)
         {
             if (accessRoleService.IsUserAdmin() || !accessRoleService.IsAuthenticationAvailable())
-                return context.Inspections.Include(inspection => inspection.InspectionFindings);
+                return (readOnly ? context.Inspections.AsNoTracking() : context.Inspections.AsTracking()).Include(inspection => inspection.InspectionFindings);
             else
                 throw new UnauthorizedAccessException($"User does not have permission to view inspections");
         }
 
         public async Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingQuery, string isarStepId)
         {
-            var inspection = await ReadByIsarStepId(isarStepId);
+            var inspection = await ReadByIsarStepId(isarStepId, readOnly: false);
 
             if (inspection is null)
             {

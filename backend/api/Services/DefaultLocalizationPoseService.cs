@@ -7,9 +7,9 @@ namespace Api.Services
 {
     public interface IDefaultLocalizationPoseService
     {
-        public abstract Task<IEnumerable<DefaultLocalizationPose>> ReadAll();
+        public abstract Task<IEnumerable<DefaultLocalizationPose>> ReadAll(bool readOnly = false);
 
-        public abstract Task<DefaultLocalizationPose?> ReadById(string id);
+        public abstract Task<DefaultLocalizationPose?> ReadById(string id, bool readOnly = false);
 
         public abstract Task<DefaultLocalizationPose> Create(DefaultLocalizationPose defaultLocalizationPose);
 
@@ -26,19 +26,19 @@ namespace Api.Services
     )]
     public class DefaultLocalizationPoseService(FlotillaDbContext context) : IDefaultLocalizationPoseService
     {
-        public async Task<IEnumerable<DefaultLocalizationPose>> ReadAll()
+        public async Task<IEnumerable<DefaultLocalizationPose>> ReadAll(bool readOnly = false)
         {
-            return await GetDefaultLocalizationPoses().ToListAsync();
+            return await GetDefaultLocalizationPoses(readOnly: readOnly).ToListAsync();
         }
 
-        private DbSet<DefaultLocalizationPose> GetDefaultLocalizationPoses()
+        private IQueryable<DefaultLocalizationPose> GetDefaultLocalizationPoses(bool readOnly = false)
         {
-            return context.DefaultLocalizationPoses;
+            return readOnly ? context.DefaultLocalizationPoses.AsNoTracking() : context.DefaultLocalizationPoses.AsTracking();
         }
 
-        public async Task<DefaultLocalizationPose?> ReadById(string id)
+        public async Task<DefaultLocalizationPose?> ReadById(string id, bool readOnly = false)
         {
-            return await GetDefaultLocalizationPoses()
+            return await GetDefaultLocalizationPoses(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 

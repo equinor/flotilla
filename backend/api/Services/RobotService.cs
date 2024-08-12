@@ -155,7 +155,7 @@ namespace Api.Services
 
         public async Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel)
         {
-            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
+            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation).AsTracking();
             var robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
 
