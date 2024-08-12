@@ -29,7 +29,7 @@ namespace Api.Test.Services
             _signalRService = new MockSignalRService();
             _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
             _userInfoService = new UserInfoService(_context, new HttpContextAccessor());
-            _missionRunService = new MissionRunService(_context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService, _userInfoService);
+            _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService, _userInfoService);
             _databaseUtilities = new DatabaseUtilities(_context);
         }
 

@@ -108,12 +108,19 @@ namespace Api.Services
             {
                 return missionRun;
             }
-            var userInfo = await userInfoService.GetRequestedUserInfo();
-            if (userInfo != null)
+            try
             {
-                logger.LogInformation($"Mission run created by user with Id {userInfo.Id}");
+                var userInfo = await userInfoService.GetRequestedUserInfo();
+                if (userInfo != null)
+                {
+                    logger.LogInformation($"Mission run created by user with Id {userInfo.Id}");
+                }
             }
+            catch (HttpRequestException e)
+            {
 
+                logger.LogInformation(e, $"Failed to log user information because: {e.Message}");
+            }
             return missionRun;
         }
 
