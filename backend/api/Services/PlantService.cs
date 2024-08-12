@@ -24,6 +24,8 @@ namespace Api.Services
         public Task<Plant> Update(Plant plant);
 
         public Task<Plant?> Delete(string id);
+
+        public void DetachTracking(Plant plant);
     }
 
     [SuppressMessage(
@@ -91,6 +93,7 @@ namespace Api.Services
                 context.Entry(plant.Installation).State = EntityState.Unchanged;
                 await context.Plants.AddAsync(plant);
                 await ApplyDatabaseUpdate(plant.Installation);
+                DetachTracking(plant);
             }
             return plant!;
         }
@@ -132,6 +135,12 @@ namespace Api.Services
                 await context.SaveChangesAsync();
             else
                 throw new UnauthorizedAccessException($"User does not have permission to update plant in installation {installation.Name}");
+        }
+
+        public void DetachTracking(Plant plant)
+        {
+            if (plant.Installation != null) installationService.DetachTracking(plant.Installation);
+            context.Entry(plant).State = EntityState.Detached;
         }
     }
 }

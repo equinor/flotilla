@@ -20,6 +20,7 @@ namespace Api.Services
 
         public abstract Task<Installation?> Delete(string id);
 
+        public void DetachTracking(Installation installation);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -88,6 +89,7 @@ namespace Api.Services
                 };
                 await context.Installations.AddAsync(installation);
                 await ApplyUnprotectedDatabaseUpdate();
+                DetachTracking(installation);
             }
 
             return installation;
@@ -113,6 +115,11 @@ namespace Api.Services
             await ApplyDatabaseUpdate(installation);
 
             return installation;
+        }
+
+        public void DetachTracking(Installation installation)
+        {
+            context.Entry(installation).State = EntityState.Detached;
         }
     }
 }

@@ -24,6 +24,7 @@ namespace Api.Services
 
         public abstract Task<Source?> Delete(string id);
 
+        public void DetachTracking(Source source);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -120,6 +121,7 @@ namespace Api.Services
                 }
             );
 
+            DetachTracking(newSource);
             return newSource;
         }
 
@@ -143,6 +145,11 @@ namespace Api.Services
             await context.SaveChangesAsync();
 
             return source;
+        }
+
+        public void DetachTracking(Source source)
+        {
+            context.Entry(source).State = EntityState.Detached;
         }
     }
 }
