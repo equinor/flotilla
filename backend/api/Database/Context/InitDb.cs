@@ -673,6 +673,7 @@ namespace Api.Database.Context
             context.AddRange(accessRoles);
 
             context.SaveChanges();
+            context.ChangeTracker.Clear();
         }
     }
 }

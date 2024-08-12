@@ -33,7 +33,7 @@ namespace Api.Services
 
         public async Task<bool> RobotIsLocalized(string robotId)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot is null)
             {
                 string errorMessage = $"Robot with ID: {robotId} was not found in the database";
@@ -46,7 +46,7 @@ namespace Api.Services
 
         public async Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot is null)
             {
                 string errorMessage = $"The robot with ID {robotId} was not found";

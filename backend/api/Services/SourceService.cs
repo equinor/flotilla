@@ -39,6 +39,7 @@ namespace Api.Services
         {
             context.Sources.Add(source);
             await context.SaveChangesAsync();
+            DetachTracking(source);
             return source;
         }
 

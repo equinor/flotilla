@@ -5,7 +5,7 @@ namespace Api.Services
     public interface IReturnToHomeService
     {
         public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(string robotId);
-        public Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId);
+        public Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId, bool readOnly = false);
     }
 
     public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService, IMapService mapService) : IReturnToHomeService
@@ -54,7 +54,7 @@ namespace Api.Services
         }
         private async Task<MissionRun> ScheduleReturnToHomeMissionRun(string robotId)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot is null)
             {
                 string errorMessage = $"Robot with ID {robotId} could not be retrieved from the database";
@@ -112,10 +112,10 @@ namespace Api.Services
             return missionRun;
         }
 
-        public async Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId)
+        public async Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId, bool readOnly = false)
         {
             IList<MissionStatus> missionStatuses = [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused];
-            var activeReturnToHomeMissions = await missionRunService.ReadMissionRuns(robotId, MissionRunType.ReturnHome, missionStatuses);
+            var activeReturnToHomeMissions = await missionRunService.ReadMissionRuns(robotId, MissionRunType.ReturnHome, missionStatuses, readOnly: readOnly);
 
             if (activeReturnToHomeMissions.Count == 0) { return null; }
 
