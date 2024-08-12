@@ -20,7 +20,7 @@ namespace Api.Services
     {
         public async Task<MissionTask> UpdateMissionTaskStatus(string isarTaskId, IsarTaskStatus isarTaskStatus)
         {
-            var missionTask = await ReadByIsarTaskId(isarTaskId);
+            var missionTask = await ReadByIsarTaskId(isarTaskId, readOnly: false);
             if (missionTask is null)
             {
                 string errorMessage = $"Inspection with ID {isarTaskId} could not be found";
@@ -41,14 +41,15 @@ namespace Api.Services
             return entry.Entity;
         }
 
-        private async Task<MissionTask?> ReadByIsarTaskId(string id)
+        private async Task<MissionTask?> ReadByIsarTaskId(string id, bool readOnly = false)
         {
-            return await GetMissionTasks().FirstOrDefaultAsync(missionTask => missionTask.IsarTaskId != null && missionTask.IsarTaskId.Equals(id));
+            return await GetMissionTasks(readOnly: readOnly).FirstOrDefaultAsync(missionTask => missionTask.IsarTaskId != null && missionTask.IsarTaskId.Equals(id));
         }
 
-        private IQueryable<MissionTask> GetMissionTasks()
+        private IQueryable<MissionTask> GetMissionTasks(bool readOnly = false)
         {
-            return context.MissionTasks.Include(missionTask => missionTask.Inspections).ThenInclude(inspection => inspection.InspectionFindings);
+            return (readOnly ? context.MissionTasks.AsNoTracking() : context.MissionTasks.AsTracking())
+                .Include(missionTask => missionTask.Inspections).ThenInclude(inspection => inspection.InspectionFindings);
         }
     }
 }

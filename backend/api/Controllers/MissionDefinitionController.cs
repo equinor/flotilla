@@ -31,7 +31,7 @@ namespace Api.Controllers
             PagedList<MissionDefinition> missionDefinitions;
             try
             {
-                missionDefinitions = await missionDefinitionService.ReadAll(parameters);
+                missionDefinitions = await missionDefinitionService.ReadAll(parameters, readOnly: true);
             }
             catch (InvalidDataException e)
             {
@@ -71,7 +71,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinitionWithTasksById([FromRoute] string id)
         {
-            var missionDefinition = await missionDefinitionService.ReadById(id);
+            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: true);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id {id}");
@@ -93,7 +93,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MissionRun>> GetNextMissionRun([FromRoute] string id)
         {
-            var missionDefinition = await missionDefinitionService.ReadById(id);
+            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: true);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id {id}");
@@ -129,7 +129,7 @@ namespace Api.Controllers
                 return BadRequest("Invalid data.");
             }
 
-            var missionDefinition = await missionDefinitionService.ReadById(id);
+            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: false);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id '{id}'");
@@ -175,7 +175,7 @@ namespace Api.Controllers
                 return BadRequest("Invalid data.");
             }
 
-            var missionDefinition = await missionDefinitionService.ReadById(id);
+            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: false);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id '{id}'");

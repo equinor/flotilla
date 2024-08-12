@@ -276,7 +276,7 @@ namespace Api.Controllers
             }
             else
             {
-                var missionDefinitions = await missionDefinitionService.ReadBySourceId(source.SourceId);
+                var missionDefinitions = await missionDefinitionService.ReadBySourceId(source.SourceId, readOnly: true);
                 if (missionDefinitions.Count > 0)
                 {
                     existingMissionDefinition = missionDefinitions.First();
@@ -390,7 +390,7 @@ namespace Api.Controllers
                 }
                 else
                 {
-                    var missionDefinitions = await missionDefinitionService.ReadBySourceId(source.SourceId);
+                    var missionDefinitions = await missionDefinitionService.ReadBySourceId(source.SourceId, readOnly: true);
                     if (missionDefinitions.Count > 0) { existingMissionDefinition = missionDefinitions.First(); }
                 }
 

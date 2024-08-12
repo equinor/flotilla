@@ -13,17 +13,17 @@ namespace Api.Services
     {
         public Task<MissionDefinition> Create(MissionDefinition missionDefinition);
 
-        public Task<MissionDefinition?> ReadById(string id);
+        public Task<MissionDefinition?> ReadById(string id, bool readOnly = false);
 
-        public Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters);
+        public Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters, bool readOnly = false);
 
-        public Task<List<MissionDefinition>> ReadByAreaId(string areaId);
+        public Task<List<MissionDefinition>> ReadByAreaId(string areaId, bool readOnly = false);
 
-        public Task<List<MissionDefinition>> ReadByDeckId(string deckId);
+        public Task<List<MissionDefinition>> ReadByDeckId(string deckId, bool readOnly = false);
 
         public Task<List<MissionTask>?> GetTasksFromSource(Source source);
 
-        public Task<List<MissionDefinition>> ReadBySourceId(string sourceId);
+        public Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = false);
 
         public Task<MissionDefinition> UpdateLastSuccessfulMissionRun(string missionRunId, string missionDefinitionId);
 
@@ -61,15 +61,15 @@ namespace Api.Services
             return missionDefinition;
         }
 
-        public async Task<MissionDefinition?> ReadById(string id)
+        public async Task<MissionDefinition?> ReadById(string id, bool readOnly = false)
         {
-            return await GetMissionDefinitionsWithSubModels().Where(m => m.IsDeprecated == false)
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(m => m.IsDeprecated == false)
                 .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
         }
 
-        public async Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters)
+        public async Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters, bool readOnly = false)
         {
-            var query = GetMissionDefinitionsWithSubModels().Where(m => m.IsDeprecated == false);
+            var query = GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(m => m.IsDeprecated == false);
             var filter = ConstructFilter(parameters);
 
             query = query.Where(filter);
@@ -85,21 +85,21 @@ namespace Api.Services
             );
         }
 
-        public async Task<List<MissionDefinition>> ReadByAreaId(string areaId)
+        public async Task<List<MissionDefinition>> ReadByAreaId(string areaId, bool readOnly = false)
         {
-            return await GetMissionDefinitionsWithSubModels().Where(
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
                 m => m.IsDeprecated == false && m.Area != null && m.Area.Id == areaId).ToListAsync();
         }
 
-        public async Task<List<MissionDefinition>> ReadBySourceId(string sourceId)
+        public async Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = false)
         {
-            return await GetMissionDefinitionsWithSubModels().Where(
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
                 m => m.IsDeprecated == false && m.Source.SourceId != null && m.Source.SourceId == sourceId).ToListAsync();
         }
 
-        public async Task<List<MissionDefinition>> ReadByDeckId(string deckId)
+        public async Task<List<MissionDefinition>> ReadByDeckId(string deckId, bool readOnly = false)
         {
-            return await GetMissionDefinitionsWithSubModels().Where(
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
                 m => m.IsDeprecated == false && m.Area != null && m.Area.Deck != null && m.Area.Deck.Id == deckId).ToListAsync();
         }
 
@@ -112,7 +112,7 @@ namespace Api.Services
                 logger.LogWarning("{Message}", errorMessage);
                 throw new MissionNotFoundException(errorMessage);
             }
-            var missionDefinition = await ReadById(missionDefinitionId);
+            var missionDefinition = await ReadById(missionDefinitionId, readOnly: false);
             if (missionDefinition == null)
             {
                 string errorMessage = $"Mission definition {missionDefinitionId} was not found";
@@ -165,7 +165,7 @@ namespace Api.Services
 
         }
 
-        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels()
+        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels(bool readOnly = false)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             return context.MissionDefinitions

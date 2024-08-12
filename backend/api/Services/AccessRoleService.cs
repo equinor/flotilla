@@ -20,6 +20,11 @@ namespace Api.Services
     {
         private const string SUPER_ADMIN_ROLE_NAME = "Role.Admin";
 
+        private IQueryable<AccessRole> GetAccessRoles(bool readOnly = false)
+        {
+            return readOnly ? context.AccessRoles.AsNoTracking() : context.AccessRoles.AsTracking();
+        }
+
         public async Task<List<string>> GetAllowedInstallationCodes()
         {
             if (httpContextAccessor.HttpContext == null)
@@ -33,9 +38,9 @@ namespace Api.Services
         public async Task<List<string>> GetAllowedInstallationCodes(List<string> roles)
         {
             if (roles.Contains(SUPER_ADMIN_ROLE_NAME))
-                return await context.Installations.Select((i) => i.InstallationCode.ToUpperInvariant()).ToListAsync();
+                return await context.Installations.AsNoTracking().Select((i) => i.InstallationCode.ToUpperInvariant()).ToListAsync();
             else
-                return await context.AccessRoles.Include((r) => r.Installation)
+                return await GetAccessRoles(readOnly: true).Include((r) => r.Installation)
                     .Where((r) => roles.Contains(r.RoleName)).Select((r) => r.Installation != null ? r.Installation.InstallationCode.ToUpperInvariant() : "").ToListAsync();
         }
 
@@ -72,13 +77,13 @@ namespace Api.Services
         public async Task<AccessRole?> ReadByInstallation(Installation installation)
         {
             ThrowExceptionIfNotAdmin();
-            return await context.AccessRoles.Include((r) => r.Installation).Where((r) => r.Installation.Id == installation.Id).FirstOrDefaultAsync();
+            return await GetAccessRoles(readOnly: true).Include((r) => r.Installation).Where((r) => r.Installation.Id == installation.Id).FirstOrDefaultAsync();
         }
 
         public async Task<List<AccessRole>> ReadAll()
         {
             ThrowExceptionIfNotAdmin();
-            return await context.AccessRoles.Include((r) => r.Installation).ToListAsync();
+            return await GetAccessRoles(readOnly: true).Include((r) => r.Installation).ToListAsync();
         }
 
         public bool IsUserAdmin()

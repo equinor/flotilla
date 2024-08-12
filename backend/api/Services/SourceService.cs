@@ -12,13 +12,13 @@ namespace Api.Services
 
         public abstract Task<List<Source>> ReadAll();
 
-        public abstract Task<Source?> ReadById(string id);
+        public abstract Task<Source?> ReadById(string id, bool readOnly = false);
 
         public abstract Task<Source?> CheckForExistingSource(string sourceId);
 
         public abstract Task<Source?> CheckForExistingSourceFromTasks(IList<MissionTask> tasks);
 
-        public abstract Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks);
+        public abstract Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks, bool readOnly = false);
 
         public abstract Task<Source> Update(Source source);
 
@@ -49,20 +49,20 @@ namespace Api.Services
             return await query.ToListAsync();
         }
 
-        private DbSet<Source> GetSources()
+        private IQueryable<Source> GetSources(bool readOnly = false)
         {
-            return context.Sources;
+            return readOnly ? context.Sources.AsNoTracking() : context.Sources.AsTracking();
         }
 
-        public async Task<Source?> ReadById(string id)
+        public async Task<Source?> ReadById(string id, bool readOnly = false)
         {
-            return await GetSources()
+            return await GetSources(readOnly: readOnly)
                 .FirstOrDefaultAsync(s => s.Id.Equals(id));
         }
 
-        public async Task<Source?> ReadBySourceId(string sourceId)
+        public async Task<Source?> ReadBySourceId(string sourceId, bool readOnly = false)
         {
-            return await GetSources()
+            return await GetSources(readOnly: readOnly)
                 .FirstOrDefaultAsync(s => s.SourceId.Equals(sourceId));
         }
 
@@ -79,7 +79,7 @@ namespace Api.Services
 
         public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id)
         {
-            var existingSource = await ReadBySourceId(id);
+            var existingSource = await ReadBySourceId(id, readOnly: true);
             if (existingSource == null || existingSource.CustomMissionTasks == null) return null;
 
             try
@@ -102,12 +102,12 @@ namespace Api.Services
             }
         }
 
-        public async Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks)
+        public async Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks, bool readOnly = false)
         {
             string json = JsonSerializer.Serialize(tasks);
             string hash = MissionTask.CalculateHashFromTasks(tasks);
 
-            var existingSource = await ReadById(hash);
+            var existingSource = await ReadById(hash, readOnly: readOnly);
 
             if (existingSource != null) return existingSource;
 
