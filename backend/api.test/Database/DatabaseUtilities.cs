@@ -13,6 +13,7 @@ namespace Api.Test.Database
     public class DatabaseUtilities
     {
         private readonly AccessRoleService _accessRoleService;
+        private readonly MissionTaskService _missionTaskService;
         private readonly AreaService _areaService;
         private readonly DeckService _deckService;
         private readonly InstallationService _installationService;
@@ -28,13 +29,14 @@ namespace Api.Test.Database
 
             _accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
             _installationService = new InstallationService(context, _accessRoleService);
+            _missionTaskService = new MissionTaskService(context, new Mock<ILogger<MissionTaskService>>().Object);
             _plantService = new PlantService(context, _installationService, _accessRoleService);
             _deckService = new DeckService(context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, new MockSignalRService());
             _areaService = new AreaService(context, _installationService, _plantService, _deckService, defaultLocalizationPoseService, _accessRoleService);
             _userInfoService = new UserInfoService(context, new HttpContextAccessor(), new Mock<ILogger<UserInfoService>>().Object);
-            _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService, _userInfoService);
             _robotModelService = new RobotModelService(context);
-            _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _areaService, _missionRunService);
+            _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _areaService);
+            _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService, _missionTaskService, _areaService, _robotService, _userInfoService);
         }
 
         public async Task<MissionRun> NewMissionRun(

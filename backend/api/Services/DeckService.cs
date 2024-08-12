@@ -24,6 +24,8 @@ namespace Api.Services
         public Task<Deck> Update(Deck deck);
 
         public Task<Deck?> Delete(string id);
+
+        public void DetachTracking(Deck deck);
     }
 
     [SuppressMessage(
@@ -114,6 +116,7 @@ namespace Api.Services
             await context.Decks.AddAsync(deck);
             await ApplyDatabaseUpdate(deck.Installation);
             _ = signalRService.SendMessageAsync("Deck created", deck.Installation, new DeckResponse(deck));
+            DetachTracking(deck);
             return deck!;
         }
 
@@ -156,6 +159,14 @@ namespace Api.Services
                 await context.SaveChangesAsync();
             else
                 throw new UnauthorizedAccessException($"User does not have permission to update deck in installation {installation.Name}");
+        }
+
+        public void DetachTracking(Deck deck)
+        {
+            if (deck.Installation != null) installationService.DetachTracking(deck.Installation);
+            if (deck.Plant != null) plantService.DetachTracking(deck.Plant);
+            if (deck.DefaultLocalizationPose != null) defaultLocalizationPoseService.DetachTracking(deck.DefaultLocalizationPose);
+            context.Entry(deck).State = EntityState.Detached;
         }
     }
 }

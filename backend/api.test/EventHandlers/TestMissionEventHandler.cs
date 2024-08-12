@@ -53,6 +53,8 @@ namespace Api.Test.EventHandlers
             var missionDefinitionServiceLogger = new Mock<ILogger<MissionDefinitionService>>().Object;
             var lastMissionRunServiceLogger = new Mock<ILogger<LastMissionRunService>>().Object;
             var sourceServiceLogger = new Mock<ILogger<SourceService>>().Object;
+            var errorHandlingServiceLogger = new Mock<ILogger<ErrorHandlingService>>().Object;
+            var missionTaskServiceLogger = new Mock<ILogger<MissionTaskService>>().Object;
 
             var configuration = WebApplication.CreateBuilder().Configuration;
 
@@ -64,12 +66,11 @@ namespace Api.Test.EventHandlers
 
             _mqttService = new MqttService(mqttServiceLogger, configuration);
 
-            _missionRunService = new MissionRunService(context, signalRService, missionLogger, accessRoleService, userInfoService);
-
+            var missionTaskService = new MissionTaskService(context, missionTaskServiceLogger);
 
             var missionLoader = new MockMissionLoader();
             var stidServiceMock = new MockStidService(context);
-            var missionDefinitionService = new MissionDefinitionService(context, missionLoader, signalRService, accessRoleService, missionDefinitionServiceLogger, _missionRunService);
+            var sourceService = new SourceService(context, sourceServiceLogger);
             var robotModelService = new RobotModelService(context);
             var taskDurationServiceMock = new MockTaskDurationService();
             var isarServiceMock = new MockIsarService();
@@ -79,12 +80,14 @@ namespace Api.Test.EventHandlers
             var deckService = new DeckService(context, defaultLocalizationPoseService, installationService, plantService, accessRoleService, signalRService);
             var areaService = new AreaService(context, installationService, plantService, deckService, defaultLocalizationPoseService, accessRoleService);
             var mapServiceMock = new MockMapService();
-            _robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService, _missionRunService);
+            _robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, areaService);
+            _missionRunService = new MissionRunService(context, signalRService, missionLogger, accessRoleService, missionTaskService, areaService, _robotService, userInfoService);
+            var missionDefinitionService = new MissionDefinitionService(context, missionLoader, signalRService, accessRoleService, missionDefinitionServiceLogger, _missionRunService, sourceService);
             _localizationService = new LocalizationService(localizationServiceLogger, _robotService, installationService, areaService);
-
+            var errorHandlingService = new ErrorHandlingService(errorHandlingServiceLogger, _robotService, _missionRunService);
             var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, _robotService, _missionRunService, mapServiceMock);
             _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService, areaService,
-                isarServiceMock, _localizationService, returnToHomeService, signalRService);
+                isarServiceMock, _localizationService, returnToHomeService, signalRService, errorHandlingService);
             var lastMissionRunService = new LastMissionRunService(missionDefinitionService);
 
             _databaseUtilities = new DatabaseUtilities(context);

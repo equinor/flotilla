@@ -29,7 +29,7 @@ namespace Api.Services
         public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
         public Task<Robot> UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status);
         public Task<Robot?> Delete(string id);
-        public Task HandleLosingConnectionToIsar(string robotId);
+        public void DetachTracking(Robot robot);
     }
 
     [SuppressMessage(
@@ -44,8 +44,7 @@ namespace Api.Services
         ISignalRService signalRService,
         IAccessRoleService accessRoleService,
         IInstallationService installationService,
-        IAreaService areaService,
-        IMissionRunService missionRunService) : IRobotService
+        IAreaService areaService) : IRobotService
     {
 
         public async Task<Robot> Create(Robot newRobot)
@@ -56,6 +55,7 @@ namespace Api.Services
 
             await context.Robots.AddAsync(newRobot);
             await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
+            DetachTracking(newRobot);
             return newRobot;
         }
 
@@ -94,6 +94,7 @@ namespace Api.Services
                 await context.Robots.AddAsync(newRobot);
                 await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
                 _ = signalRService.SendMessageAsync("Robot added", newRobot!.CurrentInstallation, new RobotResponse(newRobot!));
+                DetachTracking(newRobot);
                 return newRobot!;
             }
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
@@ -340,40 +341,6 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task UpdateCurrentRobotMissionToFailed(string robotId)
-        {
-            var robot = await ReadById(robotId) ?? throw new RobotNotFoundException($"Robot with ID: {robotId} was not found in the database");
-            if (robot.CurrentMissionId != null)
-            {
-                var missionRun = await missionRunService.ReadById(robot.CurrentMissionId);
-                if (missionRun != null)
-                {
-                    missionRun.SetToFailed("Lost connection to ISAR during mission");
-                    await missionRunService.Update(missionRun);
-                    logger.LogWarning(
-                        "Mission '{Id}' failed because ISAR could not be reached",
-                        missionRun.Id
-                    );
-                }
-            }
-        }
-
-        public async Task HandleLosingConnectionToIsar(string robotId)
-        {
-            try
-            {
-                await UpdateCurrentRobotMissionToFailed(robotId);
-                await UpdateRobotStatus(robotId, RobotStatus.Offline);
-                await UpdateCurrentMissionId(robotId, null);
-                await UpdateRobotIsarConnected(robotId, false);
-                await UpdateCurrentArea(robotId, null);
-            }
-            catch (RobotNotFoundException)
-            {
-                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-            }
-        }
-
         private IQueryable<Robot> GetRobotsWithSubModels(bool readOnly = false)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
@@ -446,5 +413,12 @@ namespace Api.Services
             _ = signalRService.SendMessageAsync("Robot updated", installation, robot != null ? new RobotResponse(robot) : null);
         }
 
+        public void DetachTracking(Robot robot)
+        {
+            if (robot.CurrentInstallation != null) installationService.DetachTracking(robot.CurrentInstallation);
+            if (robot.CurrentArea != null) areaService.DetachTracking(robot.CurrentArea);
+            if (robot.Model != null) robotModelService.DetachTracking(robot.Model);
+            context.Entry(robot).State = EntityState.Detached;
+        }
     }
 }

@@ -14,6 +14,7 @@ namespace Api.Services
         public Task<AccessRole> Create(Installation installation, string roleName, RoleAccessLevel accessLevel);
         public Task<AccessRole?> ReadByInstallation(Installation installation);
         public Task<List<AccessRole>> ReadAll();
+        public void DetachTracking(AccessRole accessRole);
     }
 
     public class AccessRoleService(FlotillaDbContext context, IHttpContextAccessor httpContextAccessor) : IAccessRoleService
@@ -71,6 +72,7 @@ namespace Api.Services
 
             await context.AccessRoles.AddAsync(newAccessRole);
             await context.SaveChangesAsync();
+            DetachTracking(newAccessRole);
             return newAccessRole!;
         }
 
@@ -97,6 +99,11 @@ namespace Api.Services
         public bool IsAuthenticationAvailable()
         {
             return httpContextAccessor.HttpContext != null;
+        }
+
+        public void DetachTracking(AccessRole accessRole)
+        {
+            context.Entry(accessRole).State = EntityState.Detached;
         }
     }
 }
