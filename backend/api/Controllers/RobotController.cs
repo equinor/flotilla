@@ -35,7 +35,7 @@ namespace Api.Controllers
         {
             try
             {
-                var robots = await robotService.ReadAll();
+                var robots = await robotService.ReadAll(readOnly: true);
                 var robotResponses = robots.Select(robot => new RobotResponse(robot));
                 return Ok(robotResponses);
             }
@@ -65,7 +65,7 @@ namespace Api.Controllers
             logger.LogInformation("Getting robot with id={Id}", id);
             try
             {
-                var robot = await robotService.ReadById(id);
+                var robot = await robotService.ReadById(id, readOnly: true);
                 if (robot == null)
                 {
                     logger.LogWarning("Could not find robot with id={Id}", id);
@@ -206,7 +206,7 @@ namespace Api.Controllers
 
             try
             {
-                var robot = await robotService.ReadById(id);
+                var robot = await robotService.ReadById(id, readOnly: true);
                 if (robot == null)
                 {
                     string errorMessage = $"No robot with id: {id} could be found";
@@ -275,7 +275,7 @@ namespace Api.Controllers
 
             try
             {
-                var robot = await robotService.ReadById(id);
+                var robot = await robotService.ReadById(id, readOnly: true);
                 if (robot == null)
                 {
                     string errorMessage = $"No robot with id: {id} could be found";
@@ -346,7 +346,7 @@ namespace Api.Controllers
 
             if (!ModelState.IsValid) return BadRequest("Invalid data");
 
-            var robot = await robotService.ReadById(id);
+            var robot = await robotService.ReadById(id, readOnly: true);
             if (robot == null)
             {
                 string errorMessage = $"No robot with id: {id} could be found";
@@ -389,7 +389,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IList<VideoStream>>> GetVideoStreams([FromRoute] string robotId)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
@@ -419,7 +419,7 @@ namespace Api.Controllers
             [FromBody] VideoStream videoStream
         )
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
@@ -467,7 +467,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> StopMission([FromRoute] string robotId)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
@@ -523,7 +523,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> PauseMission([FromRoute] string robotId)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
@@ -573,7 +573,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> ResumeMission([FromRoute] string robotId)
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
@@ -627,7 +627,7 @@ namespace Api.Controllers
             [FromRoute] string armPosition
         )
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 string errorMessage = $"Could not find robot with id {robotId}";
@@ -692,7 +692,7 @@ namespace Api.Controllers
             [FromRoute] string robotId
         )
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 string errorMessage = $"Could not find robot with id {robotId}";

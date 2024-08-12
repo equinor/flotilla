@@ -30,7 +30,7 @@ namespace Api.Controllers
             [FromRoute] string installationCode)
         {
 
-            var robots = await robotService.ReadRobotsForInstallation(installationCode);
+            var robots = await robotService.ReadRobotsForInstallation(installationCode, readOnly: true);
 
             foreach (var robot in robots)
             {
@@ -58,7 +58,7 @@ namespace Api.Controllers
         public async Task<ActionResult<string>> ClearEmergencyStateForAllRobots(
             [FromRoute] string installationCode)
         {
-            var robots = await robotService.ReadRobotsForInstallation(installationCode);
+            var robots = await robotService.ReadRobotsForInstallation(installationCode, readOnly: true);
 
             foreach (var robot in robots)
             {

@@ -90,17 +90,17 @@ namespace Api.Services
                 safePositions.Add(new SafePosition(pose));
             }
 
-            var installation = await installationService.ReadByName(newAreaQuery.InstallationCode) ??
+            var installation = await installationService.ReadByName(newAreaQuery.InstallationCode, readOnly: true) ??
                                throw new InstallationNotFoundException($"No installation with name {newAreaQuery.InstallationCode} could be found");
 
-            var plant = await plantService.ReadByInstallationAndName(installation, newAreaQuery.PlantCode) ??
+            var plant = await plantService.ReadByInstallationAndName(installation, newAreaQuery.PlantCode, readOnly: true) ??
                         throw new PlantNotFoundException($"No plant with name {newAreaQuery.PlantCode} could be found");
 
-            var deck = await deckService.ReadByInstallationAndPlantAndName(installation, plant, newAreaQuery.DeckName) ??
+            var deck = await deckService.ReadByInstallationAndPlantAndName(installation, plant, newAreaQuery.DeckName, readOnly: true) ??
                        throw new DeckNotFoundException($"No deck with name {newAreaQuery.DeckName} could be found");
 
             var existingArea = await ReadByInstallationAndPlantAndDeckAndName(
-                installation, plant, deck, newAreaQuery.AreaName);
+                installation, plant, deck, newAreaQuery.AreaName, readOnly: true);
             if (existingArea != null)
             {
                 throw new AreaExistsException($"Area with name {newAreaQuery.AreaName} already exists");
@@ -142,7 +142,7 @@ namespace Api.Services
 
         public async Task<Area?> AddSafePosition(string installationCode, string areaName, SafePosition safePosition)
         {
-            var area = await ReadByInstallationAndName(installationCode, areaName);
+            var area = await ReadByInstallationAndName(installationCode, areaName, readOnly: false);
             if (area is null) { return null; }
 
             area.SafePositions.Add(safePosition);
@@ -215,9 +215,9 @@ namespace Api.Services
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
-        public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName)
+        public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName, bool readOnly = false)
         {
-            return await GetAreas().Where(a =>
+            return await GetAreas(readOnly: readOnly).Where(a =>
                     a.Deck != null && a.Deck.Id.Equals(deck.Id) &&
                     a.Plant.Id.Equals(plant.Id) &&
                     a.Installation.Id.Equals(installation.Id) &&

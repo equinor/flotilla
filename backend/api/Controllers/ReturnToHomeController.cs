@@ -27,7 +27,7 @@ namespace Api.Controllers
             [FromRoute] string robotId
         )
         {
-            var robot = await robotService.ReadById(robotId);
+            var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot is null)
             {
                 logger.LogWarning("Could not find robot with id={Id}", robotId);
@@ -43,8 +43,6 @@ namespace Api.Controllers
             }
 
             return Ok(returnToHomeMission);
-
         }
-
     }
 }

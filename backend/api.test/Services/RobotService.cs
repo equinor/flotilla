@@ -65,7 +65,7 @@ namespace Api.Test.Services
             var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService, _missionRunService);
             var robots = await robotService.ReadAll();
             var firstRobot = robots.First();
-            var robotById = await robotService.ReadById(firstRobot.Id);
+            var robotById = await robotService.ReadById(firstRobot.Id, readOnly: false);
 
             Assert.Equal(firstRobot, robotById);
         }
@@ -90,7 +90,7 @@ namespace Api.Test.Services
                 InstallationCode = "JSV"
             });
 
-            var robotsBefore = await robotService.ReadAll();
+            var robotsBefore = await robotService.ReadAll(readOnly: true);
             int nRobotsBefore = robotsBefore.Count();
             var videoStreamQuery = new CreateVideoStreamQuery
             {
@@ -119,7 +119,7 @@ namespace Api.Test.Services
             robot.Model = robotModel;
 
             await robotService.Create(robot);
-            var robotsAfter = await robotService.ReadAll();
+            var robotsAfter = await robotService.ReadAll(readOnly: true);
             int nRobotsAfter = robotsAfter.Count();
 
             Assert.Equal(nRobotsBefore + 1, nRobotsAfter);

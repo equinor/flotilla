@@ -124,11 +124,11 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId); }
+            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId, readOnly: true); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
-            var missionDefinition = await missionDefinitionService.ReadById(missionDefinitionId);
+            var missionDefinition = await missionDefinitionService.ReadById(missionDefinitionId, readOnly: true);
             if (missionDefinition == null)
             {
                 return NotFound("Mission definition not found");
@@ -198,7 +198,7 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId); }
+            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId, readOnly: true); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
             string missionId = scheduledMissionQuery.MissionId.ToString(CultureInfo.CurrentCulture);
@@ -361,7 +361,7 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await robotService.GetRobotWithPreCheck(customMissionQuery.RobotId); }
+            try { robot = await robotService.GetRobotWithPreCheck(customMissionQuery.RobotId, readOnly: true); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
@@ -374,8 +374,7 @@ namespace Api.Controllers
             try
             {
                 Area? area = null;
-                if (customMissionQuery.AreaName != null) { area = await areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName, readOnly: false); }
-
+                if (customMissionQuery.AreaName != null) { area = await areaService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.AreaName, readOnly: true); }
                 if (area == null)
                 {
                     throw new AreaNotFoundException($"No area with name {customMissionQuery.AreaName} in installation {customMissionQuery.InstallationCode} was found");

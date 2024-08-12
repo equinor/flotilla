@@ -112,7 +112,7 @@ namespace Api.Services
                 logger.LogWarning("{Message}", errorMessage);
                 throw new MissionNotFoundException(errorMessage);
             }
-            var missionDefinition = await ReadById(missionDefinitionId, readOnly: false);
+            var missionDefinition = await ReadById(missionDefinitionId, readOnly: true);
             if (missionDefinition == null)
             {
                 string errorMessage = $"Mission definition {missionDefinitionId} was not found";
@@ -168,11 +168,16 @@ namespace Api.Services
         private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels(bool readOnly = false)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            return context.MissionDefinitions
+            var query = context.MissionDefinitions
                 .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionDefinition => missionDefinition.Area)
+                .ThenInclude(area => area != null ? area.Deck : null)
+                .Include(missionDefinition => missionDefinition.Area)
+                .ThenInclude(area => area != null ? area.Plant : null)
+                .Include(missionDefinition => missionDefinition.Area)
+                .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
@@ -182,6 +187,7 @@ namespace Api.Services
                 .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
                 .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null)
                 .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()));
+            return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
         private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)

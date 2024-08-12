@@ -164,7 +164,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             // Assert
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, readOnly: true);
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
@@ -186,8 +186,8 @@ namespace Api.Test.EventHandlers
             await _missionRunService.Create(missionRunTwo);
 
             // Assert
-            var postTestMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id);
-            var postTestMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
+            var postTestMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id, readOnly: true);
+            var postTestMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id, readOnly: true);
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRunOne!.Status);
             Assert.Equal(MissionStatus.Pending, postTestMissionRunTwo!.Status);
         }
@@ -222,7 +222,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(500);
 
             // Assert
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id);
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, readOnly: true);
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
@@ -258,7 +258,7 @@ namespace Api.Test.EventHandlers
                     ],
                     OrderBy = "DesiredStartTime",
                     PageSize = 100
-                });
+                }, readOnly: true);
             Assert.True(ongoingMission.Any());
         }
 
@@ -272,6 +272,7 @@ namespace Api.Test.EventHandlers
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
             robot.RobotCapabilities!.Remove(RobotCapabilitiesEnum.return_to_home);
+            await _robotService.Update(robot);
 
             var mqttEventArgs = new MqttReceivedArgs(
                 new IsarStatusMessage
@@ -295,7 +296,7 @@ namespace Api.Test.EventHandlers
                     ],
                     OrderBy = "DesiredStartTime",
                     PageSize = 100
-                });
+                }, readOnly: true);
             Assert.False(ongoingMission.Any());
         }
 
@@ -317,7 +318,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             // Assert
-            var postStartMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id);
+            var postStartMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id, readOnly: true);
             Assert.NotNull(postStartMissionRunOne);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunOne.Status);
 
@@ -326,7 +327,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             // Assert
-            var postStartMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id);
+            var postStartMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id, readOnly: true);
             Assert.NotNull(postStartMissionRunTwo);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
         }
@@ -360,7 +361,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(500);
 
             // Assert
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun1.Id);
+            var postTestMissionRun = await _missionRunService.ReadById(missionRun1.Id, readOnly: true);
             Assert.Equal(MissionStatus.Aborted, postTestMissionRun!.Status);
         }
 
@@ -373,7 +374,7 @@ namespace Api.Test.EventHandlers
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, null);
-            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
+            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, isarMissionId: Guid.NewGuid().ToString());
             Thread.Sleep(100);
             var missionRun2 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
             Thread.Sleep(100);
@@ -400,10 +401,10 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(500);
 
             // Assert
-            var postTestMissionRun1 = await _missionRunService.ReadById(missionRun1.Id);
+            var postTestMissionRun1 = await _missionRunService.ReadById(missionRun1.Id, readOnly: true);
             Assert.Equal(MissionRunType.Localization, postTestMissionRun1!.MissionRunType);
             Assert.Equal(MissionStatus.Successful, postTestMissionRun1!.Status);
-            var postTestMissionRun2 = await _missionRunService.ReadById(missionRun2.Id);
+            var postTestMissionRun2 = await _missionRunService.ReadById(missionRun2.Id, readOnly: true);
             Assert.Equal(MissionStatus.Pending, postTestMissionRun2!.Status);
         }
 
@@ -449,10 +450,10 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(2500); // Accommodate for sleep in OnIsarStatus
 
             // Assert
-            var postTestMissionRun1 = await _missionRunService.ReadById(missionRun1.Id);
+            var postTestMissionRun1 = await _missionRunService.ReadById(missionRun1.Id, readOnly: true);
             Assert.Equal(MissionRunType.Localization, postTestMissionRun1!.MissionRunType);
             Assert.Equal(Api.Database.Models.TaskStatus.Successful, postTestMissionRun1!.Tasks[0].Status);
-            var postTestMissionRun2 = await _missionRunService.ReadById(missionRun2.Id);
+            var postTestMissionRun2 = await _missionRunService.ReadById(missionRun2.Id, readOnly: true);
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun2!.Status);
         }
 
@@ -476,7 +477,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(1000);
 
             // Assert
-            var updatedRobot = await _robotService.ReadById(robot.Id);
+            var updatedRobot = await _robotService.ReadById(robot.Id, readOnly: true);
             Assert.True(updatedRobot?.MissionQueueFrozen);
 
             bool isRobotLocalized = await _localizationService.RobotIsLocalized(robot.Id);
@@ -525,7 +526,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(500);
 
             // Assert
-            var updatedReturnHomeMission = await _missionRunService.ReadById(returnToHomeMission.Id);
+            var updatedReturnHomeMission = await _missionRunService.ReadById(returnToHomeMission.Id, readOnly: true);
             Assert.True(updatedReturnHomeMission?.Status.Equals(MissionStatus.Aborted));
 
             // Act
@@ -552,7 +553,7 @@ namespace Api.Test.EventHandlers
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttIsarStatusEventArgs);
             Thread.Sleep(500);
 
-            var updatedMissionRun = await _missionRunService.ReadById(missionRun.Id);
+            var updatedMissionRun = await _missionRunService.ReadById(missionRun.Id, readOnly: true);
             Assert.True(updatedMissionRun?.Status.Equals(MissionStatus.Ongoing));
         }
     }
