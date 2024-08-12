@@ -20,6 +20,7 @@ namespace Api.Test.Services
         private readonly MissionRunService _missionRunService;
         private readonly ISignalRService _signalRService;
         private readonly IAccessRoleService _accessRoleService;
+        private readonly UserInfoService _userInfoService;
 
         public MissionServiceTest(DatabaseFixture fixture)
         {
@@ -27,7 +28,8 @@ namespace Api.Test.Services
             _logger = new Mock<ILogger<MissionRunService>>().Object;
             _signalRService = new MockSignalRService();
             _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
-            _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService);
+            _userInfoService = new UserInfoService(_context, new HttpContextAccessor());
+            _missionRunService = new MissionRunService(_context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService, _userInfoService);
             _databaseUtilities = new DatabaseUtilities(_context);
         }
 

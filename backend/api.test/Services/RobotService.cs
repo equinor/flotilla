@@ -26,6 +26,7 @@ namespace Api.Test.Services
         private readonly IDeckService _deckService;
         private readonly IAreaService _areaService;
         private readonly IMissionRunService _missionRunService;
+        private readonly IUserInfoService _userInfoService;
 
         public RobotServiceTest(DatabaseFixture fixture)
         {
@@ -39,7 +40,8 @@ namespace Api.Test.Services
             _defaultLocalizationPoseService = new DefaultLocalizationPoseService(_context);
             _deckService = new DeckService(_context, _defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, _signalRService);
             _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalizationPoseService, _accessRoleService);
-            _missionRunService = new MissionRunService(_context, _signalRService, new Mock<ILogger<MissionRunService>>().Object, _accessRoleService);
+            _userInfoService = new UserInfoService(_context, new HttpContextAccessor());
+            _missionRunService = new MissionRunService(_context, _signalRService, new Mock<ILogger<MissionRunService>>().Object, _accessRoleService, _userInfoService);
         }
 
         public void Dispose()
