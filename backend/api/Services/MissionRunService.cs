@@ -52,9 +52,14 @@ namespace Api.Services
             string isarMissionId,
             MissionStatus missionStatus
         );
+
         public Task<MissionRun?> Delete(string id);
+
         public Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value);
 
+        public Task UpdateCurrentRobotMissionToFailed(string robotId);
+
+        public void DetachTracking(MissionRun missionRun);
     }
 
     [SuppressMessage(
@@ -72,6 +77,9 @@ namespace Api.Services
         ISignalRService signalRService,
         ILogger<MissionRunService> logger,
         IAccessRoleService accessRoleService,
+        IMissionTaskService missionTaskService,
+        IAreaService areaService,
+        IRobotService robotService,
         IUserInfoService userInfoService) : IMissionRunService
     {
         public async Task<MissionRun> Create(MissionRun missionRun, bool triggerCreatedMissionRunEvent = true)
@@ -108,6 +116,7 @@ namespace Api.Services
             {
                 logger.LogInformation(e, $"Failed to log user information because: {e.Message}");
             }
+            DetachTracking(missionRun);
 
             return missionRun;
         }
@@ -589,6 +598,35 @@ namespace Api.Services
             try { missionRun = await Update(missionRun); }
             catch (InvalidOperationException e) { logger.LogError(e, "Failed to update {missionRunName}", missionRun.Name); };
             return missionRun;
+        }
+
+        public async Task UpdateCurrentRobotMissionToFailed(string robotId)
+        {
+            var robot = await robotService.ReadById(robotId, readOnly: true) ?? throw new RobotNotFoundException($"Robot with ID: {robotId} was not found in the database");
+            if (robot.CurrentMissionId != null)
+            {
+                var missionRun = await ReadById(robot.CurrentMissionId, readOnly: false);
+                if (missionRun != null)
+                {
+                    missionRun.SetToFailed("Lost connection to ISAR during mission");
+                    await Update(missionRun);
+                    logger.LogWarning(
+                        "Mission '{Id}' failed because ISAR could not be reached",
+                        missionRun.Id
+                    );
+                }
+            }
+        }
+
+        public void DetachTracking(MissionRun missionRun)
+        {
+            foreach (var task in missionRun.Tasks)
+            {
+                missionTaskService.DetachTracking(task);
+            }
+            if (missionRun.Area != null) areaService.DetachTracking(missionRun.Area);
+            if (missionRun.Robot != null) robotService.DetachTracking(missionRun.Robot);
+            context.Entry(missionRun).State = EntityState.Detached;
         }
     }
 }

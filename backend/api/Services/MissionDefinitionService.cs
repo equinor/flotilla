@@ -30,6 +30,8 @@ namespace Api.Services
         public Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
         public Task<MissionDefinition?> Delete(string id);
+
+        public void DetachTracking(MissionDefinition missionDefinition);
     }
 
     [SuppressMessage(
@@ -47,7 +49,8 @@ namespace Api.Services
             ISignalRService signalRService,
             IAccessRoleService accessRoleService,
             ILogger<IMissionDefinitionService> logger,
-            IMissionRunService missionRunService) : IMissionDefinitionService
+            IMissionRunService missionRunService,
+            ISourceService sourceService) : IMissionDefinitionService
     {
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
         {
@@ -58,6 +61,7 @@ namespace Api.Services
             await context.MissionDefinitions.AddAsync(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.Area?.Installation);
             _ = signalRService.SendMessageAsync("Mission definition created", missionDefinition.Area?.Installation, new MissionDefinitionResponse(missionDefinition));
+            DetachTracking(missionDefinition);
             return missionDefinition;
         }
 
@@ -238,6 +242,13 @@ namespace Api.Services
 
             // Constructing the resulting lambda expression by combining parameter and body
             return Expression.Lambda<Func<MissionDefinition, bool>>(body, missionDefinitionExpression);
+        }
+
+        public void DetachTracking(MissionDefinition missionDefinition)
+        {
+            if (missionDefinition.LastSuccessfulRun != null) missionRunService.DetachTracking(missionDefinition.LastSuccessfulRun);
+            if (missionDefinition.Source != null) sourceService.DetachTracking(missionDefinition.Source);
+            context.Entry(missionDefinition).State = EntityState.Detached;
         }
     }
 }

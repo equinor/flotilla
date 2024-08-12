@@ -13,6 +13,7 @@ namespace Api.Test.Mocks
         public readonly Mock<IRobotModelService> RobotModelServiceMock;
         public readonly Mock<IRobotService> RobotServiceMock;
         public readonly Mock<IInstallationService> InstallationServiceMock;
+        public readonly Mock<IErrorHandlingService> ErrorHandlingServiceMock;
 
         public RobotControllerMock()
         {
@@ -22,6 +23,7 @@ namespace Api.Test.Mocks
             RobotModelServiceMock = new Mock<IRobotModelService>();
             AreaServiceMock = new Mock<IAreaService>();
             InstallationServiceMock = new Mock<IInstallationService>();
+            ErrorHandlingServiceMock = new Mock<IErrorHandlingService>();
 
             var mockLoggerController = new Mock<ILogger<RobotController>>();
 
@@ -32,7 +34,8 @@ namespace Api.Test.Mocks
                 MissionServiceMock.Object,
                 RobotModelServiceMock.Object,
                 AreaServiceMock.Object,
-                InstallationServiceMock.Object
+                InstallationServiceMock.Object,
+                ErrorHandlingServiceMock.Object
             )
             {
                 CallBase = true

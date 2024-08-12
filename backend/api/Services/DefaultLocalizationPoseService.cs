@@ -17,6 +17,7 @@ namespace Api.Services
 
         public abstract Task<DefaultLocalizationPose?> Delete(string id);
 
+        public void DetachTracking(DefaultLocalizationPose defaultLocalizationPose);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -48,6 +49,7 @@ namespace Api.Services
             await context.DefaultLocalizationPoses.AddAsync(defaultLocalizationPose);
             await context.SaveChangesAsync();
 
+            DetachTracking(defaultLocalizationPose);
             return defaultLocalizationPose;
         }
 
@@ -71,6 +73,11 @@ namespace Api.Services
             await context.SaveChangesAsync();
 
             return defaultLocalizationPose;
+        }
+
+        public void DetachTracking(DefaultLocalizationPose defaultLocalizationPose)
+        {
+            context.Entry(defaultLocalizationPose).State = EntityState.Detached;
         }
     }
 }
