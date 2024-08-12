@@ -194,7 +194,7 @@ namespace Api.Services
                 .Include(area => area.Plant)
                 .Include(area => area.Installation)
                 .Where((area) => accessibleInstallationCodes.Result.Contains(area.Installation.InstallationCode.ToUpper()));
-            return readOnly ? query.AsNoTracking() : query;
+            return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
         private IQueryable<Area> GetAreasWithSubModels(bool readOnly = false)
@@ -212,7 +212,7 @@ namespace Api.Services
              .Include(a => a.Installation)
              .Include(a => a.DefaultLocalizationPose)
              .Where(a => a.Installation != null && accessibleInstallationCodes.Result.Contains(a.Installation.InstallationCode.ToUpper()));
-            return readOnly ? query.AsNoTracking() : query;
+            return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
         public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName)

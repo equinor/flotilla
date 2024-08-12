@@ -389,7 +389,7 @@ namespace Api.Services
 #pragma warning disable CA1304
                 .Where((r) => r.CurrentInstallation == null || r.CurrentInstallation.InstallationCode == null || accessibleInstallationCodes.Result.Contains(r.CurrentInstallation.InstallationCode.ToUpper()));
 #pragma warning restore CA1304
-            return readOnly ? query.AsNoTracking() : query;
+            return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
         private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)
