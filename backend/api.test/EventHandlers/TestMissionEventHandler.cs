@@ -60,9 +60,11 @@ namespace Api.Test.EventHandlers
 
             var signalRService = new MockSignalRService();
             var accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
+            var userInfoService = new UserInfoService(context, new HttpContextAccessor());
 
             _mqttService = new MqttService(mqttServiceLogger, configuration);
-            _missionRunService = new MissionRunService(context, signalRService, missionLogger, accessRoleService);
+
+            _missionRunService = new MissionRunService(context, signalRService, missionLogger, accessRoleService, userInfoService);
 
 
             var echoServiceMock = new MockEchoService();
