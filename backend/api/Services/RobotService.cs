@@ -11,10 +11,9 @@ namespace Api.Services
     {
         public Task<Robot> Create(Robot newRobot);
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
-
         public Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = false);
         public Task<IEnumerable<Robot>> ReadAll(bool readOnly = false);
-        public Task<IEnumerable<string>> ReadAllActivePlants();
+        public Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = false);
         public Task<Robot?> ReadById(string id, bool readOnly = false);
         public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = false);
         public Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = false);
@@ -52,6 +51,8 @@ namespace Api.Services
         public async Task<Robot> Create(Robot newRobot)
         {
             if (newRobot.CurrentArea is not null) context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged;
+            if (newRobot.CurrentInstallation != null) context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
+            if (newRobot.Model != null) context.Entry(newRobot.Model).State = EntityState.Unchanged;
 
             await context.Robots.AddAsync(newRobot);
             await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
@@ -60,7 +61,7 @@ namespace Api.Services
 
         public async Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery)
         {
-            var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType);
+            var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType, readOnly: true);
             if (robotModel != null)
             {
                 var installation = await installationService.ReadByName(robotQuery.CurrentInstallationCode, readOnly: true);
@@ -85,9 +86,10 @@ namespace Api.Services
                 {
                     Model = robotModel
                 };
-                context.Entry(robotModel).State = EntityState.Unchanged;
+
                 if (newRobot.CurrentArea is not null) context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged;
-                if (newRobot.CurrentInstallation is not null) context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
+                if (newRobot.CurrentInstallation != null) context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
+                if (newRobot.Model != null) context.Entry(newRobot.Model).State = EntityState.Unchanged;
 
                 await context.Robots.AddAsync(newRobot);
                 await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
@@ -166,6 +168,7 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
+            DetachTracking(robot);
 
             return robot;
         }
@@ -183,6 +186,7 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
+            DetachTracking(robot);
 
             return robot;
         }
@@ -221,6 +225,7 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
+            DetachTracking(robot);
 
             return robot;
         }
@@ -238,6 +243,7 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
+            DetachTracking(robot);
 
             return robot;
         }
@@ -255,6 +261,7 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
+            DetachTracking(robot);
 
             return robot;
         }
@@ -263,7 +270,7 @@ namespace Api.Services
         {
             logger.LogInformation("Updating current area for robot with Id {robotId} to area with Id {areaId}", robotId, areaId);
             if (areaId is null) { return await UpdateRobotProperty(robotId, "CurrentArea", null); }
-            var area = await areaService.ReadById(areaId);
+            var area = await areaService.ReadById(areaId, readOnly: true);
             if (area is null)
             {
                 logger.LogError("Could not find area '{AreaId}' setting robot '{IsarId}' area to null", areaId, robotId);
@@ -289,24 +296,24 @@ namespace Api.Services
 
         public async Task<Robot?> ReadByIsarId(string isarId, bool readOnly = false)
         {
-            return await GetRobotsWithSubModels()
+            return await GetRobotsWithSubModels(readOnly: readOnly)
                 .FirstOrDefaultAsync(robot => robot.IsarId.Equals(isarId));
         }
 
-        public async Task<IEnumerable<string>> ReadAllActivePlants()
+        public async Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = false)
         {
-            return await GetRobotsWithSubModels().Where(r => r.IsarConnected && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
+            return await GetRobotsWithSubModels(readOnly: readOnly).Where(r => r.IsarConnected && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
         }
 
         public async Task<Robot> Update(Robot robot)
         {
             if (robot.CurrentArea is not null) context.Entry(robot.CurrentArea).State = EntityState.Unchanged;
-
             context.Entry(robot.Model).State = EntityState.Unchanged;
 
             var entry = context.Update(robot);
             await ApplyDatabaseUpdate(robot.CurrentInstallation);
             _ = signalRService.SendMessageAsync("Robot updated", robot?.CurrentInstallation, robot != null ? new RobotResponse(robot) : null);
+            DetachTracking(robot!);
             return entry.Entity;
         }
 
@@ -394,7 +401,7 @@ namespace Api.Services
 
         private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)
         {
-            var robot = await ReadById(robotId);
+            var robot = await ReadById(robotId, readOnly: false);
             if (robot is null)
             {
                 string errorMessage = $"Robot with ID {robotId} was not found in the database";
@@ -413,6 +420,7 @@ namespace Api.Services
 
             try { robot = await Update(robot); }
             catch (InvalidOperationException e) { logger.LogError(e, "Failed to update {robotName}", robot.Name); };
+            DetachTracking(robot);
             return robot;
         }
 

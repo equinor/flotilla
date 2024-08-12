@@ -13,7 +13,7 @@ namespace Api.Services.ActionServices
 
         public async Task<Robot?> AddBatteryEntry(float batteryLevel, string isarId)
         {
-            var robot = await robotService.ReadByIsarId(isarId);
+            var robot = await robotService.ReadByIsarId(isarId, readOnly: true);
             if (robot == null)
             {
                 logger.LogWarning("Could not find corresponding robot for battery update on robot with ISAR id'{IsarId}'", isarId);

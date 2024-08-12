@@ -141,7 +141,7 @@ namespace Api.EventHandlers
 
                 if (robot.CurrentMissionId != null)
                 {
-                    var missionRun = await MissionRunService.ReadById(robot.CurrentMissionId);
+                    var missionRun = await MissionRunService.ReadById(robot.CurrentMissionId, readOnly: true);
                     if (missionRun != null)
                     {
                         _logger.LogError(

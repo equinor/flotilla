@@ -82,11 +82,11 @@ namespace Api.Services
 
         public async Task<Deck> Create(CreateDeckQuery newDeckQuery)
         {
-            var installation = await installationService.ReadByName(newDeckQuery.InstallationCode) ??
+            var installation = await installationService.ReadByName(newDeckQuery.InstallationCode, readOnly: true) ??
                                throw new InstallationNotFoundException($"No installation with name {newDeckQuery.InstallationCode} could be found");
-            var plant = await plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode) ??
+            var plant = await plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode, readOnly: true) ??
                         throw new PlantNotFoundException($"No plant with name {newDeckQuery.PlantCode} could be found");
-            var existingDeck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name);
+            var existingDeck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name, readOnly: true);
 
             if (existingDeck != null)
             {

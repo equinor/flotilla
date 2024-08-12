@@ -53,7 +53,6 @@ namespace Api.Services
             MissionStatus missionStatus
         );
         public Task<MissionRun?> Delete(string id);
-        public Task<bool> OngoingMission(string robotId);
         public Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value);
 
     }
@@ -78,16 +77,6 @@ namespace Api.Services
         public async Task<MissionRun> Create(MissionRun missionRun, bool triggerCreatedMissionRunEvent = true)
         {
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
-            // Making sure database does not try to create new robot
-            try
-            {
-                context.Entry(missionRun.Robot).State = EntityState.Unchanged;
-            }
-            catch (InvalidOperationException e)
-            {
-                throw new DatabaseUpdateException($"Unable to create mission. {e}");
-            }
-
 
             if (IncludesUnsupportedInspectionType(missionRun))
             {
@@ -95,8 +84,10 @@ namespace Api.Services
             }
 
             if (missionRun.Area is not null) { context.Entry(missionRun.Area).State = EntityState.Unchanged; }
+            if (missionRun.Robot is not null) { context.Entry(missionRun.Robot).State = EntityState.Unchanged; }
             await context.MissionRuns.AddAsync(missionRun);
             await ApplyDatabaseUpdate(missionRun.Area?.Installation);
+
             _ = signalRService.SendMessageAsync("Mission run created", missionRun.Area?.Installation, new MissionRunResponse(missionRun));
 
             if (triggerCreatedMissionRunEvent)
@@ -117,6 +108,7 @@ namespace Api.Services
             {
                 logger.LogInformation(e, $"Failed to log user information because: {e.Message}");
             }
+
             return missionRun;
         }
 
@@ -284,6 +276,7 @@ namespace Api.Services
             var entry = context.Update(missionRun);
             await ApplyDatabaseUpdate(missionRun.Area?.Installation);
             _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
+            DetachTracking(missionRun!);
             return entry.Entity;
         }
 
@@ -300,20 +293,6 @@ namespace Api.Services
             _ = signalRService.SendMessageAsync("Mission run deleted", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
 
             return missionRun;
-        }
-
-        public async Task<bool> OngoingMission(string robotId)
-        {
-            var ongoingMissions = await ReadAll(
-                new MissionRunQueryStringParameters
-                {
-                    Statuses = [MissionStatus.Ongoing],
-                    RobotId = robotId,
-                    OrderBy = "DesiredStartTime",
-                    PageSize = 100
-                });
-
-            return ongoingMissions.Any();
         }
 
         private IQueryable<MissionRun> GetMissionRunsWithSubModels(bool readOnly = false)

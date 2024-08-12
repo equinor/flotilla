@@ -149,7 +149,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IList<PlantInfo>>> GetActivePlants()
         {
-            var plants = await robotService.ReadAllActivePlants();
+            var plants = await robotService.ReadAllActivePlants(readOnly: true);
 
             if (plants == null)
             {

@@ -80,7 +80,7 @@ namespace Api.EventHandlers
         {
             var isarStatus = (IsarStatusMessage)mqttArgs.Message;
 
-            var robot = await RobotService.ReadByIsarId(isarStatus.IsarId);
+            var robot = await RobotService.ReadByIsarId(isarStatus.IsarId, readOnly: true);
 
             if (robot == null)
             {
@@ -92,7 +92,7 @@ namespace Api.EventHandlers
 
             if (await MissionRunService.OngoingOrPausedLocalizationMissionRunExists(robot.Id)) Thread.Sleep(5000); // Give localization mission update time to complete
 
-            var preUpdatedRobot = await RobotService.ReadByIsarId(isarStatus.IsarId);
+            var preUpdatedRobot = await RobotService.ReadByIsarId(isarStatus.IsarId, readOnly: true);
             if (preUpdatedRobot == null)
             {
                 _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", isarStatus.IsarId, isarStatus.RobotName);
@@ -255,7 +255,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            var flotillaMissionRun = await MissionRunService.ReadByIsarMissionId(isarMission.MissionId);
+            var flotillaMissionRun = await MissionRunService.ReadByIsarMissionId(isarMission.MissionId, readOnly: true);
             if (flotillaMissionRun is null)
             {
                 string errorMessage = $"Mission with isar mission Id {isarMission.IsarId} was not found";
@@ -312,7 +312,7 @@ namespace Api.EventHandlers
 
             if (!updatedFlotillaMissionRun.IsCompleted) return;
 
-            var robot = await RobotService.ReadByIsarId(isarMission.IsarId);
+            var robot = await RobotService.ReadByIsarId(isarMission.IsarId, readOnly: true);
             if (robot is null)
             {
                 _logger.LogError("Could not find robot '{RobotName}' with ISAR id '{IsarId}'", isarMission.RobotName, isarMission.IsarId);

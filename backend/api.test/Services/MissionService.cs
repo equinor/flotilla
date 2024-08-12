@@ -42,7 +42,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var missionRun = await _missionRunService.ReadById("some_id_that_does_not_exist");
+            var missionRun = await _missionRunService.ReadById("some_id_that_does_not_exist", readOnly: true);
             Assert.Null(missionRun);
         }
 
@@ -50,7 +50,8 @@ namespace Api.Test.Services
         public async Task Create()
         {
             var reportsBefore = await _missionRunService.ReadAll(
-                new MissionRunQueryStringParameters()
+                new MissionRunQueryStringParameters(),
+                readOnly: true
             );
             int nReportsBefore = reportsBefore.Count;
 

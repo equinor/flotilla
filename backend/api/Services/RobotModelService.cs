@@ -32,7 +32,7 @@ namespace Api.Services
         {
             _context = context;
 
-            if (!ReadAll().Result.Any())
+            if (!ReadAll(readOnly: true).Result.Any())
             {
                 // If no models in database, add default ones
                 // Robot models are essentially database enums and should just be added to all databases
