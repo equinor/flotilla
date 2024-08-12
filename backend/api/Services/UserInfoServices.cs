@@ -26,7 +26,7 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class UserInfoService(FlotillaDbContext context, IHttpContextAccessor httpContextAccessor) : IUserInfoService
+    public class UserInfoService(FlotillaDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<UserInfoService> logger) : IUserInfoService
     {
         public async Task<IEnumerable<UserInfo>> ReadAll()
         {
@@ -85,13 +85,13 @@ namespace Api.Services
         public async Task<UserInfo?> GetRequestedUserInfo()
         {
             if (httpContextAccessor.HttpContext == null)
-                throw new HttpRequestException("User Info can only be requested in authenticated HTTP requests");
+                throw new HttpRequestException("User Info can only be requested in authenticated HTTP requests.");
             var claims = httpContextAccessor.HttpContext.GetRequestedClaims();
 
             var objectIdClaim = claims.FirstOrDefault(c => c.Type == "oid");
             if (objectIdClaim is null)
             {
-                //handle this exception
+                logger.LogWarning("User objectId is null so it will not be added to the database.");
                 return null;
             }
             var userInfo = await ReadByOid(objectIdClaim.Value);
