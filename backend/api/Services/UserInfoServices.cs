@@ -18,7 +18,6 @@ namespace Api.Services
         public Task<UserInfo?> Delete(string id);
 
         public Task<UserInfo?> GetRequestedUserInfo();
-
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -50,13 +49,10 @@ namespace Api.Services
                 .FirstOrDefaultAsync(a => a.Oid.Equals(oid));
         }
 
-
         public async Task<UserInfo> Create(UserInfo userInfo)
         {
-
             await context.UserInfos.AddAsync(userInfo);
             await context.SaveChangesAsync();
-
             return userInfo;
         }
 

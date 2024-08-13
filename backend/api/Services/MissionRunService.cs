@@ -115,7 +115,6 @@ namespace Api.Services
             }
             catch (HttpRequestException e)
             {
-
                 logger.LogInformation(e, $"Failed to log user information because: {e.Message}");
             }
             return missionRun;
