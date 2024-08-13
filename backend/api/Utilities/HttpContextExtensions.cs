@@ -34,5 +34,13 @@ namespace Api.Utilities
             var jwtSecurityToken = handler.ReadJwtToken(accessTokenBase64);
             return jwtSecurityToken.Claims.ToList();
         }
+
+        public static string? GetUserObjectId(this HttpContext client)
+        {
+            var claims = client.GetRequestedClaims();
+            var objectIdClaim = claims.FirstOrDefault(c => c.Type == "oid");
+            if (objectIdClaim is null) { return null; }
+            return objectIdClaim.Value;
+        }
     }
 }

@@ -10,8 +10,6 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
         [Required]
-        public string Username { get; set; }
-        [Required]
         public string Oid { get; set; }
     }
 }
