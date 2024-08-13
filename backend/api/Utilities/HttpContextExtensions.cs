@@ -16,15 +16,9 @@ namespace Api.Utilities
 
         public static List<System.Security.Claims.Claim> GetRequestedRoles(this HttpContext client)
         {
-            string accessTokenBase64 = client.GetRequestToken();
-
-            var handler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = handler.ReadJwtToken(accessTokenBase64);
-
-            var claims = jwtSecurityToken.Claims;
+            var claims = client.GetRequestedClaims();
             var roles = claims.Where((c) => c.Type == "roles" || c.Type.EndsWith("role", StringComparison.CurrentCulture)).ToList();
             return roles;
-
         }
 
         public static List<string> GetRequestedRoleNames(this HttpContext client)
