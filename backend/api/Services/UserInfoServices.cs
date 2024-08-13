@@ -82,22 +82,19 @@ namespace Api.Services
         {
             if (httpContextAccessor.HttpContext == null)
                 throw new HttpRequestException("User Info can only be requested in authenticated HTTP requests.");
-            var claims = httpContextAccessor.HttpContext.GetRequestedClaims();
 
-            var objectIdClaim = claims.FirstOrDefault(c => c.Type == "oid");
-            if (objectIdClaim is null)
+            string? objectId = httpContextAccessor.HttpContext.GetUserObjectId();
+            if (objectId is null)
             {
                 logger.LogWarning("User objectId is null so it will not be added to the database.");
                 return null;
             }
-            var userInfo = await ReadByOid(objectIdClaim.Value);
+            var userInfo = await ReadByOid(objectId);
             if (userInfo is null)
             {
-                var preferredUsernameClaim = claims.FirstOrDefault(c => c.Type == "preferred_username");
                 var newUserInfo = new UserInfo
                 {
-                    Username = preferredUsernameClaim!.Value,
-                    Oid = objectIdClaim.Value
+                    Oid = objectId
                 };
                 userInfo = await Create(newUserInfo);
             }
