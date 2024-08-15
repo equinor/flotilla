@@ -22,6 +22,7 @@ const StyledCard = styled(Card)`
 const HoverableStyledCard = styled(Card)`
     display: flex;
     flex-direction: column;
+    height: 300px;
     width: 280px;
     gap: 0px;
     background-color: ${tokens.colors.ui.background__default.hex};

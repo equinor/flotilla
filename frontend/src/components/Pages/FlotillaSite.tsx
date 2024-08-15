@@ -7,6 +7,9 @@ import { RobotPage } from './RobotPage/RobotPage'
 import { APIUpdater } from 'components/Contexts/APIUpdater'
 import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
 import { AssetSelectionPage } from './AssetSelectionPage/AssetSelectionPage'
+import { MissionControlPage } from './FrontPage/MissionControlPage'
+import { InspectionPage } from './InspectionPage/InspectionPage'
+import { RobotsPage } from './RobotPage/RobotsPage'
 
 export const FlotillaSite = () => {
     return (
@@ -23,6 +26,9 @@ export const FlotillaSite = () => {
                         />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/history`} element={<MissionHistoryPage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`} element={<RobotPage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/missionControl`} element={<MissionControlPage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/inspectionPage`} element={<InspectionPage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/robotsPage`} element={<RobotsPage />} />
                     </Routes>
                 </BrowserRouter>
             </APIUpdater>

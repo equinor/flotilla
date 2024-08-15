@@ -7,10 +7,15 @@ import { Icons } from 'utils/icons'
 import { useAlertContext } from 'components/Contexts/AlertContext'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
+import { NavigationMenu } from './NavigationMenu'
 
 const StyledTopBar = styled(TopBar)`
-    align-items: center;
+    display: flex;
     box-shadow: none;
+    padding: 8px 24px 0px 24px;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
 `
 const StyledWrapper = styled.div`
     display: flex;
@@ -64,6 +69,7 @@ export const Header = ({ page }: { page: string }) => {
                         </StyledTopBarHeader>
                     </TopBar.Header>
                 </StyledWrapper>
+                <NavigationMenu />
                 <TopBar.Actions>
                     <Button
                         variant="ghost_icon"

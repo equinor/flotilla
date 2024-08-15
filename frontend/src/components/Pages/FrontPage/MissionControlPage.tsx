@@ -1,16 +1,14 @@
 import { MissionQueueView } from 'components/Pages/FrontPage/MissionOverview/MissionQueueView'
 import { OngoingMissionView } from 'components/Pages/FrontPage/MissionOverview/OngoingMissionView'
-import { RobotStatusSection } from 'components/Pages/FrontPage/RobotCards/RobotStatusSection'
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
-import { InspectionOverviewSection } from 'components/Pages/InspectionPage/InspectionOverview'
 import { StopRobotDialog } from './MissionOverview/StopDialogs'
 import { tokens } from '@equinor/eds-tokens'
 
 const StyledFrontPage = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
-    gap: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
     padding: 15px 15px;
     background-color: ${tokens.colors.ui.background__light.hex};
     min-height: calc(100vh - 65px);
@@ -30,10 +28,10 @@ const MissionsContent = styled.div`
     gap: 2rem;
 `
 
-export const FrontPage = () => {
+export const MissionControlPage = () => {
     return (
         <>
-            <Header page={'frontPage'} />
+            <Header page={'missionControlPage'} />
             <StyledFrontPage>
                 <StopRobotDialog />
                 <HorizontalContent>
@@ -42,8 +40,6 @@ export const FrontPage = () => {
                         <MissionQueueView />
                     </MissionsContent>
                 </HorizontalContent>
-                <RobotStatusSection />
-                <InspectionOverviewSection />
             </StyledFrontPage>
         </>
     )
