@@ -49,7 +49,7 @@ export const NavigationMenu = () => {
                 aria-controls="menu"
                 onClick={() => (isOpen ? closeMenu() : openMenu())}
             >
-                <Icon name={Icons.Menu}></Icon>
+                <Icon name={Icons.Menu} />
                 {TranslateText('Menu')}
             </StyledButton>
             <Menu open={isOpen} id="menu" aria-labelledby="menu" onClose={closeMenu} anchorEl={anchorEl}>
