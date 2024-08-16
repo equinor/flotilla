@@ -259,5 +259,11 @@
     "Failed to update inspection": "Failed to update inspection",
     "Battery": "Battery",
     "Recharging": "Recharging",
-    "Active Filters": "Active Filters"
+    "Active Filters": "Active Filters",
+    "Menu": "Menu",
+    "Front page": "Front page",
+    "Mission control": "Mission control",
+    "Mission history": "Mission history",
+    "Deck overview": "Deck overview",
+    "Robots": "Robots"
 }

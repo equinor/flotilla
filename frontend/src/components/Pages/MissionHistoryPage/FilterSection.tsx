@@ -26,7 +26,7 @@ const StyledHeader = styled.div`
     }
 `
 
-const StyledSerach = styled(Search)`
+const StyledSearch = styled(Search)`
     display: flex;
     width: 288px;
     height: 36px;
@@ -35,6 +35,9 @@ const StyledSerach = styled(Search)`
     border-bottom: none;
     border: 1px solid ${tokens.colors.ui.background__medium.hex};
     --eds-input-background: white;
+    > div {
+        box-shadow: unset;
+    }
 `
 
 const StyledButtonDiv = styled.div`
@@ -85,7 +88,7 @@ export const FilterSection = () => {
     return (
         <>
             <StyledHeader>
-                <StyledSerach
+                <StyledSearch
                     value={filterState.missionName ?? ''}
                     placeholder={TranslateText('Search for missions')}
                     onChange={(changes: ChangeEvent<HTMLInputElement>) => {

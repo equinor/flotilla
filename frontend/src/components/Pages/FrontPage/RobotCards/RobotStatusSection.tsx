@@ -10,9 +10,10 @@ const RobotCardSection = styled.div`
     gap: 2rem;
 `
 const RobotView = styled.div`
-    display: grid;
-    grid-column: 1/ -1;
-    gap: 1rem;
+    display: flex;
+    padding-top: 1rem;
+    flex-direction: column;
+    gap: 1.5rem;
 `
 
 export const RobotStatusSection = () => {

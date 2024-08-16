@@ -28,13 +28,13 @@ export const TextAlignedButton = styled(Button)`
 `
 export const StyledPage = styled.div`
     display: flex;
-    flex-wrap: wrap;
     justify-content: start;
     flex-direction: column;
     gap: 1rem;
-    padding: 2rem;
+    padding: 15px 15px;
     @media (max-width: 600px) {
         padding: 0.7rem;
     }
     min-height: calc(100vh - 65px);
+    background-color: ${tokens.colors.ui.background__light.hex};
 `
