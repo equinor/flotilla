@@ -3,14 +3,7 @@ services:
     build: frontend
     ports:
       - "3001:3001"
-    environment:
-      - REACT_APP_AI_CONNECTION_STRING= 
-      - REACT_APP_BACKEND_URL=http://localhost:8000
-      - REACT_APP_BACKEND_API_SCOPE=api://ea4c7b92-47b3-45fb-bd25-a8070f0c495c/user_impersonation
-      - REACT_APP_FRONTEND_URL=http://localhost:3001
-      - REACT_APP_FRONTEND_BASE_ROUTE=
-      - REACT_APP_AD_CLIENT_ID=f5993820-b7e2-4791-886f-f9f5027dc7be
-      - REACT_APP_AD_TENANT_ID=3aa4a235-b6e2-48d5-9195-7fcf05b459b0
+    env_file: "frontend/.env"
   broker:
     build:
       context: broker
