@@ -9,7 +9,7 @@ import { Icons } from 'utils/icons'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { StyledAutoComplete, StyledButton, StyledDialog } from 'components/Styles/StyledComponents'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { ScheduleMissionWithConfirmDialogs } from 'components/Displays/ConfirmScheduleDialogs/ConfirmScheduleDialog'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
@@ -54,7 +54,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
     const { setLoadingMissionSet } = useMissionsContext()
-    const { setAlert } = useAlertContext()
+    const { setAlert, setListAlert } = useAlertContext()
     const [isLocalizationVerificationDialogOpen, setIsLocalizationVerificationDialog] = useState<boolean>(false)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [missionsToSchedule, setMissionsToSchedule] = useState<CondensedMissionDefinition[]>()
@@ -86,6 +86,15 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent
+                        translatedMessage={
+                            TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`
+                        }
+                    />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent
                         translatedMessage={
                             TranslateText('Failed to schedule mission') + ` '${mission.name}'. ${e.message}`
                         }

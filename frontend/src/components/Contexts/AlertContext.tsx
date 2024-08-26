@@ -1,20 +1,20 @@
 import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react'
 import { addMinutes, max } from 'date-fns'
 import { Mission, MissionStatus } from 'models/Mission'
-import { FailedMissionAlertContent } from 'components/Alerts/FailedMissionAlert'
+import { FailedMissionAlertContent, FailedMissionAlertListContent } from 'components/Alerts/FailedMissionAlert'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useInstallationContext } from './InstallationContext'
 import { Alert } from 'models/Alert'
 import { useRobotContext } from './RobotContext'
-import { BlockedRobotAlertContent } from 'components/Alerts/BlockedRobotAlert'
+import { BlockedRobotAlertContent, BlockedRobotAlertListContent } from 'components/Alerts/BlockedRobotAlert'
 import { RobotStatus } from 'models/Robot'
-import { FailedAlertContent } from 'components/Alerts/FailedAlertContent'
+import { FailedAlertContent, FailedAlertListContent } from 'components/Alerts/FailedAlertContent'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { SafeZoneAlertContent } from 'components/Alerts/SafeZoneAlert'
+import { SafeZoneAlertContent, SafeZoneAlertListContent } from 'components/Alerts/SafeZoneAlert'
 import { useLanguageContext } from './LanguageContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 
 export enum AlertType {
     MissionFail,
@@ -165,6 +165,13 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                         />,
                         AlertCategory.ERROR
                     )
+                    setListAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertListContent
+                            translatedMessage={TranslateText('Failed to retrieve failed missions')}
+                        />,
+                        AlertCategory.ERROR
+                    )
                 })
         }
         if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
@@ -213,10 +220,21 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                         AlertCategory.INFO
                     )
                     clearAlert(AlertType.RequestSafeZone)
+                    setListAlert(
+                        alertType,
+                        <SafeZoneAlertListContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
+                        AlertCategory.INFO
+                    )
+                    clearListAlert(AlertType.RequestSafeZone)
                 } else {
                     setAlert(
                         alertType,
                         <FailedAlertContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
+                        AlertCategory.ERROR
+                    )
+                    setListAlert(
+                        alertType,
+                        <FailedAlertListContent title={backendAlert.alertTitle} message={backendAlert.alertMessage} />,
                         AlertCategory.ERROR
                     )
                 }
@@ -230,6 +248,11 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             setAlert(
                 AlertType.MissionFail,
                 <FailedMissionAlertContent missions={newFailedMissions} />,
+                AlertCategory.ERROR
+            )
+            setListAlert(
+                AlertType.MissionFail,
+                <FailedMissionAlertListContent missions={newFailedMissions} />,
                 AlertCategory.ERROR
             )
             setNewFailedMissions([])
@@ -253,8 +276,14 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     <BlockedRobotAlertContent robotNames={newBlockedRobotNames} />,
                     AlertCategory.WARNING
                 )
+                setListAlert(
+                    AlertType.BlockedRobot,
+                    <BlockedRobotAlertListContent robotNames={newBlockedRobotNames} />,
+                    AlertCategory.WARNING
+                )
             } else {
                 clearAlert(AlertType.BlockedRobot)
+                clearListAlert(AlertType.BlockedRobot)
             }
         }
         setBlockedRobotNames(newBlockedRobotNames)

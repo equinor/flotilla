@@ -5,7 +5,7 @@ import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { TaskStatus } from 'models/Task'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useInstallationContext } from './InstallationContext'
 
@@ -82,7 +82,7 @@ export const useMissionRuns = (): IMissionRunsContext => {
     const [loadingMissionSet, setLoadingMissionSet] = useState<Set<string>>(new Set())
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
-    const { setAlert } = useAlertContext()
+    const { setAlert, setListAlert } = useAlertContext()
     const { installationCode } = useInstallationContext()
 
     useEffect(() => {
@@ -137,6 +137,13 @@ export const useMissionRuns = (): IMissionRunsContext => {
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
                     AlertCategory.ERROR
                 )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent
+                        translatedMessage={TranslateText('Failed to retrieve mission runs')}
+                    />,
+                    AlertCategory.ERROR
+                )
             })
 
             setOngoingMissions(ongoing ?? [])
@@ -149,6 +156,13 @@ export const useMissionRuns = (): IMissionRunsContext => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent
+                        translatedMessage={TranslateText('Failed to retrieve mission runs')}
+                    />,
                     AlertCategory.ERROR
                 )
             })

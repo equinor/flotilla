@@ -13,7 +13,7 @@ import { Header } from 'components/Header/Header'
 import { SignalREventLabels, useSignalRContext } from 'components/Contexts/SignalRContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const StyledMissionPage = styled.div`
@@ -40,7 +40,7 @@ const VideoStreamSection = styled.div`
 export const MissionPage = () => {
     const { missionId } = useParams()
     const { TranslateText } = useLanguageContext()
-    const { setAlert } = useAlertContext()
+    const { setAlert, setListAlert } = useAlertContext()
     const [videoStreams, setVideoStreams] = useState<VideoStream[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
@@ -73,6 +73,13 @@ export const MissionPage = () => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent
+                            translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                    setListAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertListContent
                             translatedMessage={TranslateText('Failed to find mission with ID {0}', [missionId])}
                         />,
                         AlertCategory.ERROR

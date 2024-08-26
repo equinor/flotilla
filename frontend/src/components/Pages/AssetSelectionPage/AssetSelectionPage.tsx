@@ -12,7 +12,7 @@ import { EchoPlantInfo } from 'models/EchoMission'
 import { Header } from 'components/Header/Header'
 import { config } from 'config'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const Centered = styled.div`
@@ -74,7 +74,7 @@ export const AssetSelectionPage = () => {
 const InstallationPicker = () => {
     const { installationName, switchInstallation } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
-    const { setAlert } = useAlertContext()
+    const { setAlert, setListAlert } = useAlertContext()
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>(new Map())
     const [selectedInstallation, setSelectedInstallation] = useState<string>(installationName)
     const [showActivePlants, setShowActivePlants] = useState<boolean>(true)
@@ -99,6 +99,13 @@ const InstallationPicker = () => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent
+                            translatedMessage={TranslateText('Failed to retrieve installations from Echo')}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                    setListAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertListContent
                             translatedMessage={TranslateText('Failed to retrieve installations from Echo')}
                         />,
                         AlertCategory.ERROR
