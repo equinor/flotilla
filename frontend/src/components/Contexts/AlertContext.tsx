@@ -41,6 +41,10 @@ interface IAlertContext {
     setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => void
     clearAlerts: () => void
     clearAlert: (source: AlertType) => void
+    listAlerts: AlertDictionaryType
+    setListAlert: (source: AlertType, listAlert: ReactNode, category: AlertCategory) => void
+    clearListAlerts: () => void
+    clearListAlert: (source: AlertType) => void
 }
 
 interface Props {
@@ -52,12 +56,17 @@ const defaultAlertInterface = {
     setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => {},
     clearAlerts: () => {},
     clearAlert: (source: AlertType) => {},
+    listAlerts: {},
+    setListAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => {},
+    clearListAlerts: () => {},
+    clearListAlert: (source: AlertType) => {},
 }
 
 export const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
 
 export const AlertProvider: FC<Props> = ({ children }) => {
     const [alerts, setAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.alerts)
+    const [listAlerts, setListAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.listAlerts)
     const [recentFailedMissions, setRecentFailedMissions] = useState<Mission[]>([])
     const [blockedRobotNames, setBlockedRobotNames] = useState<string[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
@@ -91,6 +100,32 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             let newAlerts = { ...oldAlerts }
             delete newAlerts[source]
             return newAlerts
+        })
+    }
+
+    const setListAlert = (source: AlertType, listAlert: ReactNode, category: AlertCategory) => {
+        setListAlerts((oldListAlerts) => {
+            return {
+                ...oldListAlerts,
+                [source]: {
+                    content: listAlert,
+                    dismissFunction: () => clearListAlert(source),
+                    alertCategory: category,
+                },
+            }
+        })
+    }
+
+    const clearListAlerts = () => setListAlerts({})
+
+    const clearListAlert = (source: AlertType) => {
+        if (source === AlertType.MissionFail)
+            sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
+
+        setListAlerts((oldListAlerts) => {
+            let newListAlerts = { ...oldListAlerts }
+            delete newListAlerts[source]
+            return newListAlerts
         })
     }
 
@@ -233,6 +268,10 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 setAlert,
                 clearAlerts,
                 clearAlert,
+                listAlerts,
+                setListAlert,
+                clearListAlerts,
+                clearListAlert,
             }}
         >
             {children}

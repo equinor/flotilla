@@ -4,6 +4,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { TextAlignedButton } from 'components/Styles/StyledComponents'
+import { AlertListContents } from './AlertsListItem'
 
 const StyledDiv = styled.div`
     align-items: center;
@@ -41,5 +42,21 @@ export const BlockedRobotAlertContent = ({ robotNames }: AlertProps) => {
                 </TextAlignedButton>
             </Indent>
         </StyledDiv>
+    )
+}
+
+export const BlockedRobotAlertListContent = ({ robotNames }: AlertProps) => {
+    const { TranslateText } = useLanguageContext()
+    let message = `${TranslateText('The robot')} ${robotNames[0]} ${TranslateText('is blocked and cannot perform tasks')}.`
+
+    if (robotNames.length > 1) message = `${TranslateText('Several robots are blocked and cannot perform tasks')}.`
+
+    return (
+        <AlertListContents
+            icon={Icons.Warning}
+            iconColor={tokens.colors.interactive.danger__resting.rgba}
+            alertTitle={TranslateText('Robot is blocked')}
+            alertText={message}
+        />
     )
 }

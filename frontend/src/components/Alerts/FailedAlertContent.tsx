@@ -4,6 +4,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { TextAlignedButton } from 'components/Styles/StyledComponents'
+import { AlertListContents } from './AlertsListItem'
 
 const StyledDiv = styled.div`
     align-items: center;
@@ -36,5 +37,17 @@ export const FailedAlertContent = ({ title, message }: { title: string; message:
                 </TextAlignedButton>
             </Indent>
         </StyledDiv>
+    )
+}
+
+export const FailedAlertListContent = ({ title, message }: { title: string; message: string }) => {
+    const { TranslateText } = useLanguageContext()
+    return (
+        <AlertListContents
+            icon={Icons.Failed}
+            iconColor={tokens.colors.interactive.danger__resting.rgba}
+            alertTitle={TranslateText(title)}
+            alertText={TranslateText(message)}
+        />
     )
 }
