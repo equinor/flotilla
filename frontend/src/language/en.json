@@ -259,5 +259,12 @@
     "Failed to update inspection": "Failed to update inspection",
     "Battery": "Battery",
     "Recharging": "Recharging",
-    "Active Filters": "Active Filters"
+    "Active Filters": "Active Filters",
+    "System Alerts": "System Alerts",
+    "System": "System",
+    "Alert": "Alert",
+    "Alerts": "Alerts",
+    "No alerts": "No alerts",
+    "minutes ago": "minutes ago",
+    "Failed to retrieve previous mission runs": "Failed to retrieve previous mission runs"
 }

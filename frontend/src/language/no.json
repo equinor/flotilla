@@ -36,7 +36,7 @@
     "Cancelled": "Kansellert",
     "Available": "Tilgjengelig",
     "Busy": "Opptatt",
-    "Offline": "Offline",
+    "Offline": "Frakoblet",
     "Start time": "Starttidspunkt",
     "Time used": "Tid brukt",
     "minutes": "minutter",
@@ -259,5 +259,12 @@
     "Failed to update inspection": "Kunne ikke oppdatere inspeksjon",
     "Battery": "Batteri",
     "Recharging": "Lader",
-    "Active Filters": "Aktive filtre"
+    "Active Filters": "Aktive filtre",
+    "System Alerts": "System Varsler",
+    "System": "System",
+    "Alert": "Varsling",
+    "Alerts": "Varsler",
+    "No alerts": "Ingen varsler",
+    "minutes ago": "minutter siden",
+    "Failed to retrieve previous mission runs": "Kunne ikke hente tildigere oppdragskjøringer"
 }

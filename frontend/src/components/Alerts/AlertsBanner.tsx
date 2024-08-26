@@ -51,21 +51,19 @@ export const AlertBanner = ({ children, dismissAlert, alertCategory }: AlertProp
     const [buttonBackgroundColor, setButtonBackgroundColor] = useState<string>(bannerColor)
 
     return (
-        <>
-            <StyledCard style={{ backgroundColor: bannerColor }}>
-                <Horizontal>
-                    <Center>{children}</Center>
-                </Horizontal>
-                <Button
-                    variant="ghost_icon"
-                    onClick={dismissAlert}
-                    style={{ backgroundColor: buttonBackgroundColor }}
-                    onPointerEnter={() => setButtonBackgroundColor(hoverColor)}
-                    onPointerLeave={() => setButtonBackgroundColor(bannerColor)}
-                >
-                    <Icon name={Icons.Clear} style={{ color: tokens.colors.text.static_icons__default.hex }}></Icon>
-                </Button>
-            </StyledCard>
-        </>
+        <StyledCard style={{ backgroundColor: bannerColor }}>
+            <Horizontal>
+                <Center>{children}</Center>
+            </Horizontal>
+            <Button
+                variant="ghost_icon"
+                onClick={dismissAlert}
+                style={{ backgroundColor: buttonBackgroundColor }}
+                onPointerEnter={() => setButtonBackgroundColor(hoverColor)}
+                onPointerLeave={() => setButtonBackgroundColor(bannerColor)}
+            >
+                <Icon name={Icons.Clear} style={{ color: tokens.colors.text.static_icons__default.hex }}></Icon>
+            </Button>
+        </StyledCard>
     )
 }
