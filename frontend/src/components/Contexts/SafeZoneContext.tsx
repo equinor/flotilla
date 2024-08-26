@@ -1,9 +1,10 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { useRobotContext } from './RobotContext'
-import { AlertType, useAlertContext } from './AlertContext'
-import { SafeZoneAlertContent } from 'components/Alerts/SafeZoneAlert'
+import { AlertType } from './AlertContext'
+import { SafeZoneAlertContent, SafeZoneAlertListContent } from 'components/Alerts/SafeZoneAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { RobotFlotillaStatus } from 'models/Robot'
+import { useAlertContext } from './AlertContext'
 
 interface ISafeZoneContext {
     safeZoneStatus: boolean
@@ -22,7 +23,7 @@ export const SafeZoneContext = createContext<ISafeZoneContext>(defaultSafeZoneIn
 export const SafeZoneProvider: FC<Props> = ({ children }) => {
     const [safeZoneStatus, setSafeZoneStatus] = useState<boolean>(defaultSafeZoneInterface.safeZoneStatus)
     const { enabledRobots } = useRobotContext()
-    const { setAlert, clearAlert } = useAlertContext()
+    const { setAlert, clearAlert, setListAlert, clearListAlert } = useAlertContext()
 
     useEffect(() => {
         const missionQueueFozenStatus = enabledRobots.filter(
@@ -31,7 +32,16 @@ export const SafeZoneProvider: FC<Props> = ({ children }) => {
 
         if (missionQueueFozenStatus.length > 0 && safeZoneStatus === false) {
             setSafeZoneStatus((oldStatus) => !oldStatus)
+            clearListAlert(AlertType.DismissSafeZone)
             clearAlert(AlertType.DismissSafeZone)
+            setListAlert(
+                AlertType.RequestSafeZone,
+                <SafeZoneAlertListContent
+                    alertType={AlertType.RequestSafeZone}
+                    alertCategory={AlertCategory.WARNING}
+                />,
+                AlertCategory.WARNING
+            )
             setAlert(
                 AlertType.RequestSafeZone,
                 <SafeZoneAlertContent alertType={AlertType.RequestSafeZone} alertCategory={AlertCategory.WARNING} />,
@@ -39,8 +49,15 @@ export const SafeZoneProvider: FC<Props> = ({ children }) => {
             )
         } else if (missionQueueFozenStatus.length === 0 && safeZoneStatus === true) {
             setSafeZoneStatus((oldStatus) => !oldStatus)
+            clearListAlert(AlertType.RequestSafeZone)
+            clearListAlert(AlertType.SafeZoneSuccess)
             clearAlert(AlertType.RequestSafeZone)
             clearAlert(AlertType.SafeZoneSuccess)
+            setListAlert(
+                AlertType.DismissSafeZone,
+                <SafeZoneAlertListContent alertType={AlertType.DismissSafeZone} alertCategory={AlertCategory.INFO} />,
+                AlertCategory.INFO
+            )
             setAlert(
                 AlertType.DismissSafeZone,
                 <SafeZoneAlertContent alertType={AlertType.DismissSafeZone} alertCategory={AlertCategory.INFO} />,

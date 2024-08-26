@@ -9,7 +9,7 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { TaskType } from 'models/Task'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { RobotFlotillaStatus } from 'models/Robot'
@@ -139,7 +139,7 @@ export const StopRobotDialog = (): JSX.Element => {
     const { enabledRobots } = useRobotContext()
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
-    const { setAlert } = useAlertContext()
+    const { setAlert, setListAlert } = useAlertContext()
 
     const safeZoneActivated = enabledRobots.find((r) => r.flotillaStatus === RobotFlotillaStatus.SafeZone) !== undefined
 
@@ -158,6 +158,13 @@ export const StopRobotDialog = (): JSX.Element => {
                 <FailedRequestAlertContent translatedMessage={TranslateText('Failed to send robots to a safe zone')} />,
                 AlertCategory.ERROR
             )
+            setListAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertListContent
+                    translatedMessage={TranslateText('Failed to send robots to a safe zone')}
+                />,
+                AlertCategory.ERROR
+            )
         })
         closeDialog()
         return
@@ -168,6 +175,13 @@ export const StopRobotDialog = (): JSX.Element => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent
+                    translatedMessage={TranslateText('Failed to release robots from safe zone')}
+                />,
+                AlertCategory.ERROR
+            )
+            setListAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertListContent
                     translatedMessage={TranslateText('Failed to release robots from safe zone')}
                 />,
                 AlertCategory.ERROR

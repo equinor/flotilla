@@ -6,7 +6,7 @@ import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { Area } from 'models/Area'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 interface IInstallationContext {
@@ -42,7 +42,7 @@ export const InstallationContext = createContext<IInstallationContext>(defaultIn
 export const InstallationProvider: FC<Props> = ({ children }) => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
-    const { setAlert } = useAlertContext()
+    const { setAlert, setListAlert } = useAlertContext()
     const [allPlantsMap, setAllPlantsMap] = useState<Map<string, string>>(new Map())
     const [installationName, setInstallationName] = useState<string>(
         window.localStorage.getItem('installationName') || ''
@@ -62,6 +62,13 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent
+                        translatedMessage={TranslateText('Failed to retrieve installations from Echo')}
+                    />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent
                         translatedMessage={TranslateText('Failed to retrieve installations from Echo')}
                     />,
                     AlertCategory.ERROR
@@ -99,6 +106,15 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                                     />,
                                     AlertCategory.ERROR
                                 )
+                                setListAlert(
+                                    AlertType.RequestFail,
+                                    <FailedRequestAlertListContent
+                                        translatedMessage={TranslateText('Failed to retrieve areas on deck {0}', [
+                                            deck.deckName,
+                                        ])}
+                                    />,
+                                    AlertCategory.ERROR
+                                )
                             })
                     )
                 })
@@ -106,6 +122,15 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent
+                            translatedMessage={TranslateText('Failed to retrieve decks on installation {0}', [
+                                installationCode,
+                            ])}
+                        />,
+                        AlertCategory.ERROR
+                    )
+                    setListAlert(
+                        AlertType.RequestFail,
+                        <FailedRequestAlertListContent
                             translatedMessage={TranslateText('Failed to retrieve decks on installation {0}', [
                                 installationCode,
                             ])}

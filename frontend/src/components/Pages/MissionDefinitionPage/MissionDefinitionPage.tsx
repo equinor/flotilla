@@ -16,7 +16,7 @@ import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinit
 import { StyledPage } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 
 const StyledDictCard = styled(StyledDict.Card)`
@@ -149,7 +149,7 @@ const MissionDefinitionEditDialog = ({
         isDeprecated: false,
     }
     const { TranslateText } = useLanguageContext()
-    const { setAlert } = useAlertContext()
+    const { setAlert, setListAlert } = useAlertContext()
     const navigate = useNavigate()
     const [form, setForm] = useState<MissionDefinitionUpdateForm>(defaultMissionDefinitionForm)
 
@@ -188,6 +188,11 @@ const MissionDefinitionEditDialog = ({
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to update inspection')} />,
+                    AlertCategory.ERROR
+                )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to update inspection')} />,
                     AlertCategory.ERROR
                 )
             })

@@ -7,7 +7,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import styled from 'styled-components'
 import { useRef, useState } from 'react'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent } from 'components/Alerts/FailedRequestAlert'
+import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { Mission } from 'models/Mission'
 import { ScheduleMissionWithConfirmDialogs } from '../ConfirmScheduleDialogs/ConfirmScheduleDialog'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
@@ -32,7 +32,7 @@ enum ReRunOptions {
 
 export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
-    const { setAlert } = useAlertContext()
+    const { setAlert, setListAlert } = useAlertContext()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isLocationVerificationOpen, setIsLocationVerificationOpen] = useState<boolean>(false)
     const [selectedRerunOption, setSelectedRerunOption] = useState<ReRunOptions>()
@@ -47,13 +47,18 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
     const startReRun = (option: ReRunOptions) => {
         BackendAPICaller.reRunMission(mission.id, option === ReRunOptions.ReRunFailed)
             .then(() => navigateToHome())
-            .catch(() =>
+            .catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to rerun mission')} />,
                     AlertCategory.ERROR
                 )
-            )
+                setListAlert(
+                    AlertType.RequestFail,
+                    <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to rerun mission')} />,
+                    AlertCategory.ERROR
+                )
+            })
         setIsLocationVerificationOpen(false)
     }
 
