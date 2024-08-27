@@ -26,7 +26,7 @@ const StyledHeader = styled.div`
     }
 `
 
-const StyledSerach = styled(Search)`
+const StyledSearch = styled(Search)`
     display: flex;
     width: 288px;
     height: 36px;
@@ -85,7 +85,7 @@ export const FilterSection = () => {
     return (
         <>
             <StyledHeader>
-                <StyledSerach
+                <StyledSearch
                     value={filterState.missionName ?? ''}
                     placeholder={TranslateText('Search for missions')}
                     onChange={(changes: ChangeEvent<HTMLInputElement>) => {
