@@ -42,6 +42,7 @@ import {
     info_circle,
     blocked,
     close_circle_outlined,
+    file_description,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -87,6 +88,7 @@ Icon.add({
     info_circle,
     blocked,
     close_circle_outlined,
+    file_description,
 })
 
 export enum Icons {
@@ -132,4 +134,5 @@ export enum Icons {
     Info = 'info_circle',
     Blocked = 'blocked',
     ClosedCircleOutlined = 'close_circle_outlined',
+    FileDescription = 'file_description',
 }

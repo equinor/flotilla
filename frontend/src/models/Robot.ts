@@ -1,5 +1,6 @@
 import { Area } from './Area'
 import { BatteryStatus } from './Battery'
+import { DocumentInfo } from './DocumentInfo'
 import { Installation, placeholderInstallation } from './Installation'
 import { Pose } from './Pose'
 import { RobotModel, placeholderRobotModel } from './RobotModel'
@@ -37,6 +38,7 @@ export interface Robot {
     host?: string
     logs?: string
     port?: number
+    documentation?: DocumentInfo[]
     videoStreams?: VideoStream[]
     isarUri?: string
     currentArea?: Area

@@ -264,5 +264,6 @@
     "Alerts": "Alerts",
     "No alerts": "No alerts",
     "minutes ago": "minutes ago",
-    "Failed to retrieve previous mission runs": "Failed to retrieve previous mission runs"
+    "Failed to retrieve previous mission runs": "Failed to retrieve previous mission runs",
+    "Documentation": "Documentation"
 }
