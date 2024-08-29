@@ -29,7 +29,7 @@ namespace Api.Services
         public async Task<List<string>> GetAllowedInstallationCodes()
         {
             if (httpContextAccessor.HttpContext == null)
-                return await context.Installations.Select((i) => i.InstallationCode.ToUpperInvariant()).ToListAsync();
+                return await context.Installations.AsNoTracking().Select((i) => i.InstallationCode.ToUpperInvariant()).ToListAsync();
 
             var roles = httpContextAccessor.HttpContext.GetRequestedRoleNames();
 
