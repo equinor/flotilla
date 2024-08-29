@@ -18,6 +18,7 @@ import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { DocumentationSection } from './Documentation'
 
 const RobotArmMovementSection = styled.div`
     display: flex;
@@ -154,6 +155,9 @@ export const RobotPage = () => {
                                     />
                                 </RobotArmMovementSection>
                             </>
+                        )}
+                        {selectedRobot.documentation && selectedRobot.documentation.length > 0 && (
+                            <DocumentationSection documentation={selectedRobot.documentation} />
                         )}
                     </>
                 )}
