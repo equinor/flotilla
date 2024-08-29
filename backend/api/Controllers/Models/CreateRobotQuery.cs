@@ -16,6 +16,8 @@ namespace Api.Controllers.Models
 
         public string? CurrentAreaName { get; set; }
 
+        public IList<CreateDocumentationQuery> Documentation { get; set; }
+
         public IList<CreateVideoStreamQuery> VideoStreams { get; set; }
 
         public string Host { get; set; }

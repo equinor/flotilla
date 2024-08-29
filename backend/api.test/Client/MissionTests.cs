@@ -464,7 +464,8 @@ namespace Api.Test
                 CurrentInstallationCode = installationCode,
                 CurrentAreaName = null,
                 RobotCapabilities = [],
-                VideoStreams = new List<CreateVideoStreamQuery>()
+                VideoStreams = new List<CreateVideoStreamQuery>(),
+                Documentation = new List<CreateDocumentationQuery>()
             };
 
             string robotUrl = "/robots";
@@ -547,7 +548,8 @@ namespace Api.Test
                 CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = areaName,
                 RobotCapabilities = [],
-                VideoStreams = new List<CreateVideoStreamQuery>()
+                VideoStreams = new List<CreateVideoStreamQuery>(),
+                Documentation = new List<CreateDocumentationQuery>()
             };
 
             string robotUrl = "/robots";
@@ -729,7 +731,8 @@ namespace Api.Test
                 CurrentInstallationCode = otherInstallation.InstallationCode,
                 CurrentAreaName = null,
                 RobotCapabilities = [],
-                VideoStreams = new List<CreateVideoStreamQuery>()
+                VideoStreams = new List<CreateVideoStreamQuery>(),
+                Documentation = new List<CreateDocumentationQuery>()
             };
 
             string robotUrl = "/robots";
@@ -800,7 +803,8 @@ namespace Api.Test
                 CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = area1.AreaName,
                 RobotCapabilities = [],
-                VideoStreams = new List<CreateVideoStreamQuery>()
+                VideoStreams = new List<CreateVideoStreamQuery>(),
+                Documentation = new List<CreateDocumentationQuery>()
             };
 
             string robotUrl = "/robots";

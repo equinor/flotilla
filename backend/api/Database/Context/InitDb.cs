@@ -286,6 +286,7 @@ namespace Api.Database.Context
                 Port = 3000,
                 CurrentInstallation = installations[0],
                 VideoStreams = new List<VideoStream>(),
+                Documentation = new List<DocumentInfo>(),
                 Pose = new Pose()
             };
 
@@ -299,6 +300,7 @@ namespace Api.Database.Context
                 Port = 3000,
                 CurrentInstallation = installations[0],
                 VideoStreams = new List<VideoStream>(),
+                Documentation = new List<DocumentInfo>(),
                 Pose = new Pose()
             };
 
@@ -312,6 +314,7 @@ namespace Api.Database.Context
                 Port = 3000,
                 CurrentInstallation = installations[0],
                 VideoStreams = new List<VideoStream>(),
+                Documentation = new List<DocumentInfo>(),
                 Pose = new Pose()
             };
 

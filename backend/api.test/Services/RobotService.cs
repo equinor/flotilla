@@ -94,6 +94,11 @@ namespace Api.Test.Services
                 Url = "localhost:5000",
                 Type = "mjpeg"
             };
+            var documentationQuery = new CreateDocumentationQuery
+            {
+                Name = "Some document",
+                Url = "someURL",
+            };
             var robotQuery = new CreateRobotQuery
             {
                 Name = "",
@@ -102,6 +107,10 @@ namespace Api.Test.Services
                 VideoStreams = new List<CreateVideoStreamQuery>
                 {
                     videoStreamQuery
+                },
+                Documentation = new List<CreateDocumentationQuery>
+                {
+                    documentationQuery
                 },
                 CurrentInstallationCode = installation.InstallationCode,
                 RobotType = RobotType.Robot,

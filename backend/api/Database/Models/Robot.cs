@@ -8,6 +8,7 @@ namespace Api.Database.Models
     {
         public Robot()
         {
+            Documentation = new List<DocumentInfo>();
             VideoStreams = new List<VideoStream>();
             IsarId = "defaultIsarId";
             Name = "defaultId";
@@ -34,11 +35,23 @@ namespace Api.Database.Models
                 videoStreams.Add(videoStream);
             }
 
+            var documentation = new List<DocumentInfo>();
+            foreach (var documentQuery in createQuery.Documentation)
+            {
+                var document = new DocumentInfo
+                {
+                    Name = documentQuery.Name,
+                    Url = documentQuery.Url
+                };
+                documentation.Add(document);
+            }
+
             IsarId = createQuery.IsarId;
             Name = createQuery.Name;
             SerialNumber = createQuery.SerialNumber;
             CurrentInstallation = installation;
             CurrentArea = area;
+            Documentation = documentation;
             VideoStreams = videoStreams;
             Host = createQuery.Host;
             Port = createQuery.Port;
@@ -94,6 +107,8 @@ namespace Api.Database.Models
             if (Model.BatteryWarningThreshold == null) { return false; }
             return Model.BatteryWarningThreshold >= BatteryLevel;
         }
+
+        public IList<DocumentInfo> Documentation { get; set; }
 
         public IList<VideoStream> VideoStreams { get; set; }
 
