@@ -578,7 +578,7 @@ namespace Api.Services
 
         public async Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value)
         {
-            var missionRun = await ReadById(missionRunId);
+            var missionRun = await ReadById(missionRunId, readOnly: false);
             if (missionRun is null)
             {
                 string errorMessage = $"Mission with ID {missionRunId} was not found in the database";
