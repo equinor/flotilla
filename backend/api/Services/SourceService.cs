@@ -10,7 +10,7 @@ namespace Api.Services
     {
         public abstract Task<Source> Create(Source source);
 
-        public abstract Task<List<Source>> ReadAll();
+        public abstract Task<List<Source>> ReadAll(bool readOnly = false);
 
         public abstract Task<Source?> ReadById(string id, bool readOnly = false);
 
@@ -44,9 +44,9 @@ namespace Api.Services
             return source;
         }
 
-        public async Task<List<Source>> ReadAll()
+        public async Task<List<Source>> ReadAll(bool readOnly = false)
         {
-            var query = GetSources();
+            var query = GetSources(readOnly: readOnly);
 
             return await query.ToListAsync();
         }

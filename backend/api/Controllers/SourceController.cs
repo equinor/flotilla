@@ -31,7 +31,7 @@ public class SourceController(
         List<Source> sources;
         try
         {
-            sources = await sourceService.ReadAll();
+            sources = await sourceService.ReadAll(readOnly: true);
         }
         catch (InvalidDataException e)
         {
