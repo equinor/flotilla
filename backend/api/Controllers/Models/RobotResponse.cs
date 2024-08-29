@@ -22,6 +22,8 @@ namespace Api.Controllers.Models
 
         public float? PressureLevel { get; set; }
 
+        public IList<DocumentInfo> Documentation { get; set; }
+
         public IList<VideoStream> VideoStreams { get; set; }
 
         public string Host { get; set; }
@@ -60,6 +62,7 @@ namespace Api.Controllers.Models
             CurrentArea = robot.CurrentArea != null ? new AreaResponse(robot.CurrentArea) : null;
             BatteryLevel = robot.BatteryLevel;
             PressureLevel = robot.PressureLevel;
+            Documentation = robot.Documentation;
             VideoStreams = robot.VideoStreams;
             Host = robot.Host;
             Port = robot.Port;

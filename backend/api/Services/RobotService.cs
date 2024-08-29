@@ -321,6 +321,7 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Robots
                 .Include(r => r.VideoStreams)
+                .Include(r => r.Documentation)
                 .Include(r => r.Model)
                 .Include(r => r.CurrentInstallation)
                 .Include(r => r.CurrentArea)

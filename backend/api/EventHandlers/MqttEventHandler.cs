@@ -145,6 +145,7 @@ namespace Api.EventHandlers
                         RobotType = isarRobotInfo.RobotType,
                         SerialNumber = isarRobotInfo.SerialNumber,
                         CurrentInstallationCode = installation.InstallationCode,
+                        Documentation = isarRobotInfo.DocumentationQueries,
                         VideoStreams = isarRobotInfo.VideoStreamQueries,
                         Host = isarRobotInfo.Host,
                         Port = isarRobotInfo.Port,

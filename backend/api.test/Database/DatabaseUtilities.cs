@@ -157,6 +157,7 @@ namespace Api.Test.Database
                 CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = area?.Name,
                 VideoStreams = new List<CreateVideoStreamQuery>(),
+                Documentation = new List<CreateDocumentationQuery>(),
                 Host = "localhost",
                 Port = 3000,
                 Status = status,

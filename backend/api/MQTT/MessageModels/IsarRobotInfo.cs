@@ -22,6 +22,9 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("robot_asset")]
         public string CurrentInstallation { get; set; }
 
+        [JsonPropertyName("documentation")]
+        public List<CreateDocumentationQuery> DocumentationQueries { get; set; }
+
         [JsonPropertyName("video_streams")]
         public List<CreateVideoStreamQuery> VideoStreamQueries { get; set; }
 
