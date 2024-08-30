@@ -122,8 +122,7 @@ namespace Api.EventHandlers
                 if (stuckMission.Status == MissionStatus.Ongoing || stuckMission.Status == MissionStatus.Paused)
                 {
                     _logger.LogError("Ongoing/paused mission with ID: ${MissionId} is not being run in ISAR", robot.CurrentMissionId);
-                    stuckMission.SetToFailed("Mission failed due to issue with ISAR");
-                    await MissionService.Update(stuckMission);
+                    await MissionService.SetMissionRunToFailed(stuckMission.Id, "Mission failed due to issue with ISAR");
                 }
             }
 

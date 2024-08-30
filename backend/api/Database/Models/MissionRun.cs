@@ -176,22 +176,6 @@ namespace Api.Database.Models
             }
         }
 
-        public void SetToFailed(string? failureReason = "")
-        {
-            Status = MissionStatus.Failed;
-            StatusReason = failureReason;
-            foreach (var task in Tasks.Where(task => !task.IsCompleted))
-            {
-                task.Status = TaskStatus.Failed;
-                foreach (
-                    var inspection in task.Inspections.Where(inspection => !inspection.IsCompleted)
-                )
-                {
-                    inspection.Status = InspectionStatus.Failed;
-                }
-            }
-        }
-
         public bool IsLocalizationMission() { return MissionRunType == MissionRunType.Localization; }
 
         public bool IsReturnHomeMission() { return MissionRunType == MissionRunType.ReturnHome; }
