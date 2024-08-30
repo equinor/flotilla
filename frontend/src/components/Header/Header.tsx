@@ -15,9 +15,6 @@ import { FrontPageSectionId } from 'models/FrontPageSectionId'
 const StyledTopBar = styled(TopBar)`
     align-items: center;
     box-shadow: none;
-    @media (max-width: 600px) {
-        grid-column-gap: 12px;
-    }
 `
 const StyledWrapper = styled.div`
     display: flex;
