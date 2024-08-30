@@ -6,6 +6,7 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services.Events;
+using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 namespace Api.Services
@@ -54,6 +55,8 @@ namespace Api.Services
         public Task<MissionRun?> Delete(string id);
 
         public Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value);
+
+        public Task<MissionRun> UpdateWithIsarInfo(string missionRunId, IsarMission isarMission);
 
         public Task<MissionRun> SetMissionRunToFailed(string missionRunId, string failureDescription);
 
@@ -641,6 +644,19 @@ namespace Api.Services
             if (missionRun.Area != null) areaService.DetachTracking(missionRun.Area);
             if (missionRun.Robot != null) robotService.DetachTracking(missionRun.Robot);
             context.Entry(missionRun).State = EntityState.Detached;
+        }
+
+        public async Task<MissionRun> UpdateWithIsarInfo(string missionRunId, IsarMission isarMission)
+        {
+            var missionRun = await ReadById(missionRunId, readOnly: false) ?? throw new MissionRunNotFoundException($"Could not find mission run with ID {missionRunId}");
+
+            missionRun.IsarMissionId = isarMission.IsarMissionId;
+            foreach (var isarTask in isarMission.Tasks)
+            {
+                var task = missionRun.GetTaskByIsarId(isarTask.IsarTaskId);
+                task?.UpdateWithIsarInfo(isarTask);
+            }
+            return await Update(missionRun);
         }
     }
 }

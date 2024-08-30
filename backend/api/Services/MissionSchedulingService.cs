@@ -149,15 +149,13 @@ namespace Api.Services
                     or MissionRunNotFoundException
                     or IsarCommunicationException)
             {
-                const MissionStatus NewStatus = MissionStatus.Failed;
                 logger.LogError(
                     ex,
                     "Mission run {MissionRunId} was not started successfully due to {ErrorMessage}",
                     missionRun.Id,
                     ex.Message
                 );
-                await missionRunService.UpdateMissionRunProperty(missionRun.Id, "Status", NewStatus);
-                await missionRunService.UpdateMissionRunProperty(missionRun.Id, "StatusReason", ex.Message);
+                await missionRunService.SetMissionRunToFailed(missionRun.Id, "Mission run {MissionRunId} was not started successfully due to {ErrorMessage}");
             }
         }
 
@@ -464,7 +462,7 @@ namespace Api.Services
                 throw new IsarCommunicationException(ErrorMessage);
             }
 
-            missionRun.UpdateWithIsarInfo(isarMission);
+            await missionRunService.UpdateWithIsarInfo(missionRun.Id, isarMission);
             await missionRunService.UpdateMissionRunProperty(missionRun.Id, "Status", MissionStatus.Ongoing);
 
             robot.Status = RobotStatus.Busy;
