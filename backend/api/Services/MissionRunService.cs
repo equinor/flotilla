@@ -44,8 +44,6 @@ namespace Api.Services
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun);
 
-        public Task<MissionRun> Update(MissionRun mission);
-
         public Task<MissionRun> UpdateMissionRunType(string missionRunId, MissionRunType missionRunType);
 
         public Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
@@ -56,6 +54,8 @@ namespace Api.Services
         public Task<MissionRun?> Delete(string id);
 
         public Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value);
+
+        public Task<MissionRun> SetMissionRunToFailed(string missionRunId, string failureDescription);
 
         public Task UpdateCurrentRobotMissionToFailed(string robotId);
 
@@ -605,17 +605,31 @@ namespace Api.Services
             var robot = await robotService.ReadById(robotId, readOnly: true) ?? throw new RobotNotFoundException($"Robot with ID: {robotId} was not found in the database");
             if (robot.CurrentMissionId != null)
             {
-                var missionRun = await ReadById(robot.CurrentMissionId, readOnly: false);
-                if (missionRun != null)
+                var missionRun = await SetMissionRunToFailed(robot.CurrentMissionId, "Lost connection to ISAR during mission");
+                logger.LogWarning(
+                    "Mission '{Id}' failed because ISAR could not be reached",
+                    missionRun.Id
+                );
+            }
+        }
+
+        public async Task<MissionRun> SetMissionRunToFailed(string missionRunId, string failureDescription)
+        {
+            var missionRun = await ReadById(missionRunId, readOnly: false) ?? throw new MissionRunNotFoundException($"Could not find mission run with ID {missionRunId}");
+
+            missionRun.Status = MissionStatus.Failed;
+            missionRun.StatusReason = failureDescription;
+            foreach (var task in missionRun.Tasks.Where(task => !task.IsCompleted))
+            {
+                task.Status = Database.Models.TaskStatus.Failed;
+                foreach (
+                    var inspection in task.Inspections.Where(inspection => !inspection.IsCompleted)
+                )
                 {
-                    missionRun.SetToFailed("Lost connection to ISAR during mission");
-                    await Update(missionRun);
-                    logger.LogWarning(
-                        "Mission '{Id}' failed because ISAR could not be reached",
-                        missionRun.Id
-                    );
+                    inspection.Status = InspectionStatus.Failed;
                 }
             }
+            return await Update(missionRun);
         }
 
         public void DetachTracking(MissionRun missionRun)
