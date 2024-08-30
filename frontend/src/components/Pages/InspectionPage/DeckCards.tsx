@@ -112,17 +112,19 @@ export const DeckCards = ({ deckMissions, onClickDeck, selectedDeck, handleSched
     const { TranslateText } = useLanguageContext()
 
     return (
-        <StyledDict.DeckCards>
+        <>
             {Object.keys(deckMissions).length > 0 ? (
-                deckMissions.map((deckMission) => (
-                    <DeckCard
-                        key={'deckCard' + deckMission.deck.deckName}
-                        deckData={deckMission}
-                        onClickDeck={onClickDeck}
-                        selectedDeck={selectedDeck}
-                        handleScheduleAll={handleScheduleAll}
-                    />
-                ))
+                <StyledDict.DeckCards>
+                    {deckMissions.map((deckMission) => (
+                        <DeckCard
+                            key={'deckCard' + deckMission.deck.deckName}
+                            deckData={deckMission}
+                            onClickDeck={onClickDeck}
+                            selectedDeck={selectedDeck}
+                            handleScheduleAll={handleScheduleAll}
+                        />
+                    ))}
+                </StyledDict.DeckCards>
             ) : (
                 <StyledDict.Placeholder>
                     <Typography variant="h4" color="disabled">
@@ -130,6 +132,6 @@ export const DeckCards = ({ deckMissions, onClickDeck, selectedDeck, handleSched
                     </Typography>
                 </StyledDict.Placeholder>
             )}
-        </StyledDict.DeckCards>
+        </>
     )
 }
