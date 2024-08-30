@@ -12,6 +12,7 @@ const StyledCard = styled.div`
     padding: 6px 15px 2px 32px;
     justify-content: space-between;
     align-items: center;
+    overflow: hidden;
 
     @media (max-width: 600px) {
         padding: 6px 8px 2px 10px;
