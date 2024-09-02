@@ -158,37 +158,15 @@ namespace Api.Services
 
         public async Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel)
         {
-            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation).AsTracking();
-            var robot = await robotQuery.FirstOrDefaultAsync();
+            var robot = await UpdateRobotProperty(robotId, "BatteryLevel", batteryLevel);
             ThrowIfRobotIsNull(robot, robotId);
-
-            await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
-
-            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.BatteryLevel, batteryLevel));
-
-            robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-            NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-            DetachTracking(robot);
-
             return robot;
         }
 
         public async Task<Robot> UpdateRobotPressureLevel(string robotId, float? pressureLevel)
         {
-            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
-            var robot = await robotQuery.FirstOrDefaultAsync();
+            var robot = await UpdateRobotProperty(robotId, "PressureLevel", pressureLevel);
             ThrowIfRobotIsNull(robot, robotId);
-
-            await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
-
-            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.PressureLevel, pressureLevel));
-
-            robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-            NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-            DetachTracking(robot);
-
             return robot;
         }
 
