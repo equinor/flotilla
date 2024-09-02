@@ -377,7 +377,7 @@ namespace Api.Test.EventHandlers
             var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, null);
-            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, isarMissionId: Guid.NewGuid().ToString());
+            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
             Thread.Sleep(100);
             var missionRun2 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
             Thread.Sleep(100);
@@ -386,13 +386,16 @@ namespace Api.Test.EventHandlers
             _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), missionRunCreatedEventArgs);
             Thread.Sleep(100);
 
+            var missionRun1PostCreation = await _missionRunService.ReadById(missionRun1.Id);
+            Assert.NotNull(missionRun1PostCreation);
+
             // Act
             var mqttIsarMissionEventArgs = new MqttReceivedArgs(
                 new IsarMissionMessage
                 {
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
-                    MissionId = missionRun1.IsarMissionId,
+                    MissionId = missionRun1PostCreation.IsarMissionId,
                     Status = "successful",
                     Timestamp = DateTime.UtcNow
                 });
