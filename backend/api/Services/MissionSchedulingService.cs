@@ -45,12 +45,6 @@ namespace Api.Services
                 return;
             }
 
-            if (robot.MissionQueueFrozen)
-            {
-                logger.LogInformation("Robot {robotName} was ready to start a mission but its mission queue was frozen", robot.Name);
-                return;
-            }
-
             logger.LogInformation("Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
 
             MissionRun? missionRun;
@@ -58,6 +52,12 @@ namespace Api.Services
             catch (RobotNotFoundException)
             {
                 logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                return;
+            }
+
+            if (robot.MissionQueueFrozen && missionRun != null && !missionRun.IsEmergencyMission())
+            {
+                logger.LogInformation("Robot {robotName} was ready to start a mission but its mission queue was frozen", robot.Name);
                 return;
             }
 
