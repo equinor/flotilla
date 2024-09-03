@@ -59,18 +59,18 @@ namespace Api.Test.Services
         public async Task Read()
         {
             var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
-            var robots = await robotService.ReadAll();
+            var robots = await robotService.ReadAll(readOnly: false);
             var firstRobot = robots.First();
             var robotById = await robotService.ReadById(firstRobot.Id, readOnly: false);
 
-            Assert.Equal(firstRobot, robotById);
+            Assert.Equal(firstRobot, robotById); // To compare the objects directly, we need to use readOnly = false. Otherwise we will read in a new object
         }
 
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
             var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
-            var robot = await robotService.ReadById("some_id_that_does_not_exist");
+            var robot = await robotService.ReadById("some_id_that_does_not_exist", readOnly: true);
             Assert.Null(robot);
         }
 

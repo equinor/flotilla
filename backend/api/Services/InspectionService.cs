@@ -11,7 +11,7 @@ namespace Api.Services
     public interface IInspectionService
     {
         public Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus);
-        public Task<Inspection?> ReadByIsarStepId(string id, bool readOnly = false);
+        public Task<Inspection?> ReadByIsarStepId(string id, bool readOnly = true);
         public Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingsQuery, string isarStepId);
 
     }
@@ -63,12 +63,12 @@ namespace Api.Services
             return entry.Entity;
         }
 
-        public async Task<Inspection?> ReadByIsarStepId(string id, bool readOnly = false)
+        public async Task<Inspection?> ReadByIsarStepId(string id, bool readOnly = true)
         {
             return await GetInspections(readOnly: readOnly).FirstOrDefaultAsync(inspection => inspection.IsarStepId != null && inspection.IsarStepId.Equals(id));
         }
 
-        private IQueryable<Inspection> GetInspections(bool readOnly = false)
+        private IQueryable<Inspection> GetInspections(bool readOnly = true)
         {
             if (accessRoleService.IsUserAdmin() || !accessRoleService.IsAuthenticationAvailable())
                 return (readOnly ? context.Inspections.AsNoTracking() : context.Inspections.AsTracking()).Include(inspection => inspection.InspectionFindings);

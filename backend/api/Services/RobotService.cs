@@ -11,12 +11,12 @@ namespace Api.Services
     {
         public Task<Robot> Create(Robot newRobot);
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
-        public Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = false);
-        public Task<IEnumerable<Robot>> ReadAll(bool readOnly = false);
-        public Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = false);
-        public Task<Robot?> ReadById(string id, bool readOnly = false);
-        public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = false);
-        public Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = false);
+        public Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = true);
+        public Task<IEnumerable<Robot>> ReadAll(bool readOnly = true);
+        public Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = true);
+        public Task<Robot?> ReadById(string id, bool readOnly = true);
+        public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true);
+        public Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = true);
         public Task<Robot> Update(Robot robot);
         public Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status);
         public Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel);
@@ -100,7 +100,7 @@ namespace Api.Services
             throw new DbUpdateException("Could not create new robot in database as robot model does not exist");
         }
 
-        public async Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = false)
+        public async Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = true)
         {
             var robot = await ReadById(robotId, readOnly: readOnly);
 
@@ -269,17 +269,17 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<IEnumerable<Robot>> ReadAll(bool readOnly = false) { return await GetRobotsWithSubModels(readOnly: readOnly).ToListAsync(); }
+        public async Task<IEnumerable<Robot>> ReadAll(bool readOnly = true) { return await GetRobotsWithSubModels(readOnly: readOnly).ToListAsync(); }
 
-        public async Task<Robot?> ReadById(string id, bool readOnly = false) { return await GetRobotsWithSubModels(readOnly: readOnly).FirstOrDefaultAsync(robot => robot.Id.Equals(id)); }
+        public async Task<Robot?> ReadById(string id, bool readOnly = true) { return await GetRobotsWithSubModels(readOnly: readOnly).FirstOrDefaultAsync(robot => robot.Id.Equals(id)); }
 
-        public async Task<Robot?> ReadByIsarId(string isarId, bool readOnly = false)
+        public async Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true)
         {
             return await GetRobotsWithSubModels(readOnly: readOnly)
                 .FirstOrDefaultAsync(robot => robot.IsarId.Equals(isarId));
         }
 
-        public async Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = false)
+        public async Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = true)
         {
             return await GetRobotsWithSubModels(readOnly: readOnly).Where(r => r.IsarConnected && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
         }
@@ -307,7 +307,7 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = false)
+        public async Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = true)
         {
             return await GetRobotsWithSubModels(readOnly: readOnly)
                 .Where(robot =>
@@ -319,7 +319,7 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        private IQueryable<Robot> GetRobotsWithSubModels(bool readOnly = false)
+        private IQueryable<Robot> GetRobotsWithSubModels(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Robots

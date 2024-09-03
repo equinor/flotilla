@@ -10,13 +10,13 @@ namespace Api.Services
 {
     public interface IAreaService
     {
-        public Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters, bool readOnly = false);
+        public Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters, bool readOnly = true);
 
-        public Task<Area?> ReadById(string id, bool readOnly = false);
+        public Task<Area?> ReadById(string id, bool readOnly = true);
 
-        public Task<IEnumerable<Area?>> ReadByDeckId(string deckId, bool readOnly = false);
+        public Task<IEnumerable<Area?>> ReadByDeckId(string deckId, bool readOnly = true);
 
-        public Task<Area?> ReadByInstallationAndName(string installationCode, string areaName, bool readOnly = false);
+        public Task<Area?> ReadByInstallationAndName(string installationCode, string areaName, bool readOnly = true);
 
         public Task<Area> Create(CreateAreaQuery newArea);
 
@@ -43,7 +43,7 @@ namespace Api.Services
             FlotillaDbContext context, IInstallationService installationService, IPlantService plantService, IDeckService deckService,
             IDefaultLocalizationPoseService defaultLocalizationPoseService, IAccessRoleService accessRoleService) : IAreaService
     {
-        public async Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters, bool readOnly = false)
+        public async Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters, bool readOnly = true)
         {
             var query = GetAreasWithSubModels(readOnly: readOnly).OrderBy(a => a.Installation);
             var filter = ConstructFilter(parameters);
@@ -57,19 +57,19 @@ namespace Api.Services
             );
         }
 
-        public async Task<Area?> ReadById(string id, bool readOnly = false)
+        public async Task<Area?> ReadById(string id, bool readOnly = true)
         {
             return await GetAreas(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<IEnumerable<Area?>> ReadByDeckId(string deckId, bool readOnly = false)
+        public async Task<IEnumerable<Area?>> ReadByDeckId(string deckId, bool readOnly = true)
         {
             if (deckId == null) { return new List<Area>(); }
             return await GetAreas(readOnly: readOnly).Where(a => a.Deck != null && a.Deck.Id.Equals(deckId)).ToListAsync();
         }
 
-        public async Task<Area?> ReadByInstallationAndName(string installationCode, string areaName, bool readOnly = false)
+        public async Task<Area?> ReadByInstallationAndName(string installationCode, string areaName, bool readOnly = true)
         {
             var installation = await installationService.ReadByName(installationCode, readOnly: true);
             if (installation == null) { return null; }
@@ -187,7 +187,7 @@ namespace Api.Services
                 throw new UnauthorizedAccessException($"User does not have permission to update area in installation {installation.Name}");
         }
 
-        private IQueryable<Area> GetAreas(bool readOnly = false)
+        private IQueryable<Area> GetAreas(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Areas
@@ -201,7 +201,7 @@ namespace Api.Services
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
-        private IQueryable<Area> GetAreasWithSubModels(bool readOnly = false)
+        private IQueryable<Area> GetAreasWithSubModels(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
 
@@ -219,7 +219,7 @@ namespace Api.Services
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
-        public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName, bool readOnly = false)
+        public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName, bool readOnly = true)
         {
             return await GetAreas(readOnly: readOnly).Where(a =>
                     a.Deck != null && a.Deck.Id.Equals(deck.Id) &&

@@ -6,13 +6,13 @@ namespace Api.Services
 {
     public class InspectionFindingService(FlotillaDbContext context, IAccessRoleService accessRoleService)
     {
-        public async Task<List<InspectionFinding>> RetrieveInspectionFindings(DateTime lastReportingTime, bool readOnly = false)
+        public async Task<List<InspectionFinding>> RetrieveInspectionFindings(DateTime lastReportingTime, bool readOnly = true)
         {
             var inspectionFindingsQuery = readOnly ? context.InspectionFindings.AsNoTracking() : context.InspectionFindings.AsTracking();
             return await inspectionFindingsQuery.Where(f => f.InspectionDate > lastReportingTime).ToListAsync();
         }
 
-        public async Task<MissionRun?> GetMissionRunByIsarStepId(string isarStepId, bool readOnly = false)
+        public async Task<MissionRun?> GetMissionRunByIsarStepId(string isarStepId, bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = readOnly ? context.MissionRuns.AsNoTracking() : context.MissionRuns.AsTracking();
@@ -27,7 +27,7 @@ namespace Api.Services
 #pragma warning restore CA1304
         }
 
-        public async Task<MissionTask?> GetMissionTaskByIsarStepId(string isarStepId, bool readOnly = false)
+        public async Task<MissionTask?> GetMissionTaskByIsarStepId(string isarStepId, bool readOnly = true)
         {
             var missionRun = await GetMissionRunByIsarStepId(isarStepId, readOnly: readOnly);
             return missionRun?.Tasks.Where(missionTask => missionTask.Inspections.Any(inspection => inspection.IsarStepId == isarStepId)).FirstOrDefault();

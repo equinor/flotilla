@@ -495,7 +495,7 @@ namespace Api.Services
             return closestPose;
         }
 
-        private async Task<PagedList<MissionRun>?> GetOngoingMissions(string robotId, bool readOnly = false)
+        private async Task<PagedList<MissionRun>?> GetOngoingMissions(string robotId, bool readOnly = true)
         {
             var ongoingMissions = await missionRunService.ReadAll(
                 new MissionRunQueryStringParameters

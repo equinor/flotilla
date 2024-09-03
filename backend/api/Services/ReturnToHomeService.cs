@@ -5,7 +5,7 @@ namespace Api.Services
     public interface IReturnToHomeService
     {
         public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(string robotId);
-        public Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId, bool readOnly = false);
+        public Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId, bool readOnly = true);
     }
 
     public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService, IMapService mapService) : IReturnToHomeService
@@ -112,7 +112,7 @@ namespace Api.Services
             return missionRun;
         }
 
-        public async Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId, bool readOnly = false)
+        public async Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId, bool readOnly = true)
         {
             IList<MissionStatus> missionStatuses = [MissionStatus.Ongoing, MissionStatus.Pending, MissionStatus.Paused];
             var activeReturnToHomeMissions = await missionRunService.ReadMissionRuns(robotId, MissionRunType.ReturnHome, missionStatuses, readOnly: readOnly);

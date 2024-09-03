@@ -9,15 +9,15 @@ namespace Api.Services
 {
     public interface IDeckService
     {
-        public Task<IEnumerable<Deck>> ReadAll(bool readOnly = false);
+        public Task<IEnumerable<Deck>> ReadAll(bool readOnly = true);
 
-        public Task<Deck?> ReadById(string id, bool readOnly = false);
+        public Task<Deck?> ReadById(string id, bool readOnly = true);
 
-        public Task<IEnumerable<Deck>> ReadByInstallation(string installationCode, bool readOnly = false);
+        public Task<IEnumerable<Deck>> ReadByInstallation(string installationCode, bool readOnly = true);
 
-        public Task<Deck?> ReadByName(string deckName, bool readOnly = false);
+        public Task<Deck?> ReadByName(string deckName, bool readOnly = true);
 
-        public Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string deckName, bool readOnly = false);
+        public Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string deckName, bool readOnly = true);
 
         public Task<Deck> Create(CreateDeckQuery newDeck);
 
@@ -46,18 +46,18 @@ namespace Api.Services
         IAccessRoleService accessRoleService,
         ISignalRService signalRService) : IDeckService
     {
-        public async Task<IEnumerable<Deck>> ReadAll(bool readOnly = false)
+        public async Task<IEnumerable<Deck>> ReadAll(bool readOnly = true)
         {
             return await GetDecks(readOnly: readOnly).ToListAsync();
         }
 
-        public async Task<Deck?> ReadById(string id, bool readOnly = false)
+        public async Task<Deck?> ReadById(string id, bool readOnly = true)
         {
             return await GetDecks(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<IEnumerable<Deck>> ReadByInstallation(string installationCode, bool readOnly = false)
+        public async Task<IEnumerable<Deck>> ReadByInstallation(string installationCode, bool readOnly = true)
         {
             var installation = await installationService.ReadByName(installationCode, readOnly: true);
             if (installation == null) { return new List<Deck>(); }
@@ -65,7 +65,7 @@ namespace Api.Services
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
-        public async Task<Deck?> ReadByName(string deckName, bool readOnly = false)
+        public async Task<Deck?> ReadByName(string deckName, bool readOnly = true)
         {
             if (deckName == null) { return null; }
             return await GetDecks(readOnly: readOnly).Where(a =>
@@ -73,7 +73,7 @@ namespace Api.Services
             ).FirstOrDefaultAsync();
         }
 
-        public async Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string name, bool readOnly = false)
+        public async Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string name, bool readOnly = true)
         {
             return await GetDecks(readOnly: readOnly).Where(a =>
                 a.Plant != null && a.Plant.Id.Equals(plant.Id) &&
@@ -144,7 +144,7 @@ namespace Api.Services
             return deck;
         }
 
-        private IQueryable<Deck> GetDecks(bool readOnly = false)
+        private IQueryable<Deck> GetDecks(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)

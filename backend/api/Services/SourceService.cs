@@ -10,15 +10,15 @@ namespace Api.Services
     {
         public abstract Task<Source> Create(Source source);
 
-        public abstract Task<List<Source>> ReadAll(bool readOnly = false);
+        public abstract Task<List<Source>> ReadAll(bool readOnly = true);
 
-        public abstract Task<Source?> ReadById(string id, bool readOnly = false);
+        public abstract Task<Source?> ReadById(string id, bool readOnly = true);
 
         public abstract Task<Source?> CheckForExistingSource(string sourceId);
 
         public abstract Task<Source?> CheckForExistingSourceFromTasks(IList<MissionTask> tasks);
 
-        public abstract Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks, bool readOnly = false);
+        public abstract Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks, bool readOnly = true);
 
         public abstract Task<Source> Update(Source source);
 
@@ -44,25 +44,25 @@ namespace Api.Services
             return source;
         }
 
-        public async Task<List<Source>> ReadAll(bool readOnly = false)
+        public async Task<List<Source>> ReadAll(bool readOnly = true)
         {
             var query = GetSources(readOnly: readOnly);
 
             return await query.ToListAsync();
         }
 
-        private IQueryable<Source> GetSources(bool readOnly = false)
+        private IQueryable<Source> GetSources(bool readOnly = true)
         {
             return readOnly ? context.Sources.AsNoTracking() : context.Sources.AsTracking();
         }
 
-        public async Task<Source?> ReadById(string id, bool readOnly = false)
+        public async Task<Source?> ReadById(string id, bool readOnly = true)
         {
             return await GetSources(readOnly: readOnly)
                 .FirstOrDefaultAsync(s => s.Id.Equals(id));
         }
 
-        public async Task<Source?> ReadBySourceId(string sourceId, bool readOnly = false)
+        public async Task<Source?> ReadBySourceId(string sourceId, bool readOnly = true)
         {
             return await GetSources(readOnly: readOnly)
                 .FirstOrDefaultAsync(s => s.SourceId.Equals(sourceId));
@@ -70,13 +70,13 @@ namespace Api.Services
 
         public async Task<Source?> CheckForExistingSource(string sourceId)
         {
-            return await ReadBySourceId(sourceId);
+            return await ReadBySourceId(sourceId, readOnly: true);
         }
 
         public async Task<Source?> CheckForExistingSourceFromTasks(IList<MissionTask> tasks)
         {
             string hash = MissionTask.CalculateHashFromTasks(tasks);
-            return await ReadBySourceId(hash);
+            return await ReadBySourceId(hash, readOnly: true);
         }
 
         public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id)
@@ -104,7 +104,7 @@ namespace Api.Services
             }
         }
 
-        public async Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks, bool readOnly = false)
+        public async Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks, bool readOnly = true)
         {
             string json = JsonSerializer.Serialize(tasks);
             string hash = MissionTask.CalculateHashFromTasks(tasks);
