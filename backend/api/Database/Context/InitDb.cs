@@ -1,4 +1,5 @@
 ﻿using Api.Database.Models;
+using Microsoft.EntityFrameworkCore;
 using TaskStatus = Api.Database.Models.TaskStatus;
 namespace Api.Database.Context
 {
@@ -620,7 +621,7 @@ namespace Api.Database.Context
             });
         }
 
-        public static void AddRobotModelsToDatabase(FlotillaDbContext context)
+        public static void AddRobotModelsToContext(FlotillaDbContext context)
         {
             foreach (var type in Enum.GetValues<RobotType>())
             {
@@ -634,7 +635,6 @@ namespace Api.Database.Context
                     };
                 context.Add(model);
             }
-            context.SaveChanges();
         }
 
         public static void PopulateDb(FlotillaDbContext context)
@@ -647,10 +647,11 @@ namespace Api.Database.Context
 
             context.AddRange(inspections);
             context.AddRange(installations);
-            AddRobotModelsToDatabase(context);
+            AddRobotModelsToContext(context);
             foreach (var robot in robots)
                 robot.VideoStreams.Add(VideoStream);
-            var models = context.RobotModels.AsEnumerable().ToList();
+            context.SaveChanges();
+            var models = context.RobotModels.AsTracking().AsEnumerable().ToList();
             robots[0].Model = models.Find(model => model.Type == RobotType.TaurobInspector)!;
             robots[1].Model = models.Find(model => model.Type == RobotType.ExR2)!;
             robots[2].Model = models.Find(model => model.Type == RobotType.AnymalX)!;
