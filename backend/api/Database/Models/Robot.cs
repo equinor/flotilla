@@ -20,7 +20,7 @@ namespace Api.Database.Models
             Pose = new Pose();
         }
 
-        public Robot(CreateRobotQuery createQuery, Installation installation, Area? area = null)
+        public Robot(CreateRobotQuery createQuery, Installation installation, RobotModel model, Area? area = null)
         {
             var videoStreams = new List<VideoStream>();
             foreach (var videoStreamQuery in createQuery.VideoStreams)
@@ -47,6 +47,7 @@ namespace Api.Database.Models
             RobotCapabilities = createQuery.RobotCapabilities;
             Status = createQuery.Status;
             Pose = new Pose();
+            Model = model;
         }
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
