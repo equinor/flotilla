@@ -164,10 +164,7 @@ namespace Api.Test.Database
             };
 
             var robotModel = await _robotModelService.ReadByRobotType(createRobotQuery.RobotType, readOnly: true);
-            var robot = new Robot(createRobotQuery, installation, area)
-            {
-                Model = robotModel!
-            };
+            var robot = new Robot(createRobotQuery, installation, robotModel!, area);
             return await _robotService.Create(robot);
         }
     }

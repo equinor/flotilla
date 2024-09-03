@@ -110,9 +110,8 @@ namespace Api.Test.Services
                 Status = RobotStatus.Available
             };
 
-            var robot = new Robot(robotQuery, installation);
             var robotModel = _context.RobotModels.First();
-            robot.Model = robotModel;
+            var robot = new Robot(robotQuery, installation, robotModel);
 
             await robotService.Create(robot);
             var robotsAfter = await robotService.ReadAll(readOnly: true);

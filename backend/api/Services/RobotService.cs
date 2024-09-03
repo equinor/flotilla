@@ -82,10 +82,7 @@ namespace Api.Services
                     }
                 }
 
-                var newRobot = new Robot(robotQuery, installation, area)
-                {
-                    Model = robotModel
-                };
+                var newRobot = new Robot(robotQuery, installation, robotModel, area);
 
                 if (newRobot.CurrentArea is not null) context.Entry(newRobot.CurrentArea).State = EntityState.Unchanged;
                 if (newRobot.CurrentInstallation != null) context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
