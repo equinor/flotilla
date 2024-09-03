@@ -20,8 +20,6 @@ namespace Api.Services
 
         public abstract Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks, bool readOnly = true);
 
-        public abstract Task<Source> Update(Source source);
-
         public abstract Task<Source?> Delete(string id);
 
         public void DetachTracking(Source source);
@@ -123,13 +121,6 @@ namespace Api.Services
 
             DetachTracking(newSource);
             return newSource;
-        }
-
-        public async Task<Source> Update(Source source)
-        {
-            var entry = context.Update(source);
-            await context.SaveChangesAsync();
-            return entry.Entity;
         }
 
         public async Task<Source?> Delete(string id)
