@@ -167,8 +167,8 @@ namespace Api.Services
         public async Task<MissionRun?> ReadNextScheduledLocalizationMissionRun(string robotId, bool readOnly = true)
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
-                    .OrderBy(missionRun => missionRun.DesiredStartTime)
-                    .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending && missionRun.MissionRunType == MissionRunType.Localization);
+                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending && missionRun.MissionRunType == MissionRunType.Localization);
         }
 
         public async Task<IList<MissionRun>> ReadMissionRuns(string robotId, MissionRunType? missionRunType, IList<MissionStatus>? filterStatuses = null, bool readOnly = true)
@@ -216,59 +216,38 @@ namespace Api.Services
                 .Where(missionRun => missionRun.Robot.Id == robotId && (missionRun.Status == MissionStatus.Ongoing || missionRun.Status == MissionStatus.Paused))
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
-            foreach (var ongoingMissionRun in ongoingMissionRuns)
-            {
-                if (ongoingMissionRun.IsLocalizationMission()) { return true; }
-            }
-            return false;
+            return ongoingMissionRuns.Any((m) => m.IsLocalizationMission());
         }
 
         public async Task<bool> PendingOrOngoingLocalizationMissionRunExists(string robotId)
         {
             var pendingMissionRuns = await ReadMissionRunQueue(robotId, readOnly: true);
-            foreach (var pendingMissionRun in pendingMissionRuns)
-            {
-                if (pendingMissionRun.IsLocalizationMission()) { return true; }
-            }
+            if (pendingMissionRuns.Any((m) => m.IsLocalizationMission())) return true;
+
             var ongoingMissionRuns = await GetMissionRunsWithSubModels(readOnly: true)
                 .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing)
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
-            foreach (var ongoingMissionRun in ongoingMissionRuns)
-            {
-                if (ongoingMissionRun.IsLocalizationMission()) { return true; }
-            }
-            return false;
+            return ongoingMissionRuns.Any((m) => m.IsLocalizationMission());
         }
 
         public async Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId)
         {
             var pendingMissionRuns = await ReadMissionRunQueue(robotId, readOnly: true);
-            foreach (var pendingMissionRun in pendingMissionRuns)
-            {
-                if (pendingMissionRun.IsReturnHomeMission()) { return true; }
-            }
+            if (pendingMissionRuns.Any((m) => m.IsReturnHomeMission())) return true;
+
             var ongoingMissionRuns = await GetMissionRunsWithSubModels(readOnly: true)
                 .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing)
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
-            foreach (var ongoingMissionRun in ongoingMissionRuns)
-            {
-                if (ongoingMissionRun.IsReturnHomeMission()) { return true; }
-            }
-            return false;
-
+            return ongoingMissionRuns.Any((m) => m.IsReturnHomeMission());
         }
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun)
         {
             if (missionRun.Robot.RobotCapabilities == null) return false;
 
-            foreach (var task in missionRun.Tasks)
-                foreach (var inspection in task.Inspections)
-                    if (!inspection.IsSupportedInspectionType(missionRun.Robot.RobotCapabilities))
-                        return true;
-            return false;
+            return missionRun.Tasks.SelectMany((t) => t.Inspections).Any((i) => !i.IsSupportedInspectionType(missionRun.Robot.RobotCapabilities));
         }
 
         public async Task<MissionRun> Update(MissionRun missionRun)
