@@ -386,7 +386,7 @@ namespace Api.Test.EventHandlers
             _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), missionRunCreatedEventArgs);
             Thread.Sleep(100);
 
-            var missionRun1PostCreation = await _missionRunService.ReadById(missionRun1.Id);
+            var missionRun1PostCreation = await _missionRunService.ReadById(missionRun1.Id, readOnly: true);
             Assert.NotNull(missionRun1PostCreation);
 
             // Act

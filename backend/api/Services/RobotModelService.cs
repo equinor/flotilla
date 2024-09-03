@@ -6,11 +6,11 @@ namespace Api.Services
 {
     public interface IRobotModelService
     {
-        public abstract Task<IEnumerable<RobotModel>> ReadAll(bool readOnly = false);
+        public abstract Task<IEnumerable<RobotModel>> ReadAll(bool readOnly = true);
 
-        public abstract Task<RobotModel?> ReadById(string id, bool readOnly = false);
+        public abstract Task<RobotModel?> ReadById(string id, bool readOnly = true);
 
-        public abstract Task<RobotModel?> ReadByRobotType(RobotType robotType, bool readOnly = false);
+        public abstract Task<RobotModel?> ReadByRobotType(RobotType robotType, bool readOnly = true);
 
         public abstract Task<RobotModel> Create(RobotModel newRobotModel);
 
@@ -44,23 +44,23 @@ namespace Api.Services
             }
         }
 
-        public async Task<IEnumerable<RobotModel>> ReadAll(bool readOnly = false)
+        public async Task<IEnumerable<RobotModel>> ReadAll(bool readOnly = true)
         {
             return await GetRobotModels(readOnly: readOnly).ToListAsync();
         }
 
-        private IQueryable<RobotModel> GetRobotModels(bool readOnly = false)
+        private IQueryable<RobotModel> GetRobotModels(bool readOnly = true)
         {
             return readOnly ? _context.RobotModels.AsNoTracking() : _context.RobotModels.AsTracking();
         }
 
-        public async Task<RobotModel?> ReadById(string id, bool readOnly = false)
+        public async Task<RobotModel?> ReadById(string id, bool readOnly = true)
         {
             return await GetRobotModels(readOnly: readOnly)
                 .FirstOrDefaultAsync(robotModel => robotModel.Id.Equals(id));
         }
 
-        public async Task<RobotModel?> ReadByRobotType(RobotType robotType, bool readOnly = false)
+        public async Task<RobotModel?> ReadByRobotType(RobotType robotType, bool readOnly = true)
         {
             return await GetRobotModels(readOnly: readOnly)
                 .FirstOrDefaultAsync(robotModel => robotModel.Type.Equals(robotType));

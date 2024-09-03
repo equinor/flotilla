@@ -13,17 +13,17 @@ namespace Api.Services
     {
         public Task<MissionDefinition> Create(MissionDefinition missionDefinition);
 
-        public Task<MissionDefinition?> ReadById(string id, bool readOnly = false);
+        public Task<MissionDefinition?> ReadById(string id, bool readOnly = true);
 
-        public Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters, bool readOnly = false);
+        public Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters, bool readOnly = true);
 
-        public Task<List<MissionDefinition>> ReadByAreaId(string areaId, bool readOnly = false);
+        public Task<List<MissionDefinition>> ReadByAreaId(string areaId, bool readOnly = true);
 
-        public Task<List<MissionDefinition>> ReadByDeckId(string deckId, bool readOnly = false);
+        public Task<List<MissionDefinition>> ReadByDeckId(string deckId, bool readOnly = true);
 
         public Task<List<MissionTask>?> GetTasksFromSource(Source source);
 
-        public Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = false);
+        public Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = true);
 
         public Task<MissionDefinition> UpdateLastSuccessfulMissionRun(string missionRunId, string missionDefinitionId);
 
@@ -65,13 +65,13 @@ namespace Api.Services
             return missionDefinition;
         }
 
-        public async Task<MissionDefinition?> ReadById(string id, bool readOnly = false)
+        public async Task<MissionDefinition?> ReadById(string id, bool readOnly = true)
         {
             return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(m => m.IsDeprecated == false)
                 .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
         }
 
-        public async Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters, bool readOnly = false)
+        public async Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters, bool readOnly = true)
         {
             var query = GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(m => m.IsDeprecated == false);
             var filter = ConstructFilter(parameters);
@@ -89,19 +89,19 @@ namespace Api.Services
             );
         }
 
-        public async Task<List<MissionDefinition>> ReadByAreaId(string areaId, bool readOnly = false)
+        public async Task<List<MissionDefinition>> ReadByAreaId(string areaId, bool readOnly = true)
         {
             return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
                 m => m.IsDeprecated == false && m.Area != null && m.Area.Id == areaId).ToListAsync();
         }
 
-        public async Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = false)
+        public async Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = true)
         {
             return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
                 m => m.IsDeprecated == false && m.Source.SourceId != null && m.Source.SourceId == sourceId).ToListAsync();
         }
 
-        public async Task<List<MissionDefinition>> ReadByDeckId(string deckId, bool readOnly = false)
+        public async Task<List<MissionDefinition>> ReadByDeckId(string deckId, bool readOnly = true)
         {
             return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
                 m => m.IsDeprecated == false && m.Area != null && m.Area.Deck != null && m.Area.Deck.Id == deckId).ToListAsync();
@@ -169,7 +169,7 @@ namespace Api.Services
 
         }
 
-        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels(bool readOnly = false)
+        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.MissionDefinitions

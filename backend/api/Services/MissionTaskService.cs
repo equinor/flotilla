@@ -43,12 +43,12 @@ namespace Api.Services
             return entry.Entity;
         }
 
-        private async Task<MissionTask?> ReadByIsarTaskId(string id, bool readOnly = false)
+        private async Task<MissionTask?> ReadByIsarTaskId(string id, bool readOnly = true)
         {
             return await GetMissionTasks(readOnly: readOnly).FirstOrDefaultAsync(missionTask => missionTask.IsarTaskId != null && missionTask.IsarTaskId.Equals(id));
         }
 
-        private IQueryable<MissionTask> GetMissionTasks(bool readOnly = false)
+        private IQueryable<MissionTask> GetMissionTasks(bool readOnly = true)
         {
             return (readOnly ? context.MissionTasks.AsNoTracking() : context.MissionTasks.AsTracking())
                 .Include(missionTask => missionTask.Inspections).ThenInclude(inspection => inspection.InspectionFindings);

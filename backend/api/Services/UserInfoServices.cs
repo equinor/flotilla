@@ -7,9 +7,9 @@ namespace Api.Services
 {
     public interface IUserInfoService
     {
-        public Task<IEnumerable<UserInfo>> ReadAll();
+        public Task<IEnumerable<UserInfo>> ReadAll(bool readOnly = true);
 
-        public Task<UserInfo?> ReadById(string id);
+        public Task<UserInfo?> ReadById(string id, bool readOnly = true);
 
         public Task<UserInfo> Create(UserInfo userInfo);
 
@@ -27,25 +27,25 @@ namespace Api.Services
     )]
     public class UserInfoService(FlotillaDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<UserInfoService> logger) : IUserInfoService
     {
-        public async Task<IEnumerable<UserInfo>> ReadAll()
+        public async Task<IEnumerable<UserInfo>> ReadAll(bool readOnly = true)
         {
-            return await GetUsersInfo().ToListAsync();
+            return await GetUsersInfo(readOnly: readOnly).ToListAsync();
         }
 
-        private DbSet<UserInfo> GetUsersInfo()
+        private IQueryable<UserInfo> GetUsersInfo(bool readOnly = true)
         {
-            return context.UserInfos;
+            return readOnly ? context.UserInfos.AsNoTracking() : context.UserInfos.AsTracking();
         }
 
-        public async Task<UserInfo?> ReadById(string id)
+        public async Task<UserInfo?> ReadById(string id, bool readOnly = true)
         {
-            return await GetUsersInfo()
+            return await GetUsersInfo(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<UserInfo?> ReadByOid(string oid)
+        public async Task<UserInfo?> ReadByOid(string oid, bool readOnly = true)
         {
-            return await GetUsersInfo()
+            return await GetUsersInfo(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Oid.Equals(oid));
         }
 
@@ -65,7 +65,7 @@ namespace Api.Services
 
         public async Task<UserInfo?> Delete(string id)
         {
-            var userInfo = await GetUsersInfo()
+            var userInfo = await GetUsersInfo(readOnly: false)
                 .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (userInfo is null)
             {
@@ -89,7 +89,7 @@ namespace Api.Services
                 logger.LogWarning("User objectId is null so it will not be added to the database.");
                 return null;
             }
-            var userInfo = await ReadByOid(objectId);
+            var userInfo = await ReadByOid(objectId, readOnly: false);
             if (userInfo is null)
             {
                 var newUserInfo = new UserInfo

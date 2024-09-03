@@ -64,7 +64,7 @@ namespace Api.EventHandlers
         private async void OnIsarRobotHeartbeat(object? sender, MqttReceivedArgs mqttArgs)
         {
             var isarRobotHeartbeat = (IsarRobotHeartbeatMessage)mqttArgs.Message;
-            var robot = await RobotService.ReadByIsarId(isarRobotHeartbeat.IsarId);
+            var robot = await RobotService.ReadByIsarId(isarRobotHeartbeat.IsarId, readOnly: true);
 
             if (robot == null)
             {
@@ -123,7 +123,7 @@ namespace Api.EventHandlers
 
         private async void OnTimeoutEvent(IsarRobotHeartbeatMessage robotHeartbeatMessage)
         {
-            var robot = await RobotService.ReadByIsarId(robotHeartbeatMessage.IsarId);
+            var robot = await RobotService.ReadByIsarId(robotHeartbeatMessage.IsarId, readOnly: true);
             if (robot is null)
             {
                 _logger.LogError(

@@ -21,7 +21,7 @@ namespace Api.Services
     {
         private const string SUPER_ADMIN_ROLE_NAME = "Role.Admin";
 
-        private IQueryable<AccessRole> GetAccessRoles(bool readOnly = false)
+        private IQueryable<AccessRole> GetAccessRoles(bool readOnly = true)
         {
             return readOnly ? context.AccessRoles.AsNoTracking() : context.AccessRoles.AsTracking();
         }
