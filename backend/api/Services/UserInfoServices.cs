@@ -81,7 +81,7 @@ namespace Api.Services
         public async Task<UserInfo?> GetRequestedUserInfo()
         {
             if (httpContextAccessor.HttpContext == null)
-                throw new HttpRequestException("User Info can only be requested in authenticated HTTP requests.");
+                return null;
 
             string? objectId = httpContextAccessor.HttpContext.GetUserObjectId();
             if (objectId is null)
