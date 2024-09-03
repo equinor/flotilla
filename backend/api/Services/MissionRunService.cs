@@ -107,18 +107,9 @@ namespace Api.Services
                 OnMissionRunCreated(args);
             }
 
-            try
-            {
-                var userInfo = await userInfoService.GetRequestedUserInfo();
-                if (userInfo != null)
-                {
-                    logger.LogInformation($"Mission run created by user with Id {userInfo.Id}");
-                }
-            }
-            catch (HttpRequestException e)
-            {
-                logger.LogInformation(e, $"Failed to log user information because: {e.Message}");
-            }
+            var userInfo = await userInfoService.GetRequestedUserInfo();
+            if (userInfo != null) { logger.LogInformation($"Mission run created by user with Id {userInfo.Id}"); }
+
             DetachTracking(missionRun);
 
             return missionRun;
