@@ -39,7 +39,8 @@ namespace Api.Services
                 // If no models in database, add default ones
                 // Robot models are essentially database enums and should just be added to all databases
                 // They can then be modified later with other values if needed
-                InitDb.AddRobotModelsToDatabase(context);
+                InitDb.AddRobotModelsToContext(context);
+                context.SaveChanges();
             }
         }
 
