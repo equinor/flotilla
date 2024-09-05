@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Typography } from '@equinor/eds-core-react'
 import { FullScreenVideoStreamCard } from './FullScreenVideo'
-import { VideoStream } from 'models/VideoStream'
 import { VideoStreamCard } from './VideoStreamCards'
 import styled from 'styled-components'
 import ReactModal from 'react-modal'
@@ -24,26 +23,29 @@ const VideoFullScreen = styled(ReactModal)`
 `
 
 interface VideoStreamWindowProps {
-    videoStreams: VideoStream[]
+    videoStreams: MediaStreamTrack[]
 }
 
 export const VideoStreamWindow = ({ videoStreams }: VideoStreamWindowProps) => {
     const { TranslateText } = useLanguageContext()
     const [fullScreenMode, setFullScreenMode] = useState<boolean>(false)
-    const [fullScreenStream, setFullScreenStream] = useState<VideoStream>()
+    const [fullScreenStream, setFullScreenStream] = useState<MediaStream>()
 
     const toggleFullScreenMode = () => {
         setFullScreenMode(!fullScreenMode)
     }
-    const updateFullScreenStream = (videoStream: VideoStream) => {
+    const updateFullScreenStream = (videoStream: MediaStream) => {
         setFullScreenStream(videoStream)
         toggleFullScreenMode()
     }
 
+    const videoStreamName = 'test' // TODO: decide if we even want a name for it
+
     const videoCards = videoStreams.map((videoStream, index) => (
         <VideoStreamCard
             key={index}
-            videoStream={videoStream}
+            videoStream={new MediaStream([videoStream])}
+            videoStreamName={videoStreamName}
             toggleFullScreenMode={toggleFullScreenMode}
             setFullScreenStream={updateFullScreenStream}
         />
@@ -57,7 +59,11 @@ export const VideoStreamWindow = ({ videoStreams }: VideoStreamWindowProps) => {
                 {fullScreenMode === false && videoCards}
                 {videoStream && (
                     <VideoFullScreen isOpen={fullScreenMode} onRequestClose={toggleFullScreenMode}>
-                        {FullScreenVideoStreamCard({ videoStream, toggleFullScreenMode })}
+                        <FullScreenVideoStreamCard
+                            videoStream={videoStream}
+                            videoStreamName={videoStreamName}
+                            toggleFullScreenMode={toggleFullScreenMode}
+                        />
                     </VideoFullScreen>
                 )}
             </VideoStreamContent>

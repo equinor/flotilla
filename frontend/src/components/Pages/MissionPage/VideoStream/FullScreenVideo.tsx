@@ -1,10 +1,8 @@
-import { VideoPlayerOvenPlayer, isValidOvenPlayerType } from './VideoPlayerOvenPlayer'
-import { VideoPlayerSimple } from './VideoPlayerSimple'
-import { VideoStream } from 'models/VideoStream'
 import styled from 'styled-components'
 import { Typography, Button, Icon } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { Icons } from 'utils/icons'
+import { VideoPlayerSimpleStream } from './VideoPlayerSimpleStream'
 
 const FullscreenExitButton = styled(Button)`
     position: absolute;
@@ -28,26 +26,17 @@ const FullScreenCard = styled.div`
     padding: 1rem;
 `
 
-// Styles for rotation
-const FullScreenCardRotated = styled.div`
-    transform: rotate(270deg);
-    padding: 1rem;
-`
-const RotateText = styled.div`
-    writing-mode: vertical-rl;
-`
-
-const PositionText = styled.div`
-    display: flex;
-    flex-direction: row-reverse;
-`
-
 interface IFullScreenVideoStreamCardProps {
-    videoStream: VideoStream
+    videoStream: MediaStream
+    videoStreamName: string
     toggleFullScreenMode: VoidFunction
 }
 
-export const FullScreenVideoStreamCard = ({ videoStream, toggleFullScreenMode }: IFullScreenVideoStreamCardProps) => {
+export const FullScreenVideoStreamCard = ({
+    videoStream,
+    videoStreamName,
+    toggleFullScreenMode,
+}: IFullScreenVideoStreamCardProps) => {
     const cardWidth = () => {
         const availableInnerHeight = window.innerHeight - 9 * 16
         const availableInnerWidth = window.innerWidth - 2 * 16
@@ -55,15 +44,6 @@ export const FullScreenVideoStreamCard = ({ videoStream, toggleFullScreenMode }:
         const aspectRatio = 16 / 9
         return Math.round(
             Math.min(coverageFactor * availableInnerWidth, aspectRatio * coverageFactor * availableInnerHeight)
-        )
-    }
-    const rotatedCardWidth = () => {
-        const availableInnerHeight = window.innerHeight - 7.5 * 16
-        const availableInnerWidth = window.innerWidth + 0.5 * 16
-        const coverageFactor = 0.9
-        const aspectRatio = 9 / 16
-        return Math.round(
-            Math.min(coverageFactor * availableInnerHeight, aspectRatio * coverageFactor * availableInnerWidth)
         )
     }
 
@@ -82,33 +62,11 @@ export const FullScreenVideoStreamCard = ({ videoStream, toggleFullScreenMode }:
         )
     }
 
-    if (isValidOvenPlayerType(videoStream)) {
-        if (videoStream.shouldRotate270Clockwise) {
-            return (
-                <FullScreenCardRotated style={{ boxShadow: tokens.elevation.raised, width: rotatedCardWidth() }}>
-                    <PositionText>
-                        <RotateText>
-                            <Typography variant="h5">{videoStream.name}</Typography>
-                        </RotateText>
-                        <VideoPlayerOvenPlayer videoStream={videoStream} />
-                    </PositionText>
-                    {fullScreenExitButton(true)}
-                </FullScreenCardRotated>
-            )
-        }
-        return (
-            <FullScreenCard style={{ boxShadow: tokens.elevation.raised, width: cardWidth() }}>
-                <Typography variant="h5">{videoStream.name}</Typography>
-                <VideoPlayerOvenPlayer videoStream={videoStream} />
-                {fullScreenExitButton(false)}
-            </FullScreenCard>
-        )
-    }
     // Rotated stream is not supported for simpleplayer
     return (
         <FullScreenCard style={{ boxShadow: tokens.elevation.raised, width: cardWidth() }}>
-            <Typography variant="h5">{videoStream.name}</Typography>
-            <VideoPlayerSimple videoStream={videoStream} />
+            <Typography variant="h5">{videoStreamName}</Typography>
+            <VideoPlayerSimpleStream videoStream={videoStream} videoStreamName={videoStreamName} />
             {fullScreenExitButton(false)}
         </FullScreenCard>
     )

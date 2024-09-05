@@ -1,8 +1,19 @@
-export interface VideoStream {
-    id: string
-    name: string
-    robotId?: string
-    url: string
-    type: string
-    shouldRotate270Clockwise: boolean
+export enum MediaType {
+    Video,
+    Audio,
 }
+
+export enum MediaConnectionType {
+    LiveKit,
+}
+
+export type MediaStreamConfig = {
+    url: string
+    streamId: string
+    authToken: string
+    mediaType: MediaType
+    robotId: string
+    connectionType: MediaConnectionType
+}
+
+export type MediaStreamConfigAndTracks = MediaStreamConfig & { streams: MediaStreamTrack[] }

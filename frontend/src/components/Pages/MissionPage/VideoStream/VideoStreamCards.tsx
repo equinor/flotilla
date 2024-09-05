@@ -1,10 +1,8 @@
 import { Card, Typography, Icon, Button } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
-import { VideoPlayerOvenPlayer, isValidOvenPlayerType } from './VideoPlayerOvenPlayer'
-import { VideoPlayerSimple } from './VideoPlayerSimple'
-import { VideoStream } from 'models/VideoStream'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
+import { VideoPlayerSimpleStream } from './VideoPlayerSimpleStream'
 
 const FullscreenButton = styled(Button)`
     position: absolute;
@@ -25,25 +23,19 @@ const StyledVideoSection = styled.div`
     height: 10rem;
 `
 
-const StyledVideoSectionRotated = styled.div`
-    height: 10rem;
-    width: 10rem;
-`
-
-const Rotate = styled.div`
-    transform: rotate(270deg);
-    position: relative;
-    left: 4rem;
-    bottom: 4rem;
-`
-
 interface IVideoStreamCardProps {
-    videoStream: VideoStream
+    videoStream: MediaStream
+    videoStreamName: string
     toggleFullScreenMode: VoidFunction
     setFullScreenStream: Function
 }
 
-export const VideoStreamCard = ({ videoStream, toggleFullScreenMode, setFullScreenStream }: IVideoStreamCardProps) => {
+export const VideoStreamCard = ({
+    videoStream,
+    videoStreamName,
+    toggleFullScreenMode,
+    setFullScreenStream,
+}: IVideoStreamCardProps) => {
     const turnOnFullScreen = () => {
         setFullScreenStream(videoStream)
         toggleFullScreenMode()
@@ -55,40 +47,15 @@ export const VideoStreamCard = ({ videoStream, toggleFullScreenMode, setFullScre
         </FullscreenButton>
     )
 
-    const getVideoPlayer = () => {
-        if (isValidOvenPlayerType(videoStream)) {
-            if (videoStream.shouldRotate270Clockwise) {
-                return (
-                    <StyledVideoSectionRotated>
-                        <Rotate>
-                            <VideoPlayerOvenPlayer videoStream={videoStream} />
-                        </Rotate>
-                        {fullScreenButton}
-                    </StyledVideoSectionRotated>
-                )
-            } else {
-                return (
-                    <StyledVideoSection>
-                        <VideoPlayerOvenPlayer videoStream={videoStream} />
-                        {fullScreenButton}
-                    </StyledVideoSection>
-                )
-            }
-        } else {
-            // Rotated stream is not supported for simpleplayer
-            return (
-                <StyledVideoSection>
-                    <VideoPlayerSimple videoStream={videoStream} />
-                    {fullScreenButton}
-                </StyledVideoSection>
-            )
-        }
-    }
-
     return (
         <VideoCard style={{ boxShadow: tokens.elevation.raised }}>
-            <div onDoubleClick={turnOnFullScreen}>{getVideoPlayer()}</div>
-            <Typography variant="h5">{videoStream.name}</Typography>
+            <div onDoubleClick={turnOnFullScreen}>
+                <StyledVideoSection>
+                    <VideoPlayerSimpleStream videoStream={videoStream} videoStreamName={videoStreamName} />
+                    {fullScreenButton}
+                </StyledVideoSection>
+            </div>
+            <Typography variant="h5">{videoStreamName}</Typography>
         </VideoCard>
     )
 }
