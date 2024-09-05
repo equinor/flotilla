@@ -14,6 +14,7 @@ import { SignalRProvider } from 'components/Contexts/SignalRContext'
 import { RobotProvider } from 'components/Contexts/RobotContext'
 import { config } from 'config'
 import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitionsContext'
+import { MediaStreamProvider } from 'components/Contexts/MediaStreamContext'
 
 const appInsights = new ApplicationInsights({
     config: {
@@ -28,36 +29,38 @@ if (config.AI_CONNECTION_STRING.length > 0) {
 
 const App = () => (
     <AuthProvider>
-        <LanguageProvider>
-            <SignalRProvider>
-                <InstallationProvider>
-                    <MissionDefinitionsProvider>
-                        <RobotProvider>
-                            <MissionRunsProvider>
-                                <AlertProvider>
-                                    <SafeZoneProvider>
-                                        <MissionRunsProvider>
-                                            <MissionControlProvider>
-                                                <UnauthenticatedTemplate>
-                                                    <div className="sign-in-page">
-                                                        <AssetSelectionPage></AssetSelectionPage>
-                                                    </div>
-                                                </UnauthenticatedTemplate>
-                                                <AuthenticatedTemplate>
-                                                    <MissionFilterProvider>
-                                                        <FlotillaSite />
-                                                    </MissionFilterProvider>
-                                                </AuthenticatedTemplate>
-                                            </MissionControlProvider>
-                                        </MissionRunsProvider>
-                                    </SafeZoneProvider>
-                                </AlertProvider>
-                            </MissionRunsProvider>
-                        </RobotProvider>
-                    </MissionDefinitionsProvider>
-                </InstallationProvider>
-            </SignalRProvider>
-        </LanguageProvider>
+        <MediaStreamProvider>
+            <LanguageProvider>
+                <SignalRProvider>
+                    <InstallationProvider>
+                        <MissionDefinitionsProvider>
+                            <RobotProvider>
+                                <MissionRunsProvider>
+                                    <AlertProvider>
+                                        <SafeZoneProvider>
+                                            <MissionRunsProvider>
+                                                <MissionControlProvider>
+                                                    <UnauthenticatedTemplate>
+                                                        <div className="sign-in-page">
+                                                            <AssetSelectionPage></AssetSelectionPage>
+                                                        </div>
+                                                    </UnauthenticatedTemplate>
+                                                    <AuthenticatedTemplate>
+                                                        <MissionFilterProvider>
+                                                            <FlotillaSite />
+                                                        </MissionFilterProvider>
+                                                    </AuthenticatedTemplate>
+                                                </MissionControlProvider>
+                                            </MissionRunsProvider>
+                                        </SafeZoneProvider>
+                                    </AlertProvider>
+                                </MissionRunsProvider>
+                            </RobotProvider>
+                        </MissionDefinitionsProvider>
+                    </InstallationProvider>
+                </SignalRProvider>
+            </LanguageProvider>
+        </MediaStreamProvider>
     </AuthProvider>
 )
 
