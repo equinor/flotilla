@@ -3,7 +3,6 @@ import { BatteryStatus } from './Battery'
 import { Installation, placeholderInstallation } from './Installation'
 import { Pose } from './Pose'
 import { RobotModel, placeholderRobotModel } from './RobotModel'
-import { VideoStream } from './VideoStream'
 
 export enum RobotStatus {
     Available = 'Available',
@@ -37,7 +36,6 @@ export interface Robot {
     host?: string
     logs?: string
     port?: number
-    videoStreams?: VideoStream[]
     isarUri?: string
     currentArea?: Area
     flotillaStatus?: RobotFlotillaStatus
