@@ -1,7 +1,6 @@
 import { config } from 'config'
 import { Mission } from 'models/Mission'
 import { Robot } from 'models/Robot'
-import { VideoStream } from 'models/VideoStream'
 import { filterRobots } from 'utils/filtersAndSorts'
 import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
 import { MissionDefinitionQueryParameters } from 'models/MissionDefinitionQueryParameters'
@@ -261,12 +260,6 @@ export class BackendAPICaller {
     static async getMissionRunById(missionId: string): Promise<Mission> {
         const path: string = 'missions/runs/' + missionId
         const result = await BackendAPICaller.GET<Mission>(path).catch(BackendAPICaller.handleError('GET', path))
-        return result.content
-    }
-
-    static async getVideoStreamsByRobotId(robotId: string): Promise<VideoStream[]> {
-        const path: string = 'robots/' + robotId + '/video-streams'
-        const result = await BackendAPICaller.GET<VideoStream[]>(path).catch(BackendAPICaller.handleError('GET', path))
         return result.content
     }
 
