@@ -58,6 +58,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
+            MqttService.MqttIsarTelemetryUpdateReceived += OnIsarTelemetryUpdate;
         }
 
         public override void Unsubscribe()
@@ -71,6 +72,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
+            MqttService.MqttIsarTelemetryUpdateReceived -= OnIsarTelemetryUpdate;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken) { await stoppingToken; }
@@ -483,6 +485,26 @@ namespace Api.EventHandlers
             SignalRService.ReportGeneralFailToSignalR(robot, messageTitle, message);
 
             TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
+        }
+
+        private async void OnIsarTelemetryUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var isarTelemetyUpdate = (IsarTelemetyUpdateMessage)mqttArgs.Message;
+
+            var robot = await RobotService.ReadByIsarId(isarTelemetyUpdate.IsarId);
+            if (robot == null)
+            {
+                _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", isarTelemetyUpdate.IsarId, isarTelemetyUpdate.RobotName);
+                return;
+            }
+            await SignalRService.SendMessageAsync("Media stream config received", robot.CurrentInstallation,
+                new IsarMediaConfig
+                {
+                    Url = isarTelemetyUpdate.Url,
+                    AuthToken = isarTelemetyUpdate.Token,
+                    RobotId = isarTelemetyUpdate.IsarId,
+                    MediaConnectionType = isarTelemetyUpdate.MediaConnectionType
+                });
         }
     }
 }
