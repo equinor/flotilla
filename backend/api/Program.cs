@@ -7,7 +7,6 @@ using Api.Mqtt;
 using Api.Options;
 using Api.Services;
 using Api.Services.ActionServices;
-using Api.Services.MissionLoaders;
 using Api.SignalRHubs;
 using Api.Utilities;
 using Azure.Identity;
@@ -75,6 +74,7 @@ builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>(
 
 builder.Services.AddScoped<IIsarService, IsarService>();
 builder.Services.AddScoped<IStidService, StidService>();
+builder.Services.AddScoped<IEchoService, EchoService>();
 
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IBlobService, BlobService>();
@@ -140,7 +140,7 @@ builder.Services
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
     .EnableTokenAcquisitionToCallDownstreamApi()
     .AddInMemoryTokenCaches()
-    .AddDownstreamApi(EchoMissionLoader.ServiceName, builder.Configuration.GetSection("Echo"))
+    .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
     .AddDownstreamApi(StidService.ServiceName, builder.Configuration.GetSection("Stid"))
     .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
