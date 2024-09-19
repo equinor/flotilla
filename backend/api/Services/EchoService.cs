@@ -11,7 +11,7 @@ namespace Api.Services
     {
         public Task<IQueryable<MissionDefinition>> GetAvailableMissions(string? installationCode);
         public Task<MissionDefinition?> GetMissionById(string sourceMissionId);
-        public Task<List<MissionTask>> GetTasksForMission(string missionId);
+        public Task<List<MissionTask>> GetTasksForMission(string missionSourceId);
         public Task<List<PlantInfo>> GetPlantInfos();
     }
 
@@ -90,9 +90,9 @@ namespace Api.Services
             return processedEchoMission;
         }
 
-        public async Task<List<MissionTask>> GetTasksForMission(string missionId)
+        public async Task<List<MissionTask>> GetTasksForMission(string missionSourceId)
         {
-            var echoMission = await GetEchoMission(missionId);
+            var echoMission = await GetEchoMission(missionSourceId);
             var missionTasks = echoMission.Tags.Select(t => MissionTaskFromEchoTag(t)).ToList();
             return missionTasks;
         }

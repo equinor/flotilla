@@ -201,11 +201,11 @@ namespace Api.Controllers
             try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId, readOnly: true); }
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
-            string missionId = scheduledMissionQuery.MissionId.ToString(CultureInfo.CurrentCulture);
+            string missionSourceId = scheduledMissionQuery.MissionSourceId.ToString(CultureInfo.CurrentCulture);
             MissionDefinition? missionDefinition;
             try
             {
-                missionDefinition = await missionLoader.GetMissionById(missionId);
+                missionDefinition = await missionLoader.GetMissionById(missionSourceId);
                 if (missionDefinition == null)
                 {
                     return NotFound("Mission not found");
@@ -217,7 +217,7 @@ namespace Api.Controllers
                 {
                     logger.LogWarning(
                         "Could not find mission with id={Id}",
-                        missionId
+                        missionSourceId
                     );
                     return NotFound("Mission not found");
                 }
@@ -240,7 +240,7 @@ namespace Api.Controllers
             }
 
 
-            var missionTasks = await missionLoader.GetTasksForMission(missionId);
+            var missionTasks = await missionLoader.GetTasksForMission(missionSourceId);
 
             List<Area?> missionAreas;
             missionAreas = missionTasks
@@ -263,7 +263,7 @@ namespace Api.Controllers
                 return NotFound($"No area found for mission '{missionDefinition.Name}'.");
             }
 
-            var source = await sourceService.CheckForExistingSource(scheduledMissionQuery.MissionId);
+            var source = await sourceService.CheckForExistingSource(scheduledMissionQuery.MissionSourceId);
             MissionDefinition? existingMissionDefinition = null;
             if (source == null)
             {
