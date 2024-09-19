@@ -20,6 +20,8 @@ namespace Api.Services
 
         public abstract Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks, bool readOnly = true);
 
+        public abstract Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
+
         public abstract Task<Source?> Delete(string id);
 
         public void DetachTracking(Source source);
