@@ -282,13 +282,13 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async postMission(missionId: string, robotId: string, installationCode: string | null) {
+    static async postMission(missionSourceId: string, robotId: string, installationCode: string | null) {
         const path: string = 'missions'
         const robots: Robot[] = await BackendAPICaller.getEnabledRobots()
         const desiredRobot = filterRobots(robots, robotId)
         const body = {
             robotId: desiredRobot[0].id,
-            missionId: missionId,
+            missionSourceId: missionSourceId,
             installationCode: installationCode,
             areaName: '',
         }

@@ -63,7 +63,7 @@ namespace Api.Controllers
         ///     This mission is loaded from the mission loader
         /// </remarks>
         [HttpGet]
-        [Route("missions/{missionId}")]
+        [Route("missions/{missionSourceId}")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -71,18 +71,18 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
-        public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinition([FromRoute] string missionId)
+        public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinition([FromRoute] string missionSourceId)
         {
             try
             {
-                var mission = await missionLoader.GetMissionById(missionId);
+                var mission = await missionLoader.GetMissionById(missionSourceId);
                 return Ok(mission);
             }
             catch (HttpRequestException e)
             {
                 if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
                 {
-                    logger.LogWarning("Could not find mission with id={id}", missionId);
+                    logger.LogWarning("Could not find mission with id={id}", missionSourceId);
                     return NotFound("Mission not found");
                 }
 

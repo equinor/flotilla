@@ -280,7 +280,7 @@ namespace Api.Test
             string areaName = "areaScheduleOneMissionTest";
             (_, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
 
-            string missionId = "95";
+            string missionSourceId = "95";
 
             // Act
             var query = new ScheduledMissionQuery
@@ -288,7 +288,7 @@ namespace Api.Test
                 RobotId = robotId,
                 InstallationCode = installationCode,
                 AreaName = areaName,
-                MissionId = missionId,
+                MissionSourceId = missionSourceId,
                 DesiredStartTime = DateTime.UtcNow
             };
             var content = new StringContent(
@@ -327,7 +327,7 @@ namespace Api.Test
             string areaName = "areaSchedule3MissionsTest";
             (_, _, _, _) = await PostAssetInformationToDb(installationCode, plantCode, deckName, areaName);
 
-            string missionId = "97";
+            string missionSourceId = "97";
 
             // Act
             var query = new ScheduledMissionQuery
@@ -335,7 +335,7 @@ namespace Api.Test
                 RobotId = robotId,
                 InstallationCode = installationCode,
                 AreaName = areaName,
-                MissionId = missionId,
+                MissionSourceId = missionSourceId,
                 DesiredStartTime = DateTime.UtcNow
             };
             var content = new StringContent(
@@ -664,14 +664,14 @@ namespace Api.Test
             Assert.NotNull(robots);
             var robot = robots.Where(robot => robot.Name == "Shockwave").First();
             string robotId = robot.Id;
-            string missionId = "986"; // Corresponds to mock in ServiceMock.cs
+            string missionSourceId = "986"; // Corresponds to mock in ServiceMock.cs
 
             var query = new ScheduledMissionQuery
             {
                 RobotId = robotId,
                 InstallationCode = installationCode,
                 AreaName = areaName,
-                MissionId = missionId,
+                MissionSourceId = missionSourceId,
                 DesiredStartTime = DateTime.UtcNow
             };
             var content = new StringContent(
