@@ -42,6 +42,9 @@ namespace Api.Mqtt
                 },
                 {
                     "isar/+/cloud_health", typeof(IsarCloudHealthMessage)
+                },
+                {
+                    "isar/+/media_config", typeof(IsarTelemetyUpdateMessage)
                 }
             };
 

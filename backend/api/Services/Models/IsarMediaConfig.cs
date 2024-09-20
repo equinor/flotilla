@@ -6,8 +6,8 @@ namespace Api.Services.Models
         [JsonPropertyName("url")]
         public string? Url { get; set; }
 
-        [JsonPropertyName("authToken")]
-        public string? AuthToken { get; set; }
+        [JsonPropertyName("token")]
+        public string? Token { get; set; }
 
         [JsonPropertyName("robotId")]
         public string? RobotId { get; set; }

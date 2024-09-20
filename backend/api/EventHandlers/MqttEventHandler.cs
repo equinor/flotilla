@@ -502,8 +502,8 @@ namespace Api.EventHandlers
                 new IsarMediaConfig
                 {
                     Url = isarTelemetyUpdate.Url,
-                    AuthToken = isarTelemetyUpdate.Token,
-                    RobotId = isarTelemetyUpdate.IsarId,
+                    Token = isarTelemetyUpdate.Token,
+                    RobotId = robot.Id,
                     MediaConnectionType = isarTelemetyUpdate.MediaConnectionType
                 });
         }
