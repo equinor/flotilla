@@ -153,6 +153,9 @@ namespace Api.Mqtt
                 case Type type when type == typeof(IsarCloudHealthMessage):
                     OnIsarTopicReceived<IsarCloudHealthMessage>(content);
                     break;
+                case Type type when type == typeof(IsarTelemetyUpdateMessage):
+                    OnIsarTopicReceived<IsarTelemetyUpdateMessage>(content);
+                    break;
                 default:
                     _logger.LogWarning(
                         "No callback defined for MQTT message type '{type}'",
