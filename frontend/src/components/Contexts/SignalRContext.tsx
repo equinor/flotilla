@@ -122,5 +122,5 @@ export enum SignalREventLabels {
     robotDeleted = 'Robot deleted',
     inspectionUpdated = 'Inspection updated',
     alert = 'Alert',
-    mediaStreamConfigReceived = 'mediaStreamConfigReceived',
+    mediaStreamConfigReceived = 'Media stream config received',
 }

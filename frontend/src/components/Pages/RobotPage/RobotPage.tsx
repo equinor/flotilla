@@ -19,6 +19,10 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { DocumentationSection } from './Documentation'
+import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
+import { VideoStreamSection } from '../MissionPage/MissionPage'
+import { useEffect, useState } from 'react'
+import { VideoStreamWindow } from '../MissionPage/VideoStream/VideoStreamWindow'
 
 const RobotArmMovementSection = styled.div`
     display: flex;
@@ -60,6 +64,8 @@ export const RobotPage = () => {
     const { setAlert, setListAlert } = useAlertContext()
     const { robotId } = useParams()
     const { enabledRobots } = useRobotContext()
+    const { mediaStreams } = useMediaStreamContext()
+    const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
 
     const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
 
@@ -83,6 +89,13 @@ export const RobotPage = () => {
             })
         }
     }
+
+    useEffect(() => {
+        if (robotId && mediaStreams && Object.keys(mediaStreams).includes(robotId)) {
+            const mediaStreamConfig = mediaStreams[robotId]
+            if (mediaStreamConfig && mediaStreamConfig.streams.length > 0) setVideoMediaStreams(mediaStreamConfig.streams)
+        }
+    }, [mediaStreams, robotId])
 
     return (
         <>
@@ -159,6 +172,9 @@ export const RobotPage = () => {
                         {selectedRobot.documentation && selectedRobot.documentation.length > 0 && (
                             <DocumentationSection documentation={selectedRobot.documentation} />
                         )}
+                        <VideoStreamSection>
+                            {videoMediaStreams && videoMediaStreams.length > 0 && <VideoStreamWindow videoStreams={videoMediaStreams} />}
+                        </VideoStreamSection>
                     </>
                 )}
             </StyledPage>
