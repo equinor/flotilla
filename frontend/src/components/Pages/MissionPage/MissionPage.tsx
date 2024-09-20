@@ -32,7 +32,7 @@ const TaskAndMapSection = styled.div`
     padding-top: 16px;
     padding-bottom: 16px;
 `
-const VideoStreamSection = styled.div`
+export const VideoStreamSection = styled.div`
     display: grid;
     gap: 1rem;
 `
@@ -57,9 +57,9 @@ export const MissionPage = () => {
     }, [connectionReady])
 
     useEffect(() => {
-        if (selectedMission && Object(mediaStreams).keys.includes(selectedMission?.robot.id)) {
-            const mediaStreamConfig = mediaStreams[selectedMission.robot.id]
-            if (mediaStreamConfig.streams.length > 0) setVideoMediaStreams(mediaStreamConfig.streams)
+        if (selectedMission && mediaStreams && Object.keys(mediaStreams).includes(selectedMission?.robot.id)) {
+            const mediaStreamConfig = mediaStreams[selectedMission?.robot.id]
+            if (mediaStreamConfig && mediaStreamConfig.streams.length > 0) setVideoMediaStreams(mediaStreamConfig.streams)
         }
     }, [selectedMission, mediaStreams])
 
@@ -101,7 +101,7 @@ export const MissionPage = () => {
                             <MissionMapView mission={selectedMission} />
                         </TaskAndMapSection>
                         <VideoStreamSection>
-                            {videoMediaStreams.length > 0 && <VideoStreamWindow videoStreams={videoMediaStreams} />}
+                            {videoMediaStreams && videoMediaStreams.length > 0 && <VideoStreamWindow videoStreams={videoMediaStreams} />}
                         </VideoStreamSection>
                     </>
                 )}

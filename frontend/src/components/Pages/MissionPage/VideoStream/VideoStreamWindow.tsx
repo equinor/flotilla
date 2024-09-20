@@ -39,7 +39,7 @@ export const VideoStreamWindow = ({ videoStreams }: VideoStreamWindowProps) => {
         toggleFullScreenMode()
     }
 
-    const videoStreamName = 'test' // TODO: decide if we even want a name for it
+    const videoStreamName = 'video' // TODO: decide if we want a name for it
 
     const videoCards = videoStreams.map((videoStream, index) => (
         <VideoStreamCard

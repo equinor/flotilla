@@ -4,16 +4,14 @@ export enum MediaType {
 }
 
 export enum MediaConnectionType {
-    LiveKit,
+    LiveKit = 'LiveKit',
 }
 
-export type MediaStreamConfig = {
+export interface MediaStreamConfig {
     url: string
-    streamId: string
-    authToken: string
-    mediaType: MediaType
+    token: string
     robotId: string
-    connectionType: MediaConnectionType
+    mediaConnectionType: MediaConnectionType
 }
 
 export type MediaStreamConfigAndTracks = MediaStreamConfig & { streams: MediaStreamTrack[] }
