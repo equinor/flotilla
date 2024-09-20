@@ -6,5 +6,5 @@ interface IVideoPlayerProps {
 }
 
 export const VideoPlayerSimpleStream = ({ videoStream, videoStreamName }: IVideoPlayerProps) => (
-    <ReactPlayer url={videoStream} width="100%" height="100%" alt={videoStreamName + ' video stream'} />
+    <video autoPlay ref={(video) => {if (video) video.srcObject = videoStream;}} style={{ height: "100%", width: "100%" }}/>
 )

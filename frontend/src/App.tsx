@@ -29,9 +29,9 @@ if (config.AI_CONNECTION_STRING.length > 0) {
 
 const App = () => (
     <AuthProvider>
-        <MediaStreamProvider>
-            <LanguageProvider>
-                <SignalRProvider>
+        <LanguageProvider>
+            <SignalRProvider>
+                <MediaStreamProvider>
                     <InstallationProvider>
                         <MissionDefinitionsProvider>
                             <RobotProvider>
@@ -58,9 +58,9 @@ const App = () => (
                             </RobotProvider>
                         </MissionDefinitionsProvider>
                     </InstallationProvider>
-                </SignalRProvider>
-            </LanguageProvider>
-        </MediaStreamProvider>
+                </MediaStreamProvider>
+            </SignalRProvider>
+        </LanguageProvider>
     </AuthProvider>
 )
 

@@ -2,7 +2,7 @@ import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useRobotContext } from './RobotContext'
 import { RemoteParticipant, RemoteTrack, RemoteTrackPublication, Room, RoomEvent } from 'livekit-client'
-import { MediaConnectionType, MediaStreamConfig, MediaStreamConfigAndTracks } from 'models/VideoStream'
+import { MediaConnectionType, MediaStreamConfig, MediaStreamConfigAndTracks, MediaType } from 'models/VideoStream'
 
 type MediaStreamDictionaryType = {
     [robotId: string]: MediaStreamConfigAndTracks
@@ -29,13 +29,12 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { enabledRobots } = useRobotContext()
 
-    const addTracksToConnection = (newTracks: MediaStreamTrack[], robotId: string, streamId: string) => {
+    const addTracksToConnection = (newTracks: MediaStreamTrack[], robotId: string) => {
         setMediaStreams((oldStreams) => {
-            if (!Object(oldStreams).keys.includes(robotId)) {
+            if (!Object.keys(oldStreams).includes(robotId)) {
                 return oldStreams
             } else {
                 const newStreams = { ...oldStreams }
-                // TODO: maybe have index be streamId or at least filter on it. Otherwise remove it and just display all video streams you get
                 return {
                     ...oldStreams,
                     [robotId]: { ...newStreams[robotId], streams: newTracks },
@@ -54,13 +53,13 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
             participant: RemoteParticipant
         ) {
             const videoTracks = track.mediaStream?.getVideoTracks()
-            addTracksToConnection(videoTracks ?? [], config.robotId, config.streamId)
+            addTracksToConnection(videoTracks ?? [], config.robotId)
         }
-        await room.connect(config.url, config.authToken)
+        await room.connect(config.url, config.token)
     }
 
     const createMediaConnection = async (config: MediaStreamConfig) => {
-        switch (config.connectionType) {
+        switch (config.mediaConnectionType) {
             case MediaConnectionType.LiveKit:
                 return await createLiveKitConnection(config)
             default:
@@ -69,12 +68,11 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
         return undefined
     }
 
-    // Register a signalR event handler that listens for new failed missions
+    // Register a signalR event handler that listens for new media stream connections
     useEffect(() => {
         if (connectionReady) {
-            registerEvent(SignalREventLabels.mediaStreamConfigReceived, (username: string, message: string) => {
+            registerEvent(SignalREventLabels.mediaStreamConfigReceived, (username: string, message: string) => {              
                 const newMediaConfig: MediaStreamConfig = JSON.parse(message)
-
                 setMediaStreams((oldStreams) => {
                     if (Object.keys(oldStreams).includes(newMediaConfig.robotId)) {
                         return oldStreams
