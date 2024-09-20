@@ -301,6 +301,8 @@ namespace Api.Services
                 .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspections)
                 .ThenInclude(inspections => inspections.InspectionFindings)
+                .Include(missionRun => missionRun.Robot)
+                .ThenInclude(robot => robot.CurrentInstallation)
                 .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()))
                 .Where((m) => m.IsDeprecated == false);
             return readOnly ? query.AsNoTracking() : query.AsTracking();
