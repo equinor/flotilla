@@ -26,8 +26,8 @@ namespace Api.Controllers.Models
         [JsonPropertyName("createdAt")]
         public string CreatedAt { get; set; }
 
-        [JsonPropertyName("lastModified")]
-        public string LastModified { get; set; }
+        [JsonPropertyName("lastModifiedAt")]
+        public string LastModifiedAt { get; set; }
 
         [JsonPropertyName("inspectionDate")]
         public string InspectionDate { get; set; }
