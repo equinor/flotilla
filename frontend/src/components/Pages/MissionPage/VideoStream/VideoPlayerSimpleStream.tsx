@@ -1,5 +1,3 @@
-import ReactPlayer from 'react-player/lazy'
-
 interface IVideoPlayerProps {
     videoStream: MediaStream
     videoStreamName: string

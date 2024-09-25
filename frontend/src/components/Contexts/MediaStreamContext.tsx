@@ -2,7 +2,7 @@ import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useRobotContext } from './RobotContext'
 import { RemoteParticipant, RemoteTrack, RemoteTrackPublication, Room, RoomEvent } from 'livekit-client'
-import { MediaConnectionType, MediaStreamConfig, MediaStreamConfigAndTracks, MediaType } from 'models/VideoStream'
+import { MediaConnectionType, MediaStreamConfig, MediaStreamConfigAndTracks } from 'models/VideoStream'
 
 type MediaStreamDictionaryType = {
     [robotId: string]: MediaStreamConfigAndTracks
