@@ -70,7 +70,7 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
     // Register a signalR event handler that listens for new media stream connections
     useEffect(() => {
         if (connectionReady) {
-            registerEvent(SignalREventLabels.mediaStreamConfigReceived, (username: string, message: string) => {              
+            registerEvent(SignalREventLabels.mediaStreamConfigReceived, (username: string, message: string) => {
                 const newMediaConfig: MediaStreamConfig = JSON.parse(message)
                 setMediaStreams((oldStreams) => {
                     if (Object.keys(oldStreams).includes(newMediaConfig.robotId)) {
