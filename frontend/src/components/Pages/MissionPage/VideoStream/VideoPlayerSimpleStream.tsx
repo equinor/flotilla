@@ -6,5 +6,11 @@ interface IVideoPlayerProps {
 }
 
 export const VideoPlayerSimpleStream = ({ videoStream, videoStreamName }: IVideoPlayerProps) => (
-    <video autoPlay ref={(video) => {if (video) video.srcObject = videoStream;}} style={{ height: "100%", width: "100%" }}/>
+    <video
+        autoPlay
+        ref={(video) => {
+            if (video) video.srcObject = videoStream
+        }}
+        style={{ height: '100%', width: '100%' }}
+    />
 )
