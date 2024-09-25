@@ -29,7 +29,7 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { enabledRobots } = useRobotContext()
 
-    const addTracksToConnection = (newTracks: MediaStreamTrack[], robotId: string) => {
+    const addTrackToConnection = (newTrack: MediaStreamTrack, robotId: string) => {
         setMediaStreams((oldStreams) => {
             if (!Object.keys(oldStreams).includes(robotId)) {
                 return oldStreams
@@ -37,7 +37,7 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
                 const newStreams = { ...oldStreams }
                 return {
                     ...oldStreams,
-                    [robotId]: { ...newStreams[robotId], streams: newTracks },
+                    [robotId]: { ...newStreams[robotId], streams: [...oldStreams[robotId].streams, newTrack] },
                 }
             }
         })
@@ -52,8 +52,7 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
             publication: RemoteTrackPublication,
             participant: RemoteParticipant
         ) {
-            const videoTracks = track.mediaStream?.getVideoTracks()
-            addTracksToConnection(videoTracks ?? [], config.robotId)
+            addTrackToConnection(track.mediaStreamTrack, config.robotId)
         }
         await room.connect(config.url, config.token)
     }
