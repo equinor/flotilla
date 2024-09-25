@@ -93,7 +93,8 @@ export const RobotPage = () => {
     useEffect(() => {
         if (robotId && mediaStreams && Object.keys(mediaStreams).includes(robotId)) {
             const mediaStreamConfig = mediaStreams[robotId]
-            if (mediaStreamConfig && mediaStreamConfig.streams.length > 0) setVideoMediaStreams(mediaStreamConfig.streams)
+            if (mediaStreamConfig && mediaStreamConfig.streams.length > 0)
+                setVideoMediaStreams(mediaStreamConfig.streams)
         }
     }, [mediaStreams, robotId])
 
@@ -173,7 +174,9 @@ export const RobotPage = () => {
                             <DocumentationSection documentation={selectedRobot.documentation} />
                         )}
                         <VideoStreamSection>
-                            {videoMediaStreams && videoMediaStreams.length > 0 && <VideoStreamWindow videoStreams={videoMediaStreams} />}
+                            {videoMediaStreams && videoMediaStreams.length > 0 && (
+                                <VideoStreamWindow videoStreams={videoMediaStreams} />
+                            )}
                         </VideoStreamSection>
                     </>
                 )}
