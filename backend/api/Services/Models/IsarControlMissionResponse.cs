@@ -16,11 +16,5 @@ namespace Api.Services.Models
 
         [JsonPropertyName("task_status")]
         public string IsarTaskStatus { get; set; }
-
-        [JsonPropertyName("step_id")]
-        public string IsarStepId { get; set; }
-
-        [JsonPropertyName("step_status")]
-        public string IsarStepStatus { get; set; }
     }
 }

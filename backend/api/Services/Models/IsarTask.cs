@@ -6,8 +6,7 @@
 
         public IsarTaskStatus TaskStatus { get; } = IsarTaskStatus.NotStarted;
 
-        public IList<IsarStep> Steps { get; } = taskResponse.Steps.Select(step => new IsarStep(step)).ToList();
-
+        public IsarTaskType TaskType { get; } = TaskTypeFromString(taskResponse.TaskType);
 
         public static IsarTaskStatus StatusFromString(string status)
         {
@@ -26,7 +25,27 @@
                   )
             };
         }
+
+        public static IsarTaskType TaskTypeFromString(string isarClassName)
+        {
+            return isarClassName switch
+            {
+                "record_audio" => IsarTaskType.RecordAudio,
+                "take_image" => IsarTaskType.TakeImage,
+                "take_video" => IsarTaskType.TakeVideo,
+                "take_thermal_image" => IsarTaskType.TakeThermalImage,
+                "take_thermal_video" => IsarTaskType.TakeThermalVideo,
+                "localize" => IsarTaskType.Localize,
+                "return_to_home" => IsarTaskType.ReturnToHome,
+                "move_arm" => IsarTaskType.MoveArm,
+                _
+                  => throw new ArgumentException(
+                      $"Failed to parse step type '{isarClassName}' - not supported"
+                  )
+            };
+        }
     }
+
 
     public enum IsarTaskStatus
     {
@@ -37,5 +56,17 @@
         Failed,
         Cancelled,
         Paused,
+    }
+
+    public enum IsarTaskType
+    {
+        Localize,
+        ReturnToHome,
+        TakeImage,
+        TakeVideo,
+        TakeThermalImage,
+        TakeThermalVideo,
+        RecordAudio,
+        MoveArm
     }
 }

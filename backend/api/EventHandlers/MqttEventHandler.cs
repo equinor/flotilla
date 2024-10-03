@@ -53,7 +53,6 @@ namespace Api.EventHandlers
             MqttService.MqttIsarRobotInfoReceived += OnIsarRobotInfo;
             MqttService.MqttIsarMissionReceived += OnIsarMissionUpdate;
             MqttService.MqttIsarTaskReceived += OnIsarTaskUpdate;
-            MqttService.MqttIsarStepReceived += OnIsarStepUpdate;
             MqttService.MqttIsarBatteryReceived += OnIsarBatteryUpdate;
             MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
@@ -67,7 +66,6 @@ namespace Api.EventHandlers
             MqttService.MqttIsarRobotInfoReceived -= OnIsarRobotInfo;
             MqttService.MqttIsarMissionReceived -= OnIsarMissionUpdate;
             MqttService.MqttIsarTaskReceived -= OnIsarTaskUpdate;
-            MqttService.MqttIsarStepReceived -= OnIsarStepUpdate;
             MqttService.MqttIsarBatteryReceived -= OnIsarBatteryUpdate;
             MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
@@ -384,6 +382,9 @@ namespace Api.EventHandlers
             try { await MissionTaskService.UpdateMissionTaskStatus(task.TaskId, status); }
             catch (MissionTaskNotFoundException) { return; }
 
+            try { await InspectionService.UpdateInspectionStatus(task.TaskId, status); }
+            catch (InspectionNotFoundException) { return; }
+
             var missionRun = await MissionRunService.ReadByIsarMissionId(task.MissionId, readOnly: true);
             if (missionRun is null)
             {
@@ -394,34 +395,6 @@ namespace Api.EventHandlers
 
             _logger.LogInformation(
                 "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", task.TaskId, task.Status, task.RobotName, task.IsarId);
-        }
-
-        private async void OnIsarStepUpdate(object? sender, MqttReceivedArgs mqttArgs)
-        {
-            var step = (IsarStepMessage)mqttArgs.Message;
-
-            // Flotilla does not care about DriveTo, Localization, MoveArm or ReturnToHome steps
-            var stepType = IsarStep.StepTypeFromString(step.StepType);
-            if (stepType is IsarStepType.DriveToPose or IsarStepType.Localize or IsarStepType.MoveArm or IsarStepType.ReturnToHome) return;
-
-            IsarStepStatus status;
-            try { status = IsarStep.StatusFromString(step.Status); }
-            catch (ArgumentException e)
-            {
-                _logger.LogError(e, "Failed to parse mission status from MQTT message. Mission '{Id}' was not updated", step.MissionId);
-                return;
-            }
-
-            try { await InspectionService.UpdateInspectionStatus(step.StepId, status); }
-            catch (InspectionNotFoundException) { return; }
-
-            var missionRun = await MissionRunService.ReadByIsarMissionId(step.MissionId, readOnly: true);
-            if (missionRun is null) _logger.LogWarning("Mission run with ID {Id} was not found", step.MissionId);
-
-            _ = SignalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
-
-            _logger.LogInformation(
-                "Inspection '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", step.StepId, step.Status, step.RobotName, step.IsarId);
         }
 
         private async void OnIsarBatteryUpdate(object? sender, MqttReceivedArgs mqttArgs)

@@ -247,7 +247,7 @@ namespace Api.Services
         {
             if (missionRun.Robot.RobotCapabilities == null) return false;
 
-            return missionRun.Tasks.SelectMany((t) => t.Inspections).Any((i) => !i.IsSupportedInspectionType(missionRun.Robot.RobotCapabilities));
+            return missionRun.Tasks.Any(task => !task.Inspection.IsSupportedInspectionType(missionRun.Robot.RobotCapabilities));
         }
 
         public async Task<MissionRun> Update(MissionRun missionRun)
@@ -299,7 +299,7 @@ namespace Api.Services
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)
-                .ThenInclude(task => task.Inspections)
+                .ThenInclude(task => task.Inspection)
                 .ThenInclude(inspections => inspections.InspectionFindings)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.CurrentInstallation)
@@ -428,10 +428,7 @@ namespace Api.Services
             Expression<Func<MissionRun, bool>> inspectionTypeFilter = parameters.InspectionTypes is null
                 ? mission => true
                 : mission => mission.Tasks.Any(
-                    task =>
-                        task.Inspections.Any(
-                            inspection => parameters.InspectionTypes.Contains(inspection.InspectionType)
-                        )
+                    task => parameters.InspectionTypes.Contains(task.Inspection.InspectionType)
                 );
 
             Expression<Func<MissionRun, bool>> localizationFilter = !parameters.ExcludeLocalization
@@ -597,11 +594,10 @@ namespace Api.Services
             foreach (var task in missionRun.Tasks.Where(task => !task.IsCompleted))
             {
                 task.Status = Database.Models.TaskStatus.Failed;
-                foreach (
-                    var inspection in task.Inspections.Where(inspection => !inspection.IsCompleted)
-                )
+
+                if (!task.Inspection.IsCompleted)
                 {
-                    inspection.Status = InspectionStatus.Failed;
+                    task.Inspection.Status = InspectionStatus.Failed;
                 }
             }
             return await Update(missionRun);

@@ -106,20 +106,19 @@ const InspectionTypesDisplay = ({ task }: { task: Task }) => {
     const { TranslateText } = useLanguageContext()
     return (
         <>
-            {task.inspections?.map((inspection) => {
-                if (inspection.inspectionUrl)
-                    return (
-                        <Typography key={task.id + inspection.id + 'insp'} link href={inspection.inspectionUrl}>
-                            {TranslateText(inspection.inspectionType as string)}
-                        </Typography>
+            {task.inspection.inspectionUrl && (
+                
+                    <Typography key={task.id + task.inspection.id + 'insp'} link href={task.inspection.inspectionUrl}>
+                        {TranslateText(task.inspection.inspectionType as string)}
+                    </Typography>)
+}
+{!task.inspection.inspectionUrl &&
+                    (
+                        <Typography key={task.id + task.inspection.id + 'insp'}>
+                        {TranslateText(task.inspection.inspectionType as string)}
+                    </Typography>
                     )
-                else
-                    return (
-                        <Typography key={task.id + inspection.id + 'insp'}>
-                            {TranslateText(inspection.inspectionType as string)}
-                        </Typography>
-                    )
-            })}
+    }
         </>
     )
 }

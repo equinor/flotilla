@@ -10,9 +10,9 @@ namespace Api.Services
 {
     public interface IInspectionService
     {
-        public Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus);
-        public Task<Inspection?> ReadByIsarStepId(string id, bool readOnly = true);
-        public Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingsQuery, string isarStepId);
+        public Task<Inspection> UpdateInspectionStatus(string isarTaskId, IsarTaskStatus isarTaskStatus);
+        public Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true);
+        public Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingsQuery, string isarTaskId);
 
     }
 
@@ -23,17 +23,17 @@ namespace Api.Services
     )]
     public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, IAccessRoleService accessRoleService) : IInspectionService
     {
-        public async Task<Inspection> UpdateInspectionStatus(string isarStepId, IsarStepStatus isarStepStatus)
+        public async Task<Inspection> UpdateInspectionStatus(string isarInspectionId, IsarTaskStatus isarTaskStatus)
         {
-            var inspection = await ReadByIsarStepId(isarStepId, readOnly: false);
+            var inspection = await ReadByIsarInspectionId(isarInspectionId, readOnly: false);
             if (inspection is null)
             {
-                string errorMessage = $"Inspection with ID {isarStepId} could not be found";
+                string errorMessage = $"Inspection with ID {isarInspectionId} could not be found";
                 logger.LogError("{Message}", errorMessage);
                 throw new InspectionNotFoundException(errorMessage);
             }
 
-            inspection.UpdateStatus(isarStepStatus);
+            inspection.UpdateStatus(isarTaskStatus);
             inspection = await Update(inspection);
             return inspection;
         }
@@ -54,7 +54,7 @@ namespace Api.Services
             var missionRun = await context.MissionRuns
                     .Include(missionRun => missionRun.Area).ThenInclude(area => area != null ? area.Installation : null)
                     .Include(missionRun => missionRun.Robot)
-                    .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspections.Any(i => i.Id == inspection.Id))).AsNoTracking()
+                    .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspection.Id == inspection.Id)).AsNoTracking()
                     .FirstOrDefaultAsync();
             var installation = missionRun?.Area?.Installation;
 
@@ -63,9 +63,9 @@ namespace Api.Services
             return entry.Entity;
         }
 
-        public async Task<Inspection?> ReadByIsarStepId(string id, bool readOnly = true)
+        public async Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true)
         {
-            return await GetInspections(readOnly: readOnly).FirstOrDefaultAsync(inspection => inspection.IsarStepId != null && inspection.IsarStepId.Equals(id));
+            return await GetInspections(readOnly: readOnly).FirstOrDefaultAsync(inspection => inspection.IsarInspectionId != null && inspection.IsarInspectionId.Equals(id));
         }
 
         private IQueryable<Inspection> GetInspections(bool readOnly = true)
@@ -76,9 +76,9 @@ namespace Api.Services
                 throw new UnauthorizedAccessException($"User does not have permission to view inspections");
         }
 
-        public async Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingQuery, string isarStepId)
+        public async Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingQuery, string isarTaskId)
         {
-            var inspection = await ReadByIsarStepId(isarStepId, readOnly: false);
+            var inspection = await ReadByIsarInspectionId(isarTaskId, readOnly: false);
 
             if (inspection is null)
             {
@@ -89,7 +89,7 @@ namespace Api.Services
             {
                 InspectionDate = inspectionFindingQuery.InspectionDate.ToUniversalTime(),
                 Finding = inspectionFindingQuery.Finding,
-                IsarStepId = isarStepId,
+                IsarTaskId = isarTaskId,
             };
 
             inspection.InspectionFindings.Add(inspectionFinding);

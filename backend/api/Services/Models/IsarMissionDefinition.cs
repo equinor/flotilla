@@ -58,8 +58,8 @@ namespace Api.Services.Models
         [JsonPropertyName("tag")]
         public string? Tag { get; set; }
 
-        [JsonPropertyName("inspections")]
-        public List<IsarInspectionDefinition> Inspections { get; set; }
+        [JsonPropertyName("inspection")]
+        public IsarInspectionDefinition Inspection { get; set; }
 
         public IsarTaskDefinition(MissionTask missionTask, MissionRun missionRun)
         {
@@ -67,12 +67,7 @@ namespace Api.Services.Models
             Type = MissionTask.ConvertMissionTaskTypeToIsarTaskType(missionTask.Type);
             Pose = new IsarPose(missionTask.RobotPose);
             Tag = missionTask.TagId;
-            var isarInspections = new List<IsarInspectionDefinition>();
-            foreach (var inspection in missionTask.Inspections)
-            {
-                isarInspections.Add(new IsarInspectionDefinition(inspection, missionRun));
-            }
-            Inspections = isarInspections;
+            Inspection = new IsarInspectionDefinition(missionTask.Inspection, missionRun);
         }
     }
 
@@ -95,7 +90,7 @@ namespace Api.Services.Models
 
         public IsarInspectionDefinition(Inspection inspection, MissionRun missionRun)
         {
-            Id = inspection.IsarStepId;
+            Id = inspection.Id;
             Type = inspection.InspectionType.ToString();
             InspectionTarget = inspection.InspectionTarget != null ? new IsarPosition(
                 inspection.InspectionTarget.X,
@@ -104,7 +99,7 @@ namespace Api.Services.Models
                 "asset"
             ) : null;
             Duration = inspection.VideoDuration;
-            var metadata = new Dictionary<string, string?>
+            Metadata = new Dictionary<string, string?>
             {
                 { "map", missionRun.Map?.MapName },
                 { "description", missionRun.Description },
@@ -114,7 +109,6 @@ namespace Api.Services.Models
                 { "status_reason", missionRun.StatusReason },
                 { "analysis_type", inspection.AnalysisType?.ToString() }
             };
-            Metadata = metadata;
         }
     }
 

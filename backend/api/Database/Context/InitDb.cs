@@ -416,12 +416,11 @@ namespace Api.Database.Context
 
         private static List<MissionTask> GetMissionTasks()
         {
-            var inspections = new List<Inspection> { new() };
             var url = new Uri(
                     "https://stid.equinor.com/hua/tag?tagNo=ABCD"
                 );
             var task1 = new MissionTask(
-                inspections: inspections,
+                inspection: new Inspection(),
                 robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 taskOrder: 0,
                 tagLink: url,
@@ -431,7 +430,7 @@ namespace Api.Database.Context
             );
 
             var task2 = new MissionTask(
-                inspections: inspections,
+                inspection: new Inspection(),
                 robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 taskOrder: 0,
                 tagLink: url,
@@ -441,7 +440,7 @@ namespace Api.Database.Context
             );
 
             var task3 = new MissionTask(
-                inspections: inspections,
+                inspection: new Inspection(),
                 robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 taskOrder: 0,
                 tagLink: url,
@@ -451,7 +450,7 @@ namespace Api.Database.Context
             );
 
             var task4 = new MissionTask(
-                inspections: inspections,
+                inspection: new Inspection(),
                 robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 taskOrder: 0,
                 tagLink: url,
@@ -461,7 +460,7 @@ namespace Api.Database.Context
             );
 
             var task5 = new MissionTask(
-                inspections: inspections,
+                inspection: new Inspection(),
                 robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 taskOrder: 0,
                 tagLink: url,
@@ -471,7 +470,7 @@ namespace Api.Database.Context
             );
 
             var task6 = new MissionTask(
-                inspections: inspections,
+                inspection: new Inspection(),
                 robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 taskOrder: 0,
                 tagLink: url,
@@ -481,7 +480,7 @@ namespace Api.Database.Context
             );
 
             var task7 = new MissionTask(
-                inspections: inspections,
+                inspection: new Inspection(),
                 robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
                 taskOrder: 0,
                 tagLink: url,
@@ -668,8 +667,7 @@ namespace Api.Database.Context
             var tasks = GetMissionTasks();
             foreach (var task in tasks)
             {
-                task.Inspections.Add(inspections[0]);
-                task.Inspections.Add(inspections[1]);
+                task.Inspection = inspections[0];
             }
             context.AddRange(tasks);
             context.AddRange(missionDefinitions);

@@ -20,16 +20,11 @@ namespace Api.Services.Models
         [JsonPropertyName("tag_id")]
         public string TagId { get; set; }
 
-        [JsonPropertyName("steps")]
-        public IList<IsarStepResponse> Steps { get; set; }
-    }
-
-    public class IsarStepResponse
-    {
-        [JsonPropertyName("id")]
-        public string IsarStepId { get; set; }
-
         [JsonPropertyName("type")]
-        public string Type { get; set; }
+        public string TaskType { get; set; }
+
+        [JsonPropertyName("task_action_id")]
+        public string TaskActionId { get; set; }
+
     }
 }
