@@ -25,14 +25,16 @@ namespace Api.Services
 
         public async Task<IsarMission> StartMission(Robot robot, MissionRun missionRun)
         {
+            var missionDefinition = new
+            {
+                mission_definition = new IsarMissionDefinition(missionRun, includeStartPose: missionRun.MissionRunType == MissionRunType.Localization)
+            };
+
             var response = await CallApi(
                 HttpMethod.Post,
                 robot.IsarUri,
                 "schedule/start-mission",
-                new
-                {
-                    mission_definition = new IsarMissionDefinition(missionRun, includeStartPose: missionRun.MissionRunType == MissionRunType.Localization)
-                }
+                missionDefinition
             );
 
             if (!response.IsSuccessStatusCode)

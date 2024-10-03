@@ -15,7 +15,7 @@ export interface Task {
     isCompleted: boolean
     startTime?: Date
     endTime?: Date
-    inspections: Inspection[]
+    inspection: Inspection
 }
 
 export enum TaskStatus {
