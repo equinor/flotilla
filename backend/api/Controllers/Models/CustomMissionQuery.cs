@@ -22,7 +22,7 @@ namespace Api.Controllers.Models
 
         public Pose RobotPose { get; set; }
 
-        public List<CustomInspectionQuery> Inspections { get; set; }
+        public CustomInspectionQuery Inspection { get; set; }
     }
 
     public struct CustomMissionQuery

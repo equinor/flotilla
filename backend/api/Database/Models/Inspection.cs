@@ -44,7 +44,7 @@ namespace Api.Database.Models
         public Inspection(Inspection copy, InspectionStatus? inspectionStatus = null, bool useEmptyIDs = false)
         {
             Id = useEmptyIDs ? "" : Guid.NewGuid().ToString();
-            IsarStepId = useEmptyIDs ? "" : Guid.NewGuid().ToString();
+            IsarInspectionId = useEmptyIDs ? "" : Guid.NewGuid().ToString();
             Status = inspectionStatus ?? copy.Status;
             InspectionType = copy.InspectionType;
             VideoDuration = copy.VideoDuration;
@@ -60,7 +60,7 @@ namespace Api.Database.Models
         [Required]
         [MaxLength(200)]
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-        public string IsarStepId { get; private set; } = Guid.NewGuid().ToString();
+        public string IsarInspectionId { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         public Position InspectionTarget { get; set; }
@@ -106,35 +106,35 @@ namespace Api.Database.Models
 
         public List<InspectionFinding> InspectionFindings { get; set; }
 
-        public void UpdateWithIsarInfo(IsarStep isarStep)
+        public void UpdateWithIsarInfo(IsarTask isarTask)
         {
-            UpdateStatus(isarStep.StepStatus);
-            InspectionType = isarStep.StepType switch
+            UpdateStatus(isarTask.TaskStatus);
+            InspectionType = isarTask.TaskType switch
             {
-                IsarStepType.RecordAudio => InspectionType.Audio,
-                IsarStepType.TakeImage => InspectionType.Image,
-                IsarStepType.TakeThermalImage => InspectionType.ThermalImage,
-                IsarStepType.TakeVideo => InspectionType.Video,
-                IsarStepType.TakeThermalVideo => InspectionType.ThermalVideo,
+                IsarTaskType.RecordAudio => InspectionType.Audio,
+                IsarTaskType.TakeImage => InspectionType.Image,
+                IsarTaskType.TakeThermalImage => InspectionType.ThermalImage,
+                IsarTaskType.TakeVideo => InspectionType.Video,
+                IsarTaskType.TakeThermalVideo => InspectionType.ThermalVideo,
                 _
                     => throw new ArgumentException(
-                        $"ISAR step type '{isarStep.StepType}' not supported for inspections"
+                        $"ISAR task type '{isarTask.TaskType}' not supported for inspections"
                     )
             };
         }
 
-        public void UpdateStatus(IsarStepStatus isarStatus)
+        public void UpdateStatus(IsarTaskStatus isarStatus)
         {
             Status = isarStatus switch
             {
-                IsarStepStatus.NotStarted => InspectionStatus.NotStarted,
-                IsarStepStatus.InProgress => InspectionStatus.InProgress,
-                IsarStepStatus.Successful => InspectionStatus.Successful,
-                IsarStepStatus.Cancelled => InspectionStatus.Cancelled,
-                IsarStepStatus.Failed => InspectionStatus.Failed,
+                IsarTaskStatus.NotStarted => InspectionStatus.NotStarted,
+                IsarTaskStatus.InProgress => InspectionStatus.InProgress,
+                IsarTaskStatus.Successful => InspectionStatus.Successful,
+                IsarTaskStatus.Cancelled => InspectionStatus.Cancelled,
+                IsarTaskStatus.Failed => InspectionStatus.Failed,
                 _
                     => throw new ArgumentException(
-                        $"ISAR step status '{isarStatus}' not supported for inspection status"
+                        $"ISAR task status '{isarStatus}' not supported for inspection status"
                     )
             };
         }

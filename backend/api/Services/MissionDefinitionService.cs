@@ -185,7 +185,7 @@ namespace Api.Services
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
-                .ThenInclude(missionTask => missionTask.Inspections)
+                .ThenInclude(missionTask => missionTask.Inspection)
                 .ThenInclude(inspection => inspection.InspectionFindings)
                 .Include(missionDefinition => missionDefinition.Area != null ? missionDefinition.Area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)

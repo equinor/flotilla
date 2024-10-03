@@ -63,18 +63,15 @@ namespace Api.Services
             var positions = new List<Position>();
             foreach (var task in missionRun.Tasks)
             {
-                if (!task.Inspections.Any())
+                if (task.Inspection == null)
                 {
                     positions.Add(task.RobotPose.Position);
                     continue;
                 }
 
-                foreach (var inspection in task.Inspections)
+                if (task.Inspection.InspectionTarget != null)
                 {
-                    if (inspection.InspectionTarget != null)
-                    {
-                        positions.Add(inspection.InspectionTarget);
-                    }
+                    positions.Add(task.Inspection.InspectionTarget);
                 }
             }
             try

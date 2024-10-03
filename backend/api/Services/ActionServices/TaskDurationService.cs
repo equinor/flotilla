@@ -58,11 +58,9 @@ namespace Api.Services.ActionServices
                             .Select(
                                 task =>
                                     (task.EndTime! - task.StartTime!).Value.TotalSeconds
-                                    - task.Inspections.Sum(
-                                        inspection => inspection.VideoDuration ?? 0
+                                    - task.Inspection.VideoDuration ?? 0
                                     )
                             )
-                )
                 .ToList();
 
             // If no valid task times, return

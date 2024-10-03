@@ -93,7 +93,7 @@ namespace Api.Services
         public async Task<List<MissionTask>> GetTasksForMission(string missionSourceId)
         {
             var echoMission = await GetEchoMission(missionSourceId);
-            var missionTasks = echoMission.Tags.Select(t => MissionTaskFromEchoTag(t)).ToList();
+            var missionTasks = echoMission.Tags.SelectMany(t => MissionTasksFromEchoTag(t)).ToList();
             return missionTasks;
         }
 
@@ -262,17 +262,24 @@ namespace Api.Services
             return echoPlantInfos;
         }
 
-        public MissionTask MissionTaskFromEchoTag(EchoTag echoTag)
+        public IList<MissionTask> MissionTasksFromEchoTag(EchoTag echoTag)
         {
-            return new MissionTask
-            (
-                inspections: echoTag.Inspections
+            var inspections = echoTag.Inspections
                     .Select(inspection => new Inspection(
                         inspectionType: inspection.InspectionType,
                         videoDuration: inspection.TimeInSeconds,
                         inspection.InspectionPoint,
                         status: InspectionStatus.NotStarted))
-                    .ToList(),
+                    .ToList();
+
+            var missionTasks = new List<MissionTask>();
+
+            foreach (var inspection in inspections)
+            {
+                missionTasks.Add(
+                    new MissionTask
+            (
+                inspection: inspection,
                 tagLink: echoTag.URL,
                 tagId: echoTag.TagId,
                 robotPose: echoTag.Pose,
@@ -280,7 +287,11 @@ namespace Api.Services
                 taskOrder: echoTag.PlanOrder,
                 status: Database.Models.TaskStatus.NotStarted,
                 type: MissionTaskType.Inspection
-            );
+            ));
+
+            }
+
+            return missionTasks;
         }
     }
 }

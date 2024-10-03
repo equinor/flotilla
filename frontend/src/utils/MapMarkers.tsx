@@ -20,19 +20,20 @@ export const placeTagsInMap = (
     const orderedTasks = orderTasksByDrawOrder(tasks, currentTaskOrder, maxTaskOrder)
 
     orderedTasks.forEach((task) => {
-        if (task.inspections.length === 0) {
+        if (task.inspection === null) {
             const pixelPosition = calculateObjectPixelPosition(mapMetadata, task.robotPose.position)
             // Workaround for current bug in echo
             const order = task.taskOrder + 1
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
         }
-        task.inspections.forEach((inspection) => {
-            const pixelPosition = calculateObjectPixelPosition(mapMetadata, inspection.inspectionTarget)
+        else
+        {
+            const pixelPosition = calculateObjectPixelPosition(mapMetadata, task.inspection.inspectionTarget)
             // Workaround for current bug in echo
             const order = task.taskOrder + 1
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
-        })
-    })
+        }    
+})
 }
 
 export const placeRobotInMap = (mapMetadata: MapMetadata, map: HTMLCanvasElement, robotPose: Pose) => {

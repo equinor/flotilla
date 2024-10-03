@@ -19,7 +19,7 @@ namespace Api.Database.Models
 
         // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
         public MissionTask(
-            IList<Inspection> inspections,
+            Inspection inspection,
             Pose robotPose,
             int taskOrder,
             Uri? tagLink,
@@ -28,9 +28,7 @@ namespace Api.Database.Models
             TaskStatus status = TaskStatus.NotStarted,
             MissionTaskType type = MissionTaskType.Inspection)
         {
-            Inspections = inspections
-                .Select(inspection => new Inspection(inspection))
-                .ToList();
+            Inspection = inspection;
             TagLink = tagLink;
             TagId = tagId;
             RobotPose = robotPose;
@@ -42,9 +40,7 @@ namespace Api.Database.Models
 
         public MissionTask(CustomTaskQuery taskQuery)
         {
-            Inspections = taskQuery.Inspections
-                .Select(inspection => new Inspection(inspection))
-                .ToList();
+            Inspection = new Inspection(taskQuery.Inspection);
             TagId = taskQuery.TagId;
             Description = taskQuery.Description;
             RobotPose = taskQuery.RobotPose;
@@ -63,7 +59,7 @@ namespace Api.Database.Models
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
-                    Inspections = new List<Inspection>();
+                    Inspection = new Inspection();
                     break;
                 case MissionTaskType.ReturnHome:
                     Type = type;
@@ -71,7 +67,7 @@ namespace Api.Database.Models
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
-                    Inspections = new List<Inspection>();
+                    Inspection = new Inspection();
                     break;
                 case MissionTaskType.Inspection:
                     Type = type;
@@ -79,7 +75,7 @@ namespace Api.Database.Models
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
-                    Inspections = new List<Inspection>();
+                    Inspection = new Inspection();
                     break;
                 default:
                     throw new MissionTaskNotFoundException("MissionTaskType should be Localization, ReturnHome or Inspection");
@@ -97,7 +93,7 @@ namespace Api.Database.Models
             RobotPose = new Pose(copy.RobotPose);
             PoseId = copy.PoseId;
             Status = status ?? copy.Status;
-            Inspections = copy.Inspections.Select(i => new Inspection(i, InspectionStatus.NotStarted)).ToList();
+            Inspection = new Inspection(copy.Inspection, InspectionStatus.NotStarted);
         }
 
         [Key]
@@ -152,17 +148,14 @@ namespace Api.Database.Models
 
         public DateTime? EndTime { get; private set; }
 
-        public IList<Inspection> Inspections { get; set; }
+        public Inspection Inspection { get; set; }
 
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
             UpdateStatus(isarTask.TaskStatus);
-            foreach (var inspection in Inspections)
+            if (isarTask.TaskType != IsarTaskType.ReturnToHome && isarTask.TaskType != IsarTaskType.Localize && isarTask.TaskType != IsarTaskType.MoveArm)
             {
-                var correspondingStep = isarTask.Steps.Single(
-                    step => step.IsarStepId.Equals(inspection.IsarStepId, StringComparison.Ordinal)
-                );
-                inspection.UpdateWithIsarInfo(correspondingStep);
+                Inspection.UpdateWithIsarInfo(isarTask);
             }
         }
 
@@ -181,13 +174,9 @@ namespace Api.Database.Models
             };
         }
 
-        public Inspection? GetInspectionByIsarStepId(string isarStepId)
+        public Inspection? GetInspectionByIsarTaskId(string isarTaskId)
         {
-            return Inspections.FirstOrDefault(
-                inspection =>
-                    inspection.IsarStepId != null
-                    && inspection.IsarStepId.Equals(isarStepId, StringComparison.Ordinal)
-            );
+            return Inspection;
         }
 
         public static string ConvertMissionTaskTypeToIsarTaskType(MissionTaskType missionTaskType)
@@ -212,7 +201,7 @@ namespace Api.Database.Models
                     Id = "",
                     IsarTaskId = ""
                 };
-                taskCopy.Inspections = taskCopy.Inspections.Select(i => new Inspection(i, useEmptyIDs: true)).ToList();
+                taskCopy.Inspection = new Inspection(taskCopy.Inspection, useEmptyIDs: true);
                 genericTasks.Add(taskCopy);
             }
 
