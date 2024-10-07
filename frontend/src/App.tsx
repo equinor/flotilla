@@ -31,34 +31,34 @@ const App = () => (
     <AuthProvider>
         <LanguageProvider>
             <SignalRProvider>
-                <MediaStreamProvider>
-                    <InstallationProvider>
-                        <MissionDefinitionsProvider>
-                            <RobotProvider>
-                                <MissionRunsProvider>
-                                    <AlertProvider>
-                                        <SafeZoneProvider>
-                                            <MissionRunsProvider>
-                                                <MissionControlProvider>
-                                                    <UnauthenticatedTemplate>
-                                                        <div className="sign-in-page">
-                                                            <AssetSelectionPage></AssetSelectionPage>
-                                                        </div>
-                                                    </UnauthenticatedTemplate>
-                                                    <AuthenticatedTemplate>
-                                                        <MissionFilterProvider>
+                <InstallationProvider>
+                    <MissionDefinitionsProvider>
+                        <RobotProvider>
+                            <MissionRunsProvider>
+                                <AlertProvider>
+                                    <SafeZoneProvider>
+                                        <MissionRunsProvider>
+                                            <MissionControlProvider>
+                                                <UnauthenticatedTemplate>
+                                                    <div className="sign-in-page">
+                                                        <AssetSelectionPage></AssetSelectionPage>
+                                                    </div>
+                                                </UnauthenticatedTemplate>
+                                                <AuthenticatedTemplate>
+                                                    <MissionFilterProvider>
+                                                        <MediaStreamProvider>
                                                             <FlotillaSite />
-                                                        </MissionFilterProvider>
-                                                    </AuthenticatedTemplate>
-                                                </MissionControlProvider>
-                                            </MissionRunsProvider>
-                                        </SafeZoneProvider>
-                                    </AlertProvider>
-                                </MissionRunsProvider>
-                            </RobotProvider>
-                        </MissionDefinitionsProvider>
-                    </InstallationProvider>
-                </MediaStreamProvider>
+                                                        </MediaStreamProvider>
+                                                    </MissionFilterProvider>
+                                                </AuthenticatedTemplate>
+                                            </MissionControlProvider>
+                                        </MissionRunsProvider>
+                                    </SafeZoneProvider>
+                                </AlertProvider>
+                            </MissionRunsProvider>
+                        </RobotProvider>
+                    </MissionDefinitionsProvider>
+                </InstallationProvider>
             </SignalRProvider>
         </LanguageProvider>
     </AuthProvider>
