@@ -91,7 +91,7 @@ namespace Api.Mqtt
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPressureReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarCloudHealthReceived;
-        public static event EventHandler<MqttReceivedArgs>? MqttIsarTelemetryUpdateReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIsarMediaConfigReceived;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -153,8 +153,8 @@ namespace Api.Mqtt
                 case Type type when type == typeof(IsarCloudHealthMessage):
                     OnIsarTopicReceived<IsarCloudHealthMessage>(content);
                     break;
-                case Type type when type == typeof(IsarTelemetyUpdateMessage):
-                    OnIsarTopicReceived<IsarTelemetyUpdateMessage>(content);
+                case Type type when type == typeof(IsarMediaConfigMessage):
+                    OnIsarTopicReceived<IsarMediaConfigMessage>(content);
                     break;
                 default:
                     _logger.LogWarning(
@@ -305,7 +305,7 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarPressureMessage) => MqttIsarPressureReceived,
                     _ when type == typeof(IsarPoseMessage) => MqttIsarPoseReceived,
                     _ when type == typeof(IsarCloudHealthMessage) => MqttIsarCloudHealthReceived,
-                    _ when type == typeof(IsarTelemetyUpdateMessage) => MqttIsarTelemetryUpdateReceived,
+                    _ when type == typeof(IsarMediaConfigMessage) => MqttIsarMediaConfigReceived,
                     _
                         => throw new NotImplementedException(
                             $"No event defined for message type '{typeof(T).Name}'"

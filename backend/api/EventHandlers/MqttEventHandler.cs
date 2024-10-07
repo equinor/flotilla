@@ -58,7 +58,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
-            MqttService.MqttIsarTelemetryUpdateReceived += OnIsarTelemetryUpdate;
+            MqttService.MqttIsarMediaConfigReceived += OnIsarMediaConfigUpdate;
         }
 
         public override void Unsubscribe()
@@ -72,7 +72,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
-            MqttService.MqttIsarTelemetryUpdateReceived -= OnIsarTelemetryUpdate;
+            MqttService.MqttIsarMediaConfigReceived -= OnIsarMediaConfigUpdate;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken) { await stoppingToken; }
@@ -488,9 +488,9 @@ namespace Api.EventHandlers
             TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
         }
 
-        private async void OnIsarTelemetryUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        private async void OnIsarMediaConfigUpdate(object? sender, MqttReceivedArgs mqttArgs)
         {
-            var isarTelemetyUpdate = (IsarTelemetyUpdateMessage)mqttArgs.Message;
+            var isarTelemetyUpdate = (IsarMediaConfigMessage)mqttArgs.Message;
 
             var robot = await RobotService.ReadByIsarId(isarTelemetyUpdate.IsarId);
             if (robot == null)
