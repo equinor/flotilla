@@ -499,7 +499,7 @@ namespace Api.EventHandlers
                 return;
             }
             await SignalRService.SendMessageAsync("Media stream config received", robot.CurrentInstallation,
-                new IsarMediaConfig
+                new MediaConfig
                 {
                     Url = isarTelemetyUpdate.Url,
                     Token = isarTelemetyUpdate.Token,

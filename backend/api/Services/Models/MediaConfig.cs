@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 namespace Api.Services.Models
 {
-    public struct IsarMediaConfig
+    public struct MediaConfig
     {
         [JsonPropertyName("url")]
         public string? Url { get; set; }
