@@ -4,7 +4,7 @@ using Api.Services.Models;
 namespace Api.Mqtt.MessageModels
 {
 #nullable disable
-    public class IsarTelemetyUpdateMessage : MqttMessage
+    public class IsarMediaConfigMessage : MqttMessage
     {
         [JsonPropertyName("robot_name")]
         public string RobotName { get; set; }
