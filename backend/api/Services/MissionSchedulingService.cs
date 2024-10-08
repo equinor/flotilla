@@ -155,7 +155,7 @@ namespace Api.Services
                     missionRun.Id,
                     ex.Message
                 );
-                await missionRunService.SetMissionRunToFailed(missionRun.Id, "Mission run {MissionRunId} was not started successfully due to {ErrorMessage}");
+                await missionRunService.SetMissionRunToFailed(missionRun.Id, $"Mission run '{missionRun.Id}' was not started successfully due to '{ex.Message}'");
             }
         }
 
