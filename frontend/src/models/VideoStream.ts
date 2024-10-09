@@ -13,5 +13,3 @@ export interface MediaStreamConfig {
     robotId: string
     mediaConnectionType: MediaConnectionType
 }
-
-export type MediaStreamConfigAndTracks = MediaStreamConfig & { streams: MediaStreamTrack[] }
