@@ -168,20 +168,17 @@ namespace Api.Test
 
             string testMissionName = "testMissionInAreaTest";
 
-            var inspections = new List<CustomInspectionQuery>
+            var inspection = new CustomInspectionQuery
             {
-                new()
-                {
-                    AnalysisType = AnalysisType.CarSeal,
-                    InspectionTarget = new Position(),
-                    InspectionType = InspectionType.Image
-                }
+                AnalysisType = AnalysisType.CarSeal,
+                InspectionTarget = new Position(),
+                InspectionType = InspectionType.Image
             };
             var tasks = new List<CustomTaskQuery>
             {
                 new()
                 {
-                    Inspections = inspections,
+                    Inspection = inspection,
                     TagId = "test",
                     RobotPose = new Pose(),
                     TaskOrder = 0
