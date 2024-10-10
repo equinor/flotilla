@@ -14,6 +14,7 @@ import { SignalRProvider } from 'components/Contexts/SignalRContext'
 import { RobotProvider } from 'components/Contexts/RobotContext'
 import { config } from 'config'
 import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitionsContext'
+import { MediaStreamProvider } from 'components/Contexts/MediaStreamContext'
 
 const appInsights = new ApplicationInsights({
     config: {
@@ -45,7 +46,9 @@ const App = () => (
                                                 </UnauthenticatedTemplate>
                                                 <AuthenticatedTemplate>
                                                     <MissionFilterProvider>
-                                                        <FlotillaSite />
+                                                        <MediaStreamProvider>
+                                                            <FlotillaSite />
+                                                        </MediaStreamProvider>
                                                     </MissionFilterProvider>
                                                 </AuthenticatedTemplate>
                                             </MissionControlProvider>

@@ -1,7 +1,6 @@
 import { TaskTable } from 'components/Pages/MissionPage/TaskOverview/TaskTable'
 import { VideoStreamWindow } from 'components/Pages/MissionPage/VideoStream/VideoStreamWindow'
 import { Mission } from 'models/Mission'
-import { VideoStream } from 'models/VideoStream'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
@@ -15,6 +14,7 @@ import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 
 const StyledMissionPage = styled.div`
     display: flex;
@@ -32,7 +32,7 @@ const TaskAndMapSection = styled.div`
     padding-top: 16px;
     padding-bottom: 16px;
 `
-const VideoStreamSection = styled.div`
+export const VideoStreamSection = styled.div`
     display: grid;
     gap: 1rem;
 `
@@ -41,9 +41,10 @@ export const MissionPage = () => {
     const { missionId } = useParams()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
-    const [videoStreams, setVideoStreams] = useState<VideoStream[]>([])
+    const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
+    const { mediaStreams } = useMediaStreamContext()
 
     useEffect(() => {
         if (connectionReady) {
@@ -56,18 +57,18 @@ export const MissionPage = () => {
     }, [connectionReady])
 
     useEffect(() => {
-        const updateVideoStreams = (mission: Mission) =>
-            BackendAPICaller.getVideoStreamsByRobotId(mission.robot.id)
-                .then((streams) => setVideoStreams(streams))
-                .catch((e) => {
-                    console.warn(`Failed to get video stream with robot ID ${mission.robot.id}`)
-                })
+        if (selectedMission && mediaStreams && Object.keys(mediaStreams).includes(selectedMission?.robot.id)) {
+            const mediaStreamConfig = mediaStreams[selectedMission?.robot.id]
+            if (mediaStreamConfig && mediaStreamConfig.streams.length > 0)
+                setVideoMediaStreams(mediaStreamConfig.streams)
+        }
+    }, [selectedMission, mediaStreams])
 
+    useEffect(() => {
         if (missionId)
             BackendAPICaller.getMissionRunById(missionId)
                 .then((mission) => {
                     setSelectedMission(mission)
-                    updateVideoStreams(mission)
                 })
                 .catch((e) => {
                     setAlert(
@@ -101,7 +102,9 @@ export const MissionPage = () => {
                             <MissionMapView mission={selectedMission} />
                         </TaskAndMapSection>
                         <VideoStreamSection>
-                            {videoStreams.length > 0 && <VideoStreamWindow videoStreams={videoStreams} />}
+                            {videoMediaStreams && videoMediaStreams.length > 0 && (
+                                <VideoStreamWindow videoStreams={videoMediaStreams} />
+                            )}
                         </VideoStreamSection>
                     </>
                 )}
