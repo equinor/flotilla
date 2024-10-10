@@ -6,6 +6,7 @@ interface IVideoPlayerProps {
 export const VideoPlayerSimpleStream = ({ videoStream, videoStreamName }: IVideoPlayerProps) => (
     <video
         autoPlay
+        muted
         ref={(video) => {
             if (video) video.srcObject = videoStream
         }}
