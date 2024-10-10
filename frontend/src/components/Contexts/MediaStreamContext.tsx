@@ -1,7 +1,14 @@
 import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { useRobotContext } from './RobotContext'
-import { RemoteParticipant, RemoteTrack, RemoteTrackPublication, Room, RoomEvent } from 'livekit-client'
+import {
+    ConnectionState,
+    RemoteParticipant,
+    RemoteTrack,
+    RemoteTrackPublication,
+    Room,
+    RoomEvent,
+} from 'livekit-client'
 import { MediaConnectionType, MediaStreamConfig } from 'models/VideoStream'
 
 type MediaStreamDictionaryType = {
@@ -54,7 +61,12 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
         ) {
             addTrackToConnection(track.mediaStreamTrack, config.robotId)
         }
-        await room.connect(config.url, config.token)
+        if (room.state == ConnectionState.Disconnected) {
+            room.connect(config.url, config.token)
+                .then(() => console.log(JSON.stringify(room.state)))
+                .catch((error) => console.log('Error connecting to LiveKit room'))
+        }
+        console.log(JSON.stringify(room.numParticipants))
     }
 
     const createMediaConnection = async (config: MediaStreamConfig) => {
