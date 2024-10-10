@@ -61,12 +61,11 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
         ) {
             addTrackToConnection(track.mediaStreamTrack, config.robotId)
         }
-        if (room.state == ConnectionState.Disconnected) {
+        if (room.state === ConnectionState.Disconnected) {
             room.connect(config.url, config.token)
                 .then(() => console.log(JSON.stringify(room.state)))
-                .catch((error) => console.log('Error connecting to LiveKit room'))
+                .catch((error) => console.warn('Error connecting to LiveKit Room, may already be connected:', error))
         }
-        console.log(JSON.stringify(room.numParticipants))
     }
 
     const createMediaConnection = async (config: MediaStreamConfig) => {
