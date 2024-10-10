@@ -139,7 +139,7 @@ namespace Api.Database.Models
             if (Robot.Model.AverageDurationPerTag is not null)
             {
                 float totalInspectionDuration = Tasks.Sum(
-                    task => task.Inspections.Sum(inspection => inspection.VideoDuration ?? 0)
+                    task => task.Inspection.VideoDuration ?? 0
                 );
                 EstimatedDuration = (uint)(
                     (Robot.Model.AverageDurationPerTag * Tasks.Count) + totalInspectionDuration
@@ -161,7 +161,7 @@ namespace Api.Database.Models
                 );
                 foreach (var task in Tasks)
                 {
-                    numberOfTags += task.Inspections.Count;
+                    numberOfTags += 1;
                     var currentPosition = task.RobotPose.Position;
                     distance +=
                         Math.Abs(currentPosition.X - prevPosition.X)

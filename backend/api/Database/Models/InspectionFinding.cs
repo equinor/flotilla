@@ -14,7 +14,7 @@ namespace Api.Database.Models
         public DateTime InspectionDate { get; set; }
 
         [Required]
-        public string IsarStepId { get; set; }
+        public string IsarTaskId { get; set; }
 
         [Required]
         public string Finding { get; set; }
@@ -28,7 +28,7 @@ namespace Api.Database.Models
         public InspectionFinding()
         {
             InspectionDate = DateTime.UtcNow;
-            IsarStepId = "string";
+            IsarTaskId = "string";
             Finding = "string";
         }
     }

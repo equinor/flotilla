@@ -12,7 +12,7 @@ namespace Api.Services
             return await inspectionFindingsQuery.Where(f => f.InspectionDate > lastReportingTime).ToListAsync();
         }
 
-        public async Task<MissionRun?> GetMissionRunByIsarStepId(string isarStepId, bool readOnly = true)
+        public async Task<MissionRun?> GetMissionRunByIsarInspectionId(string isarTaskId, bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = readOnly ? context.MissionRuns.AsNoTracking() : context.MissionRuns.AsTracking();
@@ -20,17 +20,17 @@ namespace Api.Services
 #pragma warning disable CA1304
             return await query.Include(missionRun => missionRun.Area).ThenInclude(area => area != null ? area.Plant : null)
                     .Include(missionRun => missionRun.Robot)
-                    .Include(missionRun => missionRun.Tasks).ThenInclude(task => task.Inspections)
-                    .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspections.Any(inspection => inspection.IsarStepId == isarStepId)))
+                    .Include(missionRun => missionRun.Tasks).ThenInclude(task => task.Inspection)
+                    .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspection.Id == isarTaskId))
                     .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()))
                     .FirstOrDefaultAsync();
 #pragma warning restore CA1304
         }
 
-        public async Task<MissionTask?> GetMissionTaskByIsarStepId(string isarStepId, bool readOnly = true)
+        public async Task<MissionTask?> GetMissionTaskByIsarInspectionId(string isarTaskId, bool readOnly = true)
         {
-            var missionRun = await GetMissionRunByIsarStepId(isarStepId, readOnly: readOnly);
-            return missionRun?.Tasks.Where(missionTask => missionTask.Inspections.Any(inspection => inspection.IsarStepId == isarStepId)).FirstOrDefault();
+            var missionRun = await GetMissionRunByIsarInspectionId(isarTaskId, readOnly: readOnly);
+            return missionRun?.Tasks.Where(missionTask => missionTask.Inspection.Id == isarTaskId).FirstOrDefault();
         }
     }
 }

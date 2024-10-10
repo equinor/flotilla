@@ -300,7 +300,6 @@ namespace Api.Services
             var customTaskQuery = new CustomTaskQuery
             {
                 RobotPose = clonedPose,
-                Inspections = [],
                 TaskOrder = 0
             };
 

@@ -20,6 +20,9 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("status")]
         public string Status { get; set; }
 
+        [JsonPropertyName("task_type")]
+        public string TaskType { get; set; }
+
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }
     }
