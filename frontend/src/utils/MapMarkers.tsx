@@ -25,15 +25,13 @@ export const placeTagsInMap = (
             // Workaround for current bug in echo
             const order = task.taskOrder + 1
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
-        }
-        else
-        {
+        } else {
             const pixelPosition = calculateObjectPixelPosition(mapMetadata, task.inspection.inspectionTarget)
             // Workaround for current bug in echo
             const order = task.taskOrder + 1
             drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
-        }    
-})
+        }
+    })
 }
 
 export const placeRobotInMap = (mapMetadata: MapMetadata, map: HTMLCanvasElement, robotPose: Pose) => {

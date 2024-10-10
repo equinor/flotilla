@@ -463,9 +463,9 @@ namespace Api.Test
                 Port = 3000,
                 CurrentInstallationCode = installationCode,
                 CurrentAreaName = null,
-                RobotCapabilities = [],
                 VideoStreams = new List<CreateVideoStreamQuery>(),
-                Documentation = new List<CreateDocumentationQuery>()
+                Documentation = new List<CreateDocumentationQuery>(),
+                RobotCapabilities = [RobotCapabilitiesEnum.take_image]
             };
 
             string robotUrl = "/robots";
@@ -485,13 +485,21 @@ namespace Api.Test
                     new()
                     {
                         RobotPose = new Pose(new Position(23, 14, 4), new Orientation()),
-                        Inspections = [],
+                        Inspection = new CustomInspectionQuery
+                        {
+                            InspectionTarget = new Position(),
+                            InspectionType = InspectionType.Image
+                        },
                         TaskOrder = 0
                     },
                     new()
                     {
                         RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-                        Inspections = [],
+                        Inspection = new CustomInspectionQuery
+                        {
+                            InspectionTarget = new Position(),
+                            InspectionType = InspectionType.Image
+                        },
                         TaskOrder = 1
                     }
                 ]
@@ -547,7 +555,7 @@ namespace Api.Test
                 Port = 3000,
                 CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = areaName,
-                RobotCapabilities = [],
+                RobotCapabilities = [RobotCapabilitiesEnum.take_image],
                 VideoStreams = new List<CreateVideoStreamQuery>(),
                 Documentation = new List<CreateDocumentationQuery>()
             };
@@ -570,7 +578,11 @@ namespace Api.Test
                     new()
                     {
                         RobotPose = new Pose(),
-                        Inspections = [],
+                        Inspection = new CustomInspectionQuery
+                        {
+                            InspectionTarget = new Position(),
+                            InspectionType = InspectionType.Image
+                        },
                         TaskOrder = 0
                     }
                 ]
@@ -730,7 +742,7 @@ namespace Api.Test
                 Port = 3000,
                 CurrentInstallationCode = otherInstallation.InstallationCode,
                 CurrentAreaName = null,
-                RobotCapabilities = [],
+                RobotCapabilities = [RobotCapabilitiesEnum.take_image],
                 VideoStreams = new List<CreateVideoStreamQuery>(),
                 Documentation = new List<CreateDocumentationQuery>()
             };
@@ -752,13 +764,21 @@ namespace Api.Test
                     new()
                     {
                         RobotPose = new Pose(),
-                        Inspections = [],
+                        Inspection = new CustomInspectionQuery
+                        {
+                            InspectionTarget = new Position(),
+                            InspectionType = InspectionType.Image
+                        },
                         TaskOrder = 0
                     },
                     new()
                     {
                         RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-                        Inspections = [],
+                        Inspection = new CustomInspectionQuery
+                        {
+                            InspectionTarget = new Position(),
+                            InspectionType = InspectionType.Image
+                        },
                         TaskOrder = 1
                     }
                 ]
@@ -802,7 +822,7 @@ namespace Api.Test
                 Port = 3000,
                 CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = area1.AreaName,
-                RobotCapabilities = [],
+                RobotCapabilities = [RobotCapabilitiesEnum.take_image],
                 VideoStreams = new List<CreateVideoStreamQuery>(),
                 Documentation = new List<CreateDocumentationQuery>()
             };
@@ -824,13 +844,21 @@ namespace Api.Test
                     new()
                     {
                         RobotPose = new Pose(new Position(1, 9, 4), new Orientation()),
-                        Inspections = [],
+                        Inspection = new CustomInspectionQuery
+                        {
+                            InspectionTarget = new Position(),
+                            InspectionType = InspectionType.Image
+                        },
                         TaskOrder = 0
                     },
                     new()
                     {
                         RobotPose = new Pose(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f),
-                        Inspections = [],
+                        Inspection = new CustomInspectionQuery
+                        {
+                            InspectionTarget = new Position(),
+                            InspectionType = InspectionType.Image
+                        },
                         TaskOrder = 1
                     }
                 ]

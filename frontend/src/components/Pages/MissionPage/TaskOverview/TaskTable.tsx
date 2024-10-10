@@ -107,18 +107,15 @@ const InspectionTypesDisplay = ({ task }: { task: Task }) => {
     return (
         <>
             {task.inspection.inspectionUrl && (
-                
-                    <Typography key={task.id + task.inspection.id + 'insp'} link href={task.inspection.inspectionUrl}>
-                        {TranslateText(task.inspection.inspectionType as string)}
-                    </Typography>)
-}
-{!task.inspection.inspectionUrl &&
-                    (
-                        <Typography key={task.id + task.inspection.id + 'insp'}>
-                        {TranslateText(task.inspection.inspectionType as string)}
-                    </Typography>
-                    )
-    }
+                <Typography key={task.id + task.inspection.id + 'insp'} link href={task.inspection.inspectionUrl}>
+                    {TranslateText(task.inspection.inspectionType as string)}
+                </Typography>
+            )}
+            {!task.inspection.inspectionUrl && (
+                <Typography key={task.id + task.inspection.id + 'insp'}>
+                    {TranslateText(task.inspection.inspectionType as string)}
+                </Typography>
+            )}
         </>
     )
 }

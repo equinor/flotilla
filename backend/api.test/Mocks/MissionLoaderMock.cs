@@ -25,7 +25,7 @@ namespace Api.Test.Mocks
 
         private readonly List<MissionTask> _mockMissionTasks = [
             new MissionTask(
-                inspections: [],
+                inspection: new Inspection(),
                 taskOrder: 0,
                 tagId: "1",
                 tagLink: new Uri("https://testurl.com"),
@@ -37,7 +37,7 @@ namespace Api.Test.Mocks
                 }
             ),
             new MissionTask(
-                inspections: [],
+                inspection: new Inspection(),
                 taskOrder: 0,
                 tagId: "2",
                 tagLink: new Uri("https://testurl.com"),
