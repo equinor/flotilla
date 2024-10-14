@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Api.Database.Models;
 
 namespace Api.Mqtt.MessageModels
 {
@@ -25,5 +26,22 @@ namespace Api.Mqtt.MessageModels
 
         [JsonPropertyName("timestamp")]
         public DateTime Timestamp { get; set; }
+
+
+        public MissionTaskType GetMissionTaskTypeFromIsarTask(string isarTaskType)
+        {
+            return isarTaskType switch
+            {
+                "record_audio" => MissionTaskType.Inspection,
+                "take_image" => MissionTaskType.Inspection,
+                "take_video" => MissionTaskType.Inspection,
+                "take_thermal_image" => MissionTaskType.Inspection,
+                "take_thermal_video" => MissionTaskType.Inspection,
+                "localize" => MissionTaskType.Localization,
+                "return_to_home" => MissionTaskType.ReturnHome,
+
+                _ => throw new ArgumentException($"ISAR Task type '{isarTaskType}' not supported")
+            };
+        }
     }
 }

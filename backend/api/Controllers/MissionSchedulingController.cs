@@ -62,7 +62,7 @@ namespace Api.Controllers
             foreach (var task in missionTasks)
             {
                 task.Id = Guid.NewGuid().ToString();
-                task.Inspection.Id = Guid.NewGuid().ToString();
+                if (task.Inspection != null) task.Inspection.Id = Guid.NewGuid().ToString();
             }
 
             var newMissionRun = new MissionRun

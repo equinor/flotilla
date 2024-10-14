@@ -67,7 +67,7 @@ namespace Api.Controllers
             logger.LogInformation("Get inspection by ID '{id}'", id);
             try
             {
-                var inspection = await inspectionService.ReadByIsarInspectionId(id, readOnly: true);
+                var inspection = await inspectionService.ReadByIsarTaskId(id, readOnly: true);
                 if (inspection != null)
                 {
                     return Ok(inspection);

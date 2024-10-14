@@ -178,7 +178,6 @@ namespace Api.Database.Models
         take_image,
         take_video,
         take_thermal_video,
-        drive_to_pose,
         record_audio,
         localize,
         docking_procedure,

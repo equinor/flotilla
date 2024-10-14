@@ -139,7 +139,7 @@ namespace Api.Database.Models
             if (Robot.Model.AverageDurationPerTag is not null)
             {
                 float totalInspectionDuration = Tasks.Sum(
-                    task => task.Inspection.VideoDuration ?? 0
+                    task => task.Inspection?.VideoDuration ?? 0
                 );
                 EstimatedDuration = (uint)(
                     (Robot.Model.AverageDurationPerTag * Tasks.Count) + totalInspectionDuration

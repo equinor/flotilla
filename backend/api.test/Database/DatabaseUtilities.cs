@@ -161,7 +161,7 @@ namespace Api.Test.Database
                 Host = "localhost",
                 Port = 3000,
                 Status = status,
-                RobotCapabilities = [RobotCapabilitiesEnum.drive_to_pose, RobotCapabilitiesEnum.take_image, RobotCapabilitiesEnum.return_to_home, RobotCapabilitiesEnum.localize]
+                RobotCapabilities = [RobotCapabilitiesEnum.take_image, RobotCapabilitiesEnum.return_to_home, RobotCapabilitiesEnum.localize]
             };
 
             var robotModel = await _robotModelService.ReadByRobotType(createRobotQuery.RobotType, readOnly: true);

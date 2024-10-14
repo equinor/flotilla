@@ -19,7 +19,7 @@ namespace Api.Database.Models
 
         // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
         public MissionTask(
-            Inspection inspection,
+            Inspection? inspection,
             Pose robotPose,
             int taskOrder,
             Uri? tagLink,
@@ -40,13 +40,17 @@ namespace Api.Database.Models
 
         public MissionTask(CustomTaskQuery taskQuery)
         {
-            Inspection = new Inspection(taskQuery.Inspection);
             TagId = taskQuery.TagId;
             Description = taskQuery.Description;
             RobotPose = taskQuery.RobotPose;
             TaskOrder = taskQuery.TaskOrder;
             Status = TaskStatus.NotStarted;
-            Type = MissionTaskType.Inspection;
+            Type = MissionTaskType.ReturnHome;
+            if (taskQuery.Inspection is not null)
+            {
+                Inspection = new Inspection((CustomInspectionQuery)taskQuery.Inspection);
+                Type = MissionTaskType.Inspection;
+            }
         }
 
         public MissionTask(Pose robotPose, MissionTaskType type)
@@ -59,7 +63,6 @@ namespace Api.Database.Models
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
-                    Inspection = new Inspection();
                     break;
                 case MissionTaskType.ReturnHome:
                     Type = type;
@@ -67,7 +70,6 @@ namespace Api.Database.Models
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
-                    Inspection = new Inspection();
                     break;
                 case MissionTaskType.Inspection:
                     Type = type;
@@ -93,7 +95,10 @@ namespace Api.Database.Models
             RobotPose = new Pose(copy.RobotPose);
             PoseId = copy.PoseId;
             Status = status ?? copy.Status;
-            Inspection = new Inspection(copy.Inspection, InspectionStatus.NotStarted);
+            if (copy.Inspection is not null)
+            {
+                Inspection = new Inspection(copy.Inspection, InspectionStatus.NotStarted);
+            }
         }
 
         [Key]
@@ -148,14 +153,14 @@ namespace Api.Database.Models
 
         public DateTime? EndTime { get; private set; }
 
-        public Inspection Inspection { get; set; }
+        public Inspection? Inspection { get; set; }
 
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
             UpdateStatus(isarTask.TaskStatus);
             if (isarTask.TaskType != IsarTaskType.ReturnToHome && isarTask.TaskType != IsarTaskType.Localize && isarTask.TaskType != IsarTaskType.MoveArm)
             {
-                Inspection.UpdateWithIsarInfo(isarTask);
+                Inspection?.UpdateWithIsarInfo(isarTask);
             }
         }
 
@@ -172,11 +177,6 @@ namespace Api.Database.Models
                 IsarTaskStatus.Failed => TaskStatus.Failed,
                 _ => throw new ArgumentException($"ISAR Task status '{isarStatus}' not supported")
             };
-        }
-
-        public Inspection? GetInspectionByIsarTaskId(string isarTaskId)
-        {
-            return Inspection;
         }
 
         public static string ConvertMissionTaskTypeToIsarTaskType(MissionTaskType missionTaskType)
@@ -199,9 +199,15 @@ namespace Api.Database.Models
                 var taskCopy = new MissionTask(task)
                 {
                     Id = "",
-                    IsarTaskId = ""
+                    IsarTaskId = "",
                 };
-                taskCopy.Inspection = new Inspection(taskCopy.Inspection, useEmptyIDs: true);
+                if (taskCopy.Inspection is not null)
+                {
+                    taskCopy.Inspection = new Inspection(taskCopy.Inspection, useEmptyIDs: true)
+                    {
+                        IsarTaskId = ""
+                    };
+                }
                 genericTasks.Add(taskCopy);
             }
 
