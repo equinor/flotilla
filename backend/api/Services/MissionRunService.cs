@@ -247,7 +247,7 @@ namespace Api.Services
         {
             if (missionRun.Robot.RobotCapabilities == null) return false;
 
-            return missionRun.Tasks.Any(task => !task.Inspection.IsSupportedInspectionType(missionRun.Robot.RobotCapabilities));
+            return missionRun.Tasks.Any(task => task.Inspection != null && !task.Inspection.IsSupportedInspectionType(missionRun.Robot.RobotCapabilities));
         }
 
         public async Task<MissionRun> Update(MissionRun missionRun)
@@ -300,7 +300,7 @@ namespace Api.Services
                 .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspection)
-                .ThenInclude(inspections => inspections.InspectionFindings)
+                .ThenInclude(inspections => inspections != null ? inspections.InspectionFindings : null)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.CurrentInstallation)
                 .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()))
@@ -428,7 +428,7 @@ namespace Api.Services
             Expression<Func<MissionRun, bool>> inspectionTypeFilter = parameters.InspectionTypes is null
                 ? mission => true
                 : mission => mission.Tasks.Any(
-                    task => parameters.InspectionTypes.Contains(task.Inspection.InspectionType)
+                    task => task.Inspection != null && parameters.InspectionTypes.Contains(task.Inspection.InspectionType)
                 );
 
             Expression<Func<MissionRun, bool>> localizationFilter = !parameters.ExcludeLocalization
@@ -595,7 +595,7 @@ namespace Api.Services
             {
                 task.Status = Database.Models.TaskStatus.Failed;
 
-                if (!task.Inspection.IsCompleted)
+                if (task.Inspection != null && !task.Inspection.IsCompleted)
                 {
                     task.Inspection.Status = InspectionStatus.Failed;
                 }

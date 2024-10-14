@@ -36,7 +36,8 @@ namespace Api.Services
 
         private async Task<MissionTask> Update(MissionTask missionTask)
         {
-            context.Entry(missionTask.Inspection).State = EntityState.Unchanged;
+            if (missionTask.Inspection != null) context.Entry(missionTask.Inspection).State = EntityState.Unchanged;
+
 
             var entry = context.Update(missionTask);
             await context.SaveChangesAsync();
@@ -51,7 +52,7 @@ namespace Api.Services
         private IQueryable<MissionTask> GetMissionTasks(bool readOnly = true)
         {
             return (readOnly ? context.MissionTasks.AsNoTracking() : context.MissionTasks.AsTracking())
-                .Include(missionTask => missionTask.Inspection).ThenInclude(inspection => inspection.InspectionFindings);
+                .Include(missionTask => missionTask.Inspection).ThenInclude(inspection => inspection != null ? inspection.InspectionFindings : null);
         }
 
         public void DetachTracking(MissionTask missionTask)

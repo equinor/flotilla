@@ -44,7 +44,7 @@ namespace Api.Database.Models
         public Inspection(Inspection copy, InspectionStatus? inspectionStatus = null, bool useEmptyIDs = false)
         {
             Id = useEmptyIDs ? "" : Guid.NewGuid().ToString();
-            IsarInspectionId = useEmptyIDs ? "" : Guid.NewGuid().ToString();
+            IsarTaskId = copy.IsarTaskId;
             Status = inspectionStatus ?? copy.Status;
             InspectionType = copy.InspectionType;
             VideoDuration = copy.VideoDuration;
@@ -60,7 +60,7 @@ namespace Api.Database.Models
         [Required]
         [MaxLength(200)]
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
-        public string IsarInspectionId { get; set; } = Guid.NewGuid().ToString();
+        public string IsarTaskId { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         public Position InspectionTarget { get; set; }
@@ -121,6 +121,7 @@ namespace Api.Database.Models
                         $"ISAR task type '{isarTask.TaskType}' not supported for inspections"
                     )
             };
+            IsarTaskId = isarTask.IsarTaskId;
         }
 
         public void UpdateStatus(IsarTaskStatus isarStatus)

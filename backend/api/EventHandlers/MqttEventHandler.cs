@@ -382,8 +382,11 @@ namespace Api.EventHandlers
             try { await MissionTaskService.UpdateMissionTaskStatus(task.TaskId, status); }
             catch (MissionTaskNotFoundException) { return; }
 
-            try { await InspectionService.UpdateInspectionStatus(task.TaskId, status); }
-            catch (InspectionNotFoundException) { return; }
+            if (task.GetMissionTaskTypeFromIsarTask(task.TaskType) == MissionTaskType.Inspection)
+            {
+                try { await InspectionService.UpdateInspectionStatus(task.TaskId, status); }
+                catch (InspectionNotFoundException) { return; }
+            }
 
             var missionRun = await MissionRunService.ReadByIsarMissionId(task.MissionId, readOnly: true);
             if (missionRun is null)

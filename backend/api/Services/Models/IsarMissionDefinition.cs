@@ -59,7 +59,7 @@ namespace Api.Services.Models
         public string? Tag { get; set; }
 
         [JsonPropertyName("inspection")]
-        public IsarInspectionDefinition Inspection { get; set; }
+        public IsarInspectionDefinition? Inspection { get; set; }
 
         public IsarTaskDefinition(MissionTask missionTask, MissionRun missionRun)
         {
@@ -67,7 +67,7 @@ namespace Api.Services.Models
             Type = MissionTask.ConvertMissionTaskTypeToIsarTaskType(missionTask.Type);
             Pose = new IsarPose(missionTask.RobotPose);
             Tag = missionTask.TagId;
-            Inspection = new IsarInspectionDefinition(missionTask.Inspection, missionRun);
+            if (missionTask.Inspection != null) Inspection = new IsarInspectionDefinition(missionTask.Inspection, missionRun);
         }
     }
 
