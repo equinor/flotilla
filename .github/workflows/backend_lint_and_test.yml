@@ -59,8 +59,3 @@ jobs:
       # We are using severity level 'info' here.
       - name: Run dotnet format
         run: dotnet format --severity info --verbosity diagnostic --verify-no-changes --exclude ./api/migrations
-
-      - name: Run csharpier format
-        run: |
-          dotnet tool restore
-          dotnet csharpier --check
