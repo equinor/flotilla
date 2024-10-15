@@ -153,7 +153,6 @@ namespace Api.Database.Models
                 const int AssumedXyMetersFromFirst = 20;
 
                 double distance = 0;
-                int numberOfTags = 0;
                 var prevPosition = new Position(
                     Tasks.First().RobotPose.Position.X + AssumedXyMetersFromFirst,
                     Tasks.First().RobotPose.Position.Y + AssumedXyMetersFromFirst,
@@ -161,7 +160,6 @@ namespace Api.Database.Models
                 );
                 foreach (var task in Tasks)
                 {
-                    numberOfTags += 1;
                     var currentPosition = task.RobotPose.Position;
                     distance +=
                         Math.Abs(currentPosition.X - prevPosition.X)
@@ -170,7 +168,7 @@ namespace Api.Database.Models
                 }
                 int estimate = (int)(
                     (distance / (RobotVelocity * EfficiencyFactor))
-                    + (numberOfTags * InspectionTime)
+                    + InspectionTime
                 );
                 EstimatedDuration = (uint)estimate * 60;
             }

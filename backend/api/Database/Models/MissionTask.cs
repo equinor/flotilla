@@ -28,7 +28,6 @@ namespace Api.Database.Models
             TaskStatus status = TaskStatus.NotStarted,
             MissionTaskType type = MissionTaskType.Inspection)
         {
-            Inspection = inspection;
             TagLink = tagLink;
             TagId = tagId;
             RobotPose = robotPose;
@@ -36,6 +35,7 @@ namespace Api.Database.Models
             TaskOrder = taskOrder;
             Status = status;
             Type = type;
+            if (inspection != null) Inspection = new Inspection(inspection);
         }
 
         public MissionTask(CustomTaskQuery taskQuery)
@@ -45,11 +45,14 @@ namespace Api.Database.Models
             RobotPose = taskQuery.RobotPose;
             TaskOrder = taskQuery.TaskOrder;
             Status = TaskStatus.NotStarted;
-            Type = MissionTaskType.ReturnHome;
             if (taskQuery.Inspection is not null)
             {
                 Inspection = new Inspection((CustomInspectionQuery)taskQuery.Inspection);
                 Type = MissionTaskType.Inspection;
+            }
+            else
+            {
+                Type = MissionTaskType.ReturnHome;
             }
         }
 
@@ -201,13 +204,8 @@ namespace Api.Database.Models
                     Id = "",
                     IsarTaskId = "",
                 };
-                if (taskCopy.Inspection is not null)
-                {
-                    taskCopy.Inspection = new Inspection(taskCopy.Inspection, useEmptyIDs: true)
-                    {
-                        IsarTaskId = ""
-                    };
-                }
+                if (taskCopy.Inspection is not null) taskCopy.Inspection = new Inspection(taskCopy.Inspection, useEmptyID: true);
+
                 genericTasks.Add(taskCopy);
             }
 

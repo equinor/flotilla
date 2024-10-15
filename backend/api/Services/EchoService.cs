@@ -265,12 +265,12 @@ namespace Api.Services
         public IList<MissionTask> MissionTasksFromEchoTag(EchoTag echoTag)
         {
             var inspections = echoTag.Inspections
-                    .Select(inspection => new Inspection(
-                        inspectionType: inspection.InspectionType,
-                        videoDuration: inspection.TimeInSeconds,
-                        inspection.InspectionPoint,
-                        status: InspectionStatus.NotStarted))
-                    .ToList();
+                .Select(inspection => new Inspection(
+                    inspectionType: inspection.InspectionType,
+                    videoDuration: inspection.TimeInSeconds,
+                    inspection.InspectionPoint,
+                    status: InspectionStatus.NotStarted))
+                .ToList();
 
             var missionTasks = new List<MissionTask>();
 
@@ -278,17 +278,16 @@ namespace Api.Services
             {
                 missionTasks.Add(
                     new MissionTask
-            (
-                inspection: inspection,
-                tagLink: echoTag.URL,
-                tagId: echoTag.TagId,
-                robotPose: echoTag.Pose,
-                poseId: echoTag.PoseId,
-                taskOrder: echoTag.PlanOrder,
-                status: Database.Models.TaskStatus.NotStarted,
-                type: MissionTaskType.Inspection
-            ));
-
+                    (
+                        inspection: inspection,
+                        tagLink: echoTag.URL,
+                        tagId: echoTag.TagId,
+                        robotPose: echoTag.Pose,
+                        poseId: echoTag.PoseId,
+                        taskOrder: echoTag.PlanOrder,
+                        status: Database.Models.TaskStatus.NotStarted,
+                        type: MissionTaskType.Inspection
+                    ));
             }
 
             return missionTasks;
