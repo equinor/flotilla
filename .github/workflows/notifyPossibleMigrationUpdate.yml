@@ -18,11 +18,11 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get changed files in the migrations folder
         id: changed_files
-        uses: tj-actions/changed-files@v35.6.1
+        uses: tj-actions/changed-files@v45
         with:
           files: backend/api/Migrations/**
           sha: ${{ github.event.pull_request.head.sha }}
@@ -30,7 +30,7 @@ jobs:
       - name: If no migrations, check for previous comment
         if: ${{ steps.changed_files.outputs.any_changed != 'true' }}
         id: notify_comment_search
-        uses: peter-evans/find-comment@v2
+        uses: peter-evans/find-comment@v3
         with:
           issue-number: ${{ github.event.number }}
           body-includes: ${{ env.message }}
@@ -39,7 +39,7 @@ jobs:
         if: |
           !steps.notify_comment_search.outputs.comment-body &&
           steps.changed_files.outputs.any_changed != 'true'
-        uses: peter-evans/create-or-update-comment@v2
+        uses: peter-evans/create-or-update-comment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.number }}
