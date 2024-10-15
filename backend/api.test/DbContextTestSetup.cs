@@ -38,7 +38,6 @@ namespace Api.Test
             var options = CreateOptions();
             var context = new FlotillaDbContext(options);
             context.Database.EnsureCreated();
-            InitDb.PopulateDb(context);
             return context;
         }
 

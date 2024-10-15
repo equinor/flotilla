@@ -8,8 +8,8 @@ namespace Api.Database.Models
     {
         public Robot()
         {
-            Documentation = new List<DocumentInfo>();
-            VideoStreams = new List<VideoStream>();
+            Documentation = [];
+            VideoStreams = [];
             IsarId = "defaultIsarId";
             Name = "defaultId";
             SerialNumber = "defaultSerialNumber";

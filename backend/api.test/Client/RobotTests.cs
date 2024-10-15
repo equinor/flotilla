@@ -8,16 +8,19 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
+using Api.Database.Context;
 using Api.Database.Models;
+using Api.Test.Database;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-namespace Api.Test
+namespace Api.Test.Client
 {
     [Collection("Database collection")]
     public class RobotTests : IClassFixture<TestWebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
+        private readonly DatabaseUtilities _databaseUtilities;
         private readonly JsonSerializerOptions _serializerOptions =
             new()
             {
@@ -38,6 +41,8 @@ namespace Api.Test
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 TestAuthHandler.AuthenticationScheme
             );
+            object? context = factory.Services.GetService(typeof(FlotillaDbContext)) as FlotillaDbContext ?? throw new ArgumentNullException(nameof(factory));
+            _databaseUtilities = new DatabaseUtilities((FlotillaDbContext)context);
         }
 
         [Fact]
@@ -80,33 +85,13 @@ namespace Api.Test
         [Fact]
         public async Task RobotIsNotCreatedWithAreaNotInInstallation()
         {
-            // Area
-            string areaUrl = "/areas";
-            var areaResponse = await _client.GetAsync(areaUrl);
-            Assert.True(areaResponse.IsSuccessStatusCode);
-            var areas = await areaResponse.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
-            Assert.NotNull(areas);
-            var area = areas[0];
+            // Arrange - Area
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
 
-            // Installation
-            string testInstallation = "InstallationRobotIsNotCreatedWithAreaNotInInstallation";
-            var installationQuery = new CreateInstallationQuery
-            {
-                InstallationCode = testInstallation,
-                Name = testInstallation
-            };
-
-            var installationContent = new StringContent(
-                JsonSerializer.Serialize(installationQuery),
-                null,
-                "application/json"
-            );
-
-            string installationUrl = "/installations";
-            var installationResponse = await _client.PostAsync(installationUrl, installationContent);
-            Assert.True(installationResponse.IsSuccessStatusCode);
-            var wrongInstallation = await installationResponse.Content.ReadFromJsonAsync<Installation>(_serializerOptions);
-            Assert.NotNull(wrongInstallation);
+            var wrongInstallation = await _databaseUtilities.NewInstallation("wrongInstallation");
+            var wrongPlant = await _databaseUtilities.ReadOrNewPlant(wrongInstallation.InstallationCode);
+            var wrongDeck = await _databaseUtilities.ReadOrNewDeck(wrongInstallation.InstallationCode, wrongPlant.PlantCode);
+            var wrongArea = await _databaseUtilities.ReadOrNewArea(wrongInstallation.InstallationCode, wrongPlant.PlantCode, wrongDeck.Name);
 
             // Arrange - Create robot
             var robotQuery = new CreateRobotQuery
@@ -118,8 +103,9 @@ namespace Api.Test
                 Status = RobotStatus.Available,
                 Host = "localhost",
                 Port = 3000,
-                CurrentInstallationCode = wrongInstallation.InstallationCode,
-                VideoStreams = new List<CreateVideoStreamQuery>()
+                CurrentInstallationCode = installation.InstallationCode,
+                CurrentAreaName = wrongArea.Name,
+                VideoStreams = []
             };
 
             string robotUrl = "/robots";
@@ -135,9 +121,8 @@ namespace Api.Test
             }
             catch (DbUpdateException ex)
             {
-                Assert.True(ex.Message == $"Could not create new robot in database as area '{area.AreaName}' does not exist in installation {wrongInstallation.InstallationCode}");
+                Assert.True(ex.Message == $"Could not create new robot in database as area '{wrongArea.Name}' does not exist in installation {installation.InstallationCode}");
             }
         }
-
     }
 }

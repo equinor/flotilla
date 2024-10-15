@@ -70,10 +70,10 @@ namespace Api.Test.Services
             );
             int nReportsBefore = reportsBefore.Count;
 
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area);
 

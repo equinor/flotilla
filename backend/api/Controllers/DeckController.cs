@@ -150,12 +150,12 @@ namespace Api.Controllers
             logger.LogInformation("Creating new deck");
             try
             {
-                var existingInstallation = await installationService.ReadByName(deck.InstallationCode, readOnly: true);
+                var existingInstallation = await installationService.ReadByInstallationCode(deck.InstallationCode, readOnly: true);
                 if (existingInstallation == null)
                 {
                     return NotFound($"Could not find installation with name {deck.InstallationCode}");
                 }
-                var existingPlant = await plantService.ReadByInstallationAndName(existingInstallation, deck.PlantCode, readOnly: true);
+                var existingPlant = await plantService.ReadByInstallationAndPlantCode(existingInstallation, deck.PlantCode, readOnly: true);
                 if (existingPlant == null)
                 {
                     return NotFound($"Could not find plant with name {deck.PlantCode}");

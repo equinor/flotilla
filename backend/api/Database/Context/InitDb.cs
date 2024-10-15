@@ -37,10 +37,11 @@ namespace Api.Database.Context
                 InspectionType = InspectionType.ThermalImage
             };
 
-            return new List<Inspection>(new[]
-            {
-                inspection1, inspection2
-            });
+            return new List<Inspection>(
+            [
+                inspection1,
+                inspection2
+            ]);
         }
 
         private static List<AccessRole> GetAccessRoles()
@@ -52,10 +53,10 @@ namespace Api.Database.Context
                 RoleName = "Role.User.HUA"
             };
 
-            return new List<AccessRole>(new[]
-            {
+            return new List<AccessRole>(
+            [
                 accessRole1
-            });
+            ]);
         }
 
         private static List<Installation> GetInstallations()
@@ -74,10 +75,11 @@ namespace Api.Database.Context
                 InstallationCode = "KAA"
             };
 
-            return new List<Installation>(new[]
-            {
-                installation1, installation2
-            });
+            return new List<Installation>(
+            [
+                installation1,
+                installation2
+            ]);
         }
 
         private static List<Plant> GetPlants()
@@ -98,10 +100,11 @@ namespace Api.Database.Context
                 PlantCode = "Kårstø"
             };
 
-            return new List<Plant>(new[]
-            {
-                plant1, plant2
-            });
+            return new List<Plant>(
+            [
+                plant1,
+                plant2
+            ]);
         }
 
         private static List<Deck> GetDecks()
@@ -151,10 +154,14 @@ namespace Api.Database.Context
                 Name = "Huldra Mezzanine Deck"
             };
 
-            return new List<Deck>(new[]
-            {
-                deck1, deck2, deck3, deck4, deckHuldraMezzanine
-            });
+            return new List<Deck>(
+            [
+                deck1,
+                deck2,
+                deck3,
+                deck4,
+                deckHuldraMezzanine
+            ]);
         }
 
         private static List<Area> GetAreas()
@@ -168,7 +175,7 @@ namespace Api.Database.Context
                 Name = "testArea",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>(new[] { new SafePosition() })
+                SafePositions = new List<SafePosition>([new SafePosition()])
             };
 
             var area2 = new Area
@@ -180,7 +187,7 @@ namespace Api.Database.Context
                 Name = "testArea2",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>(new[] { new SafePosition() })
+                SafePositions = new List<SafePosition>([new SafePosition()])
             };
 
             var area3 = new Area
@@ -192,7 +199,7 @@ namespace Api.Database.Context
                 Name = "testArea3",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>(new[] { new SafePosition() })
+                SafePositions = new List<SafePosition>([new SafePosition()])
             };
 
             var area4 = new Area
@@ -204,7 +211,7 @@ namespace Api.Database.Context
                 Name = "testArea4",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>(new[] { new SafePosition() })
+                SafePositions = new List<SafePosition>([new SafePosition()])
             };
 
             var area5 = new Area
@@ -216,7 +223,7 @@ namespace Api.Database.Context
                 Name = "testArea5",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>(new[] { new SafePosition() })
+                SafePositions = new List<SafePosition>([new SafePosition()])
             };
 
             var area6 = new Area
@@ -228,7 +235,7 @@ namespace Api.Database.Context
                 Name = "testArea6",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>(new[] { new SafePosition() })
+                SafePositions = new List<SafePosition>([new SafePosition()])
             };
 
             var areaHuldraHB = new Area
@@ -240,13 +247,19 @@ namespace Api.Database.Context
                 Name = "HB",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>(new[] { new SafePosition() })
+                SafePositions = new List<SafePosition>([new SafePosition()])
             };
 
-            return new List<Area>(new[]
-            {
-                area1, area2, area3, area4, area5, area6,areaHuldraHB
-            });
+            return new List<Area>(
+            [
+                area1,
+                area2,
+                area3,
+                area4,
+                area5,
+                area6,
+                areaHuldraHB
+            ]);
         }
 
         private static List<Source> GetSources()
@@ -285,8 +298,8 @@ namespace Api.Database.Context
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[0],
-                VideoStreams = new List<VideoStream>(),
-                Documentation = new List<DocumentInfo>(),
+                VideoStreams = [],
+                Documentation = [],
                 Pose = new Pose()
             };
 
@@ -299,8 +312,8 @@ namespace Api.Database.Context
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[0],
-                VideoStreams = new List<VideoStream>(),
-                Documentation = new List<DocumentInfo>(),
+                VideoStreams = [],
+                Documentation = [],
                 Pose = new Pose()
             };
 
@@ -313,8 +326,8 @@ namespace Api.Database.Context
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[0],
-                VideoStreams = new List<VideoStream>(),
-                Documentation = new List<DocumentInfo>(),
+                VideoStreams = [],
+                Documentation = [],
                 Pose = new Pose()
             };
 
@@ -511,7 +524,7 @@ namespace Api.Database.Context
                 MissionId = missionDefinitions[0].Id,
                 Status = MissionStatus.Successful,
                 DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>(),
+                Tasks = [],
                 Map = new MapMetadata()
             };
 
@@ -524,7 +537,7 @@ namespace Api.Database.Context
                 MissionId = missionDefinitions[0].Id,
                 Status = MissionStatus.Successful,
                 DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>(),
+                Tasks = [],
                 Map = new MapMetadata()
             };
             missionDefinitions[0].LastSuccessfulRun = missionRun2;
@@ -617,10 +630,16 @@ namespace Api.Database.Context
 
             missionDefinitions[1].LastSuccessfulRun = missionRun3;
 
-            return new List<MissionRun>(new[]
-            {
-                missionRun1, missionRun2, missionRun3, missionRun4, missionRun5, missionRun6, missionRun7
-            });
+            return new List<MissionRun>(
+            [
+                missionRun1,
+                missionRun2,
+                missionRun3,
+                missionRun4,
+                missionRun5,
+                missionRun6,
+                missionRun7
+            ]);
         }
 
         public static void AddRobotModelsToContext(FlotillaDbContext context)

@@ -8,15 +8,18 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
+using Api.Database.Context;
 using Api.Database.Models;
+using Api.Test.Database;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
-namespace Api.Test
+namespace Api.Test.Client
 {
     [Collection("Database collection")]
     public class AreaTests : IClassFixture<TestWebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
+        private readonly DatabaseUtilities _databaseUtilities;
         private readonly JsonSerializerOptions _serializerOptions =
             new()
             {
@@ -37,6 +40,10 @@ namespace Api.Test
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 TestAuthHandler.AuthenticationScheme
             );
+
+            object? context = factory.Services.GetService(typeof(FlotillaDbContext)) as FlotillaDbContext ?? throw new ArgumentNullException(nameof(factory));
+            _databaseUtilities = new DatabaseUtilities((FlotillaDbContext)context);
+
         }
 
         [Fact]
@@ -139,32 +146,15 @@ namespace Api.Test
         [Fact]
         public async Task MissionIsCreatedInArea()
         {
-            // Arrange
-            // Robot
-            string robotUrl = "/robots";
-            var robotResponse = await _client.GetAsync(robotUrl);
-            Assert.True(robotResponse.IsSuccessStatusCode);
-            var robots = await robotResponse.Content.ReadFromJsonAsync<List<Robot>>(_serializerOptions);
-            Assert.NotNull(robots);
-            var robot = robots.Where(robot => robot.Name == "Shockwave").First();
+            // Arrange - Initialise area
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+
+            // Arrange - Robot
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
             string robotId = robot.Id;
-
-            // Installation
-            string installationUrl = "/installations";
-            var installationResponse = await _client.GetAsync(installationUrl);
-            Assert.True(installationResponse.IsSuccessStatusCode);
-            var installations = await installationResponse.Content.ReadFromJsonAsync<List<Installation>>(_serializerOptions);
-            Assert.NotNull(installations);
-            var installation = installations.Where(installation => installation.InstallationCode == robot.CurrentInstallation?.InstallationCode).First();
-
-            // Area
-            string areaUrl = "/areas";
-            var areaResponse = await _client.GetAsync(areaUrl);
-            Assert.True(areaResponse.IsSuccessStatusCode);
-            var areas = await areaResponse.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
-            Assert.NotNull(areas);
-            var area = areas.Where(area => area.InstallationCode == installation.InstallationCode).First();
-            string areaId = area.Id;
 
             string testMissionName = "testMissionInAreaTest";
 
@@ -189,7 +179,7 @@ namespace Api.Test
                 RobotId = robotId,
                 DesiredStartTime = DateTime.UtcNow,
                 InstallationCode = installation.InstallationCode,
-                AreaName = area.AreaName,
+                AreaName = area.Name,
                 Name = testMissionName,
                 Tasks = tasks
             };
@@ -208,8 +198,8 @@ namespace Api.Test
             var mission = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
             Assert.NotNull(mission);
             Assert.NotNull(mission.MissionId);
-
-            var areaMissionsResponse = await _client.GetAsync(areaUrl + $"/{areaId}/mission-definitions");
+            string areaUrl = "/areas";
+            var areaMissionsResponse = await _client.GetAsync(areaUrl + $"/{area.Id}/mission-definitions");
 
             // Assert
             Assert.True(areaMissionsResponse.IsSuccessStatusCode);
@@ -222,14 +212,12 @@ namespace Api.Test
         public async Task SafePositionTest()
         {
             // Arrange
-            string areaUrl = "/areas";
-            var areaResponse = await _client.GetAsync(areaUrl);
-            Assert.True(areaResponse.IsSuccessStatusCode);
-            var areaResponses = await areaResponse.Content.ReadFromJsonAsync<List<AreaResponse>>(_serializerOptions);
-            Assert.NotNull(areaResponses);
-            var area = areaResponses[0];
-            string areaName = area.AreaName;
-            string installationCode = area.InstallationCode;
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            string areaName = area.Name;
+            string installationCode = installation.InstallationCode;
 
             string addSafePositionUrl = $"/areas/{installationCode}/{areaName}/safe-position";
             var testPosition = new Position
@@ -255,7 +243,7 @@ namespace Api.Test
                 "application/json"
             );
 
-            areaResponse = await _client.PostAsync(addSafePositionUrl, content);
+            var areaResponse = await _client.PostAsync(addSafePositionUrl, content);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var areaContent = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
             Assert.NotNull(areaContent);
@@ -275,12 +263,11 @@ namespace Api.Test
         [Fact]
         public async Task UpdateDefaultLocalizationPoseOnDeck()
         {
-            string deckUrl = "/decks";
-            var deckResponse = await _client.GetAsync(deckUrl);
-            Assert.True(deckResponse.IsSuccessStatusCode);
-            var decks = await deckResponse.Content.ReadFromJsonAsync<List<DeckResponse>>(_serializerOptions);
-            Assert.NotNull(decks);
-            var deck = decks[0];
+            // Arrange
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+
             string deckId = deck.Id;
 
             string url = $"/decks/{deckId}/update-default-localization-pose";
@@ -308,9 +295,13 @@ namespace Api.Test
                 null,
                 "application/json"
             );
+
+            // Act
             var putResponse = await _client.PutAsync(url, content);
             Assert.True(putResponse.IsSuccessStatusCode);
             var putDeck = await putResponse.Content.ReadFromJsonAsync<DeckResponse>(_serializerOptions);
+
+            // Assert
             Assert.NotNull(putDeck);
             Assert.NotNull(putDeck.DefaultLocalizationPose);
             Assert.True(putDeck.DefaultLocalizationPose.Position.Z.Equals(query.Pose.Position.Z));
