@@ -64,7 +64,7 @@ namespace Api.Services
             var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType, readOnly: true);
             if (robotModel != null)
             {
-                var installation = await installationService.ReadByName(robotQuery.CurrentInstallationCode, readOnly: true);
+                var installation = await installationService.ReadByInstallationCode(robotQuery.CurrentInstallationCode, readOnly: true);
                 if (installation is null)
                 {
                     logger.LogError("Installation {CurrentInstallation} does not exist", robotQuery.CurrentInstallationCode);

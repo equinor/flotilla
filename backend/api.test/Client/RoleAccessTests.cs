@@ -60,23 +60,6 @@ namespace Api.Test
                 "application/json"
             );
 
-            var testPose = new Pose
-            {
-                Position = new Position
-                {
-                    X = 1,
-                    Y = 2,
-                    Z = 2
-                },
-                Orientation = new Orientation
-                {
-                    X = 0,
-                    Y = 0,
-                    Z = 0,
-                    W = 1
-                }
-            };
-
             string testInstallation = "AuthorisedGetPlantTest_NotFoundInstallation";
             var installationQuery = new CreateInstallationQuery
             {

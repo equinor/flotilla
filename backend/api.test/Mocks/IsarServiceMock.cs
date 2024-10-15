@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Api.Database.Models;
 using Api.Services;
@@ -16,7 +15,7 @@ namespace Api.Test.Mocks
                 new IsarStartMissionResponse
                 {
                     MissionId = System.Guid.NewGuid().ToString(),
-                    Tasks = new List<IsarTaskResponse>()
+                    Tasks = []
                 }
             );
             return isarServiceMissionResponse;
@@ -47,7 +46,7 @@ namespace Api.Test.Mocks
                 new IsarStartMissionResponse
                 {
                     MissionId = "testStartMoveArm",
-                    Tasks = new List<IsarTaskResponse>()
+                    Tasks = []
                 }
             );
             return isarServiceMissionResponse;

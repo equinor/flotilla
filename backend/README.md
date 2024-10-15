@@ -245,7 +245,7 @@ We use [dotnet format](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet
 to format and verify code style in backend based on the
 [C# coding conventions](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions).
 
-Dotnet format is included in the .NET6 SDK.
+Dotnet format is included in the .NET SDK.
 
 To check the formatting, run the following command in the backend folder:
 

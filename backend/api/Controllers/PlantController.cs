@@ -87,12 +87,12 @@ namespace Api.Controllers
             logger.LogInformation("Creating new plant");
             try
             {
-                var existingInstallation = await installationService.ReadByName(plant.InstallationCode, readOnly: true);
+                var existingInstallation = await installationService.ReadByInstallationCode(plant.InstallationCode, readOnly: true);
                 if (existingInstallation == null)
                 {
                     return NotFound($"Installation with installation code {plant.InstallationCode} not found");
                 }
-                var existingPlant = await plantService.ReadByInstallationAndName(existingInstallation, plant.PlantCode, readOnly: true);
+                var existingPlant = await plantService.ReadByInstallationAndPlantCode(existingInstallation, plant.PlantCode, readOnly: true);
                 if (existingPlant != null)
                 {
                     logger.LogInformation("A plant for given name and plant already exists");

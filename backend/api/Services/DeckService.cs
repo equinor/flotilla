@@ -59,8 +59,8 @@ namespace Api.Services
 
         public async Task<IEnumerable<Deck>> ReadByInstallation(string installationCode, bool readOnly = true)
         {
-            var installation = await installationService.ReadByName(installationCode, readOnly: true);
-            if (installation == null) { return new List<Deck>(); }
+            var installation = await installationService.ReadByInstallationCode(installationCode, readOnly: true);
+            if (installation == null) { return []; }
             return await GetDecks(readOnly: readOnly).Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
@@ -84,9 +84,9 @@ namespace Api.Services
 
         public async Task<Deck> Create(CreateDeckQuery newDeckQuery)
         {
-            var installation = await installationService.ReadByName(newDeckQuery.InstallationCode, readOnly: true) ??
+            var installation = await installationService.ReadByInstallationCode(newDeckQuery.InstallationCode, readOnly: true) ??
                                throw new InstallationNotFoundException($"No installation with name {newDeckQuery.InstallationCode} could be found");
-            var plant = await plantService.ReadByInstallationAndName(installation, newDeckQuery.PlantCode, readOnly: true) ??
+            var plant = await plantService.ReadByInstallationAndPlantCode(installation, newDeckQuery.PlantCode, readOnly: true) ??
                         throw new PlantNotFoundException($"No plant with name {newDeckQuery.PlantCode} could be found");
             var existingDeck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name, readOnly: true);
 

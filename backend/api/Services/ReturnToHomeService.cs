@@ -97,10 +97,10 @@ namespace Api.Services
                 Area = robot.CurrentArea,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>
-                {
+                Tasks =
+                [
                     new(new Pose(robot.CurrentArea.Deck.DefaultLocalizationPose.Pose), MissionTaskType.ReturnHome)
-                },
+                ],
                 Map = new MapMetadata()
             };
             await mapService.AssignMapToMission(returnToHomeMissionRun);

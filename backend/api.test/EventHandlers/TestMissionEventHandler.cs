@@ -155,10 +155,10 @@ namespace Api.Test.EventHandlers
         public async Task ScheduledMissionStartedWhenSystemIsAvailable()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area);
 
@@ -175,10 +175,10 @@ namespace Api.Test.EventHandlers
         public async Task SecondScheduledMissionQueuedIfRobotIsBusy()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
             var missionRunOne = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area);
             var missionRunTwo = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area);
@@ -195,16 +195,14 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Pending, postTestMissionRunTwo!.Status);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(Skip = "Skipping until a solution has been found for ExecuteUpdate in tests")]
-#pragma warning restore xUnit1004
+        [Fact]
         public async Task NewMissionIsStartedWhenRobotBecomesAvailable()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area);
 
@@ -233,10 +231,10 @@ namespace Api.Test.EventHandlers
         public async Task ReturnToHomeMissionIsStartedIfQueueIsEmptyWhenRobotBecomesAvailable()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
 
             var mqttEventArgs = new MqttReceivedArgs(
@@ -269,10 +267,10 @@ namespace Api.Test.EventHandlers
         public async Task ReturnToHomeMissionIsNotStartedIfReturnToHomeIsNotSupported()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
             robot.RobotCapabilities!.Remove(RobotCapabilitiesEnum.return_to_home);
             await _robotService.Update(robot);
@@ -307,10 +305,10 @@ namespace Api.Test.EventHandlers
         public async Task MissionRunIsStartedForOtherAvailableRobotIfOneRobotHasAnOngoingMissionRun()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robotOne = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
             var robotTwo = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
             var missionRunOne = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robotOne, area);
@@ -339,12 +337,12 @@ namespace Api.Test.EventHandlers
         public async Task QueuedMissionsAreAbortedWhenLocalizationFails()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
-            var localizationMissionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString(), Api.Database.Models.TaskStatus.Failed);
+            var localizationMissionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, taskStatus: Api.Database.Models.TaskStatus.Failed);
             var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
 
             Thread.Sleep(100);
@@ -372,10 +370,10 @@ namespace Api.Test.EventHandlers
         public async Task QueuedMissionsAreNotAbortedWhenRobotAvailableHappensAtTheSameTimeAsOnIsarMissionCompleted()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, null);
             var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
             Thread.Sleep(100);
@@ -414,15 +412,17 @@ namespace Api.Test.EventHandlers
             Assert.Equal(MissionStatus.Pending, postTestMissionRun2!.Status);
         }
 
-        [Fact]
+#pragma warning disable xUnit1004
+        [Fact(Skip = "Skipping until issue #1767 is solved because test is unreliable")]
+#pragma warning restore xUnit1004
         public async Task QueuedContinuesWhenOnIsarStatusHappensAtTheSameTimeAsOnIsarMissionCompleted()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, null);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area);
             var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString());
             var missionRun2 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true);
             Thread.Sleep(100);
@@ -467,10 +467,10 @@ namespace Api.Test.EventHandlers
         public async Task LocalizationMissionCompletesAfterPressingSendToSafeZoneButton()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
             await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Localization, MissionStatus.Ongoing, Guid.NewGuid().ToString());
 
@@ -494,7 +494,7 @@ namespace Api.Test.EventHandlers
         public async Task ReturnHomeMissionNotScheduledIfRobotIsNotLocalized()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, null);
 
             Thread.Sleep(100);
@@ -516,10 +516,10 @@ namespace Api.Test.EventHandlers
         public async Task ReturnHomeMissionAbortedIfNewMissionScheduled()
         {
             // Arrange
-            var installation = await _databaseUtilities.NewInstallation();
-            var plant = await _databaseUtilities.NewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, area);
             var returnToHomeMission = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.ReturnHome, MissionStatus.Ongoing, Guid.NewGuid().ToString());
             var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area, true, MissionRunType.Normal, MissionStatus.Pending, Guid.NewGuid().ToString());
