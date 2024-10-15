@@ -388,6 +388,14 @@ namespace Api.Services
                     return;
                 }
 
+                var unfinishedTasks = missionRun.Tasks
+                    .Where(t => !new List<Database.Models.TaskStatus>
+                        {Database.Models.TaskStatus.Successful, Database.Models.TaskStatus.Failed}
+                        .Contains(t.Status))
+                    .Select(t => new MissionTask(t)).ToList();
+
+                if (unfinishedTasks.Count == 0) continue;
+
                 var newMissionRun = new MissionRun
                 {
                     Name = missionRun.Name,
@@ -397,11 +405,7 @@ namespace Api.Services
                     Area = missionRun.Area,
                     Status = MissionStatus.Pending,
                     DesiredStartTime = DateTime.UtcNow,
-                    Tasks = missionRun.Tasks
-                        .Where(t => !new List<Database.Models.TaskStatus>
-                            {Database.Models.TaskStatus.Successful, Database.Models.TaskStatus.Failed}
-                            .Contains(t.Status))
-                        .Select(t => new MissionTask(t)).ToList(),
+                    Tasks = unfinishedTasks,
                     Map = new MapMetadata()
                 };
 
