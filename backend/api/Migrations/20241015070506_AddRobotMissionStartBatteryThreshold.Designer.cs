@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241015070506_AddRobotMissionStartBatteryThreshold")]
+    partial class AddRobotMissionStartBatteryThreshold
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -152,10 +155,13 @@ namespace Api.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("character varying(250)");
 
-                    b.Property<string>("IsarTaskId")
+                    b.Property<string>("IsarStepId")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<string>("MissionTaskId")
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("StartTime")
                         .HasColumnType("timestamp with time zone");
@@ -168,6 +174,8 @@ namespace Api.Migrations
                         .HasColumnType("real");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MissionTaskId");
 
                     b.ToTable("Inspections");
                 });
@@ -188,7 +196,7 @@ namespace Api.Migrations
                     b.Property<string>("InspectionId")
                         .HasColumnType("text");
 
-                    b.Property<string>("IsarTaskId")
+                    b.Property<string>("IsarStepId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -358,9 +366,6 @@ namespace Api.Migrations
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("InspectionId")
-                        .HasColumnType("text");
-
                     b.Property<string>("IsarTaskId")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -394,8 +399,6 @@ namespace Api.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("InspectionId");
 
                     b.HasIndex("MissionRunId");
 
@@ -890,6 +893,10 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.Inspection", b =>
                 {
+                    b.HasOne("Api.Database.Models.MissionTask", null)
+                        .WithMany("Inspections")
+                        .HasForeignKey("MissionTaskId");
+
                     b.OwnsOne("Api.Database.Models.Position", "InspectionTarget", b1 =>
                         {
                             b1.Property<string>("InspectionId")
@@ -1051,10 +1058,6 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.MissionTask", b =>
                 {
-                    b.HasOne("Api.Database.Models.Inspection", "Inspection")
-                        .WithMany()
-                        .HasForeignKey("InspectionId");
-
                     b.HasOne("Api.Database.Models.MissionRun", null)
                         .WithMany("Tasks")
                         .HasForeignKey("MissionRunId");
@@ -1124,8 +1127,6 @@ namespace Api.Migrations
                             b1.Navigation("Position")
                                 .IsRequired();
                         });
-
-                    b.Navigation("Inspection");
 
                     b.Navigation("RobotPose")
                         .IsRequired();
@@ -1397,6 +1398,11 @@ namespace Api.Migrations
             modelBuilder.Entity("Api.Database.Models.MissionRun", b =>
                 {
                     b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.MissionTask", b =>
+                {
+                    b.Navigation("Inspections");
                 });
 #pragma warning restore 612, 618
         }
