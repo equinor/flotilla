@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Context;
@@ -22,6 +21,13 @@ namespace Api.Test.Database
         private readonly RobotModelService _robotModelService;
         private readonly RobotService _robotService;
         private readonly UserInfoService _userInfoService;
+        private readonly SourceService _sourceService;
+        private readonly string _testInstallationCode = "testInstallationCode";
+        private readonly string _testInstallationName = "testInstallation";
+        private readonly string _testPlantCode = "testPlantCode";
+        private readonly string _testDeckName = "testDeck";
+        private readonly string _testAreaName = "testArea";
+
 
         public DatabaseUtilities(FlotillaDbContext context)
         {
@@ -37,6 +43,7 @@ namespace Api.Test.Database
             _robotModelService = new RobotModelService(context);
             _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _areaService);
             _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService, _missionTaskService, _areaService, _robotService, _userInfoService);
+            _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
         }
 
         public async Task<MissionRun> NewMissionRun(
@@ -46,10 +53,11 @@ namespace Api.Test.Database
             bool writeToDatabase = false,
             MissionRunType missionRunType = MissionRunType.Normal,
             MissionStatus missionStatus = MissionStatus.Pending,
-            string? isarMissionId = null,
+            string isarMissionId = "",
             Api.Database.Models.TaskStatus taskStatus = Api.Database.Models.TaskStatus.Successful
         )
         {
+            if (string.IsNullOrEmpty(isarMissionId)) isarMissionId = Guid.NewGuid().ToString();
             var missionRun = new MissionRun
             {
                 Name = "testMission",
@@ -66,25 +74,25 @@ namespace Api.Test.Database
             };
             if (missionRunType == MissionRunType.Localization)
             {
-                missionRun.Tasks = new List<MissionTask>
-                {
+                missionRun.Tasks =
+                [
                     new(new Pose(), MissionTaskType.Localization)
-                };
+                ];
                 missionRun.Tasks[0].Status = taskStatus;
             }
             else if (missionRunType == MissionRunType.ReturnHome)
             {
-                missionRun.Tasks = new List<MissionTask>
-                {
+                missionRun.Tasks =
+                [
                     new(new Pose(), MissionTaskType.ReturnHome)
-                };
+                ];
             }
             else
             {
-                missionRun.Tasks = new List<MissionTask>
-                {
+                missionRun.Tasks =
+                [
                     new(new Pose(), MissionTaskType.Inspection)
-                };
+                ];
             }
             if (writeToDatabase)
             {
@@ -93,15 +101,27 @@ namespace Api.Test.Database
             return missionRun;
         }
 
-        public async Task<Installation> NewInstallation()
+        public async Task<Installation> ReadOrNewInstallation()
         {
+            if (await _installationService.ReadByInstallationCode(_testInstallationCode) is Installation installation) return installation;
+            return await NewInstallation();
+        }
+
+        public async Task<Installation> NewInstallation(string installationCode = "")
+        {
+            if (string.IsNullOrEmpty(installationCode)) installationCode = _testInstallationCode;
             var createInstallationQuery = new CreateInstallationQuery
             {
-                InstallationCode = "testInstallationCode",
-                Name = "testInstallation"
+                InstallationCode = installationCode,
+                Name = _testInstallationName
             };
-
             return await _installationService.Create(createInstallationQuery);
+        }
+
+        public async Task<Plant> ReadOrNewPlant(string installationCode)
+        {
+            if (await _plantService.ReadByPlantCode(_testPlantCode) is Plant plant) return plant;
+            return await NewPlant(installationCode);
         }
 
         public async Task<Plant> NewPlant(string installationCode)
@@ -109,15 +129,22 @@ namespace Api.Test.Database
             var createPlantQuery = new CreatePlantQuery
             {
                 InstallationCode = installationCode,
-                PlantCode = "testPlantCode",
+                PlantCode = _testPlantCode,
                 Name = "testPlant"
             };
 
             return await _plantService.Create(createPlantQuery);
         }
 
-        public async Task<Deck> NewDeck(string installationCode, string plantCode, string deckName = "testDeck")
+        public async Task<Deck> ReadOrNewDeck(string installationCode, string plantCode)
         {
+            if (await _deckService.ReadByName(_testDeckName) is Deck deck) return deck;
+            return await NewDeck(installationCode, plantCode);
+        }
+
+        public async Task<Deck> NewDeck(string installationCode, string plantCode, string deckName = "")
+        {
+            if (string.IsNullOrEmpty(deckName)) deckName = _testDeckName;
             var createDeckQuery = new CreateDeckQuery
             {
                 InstallationCode = installationCode,
@@ -132,14 +159,21 @@ namespace Api.Test.Database
             return await _deckService.Create(createDeckQuery);
         }
 
-        public async Task<Area> NewArea(string installationCode, string plantCode, string deckName)
+        public async Task<Area> ReadOrNewArea(string installationCode, string plantCode, string deckName)
         {
+            if (await _areaService.ReadByInstallationAndName(_testInstallationCode, _testAreaName) is Area area) return area;
+            return await NewArea(installationCode, plantCode, deckName);
+        }
+
+        public async Task<Area> NewArea(string installationCode, string plantCode, string deckName, string areaName = "")
+        {
+            if (string.IsNullOrEmpty(areaName)) areaName = _testAreaName;
             var createAreaQuery = new CreateAreaQuery
             {
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
                 DeckName = deckName,
-                AreaName = "testArea",
+                AreaName = areaName,
                 DefaultLocalizationPose = new Pose()
             };
 
@@ -150,14 +184,14 @@ namespace Api.Test.Database
         {
             var createRobotQuery = new CreateRobotQuery
             {
-                Name = "TestBot",
+                Name = Guid.NewGuid().ToString(),
                 IsarId = Guid.NewGuid().ToString(),
                 RobotType = RobotType.Robot,
                 SerialNumber = "0001",
                 CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = area?.Name,
-                VideoStreams = new List<CreateVideoStreamQuery>(),
-                Documentation = new List<CreateDocumentationQuery>(),
+                VideoStreams = [],
+                Documentation = [],
                 Host = "localhost",
                 Port = 3000,
                 Status = status,
@@ -167,6 +201,14 @@ namespace Api.Test.Database
             var robotModel = await _robotModelService.ReadByRobotType(createRobotQuery.RobotType, readOnly: true);
             var robot = new Robot(createRobotQuery, installation, robotModel!, area);
             return await _robotService.Create(robot);
+        }
+
+        public async Task<Source> NewSource(string sourceId)
+        {
+            return await _sourceService.Create(new Source
+            {
+                SourceId = sourceId
+            });
         }
     }
 }

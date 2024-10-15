@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
+using Api.Test.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -25,10 +25,12 @@ namespace Api.Test.Services
         private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
         private readonly IDeckService _deckService;
         private readonly IAreaService _areaService;
+        private readonly DatabaseUtilities _databaseUtilities;
 
         public RobotServiceTest(DatabaseFixture fixture)
         {
             _context = fixture.NewContext;
+            _databaseUtilities = new DatabaseUtilities(_context);
             _logger = new Mock<ILogger<RobotService>>().Object;
             _robotModelService = new RobotModelService(_context);
             _signalRService = new MockSignalRService();
@@ -49,6 +51,8 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadAll()
         {
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var _ = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
             var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
             var robots = await robotService.ReadAll();
 
@@ -59,11 +63,11 @@ namespace Api.Test.Services
         public async Task Read()
         {
             var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
-            var robots = await robotService.ReadAll(readOnly: false);
-            var firstRobot = robots.First();
-            var robotById = await robotService.ReadById(firstRobot.Id, readOnly: false);
-
-            Assert.Equal(firstRobot, robotById); // To compare the objects directly, we need to use readOnly = false. Otherwise we will read in a new object
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
+            var robotById = await robotService.ReadById(robot.Id, readOnly: false);
+            Assert.NotNull(robotById);
+            Assert.Equal(robot.Id, robotById.Id);
         }
 
         [Fact]
@@ -104,14 +108,14 @@ namespace Api.Test.Services
                 Name = "",
                 IsarId = "",
                 SerialNumber = "",
-                VideoStreams = new List<CreateVideoStreamQuery>
-                {
+                VideoStreams =
+                [
                     videoStreamQuery
-                },
-                Documentation = new List<CreateDocumentationQuery>
-                {
+                ],
+                Documentation =
+                [
                     documentationQuery
-                },
+                ],
                 CurrentInstallationCode = installation.InstallationCode,
                 RobotType = RobotType.Robot,
                 Host = "",

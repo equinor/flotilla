@@ -12,7 +12,7 @@ namespace Api.Services
 
         public abstract Task<Installation?> ReadById(string id, bool readOnly = true);
 
-        public abstract Task<Installation?> ReadByName(string installation, bool readOnly = true);
+        public abstract Task<Installation?> ReadByInstallationCode(string installation, bool readOnly = true);
 
         public abstract Task<Installation> Create(CreateInstallationQuery newInstallation);
 
@@ -68,7 +68,7 @@ namespace Api.Services
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<Installation?> ReadByName(string installationCode, bool readOnly = true)
+        public async Task<Installation?> ReadByInstallationCode(string installationCode, bool readOnly = true)
         {
             if (installationCode == null)
                 return null;
@@ -79,7 +79,7 @@ namespace Api.Services
 
         public async Task<Installation> Create(CreateInstallationQuery newInstallationQuery)
         {
-            var installation = await ReadByName(newInstallationQuery.InstallationCode, readOnly: true);
+            var installation = await ReadByInstallationCode(newInstallationQuery.InstallationCode, readOnly: true);
             if (installation == null)
             {
                 installation = new Installation

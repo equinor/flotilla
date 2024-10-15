@@ -312,10 +312,10 @@ namespace Api.Services
                 Area = area,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.UtcNow,
-                Tasks = new List<MissionTask>(new[]
-                {
+                Tasks = new List<MissionTask>(
+                [
                     new MissionTask(customTaskQuery)
-                }),
+                ]),
                 Map = new MapMetadata()
             };
 

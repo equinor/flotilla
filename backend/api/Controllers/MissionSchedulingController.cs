@@ -362,7 +362,7 @@ namespace Api.Controllers
             catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
             catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
 
-            var installation = await installationService.ReadByName(customMissionQuery.InstallationCode, readOnly: true);
+            var installation = await installationService.ReadByInstallationCode(customMissionQuery.InstallationCode, readOnly: true);
             if (installation == null) { return NotFound($"Could not find installation with name {customMissionQuery.InstallationCode}"); }
 
             var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();

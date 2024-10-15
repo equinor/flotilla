@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Api.Services;
 using Azure;
 using Azure.Storage.Blobs.Models;
@@ -17,8 +16,8 @@ namespace Api.Test.Mocks
 
         public AsyncPageable<BlobItem> FetchAllBlobs(string containerName, string accountName)
         {
-            var page = Page<BlobItem>.FromValues(new List<BlobItem>(), continuationToken: null, response: null!);
-            var pages = AsyncPageable<BlobItem>.FromPages(new[] { page });
+            var page = Page<BlobItem>.FromValues([], continuationToken: null, response: null!);
+            var pages = AsyncPageable<BlobItem>.FromPages([page]);
             return pages;
         }
 

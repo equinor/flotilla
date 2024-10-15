@@ -86,7 +86,7 @@ namespace Api.Controllers
             logger.LogInformation("Creating new installation");
             try
             {
-                var existingInstallation = await installationService.ReadByName(installation.InstallationCode, readOnly: true);
+                var existingInstallation = await installationService.ReadByInstallationCode(installation.InstallationCode, readOnly: true);
                 if (existingInstallation != null)
                 {
                     logger.LogInformation("An installation for given name and installation already exists");

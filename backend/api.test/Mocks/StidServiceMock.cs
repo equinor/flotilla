@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Database.Context;
@@ -56,7 +55,7 @@ namespace Api.Services
                 Name = testAreaName,
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                SafePositions = new List<SafePosition>()
+                SafePositions = []
             };
 
             context.Add(testInstallation);
