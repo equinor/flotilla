@@ -151,11 +151,11 @@ namespace Api.Services
             {
                 logger.LogError(
                     ex,
-                    "Mission run {MissionRunId} was not started successfully due to {ErrorMessage}",
+                    "Mission run {MissionRunId} was not started successfully. {ErrorMessage}",
                     missionRun.Id,
                     ex.Message
                 );
-                await missionRunService.SetMissionRunToFailed(missionRun.Id, $"Mission run '{missionRun.Id}' was not started successfully due to '{ex.Message}'");
+                await missionRunService.SetMissionRunToFailed(missionRun.Id, $"Mission run '{missionRun.Id}' was not started successfully. '{ex.Message}'");
             }
         }
 

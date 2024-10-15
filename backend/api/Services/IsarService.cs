@@ -30,12 +30,21 @@ namespace Api.Services
                 mission_definition = new IsarMissionDefinition(missionRun, includeStartPose: missionRun.MissionRunType == MissionRunType.Localization)
             };
 
-            var response = await CallApi(
-                HttpMethod.Post,
-                robot.IsarUri,
-                "schedule/start-mission",
-                missionDefinition
-            );
+            HttpResponseMessage? response;
+            try
+            {
+                response = await CallApi(
+                    HttpMethod.Post,
+                    robot.IsarUri,
+                    "schedule/start-mission",
+                    missionDefinition
+                );
+            }
+            catch (Exception e)
+            {
+                logger.LogError("Encountered an exception when making an API call to ISAR: {Message}", e.Message);
+                throw new IsarCommunicationException(e.Message);
+            }
 
             if (!response.IsSuccessStatusCode)
             {
