@@ -151,11 +151,11 @@ namespace Api.Services
             {
                 logger.LogError(
                     ex,
-                    "Mission run {MissionRunId} was not started successfully due to {ErrorMessage}",
+                    "Mission run {MissionRunId} was not started successfully. {ErrorMessage}",
                     missionRun.Id,
                     ex.Message
                 );
-                await missionRunService.SetMissionRunToFailed(missionRun.Id, $"Mission run '{missionRun.Id}' was not started successfully due to '{ex.Message}'");
+                await missionRunService.SetMissionRunToFailed(missionRun.Id, $"Mission run '{missionRun.Id}' was not started successfully. '{ex.Message}'");
             }
         }
 
@@ -288,13 +288,25 @@ namespace Api.Services
                 logger.LogError("Could not find area with ID {AreaId}", areaId);
                 return;
             }
+
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
                 logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
                 return;
             }
+
             var closestSafePosition = ClosestSafePosition(robot.Pose, area.SafePositions);
+            if (closestSafePosition == null)
+            {
+                logger.LogWarning("Robot with ID: {RobotId} did not have a safe position for area it is localized in, using localization position instead", robotId);
+                if (robot.CurrentArea?.Deck.DefaultLocalizationPose == null)
+                {
+                    throw new SafeZoneException($"Robot with ID: {robotId} has no available safezone or localization poses in its current area");
+                }
+                closestSafePosition = robot.CurrentArea.Deck.DefaultLocalizationPose.Pose;
+            }
+
             // Cloning to avoid tracking same object
             var clonedPose = ObjectCopier.Clone(closestSafePosition);
             var customTaskQuery = new CustomTaskQuery
@@ -377,6 +389,14 @@ namespace Api.Services
                     return;
                 }
 
+                var unfinishedTasks = missionRun.Tasks
+                    .Where(t => !new List<Database.Models.TaskStatus>
+                        {Database.Models.TaskStatus.Successful, Database.Models.TaskStatus.Failed}
+                        .Contains(t.Status))
+                    .Select(t => new MissionTask(t)).ToList();
+
+                if (unfinishedTasks.Count == 0) continue;
+
                 var newMissionRun = new MissionRun
                 {
                     Name = missionRun.Name,
@@ -386,11 +406,7 @@ namespace Api.Services
                     Area = missionRun.Area,
                     Status = MissionStatus.Pending,
                     DesiredStartTime = DateTime.UtcNow,
-                    Tasks = missionRun.Tasks
-                        .Where(t => !new List<Database.Models.TaskStatus>
-                            {Database.Models.TaskStatus.Successful, Database.Models.TaskStatus.Failed}
-                            .Contains(t.Status))
-                        .Select(t => new MissionTask(t)).ToList(),
+                    Tasks = unfinishedTasks,
                     Map = new MapMetadata()
                 };
 
@@ -472,12 +488,11 @@ namespace Api.Services
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
         }
 
-        private static Pose ClosestSafePosition(Pose robotPose, IList<SafePosition> safePositions)
+        private static Pose? ClosestSafePosition(Pose robotPose, IList<SafePosition> safePositions)
         {
             if (safePositions == null || !safePositions.Any())
             {
-                string message = "No safe position for area the robot is localized in";
-                throw new SafeZoneException(message);
+                return null;
             }
 
             var closestPose = safePositions[0].Pose;

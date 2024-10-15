@@ -25,15 +25,24 @@ namespace Api.Services
 
         public async Task<IsarMission> StartMission(Robot robot, MissionRun missionRun)
         {
-            var response = await CallApi(
-                HttpMethod.Post,
-                robot.IsarUri,
-                "schedule/start-mission",
-                new
-                {
-                    mission_definition = new IsarMissionDefinition(missionRun, includeStartPose: missionRun.MissionRunType == MissionRunType.Localization)
-                }
-            );
+            HttpResponseMessage? response;
+            try
+            {
+                response = await CallApi(
+                    HttpMethod.Post,
+                    robot.IsarUri,
+                    "schedule/start-mission",
+                    new
+                    {
+                        mission_definition = new IsarMissionDefinition(missionRun, includeStartPose: missionRun.MissionRunType == MissionRunType.Localization)
+                    }
+                );
+            }
+            catch (Exception e)
+            {
+                logger.LogError("Encountered an exception when making an API call to ISAR: {Message}", e.Message);
+                throw new IsarCommunicationException(e.Message);
+            }
 
             if (!response.IsSuccessStatusCode)
             {

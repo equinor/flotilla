@@ -169,6 +169,9 @@ namespace Api.EventHandlers
                 return;
             }
 
+            try { await MissionScheduling.FreezeMissionRunQueueForRobot(e.RobotId); }
+            catch (RobotNotFoundException) { return; }
+
             if (robot.FlotillaStatus == e.RobotFlotillaStatus)
             {
                 _logger.LogInformation("Did not send robot to safezone since robot {RobotId} was already in the correct state", e.RobotId);
@@ -181,10 +184,6 @@ namespace Api.EventHandlers
                 _logger.LogError("Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}", e.RobotId, ex.Message);
                 return;
             }
-
-            try { await MissionScheduling.FreezeMissionRunQueueForRobot(e.RobotId); }
-            catch (RobotNotFoundException) { return; }
-
 
             Area? area;
             try
