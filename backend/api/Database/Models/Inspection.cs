@@ -41,10 +41,10 @@ namespace Api.Database.Models
         }
 
         // Creates a blank deepcopy of the provided inspection
-        public Inspection(Inspection copy, InspectionStatus? inspectionStatus = null, bool useEmptyIDs = false)
+        public Inspection(Inspection copy, InspectionStatus? inspectionStatus = null, bool useEmptyID = false)
         {
-            Id = useEmptyIDs ? "" : Guid.NewGuid().ToString();
-            IsarTaskId = copy.IsarTaskId;
+            Id = useEmptyID ? "" : Guid.NewGuid().ToString();
+            IsarTaskId = useEmptyID ? "" : copy.IsarTaskId;
             Status = inspectionStatus ?? copy.Status;
             InspectionType = copy.InspectionType;
             VideoDuration = copy.VideoDuration;
@@ -133,6 +133,7 @@ namespace Api.Database.Models
                 IsarTaskStatus.Successful => InspectionStatus.Successful,
                 IsarTaskStatus.Cancelled => InspectionStatus.Cancelled,
                 IsarTaskStatus.Failed => InspectionStatus.Failed,
+                IsarTaskStatus.Paused => InspectionStatus.InProgress,
                 _
                     => throw new ArgumentException(
                         $"ISAR task status '{isarStatus}' not supported for inspection status"
