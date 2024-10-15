@@ -16,5 +16,10 @@
         /// Lower pressure warning threshold in Bar
         /// </summary>
         public float? LowerPressureWarningThreshold { get; set; }
+
+        /// <summary>
+        ///     Lower battery threshold at which to allow missions to be scheduled, in percentage
+        /// </summary>
+        public float? BatteryMissionStartThreshold { get; set; }
     }
 }

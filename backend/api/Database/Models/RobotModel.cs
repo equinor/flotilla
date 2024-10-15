@@ -60,6 +60,11 @@ namespace Api.Database.Models
         public float? LowerPressureWarningThreshold { get; set; }
 
         /// <summary>
+        ///     Lower battery threshold at which to allow missions to be scheduled, in percentage
+        /// </summary>
+        public float? BatteryMissionStartThreshold { get; set; }
+
+        /// <summary>
         ///     The average time in seconds spent by this model on a single tag (excluding recording duration for video/audio)
         /// </summary>
         public float? AverageDurationPerTag { get; set; }
@@ -69,6 +74,7 @@ namespace Api.Database.Models
             BatteryWarningThreshold = updateQuery.BatteryWarningThreshold;
             UpperPressureWarningThreshold = updateQuery.UpperPressureWarningThreshold;
             LowerPressureWarningThreshold = updateQuery.LowerPressureWarningThreshold;
+            BatteryMissionStartThreshold = updateQuery.BatteryMissionStartThreshold;
         }
     }
 }
