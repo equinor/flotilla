@@ -65,13 +65,13 @@ namespace Api.Services
 
         public async Task<IEnumerable<Area?>> ReadByDeckId(string deckId, bool readOnly = true)
         {
-            if (deckId == null) { return new List<Area>(); }
+            if (deckId == null) { return []; }
             return await GetAreas(readOnly: readOnly).Where(a => a.Deck != null && a.Deck.Id.Equals(deckId)).ToListAsync();
         }
 
         public async Task<Area?> ReadByInstallationAndName(string installationCode, string areaName, bool readOnly = true)
         {
-            var installation = await installationService.ReadByName(installationCode, readOnly: true);
+            var installation = await installationService.ReadByInstallationCode(installationCode, readOnly: true);
             if (installation == null) { return null; }
 
             return await GetAreas(readOnly: readOnly).Where(a =>
@@ -79,8 +79,8 @@ namespace Api.Services
         }
         public async Task<IEnumerable<Area>> ReadByInstallation(string installationCode)
         {
-            var installation = await installationService.ReadByName(installationCode, readOnly: true);
-            if (installation == null) { return new List<Area>(); }
+            var installation = await installationService.ReadByInstallationCode(installationCode, readOnly: true);
+            if (installation == null) { return []; }
 
             return await GetAreas().Where(a => a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
@@ -92,10 +92,10 @@ namespace Api.Services
                 safePositions.Add(new SafePosition(pose));
             }
 
-            var installation = await installationService.ReadByName(newAreaQuery.InstallationCode, readOnly: true) ??
+            var installation = await installationService.ReadByInstallationCode(newAreaQuery.InstallationCode, readOnly: true) ??
                                throw new InstallationNotFoundException($"No installation with name {newAreaQuery.InstallationCode} could be found");
 
-            var plant = await plantService.ReadByInstallationAndName(installation, newAreaQuery.PlantCode, readOnly: true) ??
+            var plant = await plantService.ReadByInstallationAndPlantCode(installation, newAreaQuery.PlantCode, readOnly: true) ??
                         throw new PlantNotFoundException($"No plant with name {newAreaQuery.PlantCode} could be found");
 
             var deck = await deckService.ReadByInstallationAndPlantAndName(installation, plant, newAreaQuery.DeckName, readOnly: true) ??

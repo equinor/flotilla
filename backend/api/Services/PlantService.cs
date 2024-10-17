@@ -15,9 +15,11 @@ namespace Api.Services
 
         public Task<IEnumerable<Plant>> ReadByInstallation(string installationCode, bool readOnly = true);
 
-        public Task<Plant?> ReadByInstallationAndName(Installation installation, string plantCode, bool readOnly = true);
+        public Task<Plant?> ReadByPlantCode(string plantCode, bool readOnly = true);
 
-        public Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode, bool readOnly = true);
+        public Task<Plant?> ReadByInstallationAndPlantCode(Installation installation, string plantCode, bool readOnly = true);
+
+        public Task<Plant?> ReadByInstallationAndPlantCode(string installationCode, string plantCode, bool readOnly = true);
 
         public Task<Plant> Create(CreatePlantQuery newPlant);
 
@@ -53,22 +55,28 @@ namespace Api.Services
 
         public async Task<IEnumerable<Plant>> ReadByInstallation(string installationCode, bool readOnly = true)
         {
-            var installation = await installationService.ReadByName(installationCode, readOnly: true);
-            if (installation == null) { return new List<Plant>(); }
+            var installation = await installationService.ReadByInstallationCode(installationCode, readOnly: true);
+            if (installation == null) { return []; }
             return await GetPlants(readOnly: readOnly).Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
-        public async Task<Plant?> ReadByInstallationAndName(Installation installation, string plantCode, bool readOnly = true)
+        public async Task<Plant?> ReadByPlantCode(string plantCode, bool readOnly = true)
+        {
+            return await GetPlants(readOnly: readOnly).Where(a =>
+                a.PlantCode.ToLower().Equals(plantCode.ToLower())).FirstOrDefaultAsync();
+        }
+
+        public async Task<Plant?> ReadByInstallationAndPlantCode(Installation installation, string plantCode, bool readOnly = true)
         {
             return await GetPlants(readOnly: readOnly).Where(a =>
                 a.PlantCode.ToLower().Equals(plantCode.ToLower()) &&
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).FirstOrDefaultAsync();
         }
 
-        public async Task<Plant?> ReadByInstallationAndName(string installationCode, string plantCode, bool readOnly = true)
+        public async Task<Plant?> ReadByInstallationAndPlantCode(string installationCode, string plantCode, bool readOnly = true)
         {
-            var installation = await installationService.ReadByName(installationCode, readOnly: true);
+            var installation = await installationService.ReadByInstallationCode(installationCode, readOnly: true);
             if (installation == null) { return null; }
             return await GetPlants(readOnly: readOnly).Where(a =>
                 a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
@@ -78,10 +86,10 @@ namespace Api.Services
 
         public async Task<Plant> Create(CreatePlantQuery newPlantQuery)
         {
-            var installation = await installationService.ReadByName(newPlantQuery.InstallationCode, readOnly: true) ??
+            var installation = await installationService.ReadByInstallationCode(newPlantQuery.InstallationCode, readOnly: true) ??
                                throw new InstallationNotFoundException($"No installation with name {newPlantQuery.InstallationCode} could be found");
 
-            var plant = await ReadByInstallationAndName(installation, newPlantQuery.PlantCode, readOnly: true);
+            var plant = await ReadByInstallationAndPlantCode(installation, newPlantQuery.PlantCode, readOnly: true);
             if (plant == null)
             {
                 plant = new Plant

@@ -119,7 +119,7 @@ namespace Api.EventHandlers
         {
             var isarRobotInfo = (IsarRobotInfoMessage)mqttArgs.Message;
 
-            var installation = await InstallationService.ReadByName(isarRobotInfo.CurrentInstallation, readOnly: true);
+            var installation = await InstallationService.ReadByInstallationCode(isarRobotInfo.CurrentInstallation, readOnly: true);
 
             if (installation is null)
             {

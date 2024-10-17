@@ -41,6 +41,7 @@ namespace Api.Services
                 // They can then be modified later with other values if needed
                 InitDb.AddRobotModelsToContext(context);
                 context.SaveChanges();
+                context.ChangeTracker.Clear();
             }
         }
 

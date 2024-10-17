@@ -34,7 +34,8 @@ namespace Api.Configurations
 
                 using var context = new FlotillaDbContext(dbBuilder.Options);
                 context.Database.EnsureCreated();
-                InitDb.PopulateDb(context);
+                bool initializeDb = configuration.GetSection("Database").GetValue<bool>("InitializeInMemDb");
+                if (initializeDb) InitDb.PopulateDb(context);
 
                 // Setting splitting behavior explicitly to avoid warning
                 services.AddDbContext<FlotillaDbContext>(

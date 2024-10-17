@@ -63,7 +63,7 @@ namespace Api.Database.Models
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
-                    Inspections = new List<Inspection>();
+                    Inspections = [];
                     break;
                 case MissionTaskType.ReturnHome:
                     Type = type;
@@ -71,7 +71,7 @@ namespace Api.Database.Models
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
-                    Inspections = new List<Inspection>();
+                    Inspections = [];
                     break;
                 case MissionTaskType.Inspection:
                     Type = type;
@@ -79,7 +79,7 @@ namespace Api.Database.Models
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
-                    Inspections = new List<Inspection>();
+                    Inspections = [];
                     break;
                 default:
                     throw new MissionTaskNotFoundException("MissionTaskType should be Localization, ReturnHome or Inspection");
