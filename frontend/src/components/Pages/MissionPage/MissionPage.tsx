@@ -15,14 +15,11 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
+import { tokens } from '@equinor/eds-tokens'
+import { StyledPage } from 'components/Styles/StyledComponents'
 
-const StyledMissionPage = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: start;
-    flex-direction: column;
-    gap: 1rem;
-    margin: 2rem;
+const StyledMissionPage = styled(StyledPage)`
+    background-color: ${tokens.colors.ui.background__light.hex};
 `
 const TaskAndMapSection = styled.div`
     display: flex;

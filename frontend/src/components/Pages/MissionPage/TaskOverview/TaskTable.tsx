@@ -5,6 +5,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
+import { StyledTableBody, StyledTableCaption, StyledTableCaptionGray, StyledTableCell } from 'components/Styles/StyledComponents'
 
 const StyledTable = styled(Table)`
     display: block;
@@ -32,19 +33,19 @@ export const TaskTable = ({ tasks }: { tasks: Task[] | undefined }) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledTable>
-            <Table.Caption>
+            <StyledTableCaptionGray>
                 <StyledTypography variant="h2">{TranslateText('Tasks')}</StyledTypography>
-            </Table.Caption>
-            <Table.Head>
+            </StyledTableCaptionGray>
+            <Table.Head >
                 <Table.Row>
-                    <Table.Cell>#</Table.Cell>
-                    <Table.Cell>{TranslateText('Tag-ID')}</Table.Cell>
-                    <Table.Cell>{TranslateText('Description')}</Table.Cell>
-                    <Table.Cell>{TranslateText('Inspection Types')}</Table.Cell>
-                    <Table.Cell>{TranslateText('Status')}</Table.Cell>
+                    <StyledTableCell>#</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Inspection Types')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
                 </Table.Row>
             </Table.Head>
-            <Table.Body>{tasks && <TaskTableRows tasks={tasks} />}</Table.Body>
+            <StyledTableBody>{tasks && <TaskTableRows tasks={tasks} />}</StyledTableBody>
         </StyledTable>
     )
 }

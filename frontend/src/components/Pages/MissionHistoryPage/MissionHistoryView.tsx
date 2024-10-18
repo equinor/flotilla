@@ -15,6 +15,7 @@ import { SmallScreenInfoText } from 'utils/InfoText'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { StyledTableBody, StyledTableCaption, StyledTableCell } from 'components/Styles/StyledComponents'
 
 enum InspectionTableColumns {
     StatusShort = 'StatusShort',
@@ -86,15 +87,6 @@ const StyledTable = styled.div`
     display: grid;
     overflow-x: auto;
     overflow-y: hidden;
-`
-const StyledTableCell = styled(Table.Cell)`
-    background-color: ${tokens.colors.ui.background__default.hex};
-`
-const StyledTableBody = styled(Table.Body)`
-    background-color: ${tokens.colors.ui.background__light.hex};
-`
-const StyledTableCaption = styled(Table.Caption)`
-    background-color: ${tokens.colors.ui.background__default.hex};
 `
 const StyledPagination = styled(Pagination)`
     display: flex;

@@ -14,18 +14,18 @@ import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormattin
 const HeaderSection = styled(Card)`
     width: 100%;
     padding: 15px 0px 15px 0px;
-    box-shadow:
-        -10px 0px 0px 0px white,
-        30px 0px 0px 0px white;
     top: 60px;
     position: sticky;
     z-index: 1;
+    background-color: ${tokens.colors.ui.background__light.hex};
+    box-shadow: none;
 `
 
 const TitleSection = styled.div`
     display: flex;
     align-items: center;
     gap: 20px;
+
 `
 const InfoSection = styled.div`
     display: flex;
@@ -38,7 +38,7 @@ const StyledCard = styled(Card)`
     flex: 1 0 0;
     padding: 8px 16px;
     flex-direction: row;
-    background: ${tokens.colors.ui.background__light.hex};
+    background: ${tokens.colors.ui.background__default.hex};
     gap: 24px;
     align-items: stretch;
 `

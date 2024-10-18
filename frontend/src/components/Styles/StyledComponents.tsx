@@ -1,4 +1,4 @@
-import { Button, Dialog } from '@equinor/eds-core-react'
+import { Button, Dialog, Table } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 
@@ -37,4 +37,16 @@ export const StyledPage = styled.div`
         padding: 0.7rem;
     }
     min-height: calc(100vh - 65px);
+`
+export const StyledTableCell = styled(Table.Cell)`
+    background-color: ${tokens.colors.ui.background__default.hex};
+`
+export const StyledTableBody = styled(Table.Body)`
+    background-color: ${tokens.colors.ui.background__light.hex};
+`
+export const StyledTableCaption = styled(Table.Caption)`
+    background-color: ${tokens.colors.ui.background__default.hex};
+`
+export const StyledTableCaptionGray = styled(Table.Caption)`
+    background-color: ${tokens.colors.ui.background__light.hex};
 `
