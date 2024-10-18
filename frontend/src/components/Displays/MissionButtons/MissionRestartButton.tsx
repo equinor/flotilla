@@ -18,6 +18,9 @@ const Centered = styled.div`
     align-items: center;
     justify-content: center;
 `
+const StyledButton = styled(Button)`
+    padding-left: 10px;
+`
 
 interface MissionProps {
     mission: Mission
@@ -64,7 +67,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
 
     return (
         <Centered>
-            <Button
+            <StyledButton
                 variant={smallButton ? 'ghost_icon' : 'outlined'}
                 ref={anchorRef}
                 id="anchor-default"
@@ -78,7 +81,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
             >
                 <Icon name={smallButton ? Icons.AddOutlined : Icons.Add} size={24} />
                 {!smallButton && TranslateText('Queue mission')}
-            </Button>
+            </StyledButton>
             <EdsProvider density="compact">
                 <Menu
                     open={isOpen}
