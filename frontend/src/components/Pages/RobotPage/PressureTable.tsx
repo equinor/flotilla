@@ -15,6 +15,7 @@ const StyledTable = styled.div`
     display: grid;
     overflow-x: auto;
     overflow-y: hidden;
+    z-index: 0;
 `
 
 const StyledTableRow = styled(Table.Row)`
