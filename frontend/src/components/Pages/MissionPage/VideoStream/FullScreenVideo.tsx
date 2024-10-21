@@ -24,6 +24,9 @@ const FullscreenExitButtonRotate = styled(Button)`
 
 const FullScreenCard = styled.div`
     padding: 1rem;
+    box-shadow: ${tokens.elevation.raised};
+    width: 100%;
+    background-color: white;
 `
 
 interface IFullScreenVideoStreamCardProps {
@@ -37,16 +40,6 @@ export const FullScreenVideoStreamCard = ({
     videoStreamName,
     toggleFullScreenMode,
 }: IFullScreenVideoStreamCardProps) => {
-    const cardWidth = () => {
-        const availableInnerHeight = window.innerHeight - 9 * 16
-        const availableInnerWidth = window.innerWidth - 2 * 16
-        const coverageFactor = 0.9
-        const aspectRatio = 16 / 9
-        return Math.round(
-            Math.min(coverageFactor * availableInnerWidth, aspectRatio * coverageFactor * availableInnerHeight)
-        )
-    }
-
     const fullScreenExitButton = (shouldRotate270Clockwise: boolean) => {
         if (shouldRotate270Clockwise) {
             return (
@@ -64,7 +57,7 @@ export const FullScreenVideoStreamCard = ({
 
     // Rotated stream is not supported for simpleplayer
     return (
-        <FullScreenCard style={{ boxShadow: tokens.elevation.raised, width: cardWidth() }}>
+        <FullScreenCard>
             <Typography variant="h5">{videoStreamName}</Typography>
             <VideoPlayerSimpleStream videoStream={videoStream} videoStreamName={videoStreamName} />
             {fullScreenExitButton(false)}

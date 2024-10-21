@@ -18,8 +18,12 @@ const VideoFullScreen = styled(ReactModal)`
     position: absolute;
     top: 50%;
     left: 50%;
+    width: 90%;
     transform: translate(-50%, -50%);
     padding-top: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 interface VideoStreamWindowProps {
