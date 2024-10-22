@@ -1,4 +1,4 @@
-import { CircularProgress } from '@equinor/eds-core-react'
+import { CircularProgress, Typography } from '@equinor/eds-core-react'
 import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import NoMap from 'mediaAssets/NoMap.png'
@@ -22,8 +22,10 @@ const StyledMap = styled.canvas`
 
 const StyledMapLimits = styled.div`
     display: flex;
+    flex-direction: column;
     padding-left: 30px;
     justify-content: center;
+    align-items: center;
 `
 
 const StyledLoading = styled.div`
@@ -123,6 +125,9 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
             )}
             {!isLoading && (
                 <StyledMapLimits>
+                    <Typography variant='h2'>
+                        {mapMetadata?.mapName ? mapMetadata.mapName : 'No map available'}
+                    </Typography>
                     <StyledMapCompass>
                         <StyledMap id="deckMapCanvas" />
                         {mapMetadata && <MapCompass />}
