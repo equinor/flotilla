@@ -1,4 +1,4 @@
-import { Card } from '@equinor/eds-core-react'
+import { Card, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -18,6 +18,7 @@ const MapCard = styled(Card)`
     display: flex;
     max-width: 600px;
     padding: 16px;
+    justify-items: center;
 `
 
 const StyledMap = styled.canvas`
@@ -129,6 +130,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
 
     return (
         <MapCard style={{ boxShadow: tokens.elevation.raised }}>
+            <Typography variant='h3'>{mission.map?.mapName}</Typography>
             <SyledContainer>
                 <StyledElements>
                     <StyledMap id="mapCanvas" />
