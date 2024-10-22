@@ -5,7 +5,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
-import { StyledTableBody, StyledTableCaption, StyledTableCaptionGray, StyledTableCell } from 'components/Styles/StyledComponents'
+import { StyledTableBody, StyledTableCaptionGray, StyledTableCell } from 'components/Styles/StyledComponents'
 
 const StyledTable = styled(Table)`
     display: block;
@@ -36,7 +36,7 @@ export const TaskTable = ({ tasks }: { tasks: Task[] | undefined }) => {
             <StyledTableCaptionGray>
                 <StyledTypography variant="h2">{TranslateText('Tasks')}</StyledTypography>
             </StyledTableCaptionGray>
-            <Table.Head >
+            <Table.Head>
                 <Table.Row>
                     <StyledTableCell>#</StyledTableCell>
                     <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>

@@ -125,7 +125,7 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
             )}
             {!isLoading && (
                 <StyledMapLimits>
-                    <Typography variant='h2'>
+                    <Typography variant="h2">
                         {mapMetadata?.mapName ? mapMetadata.mapName : 'No map available'}
                     </Typography>
                     <StyledMapCompass>

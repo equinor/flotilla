@@ -130,7 +130,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
 
     return (
         <MapCard style={{ boxShadow: tokens.elevation.raised }}>
-            <Typography variant='h3'>{mission.map?.mapName}</Typography>
+            <Typography variant="h3">{mission.map?.mapName}</Typography>
             <SyledContainer>
                 <StyledElements>
                     <StyledMap id="mapCanvas" />
