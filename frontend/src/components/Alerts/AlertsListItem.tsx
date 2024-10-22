@@ -27,12 +27,14 @@ const StyledListHeading = styled(outline)`
     display: flex;
     justify-content: space-between;
     padding: 6px 5px 6px 5px;
+    border-radius: 3px 3px 0px 0px;
 `
 const StyledListItem = styled(outline)`
     display: flex;
     flex-direction: column;
     align-items: left;
     row-gap: 10px;
+    border-radius: 0px 0px 3px 3px;
 `
 
 const VerticalContent = styled.div`
@@ -59,6 +61,14 @@ const Right = styled.div`
     display: flex;
     align-items: right;
     justify-content: right;
+    align-content: center;
+`
+const StyledButton = styled(Button)`
+    margin-top: 6px;
+    right: 30px;
+    position: absolute;
+    height: 30px;
+    width: 30px;
 `
 
 interface AlertListInfo {
@@ -111,13 +121,9 @@ export const AlertListItem = ({ children, dismissAlert }: AlertProps) => {
     return (
         <Horizontal>
             {children}
-            <Button
-                variant="ghost_icon"
-                onClick={dismissAlert}
-                style={{ marginTop: '0px', right: '25px', position: 'absolute' }}
-            >
-                <Icon name={Icons.Clear}></Icon>
-            </Button>
+            <StyledButton variant="ghost_icon" onClick={dismissAlert}>
+                <Icon name={Icons.Clear} size={18}></Icon>
+            </StyledButton>
         </Horizontal>
     )
 }
