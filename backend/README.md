@@ -231,6 +231,28 @@ Example:
             );
 ```
 
+## Database backup and cloning
+
+You can use pg_dump to extract a PostgreSQL database into an sql file and psql to import the data into the target database from that file. Have the server running on pgAdmin and then execute the following commands.
+
+Extract the entire database:
+
+```
+pg_dump -U Username -d postgres -h host_name_or_adress -p port -f ouput_file_name.slq
+```
+
+Extract specific tables:
+
+```
+pg_dump -U Username -d postgres -h host_name_or_adress -p port -t '"table_name"' -t '"second_table_name"' -f input_file_name.slq
+```
+
+Upload file information to new database:
+
+```
+psql U Username -d postgres -h host_name_or_adress -p port -f ouput_file_name.slq
+```
+
 ## Formatting
 
 ### CSharpier
