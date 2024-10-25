@@ -23,17 +23,25 @@ export const ScheduleMissionWithConfirmDialogs = ({
     const { enabledRobots } = useRobotContext()
     const [robot, setRobot] = useState<Robot>()
 
-    const isBatteryInsufficient = (currentRobot: Robot) =>
-        currentRobot.batteryLevel &&
-        currentRobot.model.batteryWarningThreshold &&
-        currentRobot.batteryLevel < currentRobot.model.batteryWarningThreshold
+    const isBatteryInsufficient = (currentRobot: Robot) => {
+        const hasBatteryValue = currentRobot.batteryLevel !== null && currentRobot.batteryLevel !== undefined
+        return (
+            hasBatteryValue &&
+            currentRobot.model.batteryWarningThreshold &&
+            currentRobot.batteryLevel! < currentRobot.model.batteryWarningThreshold
+        )
+    }
 
-    const isPressureInsufficient = (currentRobot: Robot) =>
-        currentRobot.pressureLevel &&
-        ((currentRobot.model.lowerPressureWarningThreshold &&
-            currentRobot.pressureLevel < currentRobot.model.lowerPressureWarningThreshold) ||
+    const isPressureInsufficient = (currentRobot: Robot) => {
+        const hasPressureValue = currentRobot.pressureLevel !== null && currentRobot.pressureLevel !== undefined
+        return (
+            (hasPressureValue &&
+                currentRobot.model.lowerPressureWarningThreshold &&
+                currentRobot.pressureLevel! < currentRobot.model.lowerPressureWarningThreshold) ||
             (currentRobot.model.upperPressureWarningThreshold &&
-                currentRobot.pressureLevel > currentRobot.model.upperPressureWarningThreshold))
+                currentRobot.pressureLevel! > currentRobot.model.upperPressureWarningThreshold)
+        )
+    }
 
     useEffect(() => {
         setRobot(enabledRobots.find((robot) => robot.id === robotId))
