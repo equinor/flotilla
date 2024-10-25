@@ -214,7 +214,8 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                     {HeaderText(translatedRobot, `${mission.robot.name}`)}
                     {!isMissionCompleted && HeaderText(translatedBatteryLevel, batteryValue)}
                     {!isMissionCompleted &&
-                        mission.robot.pressureLevel &&
+                        mission.robot.pressureLevel !== undefined &&
+                        mission.robot.pressureLevel !== null &&
                         HeaderText(
                             translatedPressureLevel,
                             `${Math.round(mission.robot.pressureLevel * barToMillibar)}mBar`
