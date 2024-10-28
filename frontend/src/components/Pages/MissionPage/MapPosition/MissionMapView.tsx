@@ -79,6 +79,9 @@ export const MissionMapView = ({ mission }: MissionProps) => {
         [mission.tasks]
     )
 
+    let displayedMapName = mission.map?.mapName.split('.')[0].replace(/[^0-9a-z-A-Z ]/g, ' ')
+    displayedMapName = displayedMapName ? displayedMapName.charAt(0).toUpperCase() + displayedMapName.slice(1) : ' '
+
     useEffect(() => {
         BackendAPICaller.getMap(mission.installationCode!, mission.map?.mapName!)
             .then((imageBlob) => {
@@ -130,7 +133,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
 
     return (
         <MapCard style={{ boxShadow: tokens.elevation.raised }}>
-            <Typography variant="h3">{mission.map?.mapName}</Typography>
+            <Typography variant="h3">{displayedMapName}</Typography>
             <SyledContainer>
                 <StyledElements>
                     <StyledMap id="mapCanvas" />
