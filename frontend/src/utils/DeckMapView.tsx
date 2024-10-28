@@ -8,6 +8,7 @@ import { MapMetadata } from 'models/MapMetadata'
 import { Pose } from 'models/Pose'
 import { MapCompass } from 'utils/MapCompass'
 import { Deck } from 'models/Deck'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
 interface DeckProps {
     deck: Deck
@@ -23,7 +24,6 @@ const StyledMap = styled.canvas`
 const StyledMapLimits = styled.div`
     display: flex;
     flex-direction: column;
-    padding-left: 30px;
     justify-content: center;
     align-items: center;
 `
@@ -35,8 +35,15 @@ const StyledLoading = styled.div`
 
 const StyledMapCompass = styled.div`
     display: flex;
-    flex-direction: columns;
+    flex-direction: row;
     align-items: end;
+`
+
+const StyledCaption = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    gap: 10px;
 `
 
 export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
@@ -45,6 +52,7 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
     const [mapMetadata, setMapMetadata] = useState<MapMetadata>()
     const [isLoading, setIsLoading] = useState<boolean>()
+    const { TranslateText } = useLanguageContext()
 
     const updateMap = useCallback(() => {
         let context = mapCanvas.getContext('2d')
@@ -64,6 +72,9 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
         await image.decode()
         return image
     }
+
+    let mapName = mapMetadata?.mapName.split('.')[0].replace(/[^0-9a-z-A-Z ]/g, ' ')
+    mapName = mapName ? mapName.charAt(0).toUpperCase() + mapName.slice(1) : ' '
 
     useEffect(() => {
         const processImageURL = (imageBlob: Blob | string) => {
@@ -125,13 +136,15 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
             )}
             {!isLoading && (
                 <StyledMapLimits>
-                    <Typography variant="h2">
-                        {mapMetadata?.mapName ? mapMetadata.mapName : 'No map available'}
-                    </Typography>
-                    <StyledMapCompass>
-                        <StyledMap id="deckMapCanvas" />
-                        {mapMetadata && <MapCompass />}
-                    </StyledMapCompass>
+                    <StyledCaption>
+                        <StyledMapCompass>
+                            <StyledMap id="deckMapCanvas" />
+                            {mapMetadata && <MapCompass />}
+                        </StyledMapCompass>
+                        <Typography italic variant="body_short">
+                            {TranslateText('Map of') + ' ' + mapName}
+                        </Typography>
+                    </StyledCaption>
                 </StyledMapLimits>
             )}
         </>
