@@ -651,6 +651,7 @@ namespace Api.Database.Context
                     {
                         Type = type,
                         BatteryWarningThreshold = null,
+                        BatteryMissionStartThreshold = null,
                         LowerPressureWarningThreshold = null,
                         UpperPressureWarningThreshold = null
                     };
