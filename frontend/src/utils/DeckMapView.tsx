@@ -142,7 +142,7 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
                             {mapMetadata && <MapCompass />}
                         </StyledMapCompass>
                         <Typography italic variant="body_short">
-                            {TranslateText('Map of') + ' ' + mapName}
+                            {TranslateText('Map of {0}', [mapName])}
                         </Typography>
                     </StyledCaption>
                 </StyledMapLimits>

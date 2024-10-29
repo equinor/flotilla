@@ -19,7 +19,7 @@ const Centered = styled.div`
     justify-content: center;
 `
 const StyledButton = styled(Button)`
-    padding-left: 10px;
+    background-color: none;
 `
 
 interface MissionProps {
