@@ -5,7 +5,6 @@ import { Icons } from 'utils/icons'
 
 const BatteryAlignment = styled.div`
     display: flex;
-    align-items: center;
 `
 
 const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
@@ -15,12 +14,14 @@ interface BatteryStatusDisplayProps {
     batteryLevel?: number
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
     batteryWarningLimit?: number
+    textAlignedBottom?: boolean
 }
 
 export const BatteryStatusDisplay = ({
     batteryLevel,
     itemSize,
     batteryWarningLimit,
+    textAlignedBottom,
 }: BatteryStatusDisplayProps): JSX.Element => {
     let iconColor: string = tokens.colors.interactive.primary__resting.hex
 
@@ -45,7 +46,7 @@ export const BatteryStatusDisplay = ({
     iconColor = batteryIcon === Icons.BatteryAlert ? tokens.colors.interactive.warning__resting.hex : iconColor
 
     return (
-        <BatteryAlignment>
+        <BatteryAlignment style={{ alignItems: textAlignedBottom ? 'end' : 'center' }}>
             <Icon name={batteryIcon} color={iconColor} size={itemSize} />
             <StyledTypography $fontSize={itemSize}>{batteryValue}</StyledTypography>
         </BatteryAlignment>
