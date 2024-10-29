@@ -266,5 +266,5 @@
     "minutes ago": "minutter siden",
     "Failed to retrieve previous mission runs": "Kunne ikke hente tildigere oppdragskjøringer",
     "Documentation": "Dokumentasjon",
-    "Map of": "Kart over"
+    "Map of {0}": "Kart over {0}"
 }
