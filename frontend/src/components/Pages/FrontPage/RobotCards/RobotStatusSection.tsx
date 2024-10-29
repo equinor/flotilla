@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import { RobotStatusCard, RobotStatusCardPlaceholder } from './RobotStatusCard'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
 const RobotCardSection = styled.div`
     display: flex;
@@ -18,6 +19,7 @@ const RobotView = styled.div`
 export const RobotStatusSection = () => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
+    const { ongoingMissions } = useMissionsContext()
 
     const relevantRobots = enabledRobots.sort((robot, robotToCompareWith) =>
         robot.status! !== robotToCompareWith.status!
@@ -29,7 +31,13 @@ export const RobotStatusSection = () => {
               : -1
     )
 
-    const robotDisplay = relevantRobots.map((robot) => <RobotStatusCard key={robot.id} robot={robot} />)
+    const robotDisplay = relevantRobots.map((robot) => (
+        <RobotStatusCard
+            key={robot.id}
+            robot={robot}
+            mission={ongoingMissions.find((mission) => mission.robot.id === robot.id)}
+        />
+    ))
 
     return (
         <RobotView>
