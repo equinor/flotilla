@@ -10,9 +10,11 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { config } from 'config'
 import { RobotType } from 'models/RobotModel'
+import { Mission } from 'models/Mission'
 
 interface RobotProps {
     robot: Robot
+    mission: Mission | undefined
 }
 
 const StyledCard = styled(Card)`
@@ -56,7 +58,11 @@ const VerticalContent = styled.div`
     justify-content: left;
     gap: 4px;
 `
-
+const AreaContent = styled.div`
+    display: flex;
+    justify-content: left;
+    padding-right: 6px;
+`
 const LongTypography = styled(Typography)`
     overflow: hidden;
     text-overflow: ellipsis;
@@ -69,7 +75,7 @@ const LongTypography = styled(Typography)`
     }
 `
 
-export const RobotStatusCard = ({ robot }: RobotProps) => {
+export const RobotStatusCard = ({ robot, mission }: RobotProps) => {
     let navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
     const goToRobot = () => {
@@ -86,12 +92,19 @@ export const RobotStatusCard = ({ robot }: RobotProps) => {
         <HoverableStyledCard style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
             <RobotImage robotType={robot.model.type} height="180px" />
             <ButtonCard id="buttoncard">
-                <LongTypography variant="h5">
-                    {robot.name}
-                    {' ('}
-                    {getRobotModel(robot.model.type)}
-                    {')'}
-                </LongTypography>
+                <HorizontalContent>
+                    <LongTypography variant="h5">
+                        {robot.name}
+                        {' ('}
+                        {getRobotModel(robot.model.type)}
+                        {')'}
+                    </LongTypography>
+                    {mission?.area?.areaName && (
+                        <AreaContent>
+                            <Typography variant="h5"> {mission.area.areaName} </Typography>
+                        </AreaContent>
+                    )}
+                </HorizontalContent>
                 <HorizontalContent>
                     <VerticalContent>
                         <Typography variant="meta">{TranslateText('Status')}</Typography>
