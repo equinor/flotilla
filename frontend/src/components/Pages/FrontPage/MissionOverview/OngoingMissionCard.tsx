@@ -29,6 +29,7 @@ const StyledTitle = styled(Card)`
     padding-left: 12px;
     :hover {
         background-color: #deedee;
+        cursor: pointer;
     }
     box-shadow: none;
 `
@@ -61,7 +62,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
         <StyledMissionCard style={{ boxShadow: tokens.elevation.raised }}>
             <TopContent>
                 <StyledTitle onClick={routeChange}>
-                    <Typography variant="h6" color="primary">
+                    <Typography variant="h5" style={{ color: tokens.colors.text.static_icons__default.hex }}>
                         {mission.name}
                     </Typography>
                 </StyledTitle>
@@ -79,6 +80,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                 <BatteryStatusDisplay
                     batteryLevel={robot?.batteryLevel}
                     batteryWarningLimit={robot?.model.batteryWarningThreshold}
+                    textAlignedBottom={true}
                 />
             </BottomContent>
         </StyledMissionCard>

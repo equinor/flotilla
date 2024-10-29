@@ -62,6 +62,9 @@ const AreaContent = styled.div`
     display: flex;
     justify-content: left;
     padding-right: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 `
 const LongTypography = styled(Typography)`
     overflow: hidden;
