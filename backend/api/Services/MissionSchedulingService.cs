@@ -398,7 +398,7 @@ namespace Api.Services
 
                 var newMissionRun = new MissionRun
                 {
-                    Name = missionRun.Name,
+                    Name = missionRun.Name + " unfinished tasks",
                     Robot = missionRun.Robot,
                     MissionRunType = missionRun.MissionRunType,
                     InstallationCode = missionRun.Area!.Installation.InstallationCode,
