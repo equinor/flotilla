@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq.Dynamic.Core;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -178,9 +179,7 @@ namespace Api.Services
 
         public async Task<Robot> UpdateRobotPose(string robotId, Pose pose)
         {
-            var robotQuery = context.Robots
-                .Where(robot => robot.Id == robotId)
-                .Include(robot => robot.CurrentInstallation);
+            var robotQuery = GetRobotsWithSubModels(readOnly: true).Where(robot => robot.Id == robotId);
             var robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
 
@@ -208,37 +207,15 @@ namespace Api.Services
 
         public async Task<Robot> UpdateRobotIsarConnected(string robotId, bool isarConnected)
         {
-            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
-            var robot = await robotQuery.FirstOrDefaultAsync();
+            var robot = await UpdateRobotProperty(robotId, "IsarConnected", isarConnected);
             ThrowIfRobotIsNull(robot, robotId);
-
-            await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
-
-            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.IsarConnected, isarConnected));
-
-            robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-            NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-            DetachTracking(robot);
-
             return robot;
         }
 
         public async Task<Robot> UpdateCurrentMissionId(string robotId, string? currentMissionId)
         {
-            var robotQuery = context.Robots.Where(robot => robot.Id == robotId).Include(robot => robot.CurrentInstallation);
-            var robot = await robotQuery.FirstOrDefaultAsync();
+            var robot = await UpdateRobotProperty(robotId, "CurrentMissionId", currentMissionId);
             ThrowIfRobotIsNull(robot, robotId);
-
-            await VerifyThatUserIsAuthorizedToUpdateDataForInstallation(robot!.CurrentInstallation);
-
-            await robotQuery.ExecuteUpdateAsync(robots => robots.SetProperty(r => r.CurrentMissionId, currentMissionId));
-
-            robot = await robotQuery.FirstOrDefaultAsync();
-            ThrowIfRobotIsNull(robot, robotId);
-            NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-            DetachTracking(robot);
-
             return robot;
         }
 
