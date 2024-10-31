@@ -6,7 +6,7 @@ import { LanguageProvider } from 'components/Contexts/LanguageContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
 import { MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { MissionRunsProvider } from 'components/Contexts/MissionRunsContext'
-import { SafeZoneProvider } from 'components/Contexts/SafeZoneContext'
+import { DockProvider } from 'components/Contexts/DockContext'
 import { AlertProvider } from 'components/Contexts/AlertContext'
 import { InstallationProvider } from 'components/Contexts/InstallationContext'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
@@ -36,7 +36,7 @@ const App = () => (
                         <RobotProvider>
                             <MissionRunsProvider>
                                 <AlertProvider>
-                                    <SafeZoneProvider>
+                                    <DockProvider>
                                         <MissionRunsProvider>
                                             <MissionControlProvider>
                                                 <UnauthenticatedTemplate>
@@ -53,7 +53,7 @@ const App = () => (
                                                 </AuthenticatedTemplate>
                                             </MissionControlProvider>
                                         </MissionRunsProvider>
-                                    </SafeZoneProvider>
+                                    </DockProvider>
                                 </AlertProvider>
                             </MissionRunsProvider>
                         </RobotProvider>
