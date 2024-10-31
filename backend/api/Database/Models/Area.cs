@@ -28,25 +28,5 @@ namespace Api.Database.Models
 
         public DefaultLocalizationPose? DefaultLocalizationPose { get; set; }
 
-        public IList<SafePosition> SafePositions { get; set; }
-    }
-
-    public class SafePosition
-    {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public string Id { get; set; }
-
-        public Pose Pose { get; set; }
-
-        public SafePosition()
-        {
-            Pose = new Pose();
-        }
-
-        public SafePosition(Pose pose)
-        {
-            Pose = pose;
-        }
     }
 }

@@ -175,7 +175,7 @@ namespace Api.Database.Models
     public enum RobotFlotillaStatus
     {
         Normal,
-        SafeZone,
+        Docked,
         Recharging,
     }
 

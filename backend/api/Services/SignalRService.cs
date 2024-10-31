@@ -11,8 +11,8 @@ namespace Api.Services
     {
         public Task SendMessageAsync<T>(string label, Installation? installation, T messageObject);
         public Task SendMessageAsync(string label, Installation? installation, string message);
-        public void ReportSafeZoneFailureToSignalR(Robot robot, string message);
-        public void ReportSafeZoneSuccessToSignalR(Robot robot, string message);
+        public void ReportDockFailureToSignalR(Robot robot, string message);
+        public void ReportDockSuccessToSignalR(Robot robot, string message);
         public void ReportGeneralFailToSignalR(Robot robot, string title, string message);
     }
 
@@ -58,20 +58,20 @@ namespace Api.Services
             await Task.CompletedTask;
         }
 
-        public void ReportSafeZoneFailureToSignalR(Robot robot, string message)
+        public void ReportDockFailureToSignalR(Robot robot, string message)
         {
             _ = SendMessageAsync(
                 "Alert",
                 robot.CurrentInstallation,
-                new AlertResponse("safeZoneFailure", "Safe zone failure", message, robot.CurrentInstallation.InstallationCode, robot.Id));
+                new AlertResponse("DockFailure", "Dock failure", message, robot.CurrentInstallation.InstallationCode, robot.Id));
         }
 
-        public void ReportSafeZoneSuccessToSignalR(Robot robot, string message)
+        public void ReportDockSuccessToSignalR(Robot robot, string message)
         {
             _ = SendMessageAsync(
                "Alert",
                robot.CurrentInstallation,
-               new AlertResponse("safeZoneSuccess", "Successful drive to safe zone", message, robot.CurrentInstallation.InstallationCode, robot.Id));
+               new AlertResponse("DockSuccess", "Successful drive to Dock", message, robot.CurrentInstallation.InstallationCode, robot.Id));
         }
 
         public void ReportGeneralFailToSignalR(Robot robot, string title, string message)

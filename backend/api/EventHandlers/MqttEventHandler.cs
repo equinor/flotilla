@@ -409,13 +409,13 @@ namespace Api.EventHandlers
 
             if (robot.FlotillaStatus == RobotFlotillaStatus.Normal && robot.IsRobotBatteryTooLow())
             {
-                _logger.LogInformation("Sending robot '{RobotName}' to its safe zone as its battery level is too low.", robot.Name);
-                EmergencyActionService.SendRobotToSafezone(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Recharging));
+                _logger.LogInformation("Sending robot '{RobotName}' to its dock as its battery level is too low.", robot.Name);
+                EmergencyActionService.SendRobotToDock(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Recharging));
             }
             else if (robot.FlotillaStatus == RobotFlotillaStatus.Recharging && robot.IsRobotReadyToStartMissions())
             {
-                _logger.LogInformation("Releasing robot '{RobotName}' from its safe zone as its battery and pressure levels are good enough to run missions.", robot.Name);
-                EmergencyActionService.ReleaseRobotFromSafezone(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Normal));
+                _logger.LogInformation("Releasing robot '{RobotName}' from its dock as its battery and pressure levels are good enough to run missions.", robot.Name);
+                EmergencyActionService.ReleaseRobotFromDock(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Normal));
             }
         }
 
@@ -428,13 +428,13 @@ namespace Api.EventHandlers
 
             if (robot.FlotillaStatus == RobotFlotillaStatus.Normal && (robot.IsRobotPressureTooLow() || robot.IsRobotPressureTooHigh()))
             {
-                _logger.LogInformation("Sending robot '{RobotName}' to its safe zone as its pressure is too low or high.", robot.Name);
-                EmergencyActionService.SendRobotToSafezone(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Recharging));
+                _logger.LogInformation("Sending robot '{RobotName}' to its dock as its pressure is too low or high.", robot.Name);
+                EmergencyActionService.SendRobotToDock(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Recharging));
             }
             else if (robot.FlotillaStatus == RobotFlotillaStatus.Recharging && robot.IsRobotReadyToStartMissions())
             {
-                _logger.LogInformation("Releasing robot '{RobotName}' from its safe zone as its battery and pressure levels are good enough to run missions.", robot.Name);
-                EmergencyActionService.ReleaseRobotFromSafezone(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Normal));
+                _logger.LogInformation("Releasing robot '{RobotName}' from its dock as its battery and pressure levels are good enough to run missions.", robot.Name);
+                EmergencyActionService.ReleaseRobotFromDock(new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Normal));
             }
         }
 

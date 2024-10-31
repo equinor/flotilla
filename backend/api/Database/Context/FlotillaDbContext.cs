@@ -23,7 +23,6 @@ namespace Api.Database.Context
         public DbSet<Deck> Decks => Set<Deck>();
         public DbSet<Area> Areas => Set<Area>();
         public DbSet<Source> Sources => Set<Source>();
-        public DbSet<SafePosition> SafePositions => Set<SafePosition>();
         public DbSet<DefaultLocalizationPose> DefaultLocalizationPoses => Set<DefaultLocalizationPose>();
         public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
@@ -69,11 +68,6 @@ namespace Api.Database.Context
             modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
             modelBuilder.Entity<Robot>().OwnsMany(r => r.VideoStreams);
 
-            modelBuilder.Entity<SafePosition>().OwnsOne(s => s.Pose, poseBuilder =>
-            {
-                poseBuilder.OwnsOne(pose => pose.Position);
-                poseBuilder.OwnsOne(pose => pose.Orientation);
-            });
             modelBuilder.Entity<DefaultLocalizationPose>().OwnsOne(d => d.Pose, poseBuilder =>
             {
                 poseBuilder.OwnsOne(pose => pose.Position);

@@ -22,8 +22,6 @@ namespace Api.Services
 
         public Task<Area> Update(Area area);
 
-        public Task<Area?> AddSafePosition(string installationCode, string areaName, SafePosition safePosition);
-
         public Task<Area?> Delete(string id);
 
         public void DetachTracking(Area area);
@@ -86,11 +84,6 @@ namespace Api.Services
         }
         public async Task<Area> Create(CreateAreaQuery newAreaQuery, List<Pose> positions)
         {
-            var safePositions = new List<SafePosition>();
-            foreach (var pose in positions)
-            {
-                safePositions.Add(new SafePosition(pose));
-            }
 
             var installation = await installationService.ReadByInstallationCode(newAreaQuery.InstallationCode, readOnly: true) ??
                                throw new InstallationNotFoundException($"No installation with name {newAreaQuery.InstallationCode} could be found");
@@ -118,7 +111,6 @@ namespace Api.Services
             {
                 Name = newAreaQuery.AreaName,
                 DefaultLocalizationPose = defaultLocalizationPose,
-                SafePositions = safePositions,
                 MapMetadata = new MapMetadata(),
                 Deck = deck!,
                 Plant = plant!,
@@ -141,18 +133,6 @@ namespace Api.Services
         public async Task<Area> Create(CreateAreaQuery newArea)
         {
             var area = await Create(newArea, []);
-            return area;
-        }
-
-        public async Task<Area?> AddSafePosition(string installationCode, string areaName, SafePosition safePosition)
-        {
-            var area = await ReadByInstallationAndName(installationCode, areaName, readOnly: false);
-            if (area is null) { return null; }
-
-            area.SafePositions.Add(safePosition);
-
-            context.Areas.Update(area);
-            await ApplyDatabaseUpdate(area.Installation);
             return area;
         }
 
@@ -191,7 +171,6 @@ namespace Api.Services
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Areas
-                .Include(area => area.SafePositions)
                 .Include(area => area.DefaultLocalizationPose)
                 .Include(area => area.Deck)
                 .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
@@ -207,7 +186,6 @@ namespace Api.Services
 
             // Include related entities using the Include method
             var query = context.Areas
-             .Include(a => a.SafePositions)
              .Include(a => a.Deck)
                  .ThenInclude(deck => deck != null ? deck.Plant : null)
                  .ThenInclude(plant => plant != null ? plant.Installation : null)

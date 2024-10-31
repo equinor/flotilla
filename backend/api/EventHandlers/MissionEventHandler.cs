@@ -46,8 +46,8 @@ namespace Api.EventHandlers
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
             MissionSchedulingService.RobotAvailable += OnRobotAvailable;
             MissionSchedulingService.LocalizationMissionSuccessful += OnLocalizationMissionSuccessful;
-            EmergencyActionService.SendRobotToSafezoneTriggered += OnSendRobotToSafezoneTriggered;
-            EmergencyActionService.ReleaseRobotFromSafezoneTriggered += OnReleaseRobotFromSafezoneTriggered;
+            EmergencyActionService.SendRobotToDockTriggered += OnSendRobotToDockTriggered;
+            EmergencyActionService.ReleaseRobotFromDockTriggered += OnReleaseRobotFromDockTriggered;
         }
 
         public override void Unsubscribe()
@@ -55,8 +55,8 @@ namespace Api.EventHandlers
             MissionRunService.MissionRunCreated -= OnMissionRunCreated;
             MissionSchedulingService.RobotAvailable -= OnRobotAvailable;
             MissionSchedulingService.LocalizationMissionSuccessful -= OnLocalizationMissionSuccessful;
-            EmergencyActionService.SendRobotToSafezoneTriggered -= OnSendRobotToSafezoneTriggered;
-            EmergencyActionService.ReleaseRobotFromSafezoneTriggered -= OnReleaseRobotFromSafezoneTriggered;
+            EmergencyActionService.SendRobotToDockTriggered -= OnSendRobotToDockTriggered;
+            EmergencyActionService.ReleaseRobotFromDockTriggered -= OnReleaseRobotFromDockTriggered;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -147,8 +147,8 @@ namespace Api.EventHandlers
             {
                 if (lastMissionRun.MissionRunType == MissionRunType.Emergency & lastMissionRun.Status == MissionStatus.Successful)
                 {
-                    _logger.LogInformation("Return to safe zone mission on robot {RobotName} was successful.", robot.Name);
-                    SignalRService.ReportSafeZoneSuccessToSignalR(robot, $"Robot {robot.Name} is in the safe zone");
+                    _logger.LogInformation("Return to dock mission on robot {RobotName} was successful.", robot.Name);
+                    SignalRService.ReportDockSuccessToSignalR(robot, $"Robot {robot.Name} is in the dock");
                 }
             }
 
@@ -159,7 +159,7 @@ namespace Api.EventHandlers
             finally { _startMissionSemaphore.Release(); }
         }
 
-        private async void OnSendRobotToSafezoneTriggered(object? sender, RobotEmergencyEventArgs e)
+        private async void OnSendRobotToDockTriggered(object? sender, RobotEmergencyEventArgs e)
         {
             _logger.LogInformation("Triggered EmergencyButtonPressed event for robot ID: {RobotId}", e.RobotId);
             var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
@@ -174,7 +174,7 @@ namespace Api.EventHandlers
 
             if (robot.FlotillaStatus == e.RobotFlotillaStatus)
             {
-                _logger.LogInformation("Did not send robot to safezone since robot {RobotId} was already in the correct state", e.RobotId);
+                _logger.LogInformation("Did not send robot to Dock since robot {RobotId} was already in the correct state", e.RobotId);
                 return;
             }
 
@@ -188,7 +188,7 @@ namespace Api.EventHandlers
             Area? area;
             try
             {
-                area = await FindRelevantRobotAreaForSafePositionMission(robot.Id);
+                area = await FindRelevantRobotAreaForDockMission(robot.Id);
             }
             catch (RobotNotFoundException)
             {
@@ -201,11 +201,11 @@ namespace Api.EventHandlers
 
             if (area == null) { return; }
 
-            try { await MissionScheduling.ScheduleMissionToDriveToSafePosition(e.RobotId, area.Id); }
-            catch (SafeZoneException ex)
+            try { await MissionScheduling.ScheduleMissionToDriveToDockPosition(e.RobotId, area.Id); }
+            catch (DockException ex)
             {
-                _logger.LogError(ex, "Failed to schedule return to safe zone mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
-                SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Failed to send {robot.Name} to a safe zone");
+                _logger.LogError(ex, "Failed to schedule return to dock mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
+                SignalRService.ReportDockFailureToSignalR(robot, $"Failed to send {robot.Name} to a dock");
             }
 
             if (await MissionService.PendingOrOngoingLocalizationMissionRunExists(e.RobotId)) { return; }
@@ -213,22 +213,22 @@ namespace Api.EventHandlers
             catch (RobotNotFoundException) { return; }
             catch (MissionRunNotFoundException)
             {
-                /* Allow robot to return to safe position if there is no ongoing mission */
+                /* Allow robot to return to dock if there is no ongoing mission */
             }
             catch (MissionException ex)
             {
-                // We want to continue driving to a safe position if the isar state is idle
+                // We want to continue driving to the dock if the isar state is idle
                 if (ex.IsarStatusCode != StatusCodes.Status409Conflict)
                 {
                     _logger.LogError(ex, "Failed to stop the current mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
-                    SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Failed to stop current mission for robot {robot.Name}");
+                    SignalRService.ReportDockFailureToSignalR(robot, $"Failed to stop current mission for robot {robot.Name}");
                     return;
                 }
             }
             catch (Exception ex)
             {
-                const string Message = "Error in ISAR while stopping current mission, cannot drive to safe position";
-                SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} failed to drive to safe position");
+                const string Message = "Error in ISAR while stopping current mission, cannot drive to docking station.";
+                SignalRService.ReportDockFailureToSignalR(robot, $"Robot {robot.Name} failed to drive to docking station.");
                 _logger.LogError(ex, "{Message}", Message);
                 return;
             }
@@ -239,7 +239,7 @@ namespace Api.EventHandlers
             finally { _startMissionSemaphore.Release(); }
         }
 
-        private async void OnReleaseRobotFromSafezoneTriggered(object? sender, RobotEmergencyEventArgs e)
+        private async void OnReleaseRobotFromDockTriggered(object? sender, RobotEmergencyEventArgs e)
         {
             _logger.LogInformation("Triggered EmergencyButtonPressed event for robot ID: {RobotId}", e.RobotId);
             var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
@@ -251,7 +251,7 @@ namespace Api.EventHandlers
 
             if (robot.FlotillaStatus == e.RobotFlotillaStatus)
             {
-                _logger.LogInformation("Did not release robot from safezone since robot {RobotId} was already in the correct state", e.RobotId);
+                _logger.LogInformation("Did not release robot from Dock since robot {RobotId} was already in the correct state", e.RobotId);
                 return;
             }
 
@@ -271,7 +271,7 @@ namespace Api.EventHandlers
             finally { _startMissionSemaphore.Release(); }
         }
 
-        private async Task<Area?> FindRelevantRobotAreaForSafePositionMission(string robotId)
+        private async Task<Area?> FindRelevantRobotAreaForDockMission(string robotId)
         {
             var robot = await RobotService.ReadById(robotId, readOnly: true);
             if (robot == null)
@@ -306,7 +306,7 @@ namespace Api.EventHandlers
             if (area == null)
             {
                 _logger.LogError("Could not find area with ID {AreaId}", robot.CurrentArea!.Id);
-                SignalRService.ReportSafeZoneFailureToSignalR(robot, $"Robot {robot.Name} was not correctly localised. Could not find area {robot.CurrentArea.Name}");
+                SignalRService.ReportDockFailureToSignalR(robot, $"Robot {robot.Name} was not correctly localised. Could not find area {robot.CurrentArea.Name}");
                 return null;
             }
 

@@ -10,7 +10,7 @@ namespace Api.Controllers
     public class EmergencyActionController(IRobotService robotService, IEmergencyActionService emergencyActionService) : ControllerBase
     {
         /// <summary>
-        ///     This endpoint will abort the current running mission run and attempt to return the robot to a safe position in the
+        ///     This endpoint will abort the current running mission run and attempt to return the robot to the docking station in the
         ///     area. The mission run queue for the robot will be frozen and no further missions will run until the emergency
         ///     action has been reversed.
         /// </summary>
@@ -26,7 +26,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<string>> AbortCurrentMissionAndSendAllRobotsToSafeZone(
+        public async Task<ActionResult<string>> AbortCurrentMissionAndSendAllRobotsToDock(
             [FromRoute] string installationCode)
         {
 
@@ -34,7 +34,7 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                emergencyActionService.SendRobotToSafezone(new RobotEmergencyEventArgs(robot.Id, Database.Models.RobotFlotillaStatus.SafeZone));
+                emergencyActionService.SendRobotToDock(new RobotEmergencyEventArgs(robot.Id, Database.Models.RobotFlotillaStatus.Docked));
 
             }
 
@@ -43,8 +43,8 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     This query will clear the emergency state that is introduced by aborting the current mission and returning to a
-        ///     safe zone. Clearing the emergency state means that mission runs that may be in the robots queue will start."
+        ///     This query will clear the emergency state that is introduced by aborting the current mission and returning to the
+        ///     docking station. Clearing the emergency state means that mission runs that may be in the robots queue will start."
         /// </summary>
         [HttpPost]
         [Route("{installationCode}/clear-emergency-state")]
@@ -62,7 +62,7 @@ namespace Api.Controllers
 
             foreach (var robot in robots)
             {
-                emergencyActionService.ReleaseRobotFromSafezone(new RobotEmergencyEventArgs(robot.Id, Database.Models.RobotFlotillaStatus.Normal));
+                emergencyActionService.ReleaseRobotFromDock(new RobotEmergencyEventArgs(robot.Id, Database.Models.RobotFlotillaStatus.Normal));
             }
 
             return NoContent();
