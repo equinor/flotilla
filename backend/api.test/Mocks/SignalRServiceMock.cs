@@ -18,13 +18,13 @@ namespace Api.Services
             await Task.CompletedTask;
         }
 
-        public void ReportSafeZoneFailureToSignalR(Robot robot, string message)
+        public void ReportDockFailureToSignalR(Robot robot, string message)
         {
             return;
         }
 
 
-        public void ReportSafeZoneSuccessToSignalR(Robot robot, string message)
+        public void ReportDockSuccessToSignalR(Robot robot, string message)
         {
             return;
         }

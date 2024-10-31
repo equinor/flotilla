@@ -209,48 +209,19 @@ namespace Api.Test.Client
         }
 
         [Fact]
-        public async Task SafePositionTest()
+        public async Task EmergencyDockTest()
         {
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
             var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
-            string areaName = area.Name;
             string installationCode = installation.InstallationCode;
 
-            string addSafePositionUrl = $"/areas/{installationCode}/{areaName}/safe-position";
-            var testPosition = new Position
-            {
-                X = 1,
-                Y = 2,
-                Z = 2
-            };
-            var query = new Pose
-            {
-                Position = testPosition,
-                Orientation = new Orientation
-                {
-                    X = 0,
-                    Y = 0,
-                    Z = 0,
-                    W = 1
-                }
-            };
-            var content = new StringContent(
-                JsonSerializer.Serialize(query),
-                null,
-                "application/json"
-            );
-
-            var areaResponse = await _client.PostAsync(addSafePositionUrl, content);
-            Assert.True(areaResponse.IsSuccessStatusCode);
-            var areaContent = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
-            Assert.NotNull(areaContent);
 
             // Act
-            string goToSafePositionUrl = $"/emergency-action/{installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone";
-            var missionResponse = await _client.PostAsync(goToSafePositionUrl, null);
+            string goToDockingPositionUrl = $"/emergency-action/{installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone";
+            var missionResponse = await _client.PostAsync(goToDockingPositionUrl, null);
 
             // Assert
             Assert.True(missionResponse.IsSuccessStatusCode);
