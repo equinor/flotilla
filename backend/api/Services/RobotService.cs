@@ -308,8 +308,6 @@ namespace Api.Services
                 .Include(r => r.CurrentArea)
                 .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(r => r.CurrentArea)
-                .ThenInclude(area => area != null ? area.SafePositions : null)
-                .Include(r => r.CurrentArea)
                 .ThenInclude(area => area != null ? area.Deck : null)
                 .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
                 .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null)

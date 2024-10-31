@@ -3,9 +3,9 @@ namespace Api.Services
 {
     public interface IEmergencyActionService
     {
-        public void SendRobotToSafezone(RobotEmergencyEventArgs e);
+        public void SendRobotToDock(RobotEmergencyEventArgs e);
 
-        public void ReleaseRobotFromSafezone(RobotEmergencyEventArgs e);
+        public void ReleaseRobotFromDock(RobotEmergencyEventArgs e);
     }
 
     public class EmergencyActionService : IEmergencyActionService
@@ -15,28 +15,28 @@ namespace Api.Services
         {
         }
 
-        public void SendRobotToSafezone(RobotEmergencyEventArgs e)
+        public void SendRobotToDock(RobotEmergencyEventArgs e)
         {
-            OnSendRobotToSafezoneTriggered(e);
+            OnSendRobotToDockTriggered(e);
         }
 
-        public void ReleaseRobotFromSafezone(RobotEmergencyEventArgs e)
+        public void ReleaseRobotFromDock(RobotEmergencyEventArgs e)
         {
-            OnReleaseRobotFromSafezoneTriggered(e);
+            OnReleaseRobotFromDockTriggered(e);
         }
 
-        public static event EventHandler<RobotEmergencyEventArgs>? SendRobotToSafezoneTriggered;
+        public static event EventHandler<RobotEmergencyEventArgs>? SendRobotToDockTriggered;
 
-        protected virtual void OnSendRobotToSafezoneTriggered(RobotEmergencyEventArgs e)
+        protected virtual void OnSendRobotToDockTriggered(RobotEmergencyEventArgs e)
         {
-            SendRobotToSafezoneTriggered?.Invoke(this, e);
+            SendRobotToDockTriggered?.Invoke(this, e);
         }
 
-        public static event EventHandler<RobotEmergencyEventArgs>? ReleaseRobotFromSafezoneTriggered;
+        public static event EventHandler<RobotEmergencyEventArgs>? ReleaseRobotFromDockTriggered;
 
-        protected virtual void OnReleaseRobotFromSafezoneTriggered(RobotEmergencyEventArgs e)
+        protected virtual void OnReleaseRobotFromDockTriggered(RobotEmergencyEventArgs e)
         {
-            ReleaseRobotFromSafezoneTriggered?.Invoke(this, e);
+            ReleaseRobotFromDockTriggered?.Invoke(this, e);
         }
 
     }

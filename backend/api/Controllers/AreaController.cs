@@ -61,56 +61,6 @@ namespace Api.Controllers
             }
         }
 
-        /// <summary>
-        /// Add safe position to an area
-        /// </summary>
-        /// <remarks>
-        /// <para> This query adds a new safe position to the database </para>
-        /// </remarks>
-        [HttpPost]
-        [Authorize(Roles = Role.Admin)]
-        [Route("{installationCode}/{areaName}/safe-position")]
-        [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<AreaResponse>> AddSafePosition(
-            [FromRoute] string installationCode,
-            [FromRoute] string areaName,
-            [FromBody] Pose safePosition
-        )
-        {
-            logger.LogInformation(@"Adding new safe position to {Installation}, {Area}", installationCode, areaName);
-            try
-            {
-                var area = await areaService.AddSafePosition(installationCode, areaName, new SafePosition(safePosition));
-                if (area != null)
-                {
-                    logger.LogInformation(@"Successfully added new safe position for installation '{installationId}'
-                        and name '{name}'", installationCode, areaName);
-                    if (area.Deck == null || area.Plant == null || area.Installation == null)
-                    {
-                        string errorMessage = "Deck, plant or installation missing from area";
-                        logger.LogWarning(errorMessage);
-                        return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
-                    }
-                    var response = new AreaResponse(area);
-
-                    return CreatedAtAction(nameof(GetAreaById), new { id = area.Id }, response); ;
-                }
-                else
-                {
-                    logger.LogInformation(@"No area with installation {installationCode} and name {areaName} could be found.", installationCode, areaName);
-                    return NotFound(@$"No area with installation {installationCode} and name {areaName} could be found.");
-                }
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error while creating or adding new safe zone");
-                throw;
-            }
-        }
 
         /// <summary>
         /// Updates default localization pose

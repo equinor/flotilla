@@ -20,8 +20,6 @@ namespace Api.Controllers.Models
 
         public Pose? DefaultLocalizationPose { get; set; }
 
-        public IList<SafePosition> SafePositions { get; set; }
-
         [JsonConstructor]
 #nullable disable
         public AreaResponse() { }
@@ -37,7 +35,6 @@ namespace Api.Controllers.Models
             AreaName = area.Name;
             MapMetadata = area.MapMetadata;
             DefaultLocalizationPose = area.DefaultLocalizationPose?.Pose;
-            SafePositions = area.SafePositions;
         }
     }
 }

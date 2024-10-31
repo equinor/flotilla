@@ -18,7 +18,7 @@ namespace Api.Services
 
         public Task AbortAllScheduledMissions(string robotId, string? abortReason = null);
 
-        public Task ScheduleMissionToDriveToSafePosition(string robotId, string areaId);
+        public Task ScheduleMissionToDriveToDockPosition(string robotId, string areaId);
 
         public Task UnfreezeMissionRunQueueForRobot(string robotId);
 
@@ -280,7 +280,7 @@ namespace Api.Services
             }
         }
 
-        public async Task ScheduleMissionToDriveToSafePosition(string robotId, string areaId)
+        public async Task ScheduleMissionToDriveToDockPosition(string robotId, string areaId)
         {
             var area = await areaService.ReadById(areaId, readOnly: true);
             if (area == null)
@@ -296,19 +296,14 @@ namespace Api.Services
                 return;
             }
 
-            var closestSafePosition = ClosestSafePosition(robot.Pose, area.SafePositions);
-            if (closestSafePosition == null)
+            if (robot.CurrentArea?.Deck.DefaultLocalizationPose == null)
             {
-                logger.LogWarning("Robot with ID: {RobotId} did not have a safe position for area it is localized in, using localization position instead", robotId);
-                if (robot.CurrentArea?.Deck.DefaultLocalizationPose == null)
-                {
-                    throw new SafeZoneException($"Robot with ID: {robotId} has no available safezone or localization poses in its current area");
-                }
-                closestSafePosition = robot.CurrentArea.Deck.DefaultLocalizationPose.Pose;
+                throw new DockException($"Robot with ID: {robotId} has no available Dock or localization poses in its current area");
             }
+            var closestDockPosition = robot.CurrentArea.Deck.DefaultLocalizationPose.Pose;
 
             // Cloning to avoid tracking same object
-            var clonedPose = ObjectCopier.Clone(closestSafePosition);
+            var clonedPose = ObjectCopier.Clone(closestDockPosition);
             var customTaskQuery = new CustomTaskQuery
             {
                 RobotPose = clonedPose,
@@ -317,7 +312,7 @@ namespace Api.Services
 
             var missionRun = new MissionRun
             {
-                Name = "Drive to Safe Position",
+                Name = "Drive to Docking Station",
                 Robot = robot,
                 MissionRunType = MissionRunType.Emergency,
                 InstallationCode = area.Installation.InstallationCode,
@@ -337,7 +332,7 @@ namespace Api.Services
             }
             catch (UnsupportedRobotCapabilityException)
             {
-                logger.LogError($"Unsupported robot capability detected when driving to safe position for robot {missionRun.Robot.Name}. This should not happen.");
+                logger.LogError($"Unsupported robot capability detected when driving to dock for robot {missionRun.Robot.Name}. This should not happen.");
             }
         }
 
@@ -485,28 +480,6 @@ namespace Api.Services
             await robotService.UpdateCurrentMissionId(robot.Id, missionRun.Id);
 
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
-        }
-
-        private static Pose? ClosestSafePosition(Pose robotPose, IList<SafePosition> safePositions)
-        {
-            if (safePositions == null || !safePositions.Any())
-            {
-                return null;
-            }
-
-            var closestPose = safePositions[0].Pose;
-            float minDistance = CalculateDistance(robotPose, closestPose);
-
-            for (int i = 1; i < safePositions.Count; i++)
-            {
-                float currentDistance = CalculateDistance(robotPose, safePositions[i].Pose);
-                if (currentDistance < minDistance)
-                {
-                    minDistance = currentDistance;
-                    closestPose = safePositions[i].Pose;
-                }
-            }
-            return closestPose;
         }
 
         private async Task<PagedList<MissionRun>?> GetOngoingMissions(string robotId, bool readOnly = true)

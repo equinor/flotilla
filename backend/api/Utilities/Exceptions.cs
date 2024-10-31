@@ -86,7 +86,7 @@
     {
     }
 
-    public class SafeZoneException(string message) : Exception(message)
+    public class DockException(string message) : Exception(message)
     {
     }
 
