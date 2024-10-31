@@ -464,7 +464,7 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async Task LocalizationMissionCompletesAfterPressingSendToSafeZoneButton()
+        public async Task LocalizationMissionCompletesAfterPressingSendToDockButton()
         {
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
@@ -477,8 +477,8 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             // Act
-            var eventArgs = new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.SafeZone);
-            _emergencyActionService.RaiseEvent(nameof(EmergencyActionService.SendRobotToSafezoneTriggered), eventArgs);
+            var eventArgs = new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Docked);
+            _emergencyActionService.RaiseEvent(nameof(EmergencyActionService.SendRobotToDockTriggered), eventArgs);
 
             Thread.Sleep(1000);
 
