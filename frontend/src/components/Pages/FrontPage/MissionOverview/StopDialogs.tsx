@@ -141,7 +141,7 @@ export const StopRobotDialog = (): JSX.Element => {
     const { installationCode } = useInstallationContext()
     const { setAlert, setListAlert } = useAlertContext()
 
-    const safeZoneActivated = enabledRobots.find((r) => r.flotillaStatus === RobotFlotillaStatus.SafeZone) !== undefined
+    const dockActivated = enabledRobots.find((r) => r.flotillaStatus === RobotFlotillaStatus.Docked) !== undefined
 
     const openDialog = async () => {
         setIsStopRobotDialogOpen(true)
@@ -152,17 +152,15 @@ export const StopRobotDialog = (): JSX.Element => {
     }
 
     const stopAll = () => {
-        BackendAPICaller.sendRobotsToSafePosition(installationCode).catch((e) => {
+        BackendAPICaller.sendRobotsToDockingPosition(installationCode).catch((e) => {
             setAlert(
                 AlertType.RequestFail,
-                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to send robots to a safe zone')} />,
+                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to send robots to a dock')} />,
                 AlertCategory.ERROR
             )
             setListAlert(
                 AlertType.RequestFail,
-                <FailedRequestAlertListContent
-                    translatedMessage={TranslateText('Failed to send robots to a safe zone')}
-                />,
+                <FailedRequestAlertListContent translatedMessage={TranslateText('Failed to send robots to a dock')} />,
                 AlertCategory.ERROR
             )
         })
@@ -174,15 +172,13 @@ export const StopRobotDialog = (): JSX.Element => {
         BackendAPICaller.clearEmergencyState(installationCode).catch((e) => {
             setAlert(
                 AlertType.RequestFail,
-                <FailedRequestAlertContent
-                    translatedMessage={TranslateText('Failed to release robots from safe zone')}
-                />,
+                <FailedRequestAlertContent translatedMessage={TranslateText('Failed to release robots from dock')} />,
                 AlertCategory.ERROR
             )
             setListAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertListContent
-                    translatedMessage={TranslateText('Failed to release robots from safe zone')}
+                    translatedMessage={TranslateText('Failed to release robots from dock')}
                 />,
                 AlertCategory.ERROR
             )
@@ -193,33 +189,33 @@ export const StopRobotDialog = (): JSX.Element => {
     return (
         <>
             <StyledButton color="danger" variant="outlined" onClick={openDialog}>
-                {!safeZoneActivated ? (
-                    <>{TranslateText('Send robots to safe zone')}</>
+                {!dockActivated ? (
+                    <>{TranslateText('Send robots to dock')}</>
                 ) : (
-                    <>{TranslateText('Dismiss robots from safe zone')}</>
+                    <>{TranslateText('Dismiss robots from dock')}</>
                 )}
             </StyledButton>
             <StyledDialog open={isStopRobotDialogOpen} isDismissable>
                 <Dialog.Header>
                     <Dialog.Title>
                         <Typography variant="h5">
-                            {!safeZoneActivated
-                                ? TranslateText('Send robots to safe zone') + '?'
-                                : TranslateText('Dismiss robots from safe zone') + '?'}
+                            {!dockActivated
+                                ? TranslateText('Send robots to dock') + '?'
+                                : TranslateText('Dismiss robots from dock') + '?'}
                         </Typography>
                     </Dialog.Title>
                 </Dialog.Header>
                 <Dialog.CustomContent>
                     <StyledText>
                         <Typography variant="body_long">
-                            {!safeZoneActivated
-                                ? TranslateText('Send robots to safe zone long text')
-                                : TranslateText('Dismiss robots from safe zone long text')}
+                            {!dockActivated
+                                ? TranslateText('Send robots to dock long text')
+                                : TranslateText('Dismiss robots from dock long text')}
                         </Typography>
                         <Typography variant="body_long">
-                            {!safeZoneActivated
-                                ? TranslateText('Send robots to safe confirmation text')
-                                : TranslateText('Dismiss robots from safe confirmation text')}
+                            {!dockActivated
+                                ? TranslateText('Send robots to dock confirmation text')
+                                : TranslateText('Dismiss robots from dock confirmation text')}
                         </Typography>
                     </StyledText>
                 </Dialog.CustomContent>
@@ -234,9 +230,9 @@ export const StopRobotDialog = (): JSX.Element => {
                         >
                             {TranslateText('Cancel')}
                         </Button>
-                        {!safeZoneActivated ? (
+                        {!dockActivated ? (
                             <Button variant="contained" color="danger" onClick={stopAll}>
-                                {TranslateText('Send robots to safe zone')}
+                                {TranslateText('Send robots to dock')}
                             </Button>
                         ) : (
                             <Button variant="contained" color="danger" onClick={resetRobots}>

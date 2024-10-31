@@ -12,24 +12,24 @@ import { RobotStatus } from 'models/Robot'
 import { FailedAlertContent, FailedAlertListContent } from 'components/Alerts/FailedAlertContent'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
-import { SafeZoneAlertContent, SafeZoneAlertListContent } from 'components/Alerts/SafeZoneAlert'
+import { DockAlertContent, DockAlertListContent } from 'components/Alerts/DockAlert'
 import { useLanguageContext } from './LanguageContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 
 export enum AlertType {
     MissionFail,
     RequestFail,
-    SafeZoneFail,
+    DockFail,
     BlockedRobot,
-    RequestSafeZone,
-    DismissSafeZone,
-    SafeZoneSuccess,
+    RequestDock,
+    DismissDock,
+    DockSuccess,
 }
 
 const alertTypeEnumMap: { [key: string]: AlertType } = {
-    safeZoneFailure: AlertType.SafeZoneFail,
+    DockFailure: AlertType.DockFail,
     generalFailure: AlertType.RequestFail,
-    safeZoneSuccess: AlertType.SafeZoneSuccess,
+    DockSuccess: AlertType.DockSuccess,
 }
 
 type AlertDictionaryType = {
@@ -213,19 +213,19 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
                 if (backendAlert.robotId !== null && !enabledRobots.filter((r) => r.id === backendAlert.robotId)) return
 
-                if (alertType === AlertType.SafeZoneSuccess) {
+                if (alertType === AlertType.DockSuccess) {
                     setAlert(
                         alertType,
-                        <SafeZoneAlertContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
+                        <DockAlertContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
                         AlertCategory.INFO
                     )
-                    clearAlert(AlertType.RequestSafeZone)
+                    clearAlert(AlertType.RequestDock)
                     setListAlert(
                         alertType,
-                        <SafeZoneAlertListContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
+                        <DockAlertListContent alertType={alertType} alertCategory={AlertCategory.INFO} />,
                         AlertCategory.INFO
                     )
-                    clearListAlert(AlertType.RequestSafeZone)
+                    clearListAlert(AlertType.RequestDock)
                 } else {
                     setAlert(
                         alertType,

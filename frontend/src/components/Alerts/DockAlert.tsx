@@ -17,12 +17,12 @@ const StyledAlertTitle = styled.div`
     gap: 0.3em;
     align-items: flex-end;
 `
-interface SafeZoneBannerProps {
+interface DockBannerProps {
     alertType: AlertType
     alertCategory: AlertCategory
 }
 
-export const SafeZoneAlertContent = ({ alertType, alertCategory }: SafeZoneBannerProps): JSX.Element => {
+export const DockAlertContent = ({ alertType, alertCategory }: DockBannerProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const buttonBackgroundColor =
         alertCategory === AlertCategory.WARNING
@@ -38,34 +38,34 @@ export const SafeZoneAlertContent = ({ alertType, alertCategory }: SafeZoneBanne
                 </Typography>
             </StyledAlertTitle>
             <TextAlignedButton variant="ghost" color="secondary" style={{ backgroundColor: buttonBackgroundColor }}>
-                {alertCategory === AlertCategory.WARNING && TranslateText('Safe zone banner text')}
+                {alertCategory === AlertCategory.WARNING && TranslateText('Dock banner text')}
                 {alertCategory === AlertCategory.INFO &&
-                    alertType === AlertType.SafeZoneSuccess &&
-                    TranslateText('Safe Zone successful text')}
+                    alertType === AlertType.DockSuccess &&
+                    TranslateText('Dock successful text')}
                 {alertCategory === AlertCategory.INFO &&
-                    alertType === AlertType.DismissSafeZone &&
-                    TranslateText('Dismiss safe zone banner text')}
+                    alertType === AlertType.DismissDock &&
+                    TranslateText('Dismiss dock banner text')}
             </TextAlignedButton>
         </StyledDiv>
     )
 }
 
-export const SafeZoneAlertListContent = ({ alertType, alertCategory }: SafeZoneBannerProps): JSX.Element => {
+export const DockAlertListContent = ({ alertType, alertCategory }: DockBannerProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     let titleMessage = TranslateText('INFO')
-    let message = TranslateText('Safe zone banner text')
+    let message = TranslateText('Dock banner text')
     let icon = Icons.Warning
     let iconColor = tokens.colors.interactive.danger__resting.rgba
     if (alertCategory === AlertCategory.WARNING) titleMessage = TranslateText('WARNING')
-    if (alertCategory === AlertCategory.INFO && alertType === AlertType.SafeZoneSuccess)
+    if (alertCategory === AlertCategory.INFO && alertType === AlertType.DockSuccess)
         [message, icon, iconColor] = [
-            TranslateText('Safe Zone successful text'),
+            TranslateText('Dock successful text'),
             Icons.Info,
             tokens.colors.text.static_icons__default.rgba,
         ]
-    if (alertCategory === AlertCategory.INFO && alertType === AlertType.DismissSafeZone)
+    if (alertCategory === AlertCategory.INFO && alertType === AlertType.DismissDock)
         [message, icon, iconColor] = [
-            TranslateText('Dismiss safe zone banner text'),
+            TranslateText('Dismiss dock banner text'),
             Icons.Info,
             tokens.colors.text.static_icons__default.rgba,
         ]

@@ -10,14 +10,14 @@ export enum RobotStatus {
     Busy = 'Busy',
     Offline = 'Offline',
     Blocked = 'Blocked',
-    SafeZone = 'Safe Zone',
+    Docked = 'Docked',
     Recharging = 'Recharging',
     ConnectionIssues = 'Connection Issues',
 }
 
 export enum RobotFlotillaStatus {
     Normal = 'Normal',
-    SafeZone = 'SafeZone',
+    Docked = 'Docked',
     Recharging = 'Recharging',
 }
 

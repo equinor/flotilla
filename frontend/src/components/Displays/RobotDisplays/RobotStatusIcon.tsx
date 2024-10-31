@@ -65,10 +65,10 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected }: Statu
         iconColor = tokens.colors.interactive.disabled__text.hex
         statusIcon = Icons.Info
         status = RobotStatus.ConnectionIssues
-    } else if (flotillaStatus && status === RobotStatus.Available && flotillaStatus === RobotFlotillaStatus.SafeZone) {
+    } else if (flotillaStatus && status === RobotStatus.Available && flotillaStatus === RobotFlotillaStatus.Docked) {
         iconColor = tokens.colors.interactive.danger__resting.hex
         statusIcon = Icons.Warning
-        status = RobotStatus.SafeZone
+        status = RobotStatus.Docked
     } else if (
         flotillaStatus &&
         status === RobotStatus.Available &&

@@ -14,11 +14,11 @@ const StyledAlertTitle = styled.div`
     align-items: flex-end;
 `
 
-interface SafeZoneBannerProps {
+interface DockBannerProps {
     alertCategory: AlertCategory
 }
 
-export const SafeZoneBanner = ({ alertCategory }: SafeZoneBannerProps): JSX.Element => {
+export const DockBanner = ({ alertCategory }: DockBannerProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
 
     return (
@@ -31,8 +31,8 @@ export const SafeZoneBanner = ({ alertCategory }: SafeZoneBannerProps): JSX.Elem
             </StyledAlertTitle>
             <TextAlignedButton variant="ghost" color="secondary">
                 {alertCategory === AlertCategory.WARNING
-                    ? TranslateText('Safe zone banner text')
-                    : TranslateText('Dismiss safe zone banner text')}
+                    ? TranslateText('Dock banner text')
+                    : TranslateText('Dismiss dock banner text')}
             </TextAlignedButton>
         </StyledDiv>
     )

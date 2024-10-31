@@ -397,7 +397,7 @@ export class BackendAPICaller {
         }
     }
 
-    static async sendRobotsToSafePosition(installationCode: string) {
+    static async sendRobotsToDockingPosition(installationCode: string) {
         const path: string = `emergency-action/${installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone`
         const body = {}
 
