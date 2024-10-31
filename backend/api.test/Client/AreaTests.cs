@@ -213,9 +213,6 @@ namespace Api.Test.Client
         {
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
-            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             string installationCode = installation.InstallationCode;
 
 
