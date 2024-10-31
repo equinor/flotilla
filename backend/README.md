@@ -322,8 +322,7 @@ The access matrix looks like this:
 | Missions                   | Read          | Read     | CRUD      |
 | Robots                     | Read          | Read     | CRUD      |
 | Robot Models               | Read          | Read     | CRUD      |
-| Safe Positions             | Read          | Read     | CRUD      |
 | Start Missions Directly    | ❌            | ❌       | ✔️        |
 | Stop/Pause/Resume Missions | ❌            | ✔️       | ✔️        |
 | Localize Robots            | ❌            | ✔️       | ✔️        |
-| Robot to Safe position     | ❌            | ✔️       | ✔️        |
+| Send Robot to Dock         | ❌            | ✔️       | ✔️        |
