@@ -82,7 +82,7 @@ namespace Api.Services
 
             return await GetAreas().Where(a => a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
-        public async Task<Area> Create(CreateAreaQuery newAreaQuery, List<Pose> positions)
+        public async Task<Area> Create(CreateAreaQuery newAreaQuery)
         {
 
             var installation = await installationService.ReadByInstallationCode(newAreaQuery.InstallationCode, readOnly: true) ??
@@ -128,12 +128,6 @@ namespace Api.Services
 
             DetachTracking(newArea);
             return newArea;
-        }
-
-        public async Task<Area> Create(CreateAreaQuery newArea)
-        {
-            var area = await Create(newArea, []);
-            return area;
         }
 
         public async Task<Area> Update(Area area)
