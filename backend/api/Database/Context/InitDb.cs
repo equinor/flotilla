@@ -95,7 +95,7 @@ namespace Api.Database.Context
             var plant2 = new Plant
             {
                 Id = Guid.NewGuid().ToString(),
-                Installation = installations[0],
+                Installation = installations[1],
                 Name = "Kårstø",
                 PlantCode = "Kårstø"
             };
@@ -154,13 +154,23 @@ namespace Api.Database.Context
                 Name = "Huldra Mezzanine Deck"
             };
 
+            var deckKLab = new Deck
+            {
+                Id = Guid.NewGuid().ToString(),
+                Plant = plants[1],
+                Installation = plants[1].Installation,
+                DefaultLocalizationPose = new DefaultLocalizationPose(),
+                Name = "K-Lab"
+            };
+
             return new List<Deck>(
             [
                 deck1,
                 deck2,
                 deck3,
                 deck4,
-                deckHuldraMezzanine
+                deckHuldraMezzanine,
+                deckKLab
             ]);
         }
 
@@ -243,6 +253,17 @@ namespace Api.Database.Context
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
             };
 
+            var areaKLab = new Area
+            {
+                Id = Guid.NewGuid().ToString(),
+                Deck = decks[5],
+                Plant = decks[5].Plant,
+                Installation = decks[5].Plant.Installation,
+                Name = "K-lab",
+                MapMetadata = new MapMetadata(),
+                DefaultLocalizationPose = new DefaultLocalizationPose(),
+            };
+
             return new List<Area>(
             [
                 area1,
@@ -251,7 +272,8 @@ namespace Api.Database.Context
                 area4,
                 area5,
                 area6,
-                areaHuldraHB
+                areaHuldraHB,
+                areaKLab
             ]);
         }
 
