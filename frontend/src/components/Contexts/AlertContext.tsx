@@ -62,7 +62,7 @@ const defaultAlertInterface = {
     clearListAlert: (source: AlertType) => {},
 }
 
-export const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
+const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
 
 export const AlertProvider: FC<Props> = ({ children }) => {
     const [alerts, setAlerts] = useState<AlertDictionaryType>(defaultAlertInterface.alerts)

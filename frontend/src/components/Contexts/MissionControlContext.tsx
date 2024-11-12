@@ -15,7 +15,7 @@ interface Props {
     children: React.ReactNode
 }
 
-export interface IMissionControlContext {
+interface IMissionControlContext {
     missionControlState: IMissionControlState
     updateRobotMissionState: (newState: MissionStatusRequest, robotId: string) => void
 }
@@ -25,7 +25,7 @@ const defaultMissionControlInterface = {
     updateRobotMissionState: (newState: MissionStatusRequest, robotId: string) => {},
 }
 
-export const MissionControlContext = createContext<IMissionControlContext>(defaultMissionControlInterface)
+const MissionControlContext = createContext<IMissionControlContext>(defaultMissionControlInterface)
 const defaultManagementState: IMissionControlState = {
     isRobotMissionWaitingForResponseDict: {},
 }

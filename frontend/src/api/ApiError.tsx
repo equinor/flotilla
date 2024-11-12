@@ -1,6 +1,6 @@
 import { CustomError } from 'ts-custom-error'
 
-export const StatusTexts: { [key: number]: string } = {
+const StatusTexts: { [key: number]: string } = {
     400: 'Bad Request',
     401: 'Unauthorized', // RFC 7235
     402: 'Payment Required',

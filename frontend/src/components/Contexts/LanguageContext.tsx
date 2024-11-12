@@ -19,7 +19,7 @@ const defaultLanguageInterface = {
     TranslateText: (str: string) => '',
 }
 
-export const LanguageContext = createContext<ILanguageContext>(defaultLanguageInterface)
+const LanguageContext = createContext<ILanguageContext>(defaultLanguageInterface)
 
 export const LanguageProvider: FC<Props> = ({ children }) => {
     const prevLanguage = window.localStorage.getItem('flotilla-language')

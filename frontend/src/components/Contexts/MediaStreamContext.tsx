@@ -27,7 +27,7 @@ const defaultMediaStreamInterface = {
     mediaStreams: {},
 }
 
-export const MediaStreamContext = createContext<IMediaStreamContext>(defaultMediaStreamInterface)
+const MediaStreamContext = createContext<IMediaStreamContext>(defaultMediaStreamInterface)
 
 export const MediaStreamProvider: FC<Props> = ({ children }) => {
     const [mediaStreams, setMediaStreams] = useState<MediaStreamDictionaryType>(

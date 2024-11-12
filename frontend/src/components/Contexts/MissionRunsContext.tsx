@@ -34,7 +34,7 @@ const defaultMissionRunsContext: IMissionRunsContext = {
     setLoadingMissionSet: (newLoadingMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => {},
 }
 
-export const MissionRunsContext = createContext<IMissionRunsContext>(defaultMissionRunsContext)
+const MissionRunsContext = createContext<IMissionRunsContext>(defaultMissionRunsContext)
 
 const updateQueueIfMissionAlreadyQueued = (oldQueue: Mission[], updatedMission: Mission) => {
     const existingMissionIndex = oldQueue.findIndex((m) => m.id === updatedMission.id)
@@ -76,7 +76,7 @@ const fetchMissionRuns = (params: {
     orderBy: string
 }): Promise<Mission[]> => BackendAPICaller.getMissionRuns(params).then((response) => response.content)
 
-export const useMissionRuns = (): IMissionRunsContext => {
+const useMissionRuns = (): IMissionRunsContext => {
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
     const [loadingMissionSet, setLoadingMissionSet] = useState<Set<string>>(new Set())
