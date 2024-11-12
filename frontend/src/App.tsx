@@ -14,6 +14,7 @@ import { RobotProvider } from 'components/Contexts/RobotContext'
 import { config } from 'config'
 import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitionsContext'
 import { MediaStreamProvider } from 'components/Contexts/MediaStreamContext'
+import { DockProvider } from 'components/Contexts/DockContext'
 
 const appInsights = new ApplicationInsights({
     config: {
@@ -35,22 +36,24 @@ const App = () => (
                         <RobotProvider>
                             <MissionRunsProvider>
                                 <AlertProvider>
-                                    <MissionRunsProvider>
-                                        <MissionControlProvider>
-                                            <UnauthenticatedTemplate>
-                                                <div className="sign-in-page">
-                                                    <AssetSelectionPage></AssetSelectionPage>
-                                                </div>
-                                            </UnauthenticatedTemplate>
-                                            <AuthenticatedTemplate>
-                                                <MissionFilterProvider>
-                                                    <MediaStreamProvider>
-                                                        <FlotillaSite />
-                                                    </MediaStreamProvider>
-                                                </MissionFilterProvider>
-                                            </AuthenticatedTemplate>
-                                        </MissionControlProvider>
-                                    </MissionRunsProvider>
+                                    <DockProvider>
+                                        <MissionRunsProvider>
+                                            <MissionControlProvider>
+                                                <UnauthenticatedTemplate>
+                                                    <div className="sign-in-page">
+                                                        <AssetSelectionPage></AssetSelectionPage>
+                                                    </div>
+                                                </UnauthenticatedTemplate>
+                                                <AuthenticatedTemplate>
+                                                    <MissionFilterProvider>
+                                                        <MediaStreamProvider>
+                                                            <FlotillaSite />
+                                                        </MediaStreamProvider>
+                                                    </MissionFilterProvider>
+                                                </AuthenticatedTemplate>
+                                            </MissionControlProvider>
+                                        </MissionRunsProvider>
+                                    </DockProvider>
                                 </AlertProvider>
                             </MissionRunsProvider>
                         </RobotProvider>
