@@ -6,7 +6,6 @@ import { LanguageProvider } from 'components/Contexts/LanguageContext'
 import { MissionControlProvider } from 'components/Contexts/MissionControlContext'
 import { MissionFilterProvider } from 'components/Contexts/MissionFilterContext'
 import { MissionRunsProvider } from 'components/Contexts/MissionRunsContext'
-import { DockProvider } from 'components/Contexts/DockContext'
 import { AlertProvider } from 'components/Contexts/AlertContext'
 import { InstallationProvider } from 'components/Contexts/InstallationContext'
 import { AuthProvider } from 'components/Contexts/AuthProvider'
@@ -36,24 +35,22 @@ const App = () => (
                         <RobotProvider>
                             <MissionRunsProvider>
                                 <AlertProvider>
-                                    <DockProvider>
-                                        <MissionRunsProvider>
-                                            <MissionControlProvider>
-                                                <UnauthenticatedTemplate>
-                                                    <div className="sign-in-page">
-                                                        <AssetSelectionPage></AssetSelectionPage>
-                                                    </div>
-                                                </UnauthenticatedTemplate>
-                                                <AuthenticatedTemplate>
-                                                    <MissionFilterProvider>
-                                                        <MediaStreamProvider>
-                                                            <FlotillaSite />
-                                                        </MediaStreamProvider>
-                                                    </MissionFilterProvider>
-                                                </AuthenticatedTemplate>
-                                            </MissionControlProvider>
-                                        </MissionRunsProvider>
-                                    </DockProvider>
+                                    <MissionRunsProvider>
+                                        <MissionControlProvider>
+                                            <UnauthenticatedTemplate>
+                                                <div className="sign-in-page">
+                                                    <AssetSelectionPage></AssetSelectionPage>
+                                                </div>
+                                            </UnauthenticatedTemplate>
+                                            <AuthenticatedTemplate>
+                                                <MissionFilterProvider>
+                                                    <MediaStreamProvider>
+                                                        <FlotillaSite />
+                                                    </MediaStreamProvider>
+                                                </MissionFilterProvider>
+                                            </AuthenticatedTemplate>
+                                        </MissionControlProvider>
+                                    </MissionRunsProvider>
                                 </AlertProvider>
                             </MissionRunsProvider>
                         </RobotProvider>
