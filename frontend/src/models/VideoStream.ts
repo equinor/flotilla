@@ -1,8 +1,3 @@
-export enum MediaType {
-    Video,
-    Audio,
-}
-
 export enum MediaConnectionType {
     LiveKit = 'LiveKit',
 }
