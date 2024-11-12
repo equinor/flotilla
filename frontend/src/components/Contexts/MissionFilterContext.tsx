@@ -92,7 +92,7 @@ const defaultMissionFilterInterface: IMissionFilterContext = {
     },
 }
 
-export const MissionFilterContext = createContext<IMissionFilterContext>(defaultMissionFilterInterface)
+const MissionFilterContext = createContext<IMissionFilterContext>(defaultMissionFilterInterface)
 
 export const MissionFilterProvider: FC<Props> = ({ children }) => {
     const { TranslateText } = useLanguageContext()

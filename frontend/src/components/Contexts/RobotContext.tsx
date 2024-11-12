@@ -20,7 +20,7 @@ interface Props {
     children: React.ReactNode
 }
 
-export interface IRobotContext {
+interface IRobotContext {
     enabledRobots: Robot[]
 }
 
@@ -28,7 +28,7 @@ const defaultRobotState = {
     enabledRobots: [],
 }
 
-export const RobotContext = createContext<IRobotContext>(defaultRobotState)
+const RobotContext = createContext<IRobotContext>(defaultRobotState)
 
 export const RobotProvider: FC<Props> = ({ children }) => {
     const [enabledRobots, setEnabledRobots] = useState<Robot[]>(defaultRobotState.enabledRobots)

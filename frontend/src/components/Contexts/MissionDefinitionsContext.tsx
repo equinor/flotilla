@@ -20,7 +20,7 @@ const defaultMissionDefinitionsContext: IMissionDefinitionsContext = {
     missionDefinitions: [],
 }
 
-export const MissionDefinitionsContext = createContext<IMissionDefinitionsContext>(defaultMissionDefinitionsContext)
+const MissionDefinitionsContext = createContext<IMissionDefinitionsContext>(defaultMissionDefinitionsContext)
 
 const upsertMissionDefinition = (oldQueue: MissionDefinition[], updatedMission: MissionDefinition) => {
     const oldQueueCopy = [...oldQueue]
@@ -39,7 +39,7 @@ const fetchMissionDefinitions = (params: {
     orderBy: string
 }): Promise<MissionDefinition[]> => BackendAPICaller.getMissionDefinitions(params).then((response) => response.content)
 
-export const useMissionDefinitions = (): IMissionDefinitionsContext => {
+const useMissionDefinitions = (): IMissionDefinitionsContext => {
     const [missionDefinitions, setMissionDefinitions] = useState<MissionDefinition[]>([])
     const { registerEvent, connectionReady } = useSignalRContext()
     const { installationCode } = useInstallationContext()

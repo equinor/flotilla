@@ -51,7 +51,7 @@ const defaultSignalRInterface = {
 
 const URL = config.BACKEND_API_SIGNALR_URL
 
-export const SignalRContext = createContext<ISignalRContext>(defaultSignalRInterface)
+const SignalRContext = createContext<ISignalRContext>(defaultSignalRInterface)
 
 export const SignalRProvider: FC<Props> = ({ children }) => {
     const [connection, setConnection] = useState<signalR.HubConnection | undefined>(defaultSignalRInterface.connection)
