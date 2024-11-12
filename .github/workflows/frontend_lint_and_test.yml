@@ -64,3 +64,15 @@ jobs:
         run: yarn
       - name: Run ESLint
         run: npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0
+
+  check_exports:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install modules
+        run: yarn
+      - name: Run Unused Exports Check
+        run: ./node_modules/.bin/ts-unused-exports tsconfig.json
