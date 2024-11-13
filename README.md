@@ -25,8 +25,7 @@ For development, please fork the repository. Then, clone the repository:
 git clone https://github.com/equinor/flotilla
 ```
 
-Please see separate installation guides for [frontend](frontend), [backend](backend), and [Broker](broker).
-For the environment setup, either run the script as described below or do it manually as described in each component.
+Please see separate installation guides for the [frontend](frontend), [backend](backend), and [Broker](broker). For the environment setup, either run the script as described below or set it up manually as described in each component's guide.
 
 ### Automatic environment setup
 
