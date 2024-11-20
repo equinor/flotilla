@@ -42,7 +42,7 @@ const ContainButton = styled.div`
 interface MissionProps {
     missionName: string
     robotId: string
-    missionTaskType: TaskType
+    missionTaskType: TaskType | undefined
 }
 
 export enum MissionStatusRequest {
@@ -51,7 +51,7 @@ export enum MissionStatusRequest {
     Resume,
 }
 
-const DialogContent = ({ missionTaskType }: { missionTaskType: TaskType }) => {
+const DialogContent = ({ missionTaskType }: { missionTaskType: TaskType | undefined }) => {
     const { TranslateText } = useLanguageContext()
     switch (missionTaskType) {
         case TaskType.Localization:
@@ -76,12 +76,23 @@ const DialogContent = ({ missionTaskType }: { missionTaskType: TaskType }) => {
                     </Typography>
                 </StyledText>
             )
-        default:
+        case TaskType.Inspection:
             return (
                 <StyledText>
                     <Typography variant="body_long">{TranslateText('Stop button pressed warning text')}</Typography>
                     <Typography variant="body_long">
                         {TranslateText('Stop button pressed confirmation text')}
+                    </Typography>
+                </StyledText>
+            )
+        default:
+            return (
+                <StyledText>
+                    <Typography variant="body_long">
+                        {TranslateText('Stop button pressed with no tasktype warning text')}
+                    </Typography>
+                    <Typography variant="body_long">
+                        {TranslateText('Stop button pressed with no mission confirmation text')}
                     </Typography>
                 </StyledText>
             )

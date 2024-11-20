@@ -83,6 +83,7 @@
     "Stop button pressed warning text": "You are about to stop the entire mission. If there are no more missions in the queue, the robot will return to the start position.",
     "Stop button pressed confirmation text": "Are you sure you want to stop the mission?",
     "Stop mission": "Stop mission",
+    "Stop mission:": "Stop mission: ",
     "Search for missions": "Search for missions",
     "Search for a tag": "Search for a tag",
     "Search for a robot name": "Search for a robot name",
@@ -271,5 +272,8 @@
     "Mission Control": "Mission Control",
     "Open mission": "Open mission",
     "Open robot information": "Open robot information",
-    "Not available": "Not available"
+    "Not available": "Not available",
+    "Stop button pressed with no tasktype warning text": "A stop command was recieved with no ongoing tasks.",
+    "No mission running": "No Flotilla mission is running",
+    "Stop button pressed with no mission confirmation text": "Do you want to send the stop command to the robot regardless?"
 }
