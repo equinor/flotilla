@@ -1,9 +1,7 @@
-import { Button, Dialog, Typography, Icon } from '@equinor/eds-core-react'
+import { Button, Dialog, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Icons } from 'utils/icons'
 import { useState } from 'react'
-import { tokens } from '@equinor/eds-tokens'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
@@ -40,7 +38,7 @@ const ContainButton = styled.div`
 `
 
 interface MissionProps {
-    missionName: string
+    missionName?: string
     robotId: string
     missionTaskType: TaskType | undefined
 }
@@ -99,48 +97,44 @@ const DialogContent = ({ missionTaskType }: { missionTaskType: TaskType | undefi
     }
 }
 
-export const StopMissionDialog = ({ missionName, robotId, missionTaskType }: MissionProps): JSX.Element => {
+export const StopMissionDialog = ({
+    missionName,
+    robotId,
+    missionTaskType,
+    isStopMissionDialogOpen,
+    toggleDialog,
+}: MissionProps & { isStopMissionDialogOpen: boolean; toggleDialog: () => void }): JSX.Element => {
     const { TranslateText } = useLanguageContext()
-    const [isStopMissionDialogOpen, setIsStopMissionDialogOpen] = useState<boolean>(false)
     const { updateRobotMissionState } = useMissionControlContext()
 
     return (
-        <>
-            <Button variant="ghost_icon" onClick={() => setIsStopMissionDialogOpen(true)}>
-                <Icon
-                    name={Icons.StopButton}
-                    style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
-                    size={40}
-                />
-            </Button>
-
-            <StyledDialog open={isStopMissionDialogOpen} isDismissable>
-                <Dialog.Header>
-                    <Dialog.Title>
-                        <Typography variant="h5">
-                            {TranslateText('Stop mission')} <strong>'{missionName}'</strong>?{' '}
-                        </Typography>
-                    </Dialog.Title>
-                </Dialog.Header>
-                <Dialog.CustomContent>
-                    <DialogContent missionTaskType={missionTaskType} />
-                </Dialog.CustomContent>
-                <Dialog.Actions>
-                    <StyledDisplayButtons>
-                        <Button variant="outlined" color="danger" onClick={() => setIsStopMissionDialogOpen(false)}>
-                            {TranslateText('Cancel')}
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="danger"
-                            onClick={() => updateRobotMissionState(MissionStatusRequest.Stop, robotId)}
-                        >
-                            {TranslateText('Stop mission')}
-                        </Button>
-                    </StyledDisplayButtons>
-                </Dialog.Actions>
-            </StyledDialog>
-        </>
+        <StyledDialog open={isStopMissionDialogOpen} isDismissable>
+            <Dialog.Header>
+                <Dialog.Title>
+                    <Typography variant="h5">
+                        {missionName ? TranslateText('Stop mission:') : TranslateText('No mission running')}{' '}
+                        {missionName && missionName}
+                    </Typography>
+                </Dialog.Title>
+            </Dialog.Header>
+            <Dialog.CustomContent>
+                <DialogContent missionTaskType={missionTaskType} />
+            </Dialog.CustomContent>
+            <Dialog.Actions>
+                <StyledDisplayButtons>
+                    <Button variant="outlined" color="danger" onClick={toggleDialog}>
+                        {TranslateText('Cancel')}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        color="danger"
+                        onClick={() => updateRobotMissionState(MissionStatusRequest.Stop, robotId)}
+                    >
+                        {TranslateText('Stop mission')}
+                    </Button>
+                </StyledDisplayButtons>
+            </Dialog.Actions>
+        </StyledDialog>
     )
 }
 
