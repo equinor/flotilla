@@ -83,6 +83,7 @@
     "Stop button pressed warning text": "Du er i ferd med å stoppe hele oppdraget. Hvis det ikke er flere oppdrag i kø vil roboten bli sendt tilbake til startposisjonen sin.",
     "Stop button pressed confirmation text": "Er du sikker på at du vil stoppe oppdraget?",
     "Stop mission": "Stopp oppdraget",
+    "Stop mission:": "Stopp oppdrag: ",
     "Search for missions": "Søk etter oppdrag",
     "Search for a tag": "Søk etter tag",
     "Search for a robot name": "Søk etter robotnavn",
@@ -271,5 +272,8 @@
     "Mission Control": "Oppdragskontroll",
     "Open mission": "Åpne oppdrag",
     "Open robot information": "Åpne robotinformasjon",
-    "Not available": "Ikke tilgjengelig"
+    "Not available": "Ikke tilgjengelig",
+    "No mission running": "Ingen pågående Flotilla oppdrag",
+    "Stop button pressed with no tasktype warning text": "Et stopp signal ble mottat uten noen pågående oppdrag.",
+    "Stop button pressed with no mission confirmation text": "Ønsker du å sende stopp signalet til roboten likevel?"
 }
