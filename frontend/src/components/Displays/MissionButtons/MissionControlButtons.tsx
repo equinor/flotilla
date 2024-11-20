@@ -8,6 +8,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionControlContext } from 'components/Contexts/MissionControlContext'
 import { StopMissionDialog, MissionStatusRequest } from 'components/Pages/FrontPage/MissionOverview/StopDialogs'
 import { TaskType } from 'models/Task'
+import { useState } from 'react'
 
 interface MissionControlButtonsProps {
     missionName: string
@@ -70,12 +71,29 @@ export const MissionControlButtons = ({
 const OngoingMissionButton = ({ missionName, robotId, missionTaskType }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { updateRobotMissionState } = useMissionControlContext()
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const toggleStopMissionDialog = () => {
+        setIsDialogOpen(!isDialogOpen)
+    }
 
     return (
         <>
             <ButtonStyle>
                 <ButtonText>
-                    <StopMissionDialog missionName={missionName} robotId={robotId} missionTaskType={missionTaskType} />
+                    <Button variant="ghost_icon" onClick={toggleStopMissionDialog}>
+                        <Icon
+                            name={Icons.StopButton}
+                            style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                            size={40}
+                        />
+                        <StopMissionDialog
+                            missionName={missionName}
+                            robotId={robotId}
+                            missionTaskType={missionTaskType}
+                            isStopMissionDialogOpen={isDialogOpen}
+                            toggleDialog={toggleStopMissionDialog}
+                        />
+                    </Button>
                     <Typography variant="caption">{TranslateText('Stop')}</Typography>
                 </ButtonText>
                 <ButtonText>
@@ -99,12 +117,29 @@ const OngoingMissionButton = ({ missionName, robotId, missionTaskType }: Mission
 const PausedMissionButton = ({ missionName, robotId, missionTaskType }: MissionProps) => {
     const { TranslateText } = useLanguageContext()
     const { updateRobotMissionState } = useMissionControlContext()
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const toggleStopMissionDialog = () => {
+        setIsDialogOpen(!isDialogOpen)
+    }
 
     return (
         <>
             <ButtonStyle>
                 <ButtonText>
-                    <StopMissionDialog missionName={missionName} robotId={robotId} missionTaskType={missionTaskType} />
+                    <Button variant="ghost_icon" onClick={toggleStopMissionDialog}>
+                        <Icon
+                            name={Icons.StopButton}
+                            style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                            size={40}
+                        />
+                        <StopMissionDialog
+                            missionName={missionName}
+                            robotId={robotId}
+                            missionTaskType={missionTaskType}
+                            isStopMissionDialogOpen={isDialogOpen}
+                            toggleDialog={toggleStopMissionDialog}
+                        />
+                    </Button>
                     <Typography variant="caption">{TranslateText('Stop')}</Typography>
                 </ButtonText>
                 <ButtonText>
