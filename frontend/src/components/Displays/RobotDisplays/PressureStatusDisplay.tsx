@@ -27,7 +27,7 @@ export const PressureStatusDisplay = ({
 }: PressureStatusDisplayProps): JSX.Element => {
     const barToMillibar = 1000
     const pressureInMilliBar = `${Math.round(pressure * barToMillibar)}mBar`
-    let icon_color: string = tokens.colors.interactive.primary__resting.hex
+    let icon_color: string = tokens.colors.text.static_icons__default.hex
     let pressureStatus: PressureStatus
 
     if (!upperPressureWarningThreshold || !lowerPressureWarningThreshold) {
@@ -40,7 +40,7 @@ export const PressureStatusDisplay = ({
 
     switch (pressureStatus) {
         case PressureStatus.Normal:
-            icon_color = tokens.colors.interactive.primary__resting.hex
+            icon_color = tokens.colors.text.static_icons__default.hex
             break
         case PressureStatus.Critical:
             icon_color = tokens.colors.interactive.warning__resting.hex

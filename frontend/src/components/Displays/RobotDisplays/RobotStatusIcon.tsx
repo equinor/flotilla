@@ -44,8 +44,8 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected }: Statu
             break
         }
         case RobotStatus.Busy: {
-            statusIcon = Icons.ClosedCircleOutlined
-            iconColor = tokens.colors.interactive.warning__resting.hex
+            statusIcon = Icons.Ongoing
+            iconColor = tokens.colors.text.static_icons__default.hex
             break
         }
         case RobotStatus.Blocked: {

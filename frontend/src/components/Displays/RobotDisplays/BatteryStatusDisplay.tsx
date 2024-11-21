@@ -23,7 +23,7 @@ export const BatteryStatusDisplay = ({
     batteryWarningLimit,
     textAlignedBottom,
 }: BatteryStatusDisplayProps): JSX.Element => {
-    let iconColor: string = tokens.colors.interactive.primary__resting.hex
+    let iconColor: string = tokens.colors.text.static_icons__default.hex
 
     const getBatteryIcon = (batteryLevel?: number) => {
         switch (true) {
