@@ -41,6 +41,7 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
+            if (robot.RobotCapabilities is not null && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_localize)) { return true; }
             return robot.CurrentArea is not null;
         }
 
@@ -53,6 +54,8 @@ namespace Api.Services
                 logger.LogError("{Message}", errorMessage);
                 throw new RobotNotFoundException(errorMessage);
             }
+
+            if (robot.RobotCapabilities is not null && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_localize)) { return true; }
 
             if (robot.CurrentArea is null)
             {

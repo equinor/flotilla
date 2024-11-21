@@ -187,6 +187,8 @@ namespace Api.Database.Models
         take_thermal_video,
         record_audio,
         localize,
+        auto_localize,
+        auto_return_to_home,
         docking_procedure,
         return_to_home,
     }
