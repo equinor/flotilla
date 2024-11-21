@@ -110,7 +110,12 @@ export const RobotStatusCard = ({ robot, mission }: RobotProps) => {
                 </HorizontalContent>
                 <HorizontalContent>
                     <VerticalContent>
-                        <Typography variant="meta">{TranslateText('Status')}</Typography>
+                        <Typography
+                            variant="meta"
+                            style={{ fontSize: 14, color: tokens.colors.text.static_icons__secondary.hex }}
+                        >
+                            {TranslateText('Status')}
+                        </Typography>
                         <RobotStatusChip
                             status={robot.status}
                             flotillaStatus={robot.flotillaStatus}
@@ -121,7 +126,12 @@ export const RobotStatusCard = ({ robot, mission }: RobotProps) => {
                     {robot.status !== RobotStatus.Offline ? (
                         <>
                             <VerticalContent>
-                                <Typography variant="meta">{TranslateText('Battery')}</Typography>
+                                <Typography
+                                    variant="meta"
+                                    style={{ fontSize: 14, color: tokens.colors.text.static_icons__secondary.hex }}
+                                >
+                                    {TranslateText('Battery')}
+                                </Typography>
                                 <BatteryStatusDisplay
                                     batteryLevel={robot.batteryLevel}
                                     batteryWarningLimit={robot.model.batteryWarningThreshold}
@@ -130,7 +140,12 @@ export const RobotStatusCard = ({ robot, mission }: RobotProps) => {
 
                             {robot.pressureLevel !== undefined && robot.pressureLevel !== null && (
                                 <VerticalContent>
-                                    <Typography variant="meta">{TranslateText('Pressure')}</Typography>
+                                    <Typography
+                                        variant="meta"
+                                        style={{ fontSize: 14, color: tokens.colors.text.static_icons__secondary.hex }}
+                                    >
+                                        {TranslateText('Pressure')}
+                                    </Typography>
                                     <PressureStatusDisplay
                                         pressure={robot.pressureLevel}
                                         upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}

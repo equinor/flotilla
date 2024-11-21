@@ -54,8 +54,8 @@ const StatusContent = styled.div<{ $alignItems?: string }>`
     justify-content: flex-end;
     gap: 2rem;
     @media (max-width: 600px) {
-        flex-direction: row;
-        align-items: flex-end;
+        flex-direction: column;
+        align-items: flex-start;
     }
 `
 
