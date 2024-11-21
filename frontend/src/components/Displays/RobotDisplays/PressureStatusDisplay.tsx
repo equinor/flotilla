@@ -10,7 +10,7 @@ const PressureAlignment = styled.div`
     align-items: center;
 `
 const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
-    font-size: ${(props) => props.$fontSize};
+    font-size: ${(props) => props.$fontSize}px;
 `
 interface PressureStatusDisplayProps {
     pressure: number

@@ -115,19 +115,20 @@ export const RobotPage = () => {
                                     status={selectedRobot.status}
                                     flotillaStatus={selectedRobot.flotillaStatus}
                                     isarConnected={selectedRobot.isarConnected}
+                                    itemSize={32}
                                 />
 
                                 {selectedRobot.status !== RobotStatus.Offline && (
                                     <>
                                         <BatteryStatusDisplay
-                                            itemSize={48}
+                                            itemSize={32}
                                             batteryLevel={selectedRobot.batteryLevel}
                                             batteryWarningLimit={selectedRobot.model.batteryWarningThreshold}
                                         />
                                         {selectedRobot.pressureLevel !== null &&
                                             selectedRobot.pressureLevel !== undefined && (
                                                 <PressureStatusDisplay
-                                                    itemSize={48}
+                                                    itemSize={32}
                                                     pressure={selectedRobot.pressureLevel}
                                                     upperPressureWarningThreshold={
                                                         selectedRobot.model.upperPressureWarningThreshold

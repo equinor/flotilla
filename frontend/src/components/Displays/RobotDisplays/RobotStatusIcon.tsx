@@ -9,6 +9,7 @@ interface StatusProps {
     status?: RobotStatus
     isarConnected: boolean
     flotillaStatus?: RobotFlotillaStatus
+    itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
 }
 
 const StyledStatus = styled.div`
@@ -18,7 +19,8 @@ const StyledStatus = styled.div`
     gap: 2px;
 `
 
-const LongTypography = styled(Typography)`
+const LongTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
+    font-size: ${(props) => props.$fontSize}px;
     overflow: visible;
     white-space: normal;
     text-overflow: unset;
@@ -26,13 +28,7 @@ const LongTypography = styled(Typography)`
     hyphens: auto;
 `
 
-const StyledIcon = styled(Icon)`
-    width: 24px;
-    min-width: 24px;
-    height: 24px;
-`
-
-export const RobotStatusChip = ({ status, flotillaStatus, isarConnected }: StatusProps) => {
+export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSize }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
 
     var iconColor = tokens.colors.text.static_icons__default.hex
@@ -81,8 +77,10 @@ export const RobotStatusChip = ({ status, flotillaStatus, isarConnected }: Statu
 
     return (
         <StyledStatus>
-            <StyledIcon name={statusIcon} style={{ color: iconColor }} />
-            <LongTypography variant="body_short">{TranslateText(status)}</LongTypography>
+            <Icon name={statusIcon} size={itemSize} style={{ color: iconColor }} />
+            <LongTypography $fontSize={itemSize} variant="body_short">
+                {TranslateText(status)}
+            </LongTypography>
         </StyledStatus>
     )
 }
