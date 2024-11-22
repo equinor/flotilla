@@ -17,6 +17,8 @@ namespace Api.Services
         public Task<IsarControlMissionResponse> ResumeMission(Robot robot);
 
         public Task<IsarMission> StartMoveArm(Robot robot, string armPosition);
+
+        public Task<MediaConfig> GetMediaStreamConfig(Robot robot);
     }
 
     public class IsarService(IDownstreamApi isarApi, ILogger<IsarService> logger) : IIsarService
@@ -274,6 +276,66 @@ namespace Api.Services
             };
 
             return (description, (int)statusCode);
+        }
+
+        public async Task<MediaConfig> GetMediaStreamConfig(Robot robot)
+        {
+            string mediaStreamPath = $"/media/media-stream-config";
+            var response = await CallApi(
+                HttpMethod.Get,
+                robot.IsarUri,
+                mediaStreamPath
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                (string message, _) = GetErrorDescriptionFoFailedIsarRequest(response);
+                string errorResponse = await response.Content.ReadAsStringAsync();
+                logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
+                throw new ConfigException(message);
+            }
+            if (response.Content is null)
+            {
+                string errorMessage = "Could not read content from new robot media stream config";
+                logger.LogError("{ErrorMessage}", errorMessage);
+                throw new ConfigException(errorMessage);
+            }
+
+            IsarMediaConfigMessage? isarMediaConfigResponse;
+            try
+            {
+                isarMediaConfigResponse = await response.Content.ReadFromJsonAsync<IsarMediaConfigMessage>();
+            }
+            catch (JsonException)
+            {
+                string errorMessage = $"Could not parse content from new robot media stream config. {await response.Content.ReadAsStringAsync()}";
+                logger.LogError("{ErrorMessage}", errorMessage);
+                throw new ConfigException(errorMessage);
+            }
+
+            if (isarMediaConfigResponse == null)
+            {
+                string errorMessage = $"Parsing of robot media stream config resulted in empty config. {await response.Content.ReadAsStringAsync()}";
+                logger.LogError("{ErrorMessage}", errorMessage);
+                throw new ConfigException(errorMessage);
+            }
+
+            bool parseSuccess = Enum.TryParse(isarMediaConfigResponse.MediaConnectionType, out MediaConnectionType connectionType);
+
+            if (!parseSuccess)
+            {
+                string errorMessage = $"Could not parse connection type from new robot media stream config. {isarMediaConfigResponse.MediaConnectionType}";
+                logger.LogError("{ErrorMessage}", errorMessage);
+                throw new ConfigException(errorMessage);
+            }
+
+            return new MediaConfig
+            {
+                Url = isarMediaConfigResponse.Url,
+                Token = isarMediaConfigResponse.Token,
+                RobotId = robot.Id,
+                MediaConnectionType = connectionType
+            };
         }
     }
 }
