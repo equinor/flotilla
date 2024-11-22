@@ -1,4 +1,4 @@
-import { Chip, Table, Typography } from '@equinor/eds-core-react'
+import { Button, Chip, Table, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -6,6 +6,8 @@ import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 import { StyledTableBody, StyledTableCaptionGray, StyledTableCell } from 'components/Styles/StyledComponents'
+import { InspectionType } from 'models/Inspection'
+import { useInspectionsContext } from 'components/Contexts/InpectionsContext'
 
 const StyledTable = styled(Table)`
     display: block;
@@ -25,29 +27,39 @@ const StyledTypography = styled(Typography)`
 
     padding-bottom: 10px;
 `
+interface TaskTableProps {
+    tasks: Task[] | undefined
+}
 
-export const TaskTable = ({ tasks }: { tasks: Task[] | undefined }) => {
+export const TaskTable = ({ tasks }: TaskTableProps) => {
     const { TranslateText } = useLanguageContext()
+
     return (
-        <StyledTable>
-            <StyledTableCaptionGray>
-                <StyledTypography variant="h2">{TranslateText('Tasks')}</StyledTypography>
-            </StyledTableCaptionGray>
-            <Table.Head>
-                <Table.Row>
-                    <StyledTableCell>#</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Inspection Types')}</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
-                </Table.Row>
-            </Table.Head>
-            <StyledTableBody>{tasks && <TaskTableRows tasks={tasks} />}</StyledTableBody>
-        </StyledTable>
+        <>
+            <StyledTable>
+                <StyledTableCaptionGray>
+                    <StyledTypography variant="h2">{TranslateText('Tasks')}</StyledTypography>
+                </StyledTableCaptionGray>
+                <Table.Head>
+                    <Table.Row>
+                        <StyledTableCell>#</StyledTableCell>
+                        <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
+                        <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
+                        <StyledTableCell>{TranslateText('Inspection Types')}</StyledTableCell>
+                        <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
+                    </Table.Row>
+                </Table.Head>
+                <StyledTableBody>{tasks && <TaskTableRows tasks={tasks} />}</StyledTableBody>
+            </StyledTable>
+        </>
     )
 }
 
-const TaskTableRows = ({ tasks }: { tasks: Task[] }) => {
+interface TaskTableRowsProps {
+    tasks: Task[]
+}
+
+const TaskTableRows = ({ tasks }: TaskTableRowsProps) => {
     const rows = tasks.map((task) => {
         // Workaround for current bug in echo
         const order: number = task.taskOrder + 1
@@ -104,15 +116,35 @@ const DescriptionDisplay = ({ task }: { task: Task }) => {
     return <Typography key={task.id + 'descr'}>{capitalizeFirstLetter(task.description)}</Typography>
 }
 
-const InspectionTypesDisplay = ({ task }: { task: Task }) => {
+interface InspectionTypesDisplayProps {
+    task: Task
+}
+
+const InspectionTypesDisplay = ({ task }: InspectionTypesDisplayProps) => {
     const { TranslateText } = useLanguageContext()
+    const { switchSelectedInspectionTask } = useInspectionsContext()
+
     return (
         <>
             {task.inspection &&
-                (task.inspection.inspectionUrl ? (
-                    <Typography key={task.id + task.inspection.id + 'insp'} link href={task.inspection.inspectionUrl}>
-                        {TranslateText(task.inspection.inspectionType as string)}
-                    </Typography>
+                (task.inspection.inspectionType === InspectionType.Image ? (
+                    task.status === TaskStatus.Successful ? (
+                        <Button
+                            key={task.id + task.inspection.id + 'insp'}
+                            variant="ghost"
+                            onClick={() => switchSelectedInspectionTask(task)}
+                        >
+                            <Typography variant="body_short_link">
+                                {TranslateText(task.inspection.inspectionType as string)}
+                            </Typography>
+                        </Button>
+                    ) : (
+                        <Button key={task.id + task.inspection.id + 'insp'} variant="ghost">
+                            <Typography variant="body_short">
+                                {TranslateText(task.inspection.inspectionType as string)}
+                            </Typography>
+                        </Button>
+                    )
                 ) : (
                     <Typography key={task.id + task.inspection.id + 'insp'}>
                         {TranslateText(task.inspection.inspectionType as string)}

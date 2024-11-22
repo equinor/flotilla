@@ -15,6 +15,7 @@ import { config } from 'config'
 import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitionsContext'
 import { MediaStreamProvider } from 'components/Contexts/MediaStreamContext'
 import { DockProvider } from 'components/Contexts/DockContext'
+import { InspectionsProvider } from 'components/Contexts/InpectionsContext'
 
 const appInsights = new ApplicationInsights({
     config: {
@@ -32,32 +33,34 @@ const App = () => (
         <LanguageProvider>
             <SignalRProvider>
                 <InstallationProvider>
-                    <MissionDefinitionsProvider>
-                        <RobotProvider>
-                            <MissionRunsProvider>
-                                <AlertProvider>
-                                    <DockProvider>
-                                        <MissionRunsProvider>
-                                            <MissionControlProvider>
-                                                <UnauthenticatedTemplate>
-                                                    <div className="sign-in-page">
-                                                        <AssetSelectionPage></AssetSelectionPage>
-                                                    </div>
-                                                </UnauthenticatedTemplate>
-                                                <AuthenticatedTemplate>
-                                                    <MissionFilterProvider>
-                                                        <MediaStreamProvider>
-                                                            <FlotillaSite />
-                                                        </MediaStreamProvider>
-                                                    </MissionFilterProvider>
-                                                </AuthenticatedTemplate>
-                                            </MissionControlProvider>
-                                        </MissionRunsProvider>
-                                    </DockProvider>
-                                </AlertProvider>
-                            </MissionRunsProvider>
-                        </RobotProvider>
-                    </MissionDefinitionsProvider>
+                    <InspectionsProvider>
+                        <MissionDefinitionsProvider>
+                            <RobotProvider>
+                                <MissionRunsProvider>
+                                    <AlertProvider>
+                                        <DockProvider>
+                                            <MissionRunsProvider>
+                                                <MissionControlProvider>
+                                                    <UnauthenticatedTemplate>
+                                                        <div className="sign-in-page">
+                                                            <AssetSelectionPage></AssetSelectionPage>
+                                                        </div>
+                                                    </UnauthenticatedTemplate>
+                                                    <AuthenticatedTemplate>
+                                                        <MissionFilterProvider>
+                                                            <MediaStreamProvider>
+                                                                <FlotillaSite />
+                                                            </MediaStreamProvider>
+                                                        </MissionFilterProvider>
+                                                    </AuthenticatedTemplate>
+                                                </MissionControlProvider>
+                                            </MissionRunsProvider>
+                                        </DockProvider>
+                                    </AlertProvider>
+                                </MissionRunsProvider>
+                            </RobotProvider>
+                        </MissionDefinitionsProvider>
+                    </InspectionsProvider>
                 </InstallationProvider>
             </SignalRProvider>
         </LanguageProvider>

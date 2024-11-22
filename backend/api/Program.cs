@@ -121,6 +121,7 @@ builder.Services.AddHostedService<TeamsMessageEventHandler>();
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));
 builder.Services.Configure<MapBlobOptions>(builder.Configuration.GetSection("Maps"));
 
+
 builder.Services
     .AddControllers()
     .AddJsonOptions(
@@ -142,6 +143,7 @@ builder.Services
     .AddInMemoryTokenCaches()
     .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
     .AddDownstreamApi(StidService.ServiceName, builder.Configuration.GetSection("Stid"))
+    .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("IDA"))
     .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
 builder.Services.AddAuthorizationBuilder().AddFallbackPolicy(
