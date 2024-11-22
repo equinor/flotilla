@@ -3,13 +3,16 @@ using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Options;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 namespace Api.Services
 {
     public interface IInspectionService
     {
+        public Task<byte[]> FetchInpectionImage(string inpectionName, string installationCode);
         public Task<Inspection> UpdateInspectionStatus(string isarTaskId, IsarTaskStatus isarTaskStatus);
         public Task<Inspection?> ReadByIsarTaskId(string id, bool readOnly = true);
         public Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingsQuery, string isarTaskId);
@@ -21,8 +24,15 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, IAccessRoleService accessRoleService) : IInspectionService
+    public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, IAccessRoleService accessRoleService,
+            IOptions<IDAOptions> blobOptions,
+            IBlobService blobService) : IInspectionService
     {
+        public async Task<byte[]> FetchInpectionImage(string inpectionName, string installationCode)
+        {
+            return await blobService.DownloadBlob(inpectionName, installationCode, blobOptions.Value.StorageAccount);
+        }
+
         public async Task<Inspection> UpdateInspectionStatus(string isarTaskId, IsarTaskStatus isarTaskStatus)
         {
             var inspection = await ReadByIsarTaskId(isarTaskId, readOnly: false);
