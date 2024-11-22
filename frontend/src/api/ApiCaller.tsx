@@ -430,4 +430,12 @@ export class BackendAPICaller {
         })
         return result.content
     }
+
+    static async getInspection(installationCode: string, taskId: string): Promise<Blob> {
+        const path: string = 'inspection/' + installationCode + '/' + taskId + '/taskId'
+
+        return BackendAPICaller.GET<Blob>(path, 'image/png')
+            .then((response) => response.content)
+            .catch(BackendAPICaller.handleError('GET', path))
+    }
 }

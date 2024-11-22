@@ -17,6 +17,8 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledPage } from 'components/Styles/StyledComponents'
+import { Task } from 'models/Task'
+import { InspectionDialogView, InspectionsViewSection } from './InpectionView/InpectionView'
 
 const StyledMissionPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -42,6 +44,8 @@ export const MissionPage = () => {
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
+    const [inspectionTask, setInspectionTask] = useState<Task>()
+
 
     useEffect(() => {
         if (selectedMission && !Object.keys(mediaStreams).includes(selectedMission?.robot.id))
@@ -101,7 +105,7 @@ export const MissionPage = () => {
                     <>
                         <MissionHeader mission={selectedMission} />
                         <TaskAndMapSection>
-                            <TaskTable tasks={selectedMission?.tasks} />
+                            <TaskTable tasks={selectedMission?.tasks} setInspectionTask={setInspectionTask} />
                             <MissionMapView mission={selectedMission} />
                         </TaskAndMapSection>
                         <VideoStreamSection>
@@ -109,6 +113,10 @@ export const MissionPage = () => {
                                 <VideoStreamWindow videoStreams={videoMediaStreams} />
                             )}
                         </VideoStreamSection>
+                        {inspectionTask && inspectionTask.isarTaskId && (
+                            <InspectionDialogView task={inspectionTask} setInspectionTask={setInspectionTask} tasks={selectedMission.tasks}/>
+                        )}
+                        <InspectionsViewSection tasks={selectedMission.tasks} setInspectionTask={setInspectionTask} />
                     </>
                 )}
             </StyledMissionPage>
