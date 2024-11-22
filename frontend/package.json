@@ -6,7 +6,7 @@
     "dependencies": {
         "@azure/msal-browser": "^2.38.4",
         "@azure/msal-react": "^1.5.13",
-        "@equinor/eds-core-react": "^0.36.1",
+        "@equinor/eds-core-react": "^0.42.5",
         "@equinor/eds-icons": "^0.21.0",
         "@equinor/eds-tokens": "^0.9.2",
         "@livekit/components-styles": "^1.0.12",
@@ -30,7 +30,7 @@
         "react-player": "^2.16.0",
         "react-router-dom": "^6.22.3",
         "react-scripts": "^5.0.1",
-        "styled-components": "^6.1.8",
+        "styled-components": "^6.1.13",
         "ts-custom-error": "^3.3.1",
         "typescript": "^4.7.4",
         "video.js": "^8.10.0",
