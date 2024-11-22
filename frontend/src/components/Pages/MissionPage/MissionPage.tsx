@@ -17,6 +17,8 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledPage } from 'components/Styles/StyledComponents'
+import { InspectionDialogView, InspectionsViewSection } from '../InspectionReportPage.tsx/InspectionView'
+import { useInspectionsContext } from 'components/Contexts/InpectionsContext'
 
 const StyledMissionPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -42,6 +44,7 @@ export const MissionPage = () => {
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
+    const { selectedInspectionTask } = useInspectionsContext()
 
     useEffect(() => {
         if (selectedMission && !Object.keys(mediaStreams).includes(selectedMission?.robot.id))
@@ -109,6 +112,10 @@ export const MissionPage = () => {
                                 <VideoStreamWindow videoStreams={videoMediaStreams} />
                             )}
                         </VideoStreamSection>
+                        {selectedInspectionTask && selectedInspectionTask.isarTaskId && (
+                            <InspectionDialogView task={selectedInspectionTask} tasks={selectedMission.tasks} />
+                        )}
+                        <InspectionsViewSection tasks={selectedMission.tasks} />
                     </>
                 )}
             </StyledMissionPage>
