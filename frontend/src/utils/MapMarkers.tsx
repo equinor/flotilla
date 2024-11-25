@@ -18,18 +18,19 @@ export const placeTagsInMap = (
     const maxTaskOrder: number = Math.max(...tasks.map((task) => task.taskOrder))
 
     const orderedTasks = orderTasksByDrawOrder(tasks, currentTaskOrder, maxTaskOrder)
+    const markerSize = calculateMarkerSize(map)
 
     orderedTasks.forEach((task) => {
         if (task.inspection === null) {
             const pixelPosition = calculateObjectPixelPosition(mapMetadata, task.robotPose.position)
             // Workaround for current bug in echo
             const order = task.taskOrder + 1
-            drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
+            drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, markerSize, task.status)
         } else {
             const pixelPosition = calculateObjectPixelPosition(mapMetadata, task.inspection.inspectionTarget)
             // Workaround for current bug in echo
             const order = task.taskOrder + 1
-            drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, 30, task.status)
+            drawTagMarker(pixelPosition[0], pixelPosition[1], map, order, markerSize, task.status)
         }
     })
 }
@@ -37,8 +38,15 @@ export const placeTagsInMap = (
 export const placeRobotInMap = (mapMetadata: MapMetadata, map: HTMLCanvasElement, robotPose: Pose) => {
     const pixelPosition: [number, number] = calculateObjectPixelPosition(mapMetadata, robotPose.position)
     const rad: number = calculateNavigatorAngle(robotPose)
-    drawRobotMarker(pixelPosition[0], pixelPosition[1], map, 22)
-    drawNavigator(pixelPosition[0], pixelPosition[1], map, rad)
+    const markerSize = calculateMarkerSize(map)
+    drawRobotMarker(pixelPosition[0], pixelPosition[1], map, markerSize)
+    drawNavigator(pixelPosition[0], pixelPosition[1], map, markerSize, rad)
+}
+
+const calculateMarkerSize = (map: HTMLCanvasElement) => {
+    const markerPercentage = 0.025
+    const markerSize = map.width * markerPercentage
+    return markerSize
 }
 
 const calculateObjectPixelPosition = (mapMetadata: MapMetadata, objectPosition: ObjectPosition): [number, number] => {
@@ -101,14 +109,15 @@ const drawTagMarker = (
     context.strokeStyle = tokens.colors.text.static_icons__default.hex
     context.fill(path)
     context.stroke(path)
-    context.font = '35pt Calibri'
+    context.font = circleSize + 'pt Calibri'
     context.fillStyle = colors.textColor
     context.textAlign = 'center'
     context.fillText(tagNumber.toString(), p1, map.height - p2 + circleSize / 2)
 }
 
 const drawRobotMarker = (p1: number, p2: number, map: HTMLCanvasElement, circleSize: number) => {
-    drawAura(p1, p2, map, circleSize)
+    const outerCircleRadius = circleSize * 1.1
+    drawAura(p1, p2, map, outerCircleRadius)
 
     const context = map.getContext('2d')
     if (context === null) {
@@ -118,7 +127,7 @@ const drawRobotMarker = (p1: number, p2: number, map: HTMLCanvasElement, circleS
     context.beginPath()
 
     const outerCircle = new Path2D()
-    outerCircle.arc(p1, map.height - p2, circleSize + 5, 0, 2 * Math.PI)
+    outerCircle.arc(p1, map.height - p2, outerCircleRadius, 0, 2 * Math.PI)
     context.fillStyle = tokens.colors.text.static_icons__primary_white.hex
     context.fill(outerCircle)
 
@@ -128,7 +137,7 @@ const drawRobotMarker = (p1: number, p2: number, map: HTMLCanvasElement, circleS
     context.fill(innerCircle)
 }
 
-const drawNavigator = (p1: number, p2: number, map: HTMLCanvasElement, rad: number) => {
+const drawNavigator = (p1: number, p2: number, map: HTMLCanvasElement, markerSize: number, rad: number) => {
     const context = map.getContext('2d')
     if (context === null) {
         return
@@ -140,7 +149,7 @@ const drawNavigator = (p1: number, p2: number, map: HTMLCanvasElement, rad: numb
     const navigationIcon = 'M4.5 20.79 12 2.5l7.5 18.29-.71.71-6.79-3-6.79 3-.71-.71Z'
     const navigationPath = new Path2D(navigationIcon)
     context.save()
-    const scalingFactor = 1.2
+    const scalingFactor = 0.05 * markerSize
 
     context.translate(p1, map.height - p2)
     context.rotate(rad)
@@ -158,7 +167,7 @@ const drawAura = (x: number, y: number, map: HTMLCanvasElement, circleSize: numb
     }
 
     const pulseDurationMilliseconds = 1500
-    const pulseSizePixels = 35
+    const pulseSizePixels = circleSize * 0.5
     let timer = new Date().getTime()
     // reset timer every pulseDurationMilliseconds
     timer = timer % pulseDurationMilliseconds
