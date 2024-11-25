@@ -41,7 +41,13 @@ export const MissionPage = () => {
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const [selectedMission, setSelectedMission] = useState<Mission>()
     const { registerEvent, connectionReady } = useSignalRContext()
-    const { mediaStreams } = useMediaStreamContext()
+    const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
+
+    useEffect(() => {
+        if (selectedMission && !Object.keys(mediaStreams).includes(selectedMission?.robot.id))
+            addMediaStreamConfigIfItDoesNotExist(selectedMission?.robot.id)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedMission])
 
     useEffect(() => {
         if (connectionReady) {

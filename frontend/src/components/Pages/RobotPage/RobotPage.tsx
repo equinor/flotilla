@@ -60,9 +60,14 @@ export const RobotPage = () => {
     const { setAlert, setListAlert } = useAlertContext()
     const { robotId } = useParams()
     const { enabledRobots } = useRobotContext()
-    const { mediaStreams } = useMediaStreamContext()
+    const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
     const { ongoingMissions } = useMissionsContext()
+
+    useEffect(() => {
+        if (robotId && !Object.keys(mediaStreams).includes(robotId)) addMediaStreamConfigIfItDoesNotExist(robotId)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [robotId])
 
     const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
 
