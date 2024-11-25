@@ -47,8 +47,16 @@ namespace Api.EventHandlers
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             var content = CreateTeamsMessageCard(e.TeamsMessage);
-
-            var response = await client.PostAsync(url, content);
+            HttpResponseMessage? response;
+            try
+            {
+                response = await client.PostAsync(url, content);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send message to Teams");
+                return;
+            }
             if (response.IsSuccessStatusCode)
             {
                 _logger.LogInformation("Post request via teams incomming webhook was successful, Status Code: {response.StatusCode}", response.StatusCode);
@@ -74,4 +82,3 @@ namespace Api.EventHandlers
         }
     }
 }
-
