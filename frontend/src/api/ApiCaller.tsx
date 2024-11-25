@@ -13,6 +13,7 @@ import { MissionDefinition, PlantInfo } from 'models/MissionDefinition'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { Deck } from 'models/Deck'
 import { ApiError, isApiError } from './ApiError'
+import { MediaStreamConfig } from 'models/VideoStream'
 
 /** Implements the request sent to the backend api. */
 export class BackendAPICaller {
@@ -137,6 +138,12 @@ export class BackendAPICaller {
     static async getRobotById(robotId: string): Promise<Robot> {
         const path: string = 'robots/' + robotId
         const result = await this.GET<Robot>(path).catch(BackendAPICaller.handleError('GET', path))
+        return result.content
+    }
+
+    static async getRobotMediaConfig(robotId: string): Promise<MediaStreamConfig> {
+        const path: string = 'media-stream/' + robotId
+        const result = await this.GET<MediaStreamConfig>(path).catch(BackendAPICaller.handleError('GET', path))
         return result.content
     }
 
