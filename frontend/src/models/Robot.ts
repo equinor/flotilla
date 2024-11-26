@@ -32,6 +32,7 @@ export interface Robot {
     pressureLevel?: number
     pose?: Pose
     status: RobotStatus
+    robotCapabilities?: RobotCapabilitiesEnum[]
     isarConnected: boolean
     deprecated: boolean
     host?: string
@@ -49,4 +50,17 @@ export const placeholderRobot: Robot = {
     status: RobotStatus.Available,
     isarConnected: true,
     deprecated: false,
+}
+
+export enum RobotCapabilitiesEnum {
+    take_thermal_image = 'take_thermal_image',
+    take_image = 'take_image',
+    take_video = 'take_video',
+    take_thermal_video = 'take_thermal_video',
+    record_audio = 'record_audio',
+    localize = 'localize',
+    auto_localize = 'auto_localize',
+    auto_return_to_home = 'auto_return_to_home',
+    docking_procedure = 'docking_procedure',
+    return_to_home = 'return_to_home',
 }
