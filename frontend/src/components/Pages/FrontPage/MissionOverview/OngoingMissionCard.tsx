@@ -1,4 +1,4 @@
-import { Card, Typography } from '@equinor/eds-core-react'
+import { Icon, Typography } from '@equinor/eds-core-react'
 import { config } from 'config'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
@@ -7,65 +7,81 @@ import { MissionProgressDisplay } from 'components/Displays/MissionDisplays/Miss
 import { MissionStatusDisplayWithHeader } from 'components/Displays/MissionDisplays/MissionStatusDisplay'
 import { useNavigate } from 'react-router-dom'
 import { MissionControlButtons } from 'components/Displays/MissionButtons/MissionControlButtons'
-import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
-import { MissionRobotDisplay } from 'components/Displays/MissionDisplays/MissionRobotDisplay'
-import { useRobotContext } from 'components/Contexts/RobotContext'
 import { TaskType } from 'models/Task'
+import { StyledButton } from 'components/Styles/StyledComponents'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { Icons } from 'utils/icons'
+import { MissionAreaDisplay } from 'components/Displays/MissionDisplays/MissionAreaDispaly'
 
 interface MissionProps {
     mission: Mission
 }
 
-const StyledMissionCard = styled(Card)`
-    width: calc(100vw - 30px);
-    max-width: 400px;
-    padding: 10px;
-    justify-content: space-between;
-`
-const StyledTitle = styled(Card)`
-    width: 70%;
-    height: 50px;
-    justify-content: center;
-    padding-left: 12px;
-    :hover {
-        background-color: #deedee;
-        cursor: pointer;
-    }
-    box-shadow: none;
+const StyledMissionCard = styled.div`
+    display: flex;
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    flex: 1 0 0;
+    align-self: stretch;
 `
 const TopContent = styled.div`
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
 `
+const LeftSection = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    flex: 1 0 0;
+`
+
+const Midcontent = styled.div`
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+`
+
 const BottomContent = styled.div`
     display: flex;
     justify-content: space-between;
-    white-space: nowrap;
-    gap: 6px;
+    align-items: center;
+    align-self: stretch;
+`
+const StyledGhostButton = styled(StyledButton)`
+    padding: 0;
 `
 
 export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
-    const { enabledRobots } = useRobotContext()
+    const { TranslateText } = useLanguageContext()
+
     let navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
     }
 
-    const robot = enabledRobots.find((robot) => mission.robot.id === robot.id)
-
     let missionTaskType = TaskType.Inspection
     if (mission.tasks.every((task) => task.type === TaskType.ReturnHome)) missionTaskType = TaskType.ReturnHome
     if (mission.tasks.every((task) => task.type === TaskType.Localization)) missionTaskType = TaskType.Localization
 
     return (
-        <StyledMissionCard style={{ boxShadow: tokens.elevation.raised }}>
+        <StyledMissionCard>
             <TopContent>
-                <StyledTitle onClick={routeChange}>
+                <LeftSection>
                     <Typography variant="h5" style={{ color: tokens.colors.text.static_icons__default.hex }}>
                         {mission.name}
                     </Typography>
-                </StyledTitle>
+                    <Midcontent>
+                        <MissionStatusDisplayWithHeader status={mission.status} />
+                        <MissionAreaDisplay mission={mission} />
+                        <MissionProgressDisplay mission={mission} />
+                    </Midcontent>
+                </LeftSection>
                 <MissionControlButtons
                     missionName={mission.name}
                     missionTaskType={missionTaskType}
@@ -74,15 +90,21 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                 />
             </TopContent>
             <BottomContent>
-                <MissionStatusDisplayWithHeader status={mission.status} />
-                <MissionProgressDisplay mission={mission} />
-                <MissionRobotDisplay mission={mission} />
-                <BatteryStatusDisplay
-                    batteryLevel={robot?.batteryLevel}
-                    batteryWarningLimit={robot?.model.batteryWarningThreshold}
-                    textAlignedBottom={true}
-                />
+                <StyledGhostButton variant="ghost" onClick={routeChange}>
+                    {TranslateText('Open mission')}
+                    <Icon name={Icons.RightCheveron} size={16} />
+                </StyledGhostButton>
             </BottomContent>
+        </StyledMissionCard>
+    )
+}
+
+export const OngoingMissionPlaceholderCard = (): JSX.Element => {
+    const { TranslateText } = useLanguageContext()
+
+    return (
+        <StyledMissionCard style={{ backgroundColor: tokens.colors.ui.background__light.hex }}>
+            <Typography variant="h5">{TranslateText('No ongoing missions')}</Typography>
         </StyledMissionCard>
     )
 }

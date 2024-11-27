@@ -267,5 +267,8 @@
     "Failed to retrieve previous mission runs": "Kunne ikke hente tildigere oppdragskjøringer",
     "Documentation": "Dokumentasjon",
     "Map of {0}": "Kart over {0}",
-    "Docked": "Ladestasjon"
+    "Docked": "Ladestasjon",
+    "Mission Control": "Oppdragskontroll",
+    "Open mission": "Åpne oppdrag",
+    "Open robot information": "Åpne robotinformasjon"
 }

@@ -12,18 +12,6 @@ const StyledPlaceholder = styled(Card)`
     background-color: ${tokens.colors.ui.background__light.hex};
 `
 
-export const NoOngoingMissionsPlaceholder = (): JSX.Element => {
-    const { TranslateText } = useLanguageContext()
-    return (
-        <StyledPlaceholder>
-            <Typography variant="h4" color="disabled">
-                {' '}
-                {TranslateText('No ongoing missions')}{' '}
-            </Typography>
-        </StyledPlaceholder>
-    )
-}
-
 export const EmptyMissionQueuePlaceholder = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     return (
