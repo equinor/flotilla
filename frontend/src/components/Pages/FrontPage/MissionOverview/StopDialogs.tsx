@@ -36,8 +36,11 @@ const StyledText = styled.div`
 `
 
 const StyledButton = styled(Button)`
-    width: 210px;
     background-color: white;
+`
+
+const ContainButton = styled.div`
+    display: block;
 `
 
 interface MissionProps {
@@ -188,13 +191,15 @@ export const StopRobotDialog = (): JSX.Element => {
 
     return (
         <>
-            <StyledButton color="danger" variant="outlined" onClick={openDialog}>
-                {!dockActivated ? (
-                    <>{TranslateText('Send robots to dock')}</>
-                ) : (
-                    <>{TranslateText('Dismiss robots from dock')}</>
-                )}
-            </StyledButton>
+            <ContainButton>
+                <StyledButton color="danger" variant="outlined" onClick={openDialog}>
+                    {!dockActivated ? (
+                        <>{TranslateText('Send robots to dock')}</>
+                    ) : (
+                        <>{TranslateText('Dismiss robots from dock')}</>
+                    )}
+                </StyledButton>
+            </ContainButton>
             <StyledDialog open={isStopRobotDialogOpen} isDismissable>
                 <Dialog.Header>
                     <Dialog.Title>
