@@ -7,6 +7,8 @@ import { tokens } from '@equinor/eds-tokens'
 import { OngoingMissionCard, OngoingMissionPlaceholderCard } from './OngoingMissionCard'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { MissionHistoryButton } from './MissionHistoryButton'
+import { Robot } from 'models/Robot'
+import { RobotMissionQueueView } from './MissionQueueView'
 
 const MissionControlStyle = styled.div`
     display: flex;
@@ -27,44 +29,42 @@ const MissionControlHeader = styled.div`
     gap: 0.5rem;
 `
 
-const MissionControlCard = styled(Card)`
+const MissionControlCardStyle = styled(Card)`
+    display: flex;
+    gap: 0px;
+    flex-direction: column;
+
+    @media (min-width: 960px) {
+        width: 960px;
+    }
+
+    @media (max-width: 960px) {
+        max-width: 669px;
+        align-self: stretch;
+    }
+`
+
+const OngoingMissionControlCardStyle = styled.div`
     display: flex;
     gap: 0px;
     align-items: flex-start;
 
     @media (min-width: 960px) {
         flex-direction: row;
-        width: 960px;
     }
 
     @media (max-width: 960px) {
-        max-width: 669px;
         flex-direction: column;
-        align-self: stretch;
     }
 `
 
 export const MissionControlSection = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
-    const { ongoingMissions } = useMissionsContext()
 
     const missionControlCards = enabledRobots.map((robot, index) => {
-        const ongoingMission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
-        return (
-            <MissionControlCard key={index} style={{ boxShadow: tokens.elevation.raised }}>
-                <RobotCard robot={robot} />
-                {ongoingMission ? <OngoingMissionCard mission={ongoingMission} /> : <OngoingMissionPlaceholderCard />}
-            </MissionControlCard>
-        )
+        return <MissionControlCard key={index} robot={robot} />
     })
-
-    const missionControlPlaceholderCard = (
-        <MissionControlCard style={{ boxShadow: tokens.elevation.raised }}>
-            <RobotCardPlaceholder />
-            <OngoingMissionPlaceholderCard />
-        </MissionControlCard>
-    )
 
     return (
         <MissionControlStyle>
@@ -75,9 +75,37 @@ export const MissionControlSection = (): JSX.Element => {
             </MissionControlHeader>
             <MissionControlBody>
                 {enabledRobots.length > 0 && missionControlCards}
-                {enabledRobots.length === 0 && missionControlPlaceholderCard}
+                {enabledRobots.length === 0 && <MissionControlPlaceholderCard />}
             </MissionControlBody>
             <MissionHistoryButton />
         </MissionControlStyle>
+    )
+}
+
+const MissionControlCard = ({ robot }: { robot: Robot }) => {
+    const { ongoingMissions } = useMissionsContext()
+    const ongoingMission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
+    return (
+        <MissionControlCardStyle
+            id={FrontPageSectionId.RobotCard + robot.id}
+            style={{ boxShadow: tokens.elevation.raised }}
+        >
+            <OngoingMissionControlCardStyle>
+                <RobotCard robot={robot} />
+                {ongoingMission ? <OngoingMissionCard mission={ongoingMission} /> : <OngoingMissionPlaceholderCard />}
+            </OngoingMissionControlCardStyle>
+            <RobotMissionQueueView robot={robot} />
+        </MissionControlCardStyle>
+    )
+}
+
+const MissionControlPlaceholderCard = () => {
+    return (
+        <MissionControlCardStyle style={{ boxShadow: tokens.elevation.raised }}>
+            <OngoingMissionControlCardStyle>
+                <RobotCardPlaceholder />
+                <OngoingMissionPlaceholderCard />
+            </OngoingMissionControlCardStyle>
+        </MissionControlCardStyle>
     )
 }
