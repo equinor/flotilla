@@ -1,5 +1,5 @@
 export enum FrontPageSectionId {
     TopBar = 'topBar',
-    MissionQueue = 'missionQueue',
+    RobotCard = 'robotCard',
     InspectionTable = 'inspectionTable',
 }

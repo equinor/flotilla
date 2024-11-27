@@ -9,6 +9,7 @@ import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { MissionHistoryButton } from './MissionHistoryButton'
 import { Robot } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
+import { FrontPageSectionId } from 'models/FrontPageSectionId'
 
 const MissionControlStyle = styled.div`
     display: flex;

@@ -6,7 +6,6 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { Robot } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
@@ -72,7 +71,7 @@ export const RobotMissionQueueView = ({ robot }: { robot: Robot }): JSX.Element 
     return (
         <>
             {(robotMissionQueue.length > 0 || loadingMissionSet.size > 0) && (
-                <StyledMissionView id={FrontPageSectionId.MissionQueue}>
+                <StyledMissionView>
                     {missionQueueDisplay}
                     {loadingMissionSet.size > 0 && loadingQueueDisplay}
                 </StyledMissionView>
