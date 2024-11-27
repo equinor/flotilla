@@ -1,4 +1,3 @@
-import { MissionQueueView } from 'components/Pages/FrontPage/MissionOverview/MissionQueueView'
 import { Header } from 'components/Header/Header'
 import styled from 'styled-components'
 import { InspectionOverviewSection } from 'components/Pages/InspectionPage/InspectionOverview'
@@ -14,23 +13,13 @@ const StyledFrontPage = styled.div`
     background-color: ${tokens.colors.ui.background__light.hex};
 `
 
-const HorizontalContent = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    grid-template-columns: auto auto;
-    gap: 2rem;
-`
-
 export const FrontPage = () => {
     return (
         <>
             <Header page={'frontPage'} />
             <StyledFrontPage>
                 <StopRobotDialog />
-                <HorizontalContent>
-                    <MissionControlSection />
-                    <MissionQueueView />
-                </HorizontalContent>
+                <MissionControlSection />
                 <InspectionOverviewSection />
             </StyledFrontPage>
         </>
