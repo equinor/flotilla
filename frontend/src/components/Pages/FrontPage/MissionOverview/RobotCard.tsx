@@ -141,9 +141,7 @@ export const RobotCardPlaceholder = () => {
                 <Typography variant="h5" color="disabled">
                     {TranslateText('No robot connected')}
                 </Typography>
-                <HorizontalContent>
-                    <RobotStatusChip isarConnected={true} />
-                </HorizontalContent>
+                <RobotStatusChip isarConnected={true} />
             </VerticalContent>
         </StyledRobotPart>
     )

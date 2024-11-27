@@ -25,10 +25,13 @@ const StyledImage = styled.img<{ $height?: string }>`
 const StyledIcon = styled(Icon)`
     display: flex;
     justify-content: center;
-    height: 200px;
     width: 100%;
     scale: 50%;
     color: #6f6f6f;
+`
+
+const ContainIcon = styled.div`
+    display: block;
 `
 
 export const RobotImage = ({ robotType, height = '200px' }: TypeProps) => {
@@ -59,10 +62,18 @@ export const RobotImage = ({ robotType, height = '200px' }: TypeProps) => {
             break
         }
         case RobotType.NoneType: {
-            return <StyledIcon name={Icons.CloudOff} title={robotType} />
+            return (
+                <ContainIcon>
+                    <StyledIcon name={Icons.CloudOff} title={robotType} style={{ minHeight: height }} />
+                </ContainIcon>
+            )
         }
         default: {
-            return <StyledIcon name={Icons.Image} title={robotType} />
+            return (
+                <ContainIcon>
+                    <StyledIcon name={Icons.Image} title={robotType} style={{ minHeight: height }} />
+                </ContainIcon>
+            )
         }
     }
     return <StyledImage height={height} alt={robotType} src={robotImage} />

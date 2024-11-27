@@ -27,7 +27,7 @@ const MissionControlHeader = styled.div`
     gap: 0.5rem;
 `
 
-const TotalCard = styled(Card)`
+const MissionControlCard = styled(Card)`
     display: flex;
     flex-direction: row;
     gap: 0px;
@@ -39,19 +39,22 @@ export const MissionControlSection = (): JSX.Element => {
     const { enabledRobots } = useRobotContext()
     const { ongoingMissions } = useMissionsContext()
 
-    const robotCards = enabledRobots.map((robot, index) => {
+    const missionControlCards = enabledRobots.map((robot, index) => {
         const ongoingMission = ongoingMissions.find((mission) => mission.robot.id === robot.id)
         return (
-            <TotalCard style={{ boxShadow: tokens.elevation.raised }}>
-                <RobotCard key={index} robot={robot} />
-                {ongoingMission ? (
-                    <OngoingMissionCard key={index} mission={ongoingMission} />
-                ) : (
-                    <OngoingMissionPlaceholderCard />
-                )}
-            </TotalCard>
+            <MissionControlCard key={index} style={{ boxShadow: tokens.elevation.raised }}>
+                <RobotCard robot={robot} />
+                {ongoingMission ? <OngoingMissionCard mission={ongoingMission} /> : <OngoingMissionPlaceholderCard />}
+            </MissionControlCard>
         )
     })
+
+    const missionControlPlaceholderCard = (
+        <MissionControlCard style={{ boxShadow: tokens.elevation.raised }}>
+            <RobotCardPlaceholder />
+            <OngoingMissionPlaceholderCard />
+        </MissionControlCard>
+    )
 
     return (
         <MissionControlStyle>
@@ -61,8 +64,8 @@ export const MissionControlSection = (): JSX.Element => {
                 </Typography>
             </MissionControlHeader>
             <MissionControlBody>
-                {enabledRobots.length > 0 && robotCards}
-                {enabledRobots.length === 0 && <RobotCardPlaceholder />}
+                {enabledRobots.length > 0 && missionControlCards}
+                {enabledRobots.length === 0 && missionControlPlaceholderCard}
             </MissionControlBody>
             <MissionHistoryButton />
         </MissionControlStyle>
