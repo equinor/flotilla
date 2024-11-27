@@ -29,9 +29,19 @@ const MissionControlHeader = styled.div`
 
 const MissionControlCard = styled(Card)`
     display: flex;
-    flex-direction: row;
     gap: 0px;
-    width: 960px;
+    align-items: flex-start;
+
+    @media (min-width: 960px) {
+        flex-direction: row;
+        width: 960px;
+    }
+
+    @media (max-width: 960px) {
+        max-width: 669px;
+        flex-direction: column;
+        align-self: stretch;
+    }
 `
 
 export const MissionControlSection = (): JSX.Element => {

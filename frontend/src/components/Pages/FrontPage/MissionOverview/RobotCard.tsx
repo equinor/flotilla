@@ -1,4 +1,4 @@
-import { Icon, Typography } from '@equinor/eds-core-react'
+import { Button, Icon, Typography } from '@equinor/eds-core-react'
 import { Robot, RobotStatus } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
@@ -13,30 +13,56 @@ import { RobotType } from 'models/RobotModel'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 
-const StyledRobotPart = styled.div`
+const StyledRobotCard = styled.div`
     display: flex;
-    width: 446px;
-    padding: 16px;
-    align-items: center;
-    gap: 16px;
-    border-right: 1px solid ${tokens.colors.ui.background__medium.hex};
+
+    @media (min-width: 960px) {
+        width: 446px;
+        padding: 16px;
+        align-items: center;
+        align-self: stretch;
+        gap: 16px;
+        border-right: 1px solid ${tokens.colors.ui.background__medium.hex};
+    }
+
+    @media (max-width: 960px) {
+        padding: 8px;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 8px;
+        align-self: stretch;
+        border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
+    }
 `
 
 const HorizontalContent = styled.div`
     display: flex;
-    flex-direction: row;
-    align-content: start;
-    align-items: start;
-    justify-content: space-between;
-    gap: 4px;
-    padding-top: 2px;
+    align-items: flex-start;
+    gap: 24px;
+    align-self: stretch;
 `
+
 const VerticalContent = styled.div`
     display: flex;
     flex-direction: column;
-    justify-content: left;
-    align-items: start;
+    align-items: flex-start;
+`
+
+const StyledNoneImageBody = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 4px;
+    flex: 1 0 0;
+    align-self: stretch;
+`
+
+const StyledHeader = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-self: stretch;
+    justify-content: space-between;
 `
 
 const LongTypography = styled(Typography)`
@@ -55,6 +81,18 @@ const StyledGhostButton = styled(StyledButton)`
     padding: 0;
 `
 
+const HiddenOnSmallScreen = styled.div`
+    @media (max-width: 960px) {
+        display: none;
+    }
+`
+
+const HiddenOnLargeScreen = styled.div`
+    @media (min-width: 960px) {
+        display: none;
+    }
+`
+
 export const RobotCard = ({ robot }: { robot: Robot }) => {
     let navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
@@ -69,15 +107,24 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
     }
 
     return (
-        <StyledRobotPart>
-            <RobotImage robotType={robot.model.type} height="88px" />
-            <VerticalContent>
-                <LongTypography variant="h5">
-                    {robot.name}
-                    {' ('}
-                    {getRobotModel(robot.model.type)}
-                    {')'}
-                </LongTypography>
+        <StyledRobotCard>
+            <HiddenOnSmallScreen>
+                <RobotImage robotType={robot.model.type} height="88px" />
+            </HiddenOnSmallScreen>
+            <StyledNoneImageBody>
+                <StyledHeader>
+                    <LongTypography variant="h5">
+                        {robot.name}
+                        {' ('}
+                        {getRobotModel(robot.model.type)}
+                        {')'}
+                    </LongTypography>
+                    <HiddenOnLargeScreen>
+                        <Button variant="ghost_icon" onClick={goToRobot}>
+                            <Icon name={Icons.RightCheveron} size={24} />
+                        </Button>
+                    </HiddenOnLargeScreen>
+                </StyledHeader>
                 <HorizontalContent>
                     <VerticalContent>
                         <Typography variant="caption">{TranslateText('Status')}</Typography>
@@ -123,26 +170,28 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
                         <></>
                     )}
                 </HorizontalContent>
-                <StyledGhostButton variant="ghost" onClick={goToRobot}>
-                    {TranslateText('Open robot information')}
-                    <Icon name={Icons.RightCheveron} size={16} />
-                </StyledGhostButton>
-            </VerticalContent>
-        </StyledRobotPart>
+                <HiddenOnSmallScreen>
+                    <StyledGhostButton variant="ghost" onClick={goToRobot}>
+                        {TranslateText('Open robot information')}
+                        <Icon name={Icons.RightCheveron} size={16} />
+                    </StyledGhostButton>
+                </HiddenOnSmallScreen>
+            </StyledNoneImageBody>
+        </StyledRobotCard>
     )
 }
 
 export const RobotCardPlaceholder = () => {
     const { TranslateText } = useLanguageContext()
     return (
-        <StyledRobotPart>
+        <StyledRobotCard>
             <RobotImage robotType={RobotType.NoneType} height="88px" />
-            <VerticalContent>
+            <StyledNoneImageBody>
                 <Typography variant="h5" color="disabled">
                     {TranslateText('No robot connected')}
                 </Typography>
                 <RobotStatusChip isarConnected={true} />
-            </VerticalContent>
-        </StyledRobotPart>
+            </StyledNoneImageBody>
+        </StyledRobotCard>
     )
 }
