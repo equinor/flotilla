@@ -111,21 +111,6 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (robot.CurrentMissionId != null)
-            {
-                var stuckMission = await MissionService.ReadById(robot.CurrentMissionId!, readOnly: true);
-                if (stuckMission == null)
-                {
-                    _logger.LogError("MissionRun with ID: {MissionId} was not found in the database", robot.CurrentMissionId);
-                    return;
-                }
-                if (stuckMission.Status == MissionStatus.Ongoing || stuckMission.Status == MissionStatus.Paused)
-                {
-                    _logger.LogError("Ongoing/paused mission with ID: ${MissionId} is not being run in ISAR", robot.CurrentMissionId);
-                    await MissionService.SetMissionRunToFailed(stuckMission.Id, "Mission failed due to issue with ISAR");
-                }
-            }
-
             _startMissionSemaphore.WaitOne();
             try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
             catch (MissionRunNotFoundException) { return; }
