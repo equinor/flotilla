@@ -106,7 +106,16 @@ namespace Api.EventHandlers
 
             _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current area {areaName}", updatedRobot.Name, updatedRobot.Status, updatedRobot.CurrentArea?.Name);
 
-            if (isarStatus.Status == RobotStatus.Available) MissionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+            if (isarStatus.Status == RobotStatus.Available)
+            {
+                try { await RobotService.UpdateCurrentMissionId(robot.Id, null); }
+                catch (RobotNotFoundException)
+                {
+                    _logger.LogError("Robot {robotName} not found when updating current mission id to null", robot.Name);
+                    return;
+                }
+                MissionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+            }
             else if (isarStatus.Status == RobotStatus.Offline)
             {
                 await RobotService.UpdateCurrentArea(robot.Id, null);
@@ -331,16 +340,6 @@ namespace Api.EventHandlers
                     _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
                     return;
                 }
-            }
-
-            try
-            {
-                await RobotService.UpdateCurrentMissionId(robot.Id, null);
-            }
-            catch (RobotNotFoundException)
-            {
-                _logger.LogError("Robot {robotName} not found when updating current mission id to null", robot.Name);
-                return;
             }
 
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, updatedFlotillaMissionRun.Id);
