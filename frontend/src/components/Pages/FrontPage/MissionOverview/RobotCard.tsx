@@ -1,4 +1,4 @@
-import { Card, Typography } from '@equinor/eds-core-react'
+import { Icon, Typography } from '@equinor/eds-core-react'
 import { Robot, RobotStatus } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { RobotStatusChip } from 'components/Displays/RobotDisplays/RobotStatusIcon'
@@ -10,39 +10,18 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { config } from 'config'
 import { RobotType } from 'models/RobotModel'
-import { Mission } from 'models/Mission'
+import { StyledButton } from 'components/Styles/StyledComponents'
+import { Icons } from 'utils/icons'
 
-interface RobotProps {
-    robot: Robot
-    mission: Mission | undefined
-}
-
-const StyledCard = styled(Card)`
-    width: 220px;
-    padding: 12px;
-`
-const HoverableStyledCard = styled(Card)`
+const StyledRobotPart = styled.div`
     display: flex;
-    flex-direction: column;
-    width: 280px;
-    gap: 0px;
-    background-color: ${tokens.colors.ui.background__default.hex};
-    cursor: pointer;
-
-    #buttoncard:hover {
-        background-color: ${tokens.colors.infographic.primary__mist_blue.hex};
-    }
-
-    :hover + #buttoncard {
-        background-color: ${tokens.colors.infographic.primary__mist_blue.hex};
-    }
+    width: 446px;
+    padding: 16px;
+    align-items: center;
+    gap: 16px;
+    border-right: 1px solid ${tokens.colors.ui.background__medium.hex};
 `
-const ButtonCard = styled.div`
-    background-color: ${tokens.colors.ui.background__light.hex};
-    padding: 10px;
-    border-radius: 0px 0px 6px 6px;
-    height: 100%;
-`
+
 const HorizontalContent = styled.div`
     display: flex;
     flex-direction: row;
@@ -56,16 +35,10 @@ const VerticalContent = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: left;
+    align-items: start;
     gap: 4px;
 `
-const AreaContent = styled.div`
-    display: flex;
-    justify-content: left;
-    padding-right: 6px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-`
+
 const LongTypography = styled(Typography)`
     overflow: hidden;
     text-overflow: ellipsis;
@@ -78,7 +51,11 @@ const LongTypography = styled(Typography)`
     }
 `
 
-export const RobotStatusCard = ({ robot, mission }: RobotProps) => {
+const StyledGhostButton = styled(StyledButton)`
+    padding: 0;
+`
+
+export const RobotCard = ({ robot }: { robot: Robot }) => {
     let navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
     const goToRobot = () => {
@@ -92,30 +69,18 @@ export const RobotStatusCard = ({ robot, mission }: RobotProps) => {
     }
 
     return (
-        <HoverableStyledCard style={{ boxShadow: tokens.elevation.raised }} onClick={goToRobot}>
-            <RobotImage robotType={robot.model.type} height="180px" />
-            <ButtonCard id="buttoncard">
-                <HorizontalContent>
-                    <LongTypography variant="h5">
-                        {robot.name}
-                        {' ('}
-                        {getRobotModel(robot.model.type)}
-                        {')'}
-                    </LongTypography>
-                    {mission?.area?.areaName && (
-                        <AreaContent>
-                            <Typography variant="h5"> {mission.area.areaName} </Typography>
-                        </AreaContent>
-                    )}
-                </HorizontalContent>
+        <StyledRobotPart>
+            <RobotImage robotType={robot.model.type} height="88px" />
+            <VerticalContent>
+                <LongTypography variant="h5">
+                    {robot.name}
+                    {' ('}
+                    {getRobotModel(robot.model.type)}
+                    {')'}
+                </LongTypography>
                 <HorizontalContent>
                     <VerticalContent>
-                        <Typography
-                            variant="meta"
-                            style={{ fontSize: 14, color: tokens.colors.text.static_icons__secondary.hex }}
-                        >
-                            {TranslateText('Status')}
-                        </Typography>
+                        <Typography variant="caption">{TranslateText('Status')}</Typography>
                         <RobotStatusChip
                             status={robot.status}
                             flotillaStatus={robot.flotillaStatus}
@@ -158,22 +123,28 @@ export const RobotStatusCard = ({ robot, mission }: RobotProps) => {
                         <></>
                     )}
                 </HorizontalContent>
-            </ButtonCard>
-        </HoverableStyledCard>
+                <StyledGhostButton variant="ghost" onClick={goToRobot}>
+                    {TranslateText('Open robot information')}
+                    <Icon name={Icons.RightCheveron} size={16} />
+                </StyledGhostButton>
+            </VerticalContent>
+        </StyledRobotPart>
     )
 }
 
-export const RobotStatusCardPlaceholder = () => {
+export const RobotCardPlaceholder = () => {
     const { TranslateText } = useLanguageContext()
     return (
-        <StyledCard style={{ boxShadow: tokens.elevation.raised }}>
-            <RobotImage robotType={RobotType.NoneType} />
-            <Typography variant="h5" color="disabled">
-                {TranslateText('No robot connected')}
-            </Typography>
-            <HorizontalContent>
-                <RobotStatusChip isarConnected={true} />
-            </HorizontalContent>
-        </StyledCard>
+        <StyledRobotPart>
+            <RobotImage robotType={RobotType.NoneType} height="88px" />
+            <VerticalContent>
+                <Typography variant="h5" color="disabled">
+                    {TranslateText('No robot connected')}
+                </Typography>
+                <HorizontalContent>
+                    <RobotStatusChip isarConnected={true} />
+                </HorizontalContent>
+            </VerticalContent>
+        </StyledRobotPart>
     )
 }
