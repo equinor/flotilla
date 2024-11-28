@@ -562,7 +562,7 @@ namespace Api.Services
             {
                 if (property.Name == propertyName)
                 {
-                    logger.LogInformation("Setting {missionRunName} field {propertyName} from {oldValue} to {NewValue}", missionRun.Name, propertyName, property.GetValue(missionRun), value);
+                    logger.LogDebug("Setting {missionRunName} field {propertyName} from {oldValue} to {NewValue}", missionRun.Name, propertyName, property.GetValue(missionRun), value);
                     property.SetValue(missionRun, value);
                 }
             }
