@@ -1,7 +1,7 @@
 import { Button, Popover, Typography } from '@equinor/eds-core-react'
 import { useState, useEffect, useRef } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
-import { Robot } from 'models/Robot'
+import { Robot, RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
@@ -21,14 +21,48 @@ const StyledCloseButton = styled.div`
 const LimitWidthStyle = styled.div`
     max-width: calc(80vw);
 `
-
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
     padding: 8px;
     width: 8rem;
 `
+const RobotArmMovementSection = styled.div`
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    @media (max-width: 600px) {
+        flex-direction: column;
+    }
+`
 
-export const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProps) => {
+export const MoveRobotArmSection = ({ robot }: { robot: Robot }) => {
+    const { TranslateText } = useLanguageContext()
+
+    return (
+        <>
+            <Typography variant="h4">{TranslateText('Set robot arm to ')}</Typography>
+            <RobotArmMovementSection>
+                <MoveRobotArm
+                    robot={robot}
+                    armPosition="battery_change"
+                    isRobotAvailable={robot.status === RobotStatus.Available}
+                />
+                <MoveRobotArm
+                    robot={robot}
+                    armPosition="transport"
+                    isRobotAvailable={robot.status === RobotStatus.Available}
+                />
+                <MoveRobotArm
+                    robot={robot}
+                    armPosition="lookout"
+                    isRobotAvailable={robot.status === RobotStatus.Available}
+                />
+            </RobotArmMovementSection>
+        </>
+    )
+}
+
+const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProps) => {
     const { TranslateText } = useLanguageContext()
     const [feedback, setFeedback] = useState('')
     const [usable, setUsable] = useState(!!isRobotAvailable)
