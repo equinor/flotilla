@@ -47,10 +47,10 @@ const RobotInfo = styled.div`
     }
     margin: 0rem 0rem 2rem 0rem;
 `
-const StatusContent = styled.div<{ $alignItems?: string }>`
+const StatusContent = styled.div`
     display: flex;
     flex-direction: column;
-    align-items: ${(props) => props.$alignItems};
+    align-items: start;
     justify-content: flex-end;
     gap: 2rem;
     @media (max-width: 600px) {
@@ -110,7 +110,7 @@ export const RobotPage = () => {
                         </Typography>
                         <RobotInfo>
                             <RobotImage height="350px" robotType={selectedRobot.model.type} />
-                            <StatusContent $alignItems="start">
+                            <StatusContent>
                                 <RobotStatusChip
                                     status={selectedRobot.status}
                                     flotillaStatus={selectedRobot.flotillaStatus}
