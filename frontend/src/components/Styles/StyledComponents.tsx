@@ -1,4 +1,4 @@
-import { Button, Dialog, Table } from '@equinor/eds-core-react'
+import { Button, Dialog, Table, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import styled from 'styled-components'
 
@@ -37,6 +37,11 @@ export const StyledPage = styled.div`
         padding: 0.7rem;
     }
     min-height: calc(100vh - 65px);
+`
+export const AttributeTitleTypography = styled(Typography)`
+    variant: meta;
+    fontsize: 14;
+    color: ${tokens.colors.text.static_icons__secondary.hex};
 `
 export const StyledTableCell = styled(Table.Cell)`
     background-color: ${tokens.colors.ui.background__default.hex};
