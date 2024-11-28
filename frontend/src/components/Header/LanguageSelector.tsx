@@ -6,7 +6,6 @@ const LanguageContainer = styled.div`
     display: flex;
     gap: 0rem;
 `
-
 const LanguageButton = styled(Button)<{ $language?: string; $text?: string }>`
     background: none;
     padding: 0;
@@ -31,7 +30,6 @@ const LanguageButton = styled(Button)<{ $language?: string; $text?: string }>`
     }
       `}
 `
-
 const VerticalBar = styled(Divider)`
     width: 2px;
     height: 10px;

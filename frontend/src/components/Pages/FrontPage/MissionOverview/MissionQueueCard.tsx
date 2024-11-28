@@ -32,7 +32,6 @@ const StyledMissionCard = styled(Card)`
     align-self: stretch;
     border: 1px solid ${tokens.colors.ui.background__medium.hex};
 `
-
 const StyledBody = styled.div`
     display: flex;
     flex-direction: column;
@@ -40,13 +39,11 @@ const StyledBody = styled.div`
     align-items: flex-start;
     flex: 1 0 0;
 `
-
 const StyledDialogContent = styled.div`
     display: flex;
     flex-direction: column;
     gap: 20px;
 `
-
 const StyledButtonSection = styled.div`
     display: flex;
     flex-direction: row;
@@ -54,7 +51,6 @@ const StyledButtonSection = styled.div`
     padding: 8px;
     gap: 8px;
 `
-
 const CircularCard = styled(Card)`
     height: 24px;
     width: 24px;
@@ -62,7 +58,6 @@ const CircularCard = styled(Card)`
     justify-content: center;
     align-items: center;
 `
-
 const StyledButton = styled(Button)`
     margin-left: -18px;
     height: auto;

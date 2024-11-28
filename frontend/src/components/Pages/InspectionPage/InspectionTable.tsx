@@ -23,7 +23,6 @@ const StyledIcon = styled(Icon)`
     height: 1.3rem;
     width: 1.3rem;
 `
-
 const StyledTable = styled.div`
     display: grid;
     overflow-x: auto;
@@ -32,14 +31,12 @@ const StyledTable = styled.div`
     }
     max-width: fit-content;
 `
-
 const StyledContent = styled.div`
     display: grid;
     grid-template-columns: 14px auto;
     align-items: center;
     gap: 4px;
 `
-
 const StyledCircle = styled.div`
     width: 13px;
     height: 13px;
@@ -79,7 +76,6 @@ const HideColumnsOnSmallScreen = styled.div`
         }
     }
 `
-
 const Centered = styled.div`
     display: flex;
     justify-content: center;

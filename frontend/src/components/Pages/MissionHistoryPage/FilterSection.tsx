@@ -25,7 +25,6 @@ const StyledHeader = styled.div`
         max-width: 300px;
     }
 `
-
 const StyledSearch = styled(Search)`
     display: flex;
     width: 288px;
@@ -36,12 +35,10 @@ const StyledSearch = styled(Search)`
     border: 1px solid ${tokens.colors.ui.background__medium.hex};
     --eds-input-background: white;
 `
-
 const StyledButtonDiv = styled.div`
     display: flex;
     gap: 1rem;
 `
-
 const StyledDialog = styled(Dialog)`
     width: calc(100vw * 0.9);
     max-width: 700px;

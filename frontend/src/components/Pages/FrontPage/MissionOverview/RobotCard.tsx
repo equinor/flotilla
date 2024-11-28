@@ -35,20 +35,17 @@ const StyledRobotCard = styled.div`
         border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
     }
 `
-
 const HorizontalContent = styled.div`
     display: flex;
     align-items: flex-start;
     gap: 24px;
     align-self: stretch;
 `
-
 const VerticalContent = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
 `
-
 const StyledNoneImageBody = styled.div`
     display: flex;
     flex-direction: column;
@@ -59,7 +56,6 @@ const StyledNoneImageBody = styled.div`
         gap: 16px;
     }
 `
-
 const StyledMainBody = styled.div`
     align-self: stretch;
 
@@ -70,14 +66,12 @@ const StyledMainBody = styled.div`
         gap: 8px;
     }
 `
-
 const StyledHeader = styled.div`
     display: flex;
     flex-direction: row;
     align-self: stretch;
     justify-content: space-between;
 `
-
 const LongTypography = styled(Typography)`
     overflow: hidden;
     text-overflow: ellipsis;
@@ -89,17 +83,14 @@ const LongTypography = styled(Typography)`
         word-break: break-word;
     }
 `
-
 const StyledGhostButton = styled(StyledButton)`
     padding: 0;
 `
-
 const HiddenOnSmallScreen = styled.div`
     @media (max-width: 960px) {
         display: none;
     }
 `
-
 const HiddenOnLargeScreen = styled.div`
     @media (min-width: 960px) {
         display: none;

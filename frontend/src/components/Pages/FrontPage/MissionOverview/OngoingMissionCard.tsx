@@ -30,7 +30,6 @@ const StyledLargeScreenMissionCard = styled.div`
         display: none;
     }
 `
-
 const StyledSmallScreenMissionCard = styled.div`
     display: flex;
     flex-direction: column;
@@ -42,21 +41,18 @@ const StyledSmallScreenMissionCard = styled.div`
         display: none;
     }
 `
-
 const ControllButtonSpacing = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
     align-self: stretch;
 `
-
 const StyledHeader = styled.div`
     display: flex;
     flex-direction: row;
     align-self: stretch;
     justify-content: space-between;
 `
-
 const LeftSection = styled.div`
     display: flex;
     flex-direction: column;
@@ -64,13 +60,11 @@ const LeftSection = styled.div`
     gap: 8px;
     flex: 1 0 0;
 `
-
 const Midcontent = styled.div`
     display: flex;
     align-items: flex-start;
     gap: 24px;
 `
-
 const StyledGhostButton = styled(StyledButton)`
     padding: 0;
 `

@@ -18,14 +18,12 @@ const StyledCard = styled.div`
         padding: 6px 8px 2px 10px;
     }
 `
-
 const Horizontal = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
 `
-
 const Center = styled.div`
     align-items: center;
 `

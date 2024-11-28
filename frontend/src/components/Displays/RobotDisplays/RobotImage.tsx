@@ -21,7 +21,6 @@ const StyledImage = styled.img<{ $height?: string }>`
     justify-content: center;
     padding: 12px 5px 12px 5px;
 `
-
 const StyledIcon = styled(Icon)`
     display: flex;
     justify-content: center;
@@ -29,7 +28,6 @@ const StyledIcon = styled(Icon)`
     scale: 50%;
     color: #6f6f6f;
 `
-
 const ContainIcon = styled.div`
     display: block;
 `

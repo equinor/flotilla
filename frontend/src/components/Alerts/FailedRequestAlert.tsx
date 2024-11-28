@@ -9,13 +9,11 @@ import { AlertListContents } from './AlertsListItem'
 const StyledDiv = styled.div`
     flex-direction: column;
 `
-
 const StyledAlertTitle = styled.div`
     display: flex;
     gap: 0.3em;
     align-items: flex-end;
 `
-
 const StyledButton = styled(TextAlignedButton)`
     background-color: '${tokens.colors.ui.background__danger.hex}';
 `

@@ -20,7 +20,6 @@ const HeaderSection = styled(Card)`
     background-color: ${tokens.colors.ui.background__light.hex};
     box-shadow: none;
 `
-
 const TitleSection = styled.div`
     display: flex;
     align-items: center;
@@ -41,13 +40,11 @@ const StyledCard = styled(Card)`
     gap: 24px;
     align-items: stretch;
 `
-
 const StyledTitleText = styled.div`
     display: grid;
     grid-direction: column;
     gap: 5px;
 `
-
 const StyledTypography = styled(Typography)`
     font-family: Equinor;
     font-size: 32px;

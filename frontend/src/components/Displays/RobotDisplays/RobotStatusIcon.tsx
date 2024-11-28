@@ -18,7 +18,6 @@ const StyledStatus = styled.div`
     align-items: center;
     gap: 2px;
 `
-
 const LongTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 | 48 }>`
     font-size: ${(props) => props.$fontSize}px;
     overflow: visible;

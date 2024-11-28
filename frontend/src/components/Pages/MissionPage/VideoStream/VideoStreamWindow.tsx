@@ -13,7 +13,6 @@ const VideoStreamContent = styled.div`
     padding-top: 1rem;
     padding-bottom: 1rem;
 `
-
 const VideoFullScreen = styled(ReactModal)`
     position: absolute;
     top: 50%;
