@@ -12,7 +12,6 @@ const StyledTable = styled(Table)`
     overflow: auto;
     max-width: calc(80vw);
 `
-
 const StyledTypography = styled(Typography)`
     font-family: Equinor;
     font-size: 28px;

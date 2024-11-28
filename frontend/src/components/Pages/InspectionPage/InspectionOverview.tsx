@@ -23,21 +23,17 @@ const StyledContent = styled.div`
     flex-direction: column;
     align-items: end;
 `
-
 const StyledMissionButton = styled.div`
     display: flex;
     padding-bottom: 30px;
 `
-
 const StyledPlaceholderContent = styled.div`
     width: 100%;
 `
-
 const StyledView = styled.div`
     display: flex;
     align-items: flex-start;
 `
-
 const AlignedTextButton = styled(StyledButton)`
     text-align: left;
 `

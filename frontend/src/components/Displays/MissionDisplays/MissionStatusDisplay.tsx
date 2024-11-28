@@ -15,13 +15,11 @@ const StyledStatusDisplay = styled.div`
     flex-direction: column;
     justify-content: space-between;
 `
-
 const StyledStatusIcon = styled.div`
     display: flex;
     gap: 6px;
     align-items: center;
 `
-
 const StyledIcon = styled(Icon)`
     width: 20px;
     height: 20px;

@@ -10,14 +10,12 @@ const TableWithHeader = styled.div`
     margin: 2rem 0rem;
     max-width: 25rem;
 `
-
 const StyledTable = styled.div`
     display: grid;
     overflow-x: auto;
     overflow-y: hidden;
     z-index: 0;
 `
-
 const StyledTableRow = styled(Table.Row)`
     &:nth-child(1),
     &:nth-child(5) {

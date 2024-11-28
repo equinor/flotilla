@@ -15,14 +15,12 @@ const StyledListContainer = styled.div`
     align-items: center;
     padding: 3px 10px 2px 10px;
 `
-
 const outline = styled.div`
     outline: solid;
     outline-width: 1px;
     outline-color: lightgray;
     padding: 6px 10px 6px 10px;
 `
-
 const StyledListHeading = styled(outline)`
     display: flex;
     justify-content: space-between;
@@ -36,27 +34,23 @@ const StyledListItem = styled(outline)`
     row-gap: 10px;
     border-radius: 0px 0px 3px 3px;
 `
-
 const VerticalContent = styled.div`
     display: flex;
     flex-direction: row;
     align-items: center;
     column-gap: 4px;
 `
-
 const StyledIcon = styled(Icon)`
     width: 24px;
     min-width: 24px;
     height: 24px;
 `
-
 const Horizontal = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: top;
 `
-
 const Right = styled.div`
     display: flex;
     align-items: right;

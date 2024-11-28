@@ -20,20 +20,17 @@ const MapCard = styled(Card)`
     padding: 16px;
     justify-items: center;
 `
-
 const StyledMap = styled.canvas`
     object-fit: contain;
     max-height: 100%;
     max-width: 90%;
     margin: auto;
 `
-
 const StyledElements = styled.div`
     display: flex;
     flex-direction: columns;
     align-items: end;
 `
-
 const SyledContainer = styled.div`
     display: flex;
     max-height: 600px;

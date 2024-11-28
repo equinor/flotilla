@@ -16,20 +16,17 @@ const MissionControlStyle = styled.div`
     flex-direction: column;
     gap: 1rem;
 `
-
 const MissionControlBody = styled.div`
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
     gap: 16px;
 `
-
 const MissionControlHeader = styled.div`
     display: grid;
     grid-direction: column;
     gap: 0.5rem;
 `
-
 const MissionControlCardStyle = styled(Card)`
     display: flex;
     gap: 0px;
@@ -44,7 +41,6 @@ const MissionControlCardStyle = styled(Card)`
         align-self: stretch;
     }
 `
-
 const OngoingMissionControlCardStyle = styled.div`
     display: flex;
     gap: 0px;

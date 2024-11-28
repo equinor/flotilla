@@ -27,7 +27,6 @@ const ButtonStyle = styled.div`
     grid-template-columns: 45px 45px;
     margin-end: 20px;
 `
-
 const ButtonText = styled.div`
     display: flex;
     flex-direction: column;

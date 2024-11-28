@@ -22,23 +22,19 @@ const StyledDisplayButtons = styled.div`
     justify-content: flex-end;
     gap: 0.5rem;
 `
-
 const StyledDialog = styled(Dialog)`
     display: grid;
     width: calc(100vw * 0.8);
     max-width: 450px;
 `
-
 const StyledText = styled.div`
     display: grid;
     gird-template-rows: auto, auto;
     gap: 1rem;
 `
-
 const StyledButton = styled(Button)`
     background-color: white;
 `
-
 const ContainButton = styled.div`
     display: block;
 `

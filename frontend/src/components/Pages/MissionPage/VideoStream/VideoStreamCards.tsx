@@ -12,13 +12,11 @@ const FullscreenButton = styled(Button)`
     height: 32px;
     opacity: 0.75;
 `
-
 const VideoCard = styled(Card)`
     padding: 1rem;
     height: 15rem;
     width: 20rem;
 `
-
 const StyledVideoSection = styled.div`
     height: 10rem;
 `

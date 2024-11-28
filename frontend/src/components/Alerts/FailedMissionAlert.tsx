@@ -12,7 +12,6 @@ import { tokens } from '@equinor/eds-tokens'
 const Indent = styled.div`
     padding: 0px 0px 0px 5px;
 `
-
 const StyledButton = styled(TextAlignedButton)`
     :hover {
         background-color: #ff9797;

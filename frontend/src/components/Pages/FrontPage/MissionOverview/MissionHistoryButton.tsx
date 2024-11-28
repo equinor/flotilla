@@ -9,7 +9,6 @@ import { tokens } from '@equinor/eds-tokens'
 const ContainButton = styled.div`
     display: block;
 `
-
 const StyledButton = styled(Button)`
     display: flex;
     align-items: flex-start;

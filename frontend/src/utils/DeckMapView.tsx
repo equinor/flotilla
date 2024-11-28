@@ -20,25 +20,21 @@ const StyledMap = styled.canvas`
     max-width: 90%;
     margin: auto;
 `
-
 const StyledMapLimits = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 `
-
 const StyledLoading = styled.div`
     display: flex;
     justify-content: center;
 `
-
 const StyledMapCompass = styled.div`
     display: flex;
     flex-direction: row;
     align-items: end;
 `
-
 const StyledCaption = styled.div`
     display: flex;
     flex-direction: column;

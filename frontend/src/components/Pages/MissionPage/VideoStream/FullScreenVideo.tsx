@@ -12,7 +12,6 @@ const FullscreenExitButton = styled(Button)`
     height: 32px;
     opacity: 0.75;
 `
-
 const FullscreenExitButtonRotate = styled(Button)`
     position: absolute;
     bottom: 1px;
@@ -21,7 +20,6 @@ const FullscreenExitButtonRotate = styled(Button)`
     height: 32px;
     opacity: 0.75;
 `
-
 const FullScreenCard = styled.div`
     padding: 1rem;
     box-shadow: ${tokens.elevation.raised};
