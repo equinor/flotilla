@@ -58,7 +58,7 @@ namespace Api.Services.ActionServices
                             .Select(
                                 task =>
                                     (task.EndTime! - task.StartTime!).Value.TotalSeconds
-                                    - task.Inspection?.VideoDuration ?? 0
+                                    - (task.Inspection?.VideoDuration ?? 0)
                                     )
                             )
                 .ToList();
