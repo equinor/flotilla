@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Net;
+using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
@@ -8,14 +10,16 @@ using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Identity.Abstractions;
 namespace Api.Services
 {
     public interface IInspectionService
     {
-        public Task<byte[]> FetchInpectionImage(string inpectionName, string installationCode);
+        public Task<byte[]> FetchInpectionImage(string inpectionName, string installationCode, string storageAccount);
         public Task<Inspection> UpdateInspectionStatus(string isarTaskId, IsarTaskStatus isarTaskStatus);
         public Task<Inspection?> ReadByIsarTaskId(string id, bool readOnly = true);
         public Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingsQuery, string isarTaskId);
+        public Task<IDAInspectionDataResponse?> GetInspectionStorageInfo(string inspectionId);
 
     }
 
@@ -24,13 +28,14 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, IAccessRoleService accessRoleService,
-            IOptions<IDAOptions> blobOptions,
+    public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, IDownstreamApi idaApi, IAccessRoleService accessRoleService,
             IBlobService blobService) : IInspectionService
     {
-        public async Task<byte[]> FetchInpectionImage(string inpectionName, string installationCode)
+        public const string ServiceName = "IDAApi";
+
+        public async Task<byte[]> FetchInpectionImage(string inpectionName, string installationCode, string storageAccount)
         {
-            return await blobService.DownloadBlob(inpectionName, installationCode, blobOptions.Value.StorageAccount);
+            return await blobService.DownloadBlob(inpectionName, installationCode, storageAccount);
         }
 
         public async Task<Inspection> UpdateInspectionStatus(string isarTaskId, IsarTaskStatus isarTaskStatus)
@@ -105,6 +110,46 @@ namespace Api.Services
             inspection.InspectionFindings.Add(inspectionFinding);
             inspection = await Update(inspection);
             return inspection;
+        }
+
+        public async Task<IDAInspectionDataResponse?> GetInspectionStorageInfo(string inspectionId)
+        {
+            var inspectionID = "finaltest";
+            string relativePath = $"InspectionData/{inspectionID}/inspection-data-storage-location";
+
+            var response = await idaApi.CallApiForUserAsync(
+                ServiceName,
+                options =>
+                {
+                    options.HttpMethod = HttpMethod.Get.Method;
+                    options.RelativePath = relativePath;
+                }
+            );
+
+
+            if (response.StatusCode == HttpStatusCode.Accepted)
+            {
+                logger.LogInformation("Inspection data storage location for inspection with Id {inspectionId} is not yet available", inspectionId);
+                return null;
+            }
+
+            if (response.StatusCode == HttpStatusCode.InternalServerError)
+            {
+                logger.LogError("Inetrnal server error when trying to get inspection data for inspection with Id {inspectionId}", inspectionId);
+                return null;
+            }
+
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                logger.LogError("Could not find inspection data for inspection with Id {inspectionId}", inspectionId);
+                return null;
+            }
+
+            var inspectionData = await response.Content.ReadFromJsonAsync<
+                IDAInspectionDataResponse
+            >() ?? throw new JsonException("Failed to deserialize missions from Echo");
+
+            return inspectionData;
         }
     }
 }

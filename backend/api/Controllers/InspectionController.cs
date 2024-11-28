@@ -1,6 +1,7 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Services.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,18 +44,20 @@ namespace Api.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            // Make API call to IDA using inspection.Id
-            string inspectionBlobName = "apprentices.jpg";
-            installationCode = "kaa";
+            if (inspection.Id == null) return NotFound($"Could not find Id for Inspection with task ID {taskId}.");
+
+            var inspectionData = await inspectionService.GetInspectionStorageInfo(inspection.Id);
+
+            if (inspectionData == null) return NotFound($"Could not find inspection data for inspection with Id {inspection.Id}.");
 
             try
             {
-                byte[] inspectionStream = await inspectionService.FetchInpectionImage(inspectionBlobName, installationCode);
+                byte[] inspectionStream = await inspectionService.FetchInpectionImage(inspectionData.BlobName, inspectionData.BlobContainer, inspectionData.StorageAccount);
                 return File(inspectionStream, "image/png");
             }
             catch (Azure.RequestFailedException)
             {
-                return NotFound($"Could not find inspection blob with name {inspectionBlobName}.");
+                return NotFound($"Could not find inspection blob {inspectionData.BlobName} in container {inspectionData.BlobContainer} and storage account {inspectionData.StorageAccount}.");
             }
         }
     }

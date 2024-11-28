@@ -12,18 +12,20 @@ import { formatDateTime } from 'utils/StringFormatting'
 
 const StyledInspection = styled.canvas`
     flex: 1 0 0;
-    align-self: contain;
-    max-width: 100%;
+    align-self: stretch;
+    max-height: 60vh;
+    width: 80vh;
 `
 
 const StyledInspectionImage = styled.canvas`
     flex: 1 0 0;
-    align-self: stretch;
+    align-self: center;
     max-width: 100%;
 `
 
 const StyledDialog = styled(Dialog)`
-    width: 80vw;
+    display: flex;
+    width: 100%;
     max-height: 80vh;
 `
 const StyledCloseButton = styled(Button)`
@@ -154,9 +156,6 @@ export const InspectionDialogView = ({ task, setInspectionTask, tasks }: Inspect
             .then((imageBlob) => {
                 imageObjectURL.current = URL.createObjectURL(imageBlob)
             })
-            .catch(() => {
-                imageObjectURL.current = NoMap
-            })
             .then(() => {
                 getMeta(imageObjectURL.current).then((img) => {
                     const inspectionCanvas = document.getElementById('inspectionCanvas') as HTMLCanvasElement
@@ -173,49 +172,55 @@ export const InspectionDialogView = ({ task, setInspectionTask, tasks }: Inspect
                     setInspectionImage(img)
                 })
             })
+            .catch((e) => {})
     }, [installationCode, taskId, task])
 
     return (
-        <StyledDialog open={true}>
+        <>
+        {imageObjectURL.current != '' && (
+            <StyledDialog open={true}>
             <StyledDialogContent>
                 <StyledDialogHeader>
-                    <Typography variant="h4">{TranslateText('Inspection report')}</Typography>
+                    <Typography variant="accordion_header" group="ui">{TranslateText('Inspection report')}</Typography>
                     <StyledCloseButton variant="ghost" onClick={() => setInspectionTask(undefined)}>
                         <Icon name={Icons.Clear} size={24} />
                     </StyledCloseButton>
                 </StyledDialogHeader>
                 <StyledDialogInspectionView>
-                <div>
-                <StyledInspection id="inspectionCanvas" />
-                <StyledBottomContent>
-                    <StyledInfoContent>
-                        <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>
-                        <Typography variant="body_short">{installationName}</Typography>
-                    </StyledInfoContent>
-                    <StyledInfoContent>
-                        <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
-                        <Typography variant="body_short">{task.tagId}</Typography>
-                    </StyledInfoContent>
-                    {task.description && (
-                        <StyledInfoContent>
-                            <Typography variant="caption">{TranslateText('Description' + ':')}</Typography>
-                            <Typography variant="body_short">{task.description}</Typography>
-                        </StyledInfoContent>
-                    )}
-                    {task.endTime && (
-                        <StyledInfoContent>
-                            <Typography variant="caption">{TranslateText('Timestanp' + ':')}</Typography>
-                            <Typography variant="body_short">
-                                {formatDateTime(task.endTime, 'dd.MM.yy - HH:mm')}
-                            </Typography>
-                        </StyledInfoContent>
-                    )}
-                </StyledBottomContent>
-                </div>
-                <InspectionsViewSection tasks={tasks} setInspectionTask={setInspectionTask} widthValue='150px' />
+                    <div>
+                        <StyledInspection id="inspectionCanvas" />
+                        <StyledBottomContent>
+                            <StyledInfoContent>
+                                <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>
+                                <Typography variant="body_short">{installationName}</Typography>
+                            </StyledInfoContent>
+                            <StyledInfoContent>
+                                <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
+                                <Typography variant="body_short">{task.tagId}</Typography>
+                            </StyledInfoContent>
+                            {task.description && (
+                                <StyledInfoContent>
+                                    <Typography variant="caption">{TranslateText('Description' + ':')}</Typography>
+                                    <Typography variant="body_short">{task.description}</Typography>
+                                </StyledInfoContent>
+                            )}
+                            {task.endTime && (
+                                <StyledInfoContent>
+                                    <Typography variant="caption">{TranslateText('Timestanp' + ':')}</Typography>
+                                    <Typography variant="body_short">
+                                        {formatDateTime(task.endTime, 'dd.MM.yy - HH:mm')}
+                                    </Typography>
+                                </StyledInfoContent>
+                            )}
+                        </StyledBottomContent>
+                    </div>
+                    <InspectionsViewSection tasks={tasks} setInspectionTask={setInspectionTask} widthValue="150px" />
                 </StyledDialogInspectionView>
             </StyledDialogContent>
         </StyledDialog>
+
+        )}
+        </>
     )
 }
 
@@ -227,42 +232,68 @@ interface InspectionsViewSectionProps {
 
 export const InspectionsViewSection = ({ tasks, setInspectionTask, widthValue }: InspectionsViewSectionProps) => {
     const { TranslateText } = useLanguageContext()
+    const imageObjectURL = useRef<string>('')
 
     return (
-        <StyledSection style={{ width: widthValue ? widthValue : 'auto', borderColor: widthValue ? 'white' : 'auto', padding: widthValue ? '0px': 'auto'}}>
-            {!widthValue &&
-                <Typography variant="h4">{TranslateText('Last completed inspection')}</Typography>
-            }
+        <>
+        {imageObjectURL.current != '' && (
+            
+            <StyledSection
+            style={{
+                width: widthValue ? widthValue : 'auto',
+                borderColor: widthValue ? 'white' : 'auto',
+                padding: widthValue ? '0px' : 'auto',
+            }}
+        >
+            {!widthValue && <Typography variant="h4">{TranslateText('Last completed inspection')}</Typography>}
             <StyledImagesSection>
                 <StyledInspectionCards>
-                {Object.keys(tasks).length > 0 &&
-                    tasks.map((task) => (
-                        <StyledImageCard onClick={()=> setInspectionTask(task)}>
-                            <GetInspectionImage key={task.isarTaskId} task={task} />
-                            <StyledInspectionData>
-                                <StyledInspectionContent>
-                                    <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
-                                    <Typography variant="body_short">{task.tagId}</Typography>
-                                </StyledInspectionContent>
-                                {task.endTime && (
-                                    <StyledInspectionContent>
-                                    <Typography variant="caption">{TranslateText('Timestamp') + ':'}</Typography>
-                                    <Typography variant="body_short">{formatDateTime(task.endTime!, 'dd.MM.yy - HH:mm')}</Typography>
-                                </StyledInspectionContent>
-                                )}
-                                
-                            </StyledInspectionData>
-                        </StyledImageCard>
-                    ))}
+                    {Object.keys(tasks).length > 0 &&
+                        tasks.map(
+                            (task) =>
+                                task.status === TaskStatus.Successful && (
+                                    <StyledImageCard key={task.isarTaskId} onClick={() => setInspectionTask(task)}>
+                                        <GetInspectionImage task={task} imageObjectURL={imageObjectURL} />
+                                        <StyledInspectionData>
+                                            {task.tagId && (
+                                                <StyledInspectionContent>
+                                                    <Typography variant="caption">
+                                                        {TranslateText('Tag') + ':'}
+                                                    </Typography>
+                                                    <Typography variant="body_short">{task.tagId}</Typography>
+                                                </StyledInspectionContent>
+                                            )}
+                                            {task.endTime && (
+                                                <StyledInspectionContent>
+                                                    <Typography variant="caption">
+                                                        {TranslateText('Timestamp') + ':'}
+                                                    </Typography>
+                                                    <Typography variant="body_short">
+                                                        {formatDateTime(task.endTime!, 'dd.MM.yy - HH:mm')}
+                                                    </Typography>
+                                                </StyledInspectionContent>
+                                            )}
+                                        </StyledInspectionData>
+                                    </StyledImageCard>
+                                )
+                        )}
                 </StyledInspectionCards>
             </StyledImagesSection>
         </StyledSection>
+
+        )}
+        </>
+        
     )
 }
 
-const GetInspectionImage = ({ task }: { task: Task }) => {
-    const { installationCode, installationName } = useInstallationContext()
-    const imageObjectURL = useRef<string>('')
+interface IGetInspectionImageProps {
+    task: Task
+    imageObjectURL: React.MutableRefObject<string>
+}
+
+const GetInspectionImage = ({ task, imageObjectURL }: IGetInspectionImageProps) => {
+    const { installationCode } = useInstallationContext()
     const [inspectionCanvas, setInspectionCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [inspectionImage, setInspectionImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [inspectionContext, setInspectionContext] = useState<CanvasRenderingContext2D>()
@@ -271,9 +302,6 @@ const GetInspectionImage = ({ task }: { task: Task }) => {
         BackendAPICaller.getInspection(installationCode, task.isarTaskId!)
             .then((imageBlob) => {
                 imageObjectURL.current = URL.createObjectURL(imageBlob)
-            })
-            .catch(() => {
-                imageObjectURL.current = NoMap
             })
             .then(() => {
                 getMeta(imageObjectURL.current).then((img) => {
@@ -291,6 +319,7 @@ const GetInspectionImage = ({ task }: { task: Task }) => {
                     setInspectionImage(img)
                 })
             })
+            .catch((e) => {})
     }, [installationCode, task.isarTaskId, task])
 
     return <StyledInspectionImage id={task.isarTaskId} />

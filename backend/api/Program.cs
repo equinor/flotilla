@@ -144,6 +144,7 @@ builder.Services
     .AddInMemoryTokenCaches()
     .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
     .AddDownstreamApi(StidService.ServiceName, builder.Configuration.GetSection("Stid"))
+    .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("IDAApi"))
     .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
 builder.Services.AddAuthorizationBuilder().AddFallbackPolicy(

@@ -129,16 +129,26 @@ const InspectionTypesDisplay = ({ task, setInspectionTask }: InspectionTypesDisp
         <>
             {task.inspection &&
                 (task.inspection.inspectionType === InspectionType.Image ? (
-                    <Button
-                        key={task.id + task.inspection.id + 'insp'}
-                        variant="ghost"
-                        onClick={() => setInspectionTask(task)}
-                    >
-                        <Typography variant="body_short_link">
-                            {' '}
-                            {TranslateText(task.inspection.inspectionType as string)}{' '}
-                        </Typography>
-                    </Button>
+                    task.status === TaskStatus.Successful ? (
+                        <Button
+                            key={task.id + task.inspection.id + 'insp'}
+                            variant="ghost"
+                            onClick={() => setInspectionTask(task)}
+                        >
+                            <Typography variant="body_short_link">
+                                {TranslateText(task.inspection.inspectionType as string)}
+                            </Typography>
+                        </Button>
+                    ) : (
+                        <Button
+                            key={task.id + task.inspection.id + 'insp'}
+                            variant="ghost"
+                        >
+                            <Typography variant="body_short">
+                                {TranslateText(task.inspection.inspectionType as string)}
+                            </Typography>
+                        </Button>
+                    )
                 ) : (
                     <Typography key={task.id + task.inspection.id + 'insp'}>
                         {TranslateText(task.inspection.inspectionType as string)}
