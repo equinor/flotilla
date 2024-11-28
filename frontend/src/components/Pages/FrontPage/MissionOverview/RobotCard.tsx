@@ -10,7 +10,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { config } from 'config'
 import { RobotType } from 'models/RobotModel'
-import { StyledButton } from 'components/Styles/StyledComponents'
+import { StyledButton, AttributeTitleTypography } from 'components/Styles/StyledComponents'
 import { Icons } from 'utils/icons'
 
 const StyledRobotCard = styled.div`
@@ -127,7 +127,7 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
                 </StyledHeader>
                 <HorizontalContent>
                     <VerticalContent>
-                        <Typography variant="caption">{TranslateText('Status')}</Typography>
+                        <AttributeTitleTypography>{TranslateText('Status')}</AttributeTitleTypography>
                         <RobotStatusChip
                             status={robot.status}
                             flotillaStatus={robot.flotillaStatus}
@@ -138,12 +138,7 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
                     {robot.status !== RobotStatus.Offline ? (
                         <>
                             <VerticalContent>
-                                <Typography
-                                    variant="meta"
-                                    style={{ fontSize: 14, color: tokens.colors.text.static_icons__secondary.hex }}
-                                >
-                                    {TranslateText('Battery')}
-                                </Typography>
+                                <AttributeTitleTypography>{TranslateText('Battery')}</AttributeTitleTypography>
                                 <BatteryStatusDisplay
                                     batteryLevel={robot.batteryLevel}
                                     batteryWarningLimit={robot.model.batteryWarningThreshold}
@@ -152,12 +147,7 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
 
                             {robot.pressureLevel !== undefined && robot.pressureLevel !== null && (
                                 <VerticalContent>
-                                    <Typography
-                                        variant="meta"
-                                        style={{ fontSize: 14, color: tokens.colors.text.static_icons__secondary.hex }}
-                                    >
-                                        {TranslateText('Pressure')}
-                                    </Typography>
+                                    <AttributeTitleTypography>{TranslateText('Pressure')}</AttributeTitleTypography>
                                     <PressureStatusDisplay
                                         pressure={robot.pressureLevel}
                                         upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}

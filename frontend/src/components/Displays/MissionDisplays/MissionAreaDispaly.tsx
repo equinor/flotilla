@@ -1,6 +1,6 @@
 import { Typography } from '@equinor/eds-core-react'
-import { tokens } from '@equinor/eds-tokens'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { AttributeTitleTypography } from 'components/Styles/StyledComponents'
 import { Mission } from 'models/Mission'
 import styled from 'styled-components'
 
@@ -14,9 +14,7 @@ export const MissionAreaDisplay = ({ mission }: { mission: Mission }) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledAreaDisplay>
-            <Typography variant="meta" color={tokens.colors.text.static_icons__tertiary.hex}>
-                {TranslateText('Area')}
-            </Typography>
+            <AttributeTitleTypography>{TranslateText('Area')}</AttributeTitleTypography>
             <Typography>{mission.area?.areaName || 'N/A'}</Typography>
         </StyledAreaDisplay>
     )

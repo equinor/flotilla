@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task } from 'models/Task'
-import { tokens } from '@equinor/eds-tokens'
+import { AttributeTitleTypography } from 'components/Styles/StyledComponents'
 
 const StyledTagCount = styled.div`
     display: flex;
@@ -31,9 +31,7 @@ export const MissionProgressDisplay = ({ mission }: MissionProps) => {
 
     return (
         <StyledTagCount>
-            <Typography variant="meta" color={tokens.colors.text.static_icons__tertiary.hex}>
-                {TranslateText('Completed Tasks')}
-            </Typography>
+            <AttributeTitleTypography>{TranslateText('Completed Tasks')}</AttributeTitleTypography>
             <Typography>
                 {completedTasks}/{tasks.length}
             </Typography>
