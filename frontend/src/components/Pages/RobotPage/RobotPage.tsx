@@ -4,7 +4,6 @@ import styled from 'styled-components'
 import { BackButton } from 'utils/BackButton'
 import { Header } from 'components/Header/Header'
 import { RobotImage } from 'components/Displays/RobotDisplays/RobotImage'
-import { MoveRobotArm } from './RobotArmMovement'
 import { PressureTable } from './PressureTable'
 import { PressureStatusDisplay } from 'components/Displays/RobotDisplays/PressureStatusDisplay'
 import { BatteryStatusDisplay } from 'components/Displays/RobotDisplays/BatteryStatusDisplay'
@@ -23,15 +22,8 @@ import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { VideoStreamSection } from '../MissionPage/MissionPage'
 import { useEffect, useState } from 'react'
 import { VideoStreamWindow } from '../MissionPage/VideoStream/VideoStreamWindow'
+import { MoveRobotArmSection } from './RobotArmMovement'
 
-const RobotArmMovementSection = styled.div`
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    @media (max-width: 600px) {
-        flex-direction: column;
-    }
-`
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
     max-width: 12rem;
@@ -150,26 +142,7 @@ export const RobotPage = () => {
                         </StyledTextButton>
 
                         {selectedRobot.model.type === RobotType.TaurobInspector && (
-                            <>
-                                <Typography variant="h4">{TranslateText('Set robot arm to ')}</Typography>
-                                <RobotArmMovementSection>
-                                    <MoveRobotArm
-                                        robot={selectedRobot}
-                                        armPosition="battery_change"
-                                        isRobotAvailable={selectedRobot.status === RobotStatus.Available}
-                                    />
-                                    <MoveRobotArm
-                                        robot={selectedRobot}
-                                        armPosition="transport"
-                                        isRobotAvailable={selectedRobot.status === RobotStatus.Available}
-                                    />
-                                    <MoveRobotArm
-                                        robot={selectedRobot}
-                                        armPosition="lookout"
-                                        isRobotAvailable={selectedRobot.status === RobotStatus.Available}
-                                    />
-                                </RobotArmMovementSection>
-                            </>
+                            <MoveRobotArmSection robot={selectedRobot} />
                         )}
                         {selectedRobot.documentation && selectedRobot.documentation.length > 0 && (
                             <DocumentationSection documentation={selectedRobot.documentation} />
