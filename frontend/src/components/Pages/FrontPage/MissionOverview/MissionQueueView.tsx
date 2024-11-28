@@ -23,11 +23,14 @@ const StyledMissionView = styled.div`
 
 export const RobotMissionQueueView = ({ robot }: { robot: Robot }): JSX.Element => {
     const { TranslateText } = useLanguageContext()
-    const { missionQueue, ongoingMissions, loadingMissionSet, setLoadingMissionSet } = useMissionsContext()
+    const { missionQueue, ongoingMissions, loadingRobotMissionSet, setLoadingRobotMissionSet } = useMissionsContext()
     const { setAlert, setListAlert } = useAlertContext()
 
     const robotMissionQueue = missionQueue.filter((mission) => mission.robot.id === robot.id)
     const robotOngoingMissions = ongoingMissions.filter((mission) => mission.robot.id === robot.id)
+    const robotLoadingMissions = Array.from(loadingRobotMissionSet).filter((robotMissionName) =>
+        robotMissionName.includes(robot.id)
+    )
 
     const onDeleteMission = (mission: Mission) =>
         BackendAPICaller.deleteMission(mission.id).catch((_) => {
@@ -46,10 +49,10 @@ export const RobotMissionQueueView = ({ robot }: { robot: Robot }): JSX.Element 
         })
 
     useEffect(() => {
-        setLoadingMissionSet((currentLoadingNames) => {
+        setLoadingRobotMissionSet((currentLoadingNames) => {
             const updatedLoadingMissionNames = new Set(currentLoadingNames)
-            robotMissionQueue.forEach((mission) => updatedLoadingMissionNames.delete(mission.name))
-            robotOngoingMissions.forEach((mission) => updatedLoadingMissionNames.delete(mission.name))
+            robotMissionQueue.forEach((mission) => updatedLoadingMissionNames.delete(mission.name + robot.id))
+            robotOngoingMissions.forEach((mission) => updatedLoadingMissionNames.delete(mission.name + robot.id))
             return updatedLoadingMissionNames
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,10 +73,10 @@ export const RobotMissionQueueView = ({ robot }: { robot: Robot }): JSX.Element 
 
     return (
         <>
-            {(robotMissionQueue.length > 0 || loadingMissionSet.size > 0) && (
+            {(robotMissionQueue.length > 0 || robotLoadingMissions.length > 0) && (
                 <StyledMissionView>
                     {missionQueueDisplay}
-                    {loadingMissionSet.size > 0 && loadingQueueDisplay}
+                    {robotLoadingMissions.length > 0 && loadingQueueDisplay}
                 </StyledMissionView>
             )}
         </>
