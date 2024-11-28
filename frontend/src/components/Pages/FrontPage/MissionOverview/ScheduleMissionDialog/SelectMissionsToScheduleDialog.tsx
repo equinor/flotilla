@@ -44,7 +44,7 @@ export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: Sc
     const { TranslateText } = useLanguageContext()
     const { installationCode } = useInstallationContext()
     const { setAlert, setListAlert } = useAlertContext()
-    const { setLoadingMissionSet } = useMissionsContext()
+    const { setLoadingRobotMissionSet } = useMissionsContext()
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>([])
     const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(undefined)
 
@@ -71,15 +71,15 @@ export const SelectMissionsToScheduleDialog = ({ missionsList, closeDialog }: Sc
                     />,
                     AlertCategory.ERROR
                 )
-                setLoadingMissionSet((currentSet: Set<string>) => {
+                setLoadingRobotMissionSet((currentSet: Set<string>) => {
                     const updatedSet: Set<string> = new Set(currentSet)
-                    updatedSet.delete(String(mission.name))
+                    updatedSet.delete(String(mission.name + selectedRobot.id))
                     return updatedSet
                 })
             })
-            setLoadingMissionSet((currentSet: Set<string>) => {
+            setLoadingRobotMissionSet((currentSet: Set<string>) => {
                 const updatedSet: Set<string> = new Set(currentSet)
-                updatedSet.add(String(mission.name))
+                updatedSet.add(String(mission.name + selectedRobot.id))
                 return updatedSet
             })
         })

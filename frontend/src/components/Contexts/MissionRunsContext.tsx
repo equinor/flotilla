@@ -19,8 +19,10 @@ const upsertMissionList = (list: Mission[], mission: Mission) => {
 interface IMissionRunsContext {
     ongoingMissions: Mission[]
     missionQueue: Mission[]
-    loadingMissionSet: Set<string>
-    setLoadingMissionSet: (newLoadingMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => void
+    loadingRobotMissionSet: Set<string>
+    setLoadingRobotMissionSet: (
+        newLoadingRobotMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)
+    ) => void
 }
 
 interface Props {
@@ -30,8 +32,8 @@ interface Props {
 const defaultMissionRunsContext: IMissionRunsContext = {
     ongoingMissions: [],
     missionQueue: [],
-    loadingMissionSet: new Set(),
-    setLoadingMissionSet: (newLoadingMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => {},
+    loadingRobotMissionSet: new Set(),
+    setLoadingRobotMissionSet: (newLoadingRobotMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => {},
 }
 
 const MissionRunsContext = createContext<IMissionRunsContext>(defaultMissionRunsContext)
@@ -79,7 +81,7 @@ const fetchMissionRuns = (params: {
 const useMissionRuns = (): IMissionRunsContext => {
     const [ongoingMissions, setOngoingMissions] = useState<Mission[]>([])
     const [missionQueue, setMissionQueue] = useState<Mission[]>([])
-    const [loadingMissionSet, setLoadingMissionSet] = useState<Set<string>>(new Set())
+    const [loadingRobotMissionSet, setLoadingRobotMissionSet] = useState<Set<string>>(new Set())
     const { registerEvent, connectionReady } = useSignalRContext()
     const { TranslateText } = useLanguageContext()
     const { setAlert, setListAlert } = useAlertContext()
@@ -184,15 +186,17 @@ const useMissionRuns = (): IMissionRunsContext => {
     return {
         ongoingMissions: filteredOngoingMissions,
         missionQueue: filteredMissionQueue,
-        loadingMissionSet,
-        setLoadingMissionSet,
+        loadingRobotMissionSet,
+        setLoadingRobotMissionSet,
     }
 }
 
 export const MissionRunsProvider: FC<Props> = ({ children }) => {
-    const { ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet } = useMissionRuns()
+    const { ongoingMissions, missionQueue, loadingRobotMissionSet, setLoadingRobotMissionSet } = useMissionRuns()
     return (
-        <MissionRunsContext.Provider value={{ ongoingMissions, missionQueue, loadingMissionSet, setLoadingMissionSet }}>
+        <MissionRunsContext.Provider
+            value={{ ongoingMissions, missionQueue, loadingRobotMissionSet, setLoadingRobotMissionSet }}
+        >
             {children}
         </MissionRunsContext.Provider>
     )

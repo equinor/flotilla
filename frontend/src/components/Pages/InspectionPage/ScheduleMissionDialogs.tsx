@@ -53,7 +53,7 @@ const StyledDangerContent = styled.div`
 export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
-    const { setLoadingMissionSet } = useMissionsContext()
+    const { setLoadingRobotMissionSet } = useMissionsContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [isLocalizationVerificationDialogOpen, setIsLocalizationVerificationDialog] = useState<boolean>(false)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
@@ -101,15 +101,15 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     />,
                     AlertCategory.ERROR
                 )
-                setLoadingMissionSet((currentSet: Set<string>) => {
+                setLoadingRobotMissionSet((currentSet: Set<string>) => {
                     const updatedSet: Set<string> = new Set(currentSet)
-                    updatedSet.delete(String(mission.name))
+                    updatedSet.delete(String(mission.name + selectedRobot.id))
                     return updatedSet
                 })
             })
-            setLoadingMissionSet((currentSet: Set<string>) => {
+            setLoadingRobotMissionSet((currentSet: Set<string>) => {
                 const updatedSet: Set<string> = new Set(currentSet)
-                updatedSet.add(String(mission.name))
+                updatedSet.add(String(mission.name + selectedRobot.id))
                 return updatedSet
             })
         })
