@@ -53,9 +53,7 @@ const StyledTypography = styled(Typography)`
     line-height: 40px; /* 125% */
 
     @media (max-width: 500px) {
-        font-family: Equinor;
         font-size: 24px;
-        font-style: normal;
     }
 `
 

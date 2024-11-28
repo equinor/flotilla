@@ -46,7 +46,6 @@ const StatusContent = styled.div`
     justify-content: flex-end;
     gap: 2rem;
     @media (max-width: 600px) {
-        flex-direction: column;
         align-items: flex-start;
     }
 `

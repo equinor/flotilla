@@ -15,12 +15,12 @@ import { Icons } from 'utils/icons'
 
 const StyledRobotCard = styled.div`
     display: flex;
+    align-self: stretch;
 
     @media (min-width: 960px) {
         width: 446px;
         padding: 16px;
         align-items: center;
-        align-self: stretch;
         gap: 16px;
         border-right: 1px solid ${tokens.colors.ui.background__medium.hex};
     }
@@ -31,7 +31,6 @@ const StyledRobotCard = styled.div`
         justify-content: center;
         align-items: flex-start;
         gap: 8px;
-        align-self: stretch;
         border-bottom: 1px solid ${tokens.colors.ui.background__medium.hex};
     }
 `
