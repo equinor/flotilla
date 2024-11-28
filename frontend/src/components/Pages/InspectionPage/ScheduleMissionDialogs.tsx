@@ -65,6 +65,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 r.status === RobotStatus.Recharging) &&
             r.isarConnected
     )
+
     const onSelectedRobot = (selectedRobot: Robot) => {
         if (filteredRobots) setSelectedRobot(selectedRobot)
     }
@@ -151,6 +152,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                         )}
                         <StyledAutoComplete>
                             <Autocomplete
+                                initialSelectedOptions={filteredRobots.length === 1 ? [filteredRobots[0]] : []}
                                 dropdownHeight={200}
                                 optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
                                 options={filteredRobots}
