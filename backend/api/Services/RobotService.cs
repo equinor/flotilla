@@ -156,7 +156,7 @@ namespace Api.Services
 
         public async Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel)
         {
-            var robot = await UpdateRobotProperty(robotId, "BatteryLevel", batteryLevel);
+            var robot = await UpdateRobotProperty(robotId, "BatteryLevel", batteryLevel, isLogLevelDebug: true);
             ThrowIfRobotIsNull(robot, robotId);
             return robot;
         }
@@ -317,7 +317,7 @@ namespace Api.Services
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
-        private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value)
+        private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value, bool isLogLevelDebug = false)
         {
             var robot = await ReadById(robotId, readOnly: false);
             if (robot is null)
@@ -331,7 +331,10 @@ namespace Api.Services
             {
                 if (property.Name == propertyName)
                 {
-                    logger.LogDebug("Setting {robotName} field {propertyName} from {oldValue} to {NewValue}", robot.Name, propertyName, property.GetValue(robot), value);
+                    if (isLogLevelDebug)
+                        logger.LogDebug("Setting {robotName} field {propertyName} from {oldValue} to {NewValue}", robot.Name, propertyName, property.GetValue(robot), value);
+                    else
+                        logger.LogInformation("Setting {robotName} field {propertyName} from {oldValue} to {NewValue}", robot.Name, propertyName, property.GetValue(robot), value);
                     property.SetValue(robot, value);
                 }
             }
