@@ -53,9 +53,22 @@ const StyledNoneImageBody = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
-    flex: 1 0 0;
     align-self: stretch;
+
+    @media (min-width: 960px) {
+        gap: 16px;
+    }
+`
+
+const StyledMainBody = styled.div`
+    align-self: stretch;
+
+    @media (min-width: 960px) {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
 `
 
 const StyledHeader = styled.div`
@@ -112,54 +125,56 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
                 <RobotImage robotType={robot.model.type} height="88px" />
             </HiddenOnSmallScreen>
             <StyledNoneImageBody>
-                <StyledHeader>
-                    <LongTypography variant="h5">
-                        {robot.name}
-                        {' ('}
-                        {getRobotModel(robot.model.type)}
-                        {')'}
-                    </LongTypography>
-                    <HiddenOnLargeScreen>
-                        <Button variant="ghost_icon" onClick={goToRobot}>
-                            <Icon name={Icons.RightCheveron} size={24} />
-                        </Button>
-                    </HiddenOnLargeScreen>
-                </StyledHeader>
-                <HorizontalContent>
-                    <VerticalContent>
-                        <AttributeTitleTypography>{TranslateText('Status')}</AttributeTitleTypography>
-                        <RobotStatusChip
-                            status={robot.status}
-                            flotillaStatus={robot.flotillaStatus}
-                            isarConnected={robot.isarConnected}
-                        />
-                    </VerticalContent>
+                <StyledMainBody>
+                    <StyledHeader>
+                        <LongTypography variant="h5">
+                            {robot.name}
+                            {' ('}
+                            {getRobotModel(robot.model.type)}
+                            {')'}
+                        </LongTypography>
+                        <HiddenOnLargeScreen>
+                            <Button variant="ghost_icon" onClick={goToRobot}>
+                                <Icon name={Icons.RightCheveron} size={24} />
+                            </Button>
+                        </HiddenOnLargeScreen>
+                    </StyledHeader>
+                    <HorizontalContent>
+                        <VerticalContent>
+                            <AttributeTitleTypography>{TranslateText('Status')}</AttributeTitleTypography>
+                            <RobotStatusChip
+                                status={robot.status}
+                                flotillaStatus={robot.flotillaStatus}
+                                isarConnected={robot.isarConnected}
+                            />
+                        </VerticalContent>
 
-                    {robot.status !== RobotStatus.Offline ? (
-                        <>
-                            <VerticalContent>
-                                <AttributeTitleTypography>{TranslateText('Battery')}</AttributeTitleTypography>
-                                <BatteryStatusDisplay
-                                    batteryLevel={robot.batteryLevel}
-                                    batteryWarningLimit={robot.model.batteryWarningThreshold}
-                                />
-                            </VerticalContent>
-
-                            {robot.pressureLevel !== undefined && robot.pressureLevel !== null && (
+                        {robot.status !== RobotStatus.Offline ? (
+                            <>
                                 <VerticalContent>
-                                    <AttributeTitleTypography>{TranslateText('Pressure')}</AttributeTitleTypography>
-                                    <PressureStatusDisplay
-                                        pressure={robot.pressureLevel}
-                                        upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
-                                        lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
+                                    <AttributeTitleTypography>{TranslateText('Battery')}</AttributeTitleTypography>
+                                    <BatteryStatusDisplay
+                                        batteryLevel={robot.batteryLevel}
+                                        batteryWarningLimit={robot.model.batteryWarningThreshold}
                                     />
                                 </VerticalContent>
-                            )}
-                        </>
-                    ) : (
-                        <></>
-                    )}
-                </HorizontalContent>
+
+                                {robot.pressureLevel !== undefined && robot.pressureLevel !== null && (
+                                    <VerticalContent>
+                                        <AttributeTitleTypography>{TranslateText('Pressure')}</AttributeTitleTypography>
+                                        <PressureStatusDisplay
+                                            pressure={robot.pressureLevel}
+                                            upperPressureWarningThreshold={robot.model.upperPressureWarningThreshold}
+                                            lowerPressureWarningThreshold={robot.model.lowerPressureWarningThreshold}
+                                        />
+                                    </VerticalContent>
+                                )}
+                            </>
+                        ) : (
+                            <></>
+                        )}
+                    </HorizontalContent>
+                </StyledMainBody>
                 <HiddenOnSmallScreen>
                     <StyledGhostButton variant="ghost" onClick={goToRobot}>
                         {TranslateText('Open robot information')}

@@ -37,7 +37,6 @@ const StyledSmallScreenMissionCard = styled.div`
     align-items: flex-start;
     align-self: stretch;
     padding: 8px;
-    gap: 8px;
 
     @media (min-width: 960px) {
         display: none;
