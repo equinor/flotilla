@@ -9,3 +9,6 @@ topic read isar/#
 
 user analytics
 topic read isar/+/inspection_result
+
+user ida
+topic read isar/+/inspection_result
