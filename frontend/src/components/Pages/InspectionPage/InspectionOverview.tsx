@@ -105,7 +105,7 @@ export const InspectionOverviewSection = () => {
     return (
         <Tabs activeTab={activeTab} onChange={setActiveTab}>
             <Tabs.List>
-                <Tabs.Tab>{TranslateText('Deck Overview')}</Tabs.Tab>
+                <Tabs.Tab>{TranslateText('Inspection Overview')}</Tabs.Tab>
                 <Tabs.Tab>{TranslateText('Predefined Missions')}</Tabs.Tab>
             </Tabs.List>
             <Tabs.Panels>
