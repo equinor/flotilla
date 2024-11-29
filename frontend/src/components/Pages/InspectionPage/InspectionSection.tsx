@@ -28,14 +28,14 @@ interface DeckAreaTuple {
 }
 
 export const InspectionSection = () => {
+    const { ongoingMissions, missionQueue } = useMissionsContext()
     const { installationDecks, installationAreas } = useInstallationContext()
-    const [selectedDeck, setSelectedDeck] = useState<Deck>()
+    const { missionDefinitions } = useMissionDefinitionsContext()
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
+    const [selectedDeck, setSelectedDeck] = useState<Deck>()
     const [scrollOnToggle, setScrollOnToggle] = useState<boolean>(true)
-    const { ongoingMissions, missionQueue } = useMissionsContext()
-    const { missionDefinitions } = useMissionDefinitionsContext()
 
     const decks: DeckAreaTuple[] = installationDecks.map((deck) => {
         return {
@@ -44,24 +44,7 @@ export const InspectionSection = () => {
         }
     })
 
-    const closeDialog = () => {
-        setIsAlreadyScheduled(false)
-        setSelectedMissions([])
-        setIsDialogOpen(false)
-    }
-
-    const isScheduled = (mission: MissionDefinition) => missionQueue.map((m) => m.missionId).includes(mission.id)
-    const isOngoing = (mission: MissionDefinition) => ongoingMissions.map((m) => m.missionId).includes(mission.id)
-
-    const unscheduledMissions = selectedMissions?.filter((m) => !isOngoing(m) && !isScheduled(m))
-
-    useEffect(() => {
-        if (selectedMissions && selectedMissions.some((mission) => isOngoing(mission) || isScheduled(mission)))
-            setIsAlreadyScheduled(true)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ongoingMissions, missionQueue, selectedMissions])
-
-    const deckMissions: DeckInspectionTuple[] =
+    const deckInspections: DeckInspectionTuple[] =
         decks?.map(({ areas, deck }) => {
             const missionDefinitionsInDeck = missionDefinitions.filter((m) => m.area?.deckName === deck.deckName)
             return {
@@ -78,33 +61,62 @@ export const InspectionSection = () => {
             }
         }) ?? []
 
+    const onClickDeck = (clickedDeck: Deck) => {
+        setSelectedDeck(clickedDeck)
+        setScrollOnToggle(!scrollOnToggle)
+    }
+
+    const isScheduled = (mission: MissionDefinition) => missionQueue.map((m) => m.missionId).includes(mission.id)
+    const isOngoing = (mission: MissionDefinition) => ongoingMissions.map((m) => m.missionId).includes(mission.id)
+
+    const closeDialog = () => {
+        setIsAlreadyScheduled(false)
+        setSelectedMissions([])
+        setIsDialogOpen(false)
+    }
+
     const handleScheduleAll = (inspections: Inspection[]) => {
         setIsDialogOpen(true)
         const sortedInspections = inspections.sort(compareInspections)
         setSelectedMissions(sortedInspections.map((i) => i.missionDefinition))
     }
 
-    const onClickDeck = (clickedDeck: Deck) => {
-        setSelectedDeck(clickedDeck)
-        setScrollOnToggle(!scrollOnToggle)
-    }
+    useEffect(() => {
+        if (selectedMissions && selectedMissions.some((mission) => isOngoing(mission) || isScheduled(mission)))
+            setIsAlreadyScheduled(true)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ongoingMissions, missionQueue, selectedMissions])
+
+    const unscheduledMissions = selectedMissions?.filter((m) => !isOngoing(m) && !isScheduled(m))
+
+    const deck = installationDecks.length === 1 ? installationDecks[0] : selectedDeck
+    const inspections =
+        deckInspections.length === 1
+            ? deckInspections[0].inspections
+            : deckInspections.find((d) => d.deck === deck)?.inspections
+
+    const DeckSelection = () => (
+        <StyledDict.DeckOverview>
+            <DeckCards
+                deckMissions={deckInspections}
+                onClickDeck={onClickDeck}
+                selectedDeck={selectedDeck}
+                handleScheduleAll={handleScheduleAll}
+            />
+        </StyledDict.DeckOverview>
+    )
 
     return (
         <>
             <StyledDict.DeckOverview>
-                <DeckCards
-                    deckMissions={deckMissions}
-                    onClickDeck={onClickDeck}
-                    selectedDeck={selectedDeck}
-                    handleScheduleAll={handleScheduleAll}
-                />
-                {selectedDeck && (
+                {installationDecks.length !== 1 && <DeckSelection />}
+                {deck && inspections && (
                     <InspectionTable
-                        deck={selectedDeck}
+                        deck={deck}
                         scrollOnToggle={scrollOnToggle}
                         openDialog={() => setIsDialogOpen(true)}
                         setSelectedMissions={setSelectedMissions}
-                        inspections={deckMissions.find((d) => d.deck.deckName === selectedDeck.deckName)!.inspections}
+                        inspections={inspections}
                     />
                 )}
             </StyledDict.DeckOverview>
