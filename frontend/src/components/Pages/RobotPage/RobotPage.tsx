@@ -1,4 +1,4 @@
-import { Typography } from '@equinor/eds-core-react'
+import { Icon, Typography } from '@equinor/eds-core-react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { BackButton } from 'utils/BackButton'
@@ -23,6 +23,11 @@ import { VideoStreamSection } from '../MissionPage/MissionPage'
 import { useEffect, useState } from 'react'
 import { VideoStreamWindow } from '../MissionPage/VideoStream/VideoStreamWindow'
 import { MoveRobotArmSection } from './RobotArmMovement'
+import { Icons } from 'utils/icons'
+import { tokens } from '@equinor/eds-tokens'
+import { StopMissionDialog } from '../FrontPage/MissionOverview/StopDialogs'
+import { TaskType } from 'models/Task'
+import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
@@ -57,8 +62,21 @@ export const RobotPage = () => {
     const { enabledRobots } = useRobotContext()
     const { mediaStreams } = useMediaStreamContext()
     const [videoMediaStreams, setVideoMediaStreams] = useState<MediaStreamTrack[]>([])
+    const { ongoingMissions } = useMissionsContext()
 
     const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
+
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const toggleStopMissionDialog = () => {
+        setIsDialogOpen(!isDialogOpen)
+    }
+
+    const mission = ongoingMissions.find((mission) => mission.robot.id === selectedRobot?.id)
+
+    let missionTaskType = undefined
+    if (mission?.tasks.every((task) => task.type === TaskType.Inspection)) missionTaskType = TaskType.Inspection
+    if (mission?.tasks.every((task) => task.type === TaskType.ReturnHome)) missionTaskType = TaskType.ReturnHome
+    if (mission?.tasks.every((task) => task.type === TaskType.Localization)) missionTaskType = TaskType.Localization
 
     const returnRobotToHome = () => {
         if (robotId) {
@@ -136,6 +154,26 @@ export const RobotPage = () => {
                         {selectedRobot.model.type === RobotType.TaurobInspector && <PressureTable />}
                         <Typography variant="h2">{TranslateText('Actions')}</Typography>
 
+                        <StyledTextButton
+                            variant="contained"
+                            onClick={() => {
+                                toggleStopMissionDialog()
+                            }}
+                        >
+                            <Icon
+                                name={Icons.StopButton}
+                                style={{ color: tokens.colors.interactive.icon_on_interactive_colors.rgba }}
+                                size={24}
+                            />
+                            {TranslateText('Stop')} {selectedRobot.name}
+                            <StopMissionDialog
+                                missionName={mission?.name}
+                                robotId={selectedRobot.id}
+                                missionTaskType={missionTaskType}
+                                isStopMissionDialogOpen={isDialogOpen}
+                                toggleDialog={toggleStopMissionDialog}
+                            />
+                        </StyledTextButton>
                         <StyledTextButton variant="outlined" onClick={returnRobotToHome}>
                             {TranslateText('Return robot to home')}
                         </StyledTextButton>
