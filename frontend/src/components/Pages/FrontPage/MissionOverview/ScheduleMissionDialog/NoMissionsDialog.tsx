@@ -1,12 +1,6 @@
 import { Button, Typography } from '@equinor/eds-core-react'
-import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { StyledDialog } from 'components/Styles/StyledComponents'
-
-const StyledButton = styled(Button)`
-    display: flex;
-    justify-content: end;
-`
 
 export const NoMissionsDialog = ({ closeDialog }: { closeDialog: () => void }): JSX.Element => {
     const { TranslateText } = useLanguageContext()
@@ -20,9 +14,11 @@ export const NoMissionsDialog = ({ closeDialog }: { closeDialog: () => void }): 
                     {TranslateText('This installation does not have missions. Please create mission.')}
                 </Typography>
             </StyledDialog.Content>
-            <StyledButton onClick={closeDialog} variant="outlined">
-                {TranslateText('Cancel')}
-            </StyledButton>
+            <StyledDialog.Actions>
+                <Button onClick={closeDialog} variant="outlined">
+                    {TranslateText('Close')}
+                </Button>
+            </StyledDialog.Actions>
         </StyledDialog>
     )
 }
