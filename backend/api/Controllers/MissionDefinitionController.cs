@@ -109,7 +109,7 @@ namespace Api.Controllers
         /// <response code="400"> The mission definition data is invalid </response>
         /// <response code="404"> There was no mission definition with the given ID in the database </response>
         [HttpPut]
-        [Authorize(Roles = Role.Admin)]
+        [Authorize(Roles = Role.Any)]
         [Route("{id}")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
