@@ -252,11 +252,18 @@ namespace Api.Controllers
                 logger.LogWarning($"Mission {missionDefinition.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}.");
             }
 
-            Area? area = null;
-            area = missionAreas.GroupBy(i => i).OrderByDescending(grp => grp.Count()).Select(grp => grp.Key).First();
+            var sortedAreas = missionAreas.GroupBy(i => i).OrderByDescending(grp => grp.Count()).Select(grp => grp.Key);
+            var area = sortedAreas.First();
 
+            if (area == null && sortedAreas.Count() > 1)
+            {
+                logger.LogWarning($"Most common area in mission {missionDefinition.Name} is null. Will use second most common area.");
+                area = sortedAreas.Skip(1).First();
+
+            }
             if (area == null)
             {
+                logger.LogError($"Mission {missionDefinition.Name} doesn't have any tags with valid area.");
                 return NotFound($"No area found for mission '{missionDefinition.Name}'.");
             }
 
