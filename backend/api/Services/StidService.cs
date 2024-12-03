@@ -35,7 +35,7 @@ namespace Api.Services
             if (stidTagAreaResponse.LocationCode == null)
             {
                 string errorMessage = $"Could not get area name from STID for tag {tag}";
-                logger.LogError("{Message}", errorMessage);
+                logger.LogDebug("{Message}", errorMessage);
                 return null;
             }
 
