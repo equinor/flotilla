@@ -275,5 +275,9 @@
     "Not available": "Ikke tilgjengelig",
     "No mission running": "Ingen pågående Flotilla oppdrag",
     "Stop button pressed with no tasktype warning text": "Et stopp signal ble mottat uten noen pågående oppdrag.",
-    "Stop button pressed with no mission confirmation text": "Ønsker du å sende stopp signalet til roboten likevel?"
+    "Stop button pressed with no mission confirmation text": "Ønsker du å sende stopp signalet til roboten likevel?",
+    "Tag": "Tag",
+    "Timestamp": "Tidspunkt",
+    "Last completed inspection": "Siste gjennomførte inspeksjon",
+    "Inspection report": "Inspeksjonsrapport"
 }

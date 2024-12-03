@@ -18,7 +18,7 @@ import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import { Task } from 'models/Task'
-import { InspectionDialogView, InspectionsViewSection } from './InpectionView/InpectionView'
+import { InspectionDialogView, InspectionsViewSection } from './InpectionView/InspectionView'
 
 const StyledMissionPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -45,7 +45,6 @@ export const MissionPage = () => {
     const { registerEvent, connectionReady } = useSignalRContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
     const [inspectionTask, setInspectionTask] = useState<Task>()
-
 
     useEffect(() => {
         if (selectedMission && !Object.keys(mediaStreams).includes(selectedMission?.robot.id))

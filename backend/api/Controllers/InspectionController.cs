@@ -1,7 +1,7 @@
-﻿using Api.Controllers.Models;
+﻿using System.Globalization;
+using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
-using Api.Services.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -49,6 +49,11 @@ namespace Api.Controllers
             var inspectionData = await inspectionService.GetInspectionStorageInfo(inspection.Id);
 
             if (inspectionData == null) return NotFound($"Could not find inspection data for inspection with Id {inspection.Id}.");
+
+            if (!inspectionData.BlobContainer.ToLower(CultureInfo.CurrentCulture).Equals(installationCode.ToLower(CultureInfo.CurrentCulture), StringComparison.Ordinal))
+            {
+                return NotFound($"Could not find inspection data for inspection with Id {inspection.Id} because blob name {inspectionData.BlobName} does not match installation {installationCode}.");
+            }
 
             try
             {

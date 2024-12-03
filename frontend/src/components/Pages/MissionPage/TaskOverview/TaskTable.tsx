@@ -1,4 +1,4 @@
-import { Button, Chip, Dialog, Table, Typography } from '@equinor/eds-core-react'
+import { Button, Chip, Table, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { TaskStatusDisplay } from './TaskStatusDisplay'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
@@ -6,8 +6,6 @@ import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 import { StyledTableBody, StyledTableCaptionGray, StyledTableCell } from 'components/Styles/StyledComponents'
-import { useState } from 'react'
-import { InspectionDialogView } from '../InpectionView/InpectionView'
 import { InspectionType } from 'models/Inspection'
 
 const StyledTable = styled(Table)`
@@ -140,10 +138,7 @@ const InspectionTypesDisplay = ({ task, setInspectionTask }: InspectionTypesDisp
                             </Typography>
                         </Button>
                     ) : (
-                        <Button
-                            key={task.id + task.inspection.id + 'insp'}
-                            variant="ghost"
-                        >
+                        <Button key={task.id + task.inspection.id + 'insp'} variant="ghost">
                             <Typography variant="body_short">
                                 {TranslateText(task.inspection.inspectionType as string)}
                             </Typography>

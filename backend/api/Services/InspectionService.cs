@@ -5,11 +5,9 @@ using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
-using Api.Options;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.Identity.Abstractions;
 namespace Api.Services
 {
@@ -31,7 +29,7 @@ namespace Api.Services
     public class InspectionService(FlotillaDbContext context, ILogger<InspectionService> logger, IDownstreamApi idaApi, IAccessRoleService accessRoleService,
             IBlobService blobService) : IInspectionService
     {
-        public const string ServiceName = "IDAApi";
+        public const string ServiceName = "IDA";
 
         public async Task<byte[]> FetchInpectionImage(string inpectionName, string installationCode, string storageAccount)
         {
@@ -114,8 +112,7 @@ namespace Api.Services
 
         public async Task<IDAInspectionDataResponse?> GetInspectionStorageInfo(string inspectionId)
         {
-            var inspectionID = "finaltest";
-            string relativePath = $"InspectionData/{inspectionID}/inspection-data-storage-location";
+            string relativePath = $"InspectionData/{inspectionId}/inspection-data-storage-location";
 
             var response = await idaApi.CallApiForUserAsync(
                 ServiceName,
