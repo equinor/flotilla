@@ -7,6 +7,7 @@ export const VideoPlayerSimpleStream = ({ videoStream, videoStreamName }: IVideo
     <video
         autoPlay
         muted
+        playsInline
         ref={(video) => {
             if (video) video.srcObject = videoStream
         }}
