@@ -275,5 +275,9 @@
     "Not available": "Not available",
     "Stop button pressed with no tasktype warning text": "A stop command was recieved with no ongoing tasks.",
     "No mission running": "No Flotilla mission is running",
-    "Stop button pressed with no mission confirmation text": "Do you want to send the stop command to the robot regardless?"
+    "Stop button pressed with no mission confirmation text": "Do you want to send the stop command to the robot regardless?",
+    "Tag": "Tag",
+    "Timestamp": "Timestamp",
+    "Last completed inspection": "Last completed inspection",
+    "Inspection report": "Inspection report"
 }
