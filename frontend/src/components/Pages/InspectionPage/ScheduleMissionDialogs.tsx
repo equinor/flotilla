@@ -56,7 +56,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { setLoadingRobotMissionSet } = useMissionsContext()
     const { setAlert, setListAlert } = useAlertContext()
     const [isLocalizationVerificationDialogOpen, setIsLocalizationVerificationDialog] = useState<boolean>(false)
-    const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const [missionsToSchedule, setMissionsToSchedule] = useState<MissionDefinition[]>()
     const filteredRobots = enabledRobots.filter(
         (r) =>
@@ -64,6 +63,9 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 r.status === RobotStatus.Busy ||
                 r.status === RobotStatus.Recharging) &&
             r.isarConnected
+    )
+    const [selectedRobot, setSelectedRobot] = useState<Robot | undefined>(
+        filteredRobots.length === 1 ? filteredRobots[0] : undefined
     )
 
     const onSelectedRobot = (selectedRobot: Robot) => {
@@ -152,7 +154,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                         )}
                         <StyledAutoComplete>
                             <Autocomplete
-                                initialSelectedOptions={filteredRobots.length === 1 ? [filteredRobots[0]] : []}
+                                initialSelectedOptions={selectedRobot ? [selectedRobot] : []}
                                 dropdownHeight={200}
                                 optionLabel={(r) => r.name + ' (' + r.model.type + ')'}
                                 options={filteredRobots}
