@@ -20,6 +20,7 @@ const Centered = styled.div`
 `
 const StyledButton = styled(Button)`
     background-color: none;
+    height: 36px;
 `
 
 interface MissionProps {

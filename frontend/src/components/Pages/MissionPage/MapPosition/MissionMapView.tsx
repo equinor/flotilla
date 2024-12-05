@@ -3,13 +3,13 @@ import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import NoMap from 'mediaAssets/NoMap.png'
 import { placeRobotInMap, placeTagsInMap } from 'utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
 import { MapCompass } from 'utils/MapCompass'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { useQuery } from '@tanstack/react-query'
+import NoMap from 'mediaAssets/NoMap.png'
 
 interface MissionProps {
     mission: Mission
@@ -20,23 +20,25 @@ const MapCard = styled(Card)`
     max-width: 600px;
     padding: 16px;
     justify-items: center;
+    gap: 5px;
 `
 const StyledMap = styled.canvas`
     object-fit: contain;
     max-height: 100%;
     max-width: 90%;
-    margin: auto;
 `
 const StyledElements = styled.div`
     display: flex;
     flex-direction: columns;
     align-items: end;
 `
-const SyledContainer = styled.div`
-    display: flex;
-    max-height: 600px;
-    max-width: 100%;
-`
+
+export const getMeta = async (url: string) => {
+    const image = new Image()
+    image.src = url
+    await image.decode()
+    return image
+}
 
 export const MissionMapView = ({ mission }: MissionProps) => {
     const { enabledRobots } = useRobotContext()
@@ -44,9 +46,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
     const [currentTaskOrder, setCurrentTaskOrder] = useState<number>(0)
-
     const missionRobot = enabledRobots.find((robot) => robot.id === mission.robot.id)
-
     const imageObjectURL = useRef<string>('')
 
     const fetchMapInfo = (mission: Mission) => {
@@ -77,13 +77,6 @@ export const MissionMapView = ({ mission }: MissionProps) => {
             placeRobotInMap(mapInfo, mapCanvas, missionRobot.pose)
         }
     }, [currentTaskOrder, mapCanvas, mapImage, mission, missionRobot?.pose])
-
-    const getMeta = async (url: string) => {
-        const image = new Image()
-        image.src = url
-        await image.decode()
-        return image
-    }
 
     const findCurrentTaskOrder = useCallback(
         () =>
@@ -151,13 +144,11 @@ export const MissionMapView = ({ mission }: MissionProps) => {
 
     return (
         <MapCard style={{ boxShadow: tokens.elevation.raised }}>
-            <Typography variant="h3">{displayedMapName}</Typography>
-            <SyledContainer>
-                <StyledElements>
-                    <StyledMap id="mapCanvas" />
-                    {imageObjectURL.current !== NoMap && mapContext && <MapCompass />}
-                </StyledElements>
-            </SyledContainer>
+            <Typography variant="h4">{displayedMapName}</Typography>
+            <StyledElements>
+                <StyledMap id="mapCanvas" />
+                {imageObjectURL.current !== NoMap && mapContext && <MapCompass />}
+            </StyledElements>
         </MapCard>
     )
 }

@@ -18,6 +18,7 @@ const StyledTopBar = styled(TopBar)`
     @media (max-width: 600px) {
         grid-column-gap: 12px;
     }
+    height: fit-content;
 `
 const StyledWrapper = styled.div`
     display: flex;
