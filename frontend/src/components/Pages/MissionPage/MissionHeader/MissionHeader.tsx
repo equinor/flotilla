@@ -28,18 +28,15 @@ const TitleSection = styled.div`
 const InfoSection = styled.div`
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    width: fit-content;
-`
-const StyledCard = styled.div`
-    display: flex;
-    flex: 1 0 0;
-    padding: 8px 16px;
-    flex-direction: row;
-    align-items: end;
     gap: 32px;
-    height: 30px;
     width: fit-content;
+    @media (max-width: 600px) {
+        display: grid;
+        grid-template-columns: repeat(3, calc(75vw / 3));
+        gap: 32px;
+        width: fit-content;
+        align-items: end;
+    }
 `
 const StyledTitleText = styled.div`
     display: grid;
@@ -203,33 +200,25 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
             </HeaderSection>
             <StyledMissionHeader>
                 <InfoSection>
-                    <StyledCard>
-                        <div>
-                            {HeaderText(translatedStatus, '')}
-                            <MissionStatusDisplay status={mission.status} />
-                        </div>
-                        {HeaderText(translatedArea, `${mission.area?.areaName}`)}
-                        {HeaderText(translatedTasks, `${numberOfCompletedTasks + '/' + mission.tasks.length}`)}
-                    </StyledCard>
-                    <StyledCard>
-                        {HeaderText(translatedStartDate, `${startDate}`)}
-                        {HeaderText(translatedStartTime, `${startTime}`)}
-                    </StyledCard>
-                    <StyledCard>
-                        {HeaderText(translatedUsedTime, `${usedTime}`)}
-                        {!isMissionCompleted && HeaderText(translatedEstimatedTimeRemaining, `${remainingTime}`)}
-                    </StyledCard>
-                    <StyledCard>
-                        {HeaderText(translatedRobot, `${mission.robot.name}`)}
-                        {!isMissionCompleted && HeaderText(translatedBatteryLevel, batteryValue)}
-                        {!isMissionCompleted &&
-                            mission.robot.pressureLevel !== undefined &&
-                            mission.robot.pressureLevel !== null &&
-                            HeaderText(
-                                translatedPressureLevel,
-                                `${Math.round(mission.robot.pressureLevel * barToMillibar)}mBar`
-                            )}
-                    </StyledCard>
+                    <div>
+                        {HeaderText(translatedStatus, '')}
+                        <MissionStatusDisplay status={mission.status} />
+                    </div>
+                    {HeaderText(translatedArea, `${mission.area?.areaName}`)}
+                    {HeaderText(translatedTasks, `${numberOfCompletedTasks + '/' + mission.tasks.length}`)}
+                    {HeaderText(translatedStartDate, `${startDate}`)}
+                    {HeaderText(translatedStartTime, `${startTime}`)}
+                    {HeaderText(translatedUsedTime, `${usedTime}`)}
+                    {!isMissionCompleted && HeaderText(translatedEstimatedTimeRemaining, `${remainingTime}`)}
+                    {HeaderText(translatedRobot, `${mission.robot.name}`)}
+                    {!isMissionCompleted && HeaderText(translatedBatteryLevel, batteryValue)}
+                    {!isMissionCompleted &&
+                        mission.robot.pressureLevel !== undefined &&
+                        mission.robot.pressureLevel !== null &&
+                        HeaderText(
+                            translatedPressureLevel,
+                            `${Math.round(mission.robot.pressureLevel * barToMillibar)}mBar`
+                        )}
                 </InfoSection>
             </StyledMissionHeader>
         </>
