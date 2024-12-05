@@ -1,9 +1,8 @@
 import { Card, Typography } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import NoMap from 'mediaAssets/NoMap.png'
 import { placeRobotInMap, placeTagsInMap } from 'utils/MapMarkers'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
@@ -19,23 +18,25 @@ const MapCard = styled(Card)`
     max-width: 600px;
     padding: 16px;
     justify-items: center;
+    gap: 5px;
 `
 const StyledMap = styled.canvas`
     object-fit: contain;
     max-height: 100%;
     max-width: 90%;
-    margin: auto;
 `
 const StyledElements = styled.div`
     display: flex;
     flex-direction: columns;
     align-items: end;
 `
-const SyledContainer = styled.div`
-    display: flex;
-    max-height: 600px;
-    max-width: 100%;
-`
+
+export const getMeta = async (url: string) => {
+    const image = new Image()
+    image.src = url
+    await image.decode()
+    return image
+}
 
 export const MissionMapView = ({ mission }: MissionProps) => {
     const { enabledRobots } = useRobotContext()
@@ -43,10 +44,8 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
     const [currentTaskOrder, setCurrentTaskOrder] = useState<number>(0)
-
     const missionRobot = enabledRobots.find((robot) => robot.id === mission.robot.id)
-
-    const imageObjectURL = useRef<string>('')
+    const [displayMap, setDisplayMap] = useState<boolean>(false)
 
     const updateMap = useCallback(() => {
         let context = mapCanvas.getContext('2d')
@@ -61,13 +60,6 @@ export const MissionMapView = ({ mission }: MissionProps) => {
         }
     }, [currentTaskOrder, mapCanvas, mapImage, mission, missionRobot?.pose])
 
-    const getMeta = async (url: string) => {
-        const image = new Image()
-        image.src = url
-        await image.decode()
-        return image
-    }
-
     const findCurrentTaskOrder = useCallback(
         () =>
             mission.tasks
@@ -80,29 +72,31 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     displayedMapName = displayedMapName ? displayedMapName.charAt(0).toUpperCase() + displayedMapName.slice(1) : ' '
 
     useEffect(() => {
+        const processImageURL = (imageBlob: Blob | string) => {
+            const imageObjectURL = typeof imageBlob === 'string' ? imageBlob : URL.createObjectURL(imageBlob as Blob)
+            if (!imageObjectURL) return
+
+            getMeta(imageObjectURL as string).then((img) => {
+                const mapCanvas = document.getElementById('missionPageMapCanvas') as HTMLCanvasElement
+                if (!mapCanvas) return
+                mapCanvas.width = img.width
+                mapCanvas.height = img.height
+                let context = mapCanvas?.getContext('2d')
+                if (context) {
+                    setMapContext(context)
+                    context.drawImage(img, 0, 0)
+                }
+                setMapCanvas(mapCanvas)
+                setMapImage(img)
+            })
+        }
+
         BackendAPICaller.getMap(mission.installationCode!, mission.map?.mapName!)
             .then((imageBlob) => {
-                imageObjectURL.current = URL.createObjectURL(imageBlob)
+                processImageURL(imageBlob)
+                setDisplayMap(true)
             })
-            .catch(() => {
-                imageObjectURL.current = NoMap
-            })
-            .then(() => {
-                getMeta(imageObjectURL.current).then((img) => {
-                    const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement
-                    if (mapCanvas) {
-                        mapCanvas.width = img.width
-                        mapCanvas.height = img.height
-                        let context = mapCanvas?.getContext('2d')
-                        if (context) {
-                            setMapContext(context)
-                            context.drawImage(img, 0, 0)
-                        }
-                        setMapCanvas(mapCanvas)
-                    }
-                    setMapImage(img)
-                })
-            })
+            .catch(() => {})
     }, [mission.installationCode, mission.id, mission.map?.mapName])
 
     useEffect(() => {
@@ -129,14 +123,16 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     }, [updateMap, mapContext])
 
     return (
-        <MapCard style={{ boxShadow: tokens.elevation.raised }}>
-            <Typography variant="h3">{displayedMapName}</Typography>
-            <SyledContainer>
-                <StyledElements>
-                    <StyledMap id="mapCanvas" />
-                    {imageObjectURL.current !== NoMap && mapContext && <MapCompass />}
-                </StyledElements>
-            </SyledContainer>
-        </MapCard>
+        <>
+            {displayMap && (
+                <MapCard style={{ boxShadow: tokens.elevation.raised }}>
+                    <Typography variant="h4">{displayedMapName}</Typography>
+                    <StyledElements>
+                        <StyledMap id="missionPageMapCanvas" />
+                        {mapContext && <MapCompass />}
+                    </StyledElements>
+                </MapCard>
+            )}
+        </>
     )
 }
