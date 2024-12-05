@@ -17,28 +17,27 @@ const HeaderSection = styled(Card)`
     top: 60px;
     position: sticky;
     z-index: 1;
-    background-color: ${tokens.colors.ui.background__light.hex};
     box-shadow: none;
+    background-color: ${tokens.colors.ui.background__light.hex};
 `
 const TitleSection = styled.div`
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 20px;
 `
 const InfoSection = styled.div`
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    max-width: 950px;
-`
-const StyledCard = styled(Card)`
-    display: flex;
-    flex: 1 0 0;
-    padding: 8px 16px;
-    flex-direction: row;
-    background: ${tokens.colors.ui.background__default.hex};
-    gap: 24px;
-    align-items: stretch;
+    gap: 32px;
+    width: fit-content;
+    @media (max-width: 600px) {
+        display: grid;
+        grid-template-columns: repeat(3, calc(75vw / 3));
+        gap: 32px;
+        width: fit-content;
+        align-items: end;
+    }
 `
 const StyledTitleText = styled.div`
     display: grid;
@@ -51,10 +50,24 @@ const StyledTypography = styled(Typography)`
     font-style: normal;
     font-weight: 400;
     line-height: 40px; /* 125% */
-
-    @media (max-width: 500px) {
+    @media (max-width: 600px) {
         font-size: 24px;
     }
+`
+
+const StyledMissionHeader = styled(Card)`
+    display: flex;
+    padding: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    align-content: center;
+    gap: 24px;
+    flex: 1 0 0;
+    align-self: stretch;
+    border-radius: 6px;
+    max-height: fit-content;
+    border: 1px solid ${tokens.colors.ui.background__medium.rgba};
+    background: ${tokens.colors.ui.background__default.rgba};
 `
 
 const HeaderText = (title: string, text: string) => {
@@ -186,23 +199,17 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                 </Typography>
                 <StatusReason statusReason={mission.statusReason} status={mission.status}></StatusReason>
             </HeaderSection>
-            <InfoSection>
-                <StyledCard>
+            <StyledMissionHeader>
+                <InfoSection>
                     <div>
                         {HeaderText(translatedStatus, '')}
                         <MissionStatusDisplay status={mission.status} />
                     </div>
                     {HeaderText(translatedTasks, `${numberOfCompletedTasks + '/' + mission.tasks.length}`)}
-                </StyledCard>
-                <StyledCard>
                     {HeaderText(translatedStartDate, `${startDate}`)}
                     {HeaderText(translatedStartTime, `${startTime}`)}
-                </StyledCard>
-                <StyledCard>
                     {HeaderText(translatedUsedTime, `${usedTime}`)}
                     {!isMissionCompleted && HeaderText(translatedEstimatedTimeRemaining, `${remainingTime}`)}
-                </StyledCard>
-                <StyledCard>
                     {HeaderText(translatedRobot, `${mission.robot.name}`)}
                     {!isMissionCompleted && HeaderText(translatedBatteryLevel, batteryValue)}
                     {!isMissionCompleted &&
@@ -212,8 +219,8 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                             translatedPressureLevel,
                             `${Math.round(mission.robot.pressureLevel * barToMillibar)}mBar`
                         )}
-                </StyledCard>
-            </InfoSection>
+                </InfoSection>
+            </StyledMissionHeader>
         </>
     )
 }
