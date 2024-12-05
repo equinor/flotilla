@@ -5,44 +5,27 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
-import { StyledTableBody, StyledTableCaptionGray, StyledTableCell } from 'components/Styles/StyledComponents'
 
 const StyledTable = styled(Table)`
     display: block;
     overflow: auto;
     max-width: calc(80vw);
 `
-const StyledTypography = styled(Typography)`
-    font-family: Equinor;
-    font-size: 28px;
-    font-style: normal;
-    line-height: 35px;
-
-    @media (max-width: 500px) {
-        font-size: 24px;
-        line-height: 30px;
-    }
-
-    padding-bottom: 10px;
-`
 
 export const TaskTable = ({ tasks }: { tasks: Task[] | undefined }) => {
     const { TranslateText } = useLanguageContext()
     return (
         <StyledTable>
-            <StyledTableCaptionGray>
-                <StyledTypography variant="h2">{TranslateText('Tasks')}</StyledTypography>
-            </StyledTableCaptionGray>
             <Table.Head>
                 <Table.Row>
-                    <StyledTableCell>#</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Inspection Types')}</StyledTableCell>
-                    <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
+                    <Table.Cell>#</Table.Cell>
+                    <Table.Cell>{TranslateText('Tag-ID')}</Table.Cell>
+                    <Table.Cell>{TranslateText('Description')}</Table.Cell>
+                    <Table.Cell>{TranslateText('Inspection Types')}</Table.Cell>
+                    <Table.Cell>{TranslateText('Status')}</Table.Cell>
                 </Table.Row>
             </Table.Head>
-            <StyledTableBody>{tasks && <TaskTableRows tasks={tasks} />}</StyledTableBody>
+            <Table.Body>{tasks && <TaskTableRows tasks={tasks} />}</Table.Body>
         </StyledTable>
     )
 }

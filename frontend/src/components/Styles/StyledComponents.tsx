@@ -52,6 +52,3 @@ export const StyledTableBody = styled(Table.Body)`
 export const StyledTableCaption = styled(Table.Caption)`
     background-color: ${tokens.colors.ui.background__default.hex};
 `
-export const StyledTableCaptionGray = styled(Table.Caption)`
-    background-color: ${tokens.colors.ui.background__light.hex};
-`
