@@ -11,6 +11,7 @@ const StyledFrontPage = styled.div`
     gap: 3rem;
     padding: 15px 15px;
     background-color: ${tokens.colors.ui.background__light.hex};
+    min-height: calc(100vh - 65px);
 `
 
 export const FrontPage = () => {
