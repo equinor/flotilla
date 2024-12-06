@@ -25,6 +25,7 @@ namespace Api.Database.Models
             Uri? tagLink,
             string? tagId,
             int? poseId,
+            IsarZoomDescription? zoomDescription = null,
             TaskStatus status = TaskStatus.NotStarted,
             MissionTaskType type = MissionTaskType.Inspection)
         {
@@ -35,6 +36,7 @@ namespace Api.Database.Models
             TaskOrder = taskOrder;
             Status = status;
             Type = type;
+            IsarZoomDescription = zoomDescription;
             if (inspection != null) Inspection = new Inspection(inspection);
         }
 
@@ -45,6 +47,7 @@ namespace Api.Database.Models
             RobotPose = taskQuery.RobotPose;
             TaskOrder = taskQuery.TaskOrder;
             Status = TaskStatus.NotStarted;
+            IsarZoomDescription = taskQuery.IsarZoomDescription;
             if (taskQuery.Inspection is not null)
             {
                 Inspection = new Inspection((CustomInspectionQuery)taskQuery.Inspection);
@@ -98,6 +101,7 @@ namespace Api.Database.Models
             RobotPose = new Pose(copy.RobotPose);
             PoseId = copy.PoseId;
             Status = status ?? copy.Status;
+            IsarZoomDescription = copy.IsarZoomDescription;
             if (copy.Inspection is not null)
             {
                 Inspection = new Inspection(copy.Inspection, InspectionStatus.NotStarted);
@@ -155,6 +159,8 @@ namespace Api.Database.Models
         public DateTime? StartTime { get; private set; }
 
         public DateTime? EndTime { get; private set; }
+
+        public IsarZoomDescription? IsarZoomDescription { get; set; }
 
         public Inspection? Inspection { get; set; }
 
