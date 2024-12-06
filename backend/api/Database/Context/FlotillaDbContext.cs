@@ -1,4 +1,5 @@
 ﻿using Api.Database.Models;
+using Api.Services.MissionLoaders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -26,6 +27,7 @@ namespace Api.Database.Context
         public DbSet<DefaultLocalizationPose> DefaultLocalizationPoses => Set<DefaultLocalizationPose>();
         public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
+        public DbSet<TagInspectionMetadata> TagInspectionMetadata => Set<TagInspectionMetadata>();
 
         // Timeseries:
         public DbSet<RobotPressureTimeseries> RobotPressureTimeseries => Set<RobotPressureTimeseries>();

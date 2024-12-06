@@ -1,9 +1,12 @@
 ﻿using System.Globalization;
 using System.Text.Json;
 using Api.Controllers.Models;
+using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services.MissionLoaders;
+using Api.Services.Models;
 using Api.Utilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
 namespace Api.Services
 {
@@ -13,10 +16,11 @@ namespace Api.Services
         public Task<MissionDefinition?> GetMissionById(string sourceMissionId);
         public Task<List<MissionTask>> GetTasksForMission(string missionSourceId);
         public Task<List<PlantInfo>> GetPlantInfos();
+        public Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(TagInspectionMetadata metadata);
     }
 
     public class EchoService(
-            ILogger<EchoService> logger, IDownstreamApi echoApi, ISourceService sourceService, IStidService stidService) : IEchoService
+            ILogger<EchoService> logger, IDownstreamApi echoApi, ISourceService sourceService, IStidService stidService, FlotillaDbContext context) : IEchoService
     {
 
         public const string ServiceName = "EchoApi";
@@ -93,7 +97,7 @@ namespace Api.Services
         public async Task<List<MissionTask>> GetTasksForMission(string missionSourceId)
         {
             var echoMission = await GetEchoMission(missionSourceId);
-            var missionTasks = echoMission.Tags.SelectMany(t => MissionTasksFromEchoTag(t)).ToList();
+            var missionTasks = echoMission.Tags.Select(t => MissionTasksFromEchoTag(t)).SelectMany(task => task.Result).ToList();
             return missionTasks;
         }
 
@@ -269,7 +273,7 @@ namespace Api.Services
             return echoPlantInfos;
         }
 
-        public IList<MissionTask> MissionTasksFromEchoTag(EchoTag echoTag)
+        public async Task<IList<MissionTask>> MissionTasksFromEchoTag(EchoTag echoTag)
         {
             var inspections = echoTag.Inspections
                 .Select(inspection => new Inspection(
@@ -292,12 +296,35 @@ namespace Api.Services
                         robotPose: echoTag.Pose,
                         poseId: echoTag.PoseId,
                         taskOrder: echoTag.PlanOrder,
+                        zoomDescription: await FindInspectionZoom(echoTag),
                         status: Database.Models.TaskStatus.NotStarted,
                         type: MissionTaskType.Inspection
                     ));
             }
 
             return missionTasks;
+        }
+
+        public async Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(TagInspectionMetadata metadata)
+        {
+            var existingMetadata = await context.TagInspectionMetadata.Where(e => e.TagId == metadata.TagId).FirstOrDefaultAsync();
+            if (existingMetadata == null)
+            {
+                await context.TagInspectionMetadata.AddAsync(metadata);
+            }
+            else
+            {
+                existingMetadata.ZoomDescription = metadata.ZoomDescription;
+                context.TagInspectionMetadata.Update(existingMetadata);
+            }
+
+            await context.SaveChangesAsync();
+            return metadata;
+        }
+
+        private async Task<IsarZoomDescription?> FindInspectionZoom(EchoTag echoTag)
+        {
+            return (await context.TagInspectionMetadata.Where((e) => e.TagId == echoTag.TagId).FirstOrDefaultAsync())?.ZoomDescription;
         }
     }
 }
