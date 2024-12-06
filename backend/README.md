@@ -204,7 +204,7 @@ and [promoteToStaging](https://github.com/equinor/flotilla/blob/main/.github/wor
 
 ## Database setup
 
-If reseting database, but still using postgresql (removing old migrations and adding them manually again), you need to manually add some migrations commands for the timeseries db.
+If resetting the database, but still using postgresql (removing old migrations and adding them manually again), you need to manually add some migrations commands for the timeseries db.
 
 Add the following to the **top of the first migration's** `Up()` method:
 
