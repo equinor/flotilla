@@ -129,9 +129,9 @@ const MoveRobotArm = ({ robot, armPosition, isRobotAvailable }: RobotProps) => {
             </StyledTextButton>
             <StyledDialog open={feedback !== ''}>
                 {feedback}
-                <StyledCloseButton>
+                <StyledDialog.Actions>
                     <Button onClick={() => setFeedback('')}>{TranslateText('Close')}</Button>
-                </StyledCloseButton>
+                </StyledDialog.Actions>
             </StyledDialog>
         </>
     )
