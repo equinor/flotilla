@@ -1,0 +1,11 @@
+## Ready for review checklist:
+- [ ] A self-review has been performed
+- [ ] All commits run individually
+- [ ] Temporary changes have been removed, like console.log, TODO, etc.
+- [ ] The PR has been tested locally
+- [ ] A test have been written
+  - [ ] This change doesn't need a new test
+- [ ] Relevant issues are linked
+- [ ] Remaining work is documented in issues
+  - [ ] There is no remaining work from this PR that require new issues
+- [  ] The changes does not introduce dead code as unused imports, functions etc.
