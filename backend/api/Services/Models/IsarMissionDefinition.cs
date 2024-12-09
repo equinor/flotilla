@@ -1,6 +1,8 @@
-﻿using System.Globalization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Text.Json.Serialization;
 using Api.Database.Models;
+using Microsoft.EntityFrameworkCore;
 namespace Api.Services.Models
 {
     /// <summary>
@@ -61,12 +63,17 @@ namespace Api.Services.Models
         [JsonPropertyName("inspection")]
         public IsarInspectionDefinition? Inspection { get; set; }
 
+        [JsonPropertyName("zoom")]
+        public IsarZoomDescription? Zoom { get; set; }
+
         public IsarTaskDefinition(MissionTask missionTask, MissionRun missionRun)
         {
             Id = missionTask.IsarTaskId;
             Type = MissionTask.ConvertMissionTaskTypeToIsarTaskType(missionTask.Type);
             Pose = new IsarPose(missionTask.RobotPose);
             Tag = missionTask.TagId;
+            Zoom = missionTask.IsarZoomDescription;
+
             if (missionTask.Inspection != null) Inspection = new IsarInspectionDefinition(missionTask.Inspection, missionRun);
         }
     }
@@ -161,5 +168,17 @@ namespace Api.Services.Models
 
         [JsonPropertyName("frame_name")]
         public string FrameName { get; } = "asset";
+    }
+
+    [Owned]
+    public class IsarZoomDescription(double objectWidth, double objectHeight)
+    {
+        [Required]
+        [JsonPropertyName("objectWidth")]
+        public double ObjectWidth { get; set; } = objectWidth;
+
+        [Required]
+        [JsonPropertyName("objectHeight")]
+        public double ObjectHeight { get; set; } = objectHeight;
     }
 }

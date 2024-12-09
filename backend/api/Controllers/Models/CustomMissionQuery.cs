@@ -1,4 +1,5 @@
 ﻿using Api.Database.Models;
+using Api.Services.Models;
 namespace Api.Controllers.Models
 {
     public struct CustomInspectionQuery
@@ -22,6 +23,8 @@ namespace Api.Controllers.Models
 
         public Pose RobotPose { get; set; }
 
+        public IsarZoomDescription? IsarZoomDescription { get; set; }
+
         public CustomInspectionQuery? Inspection { get; set; }
     }
 
@@ -44,5 +47,7 @@ namespace Api.Controllers.Models
         public string? Comment { get; set; }
 
         public List<CustomTaskQuery> Tasks { get; set; }
+
+        public IsarZoomDescription? IsarZoomDescription { get; set; }
     }
 }
