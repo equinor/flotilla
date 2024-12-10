@@ -8,4 +8,4 @@
 - [ ] Relevant issues are linked
 - [ ] Remaining work is documented in issues
   - [ ] There is no remaining work from this PR that require new issues
-- [  ] The changes does not introduce dead code as unused imports, functions etc.
+- [ ] The changes does not introduce dead code as unused imports, functions etc.
