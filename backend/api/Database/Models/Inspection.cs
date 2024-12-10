@@ -20,6 +20,7 @@ namespace Api.Database.Models
             InspectionType inspectionType,
             float? videoDuration,
             Position inspectionTarget,
+            string? inspectionTargetName,
             InspectionStatus status = InspectionStatus.NotStarted,
             AnalysisType? analysisType = null
             )
@@ -27,6 +28,7 @@ namespace Api.Database.Models
             InspectionType = inspectionType;
             VideoDuration = videoDuration;
             InspectionTarget = inspectionTarget;
+            InspectionTargetName = inspectionTargetName;
             AnalysisType = analysisType;
             Status = status;
         }
@@ -64,6 +66,8 @@ namespace Api.Database.Models
 
         [Required]
         public Position InspectionTarget { get; set; }
+
+        public string? InspectionTargetName { get; set; }
 
         [Required]
         public InspectionStatus Status

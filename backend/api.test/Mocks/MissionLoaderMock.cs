@@ -30,6 +30,7 @@ namespace Api.Test.Mocks
                 tagId: "1",
                 tagLink: new Uri("https://testurl.com"),
                 poseId: 1,
+                taskDescription: "description",
                 robotPose: new Pose
                 {
                     Position = new Position { X = 0, Y = 0, Z = 0 },
@@ -42,6 +43,7 @@ namespace Api.Test.Mocks
                 tagId: "2",
                 tagLink: new Uri("https://testurl.com"),
                 poseId: 1,
+                taskDescription: "description",
                 robotPose: new Pose
                 {
                     Position = new Position { X = 0, Y = 0, Z = 0 },

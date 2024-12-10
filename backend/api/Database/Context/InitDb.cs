@@ -453,6 +453,7 @@ namespace Api.Database.Context
                 taskOrder: 0,
                 tagLink: url,
                 tagId: "ABCD",
+                taskDescription: "Task description",
                 poseId: 2,
                 status: TaskStatus.Successful
             );
@@ -463,6 +464,7 @@ namespace Api.Database.Context
                 taskOrder: 0,
                 tagLink: url,
                 tagId: "ABCDE",
+                taskDescription: "Task description",
                 poseId: 2,
                 status: TaskStatus.Failed
             );
@@ -473,6 +475,7 @@ namespace Api.Database.Context
                 taskOrder: 0,
                 tagLink: url,
                 tagId: "ABCDEF",
+                taskDescription: "Task description",
                 poseId: 2,
                 status: TaskStatus.PartiallySuccessful
             );
@@ -483,6 +486,7 @@ namespace Api.Database.Context
                 taskOrder: 0,
                 tagLink: url,
                 tagId: "ABCDEFG",
+                taskDescription: "Task description",
                 poseId: 2,
                 status: TaskStatus.Cancelled
             );
@@ -493,6 +497,7 @@ namespace Api.Database.Context
                 taskOrder: 0,
                 tagLink: url,
                 tagId: "ABCDEFGH",
+                taskDescription: "Task description",
                 poseId: 2,
                 status: TaskStatus.Failed
             );
@@ -503,6 +508,7 @@ namespace Api.Database.Context
                 taskOrder: 0,
                 tagLink: url,
                 tagId: "ABCDEFGHI",
+                taskDescription: "Task description",
                 poseId: 2,
                 status: TaskStatus.Failed
             );
@@ -513,6 +519,7 @@ namespace Api.Database.Context
                 taskOrder: 0,
                 tagLink: url,
                 tagId: "ABCDEFGHIJ",
+                taskDescription: "Task description",
                 poseId: 2,
                 status: TaskStatus.Failed
             );
