@@ -96,8 +96,12 @@ const TagIdDisplay = ({ task }: { task: Task }) => {
 }
 
 const DescriptionDisplay = ({ task }: { task: Task }) => {
+    const capitalizeFirstLetter = (str: string) => {
+        return str.charAt(0).toUpperCase() + str.slice(1)
+    }
+
     if (!task.description) return <Typography key={task.id + 'descr'}>{'N/A'}</Typography>
-    return <Typography key={task.id + 'descr'}>{task.description}</Typography>
+    return <Typography key={task.id + 'descr'}>{capitalizeFirstLetter(task.description)}</Typography>
 }
 
 const InspectionTypesDisplay = ({ task }: { task: Task }) => {
