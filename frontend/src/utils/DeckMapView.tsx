@@ -9,6 +9,7 @@ import { Pose } from 'models/Pose'
 import { MapCompass } from 'utils/MapCompass'
 import { Deck } from 'models/Deck'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { getMeta } from 'components/Pages/MissionPage/MapPosition/MissionMapView'
 
 interface DeckProps {
     deck: Deck
@@ -61,13 +62,6 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
             placeRobotInMap(mapMetadata, mapCanvas, markedRobotPosition)
         }
     }, [mapCanvas, mapImage, mapMetadata, markedRobotPosition])
-
-    const getMeta = async (url: string) => {
-        const image = new Image()
-        image.src = url
-        await image.decode()
-        return image
-    }
 
     let mapName = mapMetadata?.mapName.split('.')[0].replace(/[^0-9a-z-A-Z ]/g, ' ')
     mapName = mapName ? mapName.charAt(0).toUpperCase() + mapName.slice(1) : ' '
@@ -137,9 +131,11 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
                             <StyledMap id="deckMapCanvas" />
                             {mapMetadata && <MapCompass />}
                         </StyledMapCompass>
-                        <Typography italic variant="body_short">
-                            {TranslateText('Map of {0}', [mapName])}
-                        </Typography>
+                        {mapMetadata !== undefined && (
+                            <Typography italic variant="body_short">
+                                {TranslateText('Map of {0}', [mapName])}
+                            </Typography>
+                        )}
                     </StyledCaption>
                 </StyledMapLimits>
             )}

@@ -17,18 +17,37 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledPage } from 'components/Styles/StyledComponents'
+import { Typography } from '@equinor/eds-core-react'
 
 const StyledMissionPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
 `
 const TaskAndMapSection = styled.div`
     display: flex;
+    min-width: 50%;
+    max-width: fit-content;
+    min-height: 60%;
+    padding: 24px;
+    @media (max-width: 600px) {
+        padding: 6px 8px 8px 6px;
+    }
+    flex-direction: column;
+    justify-content: center;
     align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 8rem;
-    padding-top: 16px;
-    padding-bottom: 16px;
+    gap: 8px;
+    align-self: stretch;
+    border-radius: 6px;
+    border: 1px solid ${tokens.colors.ui.background__medium.rgba};
+    background: ${tokens.colors.ui.background__default.rgba};
 `
+
+const StyledTableAndMap = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    align-items: top;
+    gap: 24px;
+`
+
 export const VideoStreamSection = styled.div`
     display: grid;
     gap: 1rem;
@@ -101,8 +120,11 @@ export const MissionPage = () => {
                     <>
                         <MissionHeader mission={selectedMission} />
                         <TaskAndMapSection>
-                            <TaskTable tasks={selectedMission?.tasks} />
-                            <MissionMapView mission={selectedMission} />
+                            <Typography variant="h4">{TranslateText('Tasks')}</Typography>
+                            <StyledTableAndMap>
+                                <TaskTable tasks={selectedMission?.tasks} />
+                                <MissionMapView mission={selectedMission} />
+                            </StyledTableAndMap>
                         </TaskAndMapSection>
                         <VideoStreamSection>
                             {videoMediaStreams && videoMediaStreams.length > 0 && (
