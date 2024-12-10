@@ -530,9 +530,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            string messageTitle = "Failed Telemetry";
             string message = $"Failed telemetry request for robot {cloudHealthStatus.RobotName}.";
-            SignalRService.ReportGeneralFailToSignalR(robot, messageTitle, message);
 
             TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
         }
