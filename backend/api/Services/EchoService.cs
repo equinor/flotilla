@@ -203,7 +203,7 @@ namespace Api.Services
                         $"https://stid.equinor.com/{installationCode}/tag?tagNo={planItem.Tag}"
                     ),
                     Inspections = planItem.SensorTypes
-                        .Select(sensor => new EchoInspection(sensor, planItem.InspectionPoint.EnuPosition.ToPosition())).Distinct(new EchoInspectionComparer()).ToList()
+                        .Select(sensor => new EchoInspection(sensor, planItem.InspectionPoint.EnuPosition.ToPosition(), planItem.InspectionPoint.Name)).Distinct(new EchoInspectionComparer()).ToList()
                 };
 
                 if (tag.Inspections.Count < 1)
@@ -279,7 +279,8 @@ namespace Api.Services
                 .Select(inspection => new Inspection(
                     inspectionType: inspection.InspectionType,
                     videoDuration: inspection.TimeInSeconds,
-                    inspection.InspectionPoint,
+                    inspectionTarget: inspection.InspectionPoint,
+                    inspectionTargetName: inspection.InspectionPointName,
                     status: InspectionStatus.NotStarted))
                 .ToList();
 
@@ -296,6 +297,7 @@ namespace Api.Services
                         robotPose: echoTag.Pose,
                         poseId: echoTag.PoseId,
                         taskOrder: echoTag.PlanOrder,
+                        taskDescription: inspection.InspectionTargetName,
                         zoomDescription: await FindInspectionZoom(echoTag),
                         status: Database.Models.TaskStatus.NotStarted,
                         type: MissionTaskType.Inspection

@@ -25,6 +25,7 @@ namespace Api.Database.Models
             Uri? tagLink,
             string? tagId,
             int? poseId,
+            string? taskDescription,
             IsarZoomDescription? zoomDescription = null,
             TaskStatus status = TaskStatus.NotStarted,
             MissionTaskType type = MissionTaskType.Inspection)
@@ -34,6 +35,7 @@ namespace Api.Database.Models
             RobotPose = robotPose;
             PoseId = poseId;
             TaskOrder = taskOrder;
+            Description = taskDescription;
             Status = status;
             Type = type;
             IsarZoomDescription = zoomDescription;
