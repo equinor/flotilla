@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    [Migration("20241031134209_AddDockPositionInsteadOfSafePosition")]
-    partial class AddDockPositionInsteadOfSafePosition
+    [Migration("20241210093952_Reset-Structure")]
+    partial class ResetStructure
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
