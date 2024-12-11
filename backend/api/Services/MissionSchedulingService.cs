@@ -98,7 +98,11 @@ namespace Api.Services
                 return;
             }
 
-            if (!await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.InspectionArea.Id))
+            if (robot.CurrentInspectionArea == null)
+            {
+                await robotService.UpdateCurrentInspectionArea(robot.Id, missionRun.InspectionArea.Id);
+            }
+            else if (!await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.InspectionArea.Id))
             {
                 logger.LogError("Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Aborting all mission runs", robot.Id, missionRun.Id);
                 try { await AbortAllScheduledMissions(robot.Id, "Aborted: Robot was at different deck"); }

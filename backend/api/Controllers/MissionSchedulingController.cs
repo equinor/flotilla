@@ -319,7 +319,7 @@ namespace Api.Controllers
                 await missionDefinitionService.Create(scheduledMissionDefinition);
             }
 
-            if (!await localizationService.RobotIsOnSameDeckAsMission(missionRun.Robot.Id, missionRun.InspectionArea.Id))
+            if (missionRun.Robot.CurrentInspectionArea != null && !await localizationService.RobotIsOnSameDeckAsMission(missionRun.Robot.Id, missionRun.InspectionArea.Id))
             {
                 return Conflict($"The robot {missionRun.Robot.Name} is assumed to be in a different inspection area so the mission was not scheduled.");
             }
