@@ -1,9 +1,4 @@
-interface IVideoPlayerProps {
-    videoStream: MediaStream
-    videoStreamName: string
-}
-
-export const VideoPlayerSimpleStream = ({ videoStream, videoStreamName }: IVideoPlayerProps) => (
+export const VideoPlayerSimpleStream = ({ videoStream }: { videoStream: MediaStream }) => (
     <video
         autoPlay
         muted
