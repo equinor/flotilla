@@ -48,10 +48,10 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// List all decks in the Flotilla database
+        /// List all decks in the specified installation
         /// </summary>
         /// <remarks>
-        /// <para> This query gets all decks </para>
+        /// <para> This query gets all decks in specified installation</para>
         /// </remarks>
         [HttpGet("installation/{installationCode}")]
         [Authorize(Roles = Role.Any)]

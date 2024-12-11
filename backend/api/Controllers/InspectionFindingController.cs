@@ -49,7 +49,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// Get the full inspection against an isarTaskId
+        /// Get the full inspection for specified isarTaskId
         /// </summary>
         /// <remarks>
         /// </remarks>
