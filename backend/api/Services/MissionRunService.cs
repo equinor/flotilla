@@ -295,7 +295,6 @@ namespace Api.Services
                 .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
                 .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null)
                 .Include(missionRun => missionRun.Robot)
-                .ThenInclude(robot => robot.VideoStreams)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)

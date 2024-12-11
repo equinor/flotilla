@@ -17,14 +17,6 @@ namespace Api.Database.Context
         private static readonly List<MissionRun> missionRuns = GetMissionRuns();
         private static readonly List<AccessRole> accessRoles = GetAccessRoles();
 
-        private static VideoStream VideoStream =>
-            new()
-            {
-                Name = "Front camera",
-                Url = "http://localhost:5000/stream?topic=/camera/rgb/image_raw",
-                Type = "mjpeg"
-            };
-
         private static List<Inspection> GetInspections()
         {
             var inspection1 = new Inspection
@@ -313,7 +305,6 @@ namespace Api.Database.Context
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[0],
-                VideoStreams = [],
                 Documentation = [],
                 Pose = new Pose()
             };
@@ -327,7 +318,6 @@ namespace Api.Database.Context
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[0],
-                VideoStreams = [],
                 Documentation = [],
                 Pose = new Pose()
             };
@@ -341,7 +331,6 @@ namespace Api.Database.Context
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallation = installations[0],
-                VideoStreams = [],
                 Documentation = [],
                 Pose = new Pose()
             };
@@ -692,8 +681,6 @@ namespace Api.Database.Context
             context.AddRange(inspections);
             context.AddRange(installations);
             AddRobotModelsToContext(context);
-            foreach (var robot in robots)
-                robot.VideoStreams.Add(VideoStream);
             context.SaveChanges();
             var models = context.RobotModels.AsTracking().AsEnumerable().ToList();
             robots[0].Model = models.Find(model => model.Type == RobotType.TaurobInspector)!;

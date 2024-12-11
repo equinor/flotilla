@@ -25,9 +25,6 @@ namespace Api.Mqtt.MessageModels
         [JsonPropertyName("documentation")]
         public List<CreateDocumentationQuery> DocumentationQueries { get; set; }
 
-        [JsonPropertyName("video_streams")]
-        public List<CreateVideoStreamQuery> VideoStreamQueries { get; set; }
-
         [JsonPropertyName("host")]
         public string Host { get; set; }
 

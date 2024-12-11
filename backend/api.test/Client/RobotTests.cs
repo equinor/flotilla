@@ -105,7 +105,6 @@ namespace Api.Test.Client
                 Port = 3000,
                 CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = wrongArea.Name,
-                VideoStreams = []
             };
 
             string robotUrl = "/robots";

@@ -68,7 +68,6 @@ namespace Api.Database.Context
             modelBuilder.Entity<MissionRun>().OwnsOne(m => m.Map).OwnsOne(b => b.Boundary);
             modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
             modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
-            modelBuilder.Entity<Robot>().OwnsMany(r => r.VideoStreams);
 
             modelBuilder.Entity<DefaultLocalizationPose>().OwnsOne(d => d.Pose, poseBuilder =>
             {

@@ -9,7 +9,6 @@ namespace Api.Database.Models
         public Robot()
         {
             Documentation = [];
-            VideoStreams = [];
             IsarId = "defaultIsarId";
             Name = "defaultId";
             SerialNumber = "defaultSerialNumber";
@@ -23,18 +22,6 @@ namespace Api.Database.Models
 
         public Robot(CreateRobotQuery createQuery, Installation installation, RobotModel model, Area? area = null)
         {
-            var videoStreams = new List<VideoStream>();
-            foreach (var videoStreamQuery in createQuery.VideoStreams)
-            {
-                var videoStream = new VideoStream
-                {
-                    Name = videoStreamQuery.Name,
-                    Url = videoStreamQuery.Url,
-                    Type = videoStreamQuery.Type
-                };
-                videoStreams.Add(videoStream);
-            }
-
             var documentation = new List<DocumentInfo>();
             foreach (var documentQuery in createQuery.Documentation)
             {
@@ -52,7 +39,6 @@ namespace Api.Database.Models
             CurrentInstallation = installation;
             CurrentArea = area;
             Documentation = documentation;
-            VideoStreams = videoStreams;
             Host = createQuery.Host;
             Port = createQuery.Port;
             IsarConnected = true;
@@ -116,8 +102,6 @@ namespace Api.Database.Models
         }
 
         public IList<DocumentInfo> Documentation { get; set; }
-
-        public IList<VideoStream> VideoStreams { get; set; }
 
         [Required]
         [MaxLength(200)]

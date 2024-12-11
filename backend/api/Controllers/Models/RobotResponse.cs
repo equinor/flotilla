@@ -24,8 +24,6 @@ namespace Api.Controllers.Models
 
         public IList<DocumentInfo> Documentation { get; set; }
 
-        public IList<VideoStream> VideoStreams { get; set; }
-
         public string Host { get; set; }
 
         public int Port { get; set; }
@@ -63,7 +61,6 @@ namespace Api.Controllers.Models
             BatteryLevel = robot.BatteryLevel;
             PressureLevel = robot.PressureLevel;
             Documentation = robot.Documentation;
-            VideoStreams = robot.VideoStreams;
             Host = robot.Host;
             Port = robot.Port;
             IsarConnected = robot.IsarConnected;
