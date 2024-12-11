@@ -38,7 +38,8 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
 
     const ongoingLocalizationMissionOnSameDeckExists =
         ongoingMissions.filter(
-            (mission) => mission.robot?.id === selectedRobot?.id && mission.area?.deckName === unikMissionDeckNames[0]
+            (mission) =>
+                mission.robot?.id === selectedRobot?.id && mission.inspectionArea?.deckName === unikMissionDeckNames[0]
         ).length > 0
 
     useEffect(() => {
@@ -50,8 +51,8 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
 
         if (
             (unikMissionDeckNames.length === 1 &&
-                selectedRobot.currentArea?.deckName &&
-                unikMissionDeckNames[0] === selectedRobot?.currentArea?.deckName) ||
+                selectedRobot.currentInspectionArea?.deckName &&
+                unikMissionDeckNames[0] === selectedRobot?.currentInspectionArea?.deckName) ||
             ongoingLocalizationMissionOnSameDeckExists
         ) {
             scheduleMissions()
@@ -68,18 +69,18 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
             return
         }
 
-        if (!selectedRobot.currentArea?.deckName && !ongoingLocalizationMissionOnSameDeckExists) {
+        if (!selectedRobot.currentInspectionArea?.deckName && !ongoingLocalizationMissionOnSameDeckExists) {
             setDialogToOpen(DialogTypes.verifyDeck)
             return
         }
 
-        if (unikMissionDeckNames[0] !== selectedRobot.currentArea?.deckName) {
+        if (unikMissionDeckNames[0] !== selectedRobot.currentInspectionArea?.deckName) {
             setDialogToOpen(DialogTypes.conflictingRobotDeck)
             return
         }
         // To ignore scheduleMissions dependency
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [unikMissionDeckNames, selectedRobot?.currentArea?.deckName])
+    }, [unikMissionDeckNames, selectedRobot?.currentInspectionArea?.deckName])
 
     return (
         <>
@@ -97,7 +98,7 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
             {dialogToOpen === DialogTypes.conflictingRobotDeck && (
                 <ConflictingRobotDeckDialog
                     closeDialog={closeDialog}
-                    robotDeckName={selectedRobot?.currentArea?.deckName!}
+                    robotDeckName={selectedRobot?.currentInspectionArea?.deckName!}
                     desiredDeckName={unikMissionDeckNames![0]}
                 />
             )}

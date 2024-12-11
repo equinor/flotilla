@@ -135,7 +135,6 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
     const translatedBatteryLevel = TranslateText('Battery level')
     const translatedPressureLevel = TranslateText('Pressure level')
     const translatedDescription = TranslateText('Description')
-    const translatedArea = TranslateText('Area')
     const translatedTasks = TranslateText('Completed Tasks')
     const translatedStatus = TranslateText('Status')
 
@@ -193,7 +192,6 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                         {HeaderText(translatedStatus, '')}
                         <MissionStatusDisplay status={mission.status} />
                     </div>
-                    {HeaderText(translatedArea, `${mission.area?.areaName}`)}
                     {HeaderText(translatedTasks, `${numberOfCompletedTasks + '/' + mission.tasks.length}`)}
                 </StyledCard>
                 <StyledCard>

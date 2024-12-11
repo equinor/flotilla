@@ -165,7 +165,7 @@ export class BackendAPICaller {
             })
         }
 
-        if (parameters.area) path = path + 'Area=' + parameters.area + '&'
+        if (parameters.inspectionArea) path = path + 'InspectionArea=' + parameters.inspectionArea + '&'
         if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
         if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'
         if (parameters.orderBy) path = path + 'OrderBy=' + parameters.orderBy + '&'
@@ -208,7 +208,7 @@ export class BackendAPICaller {
         const installationCode: string | null = BackendAPICaller.installationCode
         if (installationCode) path = path + 'InstallationCode=' + installationCode + '&'
 
-        if (parameters.area) path = path + 'Area=' + parameters.area + '&'
+        if (parameters.inspectionArea) path = path + 'InspectionArea=' + parameters.inspectionArea + '&'
         if (parameters.sourceId) path = path + 'SourceId=' + parameters.sourceId + '&'
         if (parameters.pageNumber) path = path + 'PageNumber=' + parameters.pageNumber + '&'
         if (parameters.pageSize) path = path + 'PageSize=' + parameters.pageSize + '&'

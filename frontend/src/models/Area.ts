@@ -1,5 +1,3 @@
-import { Pose } from './Pose'
-
 export interface Area {
     id: string
     areaName: string
@@ -7,5 +5,4 @@ export interface Area {
     plantName: string
     installationCode: string
     deckName: string
-    defaultLocalizationPose?: Pose
 }

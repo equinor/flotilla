@@ -115,7 +115,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
                     scheduleMissions={() => startReRun(selectedRerunOption!)}
                     closeDialog={() => setIsLocationVerificationOpen(false)}
                     robotId={mission.robot.id}
-                    missionDeckNames={[mission.area?.deckName ?? '']}
+                    missionDeckNames={[mission.inspectionArea?.deckName ?? '']}
                 />
             )}
         </Centered>

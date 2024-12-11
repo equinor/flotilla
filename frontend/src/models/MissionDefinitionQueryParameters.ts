@@ -1,7 +1,7 @@
 export interface MissionDefinitionQueryParameters {
     nameSearch?: string
     robotNameSearch?: string
-    area?: string
+    inspectionArea?: string
     sourceId?: string
     pageNumber?: number
     pageSize?: number

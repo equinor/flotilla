@@ -54,11 +54,6 @@ const DeckCard = ({ deckData, onClickDeck, selectedDeck, handleScheduleAll }: De
     if (deckData.inspections.length === 0) queueMissionsTooltip = TranslateText('No planned inspection')
     else if (isScheduleMissionsDisabled) queueMissionsTooltip = TranslateText('No robot available')
 
-    const formattedAreaNames = deckData.areas
-        .map((area) => area.areaName.toLocaleUpperCase())
-        .sort()
-        .join(' | ')
-
     return (
         <StyledDict.DeckCard key={deckData.deck.deckName}>
             <StyledDict.Rectangle style={{ background: `${getCardColorFromInspections(deckData.inspections)}` }} />
@@ -83,7 +78,6 @@ const DeckCard = ({ deckData, onClickDeck, selectedDeck, handleScheduleAll }: De
                                 </StyledDict.Content>
                             ))}
                     </StyledDict.TopDeckText>
-                    {deckData.areas && <Typography variant={'body_short'}>{formattedAreaNames}</Typography>}
                     {deckData.inspections && (
                         <CardMissionInformation deckName={deckData.deck.deckName} inspections={deckData.inspections} />
                     )}

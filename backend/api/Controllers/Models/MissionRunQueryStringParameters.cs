@@ -21,9 +21,9 @@ namespace Api.Controllers.Models
         public string? InstallationCode { get; set; }
 
         /// <summary>
-        /// Filter for the area of the mission
+        /// Filter for the inspection area of the mission
         /// </summary>
-        public string? Area { get; set; }
+        public string? InspectionArea { get; set; }
 
         /// <summary>
         /// Filter for the robot id of the robot assigned to the mission

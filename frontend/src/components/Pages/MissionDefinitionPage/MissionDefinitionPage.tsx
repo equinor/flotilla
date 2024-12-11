@@ -81,20 +81,16 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
             <StyledDict.FormContainer>
                 <MetadataItem title={TranslateText('Name')} content={missionDefinition.name} onEdit={onEdit('name')} />
                 <MetadataItem
-                    title={TranslateText('Area')}
-                    content={missionDefinition.area ? missionDefinition.area.areaName : ''}
-                />
-                <MetadataItem
                     title={TranslateText('Deck')}
-                    content={missionDefinition.area ? missionDefinition.area.deckName : ''}
+                    content={missionDefinition.inspectionArea ? missionDefinition.inspectionArea.deckName : ''}
                 />
                 <MetadataItem
                     title={TranslateText('Plant')}
-                    content={missionDefinition.area ? missionDefinition.area.plantName : ''}
+                    content={missionDefinition.inspectionArea ? missionDefinition.inspectionArea.plantName : ''}
                 />
                 <MetadataItem
                     title={TranslateText('Installation')}
-                    content={missionDefinition.area ? missionDefinition.area.installationCode : ''}
+                    content={missionDefinition.inspectionArea ? missionDefinition.inspectionArea.installationCode : ''}
                 />
                 <MetadataItem title={TranslateText('Mission source id')} content={missionDefinition.sourceId} />
                 <MetadataItem

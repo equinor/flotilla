@@ -11,7 +11,6 @@ import { TaskType } from 'models/Task'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
-import { MissionAreaDisplay } from 'components/Displays/MissionDisplays/MissionAreaDispaly'
 
 interface MissionProps {
     mission: Mission
@@ -95,7 +94,6 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
             <ControllButtonSpacing>
                 <Midcontent>
                     <MissionStatusDisplayWithHeader status={mission.status} />
-                    <MissionAreaDisplay mission={mission} />
                     <MissionProgressDisplay mission={mission} />
                 </Midcontent>
                 <MissionControlButtons
@@ -117,7 +115,6 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
                     </Typography>
                     <Midcontent>
                         <MissionStatusDisplayWithHeader status={mission.status} />
-                        <MissionAreaDisplay mission={mission} />
                         <MissionProgressDisplay mission={mission} />
                     </Midcontent>
                 </LeftSection>
