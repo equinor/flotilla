@@ -65,13 +65,6 @@ namespace Api.Database.Models
         {
             switch (type)
             {
-                case MissionTaskType.Localization:
-                    Type = type;
-                    Description = "Localization";
-                    RobotPose = robotPose;
-                    TaskOrder = 0;
-                    Status = TaskStatus.NotStarted;
-                    break;
                 case MissionTaskType.ReturnHome:
                     Type = type;
                     Description = "Return to home";
@@ -195,7 +188,6 @@ namespace Api.Database.Models
             return missionTaskType switch
             {
                 MissionTaskType.ReturnHome => "return_to_home",
-                MissionTaskType.Localization => "localization",
                 MissionTaskType.Inspection => "inspection",
                 _ => throw new ArgumentException($"ISAR Mission task type '{missionTaskType}' not supported"),
             };
@@ -237,7 +229,6 @@ namespace Api.Database.Models
     public enum MissionTaskType
     {
         Inspection,
-        Localization,
         ReturnHome
     }
 }

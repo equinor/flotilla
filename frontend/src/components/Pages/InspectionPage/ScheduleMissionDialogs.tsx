@@ -200,7 +200,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     scheduleMissions={scheduleMissions}
                     closeDialog={closeScheduleDialogs}
                     robotId={selectedRobot!.id}
-                    missionDeckNames={props.selectedMissions.map((mission) => mission.area?.deckName ?? '')}
+                    missionDeckNames={props.selectedMissions.map((mission) => mission.inspectionArea?.deckName ?? '')}
                 />
             )}
         </>

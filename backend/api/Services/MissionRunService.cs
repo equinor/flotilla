@@ -349,11 +349,11 @@ namespace Api.Services
             MissionRunQueryStringParameters parameters
         )
         {
-            Expression<Func<MissionRun, bool>> areaFilter = parameters.Area is null
+            Expression<Func<MissionRun, bool>> inspectionAreaFilter = parameters.InspectionArea is null
                 ? missionRun => true
                 : missionRun =>
                     missionRun.InspectionArea != null &&
-                    missionRun.InspectionArea.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
+                    missionRun.InspectionArea.Name.ToLower().Equals(parameters.InspectionArea.Trim().ToLower());
 
             Expression<Func<MissionRun, bool>> installationFilter = parameters.InstallationCode is null
                 ? missionRun => true
@@ -385,10 +385,6 @@ namespace Api.Services
                 : mission => mission.Tasks.Any(
                     task => task.Inspection != null && parameters.InspectionTypes.Contains(task.Inspection.InspectionType)
                 );
-
-            Expression<Func<MissionRun, bool>> localizationFilter = !parameters.ExcludeLocalization
-                ? missionRun => true
-                : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.Localization));
 
             Expression<Func<MissionRun, bool>> returnTohomeFilter = !parameters.ExcludeReturnToHome
                 ? missionRun => true
@@ -431,16 +427,16 @@ namespace Api.Services
                                 Expression.AndAlso(
                                     Expression.Invoke(inspectionTypeFilter, missionRun),
                                     Expression.AndAlso(
-                                        Expression.Invoke(localizationFilter, missionRun),
+                                        Expression.Invoke(returnTohomeFilter, missionRun),
                                         Expression.AndAlso(
-                                            Expression.Invoke(returnTohomeFilter, missionRun),
+                                            Expression.Invoke(desiredStartTimeFilter, missionRun),
                                             Expression.AndAlso(
-                                                Expression.Invoke(desiredStartTimeFilter, missionRun),
+                                                Expression.Invoke(startTimeFilter, missionRun),
                                                 Expression.AndAlso(
-                                                    Expression.Invoke(startTimeFilter, missionRun),
+                                                    Expression.Invoke(endTimeFilter, missionRun),
                                                     Expression.AndAlso(
-                                                        Expression.Invoke(endTimeFilter, missionRun),
-                                                        Expression.Invoke(robotTypeFilter, missionRun)
+                                                        Expression.Invoke(robotTypeFilter, missionRun),
+                                                        Expression.Invoke(inspectionAreaFilter, missionRun)
                                                     )
                                                 )
                                             )

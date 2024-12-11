@@ -210,10 +210,10 @@ namespace Api.Services
             MissionDefinitionQueryStringParameters parameters
         )
         {
-            Expression<Func<MissionDefinition, bool>> areaFilter = parameters.Area is null
+            Expression<Func<MissionDefinition, bool>> inspectionAreaFilter = parameters.InspectionArea is null
                 ? missionDefinition => true
                 : missionDefinition =>
-                    missionDefinition.InspectionArea != null && missionDefinition.InspectionArea.Name.ToLower().Equals(parameters.Area.Trim().ToLower());
+                    missionDefinition.InspectionArea != null && missionDefinition.InspectionArea.Name.ToLower().Equals(parameters.InspectionArea.Trim().ToLower());
 
             Expression<Func<MissionDefinition, bool>> installationFilter = parameters.InstallationCode is null
                 ? missionDefinition => true
@@ -226,7 +226,7 @@ namespace Api.Services
             // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
             Expression body = Expression.AndAlso(
                 Expression.Invoke(installationFilter, missionDefinitionExpression),
-                Expression.Invoke(areaFilter, missionDefinitionExpression)
+                Expression.Invoke(inspectionAreaFilter, missionDefinitionExpression)
             );
 
             // Constructing the resulting lambda expression by combining parameter and body

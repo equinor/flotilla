@@ -9,7 +9,7 @@ export interface MissionRunQueryParameters {
     robotNameSearch?: string
     tagSearch?: string
     inspectionTypes?: InspectionType[]
-    area?: string
+    inspectionArea?: string
     excludeLocalization?: boolean
     excludeReturnToHome?: boolean
     minStartTime?: number

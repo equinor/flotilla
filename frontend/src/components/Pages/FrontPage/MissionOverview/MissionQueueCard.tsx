@@ -174,9 +174,8 @@ const MissionDetails = ({ mission }: { mission: Mission }) => {
         return translateNotAvailable
     }
 
-    const area = `${TranslateText('Area')}: ${mission.area?.areaName ?? TranslateText('Not available')}`
     const tasks = `${TranslateText('Tasks')}: ${mission.tasks.length}`
-    const missionDetails = `${area} | ${tasks} | ${estimatedDuration()}`
+    const missionDetails = `${tasks} | ${estimatedDuration()}`
 
     return (
         <Typography variant="caption" color={tokens.colors.text.static_icons__tertiary.hex}>

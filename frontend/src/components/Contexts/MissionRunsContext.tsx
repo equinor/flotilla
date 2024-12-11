@@ -178,8 +178,10 @@ const useMissionRuns = (): IMissionRunsContext => {
     const [filteredMissionQueue, setFilteredMissionQueue] = useState<Mission[]>([])
     const [filteredOngoingMissions, setFilteredOngoingMissions] = useState<Mission[]>([])
     useEffect(() => {
-        setFilteredOngoingMissions(ongoingMissions.filter((m) => m.area?.installationCode === installationCode))
-        setFilteredMissionQueue(missionQueue.filter((m) => m.area?.installationCode === installationCode))
+        setFilteredOngoingMissions(
+            ongoingMissions.filter((m) => m.inspectionArea?.installationCode === installationCode)
+        )
+        setFilteredMissionQueue(missionQueue.filter((m) => m.inspectionArea?.installationCode === installationCode))
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [installationCode, ongoingMissions, missionQueue])
 

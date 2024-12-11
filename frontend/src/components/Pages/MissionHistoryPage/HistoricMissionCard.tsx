@@ -61,9 +61,6 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
                     {mission.name}
                 </Typography>
             </Table.Cell>
-            <Table.Cell id={InspectionTableColumns.Area}>
-                <Typography>{mission.area?.areaName}</Typography>
-            </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Robot}>
                 <Typography>{mission.robot.name}</Typography>
             </Table.Cell>

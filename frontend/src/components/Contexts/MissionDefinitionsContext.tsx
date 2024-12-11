@@ -62,7 +62,6 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
             })
             registerEvent(SignalREventLabels.missionDefinitionDeleted, (username: string, message: string) => {
                 const mDef: MissionDefinition = JSON.parse(message)
-                if (!mDef.area) return
                 setMissionDefinitions((oldMissionDefs) => {
                     const oldListCopy = [...oldMissionDefs]
                     const queueIndex = oldListCopy.findIndex((m) => m.id === mDef.id)

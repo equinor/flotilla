@@ -45,9 +45,6 @@ const HideColumnsOnSmallScreen = styled.div`
         #${InspectionTableColumns.Status} {
             display: none;
         }
-        #${InspectionTableColumns.Area} {
-            display: none;
-        }
         #${InspectionTableColumns.Robot} {
             display: none;
         }
@@ -295,9 +292,6 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                                 </StyledTableCell>
                                 <StyledTableCell id={InspectionTableColumns.Name}>
                                     {TranslateText('Name')}
-                                </StyledTableCell>
-                                <StyledTableCell id={InspectionTableColumns.Area}>
-                                    {TranslateText('Area')}
                                 </StyledTableCell>
                                 <StyledTableCell id={InspectionTableColumns.Robot}>
                                     {TranslateText('Robot')}

@@ -14,9 +14,9 @@
         public string? InstallationCode { get; set; }
 
         /// <summary>
-        /// Filter for the area of the mission
+        /// Filter for the inspection area of the mission
         /// </summary>
-        public string? Area { get; set; }
+        public string? InspectionArea { get; set; }
 
         /// <summary>
         /// The search parameter for the mission name

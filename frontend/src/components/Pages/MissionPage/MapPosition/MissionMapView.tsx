@@ -50,11 +50,11 @@ export const MissionMapView = ({ mission }: MissionProps) => {
 
     const updateMap = useCallback(() => {
         let context = mapCanvas.getContext('2d')
-        if (context === null) {
+        if (!context || !mission.map) {
             return
         }
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
-        context?.drawImage(mapImage, 0, 0)
+        context.drawImage(mapImage, 0, 0)
         placeTagsInMap(mission.tasks, mission.map!, mapCanvas, currentTaskOrder)
         if (missionRobot?.pose && mission.map) {
             placeRobotInMap(mission.map, mapCanvas, missionRobot.pose)
