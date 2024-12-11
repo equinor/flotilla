@@ -66,12 +66,6 @@ namespace Api.Controllers.Models
         public MissionRunType? MissionRunType { get; set; }
 
         /// <summary>
-        /// Filter for whether the result should exclude localization missions. The default is false
-        /// </summary>
-        /// 
-        public bool ExcludeLocalization { get; set; }
-
-        /// <summary>
         /// Filter for whether the result should exclude return to home missions. The default is false
         /// </summary>
         public bool ExcludeReturnToHome { get; set; }

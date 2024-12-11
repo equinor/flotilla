@@ -85,8 +85,8 @@ namespace Api.EventHandlers
                 {
                     var finding = new Finding(
                         task.TagId ?? "NA",
-                        missionRun.Area?.Plant.Name ?? "NA",
-                        missionRun.Area?.Name ?? "NA",
+                        missionRun.InspectionArea?.Plant.Name ?? "NA",
+                        missionRun.InspectionArea?.Name ?? "NA",
                         inspectionFinding.Finding,
                         inspectionFinding.InspectionDate
                     );
@@ -112,7 +112,7 @@ namespace Api.EventHandlers
 
                 var factsArray = new JArray(
                     new JObject(new JProperty("name", "Anlegg"), new JProperty("value", finding.PlantName)),
-                    new JObject(new JProperty("name", "Område"), new JProperty("value", finding.AreaName)),
+                    new JObject(new JProperty("name", "Område"), new JProperty("value", finding.InspectionAreaName)),
                     new JObject(new JProperty("name", "Tag Number"), new JProperty("value", finding.TagId)),
                     new JObject(new JProperty("name", "Beskrivelse"), new JProperty("value", finding.FindingDescription)),
                     new JObject(new JProperty("name", "Tidspunkt"), new JProperty("value", finding.Timestamp.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)))
@@ -169,11 +169,11 @@ namespace Api.EventHandlers
         }
     }
 
-    public class Finding(string tagId, string plantName, string areaName, string findingDescription, DateTime timestamp)
+    public class Finding(string tagId, string plantName, string inspectionAreaName, string findingDescription, DateTime timestamp)
     {
         public string TagId { get; set; } = tagId ?? throw new ArgumentNullException(nameof(tagId));
         public string PlantName { get; set; } = plantName ?? throw new ArgumentNullException(nameof(plantName));
-        public string AreaName { get; set; } = areaName ?? throw new ArgumentNullException(nameof(areaName));
+        public string InspectionAreaName { get; set; } = inspectionAreaName ?? throw new ArgumentNullException(nameof(inspectionAreaName));
         public string FindingDescription { get; set; } = findingDescription ?? throw new ArgumentNullException(nameof(findingDescription));
         public DateTime Timestamp { get; set; } = timestamp;
     }

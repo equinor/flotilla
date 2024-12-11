@@ -11,10 +11,6 @@ namespace Api.Services.Events
     {
         public string RobotId { get; } = robotId;
     }
-    public class LocalizationMissionSuccessfulEventArgs(string robotId) : EventArgs
-    {
-        public string RobotId { get; } = robotId;
-    }
 
     public class RobotEmergencyEventArgs(string robotId, RobotFlotillaStatus? robotFlotillaStatus = null) : EventArgs
     {

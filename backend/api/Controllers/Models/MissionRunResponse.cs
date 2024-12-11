@@ -20,7 +20,7 @@ namespace Api.Controllers.Models
 
         public string InstallationCode { get; set; }
 
-        public AreaResponse? Area { get; set; }
+        public DeckResponse? InspectionArea { get; set; }
 
         public virtual RobotResponse Robot { get; set; }
 
@@ -37,8 +37,6 @@ namespace Api.Controllers.Models
         public uint? EstimatedDuration { get; set; }
 
         public IList<MissionTask> Tasks { get; set; }
-
-        public MapMetadata? Map { get; set; }
 
         public MissionRunType MissionRunType { get; set; }
 
@@ -57,7 +55,7 @@ namespace Api.Controllers.Models
             StatusReason = mission.StatusReason;
             Comment = mission.Comment;
             InstallationCode = mission.InstallationCode;
-            Area = mission.Area != null ? new AreaResponse(mission.Area) : null;
+            InspectionArea = mission.InspectionArea != null ? new DeckResponse(mission.InspectionArea) : null;
             Robot = new RobotResponse(mission.Robot);
             Status = mission.Status;
             IsCompleted = mission.IsCompleted;
@@ -66,7 +64,6 @@ namespace Api.Controllers.Models
             EndTime = mission.EndTime;
             EstimatedDuration = mission.EstimatedDuration;
             Tasks = mission.Tasks;
-            Map = mission.Map;
             MissionRunType = mission.MissionRunType;
         }
 

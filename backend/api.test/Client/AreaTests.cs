@@ -179,7 +179,7 @@ namespace Api.Test.Client
                 RobotId = robotId,
                 DesiredStartTime = DateTime.UtcNow,
                 InstallationCode = installation.InstallationCode,
-                AreaName = area.Name,
+                InspectionAreaName = deck.Name,
                 Name = testMissionName,
                 Tasks = tasks
             };

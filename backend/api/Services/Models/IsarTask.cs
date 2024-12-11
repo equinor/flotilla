@@ -37,7 +37,6 @@
                 "take_video" => IsarTaskType.TakeVideo,
                 "take_thermal_image" => IsarTaskType.TakeThermalImage,
                 "take_thermal_video" => IsarTaskType.TakeThermalVideo,
-                "localize" => IsarTaskType.Localize,
                 "return_to_home" => IsarTaskType.ReturnToHome,
                 "move_arm" => IsarTaskType.MoveArm,
                 _
@@ -62,7 +61,6 @@
 
     public enum IsarTaskType
     {
-        Localize,
         ReturnToHome,
         TakeImage,
         TakeVideo,

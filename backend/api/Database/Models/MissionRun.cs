@@ -70,7 +70,7 @@ namespace Api.Database.Models
         public string? Comment { get; set; }
 
         [Required]
-        public Area Area { get; set; }
+        public Deck InspectionArea { get; set; }
 
         public bool IsCompleted =>
             _status
@@ -79,8 +79,6 @@ namespace Api.Database.Models
                 or MissionStatus.Successful
                 or MissionStatus.PartiallySuccessful
                 or MissionStatus.Failed;
-
-        public MapMetadata? Map { get; set; }
 
         public DateTime? StartTime { get; private set; }
 
@@ -174,8 +172,6 @@ namespace Api.Database.Models
             }
         }
 
-        public bool IsLocalizationMission() { return MissionRunType == MissionRunType.Localization; }
-
         public bool IsReturnHomeMission() { return MissionRunType == MissionRunType.ReturnHome; }
 
         public bool IsEmergencyMission() { return MissionRunType == MissionRunType.Emergency; }
@@ -197,7 +193,6 @@ namespace Api.Database.Models
     {
         Normal,
         ReturnHome,
-        Emergency,
-        Localization
+        Emergency
     }
 }

@@ -251,7 +251,7 @@ namespace Api.Controllers
                 if (area == null)
                     return NotFound($"Could not find area with id {id}");
 
-                var missionDefinitions = await missionDefinitionService.ReadByAreaId(area.Id, readOnly: true);
+                var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(area.Deck.Id, readOnly: true);
                 var missionDefinitionResponses = missionDefinitions.FindAll(m => !m.IsDeprecated).Select(m => new MissionDefinitionResponse(m));
                 return Ok(missionDefinitionResponses);
             }

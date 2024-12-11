@@ -65,11 +65,11 @@ namespace Api.Services
             var entry = context.Update(inspection);
 
             var missionRun = await context.MissionRuns
-                    .Include(missionRun => missionRun.Area).ThenInclude(area => area != null ? area.Installation : null)
+                    .Include(missionRun => missionRun.InspectionArea).ThenInclude(area => area != null ? area.Installation : null)
                     .Include(missionRun => missionRun.Robot)
                     .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspection != null && missionTask.Inspection.Id == inspection.Id)).AsNoTracking()
                     .FirstOrDefaultAsync();
-            var installation = missionRun?.Area?.Installation;
+            var installation = missionRun?.InspectionArea?.Installation;
 
             await ApplyDatabaseUpdate(installation);
 

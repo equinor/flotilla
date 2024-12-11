@@ -18,7 +18,7 @@ namespace Api.Services
 
         public Task AbortAllScheduledMissions(string robotId, string? abortReason = null);
 
-        public Task ScheduleMissionToDriveToDockPosition(string robotId, string areaId);
+        public Task ScheduleMissionToDriveToDockPosition(string robotId, Deck? inspectionArea);
 
         public Task UnfreezeMissionRunQueueForRobot(string robotId);
 
@@ -26,14 +26,12 @@ namespace Api.Services
 
         public void TriggerRobotAvailable(RobotAvailableEventArgs e);
 
-        public void TriggerLocalizationMissionSuccessful(LocalizationMissionSuccessfulEventArgs e);
-
         public Task AbortActiveReturnToHomeMission(string robotId);
 
     }
 
     public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
-            IAreaService areaService, IIsarService isarService, ILocalizationService localizationService, IReturnToHomeService returnToHomeService, ISignalRService signalRService, IErrorHandlingService errorHandlingService) : IMissionSchedulingService
+            IIsarService isarService, ILocalizationService localizationService, IReturnToHomeService returnToHomeService, ISignalRService signalRService, IErrorHandlingService errorHandlingService) : IMissionSchedulingService
     {
         public async Task StartNextMissionRunIfSystemIsAvailable(string robotId)
         {
@@ -45,7 +43,7 @@ namespace Api.Services
                 return;
             }
 
-            logger.LogInformation("Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
+            logger.LogInformation("Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentInspectionArea?.Name);
 
             MissionRun? missionRun;
             try { missionRun = await SelectNextMissionRun(robot.Id); }
@@ -65,26 +63,13 @@ namespace Api.Services
             {
                 logger.LogInformation("The robot was ready to start mission, but no mission is scheduled");
 
-                if (!await localizationService.RobotIsLocalized(robotId))
-                {
-                    string infoMessage = $"Not scheduling a return to home mission as the robot {robotId} is not localized.";
-                    logger.LogInformation("{Message}", infoMessage);
-                    return;
-                }
-
-                if (robot.RobotCapabilities == null || !robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.return_to_home))
-                {
-                    await robotService.UpdateCurrentArea(robot.Id, null);
-                    return;
-                }
-                else
+                if (robot.RobotCapabilities != null && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.return_to_home))
                 {
                     try { missionRun = await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
                     catch (ReturnToHomeMissionFailedToScheduleException)
                     {
                         signalRService.ReportGeneralFailToSignalR(robot, $"Failed to schedule return to home for robot {robot.Name}", "");
                         logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
-                        await robotService.UpdateCurrentArea(robot.Id, null);
                     }
 
                     if (missionRun == null) { return; }  // The robot is already home
@@ -100,10 +85,12 @@ namespace Api.Services
                         "Post return to home mission created: Robot {robotName} has status {robotStatus} and current area {areaName}",
                         postReturnToHomeMissionCreatedRobot.Name,
                         postReturnToHomeMissionCreatedRobot.Status,
-                        postReturnToHomeMissionCreatedRobot.CurrentArea?.Name
+                        postReturnToHomeMissionCreatedRobot.CurrentInspectionArea?.Name
                     );
                 }
             }
+
+            if (missionRun == null) { return; }
 
             if (!await TheSystemIsAvailableToRunAMission(robot.Id, missionRun.Id))
             {
@@ -111,16 +98,7 @@ namespace Api.Services
                 return;
             }
 
-            // Verify that localization is fine
-            if (!await localizationService.RobotIsLocalized(robot.Id) && !missionRun.IsLocalizationMission())
-            {
-                logger.LogError("Tried to schedule mission {MissionRunId} on robot {RobotId} before the robot was localized, scheduled missions will be aborted", missionRun.Id, robot.Id);
-                try { await AbortAllScheduledMissions(robot.Id, "Aborted: Robot was not localized"); }
-                catch (RobotNotFoundException) { logger.LogError("Failed to abort scheduled missions for robot {RobotId}", robot.Id); }
-                return;
-            }
-
-            if (!missionRun.IsLocalizationMission() && !await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.Area.Id))
+            if (!await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.InspectionArea.Id))
             {
                 logger.LogError("Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Aborting all mission runs", robot.Id, missionRun.Id);
                 try { await AbortAllScheduledMissions(robot.Id, "Aborted: Robot was at different deck"); }
@@ -130,7 +108,6 @@ namespace Api.Services
                 catch (ReturnToHomeMissionFailedToScheduleException)
                 {
                     logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
-                    await robotService.UpdateCurrentArea(robot.Id, null);
                 }
                 return;
             }
@@ -180,7 +157,6 @@ namespace Api.Services
             catch (ReturnToHomeMissionFailedToScheduleException)
             {
                 logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
-                await robotService.UpdateCurrentArea(robot.Id, null);
                 return null;
             }
             return missionRun;
@@ -280,15 +256,8 @@ namespace Api.Services
             }
         }
 
-        public async Task ScheduleMissionToDriveToDockPosition(string robotId, string areaId)
+        public async Task ScheduleMissionToDriveToDockPosition(string robotId, Deck? inspectionArea)
         {
-            var area = await areaService.ReadById(areaId, readOnly: true);
-            if (area == null)
-            {
-                logger.LogError("Could not find area with ID {AreaId}", areaId);
-                return;
-            }
-
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
             {
@@ -296,14 +265,19 @@ namespace Api.Services
                 return;
             }
 
-            if (robot.CurrentArea?.Deck.DefaultLocalizationPose == null)
+            var robotPose = new Pose();
+
+            if (inspectionArea != null)
             {
-                throw new DockException($"Robot with ID: {robotId} has no available Dock or localization poses in its current area");
+                if (robot.CurrentInspectionArea?.DefaultLocalizationPose == null)
+                {
+                    throw new DockException($"Robot with ID: {robotId} has no available Dock or localization poses in its current inspection area");
+                }
+                robotPose = robot.CurrentInspectionArea.DefaultLocalizationPose.Pose;
             }
-            var closestDockPosition = robot.CurrentArea.Deck.DefaultLocalizationPose.Pose;
 
             // Cloning to avoid tracking same object
-            var clonedPose = ObjectCopier.Clone(closestDockPosition);
+            var clonedPose = ObjectCopier.Clone(robotPose);
             var customTaskQuery = new CustomTaskQuery
             {
                 RobotPose = clonedPose,
@@ -315,15 +289,14 @@ namespace Api.Services
                 Name = "Drive to Docking Station",
                 Robot = robot,
                 MissionRunType = MissionRunType.Emergency,
-                InstallationCode = area.Installation.InstallationCode,
-                Area = area,
+                InstallationCode = robot.CurrentInstallation.InstallationCode,
+                InspectionArea = inspectionArea,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.UtcNow,
                 Tasks = new List<MissionTask>(
                 [
                     new MissionTask(customTaskQuery)
-                ]),
-                Map = new MapMetadata()
+                ])
             };
 
             try
@@ -346,11 +319,6 @@ namespace Api.Services
             OnRobotAvailable(e);
         }
 
-        public void TriggerLocalizationMissionSuccessful(LocalizationMissionSuccessfulEventArgs e)
-        {
-            OnLocalizationMissionSuccessful(e);
-        }
-
         private async Task<MissionRun?> SelectNextMissionRun(string robotId)
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
@@ -361,7 +329,7 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            var missionRun = await missionRunService.ReadNextScheduledLocalizationMissionRun(robot.Id, readOnly: true) ?? await missionRunService.ReadNextScheduledEmergencyMissionRun(robot.Id, readOnly: true);
+            var missionRun = await missionRunService.ReadNextScheduledEmergencyMissionRun(robot.Id, readOnly: true);
             if (robot.MissionQueueFrozen == false && missionRun == null) { missionRun = await missionRunService.ReadNextScheduledMissionRun(robot.Id, readOnly: true); }
             return missionRun;
         }
@@ -396,12 +364,11 @@ namespace Api.Services
                     Name = missionRun.Name,
                     Robot = missionRun.Robot,
                     MissionRunType = missionRun.MissionRunType,
-                    InstallationCode = missionRun.Area!.Installation.InstallationCode,
-                    Area = missionRun.Area,
+                    InstallationCode = missionRun.InspectionArea!.Installation.InstallationCode,
+                    InspectionArea = missionRun.InspectionArea,
                     Status = MissionStatus.Pending,
                     DesiredStartTime = DateTime.UtcNow,
-                    Tasks = unfinishedTasks,
-                    Map = new MapMetadata()
+                    Tasks = unfinishedTasks
                 };
 
                 try
@@ -522,7 +489,7 @@ namespace Api.Services
                 throw new MissionRunNotFoundException(errorMessage);
             }
 
-            if (robot.MissionQueueFrozen && missionRun.MissionRunType != MissionRunType.Emergency && missionRun.MissionRunType != MissionRunType.Localization)
+            if (robot.MissionQueueFrozen && missionRun.MissionRunType != MissionRunType.Emergency)
             {
                 logger.LogInformation("Mission run {MissionRunId} was not started as the mission run queue for robot {RobotName} is frozen", missionRun.Id, robot.Name);
                 return false;
@@ -541,11 +508,6 @@ namespace Api.Services
             if (robot.Deprecated)
             {
                 logger.LogWarning("Mission run {MissionRunId} was not started as the robot {RobotId} is deprecated", missionRun.Id, robot.Id);
-                return false;
-            }
-            if (await missionRunService.OngoingOrPausedLocalizationMissionRunExists(robot.Id))
-            {
-                logger.LogInformation("Mission run {MissionRunId} was not started as there is an ongoing localization mission", missionRun.Id);
                 return false;
             }
             return true;
@@ -571,16 +533,7 @@ namespace Api.Services
             catch (MissionRunNotFoundException) { return; }
         }
 
-        private static float CalculateDistance(Pose pose1, Pose pose2)
-        {
-            var pos1 = pose1.Position;
-            var pos2 = pose2.Position;
-            return (float)Math.Sqrt(Math.Pow(pos1.X - pos2.X, 2) + Math.Pow(pos1.Y - pos2.Y, 2) + Math.Pow(pos1.Z - pos2.Z, 2));
-        }
-
         protected virtual void OnRobotAvailable(RobotAvailableEventArgs e) { RobotAvailable?.Invoke(this, e); }
         public static event EventHandler<RobotAvailableEventArgs>? RobotAvailable;
-        protected virtual void OnLocalizationMissionSuccessful(LocalizationMissionSuccessfulEventArgs e) { LocalizationMissionSuccessful?.Invoke(this, e); }
-        public static event EventHandler<LocalizationMissionSuccessfulEventArgs>? LocalizationMissionSuccessful;
     }
 }

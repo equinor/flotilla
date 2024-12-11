@@ -18,7 +18,6 @@ namespace Api.Services
                 await robotService.UpdateRobotStatus(robotId, RobotStatus.Offline);
                 await robotService.UpdateCurrentMissionId(robotId, null);
                 await robotService.UpdateRobotIsarConnected(robotId, false);
-                await robotService.UpdateCurrentArea(robotId, null);
             }
             catch (RobotNotFoundException)
             {

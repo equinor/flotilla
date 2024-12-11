@@ -168,7 +168,13 @@ namespace Api.Services
                 .Include(area => area.DefaultLocalizationPose)
                 .Include(area => area.Deck)
                 .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
+                .Include(area => area.Deck)
+                .ThenInclude(deck => deck != null ? deck.Plant : null)
+                .ThenInclude(plant => plant != null ? plant.Installation : null)
+                .Include(area => area.Deck)
+                .ThenInclude(deck => deck != null ? deck.Installation : null)
                 .Include(area => area.Plant)
+                .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(area => area.Installation)
                 .Where((area) => accessibleInstallationCodes.Result.Contains(area.Installation.InstallationCode.ToUpper()));
             return readOnly ? query.AsNoTracking() : query.AsTracking();
