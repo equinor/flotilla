@@ -18,9 +18,6 @@
     public class MissionSourceTypeException(string message) : Exception(message)
     {
     }
-    public class OngoingMissionNotLocalizationException(string message) : Exception(message)
-    {
-    }
 
     public class SourceException(string message) : Exception(message)
     {
@@ -103,10 +100,6 @@
     }
 
     public class IsarCommunicationException(string message) : Exception(message)
-    {
-    }
-
-    public class LocalizationFailedException(string message) : Exception(message)
     {
     }
 

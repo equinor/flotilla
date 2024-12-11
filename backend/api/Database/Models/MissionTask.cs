@@ -88,7 +88,7 @@ namespace Api.Database.Models
                     Inspection = new Inspection();
                     break;
                 default:
-                    throw new MissionTaskNotFoundException("MissionTaskType should be Localization, ReturnHome or Inspection");
+                    throw new MissionTaskNotFoundException("MissionTaskType should be ReturnHome or Inspection");
             }
         }
 
@@ -169,7 +169,7 @@ namespace Api.Database.Models
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
             UpdateStatus(isarTask.TaskStatus);
-            if (isarTask.TaskType != IsarTaskType.ReturnToHome && isarTask.TaskType != IsarTaskType.Localize && isarTask.TaskType != IsarTaskType.MoveArm)
+            if (isarTask.TaskType != IsarTaskType.ReturnToHome && isarTask.TaskType != IsarTaskType.MoveArm)
             {
                 Inspection?.UpdateWithIsarInfo(isarTask);
             }

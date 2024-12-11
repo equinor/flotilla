@@ -54,7 +54,7 @@ namespace Api.Test.Mocks
 
         private readonly MissionDefinition _mockMissionDefinition = new()
         {
-            Area = new Area(),
+            InspectionArea = new Deck(),
             Comment = "",
             Id = "",
             InstallationCode = "TTT",

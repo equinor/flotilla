@@ -18,11 +18,11 @@ namespace Api.Services
             var query = readOnly ? context.MissionRuns.AsNoTracking() : context.MissionRuns.AsTracking();
 
 #pragma warning disable CA1304
-            return await query.Include(missionRun => missionRun.Area).ThenInclude(area => area != null ? area.Plant : null)
+            return await query.Include(missionRun => missionRun.InspectionArea).ThenInclude(area => area != null ? area.Plant : null)
                     .Include(missionRun => missionRun.Robot)
                     .Include(missionRun => missionRun.Tasks).ThenInclude(task => task.Inspection)
                     .Where(missionRun => missionRun.Tasks.Any(missionTask => missionTask.Inspection != null && missionTask.Inspection.Id == isarTaskId))
-                    .Where((m) => m.Area == null || accessibleInstallationCodes.Result.Contains(m.Area.Installation.InstallationCode.ToUpper()))
+                    .Where((m) => m.InspectionArea == null || accessibleInstallationCodes.Result.Contains(m.InspectionArea.Installation.InstallationCode.ToUpper()))
                     .FirstOrDefaultAsync();
 #pragma warning restore CA1304
         }

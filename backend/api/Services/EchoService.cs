@@ -144,7 +144,7 @@ namespace Api.Services
                 Source = source,
                 Name = echoMission.Name,
                 InstallationCode = echoMission.InstallationCode,
-                Area = area
+                InspectionArea = area.Deck
             };
             return missionDefinition;
         }

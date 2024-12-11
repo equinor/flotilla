@@ -277,7 +277,6 @@ namespace Api.Test.Client
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
 
             string testMissionName = "testMissionScheduleDuplicateCustomMissionDefinitions";
 
@@ -290,7 +289,7 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                AreaName = area.Name,
+                InspectionAreaName = deck.Name,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
@@ -353,7 +352,6 @@ namespace Api.Test.Client
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
 
             // Arrange - Robot
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
@@ -365,7 +363,7 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                AreaName = area.Name,
+                InspectionAreaName = deck.Name,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
@@ -512,7 +510,6 @@ namespace Api.Test.Client
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
 
             string testMissionName = "testMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission";
 
@@ -529,7 +526,7 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                AreaName = area.Name,
+                InspectionAreaName = deck.Name,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
@@ -577,18 +574,14 @@ namespace Api.Test.Client
 
             string deckName1 = "deckMissionFailsIfRobotIsNotInSameDeckAsMission1";
             var deck1 = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode, deckName1);
-            string areaName1 = "areaMissionFailsIfRobotIsNotInSameDeckAsMission1";
-            var area1 = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck1.Name, areaName1);
 
             string deckName2 = "deckMissionFailsIfRobotIsNotInSameDeckAsMission2";
             var deck2 = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode, deckName2);
-            string areaName2 = "areaMissionFailsIfRobotIsNotInSameDeckAsMission2";
-            var area2 = await _databaseUtilities.NewArea(installation.InstallationCode, plant.PlantCode, deck2.Name, areaName2);
 
             string testMissionName = "testMissionFailsIfRobotIsNotInSameDeckAsMission";
 
             // Arrange - Robot
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, area1);
+            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, deck1);
             string robotId = robot.Id;
 
             // Arrange - Mission Run Query
@@ -596,7 +589,7 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                AreaName = area2.Name,
+                InspectionAreaName = deck2.Name,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,

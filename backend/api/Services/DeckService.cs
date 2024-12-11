@@ -15,7 +15,7 @@ namespace Api.Services
 
         public Task<IEnumerable<Deck>> ReadByInstallation(string installationCode, bool readOnly = true);
 
-        public Task<Deck?> ReadByName(string deckName, bool readOnly = true);
+        public Task<Deck?> ReadByInstallationAndName(string installationCode, string deckName, bool readOnly = true);
 
         public Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string deckName, bool readOnly = true);
 
@@ -65,11 +65,11 @@ namespace Api.Services
                 a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
         }
 
-        public async Task<Deck?> ReadByName(string deckName, bool readOnly = true)
+        public async Task<Deck?> ReadByInstallationAndName(string installationCode, string deckName, bool readOnly = true)
         {
             if (deckName == null) { return null; }
             return await GetDecks(readOnly: readOnly).Where(a =>
-                a.Name.ToLower().Equals(deckName.ToLower())
+                a.Installation != null && a.Installation.InstallationCode.Equals(installationCode) && a.Name.ToLower().Equals(deckName.ToLower())
             ).FirstOrDefaultAsync();
         }
 

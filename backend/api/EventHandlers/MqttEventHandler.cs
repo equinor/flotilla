@@ -89,15 +89,13 @@ namespace Api.EventHandlers
 
             if (robot.Status == isarStatus.Status) { return; }
 
-            if (await MissionRunService.OngoingOrPausedLocalizationMissionRunExists(robot.Id)) Thread.Sleep(5000); // Give localization mission update time to complete
-
             var preUpdatedRobot = await RobotService.ReadByIsarId(isarStatus.IsarId, readOnly: true);
             if (preUpdatedRobot == null)
             {
                 _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", isarStatus.IsarId, isarStatus.RobotName);
                 return;
             }
-            _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current area {areaName}", preUpdatedRobot.Name, preUpdatedRobot.Status, preUpdatedRobot.CurrentArea?.Name);
+            _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current inspection area {areaName}", preUpdatedRobot.Name, preUpdatedRobot.Status, preUpdatedRobot.CurrentInspectionArea?.Name);
 
             _updateRobotSemaphore.WaitOne();
             _logger.LogDebug("Semaphore acquired for updating robot status");
@@ -110,7 +108,7 @@ namespace Api.EventHandlers
             _logger.LogInformation("Updated status for robot {Name} to {Status}", updatedRobot.Name, updatedRobot.Status);
 
 
-            _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current area {areaName}", updatedRobot.Name, updatedRobot.Status, updatedRobot.CurrentArea?.Name);
+            _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current inspection area {areaName}", updatedRobot.Name, updatedRobot.Status, updatedRobot.CurrentInspectionArea?.Name);
 
             if (isarStatus.Status == RobotStatus.Available)
             {
@@ -132,10 +130,6 @@ namespace Api.EventHandlers
                     _logger.LogDebug("Semaphore released after updating robot current mission id");
                 }
                 MissionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
-            }
-            else if (isarStatus.Status == RobotStatus.Offline)
-            {
-                await RobotService.UpdateCurrentArea(robot.Id, null);
             }
         }
 
@@ -273,57 +267,6 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (flotillaMissionRun.IsLocalizationMission())
-            {
-                if (flotillaMissionRun.Tasks.Any((task) => task.Status == Database.Models.TaskStatus.Successful || task.Status == Database.Models.TaskStatus.PartiallySuccessful))
-                {
-                    try
-                    {
-                        _updateRobotSemaphore.WaitOne();
-                        _logger.LogDebug("Semaphore acquired for updating robot current area for localization mission successful");
-
-                        var robotWithUpdatedArea = await RobotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, flotillaMissionRun.Area.Id);
-                    }
-                    catch (RobotNotFoundException)
-                    {
-                        _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", flotillaMissionRun.Robot.Name, flotillaMissionRun.Robot.Id);
-                        return;
-                    }
-                    finally
-                    {
-                        _updateRobotSemaphore.Release();
-                        _logger.LogDebug("Semaphore released after updating robot current area for localization mission successful");
-                    }
-                }
-                else if (flotillaMissionRun.Tasks.All((task) => task.Status == Database.Models.TaskStatus.Cancelled || task.Status == Database.Models.TaskStatus.Failed) || flotillaMissionRun.Status == MissionStatus.Aborted)
-                {
-                    try
-                    {
-                        _updateRobotSemaphore.WaitOne();
-                        _logger.LogDebug("Semaphore acquired for updating robot current area for localization mission unsuccessful");
-
-                        await RobotService.UpdateCurrentArea(flotillaMissionRun.Robot.Id, null);
-
-                        _logger.LogError("Localization mission run {MissionRunId} was unsuccessful on {RobotId}, scheduled missions will be aborted", flotillaMissionRun.Id, flotillaMissionRun.Robot.Id);
-                        try { await MissionScheduling.AbortAllScheduledMissions(flotillaMissionRun.Robot.Id, "Aborted: Robot was not localized"); }
-                        catch (RobotNotFoundException) { _logger.LogError("Failed to abort scheduled missions for robot {RobotId}", flotillaMissionRun.Robot.Id); }
-                    }
-                    catch (RobotNotFoundException)
-                    {
-                        _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", flotillaMissionRun.Robot.Name, flotillaMissionRun.Robot.Id);
-                        return;
-                    }
-                    finally
-                    {
-                        _updateRobotSemaphore.Release();
-                        _logger.LogDebug("Semaphore released after updating robot current area for localization mission unsuccessful");
-                    }
-
-                    SignalRService.ReportGeneralFailToSignalR(flotillaMissionRun.Robot, "Failed Localization Mission", $"Failed localization mission for robot {flotillaMissionRun.Robot.Name}.");
-                    _logger.LogError("Localization mission for robot '{RobotName}' failed.", isarMission.RobotName);
-                }
-            }
-
             if (flotillaMissionRun.Status == status) { return; }
             if (flotillaMissionRun.Status == MissionStatus.Aborted && status == MissionStatus.Cancelled) { status = MissionStatus.Aborted; }
 
@@ -345,34 +288,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (updatedFlotillaMissionRun.IsReturnHomeMission() && (updatedFlotillaMissionRun.Status == MissionStatus.Cancelled || updatedFlotillaMissionRun.Status == MissionStatus.Failed))
-            {
-                try
-                {
-                    _updateRobotSemaphore.WaitOne();
-                    _logger.LogDebug("Semaphore acquired for updating robot current area");
-
-                    await RobotService.UpdateCurrentArea(robot.Id, null);
-                }
-                catch (RobotNotFoundException)
-                {
-                    _logger.LogError("Could not find robot '{RobotName}' with ID '{Id}'", robot.Name, robot.Id);
-                    return;
-                }
-                finally
-                {
-                    _updateRobotSemaphore.Release();
-                    _logger.LogDebug("Semaphore released after updating robot current area");
-                }
-            }
-
             _logger.LogInformation("Robot '{Id}' ('{Name}') - completed mission run {MissionRunId}", robot.IsarId, robot.Name, updatedFlotillaMissionRun.Id);
-
-            if (updatedFlotillaMissionRun.IsLocalizationMission() && (updatedFlotillaMissionRun.Status == MissionStatus.Successful || updatedFlotillaMissionRun.Status == MissionStatus.PartiallySuccessful))
-            {
-                _logger.LogInformation("Triggering localization mission successful. The robot {robotName} have status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentArea?.Name);
-                MissionScheduling.TriggerLocalizationMissionSuccessful(new LocalizationMissionSuccessfulEventArgs(robot.Id));
-            }
 
             if (updatedFlotillaMissionRun.MissionId == null)
             {
@@ -417,7 +333,7 @@ namespace Api.EventHandlers
                 _logger.LogWarning("Mission run with ID {Id} was not found", task.MissionId);
             }
 
-            _ = SignalRService.SendMessageAsync("Mission run updated", missionRun?.Area?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
+            _ = SignalRService.SendMessageAsync("Mission run updated", missionRun?.InspectionArea?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
 
             _logger.LogInformation(
                 "Task '{Id}' updated to '{Status}' for robot '{RobotName}' with ISAR id '{IsarId}'", task.TaskId, task.Status, task.RobotName, task.IsarId);

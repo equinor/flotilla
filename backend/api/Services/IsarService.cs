@@ -21,15 +21,22 @@ namespace Api.Services
         public Task<MediaConfig> GetMediaStreamConfig(Robot robot);
     }
 
-    public class IsarService(IDownstreamApi isarApi, ILogger<IsarService> logger) : IIsarService
+    public class IsarService(IDownstreamApi isarApi, IMissionDefinitionService missionDefinitionService, ILogger<IsarService> logger) : IIsarService
     {
         public const string ServiceName = "IsarApi";
 
         public async Task<IsarMission> StartMission(Robot robot, MissionRun missionRun)
         {
-            var missionDefinition = new
+            string? mapName = null;
+            if (missionRun.MissionId != null)
             {
-                mission_definition = new IsarMissionDefinition(missionRun, includeStartPose: missionRun.MissionRunType == MissionRunType.Localization)
+                var missionDefinition = await missionDefinitionService.ReadById(missionRun.MissionId);
+                mapName = missionDefinition?.Map?.MapName;
+            }
+
+            var isarMissionDefinition = new
+            {
+                mission_definition = new IsarMissionDefinition(missionRun, mapName: mapName, includeStartPose: true)
             };
 
             HttpResponseMessage? response;
@@ -39,7 +46,7 @@ namespace Api.Services
                     HttpMethod.Post,
                     robot.IsarUri,
                     "schedule/start-mission",
-                    missionDefinition
+                    isarMissionDefinition
                 );
             }
             catch (Exception e)

@@ -29,7 +29,9 @@ namespace Api.Database.Models
         public virtual MissionRun? LastSuccessfulRun { get; set; }
 
         [Required]
-        public Area Area { get; set; }
+        public Deck InspectionArea { get; set; }
+
+        public MapMetadata? Map { get; set; }
 
         public bool IsDeprecated { get; set; }
     }

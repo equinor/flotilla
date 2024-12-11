@@ -5,11 +5,10 @@ namespace Api.Services
     public interface ILocalizationService
     {
         public Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition);
-        public Task<bool> RobotIsLocalized(string robotId);
-        public Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId);
+        public Task<bool> RobotIsOnSameDeckAsMission(string robotId, string inspectionAreaId);
     }
 
-    public class LocalizationService(ILogger<LocalizationService> logger, IRobotService robotService, IInstallationService installationService, IAreaService areaService) : ILocalizationService
+    public class LocalizationService(ILogger<LocalizationService> logger, IRobotService robotService, IInstallationService installationService, IDeckService deckService) : ILocalizationService
     {
 
         public async Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition)
@@ -31,21 +30,7 @@ namespace Api.Services
             }
         }
 
-        public async Task<bool> RobotIsLocalized(string robotId)
-        {
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot is null)
-            {
-                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            if (robot.RobotCapabilities is not null && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_localize)) { return true; }
-            return robot.CurrentArea is not null;
-        }
-
-        public async Task<bool> RobotIsOnSameDeckAsMission(string robotId, string areaId)
+        public async Task<bool> RobotIsOnSameDeckAsMission(string robotId, string inspectionAreaId)
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot is null)
@@ -57,35 +42,29 @@ namespace Api.Services
 
             if (robot.RobotCapabilities is not null && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_localize)) { return true; }
 
-            if (robot.CurrentArea is null)
+            if (robot.CurrentInspectionArea is null)
             {
-                const string ErrorMessage = "The robot is not associated with an area and a mission may not be started";
+                const string ErrorMessage = "The robot is not associated with an inspection area and a mission may not be started";
                 logger.LogError("{Message}", ErrorMessage);
                 throw new RobotCurrentAreaMissingException(ErrorMessage);
             }
 
-            var missionArea = await areaService.ReadById(areaId, readOnly: true);
-            if (missionArea is null)
+            var missionInspectionArea = await deckService.ReadById(inspectionAreaId, readOnly: true);
+            if (missionInspectionArea is null)
             {
-                const string ErrorMessage = "The robot is not located on the same deck as the mission as the area has not been set";
+                const string ErrorMessage = "The mission does not have an associated inspection area";
                 logger.LogError("{Message}", ErrorMessage);
-                throw new AreaNotFoundException(ErrorMessage);
+                throw new DeckNotFoundException(ErrorMessage);
             }
 
-            if (robot.CurrentArea?.Deck is null)
+            if (robot.CurrentInspectionArea is null)
             {
                 const string ErrorMessage = "The robot area is not associated with any deck";
                 logger.LogError("{Message}", ErrorMessage);
                 throw new DeckNotFoundException(ErrorMessage);
             }
-            if (missionArea.Deck is null)
-            {
-                const string ErrorMessage = "The mission area is not associated with any deck";
-                logger.LogError("{Message}", ErrorMessage);
-                throw new DeckNotFoundException(ErrorMessage);
-            }
 
-            return robot.CurrentArea.Deck.Id == missionArea.Deck.Id;
+            return robot.CurrentInspectionArea.Id == missionInspectionArea.Id;
         }
     }
 }

@@ -38,7 +38,7 @@ namespace Api.Controllers.Models
 
         public TimeSpan? InspectionFrequency { get; set; }
 
-        public string? AreaName { get; set; }
+        public string? InspectionAreaName { get; set; }
 
         public string Name { get; set; }
 

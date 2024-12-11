@@ -41,15 +41,15 @@ namespace Api.Test.Database
             _areaService = new AreaService(context, _installationService, _plantService, _deckService, defaultLocalizationPoseService, _accessRoleService);
             _userInfoService = new UserInfoService(context, new HttpContextAccessor(), new Mock<ILogger<UserInfoService>>().Object);
             _robotModelService = new RobotModelService(context);
-            _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _areaService);
-            _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService, _missionTaskService, _areaService, _robotService, _userInfoService);
+            _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _deckService);
+            _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService, _missionTaskService, _deckService, _robotService, _userInfoService);
             _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
         }
 
         public async Task<MissionRun> NewMissionRun(
             string installationCode,
             Robot robot,
-            Area area,
+            Deck inspectionArea,
             bool writeToDatabase = false,
             MissionRunType missionRunType = MissionRunType.Normal,
             MissionStatus missionStatus = MissionStatus.Pending,
@@ -67,20 +67,12 @@ namespace Api.Test.Database
                 MissionRunType = missionRunType,
                 Status = missionStatus,
                 DesiredStartTime = DateTime.Now,
-                Area = area,
+                InspectionArea = inspectionArea,
                 Tasks = [],
-                Map = new MapMetadata(),
                 InstallationCode = installationCode
             };
-            if (missionRunType == MissionRunType.Localization)
-            {
-                missionRun.Tasks =
-                [
-                    new(new Pose(), MissionTaskType.Localization)
-                ];
-                missionRun.Tasks[0].Status = taskStatus;
-            }
-            else if (missionRunType == MissionRunType.ReturnHome)
+
+            if (missionRunType == MissionRunType.ReturnHome)
             {
                 missionRun.Tasks =
                 [
@@ -138,7 +130,7 @@ namespace Api.Test.Database
 
         public async Task<Deck> ReadOrNewDeck(string installationCode, string plantCode)
         {
-            if (await _deckService.ReadByName(_testDeckName) is Deck deck) return deck;
+            if (await _deckService.ReadByInstallationAndName(installationCode, _testDeckName) is Deck deck) return deck;
             return await NewDeck(installationCode, plantCode);
         }
 
@@ -180,7 +172,7 @@ namespace Api.Test.Database
             return await _areaService.Create(createAreaQuery);
         }
 
-        public async Task<Robot> NewRobot(RobotStatus status, Installation installation, Area? area = null)
+        public async Task<Robot> NewRobot(RobotStatus status, Installation installation, Deck? inspectionArea = null)
         {
             var createRobotQuery = new CreateRobotQuery
             {
@@ -189,7 +181,7 @@ namespace Api.Test.Database
                 RobotType = RobotType.Robot,
                 SerialNumber = "0001",
                 CurrentInstallationCode = installation.InstallationCode,
-                CurrentAreaName = area?.Name,
+                CurrentInspectionAreaName = inspectionArea?.Name,
                 Documentation = [],
                 Host = "localhost",
                 Port = 3000,
@@ -198,7 +190,7 @@ namespace Api.Test.Database
             };
 
             var robotModel = await _robotModelService.ReadByRobotType(createRobotQuery.RobotType, readOnly: true);
-            var robot = new Robot(createRobotQuery, installation, robotModel!, area);
+            var robot = new Robot(createRobotQuery, installation, robotModel!, inspectionArea);
             return await _robotService.Create(robot);
         }
 

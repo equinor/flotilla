@@ -22,7 +22,6 @@ namespace Api.Test.Services
         private readonly IAccessRoleService _accessRoleService;
         private readonly UserInfoService _userInfoService;
         private readonly IMissionTaskService _missionTaskService;
-        private readonly IAreaService _areaService;
         private readonly IDeckService _deckService;
         private readonly IInstallationService _installationService;
         private readonly IPlantService _plantService;
@@ -41,10 +40,9 @@ namespace Api.Test.Services
             _installationService = new InstallationService(_context, _accessRoleService);
             _plantService = new PlantService(_context, _installationService, _accessRoleService);
             _deckService = new DeckService(_context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, new MockSignalRService());
-            _areaService = new AreaService(_context, _installationService, _plantService, _deckService, defaultLocalizationPoseService, _accessRoleService);
             _robotModelService = new RobotModelService(_context);
-            _robotService = new RobotService(_context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _areaService);
-            _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService, _missionTaskService, _areaService, _robotService, _userInfoService);
+            _robotService = new RobotService(_context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _deckService);
+            _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService, _missionTaskService, _deckService, _robotService, _userInfoService);
             _databaseUtilities = new DatabaseUtilities(_context);
         }
 
@@ -73,9 +71,8 @@ namespace Api.Test.Services
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
-            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, area);
+            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck);
 
             await _missionRunService.Create(missionRun);
 

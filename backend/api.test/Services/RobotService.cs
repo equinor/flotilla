@@ -53,7 +53,7 @@ namespace Api.Test.Services
         {
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var _ = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _deckService);
             var robots = await robotService.ReadAll();
 
             Assert.True(robots.Any());
@@ -62,7 +62,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task Read()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _deckService);
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
             var robotById = await robotService.ReadById(robot.Id, readOnly: false);
@@ -73,7 +73,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _deckService);
             var robot = await robotService.ReadById("some_id_that_does_not_exist", readOnly: true);
             Assert.Null(robot);
         }
@@ -81,7 +81,7 @@ namespace Api.Test.Services
         [Fact]
         public async Task Create()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _areaService);
+            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _deckService);
             var installationService = new InstallationService(_context, _accessRoleService);
 
             var installation = await installationService.Create(new CreateInstallationQuery

@@ -31,13 +31,13 @@ namespace Api.Services.Models
             Tasks = tasks;
         }
 
-        public IsarMissionDefinition(MissionRun missionRun, bool includeStartPose = false)
+        public IsarMissionDefinition(MissionRun missionRun, bool includeStartPose = false, string? mapName = null)
         {
             Name = missionRun.Name;
-            Tasks = missionRun.Tasks.Select(task => new IsarTaskDefinition(task, missionRun)).ToList();
-            StartPose = includeStartPose && missionRun.Area.Deck.DefaultLocalizationPose != null ? new IsarPose(missionRun.Area.Deck.DefaultLocalizationPose.Pose) : null;
-            Undock = includeStartPose && missionRun.Area.Deck.DefaultLocalizationPose != null && missionRun.Area.Deck.DefaultLocalizationPose.DockingEnabled;
-            Dock = missionRun.Area.Deck.DefaultLocalizationPose != null && missionRun.Area.Deck.DefaultLocalizationPose.DockingEnabled && missionRun.IsReturnHomeMission();
+            Tasks = missionRun.Tasks.Select(task => new IsarTaskDefinition(task, missionRun, mapName)).ToList();
+            StartPose = includeStartPose && missionRun.InspectionArea.DefaultLocalizationPose != null ? new IsarPose(missionRun.InspectionArea.DefaultLocalizationPose.Pose) : null;
+            Undock = includeStartPose && missionRun.InspectionArea.DefaultLocalizationPose != null && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled;
+            Dock = missionRun.InspectionArea.DefaultLocalizationPose != null && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled && missionRun.IsReturnHomeMission();
         }
     }
 
@@ -61,7 +61,7 @@ namespace Api.Services.Models
         [JsonPropertyName("zoom")]
         public IsarZoomDescription? Zoom { get; set; }
 
-        public IsarTaskDefinition(MissionTask missionTask, MissionRun missionRun)
+        public IsarTaskDefinition(MissionTask missionTask, MissionRun missionRun, string? mapName = null)
         {
             Id = missionTask.IsarTaskId;
             Type = MissionTask.ConvertMissionTaskTypeToIsarTaskType(missionTask.Type);
@@ -69,7 +69,7 @@ namespace Api.Services.Models
             Tag = missionTask.TagId;
             Zoom = missionTask.IsarZoomDescription;
 
-            if (missionTask.Inspection != null) Inspection = new IsarInspectionDefinition(missionTask.Inspection, missionRun);
+            if (missionTask.Inspection != null) Inspection = new IsarInspectionDefinition(missionTask.Inspection, missionRun, mapName);
         }
     }
 
@@ -87,7 +87,7 @@ namespace Api.Services.Models
         [JsonPropertyName("metadata")]
         public Dictionary<string, string?>? Metadata { get; set; }
 
-        public IsarInspectionDefinition(Inspection inspection, MissionRun missionRun)
+        public IsarInspectionDefinition(Inspection inspection, MissionRun missionRun, string? mapName = null)
         {
             Type = inspection.InspectionType.ToString();
             InspectionTarget = inspection.InspectionTarget != null ? new IsarPosition(
@@ -99,7 +99,7 @@ namespace Api.Services.Models
             Duration = inspection.VideoDuration;
             Metadata = new Dictionary<string, string?>
             {
-                { "map", missionRun.Map?.MapName },
+                { "map", mapName },
                 { "description", missionRun.Description },
                 { "estimated_duration", missionRun.EstimatedDuration?.ToString("D", CultureInfo.InvariantCulture) },
                 { "asset_code", missionRun.InstallationCode },

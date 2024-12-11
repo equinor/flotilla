@@ -25,14 +25,17 @@ namespace Api.Controllers.Models
         [JsonPropertyName("lastSuccessfulRun")]
         public virtual MissionRun? LastSuccessfulRun { get; set; }
 
-        [JsonPropertyName("area")]
-        public AreaResponse? Area { get; set; }
+        [JsonPropertyName("inspectionArea")]
+        public DeckResponse? InspectionArea { get; set; }
 
         [JsonPropertyName("isDeprecated")]
         public bool IsDeprecated { get; set; }
 
         [JsonPropertyName("sourceId")]
         public string SourceId { get; set; } = string.Empty;
+
+        [JsonPropertyName("map")]
+        public MapMetadata? Map { get; set; }
 
         [JsonConstructor]
         public MissionDefinitionResponse() { }
@@ -44,10 +47,11 @@ namespace Api.Controllers.Models
             InstallationCode = missionDefinition.InstallationCode;
             Comment = missionDefinition.Comment;
             InspectionFrequency = missionDefinition.InspectionFrequency;
-            Area = missionDefinition.Area != null ? new AreaResponse(missionDefinition.Area) : null;
+            InspectionArea = missionDefinition.InspectionArea != null ? new DeckResponse(missionDefinition.InspectionArea) : null;
             LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
             IsDeprecated = missionDefinition.IsDeprecated;
             SourceId = missionDefinition.Source.SourceId;
+            Map = missionDefinition.Map;
         }
     }
 
@@ -74,10 +78,13 @@ namespace Api.Controllers.Models
         [JsonPropertyName("lastSuccessfulRun")]
         public virtual MissionRun? LastSuccessfulRun { get; } = missionDefinition.LastSuccessfulRun;
 
-        [JsonPropertyName("area")]
-        public Area? Area { get; } = missionDefinition.Area;
+        [JsonPropertyName("inspectionArea")]
+        public Deck? InspectionArea { get; } = missionDefinition.InspectionArea;
 
         [JsonPropertyName("isDeprecated")]
         public bool IsDeprecated { get; } = missionDefinition.IsDeprecated;
+
+        [JsonPropertyName("map")]
+        public MapMetadata? Map { get; } = missionDefinition.Map;
     }
 }

@@ -121,7 +121,7 @@ namespace Api.Controllers
                 if (deck == null)
                     return NotFound($"Could not find deck with id {deckId}");
 
-                var missionDefinitions = await missionDefinitionService.ReadByDeckId(deck.Id, readOnly: true);
+                var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(deck.Id, readOnly: true);
                 var missionDefinitionResponses = missionDefinitions.FindAll(m => !m.IsDeprecated).Select(m => new MissionDefinitionResponse(m));
                 return Ok(missionDefinitionResponses);
             }

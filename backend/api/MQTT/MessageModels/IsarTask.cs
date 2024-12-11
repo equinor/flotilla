@@ -37,7 +37,6 @@ namespace Api.Mqtt.MessageModels
                 "take_video" => MissionTaskType.Inspection,
                 "take_thermal_image" => MissionTaskType.Inspection,
                 "take_thermal_video" => MissionTaskType.Inspection,
-                "localize" => MissionTaskType.Localization,
                 "return_to_home" => MissionTaskType.ReturnHome,
 
                 _ => throw new ArgumentException($"ISAR Task type '{isarTaskType}' not supported")

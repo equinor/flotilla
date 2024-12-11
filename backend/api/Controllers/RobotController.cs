@@ -218,14 +218,14 @@ namespace Api.Controllers
                 Robot updatedRobot;
                 switch (fieldName)
                 {
-                    case "areaId":
+                    case "currentInspectionAreaId":
                         if (query.AreaId == null)
-                            updatedRobot = await robotService.UpdateCurrentArea(id, null);
+                            updatedRobot = await robotService.UpdateCurrentInspectionArea(id, null);
                         else
                         {
                             var area = await areaService.ReadById(query.AreaId, readOnly: true);
                             if (area == null) return NotFound($"No area with ID {query.AreaId} was found");
-                            updatedRobot = await robotService.UpdateCurrentArea(id, area.Id);
+                            updatedRobot = await robotService.UpdateCurrentInspectionArea(id, area.Id);
                         }
                         break;
                     case "pose":
@@ -658,14 +658,6 @@ namespace Api.Controllers
                 string errorMessage = "Error in ISAR while stopping current mission";
                 logger.LogError(ex, "{Message}", errorMessage);
                 return Conflict(errorMessage);
-            }
-
-            try { await robotService.UpdateCurrentArea(robot.Id, null); }
-            catch (RobotNotFoundException)
-            {
-                string errorMessage = $"Failed to set current area to null for robot with id {robotId} because the robot was not found";
-                logger.LogWarning("{Message}", errorMessage);
-                return NotFound(errorMessage);
             }
 
             return NoContent();

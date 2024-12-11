@@ -104,7 +104,7 @@ namespace Api.Test.Client
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallationCode = installation.InstallationCode,
-                CurrentAreaName = wrongArea.Name,
+                CurrentInspectionAreaName = wrongDeck.Name,
             };
 
             string robotUrl = "/robots";
@@ -120,7 +120,7 @@ namespace Api.Test.Client
             }
             catch (DbUpdateException ex)
             {
-                Assert.True(ex.Message == $"Could not create new robot in database as area '{wrongArea.Name}' does not exist in installation {installation.InstallationCode}");
+                Assert.True(ex.Message == $"Could not create new robot in database as inspection area '{wrongDeck.Name}' does not exist in installation {installation.InstallationCode}");
             }
         }
     }

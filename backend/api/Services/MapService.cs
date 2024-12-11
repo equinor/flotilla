@@ -10,7 +10,7 @@ namespace Api.Services
     {
         public Task<byte[]> FetchMapImage(string mapName, string installationCode);
         public Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string installationCode);
-        public Task AssignMapToMission(MissionRun mission);
+        public Task<MapMetadata?> ChooseMapFromMissionRunTasks(MissionRun mission);
     }
 
     public class MapService(ILogger<MapService> logger,
@@ -57,7 +57,7 @@ namespace Api.Services
             return map;
         }
 
-        public async Task AssignMapToMission(MissionRun missionRun)
+        public async Task<MapMetadata?> ChooseMapFromMissionRunTasks(MissionRun missionRun)
         {
             MapMetadata? mapMetadata;
             var positions = new List<Position>();
@@ -81,16 +81,16 @@ namespace Api.Services
             catch (ArgumentOutOfRangeException)
             {
                 logger.LogWarning("Unable to find a map for mission '{missionId}'", missionRun.Id);
-                return;
+                return null;
             }
 
             if (mapMetadata == null)
             {
-                return;
+                return null;
             }
 
-            missionRun.Map = mapMetadata;
             logger.LogInformation("Assigned map {map} to mission {mission}", mapMetadata.MapName, missionRun.Name);
+            return mapMetadata;
         }
 
         private Boundary ExtractMapMetadata(BlobItem map)

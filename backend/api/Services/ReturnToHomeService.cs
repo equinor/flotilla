@@ -8,22 +8,16 @@ namespace Api.Services
         public Task<MissionRun?> GetActiveReturnToHomeMissionRun(string robotId, bool readOnly = true);
     }
 
-    public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService, IMapService mapService) : IReturnToHomeService
+    public class ReturnToHomeService(ILogger<ReturnToHomeService> logger, IRobotService robotService, IMissionRunService missionRunService) : IReturnToHomeService
     {
         public async Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(string robotId)
         {
             logger.LogInformation("Scheduling return to home mission if not already scheduled or the robot is home for robot {RobotId}", robotId);
+            var lastMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robotId);
 
-            if (await IsReturnToHomeMissionAlreadyScheduled(robotId))
+            if (await IsReturnToHomeMissionAlreadyScheduled(robotId) || (lastMissionRun != null && lastMissionRun.IsReturnHomeMission()))
             {
                 logger.LogInformation("ReturnToHomeMission is already scheduled for Robot {RobotId}", robotId);
-                return null;
-            }
-
-            if (await IsRobotHome(robotId))
-            {
-                logger.LogInformation("Robot {RobotId} is home, setting current area to null", robotId);
-                await robotService.UpdateCurrentArea(robotId, null);
                 return null;
             }
 
@@ -37,21 +31,12 @@ namespace Api.Services
 
             return missionRun;
         }
-        private async Task<bool> IsRobotHome(string robotId)
-        {
-            var lastExecutedMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robotId, readOnly: true);
-            if (lastExecutedMissionRun is null)
-            {
-                logger.LogInformation("Could not find last executed mission run for robot {RobotId}, can not guarantee that the robot is in its home", robotId);
-                return false;
-            }
 
-            return lastExecutedMissionRun.IsReturnHomeMission();
-        }
         private async Task<bool> IsReturnToHomeMissionAlreadyScheduled(string robotId)
         {
             return await missionRunService.PendingOrOngoingReturnToHomeMissionRunExists(robotId);
         }
+
         private async Task<MissionRun> ScheduleReturnToHomeMissionRun(string robotId)
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
@@ -62,67 +47,17 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
             Pose? return_to_home_pose;
-            Area? currentArea;
+            Deck? currentInspectionArea;
             if (robot.RobotCapabilities is not null && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_return_to_home))
             {
                 var previousMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robot.Id, readOnly: true);
-                if (previousMissionRun is null)
-                {
-                    string errorMessage = $"Unable to schedule a return to home mission as the robot {robot.Id} has no previous mission run";
-                    logger.LogError("{Message}", errorMessage);
-                    throw new MissionRunNotFoundException(errorMessage);
-                }
-
-                if (previousMissionRun.Area.Deck is null)
-                {
-                    string errorMessage = $"Unable to schedule a return to home mission as the area {previousMissionRun.Area.Id} for robot {robot.Id} is not linked to a deck";
-                    logger.LogError("{Message}", errorMessage);
-                    throw new DeckNotFoundException(errorMessage);
-                }
-
-                if (previousMissionRun.Area.Deck.DefaultLocalizationPose is null)
-                {
-                    logger.LogError(
-                        "Unable to schedule a return to home mission as the current area {AreaId} for robot {RobotId} is linked to the deck {DeckId} which has no default pose",
-                        previousMissionRun.Area.Id, robot.Id, previousMissionRun.Area.Deck.Id);
-                    string errorMessage =
-                        $"Unable to schedule a return to home mission as the current area {previousMissionRun.Area.Id} for robot {robot.Id} "
-                        + $"is linked to the deck {previousMissionRun.Area.Deck.Id} which has no default pose";
-                    logger.LogError("{Message}", errorMessage);
-                    throw new PoseNotFoundException(errorMessage);
-                }
-                currentArea = previousMissionRun.Area;
-                return_to_home_pose = new Pose(previousMissionRun.Area.Deck.DefaultLocalizationPose.Pose);
+                currentInspectionArea = previousMissionRun?.InspectionArea;
+                return_to_home_pose = previousMissionRun?.InspectionArea?.DefaultLocalizationPose?.Pose == null ? new Pose() : new Pose(previousMissionRun.InspectionArea.DefaultLocalizationPose.Pose);
             }
             else
             {
-                if (robot.CurrentArea is null)
-                {
-                    string errorMessage = $"Unable to schedule a return to home mission as the robot {robot.Id} is not localized.";
-                    logger.LogError("{Message}", errorMessage);
-                    throw new AreaNotFoundException(errorMessage);
-                }
-
-                if (robot.CurrentArea.Deck is null)
-                {
-                    string errorMessage = $"Unable to schedule a return to home mission as the current area {robot.CurrentArea.Id} for robot {robot.Id} is not linked to a deck";
-                    logger.LogError("{Message}", errorMessage);
-                    throw new DeckNotFoundException(errorMessage);
-                }
-
-                if (robot.CurrentArea.Deck.DefaultLocalizationPose is null)
-                {
-                    logger.LogError(
-                        "Unable to schedule a return to home mission as the current area {AreaId} for robot {RobotId} is linked to the deck {DeckId} which has no default pose",
-                        robot.CurrentArea.Id, robot.Id, robot.CurrentArea.Deck.Id);
-                    string errorMessage =
-                        $"Unable to schedule a return to home mission as the current area {robot.CurrentArea.Id} for robot {robot.Id} "
-                        + $"is linked to the deck {robot.CurrentArea.Deck.Id} which has no default pose";
-                    logger.LogError("{Message}", errorMessage);
-                    throw new PoseNotFoundException(errorMessage);
-                }
-                currentArea = robot.CurrentArea;
-                return_to_home_pose = new Pose(robot.CurrentArea.Deck.DefaultLocalizationPose.Pose);
+                currentInspectionArea = robot.CurrentInspectionArea;
+                return_to_home_pose = robot.CurrentInspectionArea?.DefaultLocalizationPose?.Pose == null ? new Pose() : new Pose(robot.CurrentInspectionArea.DefaultLocalizationPose.Pose);
             }
 
 
@@ -132,21 +67,19 @@ namespace Api.Services
                 Robot = robot,
                 InstallationCode = robot.CurrentInstallation.InstallationCode,
                 MissionRunType = MissionRunType.ReturnHome,
-                Area = currentArea,
+                InspectionArea = currentInspectionArea,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.UtcNow,
                 Tasks =
                 [
                     new(return_to_home_pose, MissionTaskType.ReturnHome)
-                ],
-                Map = new MapMetadata()
+                ]
             };
-            await mapService.AssignMapToMission(returnToHomeMissionRun);
 
             var missionRun = await missionRunService.Create(returnToHomeMissionRun, false);
             logger.LogInformation(
                 "Scheduled a mission for the robot {RobotName} to return to home location on deck {DeckName}",
-                robot.Name, currentArea.Deck.Name);
+                robot.Name, currentInspectionArea?.Name);
             return missionRun;
         }
 
