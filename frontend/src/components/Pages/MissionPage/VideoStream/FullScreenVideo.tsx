@@ -29,7 +29,7 @@ const FullScreenCard = styled.div`
 
 interface IFullScreenVideoStreamCardProps {
     videoStream: MediaStream
-    videoStreamName: string
+    videoStreamName?: string
     toggleFullScreenMode: VoidFunction
 }
 
@@ -56,8 +56,8 @@ export const FullScreenVideoStreamCard = ({
     // Rotated stream is not supported for simpleplayer
     return (
         <FullScreenCard>
-            <Typography variant="h5">{videoStreamName}</Typography>
-            <VideoPlayerSimpleStream videoStream={videoStream} videoStreamName={videoStreamName} />
+            {videoStreamName && <Typography variant="h5">{videoStreamName}</Typography>}
+            <VideoPlayerSimpleStream videoStream={videoStream} />
             {fullScreenExitButton(false)}
         </FullScreenCard>
     )

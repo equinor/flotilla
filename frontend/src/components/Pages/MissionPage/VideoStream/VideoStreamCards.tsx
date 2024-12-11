@@ -23,7 +23,7 @@ const StyledVideoSection = styled.div`
 
 interface IVideoStreamCardProps {
     videoStream: MediaStream
-    videoStreamName: string
+    videoStreamName?: string
     toggleFullScreenMode: VoidFunction
     setFullScreenStream: Function
 }
@@ -49,11 +49,11 @@ export const VideoStreamCard = ({
         <VideoCard style={{ boxShadow: tokens.elevation.raised }}>
             <div onDoubleClick={turnOnFullScreen}>
                 <StyledVideoSection>
-                    <VideoPlayerSimpleStream videoStream={videoStream} videoStreamName={videoStreamName} />
+                    <VideoPlayerSimpleStream videoStream={videoStream} />
                     {fullScreenButton}
                 </StyledVideoSection>
             </div>
-            <Typography variant="h5">{videoStreamName}</Typography>
+            {videoStreamName && <Typography variant="h5">{videoStreamName}</Typography>}
         </VideoCard>
     )
 }
