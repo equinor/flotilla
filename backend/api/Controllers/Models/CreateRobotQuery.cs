@@ -18,8 +18,6 @@ namespace Api.Controllers.Models
 
         public IList<CreateDocumentationQuery> Documentation { get; set; }
 
-        public IList<CreateVideoStreamQuery> VideoStreams { get; set; }
-
         public string Host { get; set; }
 
         public int Port { get; set; }

@@ -92,12 +92,6 @@ namespace Api.Test.Services
 
             var robotsBefore = await robotService.ReadAll(readOnly: true);
             int nRobotsBefore = robotsBefore.Count();
-            var videoStreamQuery = new CreateVideoStreamQuery
-            {
-                Name = "Front Camera",
-                Url = "localhost:5000",
-                Type = "mjpeg"
-            };
             var documentationQuery = new CreateDocumentationQuery
             {
                 Name = "Some document",
@@ -108,10 +102,6 @@ namespace Api.Test.Services
                 Name = "",
                 IsarId = "",
                 SerialNumber = "",
-                VideoStreams =
-                [
-                    videoStreamQuery
-                ],
                 Documentation =
                 [
                     documentationQuery

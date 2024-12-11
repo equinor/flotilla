@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Api.Controllers.Models;
+﻿using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Mqtt;
 using Api.Mqtt.Events;
@@ -173,7 +172,6 @@ namespace Api.EventHandlers
                         SerialNumber = isarRobotInfo.SerialNumber,
                         CurrentInstallationCode = installation.InstallationCode,
                         Documentation = isarRobotInfo.DocumentationQueries,
-                        VideoStreams = isarRobotInfo.VideoStreamQueries,
                         Host = isarRobotInfo.Host,
                         Port = isarRobotInfo.Port,
                         RobotCapabilities = isarRobotInfo.Capabilities,
@@ -201,7 +199,6 @@ namespace Api.EventHandlers
 
                     List<string> updatedFields = [];
 
-                    if (isarRobotInfo.VideoStreamQueries is not null) UpdateVideoStreamsIfChanged(isarRobotInfo.VideoStreamQueries, ref robot, ref updatedFields);
                     if (isarRobotInfo.Host is not null) UpdateHostIfChanged(isarRobotInfo.Host, ref robot, ref updatedFields);
 
                     UpdatePortIfChanged(isarRobotInfo.Port, ref robot, ref updatedFields);
@@ -222,31 +219,6 @@ namespace Api.EventHandlers
             }
             catch (DbUpdateException e) { _logger.LogError(e, "Could not add robot to db"); }
             catch (Exception e) { _logger.LogError(e, "Could not update robot in db"); }
-        }
-
-        private static void UpdateVideoStreamsIfChanged(List<CreateVideoStreamQuery> videoStreamQueries, ref Robot robot, ref List<string> updatedFields)
-        {
-            var updatedStreams = videoStreamQueries
-                .Select(
-                    stream =>
-                        new VideoStream
-                        {
-                            Name = stream.Name,
-                            Url = stream.Url,
-                            Type = stream.Type
-                        }
-                )
-                .ToList();
-
-            var existingVideoStreams = robot.VideoStreams;
-            if (updatedStreams.Count == robot.VideoStreams.Count && updatedStreams.TrueForAll(stream => existingVideoStreams.Contains(stream))) return;
-            var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
-            updatedFields.Add(
-                $"\nVideoStreams ({JsonSerializer.Serialize(robot.VideoStreams, serializerOptions)} "
-                + "\n-> "
-                + $"\n{JsonSerializer.Serialize(updatedStreams, serializerOptions)})\n"
-            );
-            robot.VideoStreams = updatedStreams;
         }
 
         private static void UpdateHostIfChanged(string host, ref Robot robot, ref List<string> updatedFields)

@@ -190,7 +190,6 @@ namespace Api.Test.Database
                 SerialNumber = "0001",
                 CurrentInstallationCode = installation.InstallationCode,
                 CurrentAreaName = area?.Name,
-                VideoStreams = [],
                 Documentation = [],
                 Host = "localhost",
                 Port = 3000,
