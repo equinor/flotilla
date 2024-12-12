@@ -67,6 +67,9 @@ namespace Api.Test.Client
         [Fact]
         public async Task GetRobotById_ShouldReturnRobot()
         {
+            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            _ = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
+
             string url = "/robots";
             var response = await _client.GetAsync(url);
             var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(_serializerOptions);
