@@ -28,7 +28,7 @@ export interface Robot {
     serialNumber?: string
     currentInstallation: Installation
     batteryLevel?: number
-    batteryStatus?: BatteryStatus
+    batteryState?: BatteryStatus
     pressureLevel?: number
     pose?: Pose
     status: RobotStatus
