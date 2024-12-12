@@ -8,7 +8,7 @@ namespace Api.Services
 {
     public interface IMissionSchedulingService
     {
-        public Task StartNextMissionRunIfSystemIsAvailable(string robotId);
+        public Task StartNextMissionRunIfSystemIsAvailable(Robot robot);
 
         public Task<bool> OngoingMission(string robotId);
 
@@ -33,23 +33,15 @@ namespace Api.Services
     public class MissionSchedulingService(ILogger<MissionSchedulingService> logger, IMissionRunService missionRunService, IRobotService robotService,
             IIsarService isarService, ILocalizationService localizationService, IReturnToHomeService returnToHomeService, ISignalRService signalRService, IErrorHandlingService errorHandlingService) : IMissionSchedulingService
     {
-        public async Task StartNextMissionRunIfSystemIsAvailable(string robotId)
+        public async Task StartNextMissionRunIfSystemIsAvailable(Robot robot)
         {
-            logger.LogInformation("Starting next mission run if system is available for robot ID: {RobotId}", robotId);
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot == null)
-            {
-                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
-                return;
-            }
-
             logger.LogInformation("Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentInspectionArea?.Name);
 
             MissionRun? missionRun;
             try { missionRun = await SelectNextMissionRun(robot.Id); }
             catch (RobotNotFoundException)
             {
-                logger.LogError("Robot with ID: {RobotId} was not found in the database", robotId);
+                logger.LogError("Robot with ID: {RobotId} was not found in the database", robot.Id);
                 return;
             }
 
