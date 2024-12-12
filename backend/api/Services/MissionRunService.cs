@@ -323,7 +323,7 @@ namespace Api.Services
 
         /// <summary>
         ///     Filters by <see cref="MissionRunQueryStringParameters.InstallationCode" />,
-        ///     <see cref="MissionRunQueryStringParameters.Area" />,
+        ///     <see cref="MissionRunQueryStringParameters.InspectionArea" />,
         ///     <see cref="MissionRunQueryStringParameters.Statuses" />,
         ///     <see cref="MissionRunQueryStringParameters.RobotId" />,
         ///     <see cref="MissionRunQueryStringParameters.RobotModelType" />,
@@ -331,7 +331,6 @@ namespace Api.Services
         ///     <see cref="MissionRunQueryStringParameters.RobotNameSearch" />,
         ///     <see cref="MissionRunQueryStringParameters.TagSearch" />,
         ///     <see cref="MissionRunQueryStringParameters.InspectionTypes" />,
-        ///     <see cref="MissionRunQueryStringParameters.ExcludeLocalization" />,
         ///     <see cref="MissionRunQueryStringParameters.ExcludeReturnToHome" />,
         ///     <see cref="MissionRunQueryStringParameters.MinStartTime" />,
         ///     <see cref="MissionRunQueryStringParameters.MaxStartTime" />,

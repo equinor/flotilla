@@ -121,7 +121,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            try { await MissionScheduling.ScheduleMissionToDriveToDockPosition(e.RobotId, robot.CurrentInspectionArea); }
+            try { await MissionScheduling.ScheduleMissionToDriveToDockPosition(e.RobotId); }
             catch (DockException ex)
             {
                 _logger.LogError(ex, "Failed to schedule return to dock mission on robot {RobotName} because: {ErrorMessage}", robot.Name, ex.Message);
