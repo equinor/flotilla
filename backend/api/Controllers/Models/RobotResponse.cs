@@ -20,6 +20,8 @@ namespace Api.Controllers.Models
 
         public float BatteryLevel { get; set; }
 
+        public BatteryState? BatteryState { get; set; }
+
         public float? PressureLevel { get; set; }
 
         public IList<DocumentInfo> Documentation { get; set; }
@@ -61,6 +63,7 @@ namespace Api.Controllers.Models
             CurrentInstallation = robot.CurrentInstallation;
             CurrentArea = robot.CurrentArea != null ? new AreaResponse(robot.CurrentArea) : null;
             BatteryLevel = robot.BatteryLevel;
+            BatteryState = robot.BatteryState;
             PressureLevel = robot.PressureLevel;
             Documentation = robot.Documentation;
             VideoStreams = robot.VideoStreams;
