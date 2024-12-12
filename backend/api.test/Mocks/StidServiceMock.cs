@@ -16,7 +16,10 @@ namespace Api.Services
             await Task.CompletedTask;
             string testAreaName = "StidServiceMockArea";
 
-            var area = context.Areas.Include(a => a.Deck).Include(d => d.Plant)
+            var area = context.Areas
+                .Include(a => a.Deck).ThenInclude(d => d.Installation)
+                .Include(a => a.Deck).ThenInclude(d => d.Plant).ThenInclude(p => p.Installation)
+                .Include(d => d.Plant)
                 .Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
                 .Where(area => area.Name.Contains(testAreaName)).ToList().FirstOrDefault();
             if (area != null) { return area; }

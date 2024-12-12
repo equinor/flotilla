@@ -91,7 +91,6 @@ namespace Api.Test.Client
             var wrongInstallation = await _databaseUtilities.NewInstallation("wrongInstallation");
             var wrongPlant = await _databaseUtilities.ReadOrNewPlant(wrongInstallation.InstallationCode);
             var wrongDeck = await _databaseUtilities.ReadOrNewDeck(wrongInstallation.InstallationCode, wrongPlant.PlantCode);
-            var wrongArea = await _databaseUtilities.ReadOrNewArea(wrongInstallation.InstallationCode, wrongPlant.PlantCode, wrongDeck.Name);
 
             // Arrange - Create robot
             var robotQuery = new CreateRobotQuery

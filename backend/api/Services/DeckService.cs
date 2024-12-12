@@ -69,7 +69,7 @@ namespace Api.Services
         {
             if (deckName == null) { return null; }
             return await GetDecks(readOnly: readOnly).Where(a =>
-                a.Installation != null && a.Installation.InstallationCode.Equals(installationCode) && a.Name.ToLower().Equals(deckName.ToLower())
+                a.Installation != null && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower()) && a.Name.ToLower().Equals(deckName.ToLower())
             ).FirstOrDefaultAsync();
         }
 
@@ -147,7 +147,7 @@ namespace Api.Services
         private IQueryable<Deck> GetDecks(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            var query = context.Decks.Include(p => p.Plant).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
+            var query = context.Decks.Include(p => p.Plant).ThenInclude(p => p.Installation).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
                 .Where((d) => accessibleInstallationCodes.Result.Contains(d.Installation.InstallationCode.ToUpper()));
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }

@@ -169,8 +169,7 @@ namespace Api.Services
                 .ThenInclude(deck => deck.Plant)
                 .ThenInclude(plant => plant.Installation)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
-                .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(area => area != null ? area.Installation : null)
+                .ThenInclude(area => area.Installation)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
