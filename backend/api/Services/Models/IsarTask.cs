@@ -4,6 +4,8 @@
     {
         public string IsarTaskId { get; } = taskResponse.IsarTaskId;
 
+        public string? IsarInspectionId { get; } = taskResponse.IsarInspectionId;
+
         public IsarTaskStatus TaskStatus { get; } = IsarTaskStatus.NotStarted;
 
         public IsarTaskType TaskType { get; } = TaskTypeFromString(taskResponse.TaskType);
