@@ -41,10 +41,10 @@ namespace Api.Controllers
                 var config = await isarService.GetMediaStreamConfig(robot);
                 return Ok(config);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                logger.LogError(e, "Error during GET of media stream config from ISAR");
-                throw;
+                logger.LogWarning("No ISAR media config retrieved from robot with ID {id}", id);
+                return NotFound($"No media config retrieved for robot with ID {id}");
             }
         }
     }
