@@ -71,22 +71,6 @@ namespace Api.Services
                         signalRService.ReportGeneralFailToSignalR(robot, $"Failed to schedule return to home for robot {robot.Name}", "");
                         logger.LogError("Failed to schedule a return to home mission for robot {RobotId}", robot.Id);
                     }
-
-                    if (missionRun == null) { return; }  // The robot is already home
-
-                    var postReturnToHomeMissionCreatedRobot = await robotService.ReadById(missionRun.Robot.Id, readOnly: true);
-                    if (postReturnToHomeMissionCreatedRobot == null)
-                    {
-                        logger.LogInformation("Could not find robot {Name}", missionRun.Robot.Name);
-                        return;
-                    }
-
-                    logger.LogInformation(
-                        "Post return to home mission created: Robot {robotName} has status {robotStatus} and current area {areaName}",
-                        postReturnToHomeMissionCreatedRobot.Name,
-                        postReturnToHomeMissionCreatedRobot.Status,
-                        postReturnToHomeMissionCreatedRobot.CurrentInspectionArea?.Name
-                    );
                 }
             }
 
