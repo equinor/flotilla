@@ -290,7 +290,6 @@ export class BackendAPICaller {
             robotId: desiredRobot[0].id,
             missionSourceId: missionSourceId,
             installationCode: installationCode,
-            areaName: '',
         }
         const result = await BackendAPICaller.POST<unknown, unknown>(path, body).catch(
             BackendAPICaller.handleError('POST', path)

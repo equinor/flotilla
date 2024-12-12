@@ -51,9 +51,6 @@ namespace Api.Test.Client
         {
             // Arrange - Area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
-            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
 
             // Arrange - Robot
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation);
@@ -67,7 +64,6 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                AreaName = area.Name,
                 MissionSourceId = missionSourceId,
                 DesiredStartTime = DateTime.UtcNow
             };
@@ -92,14 +88,10 @@ namespace Api.Test.Client
         {
             // Arrange - Area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
-            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
 
             // Arrange - Robot
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation);
             string robotId = robot.Id;
-
 
             string missionSourceId = "97";
 
@@ -108,7 +100,6 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                AreaName = area.Name,
                 MissionSourceId = missionSourceId,
                 DesiredStartTime = DateTime.UtcNow
             };
@@ -471,7 +462,6 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                AreaName = area.Name,
                 MissionSourceId = missionSourceId,
                 DesiredStartTime = DateTime.UtcNow
             };

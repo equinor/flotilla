@@ -144,19 +144,18 @@ namespace Api.Test.Client
         }
 
         [Fact]
-        public async Task MissionIsCreatedInArea()
+        public async Task MissionIsCreatedInInspectionArea()
         {
             // Arrange - Initialise area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
             var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
 
             // Arrange - Robot
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
             string robotId = robot.Id;
 
-            string testMissionName = "testMissionInAreaTest";
+            string testMissionName = "testMissionInInspectionAreaTest";
 
             var inspection = new CustomInspectionQuery
             {
@@ -198,12 +197,12 @@ namespace Api.Test.Client
             var mission = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
             Assert.NotNull(mission);
             Assert.NotNull(mission.MissionId);
-            string areaUrl = "/areas";
-            var areaMissionsResponse = await _client.GetAsync(areaUrl + $"/{area.Id}/mission-definitions");
+            string inspectionAreaUrl = "/decks";
+            var inspectionareaMissionsResponse = await _client.GetAsync(inspectionAreaUrl + $"/{deck.Id}/mission-definitions");
 
             // Assert
-            Assert.True(areaMissionsResponse.IsSuccessStatusCode);
-            var missions = await areaMissionsResponse.Content.ReadFromJsonAsync<IList<MissionDefinitionResponse>>(_serializerOptions);
+            Assert.True(inspectionareaMissionsResponse.IsSuccessStatusCode);
+            var missions = await inspectionareaMissionsResponse.Content.ReadFromJsonAsync<IList<MissionDefinitionResponse>>(_serializerOptions);
             Assert.NotNull(missions);
             Assert.Single(missions.Where(m => m.Id.Equals(mission.MissionId, StringComparison.Ordinal)));
         }
