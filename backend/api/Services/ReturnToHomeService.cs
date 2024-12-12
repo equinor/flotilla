@@ -15,7 +15,7 @@ namespace Api.Services
             logger.LogInformation("Scheduling return to home mission if not already scheduled or the robot is home for robot {RobotId}", robotId);
             var lastMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robotId);
 
-            if (await IsReturnToHomeMissionAlreadyScheduled(robotId) || (lastMissionRun != null && lastMissionRun.IsReturnHomeMission()))
+            if (await IsReturnToHomeMissionAlreadyScheduled(robotId) || (lastMissionRun != null && (lastMissionRun.IsReturnHomeMission() || lastMissionRun.IsEmergencyMission())))
             {
                 logger.LogInformation("ReturnToHomeMission is already scheduled for Robot {RobotId}", robotId);
                 return null;

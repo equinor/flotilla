@@ -74,7 +74,7 @@ namespace Api.EventHandlers
                 await MissionScheduling.AbortActiveReturnToHomeMission(missionRun.Robot.Id);
             }
 
-            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot.Id); }
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
@@ -90,7 +90,7 @@ namespace Api.EventHandlers
             }
 
             _startMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
@@ -153,7 +153,7 @@ namespace Api.EventHandlers
             }
 
             _startMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
@@ -174,8 +174,10 @@ namespace Api.EventHandlers
                 return;
             }
 
-            try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(e.RobotId); }
+            try { await MissionScheduling.UnfreezeMissionRunQueueForRobot(robot.Id); }
             catch (RobotNotFoundException) { return; }
+
+            robot.MissionQueueFrozen = false;
 
             try { await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus ?? RobotFlotillaStatus.Normal); }
             catch (Exception ex)
@@ -185,7 +187,7 @@ namespace Api.EventHandlers
             }
 
             _startMissionSemaphore.WaitOne();
-            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id); }
+            try { await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot); }
             catch (MissionRunNotFoundException) { return; }
             finally { _startMissionSemaphore.Release(); }
         }
