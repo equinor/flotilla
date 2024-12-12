@@ -18,7 +18,7 @@ namespace Api.Services
 
         public Task AbortAllScheduledMissions(string robotId, string? abortReason = null);
 
-        public Task ScheduleMissionToDriveToDockPosition(string robotId, Deck? inspectionArea);
+        public Task ScheduleMissionToDriveToDockPosition(string robotId);
 
         public Task UnfreezeMissionRunQueueForRobot(string robotId);
 
@@ -260,7 +260,7 @@ namespace Api.Services
             }
         }
 
-        public async Task ScheduleMissionToDriveToDockPosition(string robotId, Deck? inspectionArea)
+        public async Task ScheduleMissionToDriveToDockPosition(string robotId)
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
@@ -269,15 +269,24 @@ namespace Api.Services
                 return;
             }
 
-            var robotPose = new Pose();
+            Pose robotPose;
 
-            if (inspectionArea != null)
+            if (robot.CurrentInspectionArea != null)
             {
                 if (robot.CurrentInspectionArea?.DefaultLocalizationPose == null)
                 {
-                    throw new DockException($"Robot with ID: {robotId} has no available Dock or localization poses in its current inspection area");
+                    robotPose = new Pose();
                 }
-                robotPose = robot.CurrentInspectionArea.DefaultLocalizationPose.Pose;
+                else
+                {
+                    robotPose = robot.CurrentInspectionArea.DefaultLocalizationPose.Pose;
+                }
+            }
+            else
+            {
+                string errorMessage = $"Robot with ID {robotId} could return home as it did not have an inspection area";
+                logger.LogError("{Message}", errorMessage);
+                throw new DeckNotFoundException(errorMessage);
             }
 
             // Cloning to avoid tracking same object
@@ -294,7 +303,7 @@ namespace Api.Services
                 Robot = robot,
                 MissionRunType = MissionRunType.Emergency,
                 InstallationCode = robot.CurrentInstallation.InstallationCode,
-                InspectionArea = inspectionArea,
+                InspectionArea = robot.CurrentInspectionArea!,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.UtcNow,
                 Tasks = new List<MissionTask>(

@@ -60,6 +60,12 @@ namespace Api.Services
                 return_to_home_pose = robot.CurrentInspectionArea?.DefaultLocalizationPose?.Pose == null ? new Pose() : new Pose(robot.CurrentInspectionArea.DefaultLocalizationPose.Pose);
             }
 
+            if (currentInspectionArea == null)
+            {
+                string errorMessage = $"Robot with ID {robotId} could return home as it did not have an inspection area";
+                logger.LogError("{Message}", errorMessage);
+                throw new DeckNotFoundException(errorMessage);
+            }
 
             var returnToHomeMissionRun = new MissionRun
             {
@@ -67,7 +73,7 @@ namespace Api.Services
                 Robot = robot,
                 InstallationCode = robot.CurrentInstallation.InstallationCode,
                 MissionRunType = MissionRunType.ReturnHome,
-                InspectionArea = currentInspectionArea,
+                InspectionArea = currentInspectionArea!,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.UtcNow,
                 Tasks =
