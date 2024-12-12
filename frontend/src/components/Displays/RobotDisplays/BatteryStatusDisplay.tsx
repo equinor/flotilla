@@ -2,6 +2,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { Icon, Typography } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { Icons } from 'utils/icons'
+import { BatteryStatus } from 'models/Battery'
 
 const BatteryAlignment = styled.div`
     display: flex;
@@ -12,6 +13,7 @@ const StyledTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40
 `
 interface BatteryStatusDisplayProps {
     batteryLevel?: number
+    batteryState?: BatteryStatus
     itemSize?: 24 | 16 | 18 | 32 | 40 | 48 | undefined
     batteryWarningLimit?: number
     textAlignedBottom?: boolean
@@ -19,6 +21,7 @@ interface BatteryStatusDisplayProps {
 
 export const BatteryStatusDisplay = ({
     batteryLevel,
+    batteryState,
     itemSize,
     batteryWarningLimit,
     textAlignedBottom,
@@ -27,6 +30,8 @@ export const BatteryStatusDisplay = ({
 
     const getBatteryIcon = (batteryLevel?: number) => {
         switch (true) {
+            case batteryState === BatteryStatus.Charging:
+                return Icons.BatteryCharging
             case batteryLevel === null || batteryLevel === undefined:
                 return Icons.BatteryUnknown
             case !batteryWarningLimit || batteryLevel! > batteryWarningLimit:

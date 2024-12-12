@@ -145,6 +145,7 @@ export const RobotCard = ({ robot }: { robot: Robot }) => {
                                     <AttributeTitleTypography>{TranslateText('Battery')}</AttributeTitleTypography>
                                     <BatteryStatusDisplay
                                         batteryLevel={robot.batteryLevel}
+                                        batteryState={robot.batteryState}
                                         batteryWarningLimit={robot.model.batteryWarningThreshold}
                                     />
                                 </VerticalContent>

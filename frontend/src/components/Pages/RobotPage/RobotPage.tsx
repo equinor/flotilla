@@ -137,6 +137,7 @@ export const RobotPage = () => {
                                         <BatteryStatusDisplay
                                             itemSize={32}
                                             batteryLevel={selectedRobot.batteryLevel}
+                                            batteryState={selectedRobot.batteryState}
                                             batteryWarningLimit={selectedRobot.model.batteryWarningThreshold}
                                         />
                                         {selectedRobot.pressureLevel !== null &&
