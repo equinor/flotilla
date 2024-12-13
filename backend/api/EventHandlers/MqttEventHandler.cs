@@ -133,6 +133,38 @@ namespace Api.EventHandlers
             }
         }
 
+        private async void CreateRobot(IsarRobotInfoMessage isarRobotInfo, Installation installation)
+        {
+            _logger.LogInformation(
+                "Received message from new ISAR instance '{Id}' with robot name '{Name}'. Adding new robot to database",
+                isarRobotInfo.IsarId, isarRobotInfo.RobotName);
+
+            var robotQuery = new CreateRobotQuery
+            {
+                IsarId = isarRobotInfo.IsarId,
+                Name = isarRobotInfo.RobotName,
+                RobotType = isarRobotInfo.RobotType,
+                SerialNumber = isarRobotInfo.SerialNumber,
+                CurrentInstallationCode = installation.InstallationCode,
+                Documentation = isarRobotInfo.DocumentationQueries,
+                Host = isarRobotInfo.Host,
+                Port = isarRobotInfo.Port,
+                RobotCapabilities = isarRobotInfo.Capabilities,
+                Status = RobotStatus.Available,
+            };
+
+            try
+            {
+                var newRobot = await RobotService.CreateFromQuery(robotQuery);
+                _logger.LogInformation("Added robot '{RobotName}' with ISAR id '{IsarId}' to database", newRobot.Name, newRobot.IsarId);
+            }
+            catch (DbUpdateException)
+            {
+                _logger.LogError($"Failed to add robot {robotQuery.Name} with to the database");
+                return;
+            }
+        }
+
         private async void OnIsarRobotInfo(object? sender, MqttReceivedArgs mqttArgs)
         {
             var isarRobotInfo = (IsarRobotInfoMessage)mqttArgs.Message;
@@ -154,35 +186,7 @@ namespace Api.EventHandlers
 
                 if (robot == null)
                 {
-                    _logger.LogInformation(
-                        "Received message from new ISAR instance '{Id}' with robot name '{Name}'. Adding new robot to database",
-                        isarRobotInfo.IsarId, isarRobotInfo.RobotName);
-
-                    var robotQuery = new CreateRobotQuery
-                    {
-                        IsarId = isarRobotInfo.IsarId,
-                        Name = isarRobotInfo.RobotName,
-                        RobotType = isarRobotInfo.RobotType,
-                        SerialNumber = isarRobotInfo.SerialNumber,
-                        CurrentInstallationCode = installation.InstallationCode,
-                        Documentation = isarRobotInfo.DocumentationQueries,
-                        Host = isarRobotInfo.Host,
-                        Port = isarRobotInfo.Port,
-                        RobotCapabilities = isarRobotInfo.Capabilities,
-                        Status = RobotStatus.Available,
-                    };
-
-                    try
-                    {
-                        var newRobot = await RobotService.CreateFromQuery(robotQuery);
-                        _logger.LogInformation("Added robot '{RobotName}' with ISAR id '{IsarId}' to database", newRobot.Name, newRobot.IsarId);
-                    }
-                    catch (DbUpdateException)
-                    {
-                        _logger.LogError($"Failed to add robot {robotQuery.Name} with to the database");
-                        return;
-                    }
-
+                    CreateRobot(isarRobotInfo, installation);
                     return;
                 }
 
