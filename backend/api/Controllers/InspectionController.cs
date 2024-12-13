@@ -83,15 +83,15 @@ namespace Api.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            if (inspection.Id == null) return NotFound($"Could not find Id for Inspection with task ID {taskId}.");
+            if (inspection.IsarInspectionId == null) return NotFound($"Could not find isar inspection Id {inspection.IsarInspectionId} for Inspection with task ID {taskId}.");
 
-            var inspectionData = await inspectionService.GetInspectionStorageInfo(inspection.Id);
+            var inspectionData = await inspectionService.GetInspectionStorageInfo(inspection.IsarInspectionId);
 
-            if (inspectionData == null) return NotFound($"Could not find inspection data for inspection with Id {inspection.Id}.");
+            if (inspectionData == null) return NotFound($"Could not find inspection data for inspection with isar Id {inspection.IsarInspectionId}.");
 
             if (!inspectionData.BlobContainer.ToLower(CultureInfo.CurrentCulture).Equals(installationCode.ToLower(CultureInfo.CurrentCulture), StringComparison.Ordinal))
             {
-                return NotFound($"Could not find inspection data for inspection with Id {inspection.Id} because blob name {inspectionData.BlobName} does not match installation {installationCode}.");
+                return NotFound($"Could not find inspection data for inspection with isar Id {inspection.IsarInspectionId} because blob name {inspectionData.BlobName} does not match installation {installationCode}.");
             }
 
             try
