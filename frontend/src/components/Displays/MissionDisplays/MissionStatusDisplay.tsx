@@ -39,16 +39,17 @@ const MissionStatusIcon = ({ status }: StatusProps) => {
         case MissionStatus.Ongoing: {
             return <StyledIcon name={Icons.Ongoing} style={{ color: tokens.colors.text.static_icons__secondary.hex }} />
         }
-        case MissionStatus.Failed: {
-            return <StyledIcon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
-        }
         case MissionStatus.Successful: {
             return (
                 <StyledIcon name={Icons.Successful} style={{ color: tokens.colors.interactive.success__resting.hex }} />
             )
         }
-        case MissionStatus.PartiallySuccessful: {
+        case MissionStatus.PartiallySuccessful:
+        case MissionStatus.Cancelled: {
             return <StyledIcon name={Icons.Warning} style={{ color: tokens.colors.interactive.warning__resting.hex }} />
+        }
+        case MissionStatus.Failed: {
+            return <StyledIcon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
         }
     }
     return <StyledIcon name={Icons.Failed} style={{ color: tokens.colors.interactive.danger__resting.hex }} />
