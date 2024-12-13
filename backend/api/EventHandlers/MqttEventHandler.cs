@@ -129,7 +129,7 @@ namespace Api.EventHandlers
                     _updateRobotSemaphore.Release();
                     _logger.LogDebug("Semaphore released after updating robot current mission id");
                 }
-                MissionScheduling.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot.Id);
             }
         }
 
