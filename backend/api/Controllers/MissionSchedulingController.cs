@@ -280,6 +280,11 @@ namespace Api.Controllers
                 if (missionDefinitions.Count > 0)
                 {
                     existingMissionDefinition = missionDefinitions.First();
+                    if (existingMissionDefinition.InspectionArea == null)
+                    {
+                        existingMissionDefinition.InspectionArea = area.Deck;
+                        await missionDefinitionService.Update(existingMissionDefinition);
+                    }
                 }
             }
 
@@ -319,7 +324,7 @@ namespace Api.Controllers
                 await missionDefinitionService.Create(scheduledMissionDefinition);
             }
 
-            if (missionRun.Robot.CurrentInspectionArea != null && !await localizationService.RobotIsOnSameDeckAsMission(missionRun.Robot.Id, missionRun.InspectionArea.Id))
+            if (missionRun.Robot.CurrentInspectionArea != null && !await localizationService.RobotIsOnSameDeckAsMission(missionRun.Robot.Id, missionRun.InspectionArea!.Id))
             {
                 return Conflict($"The robot {missionRun.Robot.Name} is assumed to be in a different inspection area so the mission was not scheduled.");
             }
