@@ -35,9 +35,12 @@ namespace Api.Services.Models
         {
             Name = missionRun.Name;
             Tasks = missionRun.Tasks.Select(task => new IsarTaskDefinition(task, missionRun, mapName)).ToList();
-            StartPose = includeStartPose && missionRun.InspectionArea.DefaultLocalizationPose != null ? new IsarPose(missionRun.InspectionArea.DefaultLocalizationPose.Pose) : null;
-            Undock = includeStartPose && missionRun.InspectionArea.DefaultLocalizationPose != null && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled;
-            Dock = missionRun.InspectionArea.DefaultLocalizationPose != null && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled && missionRun.IsReturnHomeMission();
+            if (missionRun.InspectionArea != null)
+            {
+                StartPose = includeStartPose && missionRun.InspectionArea.DefaultLocalizationPose != null ? new IsarPose(missionRun.InspectionArea.DefaultLocalizationPose.Pose) : null;
+                Undock = includeStartPose && missionRun.InspectionArea.DefaultLocalizationPose != null && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled;
+                Dock = missionRun.InspectionArea.DefaultLocalizationPose != null && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled && missionRun.IsReturnHomeMission();
+            }
         }
     }
 

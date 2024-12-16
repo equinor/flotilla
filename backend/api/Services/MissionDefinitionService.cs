@@ -166,17 +166,17 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.MissionDefinitions
                 .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(deck => deck.Plant)
+                .ThenInclude(deck => deck!.Plant)
                 .ThenInclude(plant => plant.Installation)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(area => area.Installation)
+                .ThenInclude(area => area!.Installation)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
                 .ThenInclude(missionTask => missionTask.Inspection)
                 .ThenInclude(inspection => inspection != null ? inspection.InspectionFindings : null)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(deck => deck.DefaultLocalizationPose)
+                .ThenInclude(deck => deck!.DefaultLocalizationPose)
                 .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null)
                 .Where((m) => m.InspectionArea == null || accessibleInstallationCodes.Result.Contains(m.InspectionArea.Installation.InstallationCode.ToUpper()));
             return readOnly ? query.AsNoTracking() : query.AsTracking();
