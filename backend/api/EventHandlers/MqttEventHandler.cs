@@ -100,15 +100,16 @@ namespace Api.EventHandlers
             _updateRobotSemaphore.WaitOne();
             _logger.LogDebug("Semaphore acquired for updating robot status");
 
-            var updatedRobot = await RobotService.UpdateRobotStatus(robot.Id, isarStatus.Status);
+            await RobotService.UpdateRobotStatus(robot.Id, isarStatus.Status);
+            robot.Status = isarStatus.Status;
 
             _updateRobotSemaphore.Release();
             _logger.LogDebug("Semaphore released after updating robot status");
 
-            _logger.LogInformation("Updated status for robot {Name} to {Status}", updatedRobot.Name, updatedRobot.Status);
+            _logger.LogInformation("Updated status for robot {Name} to {Status}", robot.Name, robot.Status);
 
 
-            _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current inspection area {areaName}", updatedRobot.Name, updatedRobot.Status, updatedRobot.CurrentInspectionArea?.Name);
+            _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current inspection area {areaName}", robot.Name, robot.Status, robot.CurrentInspectionArea?.Name);
 
             if (isarStatus.Status == RobotStatus.Available)
             {
