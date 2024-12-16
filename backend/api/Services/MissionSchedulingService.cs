@@ -38,7 +38,7 @@ namespace Api.Services
             logger.LogInformation("Robot {robotName} has status {robotStatus} and current area {areaName}", robot.Name, robot.Status, robot.CurrentInspectionArea?.Name);
 
             MissionRun? missionRun;
-            try { missionRun = await SelectNextMissionRun(robot.Id); }
+            try { missionRun = await SelectNextMissionRun(robot); }
             catch (RobotNotFoundException)
             {
                 logger.LogError("Robot with ID: {RobotId} was not found in the database", robot.Id);
@@ -68,7 +68,7 @@ namespace Api.Services
 
             if (missionRun == null) { return; }
 
-            if (!await TheSystemIsAvailableToRunAMission(robot.Id, missionRun.Id))
+            if (!TheSystemIsAvailableToRunAMission(robot, missionRun))
             {
                 logger.LogInformation("Mission {MissionRunId} was put on the queue as the system may not start a mission now", missionRun.Id);
                 return;
@@ -98,7 +98,7 @@ namespace Api.Services
                 if (missionRun == null) { return; }
             }
 
-            try { await StartMissionRun(missionRun); }
+            try { await StartMissionRun(missionRun, robot); }
             catch (Exception ex) when (
                 ex is MissionException
                     or RobotNotFoundException
@@ -308,16 +308,8 @@ namespace Api.Services
             OnRobotAvailable(e);
         }
 
-        private async Task<MissionRun?> SelectNextMissionRun(string robotId)
+        private async Task<MissionRun?> SelectNextMissionRun(Robot robot)
         {
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot == null)
-            {
-                string errorMessage = $"Could not find robot with id {robotId}";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
             var missionRun = await missionRunService.ReadNextScheduledEmergencyMissionRun(robot.Id, readOnly: true);
             if (robot.MissionQueueFrozen == false && missionRun == null) { missionRun = await missionRunService.ReadNextScheduledMissionRun(robot.Id, readOnly: true); }
             return missionRun;
@@ -371,32 +363,9 @@ namespace Api.Services
             }
         }
 
-        private async Task StartMissionRun(MissionRun queuedMissionRun)
+        private async Task StartMissionRun(MissionRun queuedMissionRun, Robot robot)
         {
-            string robotId = queuedMissionRun.Robot.Id;
             string missionRunId = queuedMissionRun.Id;
-
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot == null)
-            {
-                string errorMessage = $"Could not find robot with id {robotId}";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            if (robot.Status is not RobotStatus.Available)
-            {
-                string errorMessage = $"Robot {robotId} has status {robot.Status} and is not available";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotAvailableException(errorMessage);
-            }
-
-            if (robot.Deprecated)
-            {
-                string errorMessage = $"Robot {robotId} is deprecated and cannot start mission";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotAvailableException(errorMessage);
-            }
 
             var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
             if (missionRun == null)
@@ -452,32 +421,8 @@ namespace Api.Services
             return ongoingMissions;
         }
 
-        private async Task<bool> TheSystemIsAvailableToRunAMission(string robotId, string missionRunId)
+        private bool TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
         {
-            bool ongoingMission = await OngoingMission(robotId);
-
-            if (ongoingMission)
-            {
-                logger.LogInformation("Mission run {MissionRunId} was not started as there is already an ongoing mission", missionRunId);
-                return false;
-            }
-
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot is null)
-            {
-                string errorMessage = $"Robot with ID: {robotId} was not found in the database";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
-            if (missionRun is null)
-            {
-                string errorMessage = $"Mission run with Id {missionRunId} was not found in the database";
-                logger.LogError("{Message}", errorMessage);
-                throw new MissionRunNotFoundException(errorMessage);
-            }
-
             if (robot.MissionQueueFrozen && missionRun.MissionRunType != MissionRunType.Emergency)
             {
                 logger.LogInformation("Mission run {MissionRunId} was not started as the mission run queue for robot {RobotName} is frozen", missionRun.Id, robot.Name);
