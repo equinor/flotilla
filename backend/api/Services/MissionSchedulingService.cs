@@ -114,6 +114,9 @@ namespace Api.Services
                 );
                 await missionRunService.SetMissionRunToFailed(missionRun.Id, $"Mission run '{missionRun.Id}' was not started successfully. '{ex.Message}'");
             }
+            catch (RobotBusyException)
+            {
+            }
         }
 
         public async Task<MissionRun?> HandleBatteryAndPressureLevel(Robot robot)

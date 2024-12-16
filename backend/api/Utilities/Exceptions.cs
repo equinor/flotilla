@@ -91,6 +91,10 @@
     {
     }
 
+    public class RobotBusyException(string message) : Exception(message)
+    {
+    }
+
     public class RobotNotInSameInstallationAsMissionException(string message) : Exception(message)
     {
     }

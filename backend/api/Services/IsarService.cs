@@ -57,6 +57,9 @@ namespace Api.Services
 
             if (!response.IsSuccessStatusCode)
             {
+                if (response.StatusCode == HttpStatusCode.Conflict)
+                    throw new RobotBusyException("Robot was not available when starting mission");
+
                 (string message, int statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
                 string errorResponse = await response.Content.ReadAsStringAsync();
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
