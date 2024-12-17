@@ -3,6 +3,7 @@ import { Position } from './Position'
 export interface Inspection {
     id: string
     isarTaskId?: string
+    isarInspectionId?: string
     status: InspectionStatus
     isCompleted: boolean
     inspectionType: InspectionType

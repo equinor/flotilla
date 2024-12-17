@@ -9,15 +9,20 @@ using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
+
 namespace Api.Services
+
 {
     public interface IInspectionService
     {
         public Task<byte[]> FetchInpectionImage(string inpectionName, string installationCode, string storageAccount);
         public Task<Inspection> UpdateInspectionStatus(string isarTaskId, IsarTaskStatus isarTaskStatus);
         public Task<Inspection?> ReadByIsarTaskId(string id, bool readOnly = true);
+        public Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true);
         public Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingsQuery, string isarTaskId);
         public Task<IDAInspectionDataResponse?> GetInspectionStorageInfo(string inspectionId);
+        public Task<byte[]?> GetInspectionData(string installationCode, string isarInspectionId);
+
 
     }
 
@@ -81,6 +86,11 @@ namespace Api.Services
             return await GetInspections(readOnly: readOnly).FirstOrDefaultAsync(inspection => inspection.IsarTaskId != null && inspection.IsarTaskId.Equals(id));
         }
 
+        public async Task<Inspection?> ReadByIsarInspectionId(string id, bool readOnly = true)
+        {
+            return await GetInspections(readOnly: readOnly).FirstOrDefaultAsync(inspection => inspection.IsarInspectionId != null && inspection.IsarInspectionId.Equals(id));
+        }
+
         private IQueryable<Inspection> GetInspections(bool readOnly = true)
         {
             if (accessRoleService.IsUserAdmin() || !accessRoleService.IsAuthenticationAvailable())
@@ -142,11 +152,61 @@ namespace Api.Services
                 return null;
             }
 
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                logger.LogError("Could not get inspection data for inspection with Id {inspectionId}", inspectionId);
+                return null;
+            }
+
             var inspectionData = await response.Content.ReadFromJsonAsync<
                 IDAInspectionDataResponse
             >() ?? throw new JsonException("Failed to deserialize inspection data from IDA.");
 
             return inspectionData;
+        }
+
+        public async Task<byte[]?> GetInspectionData(string installationCode, string isarInspectionId)
+        {
+            Inspection? inspection;
+            try
+            {
+                inspection = await ReadByIsarInspectionId(isarInspectionId, readOnly: true);
+                if (inspection == null)
+                {
+                    logger.LogError($"Could not find inspection with isar inspection Id {isarInspectionId}.");
+                    return null;
+                }
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, $"Error while finding an inspection with isar inspection Id {isarInspectionId}. {e.Message}");
+                return null;
+            }
+
+            var inspectionData = await GetInspectionStorageInfo(inspection.IsarInspectionId);
+
+            if (inspectionData == null)
+            {
+                logger.LogError($"Could not find inspection data for inspection with isar Id {inspection.IsarInspectionId}.");
+                return null;
+            }
+
+            if (!inspectionData.BlobContainer.ToLower(CultureInfo.CurrentCulture).Equals(installationCode.ToLower(CultureInfo.CurrentCulture), StringComparison.Ordinal))
+            {
+                logger.LogError($"Could not find inspection data for inspection with isar Id {inspection.IsarInspectionId} because blob name {inspectionData.BlobContainer} does not match installation {installationCode}.");
+                return null;
+            }
+
+            try
+            {
+                byte[] inspectionStream = await FetchInpectionImage(inspectionData.BlobName, inspectionData.BlobContainer, inspectionData.StorageAccount);
+                return inspectionStream;
+            }
+            catch (Azure.RequestFailedException e)
+            {
+                logger.LogError($"Could not find inspection blob {inspectionData.BlobName} in container {inspectionData.BlobContainer} and storage account {inspectionData.StorageAccount}. {e.Message}");
+                return null;
+            }
         }
     }
 }
