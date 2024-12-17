@@ -390,7 +390,7 @@ namespace Api.EventHandlers
             if (flotillaMissionRun is null)
             {
                 string errorMessage =
-                    $"Mission with isar mission Id {isarMission.IsarId} was not found";
+                    $"Mission with isar mission Id {isarMission.MissionId} was not found";
                 _logger.LogError("{Message}", errorMessage);
                 return;
             }

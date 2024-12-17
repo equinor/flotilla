@@ -2,50 +2,39 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
-using Api.Database.Context;
 using Api.Database.Models;
 using Api.Test.Database;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
 namespace Api.Test.Client
 {
-    [Collection("Database collection")]
-    public class AreaTests : IClassFixture<TestWebApplicationFactory<Program>>
+    public class AreaTests : IAsyncLifetime
     {
-        private readonly HttpClient _client;
-        private readonly DatabaseUtilities _databaseUtilities;
-        private readonly JsonSerializerOptions _serializerOptions =
-            new()
-            {
-                Converters = { new JsonStringEnumConverter() },
-                PropertyNameCaseInsensitive = true,
-            };
+        public required DatabaseUtilities DatabaseUtilities;
+        public required HttpClient Client;
+        public required JsonSerializerOptions SerializerOptions;
 
-        public AreaTests(TestWebApplicationFactory<Program> factory)
+        public async Task InitializeAsync()
         {
-            _client = factory.CreateClient(
-                new WebApplicationFactoryClientOptions
-                {
-                    AllowAutoRedirect = false,
-                    BaseAddress = new Uri("https://localhost:8000"),
-                }
+            string databaseName = Guid.NewGuid().ToString();
+            (string connectionString, var connection) = await TestSetupHelpers.ConfigureDatabase(
+                databaseName
             );
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                TestAuthHandler.AuthenticationScheme
-            );
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
 
-            object? context =
-                factory.Services.GetService(typeof(FlotillaDbContext)) as FlotillaDbContext
-                ?? throw new ArgumentNullException(nameof(factory));
-            _databaseUtilities = new DatabaseUtilities((FlotillaDbContext)context);
+            Client = TestSetupHelpers.ConfigureHttpClient(factory);
+            SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
+
+            DatabaseUtilities = new DatabaseUtilities(
+                TestSetupHelpers.ConfigureFlotillaDbContext(connectionString)
+            );
         }
+
+        public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
         public async Task AreaTest()
@@ -127,19 +116,16 @@ namespace Api.Test.Client
 
             // Act
             string installationUrl = "/installations";
-            var installationResponse = await _client.PostAsync(
-                installationUrl,
-                installationContent
-            );
+            var installationResponse = await Client.PostAsync(installationUrl, installationContent);
             string plantUrl = "/plants";
-            var plantResponse = await _client.PostAsync(plantUrl, plantContent);
+            var plantResponse = await Client.PostAsync(plantUrl, plantContent);
             string inspectionAreaUrl = "/inspectionAreas";
-            var inspectionAreaResponse = await _client.PostAsync(
+            var inspectionAreaResponse = await Client.PostAsync(
                 inspectionAreaUrl,
                 inspectionAreaContent
             );
             string areaUrl = "/areas";
-            var areaResponse = await _client.PostAsync(areaUrl, areaContent);
+            var areaResponse = await Client.PostAsync(areaUrl, areaContent);
 
             // Assert
             Assert.True(installationResponse.IsSuccessStatusCode);
@@ -147,7 +133,7 @@ namespace Api.Test.Client
             Assert.True(inspectionAreaResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(
-                _serializerOptions
+                SerializerOptions
             );
             Assert.NotNull(area);
         }
@@ -156,15 +142,15 @@ namespace Api.Test.Client
         public async Task MissionIsCreatedInInspectionArea()
         {
             // Arrange - Initialise area
-            var installation = await _databaseUtilities.ReadOrNewInstallation();
-            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.ReadOrNewInstallation();
+            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
 
             // Arrange - Robot
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
             string robotId = robot.Id;
 
             string testMissionName = "testMissionInInspectionAreaTest";
@@ -203,16 +189,16 @@ namespace Api.Test.Client
 
             // Act
             string missionUrl = "/missions/custom";
-            var missionResponse = await _client.PostAsync(missionUrl, missionContent);
+            var missionResponse = await Client.PostAsync(missionUrl, missionContent);
 
             Assert.True(missionResponse.IsSuccessStatusCode);
             var mission = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(
-                _serializerOptions
+                SerializerOptions
             );
             Assert.NotNull(mission);
             Assert.NotNull(mission.MissionId);
             string inspectionAreaUrl = "/inspectionAreas";
-            var inspectionareaMissionsResponse = await _client.GetAsync(
+            var inspectionareaMissionsResponse = await Client.GetAsync(
                 inspectionAreaUrl + $"/{inspectionArea.Id}/mission-definitions"
             );
 
@@ -220,7 +206,7 @@ namespace Api.Test.Client
             Assert.True(inspectionareaMissionsResponse.IsSuccessStatusCode);
             var missions = await inspectionareaMissionsResponse.Content.ReadFromJsonAsync<
                 IList<MissionDefinitionResponse>
-            >(_serializerOptions);
+            >(SerializerOptions);
             Assert.NotNull(missions);
             Assert.Single(
                 missions.Where(m => m.Id.Equals(mission.MissionId, StringComparison.Ordinal))
@@ -231,13 +217,13 @@ namespace Api.Test.Client
         public async Task EmergencyDockTest()
         {
             // Arrange
-            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var installation = await DatabaseUtilities.ReadOrNewInstallation();
             string installationCode = installation.InstallationCode;
 
             // Act
             string goToDockingPositionUrl =
                 $"/emergency-action/{installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone";
-            var missionResponse = await _client.PostAsync(goToDockingPositionUrl, null);
+            var missionResponse = await Client.PostAsync(goToDockingPositionUrl, null);
 
             // Assert
             Assert.True(missionResponse.IsSuccessStatusCode);
@@ -251,9 +237,9 @@ namespace Api.Test.Client
         public async Task UpdateDefaultLocalizationPoseOnInspectionArea()
         {
             // Arrange
-            var installation = await _databaseUtilities.ReadOrNewInstallation();
-            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.ReadOrNewInstallation();
+            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
@@ -287,11 +273,11 @@ namespace Api.Test.Client
             );
 
             // Act
-            var putResponse = await _client.PutAsync(url, content);
+            var putResponse = await Client.PutAsync(url, content);
             Assert.True(putResponse.IsSuccessStatusCode);
             var putInspectionArea =
                 await putResponse.Content.ReadFromJsonAsync<InspectionAreaResponse>(
-                    _serializerOptions
+                    SerializerOptions
                 );
 
             // Assert
