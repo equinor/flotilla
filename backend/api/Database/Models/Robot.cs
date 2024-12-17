@@ -74,6 +74,8 @@ namespace Api.Database.Models
 
         public float BatteryLevel { get; set; }
 
+        public BatteryState? BatteryState { get; set; }
+
         public float? PressureLevel { get; set; }
 
         public bool IsRobotPressureTooLow()
@@ -175,5 +177,11 @@ namespace Api.Database.Models
         auto_return_to_home,
         docking_procedure,
         return_to_home,
+    }
+
+    public enum BatteryState
+    {
+        Normal,
+        Charging,
     }
 }

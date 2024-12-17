@@ -21,6 +21,7 @@ namespace Api.Services
         public Task<Robot> Update(Robot robot);
         public Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status);
         public Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel);
+        public Task<Robot> UpdateRobotBatteryState(string robotId, BatteryState? batteryState);
         public Task<Robot> UpdateRobotPressureLevel(string robotId, float? pressureLevel);
         public Task<Robot> UpdateRobotPose(string robotId, Pose pose);
         public Task<Robot> UpdateRobotIsarConnected(string robotId, bool isarConnected);
@@ -157,6 +158,13 @@ namespace Api.Services
         public async Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel)
         {
             var robot = await UpdateRobotProperty(robotId, "BatteryLevel", batteryLevel, isLogLevelDebug: true);
+            ThrowIfRobotIsNull(robot, robotId);
+            return robot;
+        }
+
+        public async Task<Robot> UpdateRobotBatteryState(string robotId, BatteryState? batteryState)
+        {
+            var robot = await UpdateRobotProperty(robotId, "BatteryState", batteryState, isLogLevelDebug: true);
             ThrowIfRobotIsNull(robot, robotId);
             return robot;
         }
