@@ -16,7 +16,7 @@ namespace Api.Controllers
             IIsarService isarService,
             IMissionSchedulingService missionSchedulingService,
             IRobotModelService robotModelService,
-            IAreaService areaService,
+            IDeckService deckService,
             IErrorHandlingService errorHandlingService
         ) : ControllerBase
     {
@@ -163,8 +163,8 @@ namespace Api.Controllers
 
             try
             {
-                var updatedRobot = await robotService.Update(robot);
-                var robotResponse = new RobotResponse(updatedRobot);
+                await robotService.Update(robot);
+                var robotResponse = new RobotResponse(robot);
                 logger.LogInformation("Successful PUT of robot to database");
 
                 return Ok(robotResponse);
@@ -215,31 +215,36 @@ namespace Api.Controllers
                     return NotFound(errorMessage);
                 }
 
-                Robot updatedRobot;
                 switch (fieldName)
                 {
                     case "currentInspectionAreaId":
-                        if (query.AreaId == null)
-                            updatedRobot = await robotService.UpdateCurrentInspectionArea(id, null);
+                        if (query.InspectionAreaId == null)
+                        {
+                            await robotService.UpdateCurrentInspectionArea(id, null);
+                            robot.CurrentInspectionArea = null;
+                        }
                         else
                         {
-                            var area = await areaService.ReadById(query.AreaId, readOnly: true);
-                            if (area == null) return NotFound($"No area with ID {query.AreaId} was found");
-                            updatedRobot = await robotService.UpdateCurrentInspectionArea(id, area.Id);
+                            var inspectionArea = await deckService.ReadById(query.InspectionAreaId, readOnly: true);
+                            if (inspectionArea == null) return NotFound($"No inspection area with ID {query.InspectionAreaId} was found");
+                            await robotService.UpdateCurrentInspectionArea(id, inspectionArea.Id);
+                            robot.CurrentInspectionArea = inspectionArea;
                         }
                         break;
                     case "pose":
                         if (query.Pose == null) return BadRequest("Cannot set robot pose to null");
-                        updatedRobot = await robotService.UpdateRobotPose(id, query.Pose);
+                        await robotService.UpdateRobotPose(id, query.Pose);
+                        robot.Pose = query.Pose;
                         break;
                     case "missionId":
-                        updatedRobot = await robotService.UpdateCurrentMissionId(id, query.MissionId);
+                        await robotService.UpdateCurrentMissionId(id, query.MissionId);
+                        robot.CurrentMissionId = query.MissionId;
                         break;
                     default:
                         return NotFound($"Could not find any field with name {fieldName}");
                 }
 
-                var robotResponse = new RobotResponse(updatedRobot);
+                var robotResponse = new RobotResponse(robot);
                 logger.LogInformation("Successful PUT of robot to database");
 
                 return Ok(robotResponse);
@@ -284,10 +289,10 @@ namespace Api.Controllers
                     return NotFound(errorMessage);
                 }
 
-                Robot updatedRobot;
-                updatedRobot = await robotService.UpdateDeprecated(id, deprecated);
+                await robotService.UpdateDeprecated(id, deprecated);
+                robot.Deprecated = deprecated;
 
-                var robotResponse = new RobotResponse(updatedRobot);
+                var robotResponse = new RobotResponse(robot);
                 logger.LogInformation("Successful updated deprecated on robot to database");
 
                 return Ok(robotResponse);
@@ -357,10 +362,11 @@ namespace Api.Controllers
 
             try
             {
-                var updatedRobot = await robotService.UpdateRobotStatus(id, robotStatus);
-                logger.LogInformation("Successfully updated robot {RobotId}", updatedRobot.Id);
+                await robotService.UpdateRobotStatus(id, robotStatus);
+                robot.Status = robotStatus;
+                logger.LogInformation("Successfully updated robot {RobotId}", robot.Id);
 
-                var robotResponse = new RobotResponse(updatedRobot);
+                var robotResponse = new RobotResponse(robot);
 
                 if (robotStatus == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
 

@@ -18,18 +18,18 @@ namespace Api.Services
         public Task<Robot?> ReadById(string id, bool readOnly = true);
         public Task<Robot?> ReadByIsarId(string isarId, bool readOnly = true);
         public Task<IList<Robot>> ReadRobotsForInstallation(string installationCode, bool readOnly = true);
-        public Task<Robot> Update(Robot robot);
-        public Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status);
-        public Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel);
-        public Task<Robot> UpdateRobotBatteryState(string robotId, BatteryState? batteryState);
-        public Task<Robot> UpdateRobotPressureLevel(string robotId, float? pressureLevel);
-        public Task<Robot> UpdateRobotPose(string robotId, Pose pose);
-        public Task<Robot> UpdateRobotIsarConnected(string robotId, bool isarConnected);
-        public Task<Robot> UpdateCurrentMissionId(string robotId, string? missionId);
-        public Task<Robot> UpdateCurrentInspectionArea(string robotId, string? inspectionAreaId);
-        public Task<Robot> UpdateDeprecated(string robotId, bool deprecated);
-        public Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
-        public Task<Robot> UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status);
+        public Task Update(Robot robot);
+        public Task UpdateRobotStatus(string robotId, RobotStatus status);
+        public Task UpdateRobotBatteryLevel(string robotId, float batteryLevel);
+        public Task UpdateRobotBatteryState(string robotId, BatteryState? batteryState);
+        public Task UpdateRobotPressureLevel(string robotId, float? pressureLevel);
+        public Task UpdateRobotPose(string robotId, Pose pose);
+        public Task UpdateRobotIsarConnected(string robotId, bool isarConnected);
+        public Task UpdateCurrentMissionId(string robotId, string? missionId);
+        public Task UpdateCurrentInspectionArea(string robotId, string? inspectionAreaId);
+        public Task UpdateDeprecated(string robotId, bool deprecated);
+        public Task UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
+        public Task UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status);
         public Task<Robot?> Delete(string id);
         public void DetachTracking(Robot robot);
     }
@@ -148,32 +148,24 @@ namespace Api.Services
             return robot;
         }
 
-        public async Task<Robot> UpdateRobotStatus(string robotId, RobotStatus status)
+        public async Task UpdateRobotStatus(string robotId, RobotStatus status)
         {
-            var robot = await UpdateRobotProperty(robotId, "Status", status);
-            ThrowIfRobotIsNull(robot, robotId);
-            return robot;
+            await UpdateRobotProperty(robotId, "Status", status);
         }
 
-        public async Task<Robot> UpdateRobotBatteryLevel(string robotId, float batteryLevel)
+        public async Task UpdateRobotBatteryLevel(string robotId, float batteryLevel)
         {
-            var robot = await UpdateRobotProperty(robotId, "BatteryLevel", batteryLevel, isLogLevelDebug: true);
-            ThrowIfRobotIsNull(robot, robotId);
-            return robot;
+            await UpdateRobotProperty(robotId, "BatteryLevel", batteryLevel, isLogLevelDebug: true);
         }
 
-        public async Task<Robot> UpdateRobotBatteryState(string robotId, BatteryState? batteryState)
+        public async Task UpdateRobotBatteryState(string robotId, BatteryState? batteryState)
         {
-            var robot = await UpdateRobotProperty(robotId, "BatteryState", batteryState, isLogLevelDebug: true);
-            ThrowIfRobotIsNull(robot, robotId);
-            return robot;
+            await UpdateRobotProperty(robotId, "BatteryState", batteryState, isLogLevelDebug: true);
         }
 
-        public async Task<Robot> UpdateRobotPressureLevel(string robotId, float? pressureLevel)
+        public async Task UpdateRobotPressureLevel(string robotId, float? pressureLevel)
         {
-            var robot = await UpdateRobotProperty(robotId, "PressureLevel", pressureLevel);
-            ThrowIfRobotIsNull(robot, robotId);
-            return robot;
+            await UpdateRobotProperty(robotId, "PressureLevel", pressureLevel);
         }
 
         private void ThrowIfRobotIsNull(Robot? robot, string robotId)
@@ -185,7 +177,7 @@ namespace Api.Services
             throw new RobotNotFoundException(errorMessage);
         }
 
-        public async Task<Robot> UpdateRobotPose(string robotId, Pose pose)
+        public async Task UpdateRobotPose(string robotId, Pose pose)
         {
             var robotQuery = GetRobotsWithSubModels(readOnly: true).Where(robot => robot.Id == robotId);
             var robot = await robotQuery.FirstOrDefaultAsync();
@@ -209,46 +201,46 @@ namespace Api.Services
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
             DetachTracking(robot);
-
-            return robot;
         }
 
-        public async Task<Robot> UpdateRobotIsarConnected(string robotId, bool isarConnected)
+        public async Task UpdateRobotIsarConnected(string robotId, bool isarConnected)
         {
-            var robot = await UpdateRobotProperty(robotId, "IsarConnected", isarConnected);
-            ThrowIfRobotIsNull(robot, robotId);
-            return robot;
+            await UpdateRobotProperty(robotId, "IsarConnected", isarConnected);
         }
 
-        public async Task<Robot> UpdateCurrentMissionId(string robotId, string? currentMissionId)
+        public async Task UpdateCurrentMissionId(string robotId, string? currentMissionId)
         {
-            var robot = await UpdateRobotProperty(robotId, "CurrentMissionId", currentMissionId);
-            ThrowIfRobotIsNull(robot, robotId);
-            return robot;
+            await UpdateRobotProperty(robotId, "CurrentMissionId", currentMissionId);
         }
 
-        public async Task<Robot> UpdateCurrentInspectionArea(string robotId, string? inspectionAreaId)
+        public async Task UpdateCurrentInspectionArea(string robotId, string? inspectionAreaId)
         {
             logger.LogInformation("Updating current inspection area for robot with Id {robotId} to inspection area with Id {areaId}", robotId, inspectionAreaId);
-            if (inspectionAreaId is null) { return await UpdateRobotProperty(robotId, "CurrentInspectionArea", null); }
+            if (inspectionAreaId is null)
+            {
+                await UpdateRobotProperty(robotId, "CurrentInspectionArea", null);
+                return;
+            }
+
             var area = await deckService.ReadById(inspectionAreaId, readOnly: true);
             if (area is null)
             {
                 logger.LogError("Could not find inspection area '{InspectionAreaId}' setting robot '{IsarId}' inspection area to null", inspectionAreaId, robotId);
-                return await UpdateRobotProperty(robotId, "CurrentInspectionArea", null);
+                await UpdateRobotProperty(robotId, "CurrentInspectionArea", null);
             }
-            return await UpdateRobotProperty(robotId, "CurrentInspectionArea", area);
+            else
+            {
+                await UpdateRobotProperty(robotId, "CurrentInspectionArea", area);
+            }
         }
 
-        public async Task<Robot> UpdateDeprecated(string robotId, bool deprecated) { return await UpdateRobotProperty(robotId, "Deprecated", deprecated); }
+        public async Task UpdateDeprecated(string robotId, bool deprecated) { await UpdateRobotProperty(robotId, "Deprecated", deprecated); }
 
-        public async Task<Robot> UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen) { return await UpdateRobotProperty(robotId, "MissionQueueFrozen", missionQueueFrozen); }
+        public async Task UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen) { await UpdateRobotProperty(robotId, "MissionQueueFrozen", missionQueueFrozen); }
 
-        public async Task<Robot> UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status)
+        public async Task UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status)
         {
-            var robot = await UpdateRobotProperty(robotId, "FlotillaStatus", status);
-            ThrowIfRobotIsNull(robot, robotId);
-            return robot;
+            await UpdateRobotProperty(robotId, "FlotillaStatus", status);
         }
 
         public async Task<IEnumerable<Robot>> ReadAll(bool readOnly = true) { return await GetRobotsWithSubModels(readOnly: readOnly).ToListAsync(); }
@@ -266,16 +258,15 @@ namespace Api.Services
             return await GetRobotsWithSubModels(readOnly: readOnly).Where(r => r.IsarConnected && r.CurrentInstallation != null).Select(r => r.CurrentInstallation!.InstallationCode).ToListAsync();
         }
 
-        public async Task<Robot> Update(Robot robot)
+        public async Task Update(Robot robot)
         {
             if (robot.CurrentInspectionArea is not null) context.Entry(robot.CurrentInspectionArea).State = EntityState.Unchanged;
             context.Entry(robot.Model).State = EntityState.Unchanged;
 
-            var entry = context.Update(robot);
+            context.Update(robot);
             await ApplyDatabaseUpdate(robot.CurrentInstallation);
             _ = signalRService.SendMessageAsync("Robot updated", robot?.CurrentInstallation, robot != null ? new RobotResponse(robot) : null);
             DetachTracking(robot!);
-            return entry.Entity;
         }
 
         public async Task<Robot?> Delete(string id)
@@ -321,7 +312,7 @@ namespace Api.Services
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
-        private async Task<Robot> UpdateRobotProperty(string robotId, string propertyName, object? value, bool isLogLevelDebug = false)
+        private async Task UpdateRobotProperty(string robotId, string propertyName, object? value, bool isLogLevelDebug = false)
         {
             var robot = await ReadById(robotId, readOnly: false);
             if (robot is null)
@@ -343,10 +334,9 @@ namespace Api.Services
                 }
             }
 
-            try { robot = await Update(robot); }
+            try { await Update(robot); }
             catch (InvalidOperationException e) { logger.LogError(e, "Failed to update {robotName}", robot.Name); };
             DetachTracking(robot);
-            return robot;
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)

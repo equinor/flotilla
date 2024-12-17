@@ -2,7 +2,7 @@
 {
     public class UpdateRobotQuery
     {
-        public string? AreaId { get; set; }
+        public string? InspectionAreaId { get; set; }
 
         public Pose? Pose { get; set; }
 

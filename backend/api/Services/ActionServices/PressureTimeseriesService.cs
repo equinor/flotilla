@@ -24,7 +24,8 @@ namespace Api.Services.ActionServices
             {
                 if (robot.PressureLevel is null || Math.Abs(pressureLevel - (float)robot.PressureLevel) > Tolerance)
                 {
-                    robot = await robotService.UpdateRobotPressureLevel(robot.Id, pressureLevel);
+                    await robotService.UpdateRobotPressureLevel(robot.Id, pressureLevel);
+                    robot.PressureLevel = pressureLevel;
                 }
             }
             catch (Exception e)
