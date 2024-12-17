@@ -1,49 +1,39 @@
 ﻿using System;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Api.Test
+namespace Api.Test.Client
 {
-    [Collection("Database collection")]
-    public class RoleAccessTests : IClassFixture<TestWebApplicationFactory<Program>>
+    public class RoleAccessTests : IAsyncLifetime
     {
-        private readonly HttpClient _client;
-        private readonly MockHttpContextAccessor _httpContextAccessor;
-        private readonly JsonSerializerOptions _serializerOptions =
-            new()
-            {
-                Converters = { new JsonStringEnumConverter() },
-                PropertyNameCaseInsensitive = true,
-            };
+        public required HttpClient Client;
+        public required JsonSerializerOptions SerializerOptions;
+        public required MockHttpContextAccessor HttpContextAccessor;
 
-        public RoleAccessTests(TestWebApplicationFactory<Program> factory)
+        public async Task InitializeAsync()
         {
-            _httpContextAccessor = (MockHttpContextAccessor)
-                factory.Services.GetService<IHttpContextAccessor>()!;
-            _httpContextAccessor.SetHttpContextRoles(["Role.Admin"]);
-            //var x = new HttpContextAccessor();
-            _client = factory.CreateClient(
-                new WebApplicationFactoryClientOptions
-                {
-                    AllowAutoRedirect = false,
-                    BaseAddress = new Uri("https://localhost:8000"),
-                }
+            string databaseName = Guid.NewGuid().ToString();
+            (string connectionString, var connection) = await TestSetupHelpers.ConfigureDatabase(
+                databaseName
             );
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                TestAuthHandler.AuthenticationScheme
-            );
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
+            var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
+
+            Client = TestSetupHelpers.ConfigureHttpClient(factory);
+            SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
+            HttpContextAccessor = (MockHttpContextAccessor)
+                serviceProvider.GetService<IHttpContextAccessor>()!;
         }
+
+        public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
         public async Task AuthorisedGetPlantTest_NotFound()
@@ -90,29 +80,26 @@ namespace Api.Test
 
             // Act
             string installationUrl = "/installations";
-            var installationResponse = await _client.PostAsync(
-                installationUrl,
-                installationContent
-            );
+            var installationResponse = await Client.PostAsync(installationUrl, installationContent);
             string accessRoleUrl = "/access-roles";
-            var accessRoleResponse = await _client.PostAsync(accessRoleUrl, accessRoleContent);
+            var accessRoleResponse = await Client.PostAsync(accessRoleUrl, accessRoleContent);
             string plantUrl = "/plants";
-            var plantResponse = await _client.PostAsync(plantUrl, plantContent);
+            var plantResponse = await Client.PostAsync(plantUrl, plantContent);
 
             // Only restrict ourselves to non-admin role after doing POSTs
-            _httpContextAccessor.SetHttpContextRoles(["User.TestInstallationAreaTest_Wrong"]);
+            HttpContextAccessor.SetHttpContextRoles(["User.TestInstallationAreaTest_Wrong"]);
 
             // Assert
             Assert.True(accessRoleResponse.IsSuccessStatusCode);
             Assert.True(installationResponse.IsSuccessStatusCode);
             Assert.True(plantResponse.IsSuccessStatusCode);
 
-            var plant = await plantResponse.Content.ReadFromJsonAsync<Plant>(_serializerOptions);
+            var plant = await plantResponse.Content.ReadFromJsonAsync<Plant>(SerializerOptions);
             Assert.NotNull(plant);
 
             // Act
             string getPlantUrl = $"/plants/{plant.Id}";
-            var samePlantResponse = await _client.GetAsync(getPlantUrl);
+            var samePlantResponse = await Client.GetAsync(getPlantUrl);
 
             // Assert
             Assert.False(samePlantResponse.IsSuccessStatusCode);
@@ -217,24 +204,21 @@ namespace Api.Test
 
             // Act
             string installationUrl = "/installations";
-            var installationResponse = await _client.PostAsync(
-                installationUrl,
-                installationContent
-            );
+            var installationResponse = await Client.PostAsync(installationUrl, installationContent);
             string accessRoleUrl = "/access-roles";
-            var accessRoleResponse = await _client.PostAsync(accessRoleUrl, accessRoleContent);
+            var accessRoleResponse = await Client.PostAsync(accessRoleUrl, accessRoleContent);
             string plantUrl = "/plants";
-            var plantResponse = await _client.PostAsync(plantUrl, plantContent);
+            var plantResponse = await Client.PostAsync(plantUrl, plantContent);
             string inspectionAreaUrl = "/inspectionAreas";
-            var inspectionAreaResponse = await _client.PostAsync(
+            var inspectionAreaResponse = await Client.PostAsync(
                 inspectionAreaUrl,
                 inspectionAreaContent
             );
             string areaUrl = "/areas";
-            var areaResponse = await _client.PostAsync(areaUrl, areaContent);
+            var areaResponse = await Client.PostAsync(areaUrl, areaContent);
 
             // Only restrict ourselves to non-admin role after doing POSTs
-            _httpContextAccessor.SetHttpContextRoles(
+            HttpContextAccessor.SetHttpContextRoles(
                 [
                     "User.ExplicitlyAuthorisedPostInstallationPlantInspectionAreaAndAreaTestInstallation",
                 ]
@@ -247,18 +231,18 @@ namespace Api.Test
             Assert.True(inspectionAreaResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(
-                _serializerOptions
+                SerializerOptions
             );
             Assert.NotNull(area);
 
             // Act
             string getAreaUrl = $"/areas/{area.Id}";
-            var sameAreaResponse = await _client.GetAsync(getAreaUrl);
+            var sameAreaResponse = await Client.GetAsync(getAreaUrl);
 
             // Assert
             Assert.True(sameAreaResponse.IsSuccessStatusCode);
             var sameArea = await sameAreaResponse.Content.ReadFromJsonAsync<AreaResponse>(
-                _serializerOptions
+                SerializerOptions
             );
             Assert.NotNull(sameArea);
             Assert.Equal(sameArea.Id, area.Id);
@@ -346,19 +330,16 @@ namespace Api.Test
 
             // Act
             string installationUrl = "/installations";
-            var installationResponse = await _client.PostAsync(
-                installationUrl,
-                installationContent
-            );
+            var installationResponse = await Client.PostAsync(installationUrl, installationContent);
             string plantUrl = "/plants";
-            var plantResponse = await _client.PostAsync(plantUrl, plantContent);
+            var plantResponse = await Client.PostAsync(plantUrl, plantContent);
             string inspectionAreaUrl = "/inspectionAreas";
-            var inspectionAreaResponse = await _client.PostAsync(
+            var inspectionAreaResponse = await Client.PostAsync(
                 inspectionAreaUrl,
                 inspectionAreaContent
             );
             string areaUrl = "/areas";
-            var areaResponse = await _client.PostAsync(areaUrl, areaContent);
+            var areaResponse = await Client.PostAsync(areaUrl, areaContent);
 
             // Assert
             Assert.True(installationResponse.IsSuccessStatusCode);
@@ -366,7 +347,7 @@ namespace Api.Test
             Assert.True(inspectionAreaResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(
-                _serializerOptions
+                SerializerOptions
             );
             Assert.NotNull(area);
         }

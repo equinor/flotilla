@@ -2,58 +2,48 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
-using Api.Database.Context;
 using Api.Database.Models;
 using Api.Test.Database;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace Api.Test.Client
 {
-    [Collection("Database collection")]
-    public class RobotTests : IClassFixture<TestWebApplicationFactory<Program>>
+    public class RobotTests : IAsyncLifetime
     {
-        private readonly HttpClient _client;
-        private readonly DatabaseUtilities _databaseUtilities;
-        private readonly JsonSerializerOptions _serializerOptions =
-            new()
-            {
-                Converters = { new JsonStringEnumConverter() },
-                PropertyNameCaseInsensitive = true,
-            };
+        public required DatabaseUtilities DatabaseUtilities;
+        public required HttpClient Client;
+        public required JsonSerializerOptions SerializerOptions;
 
-        public RobotTests(TestWebApplicationFactory<Program> factory)
+        public async Task InitializeAsync()
         {
-            _client = factory.CreateClient(
-                new WebApplicationFactoryClientOptions
-                {
-                    AllowAutoRedirect = false,
-                    BaseAddress = new Uri("https://localhost:8000"),
-                }
+            string databaseName = Guid.NewGuid().ToString();
+            (string connectionString, var connection) = await TestSetupHelpers.ConfigureDatabase(
+                databaseName
             );
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                TestAuthHandler.AuthenticationScheme
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
+
+            Client = TestSetupHelpers.ConfigureHttpClient(factory);
+            SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
+
+            DatabaseUtilities = new DatabaseUtilities(
+                TestSetupHelpers.ConfigureFlotillaDbContext(connectionString)
             );
-            object? context =
-                factory.Services.GetService(typeof(FlotillaDbContext)) as FlotillaDbContext
-                ?? throw new ArgumentNullException(nameof(factory));
-            _databaseUtilities = new DatabaseUtilities((FlotillaDbContext)context);
         }
+
+        public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
         public async Task RobotsTest()
         {
             string url = "/robots";
-            var response = await _client.GetAsync(url);
+            var response = await Client.GetAsync(url);
             var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(
-                _serializerOptions
+                SerializerOptions
             );
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(robots);
@@ -64,28 +54,28 @@ namespace Api.Test.Client
         {
             string robotId = "RandomString";
             string url = "/robots/" + robotId;
-            var response = await _client.GetAsync(url);
+            var response = await Client.GetAsync(url);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
         public async Task GetRobotById_ShouldReturnRobot()
         {
-            var installation = await _databaseUtilities.ReadOrNewInstallation();
-            _ = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
+            var installation = await DatabaseUtilities.ReadOrNewInstallation();
+            _ = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
 
             string url = "/robots";
-            var response = await _client.GetAsync(url);
+            var response = await Client.GetAsync(url);
             var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(
-                _serializerOptions
+                SerializerOptions
             );
             Assert.NotNull(robots);
 
             string robotId = robots[0].Id;
 
-            var robotResponse = await _client.GetAsync("/robots/" + robotId);
+            var robotResponse = await Client.GetAsync("/robots/" + robotId);
             var robot = await robotResponse.Content.ReadFromJsonAsync<RobotResponse>(
-                _serializerOptions
+                SerializerOptions
             );
             Assert.Equal(HttpStatusCode.OK, robotResponse.StatusCode);
             Assert.NotNull(robot);
@@ -100,13 +90,13 @@ namespace Api.Test.Client
         public async Task RobotIsNotCreatedWithAreaNotInInstallation()
         {
             // Arrange - Area
-            var installation = await _databaseUtilities.ReadOrNewInstallation();
+            var installation = await DatabaseUtilities.ReadOrNewInstallation();
 
-            var wrongInstallation = await _databaseUtilities.NewInstallation("wrongInstallation");
-            var wrongPlant = await _databaseUtilities.ReadOrNewPlant(
+            var wrongInstallation = await DatabaseUtilities.NewInstallation("wrongInstallation");
+            var wrongPlant = await DatabaseUtilities.ReadOrNewPlant(
                 wrongInstallation.InstallationCode
             );
-            var wrongInspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
+            var wrongInspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
                 wrongInstallation.InstallationCode,
                 wrongPlant.PlantCode
             );
@@ -134,7 +124,7 @@ namespace Api.Test.Client
 
             try
             {
-                var response = await _client.PostAsync(robotUrl, content);
+                var response = await Client.PostAsync(robotUrl, content);
             }
             catch (DbUpdateException ex)
             {

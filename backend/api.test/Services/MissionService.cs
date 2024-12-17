@@ -1,93 +1,40 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
-using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Moq;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Api.Test.Services
 {
-    [Collection("Database collection")]
-    public class MissionServiceTest : IDisposable
+    public class MissionServiceTest : IAsyncLifetime
     {
-        private readonly FlotillaDbContext _context;
-        private readonly DatabaseUtilities _databaseUtilities;
-        private readonly ILogger<MissionRunService> _logger;
-        private readonly MissionRunService _missionRunService;
-        private readonly ISignalRService _signalRService;
-        private readonly IAccessRoleService _accessRoleService;
-        private readonly UserInfoService _userInfoService;
-        private readonly IMissionTaskService _missionTaskService;
-        private readonly IInspectionAreaService _inspectionAreaService;
-        private readonly IInstallationService _installationService;
-        private readonly IPlantService _plantService;
-        private readonly IRobotModelService _robotModelService;
-        private readonly IRobotService _robotService;
+        public required DatabaseUtilities DatabaseUtilities;
+        public required IMissionRunService MissionRunService;
 
-        public MissionServiceTest(DatabaseFixture fixture)
+        public async Task InitializeAsync()
         {
-            _context = fixture.NewContext;
-            var defaultLocalizationPoseService = new DefaultLocalizationPoseService(_context);
-            _logger = new Mock<ILogger<MissionRunService>>().Object;
-            _signalRService = new MockSignalRService();
-            _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
-            _userInfoService = new UserInfoService(
-                _context,
-                new HttpContextAccessor(),
-                new Mock<ILogger<UserInfoService>>().Object
+            string databaseName = Guid.NewGuid().ToString();
+            (string connectionString, var connection) = await TestSetupHelpers.ConfigureDatabase(
+                databaseName
             );
-            _missionTaskService = new MissionTaskService(
-                _context,
-                new Mock<ILogger<MissionTaskService>>().Object
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
+            var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
+
+            DatabaseUtilities = new DatabaseUtilities(
+                TestSetupHelpers.ConfigureFlotillaDbContext(connectionString)
             );
-            _installationService = new InstallationService(_context, _accessRoleService);
-            _plantService = new PlantService(_context, _installationService, _accessRoleService);
-            _inspectionAreaService = new InspectionAreaService(
-                _context,
-                defaultLocalizationPoseService,
-                _installationService,
-                _plantService,
-                _accessRoleService,
-                new MockSignalRService()
-            );
-            _robotModelService = new RobotModelService(_context);
-            _robotService = new RobotService(
-                _context,
-                new Mock<ILogger<RobotService>>().Object,
-                _robotModelService,
-                new MockSignalRService(),
-                _accessRoleService,
-                _installationService,
-                _inspectionAreaService
-            );
-            _missionRunService = new MissionRunService(
-                _context,
-                _signalRService,
-                _logger,
-                _accessRoleService,
-                _missionTaskService,
-                _inspectionAreaService,
-                _robotService,
-                _userInfoService
-            );
-            _databaseUtilities = new DatabaseUtilities(_context);
+            MissionRunService = serviceProvider.GetRequiredService<IMissionRunService>();
         }
 
-        public void Dispose()
-        {
-            _context.Dispose();
-            GC.SuppressFinalize(this);
-        }
+        public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var missionRun = await _missionRunService.ReadById(
+            var missionRun = await MissionRunService.ReadById(
                 "some_id_that_does_not_exist",
                 readOnly: true
             );
@@ -97,28 +44,28 @@ namespace Api.Test.Services
         [Fact]
         public async Task Create()
         {
-            var reportsBefore = await _missionRunService.ReadAll(
+            var reportsBefore = await MissionRunService.ReadAll(
                 new MissionRunQueryStringParameters(),
                 readOnly: true
             );
             int nReportsBefore = reportsBefore.Count;
 
-            var installation = await _databaseUtilities.ReadOrNewInstallation();
-            var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.ReadOrNewInstallation();
+            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
-            var missionRun = await _databaseUtilities.NewMissionRun(
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
+            var missionRun = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
                 inspectionArea
             );
 
-            await _missionRunService.Create(missionRun);
+            await MissionRunService.Create(missionRun);
 
-            var reportsAfter = await _missionRunService.ReadAll(
+            var reportsAfter = await MissionRunService.ReadAll(
                 new MissionRunQueryStringParameters()
             );
             int nReportsAfter = reportsAfter.Count;
