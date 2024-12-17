@@ -45,7 +45,7 @@ namespace Api.Services
                 return;
             }
 
-            if (robot.MissionQueueFrozen && missionRun != null && !missionRun.IsEmergencyMission())
+            if (robot.MissionQueueFrozen && missionRun != null && !(missionRun.IsEmergencyMission() || missionRun.IsReturnHomeMission()))
             {
                 logger.LogInformation("Robot {robotName} was ready to start a mission but its mission queue was frozen", robot.Name);
                 return;
@@ -426,7 +426,7 @@ namespace Api.Services
 
         private bool TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
         {
-            if (robot.MissionQueueFrozen && missionRun.MissionRunType != MissionRunType.Emergency)
+            if (robot.MissionQueueFrozen && !(missionRun.IsEmergencyMission() || missionRun.IsReturnHomeMission()))
             {
                 logger.LogInformation("Mission run {MissionRunId} was not started as the mission run queue for robot {RobotName} is frozen", missionRun.Id, robot.Name);
                 return false;
