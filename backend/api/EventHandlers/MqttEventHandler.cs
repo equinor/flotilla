@@ -351,6 +351,10 @@ namespace Api.EventHandlers
             _logger.LogDebug("Semaphore acquired for updating battery");
 
             var robot = await BatteryTimeseriesService.AddBatteryEntry(batteryStatus.BatteryLevel, batteryStatus.IsarId);
+            if (robot != null && robot.BatteryState != batteryStatus.BatteryState)
+            {
+                robot = await RobotService.UpdateRobotBatteryState(robot.Id, batteryStatus.BatteryState);
+            }
 
             _updateRobotSemaphore.Release();
             _logger.LogDebug("Semaphore released after updating battery");
