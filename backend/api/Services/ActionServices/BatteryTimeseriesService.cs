@@ -24,7 +24,8 @@ namespace Api.Services.ActionServices
             {
                 if (Math.Abs(batteryLevel - robot.BatteryLevel) > Tolerance)
                 {
-                    robot = await robotService.UpdateRobotBatteryLevel(robot.Id, batteryLevel);
+                    await robotService.UpdateRobotBatteryLevel(robot.Id, batteryLevel);
+                    robot.BatteryLevel = batteryLevel;
                 }
             }
             catch (Exception e)
