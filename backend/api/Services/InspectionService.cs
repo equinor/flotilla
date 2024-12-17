@@ -114,7 +114,7 @@ namespace Api.Services
         {
             string relativePath = $"InspectionData/{inspectionId}/inspection-data-storage-location";
 
-            var response = await idaApi.CallApiForUserAsync(
+            var response = await idaApi.CallApiForAppAsync(
                 ServiceName,
                 options =>
                 {
@@ -122,7 +122,6 @@ namespace Api.Services
                     options.RelativePath = relativePath;
                 }
             );
-
 
             if (response.StatusCode == HttpStatusCode.Accepted)
             {
