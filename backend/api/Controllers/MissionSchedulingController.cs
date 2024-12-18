@@ -129,6 +129,10 @@ namespace Api.Controllers
             {
                 return NotFound("Mission definition not found");
             }
+            else if (missionDefinition.InspectionArea == null)
+            {
+                logger.LogWarning("Mission definition with ID {id} does not have an inspection area when scheduling", missionDefinition.Id);
+            }
 
             try { await localizationService.EnsureRobotIsOnSameInstallationAsMission(robot, missionDefinition); }
             catch (InstallationNotFoundException e) { return NotFound(e.Message); }
