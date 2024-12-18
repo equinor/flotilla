@@ -1,5 +1,5 @@
 import { Button, Checkbox, Dialog, Typography } from '@equinor/eds-core-react'
-import { InspectionAreaMapView } from 'utils/DeckMapView'
+import { InspectionAreaMapView } from 'utils/InspectionAreaMapView'
 import { HorizontalContent, StyledDialog, VerticalContent } from './ScheduleMissionStyles'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Robot } from 'models/Robot'

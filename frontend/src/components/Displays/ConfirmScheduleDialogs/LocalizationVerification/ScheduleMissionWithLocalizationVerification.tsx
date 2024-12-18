@@ -5,7 +5,7 @@ import {
     ConflictingMissionInspectionAreasDialog,
     ConflictingRobotInspectionAreaDialog,
 } from './ConflictingLocalizationDialog'
-import { UnknownInspectionAreaDialog } from './UnknownDeckDialog'
+import { UnknownInspectionAreaDialog } from './UnknownInspectionAreaDialog'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
