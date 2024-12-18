@@ -89,13 +89,7 @@ namespace Api.EventHandlers
 
             if (robot.Status == isarStatus.Status) { return; }
 
-            var preUpdatedRobot = await RobotService.ReadByIsarId(isarStatus.IsarId, readOnly: true);
-            if (preUpdatedRobot == null)
-            {
-                _logger.LogInformation("Received message from unknown ISAR instance {Id} with robot name {Name}", isarStatus.IsarId, isarStatus.RobotName);
-                return;
-            }
-            _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current inspection area {areaName}", preUpdatedRobot.Name, preUpdatedRobot.Status, preUpdatedRobot.CurrentInspectionArea?.Name);
+            _logger.LogInformation("OnIsarStatus: Robot {robotName} has status {robotStatus} and current inspection area {areaName}", robot.Name, robot.Status, robot.CurrentInspectionArea?.Name);
 
             _updateRobotSemaphore.WaitOne();
             _logger.LogDebug("Semaphore acquired for updating robot status");
