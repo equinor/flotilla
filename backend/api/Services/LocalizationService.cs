@@ -9,14 +9,17 @@ namespace Api.Services
             Robot robot,
             MissionDefinition missionDefinition
         );
-        public Task<bool> RobotIsOnSameDeckAsMission(string robotId, string inspectionAreaId);
+        public Task<bool> RobotIsOnSameInspectionAreaAsMission(
+            string robotId,
+            string inspectionAreaId
+        );
     }
 
     public class LocalizationService(
         ILogger<LocalizationService> logger,
         IRobotService robotService,
         IInstallationService installationService,
-        IDeckService deckService
+        IInspectionAreaService inspectionAreaService
     ) : ILocalizationService
     {
         public async Task EnsureRobotIsOnSameInstallationAsMission(
@@ -46,7 +49,10 @@ namespace Api.Services
             }
         }
 
-        public async Task<bool> RobotIsOnSameDeckAsMission(string robotId, string inspectionAreaId)
+        public async Task<bool> RobotIsOnSameInspectionAreaAsMission(
+            string robotId,
+            string inspectionAreaId
+        )
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot is null)
@@ -72,7 +78,7 @@ namespace Api.Services
                 throw new RobotCurrentAreaMissingException(ErrorMessage);
             }
 
-            var missionInspectionArea = await deckService.ReadById(
+            var missionInspectionArea = await inspectionAreaService.ReadById(
                 inspectionAreaId,
                 readOnly: true
             );
@@ -81,14 +87,15 @@ namespace Api.Services
                 const string ErrorMessage =
                     "The mission does not have an associated inspection area";
                 logger.LogError("{Message}", ErrorMessage);
-                throw new DeckNotFoundException(ErrorMessage);
+                throw new InspectionAreaNotFoundException(ErrorMessage);
             }
 
             if (robot.CurrentInspectionArea is null)
             {
-                const string ErrorMessage = "The robot area is not associated with any deck";
+                const string ErrorMessage =
+                    "The robot area is not associated with any inspection area";
                 logger.LogError("{Message}", ErrorMessage);
-                throw new DeckNotFoundException(ErrorMessage);
+                throw new InspectionAreaNotFoundException(ErrorMessage);
             }
 
             return robot.CurrentInspectionArea.Id == missionInspectionArea.Id;

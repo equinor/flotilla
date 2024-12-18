@@ -24,7 +24,7 @@ namespace Api.Database.Context
         public DbSet<MissionDefinition> MissionDefinitions => Set<MissionDefinition>();
         public DbSet<Plant> Plants => Set<Plant>();
         public DbSet<Installation> Installations => Set<Installation>();
-        public DbSet<Deck> Decks => Set<Deck>();
+        public DbSet<InspectionArea> InspectionAreas => Set<InspectionArea>();
         public DbSet<Area> Areas => Set<Area>();
         public DbSet<Source> Sources => Set<Source>();
         public DbSet<DefaultLocalizationPose> DefaultLocalizationPoses =>
@@ -119,7 +119,7 @@ namespace Api.Database.Context
 
             modelBuilder
                 .Entity<Area>()
-                .HasOne(a => a.Deck)
+                .HasOne(a => a.InspectionArea)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder
@@ -133,12 +133,12 @@ namespace Api.Database.Context
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder
-                .Entity<Deck>()
+                .Entity<InspectionArea>()
                 .HasOne(d => d.Plant)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder
-                .Entity<Deck>()
+                .Entity<InspectionArea>()
                 .HasOne(d => d.Installation)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);

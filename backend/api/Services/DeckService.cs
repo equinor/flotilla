@@ -8,37 +8,37 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
 {
-    public interface IDeckService
+    public interface IInspectionAreaService
     {
-        public Task<IEnumerable<Deck>> ReadAll(bool readOnly = true);
+        public Task<IEnumerable<InspectionArea>> ReadAll(bool readOnly = true);
 
-        public Task<Deck?> ReadById(string id, bool readOnly = true);
+        public Task<InspectionArea?> ReadById(string id, bool readOnly = true);
 
-        public Task<IEnumerable<Deck>> ReadByInstallation(
+        public Task<IEnumerable<InspectionArea>> ReadByInstallation(
             string installationCode,
             bool readOnly = true
         );
 
-        public Task<Deck?> ReadByInstallationAndName(
+        public Task<InspectionArea?> ReadByInstallationAndName(
             string installationCode,
-            string deckName,
+            string inspectionAreaName,
             bool readOnly = true
         );
 
-        public Task<Deck?> ReadByInstallationAndPlantAndName(
+        public Task<InspectionArea?> ReadByInstallationAndPlantAndName(
             Installation installation,
             Plant plant,
-            string deckName,
+            string inspectionAreaName,
             bool readOnly = true
         );
 
-        public Task<Deck> Create(CreateDeckQuery newDeck);
+        public Task<InspectionArea> Create(CreateInspectionAreaQuery newInspectionArea);
 
-        public Task<Deck> Update(Deck deck);
+        public Task<InspectionArea> Update(InspectionArea inspectionArea);
 
-        public Task<Deck?> Delete(string id);
+        public Task<InspectionArea?> Delete(string id);
 
-        public void DetachTracking(Deck deck);
+        public void DetachTracking(InspectionArea inspectionArea);
     }
 
     [SuppressMessage(
@@ -51,26 +51,27 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class DeckService(
+    public class InspectionAreaService(
         FlotillaDbContext context,
         IDefaultLocalizationPoseService defaultLocalizationPoseService,
         IInstallationService installationService,
         IPlantService plantService,
         IAccessRoleService accessRoleService,
         ISignalRService signalRService
-    ) : IDeckService
+    ) : IInspectionAreaService
     {
-        public async Task<IEnumerable<Deck>> ReadAll(bool readOnly = true)
+        public async Task<IEnumerable<InspectionArea>> ReadAll(bool readOnly = true)
         {
-            return await GetDecks(readOnly: readOnly).ToListAsync();
+            return await GetInspectionAreas(readOnly: readOnly).ToListAsync();
         }
 
-        public async Task<Deck?> ReadById(string id, bool readOnly = true)
+        public async Task<InspectionArea?> ReadById(string id, bool readOnly = true)
         {
-            return await GetDecks(readOnly: readOnly).FirstOrDefaultAsync(a => a.Id.Equals(id));
+            return await GetInspectionAreas(readOnly: readOnly)
+                .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<IEnumerable<Deck>> ReadByInstallation(
+        public async Task<IEnumerable<InspectionArea>> ReadByInstallation(
             string installationCode,
             bool readOnly = true
         )
@@ -83,38 +84,38 @@ namespace Api.Services
             {
                 return [];
             }
-            return await GetDecks(readOnly: readOnly)
+            return await GetInspectionAreas(readOnly: readOnly)
                 .Where(a => a.Installation != null && a.Installation.Id.Equals(installation.Id))
                 .ToListAsync();
         }
 
-        public async Task<Deck?> ReadByInstallationAndName(
+        public async Task<InspectionArea?> ReadByInstallationAndName(
             string installationCode,
-            string deckName,
+            string inspectionAreaName,
             bool readOnly = true
         )
         {
-            if (deckName == null)
+            if (inspectionAreaName == null)
             {
                 return null;
             }
-            return await GetDecks(readOnly: readOnly)
+            return await GetInspectionAreas(readOnly: readOnly)
                 .Where(a =>
                     a.Installation != null
                     && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower())
-                    && a.Name.ToLower().Equals(deckName.ToLower())
+                    && a.Name.ToLower().Equals(inspectionAreaName.ToLower())
                 )
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<Deck?> ReadByInstallationAndPlantAndName(
+        public async Task<InspectionArea?> ReadByInstallationAndPlantAndName(
             Installation installation,
             Plant plant,
             string name,
             bool readOnly = true
         )
         {
-            return await GetDecks(readOnly: readOnly)
+            return await GetInspectionAreas(readOnly: readOnly)
                 .Where(a =>
                     a.Plant != null
                     && a.Plant.Id.Equals(plant.Id)
@@ -127,110 +128,113 @@ namespace Api.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<Deck> Create(CreateDeckQuery newDeckQuery)
+        public async Task<InspectionArea> Create(CreateInspectionAreaQuery newInspectionAreaQuery)
         {
             var installation =
                 await installationService.ReadByInstallationCode(
-                    newDeckQuery.InstallationCode,
+                    newInspectionAreaQuery.InstallationCode,
                     readOnly: true
                 )
                 ?? throw new InstallationNotFoundException(
-                    $"No installation with name {newDeckQuery.InstallationCode} could be found"
+                    $"No installation with name {newInspectionAreaQuery.InstallationCode} could be found"
                 );
             var plant =
                 await plantService.ReadByInstallationAndPlantCode(
                     installation,
-                    newDeckQuery.PlantCode,
+                    newInspectionAreaQuery.PlantCode,
                     readOnly: true
                 )
                 ?? throw new PlantNotFoundException(
-                    $"No plant with name {newDeckQuery.PlantCode} could be found"
+                    $"No plant with name {newInspectionAreaQuery.PlantCode} could be found"
                 );
-            var existingDeck = await ReadByInstallationAndPlantAndName(
+            var existingInspectionArea = await ReadByInstallationAndPlantAndName(
                 installation,
                 plant,
-                newDeckQuery.Name,
+                newInspectionAreaQuery.Name,
                 readOnly: true
             );
 
-            if (existingDeck != null)
+            if (existingInspectionArea != null)
             {
-                throw new DeckExistsException($"Deck with name {newDeckQuery.Name} already exists");
+                throw new InspectionAreaExistsException(
+                    $"Inspection are with name {newInspectionAreaQuery.Name} already exists"
+                );
             }
 
             DefaultLocalizationPose? defaultLocalizationPose = null;
-            if (newDeckQuery.DefaultLocalizationPose != null)
+            if (newInspectionAreaQuery.DefaultLocalizationPose != null)
             {
                 defaultLocalizationPose = await defaultLocalizationPoseService.Create(
                     new DefaultLocalizationPose(
-                        newDeckQuery.DefaultLocalizationPose.Value.Pose,
-                        newDeckQuery.DefaultLocalizationPose.Value.IsDockingStation
+                        newInspectionAreaQuery.DefaultLocalizationPose.Value.Pose,
+                        newInspectionAreaQuery.DefaultLocalizationPose.Value.IsDockingStation
                     )
                 );
             }
 
-            var deck = new Deck
+            var inspectionArea = new InspectionArea
             {
-                Name = newDeckQuery.Name,
+                Name = newInspectionAreaQuery.Name,
                 Installation = installation,
                 Plant = plant,
                 DefaultLocalizationPose = defaultLocalizationPose,
             };
 
-            context.Entry(deck.Installation).State = EntityState.Unchanged;
-            context.Entry(deck.Plant).State = EntityState.Unchanged;
-            if (deck.DefaultLocalizationPose is not null)
+            context.Entry(inspectionArea.Installation).State = EntityState.Unchanged;
+            context.Entry(inspectionArea.Plant).State = EntityState.Unchanged;
+            if (inspectionArea.DefaultLocalizationPose is not null)
             {
-                context.Entry(deck.DefaultLocalizationPose).State = EntityState.Modified;
+                context.Entry(inspectionArea.DefaultLocalizationPose).State = EntityState.Modified;
             }
 
-            await context.Decks.AddAsync(deck);
-            await ApplyDatabaseUpdate(deck.Installation);
+            await context.InspectionAreas.AddAsync(inspectionArea);
+            await ApplyDatabaseUpdate(inspectionArea.Installation);
             _ = signalRService.SendMessageAsync(
-                "Deck created",
-                deck.Installation,
-                new DeckResponse(deck)
+                "InspectionArea created",
+                inspectionArea.Installation,
+                new InspectionAreaResponse(inspectionArea)
             );
-            DetachTracking(deck);
-            return deck!;
+            DetachTracking(inspectionArea);
+            return inspectionArea!;
         }
 
-        public async Task<Deck> Update(Deck deck)
+        public async Task<InspectionArea> Update(InspectionArea inspectionArea)
         {
-            var entry = context.Update(deck);
-            await ApplyDatabaseUpdate(deck.Installation);
+            var entry = context.Update(inspectionArea);
+            await ApplyDatabaseUpdate(inspectionArea.Installation);
             _ = signalRService.SendMessageAsync(
-                "Deck updated",
-                deck.Installation,
-                new DeckResponse(deck)
+                "InspectionArea updated",
+                inspectionArea.Installation,
+                new InspectionAreaResponse(inspectionArea)
             );
             return entry.Entity;
         }
 
-        public async Task<Deck?> Delete(string id)
+        public async Task<InspectionArea?> Delete(string id)
         {
-            var deck = await GetDecks().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
-            if (deck is null)
+            var inspectionArea = await GetInspectionAreas()
+                .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            if (inspectionArea is null)
             {
                 return null;
             }
 
-            context.Decks.Remove(deck);
-            await ApplyDatabaseUpdate(deck.Installation);
+            context.InspectionAreas.Remove(inspectionArea);
+            await ApplyDatabaseUpdate(inspectionArea.Installation);
             _ = signalRService.SendMessageAsync(
-                "Deck deleted",
-                deck.Installation,
-                new DeckResponse(deck)
+                "InspectionArea deleted",
+                inspectionArea.Installation,
+                new InspectionAreaResponse(inspectionArea)
             );
 
-            return deck;
+            return inspectionArea;
         }
 
-        private IQueryable<Deck> GetDecks(bool readOnly = true)
+        private IQueryable<InspectionArea> GetInspectionAreas(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context
-                .Decks.Include(p => p.Plant)
+                .InspectionAreas.Include(p => p.Plant)
                 .ThenInclude(p => p.Installation)
                 .Include(i => i.Installation)
                 .Include(d => d.DefaultLocalizationPose)
@@ -255,19 +259,21 @@ namespace Api.Services
                 await context.SaveChangesAsync();
             else
                 throw new UnauthorizedAccessException(
-                    $"User does not have permission to update deck in installation {installation.Name}"
+                    $"User does not have permission to update inspection area in installation {installation.Name}"
                 );
         }
 
-        public void DetachTracking(Deck deck)
+        public void DetachTracking(InspectionArea inspectionArea)
         {
-            if (deck.Installation != null)
-                installationService.DetachTracking(deck.Installation);
-            if (deck.Plant != null)
-                plantService.DetachTracking(deck.Plant);
-            if (deck.DefaultLocalizationPose != null)
-                defaultLocalizationPoseService.DetachTracking(deck.DefaultLocalizationPose);
-            context.Entry(deck).State = EntityState.Detached;
+            if (inspectionArea.Installation != null)
+                installationService.DetachTracking(inspectionArea.Installation);
+            if (inspectionArea.Plant != null)
+                plantService.DetachTracking(inspectionArea.Plant);
+            if (inspectionArea.DefaultLocalizationPose != null)
+                defaultLocalizationPoseService.DetachTracking(
+                    inspectionArea.DefaultLocalizationPose
+                );
+            context.Entry(inspectionArea).State = EntityState.Detached;
         }
     }
 }

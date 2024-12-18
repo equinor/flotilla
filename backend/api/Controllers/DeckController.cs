@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers
 {
     [ApiController]
-    [Route("decks")]
-    public class DeckController(
-        ILogger<DeckController> logger,
+    [Route("inspectionAreas")]
+    public class InspectionAreaController(
+        ILogger<InspectionAreaController> logger,
         IMapService mapService,
-        IDeckService deckService,
+        IInspectionAreaService inspectionAreaService,
         IDefaultLocalizationPoseService defaultLocalizationPoseService,
         IInstallationService installationService,
         IPlantService plantService,
@@ -20,96 +20,105 @@ namespace Api.Controllers
     ) : ControllerBase
     {
         /// <summary>
-        /// List all decks in the Flotilla database
+        /// List all inspection areas in the Flotilla database
         /// </summary>
         /// <remarks>
-        /// <para> This query gets all decks </para>
+        /// <para> This query gets all inspection areas </para>
         /// </remarks>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(IList<DeckResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<InspectionAreaResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<DeckResponse>>> GetDecks()
+        public async Task<ActionResult<IList<InspectionAreaResponse>>> GetInspectionAreas()
         {
             try
             {
-                var decks = await deckService.ReadAll(readOnly: true);
-                var deckResponses = decks.Select(d => new DeckResponse(d)).ToList();
-                return Ok(deckResponses);
+                var inspectionAreas = await inspectionAreaService.ReadAll(readOnly: true);
+                var inspectionAreaResponses = inspectionAreas
+                    .Select(d => new InspectionAreaResponse(d))
+                    .ToList();
+                return Ok(inspectionAreaResponses);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error during GET of decks from database");
+                logger.LogError(e, "Error during GET of inspection areas from database");
                 throw;
             }
         }
 
         /// <summary>
-        /// List all decks in the specified installation
+        /// List all inspection areas in the specified installation
         /// </summary>
         /// <remarks>
-        /// <para> This query gets all decks in specified installation</para>
+        /// <para> This query gets all inspection areas in specified installation</para>
         /// </remarks>
         [HttpGet("installation/{installationCode}")]
         [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(IList<DeckResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<InspectionAreaResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<DeckResponse>>> GetDecksByInstallationCode(
-            [FromRoute] string installationCode
-        )
+        public async Task<
+            ActionResult<IList<InspectionAreaResponse>>
+        > GetInspectionAreasByInstallationCode([FromRoute] string installationCode)
         {
             try
             {
-                var decks = await deckService.ReadByInstallation(installationCode, readOnly: true);
-                var deckResponses = decks.Select(d => new DeckResponse(d)).ToList();
-                return Ok(deckResponses);
+                var inspectionAreas = await inspectionAreaService.ReadByInstallation(
+                    installationCode,
+                    readOnly: true
+                );
+                var inspectionAreaResponses = inspectionAreas
+                    .Select(d => new InspectionAreaResponse(d))
+                    .ToList();
+                return Ok(inspectionAreaResponses);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error during GET of decks from database");
+                logger.LogError(e, "Error during GET of inspection areas from database");
                 throw;
             }
         }
 
         /// <summary>
-        /// Lookup deck by specified id.
+        /// Lookup inspection area by specified id.
         /// </summary>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(DeckResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<DeckResponse>> GetDeckById([FromRoute] string id)
+        public async Task<ActionResult<InspectionAreaResponse>> GetInspectionAreaById(
+            [FromRoute] string id
+        )
         {
             try
             {
-                var deck = await deckService.ReadById(id, readOnly: true);
-                if (deck == null)
-                    return NotFound($"Could not find deck with id {id}");
-                return Ok(new DeckResponse(deck));
+                var inspectionArea = await inspectionAreaService.ReadById(id, readOnly: true);
+                if (inspectionArea == null)
+                    return NotFound($"Could not find inspection area with id {id}");
+                return Ok(new InspectionAreaResponse(inspectionArea));
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error during GET of deck from database");
+                logger.LogError(e, "Error during GET of inspection area from database");
                 throw;
             }
         }
 
         /// <summary>
-        /// Lookup all the mission definitions related to a deck
+        /// Lookup all the mission definitions related to a inspection area
         /// </summary>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
-        [Route("{deckId}/mission-definitions")]
+        [Route("{inspectionAreaId}/mission-definitions")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -117,16 +126,19 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<
             ActionResult<IList<MissionDefinitionResponse>>
-        > GetMissionDefinitionsInDeck([FromRoute] string deckId)
+        > GetMissionDefinitionsInInspectionArea([FromRoute] string inspectionAreaId)
         {
             try
             {
-                var deck = await deckService.ReadById(deckId, readOnly: true);
-                if (deck == null)
-                    return NotFound($"Could not find deck with id {deckId}");
+                var inspectionArea = await inspectionAreaService.ReadById(
+                    inspectionAreaId,
+                    readOnly: true
+                );
+                if (inspectionArea == null)
+                    return NotFound($"Could not find inspection area with id {inspectionAreaId}");
 
                 var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(
-                    deck.Id,
+                    inspectionArea.Id,
                     readOnly: true
                 );
                 var missionDefinitionResponses = missionDefinitions
@@ -136,74 +148,79 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error during GET of deck missions from database");
+                logger.LogError(e, "Error during GET of inspection area missions from database");
                 throw;
             }
         }
 
         /// <summary>
-        /// Add a new deck
+        /// Add a new inspection area
         /// </summary>
         /// <remarks>
-        /// <para> This query adds a new deck to the database </para>
+        /// <para> This query adds a new inspection area to the database </para>
         /// </remarks>
         [HttpPost]
         [Authorize(Roles = Role.Admin)]
-        [ProducesResponseType(typeof(DeckResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<DeckResponse>> Create([FromBody] CreateDeckQuery deck)
+        public async Task<ActionResult<InspectionAreaResponse>> Create(
+            [FromBody] CreateInspectionAreaQuery inspectionArea
+        )
         {
-            logger.LogInformation("Creating new deck");
+            logger.LogInformation("Creating new inspection area");
             try
             {
                 var existingInstallation = await installationService.ReadByInstallationCode(
-                    deck.InstallationCode,
+                    inspectionArea.InstallationCode,
                     readOnly: true
                 );
                 if (existingInstallation == null)
                 {
                     return NotFound(
-                        $"Could not find installation with name {deck.InstallationCode}"
+                        $"Could not find installation with name {inspectionArea.InstallationCode}"
                     );
                 }
                 var existingPlant = await plantService.ReadByInstallationAndPlantCode(
                     existingInstallation,
-                    deck.PlantCode,
+                    inspectionArea.PlantCode,
                     readOnly: true
                 );
                 if (existingPlant == null)
                 {
-                    return NotFound($"Could not find plant with name {deck.PlantCode}");
+                    return NotFound($"Could not find plant with name {inspectionArea.PlantCode}");
                 }
-                var existingDeck = await deckService.ReadByInstallationAndPlantAndName(
-                    existingInstallation,
-                    existingPlant,
-                    deck.Name,
-                    readOnly: true
-                );
-                if (existingDeck != null)
+                var existingInspectionArea =
+                    await inspectionAreaService.ReadByInstallationAndPlantAndName(
+                        existingInstallation,
+                        existingPlant,
+                        inspectionArea.Name,
+                        readOnly: true
+                    );
+                if (existingInspectionArea != null)
                 {
-                    logger.LogInformation("An deck for given name and deck already exists");
-                    return BadRequest($"Deck already exists");
+                    logger.LogInformation(
+                        "An inspection area for given name and inspection area already exists"
+                    );
+                    return BadRequest($"InspectionArea already exists");
                 }
 
-                var newDeck = await deckService.Create(deck);
+                var newInspectionArea = await inspectionAreaService.Create(inspectionArea);
                 logger.LogInformation(
-                    "Succesfully created new deck with id '{deckId}'",
-                    newDeck.Id
+                    "Succesfully created new inspection area with id '{inspectionAreaId}'",
+                    newInspectionArea.Id
                 );
                 return CreatedAtAction(
-                    nameof(GetDeckById),
-                    new { id = newDeck.Id },
-                    new DeckResponse(newDeck)
+                    nameof(GetInspectionAreaById),
+                    new { id = newInspectionArea.Id },
+                    new InspectionAreaResponse(newInspectionArea)
                 );
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error while creating new deck");
+                logger.LogError(e, "Error while creating new inspection area");
                 throw;
             }
         }
@@ -212,48 +229,59 @@ namespace Api.Controllers
         /// Updates default localization pose
         /// </summary>
         /// <remarks>
-        /// <para> This query updates the default localization pose for a deck </para>
+        /// <para> This query updates the default localization pose for a inspection area </para>
         /// </remarks>
         [HttpPut]
         [Authorize(Roles = Role.Admin)]
-        [Route("{deckId}/update-default-localization-pose")]
-        [ProducesResponseType(typeof(DeckResponse), StatusCodes.Status201Created)]
+        [Route("{inspectionAreaId}/update-default-localization-pose")]
+        [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<DeckResponse>> UpdateDefaultLocalizationPose(
-            [FromRoute] string deckId,
+        public async Task<ActionResult<InspectionAreaResponse>> UpdateDefaultLocalizationPose(
+            [FromRoute] string inspectionAreaId,
             [FromBody] CreateDefaultLocalizationPose newDefaultLocalizationPose
         )
         {
-            logger.LogInformation("Updating default localization pose on deck '{deckId}'", deckId);
+            logger.LogInformation(
+                "Updating default localization pose on inspection area '{inspectionAreaId}'",
+                inspectionAreaId
+            );
             try
             {
-                var deck = await deckService.ReadById(deckId, readOnly: false);
-                if (deck is null)
+                var inspectionArea = await inspectionAreaService.ReadById(
+                    inspectionAreaId,
+                    readOnly: false
+                );
+                if (inspectionArea is null)
                 {
-                    logger.LogInformation("A deck with id '{deckId}' does not exist", deckId);
-                    return NotFound("Deck does not exists");
+                    logger.LogInformation(
+                        "A inspection area with id '{inspectionAreaId}' does not exist",
+                        inspectionAreaId
+                    );
+                    return NotFound("InspectionArea does not exists");
                 }
 
-                if (deck.DefaultLocalizationPose != null)
+                if (inspectionArea.DefaultLocalizationPose != null)
                 {
-                    deck.DefaultLocalizationPose.Pose = newDefaultLocalizationPose.Pose;
-                    deck.DefaultLocalizationPose.DockingEnabled =
+                    inspectionArea.DefaultLocalizationPose.Pose = newDefaultLocalizationPose.Pose;
+                    inspectionArea.DefaultLocalizationPose.DockingEnabled =
                         newDefaultLocalizationPose.IsDockingStation;
-                    _ = await defaultLocalizationPoseService.Update(deck.DefaultLocalizationPose);
+                    _ = await defaultLocalizationPoseService.Update(
+                        inspectionArea.DefaultLocalizationPose
+                    );
                 }
                 else
                 {
-                    deck.DefaultLocalizationPose = new DefaultLocalizationPose(
+                    inspectionArea.DefaultLocalizationPose = new DefaultLocalizationPose(
                         newDefaultLocalizationPose.Pose,
                         newDefaultLocalizationPose.IsDockingStation
                     );
-                    deck = await deckService.Update(deck);
+                    inspectionArea = await inspectionAreaService.Update(inspectionArea);
                 }
 
-                return Ok(new DeckResponse(deck));
+                return Ok(new InspectionAreaResponse(inspectionArea));
             }
             catch (Exception e)
             {
@@ -263,26 +291,28 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// Deletes the deck with the specified id from the database.
+        /// Deletes the inspection area with the specified id from the database.
         /// </summary>
         [HttpDelete]
         [Authorize(Roles = Role.Admin)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(DeckResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<DeckResponse>> DeleteDeck([FromRoute] string id)
+        public async Task<ActionResult<InspectionAreaResponse>> DeleteInspectionArea(
+            [FromRoute] string id
+        )
         {
-            var deck = await deckService.Delete(id);
-            if (deck is null)
-                return NotFound($"Deck with id {id} not found");
-            return Ok(new DeckResponse(deck));
+            var inspectionArea = await inspectionAreaService.Delete(id);
+            if (inspectionArea is null)
+                return NotFound($"InspectionArea with id {id} not found");
+            return Ok(new InspectionAreaResponse(inspectionArea));
         }
 
         /// <summary>
-        /// Gets map metadata for localization poses belonging to deck with specified id
+        /// Gets map metadata for localization poses belonging to inspection area with specified id
         /// </summary>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
@@ -294,47 +324,51 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MapMetadata>> GetMapMetadata([FromRoute] string id)
         {
-            var deck = await deckService.ReadById(id, readOnly: true);
-            if (deck is null)
+            var inspectionArea = await inspectionAreaService.ReadById(id, readOnly: true);
+            if (inspectionArea is null)
             {
-                string errorMessage = $"Deck not found for deck with ID {id}";
+                string errorMessage = $"InspectionArea not found for inspectionArea with ID {id}";
                 logger.LogError("{ErrorMessage}", errorMessage);
                 return NotFound(errorMessage);
             }
-            if (deck.Installation == null)
+            if (inspectionArea.Installation == null)
             {
-                string errorMessage = "Installation missing from deck";
+                string errorMessage = "Installation missing from inspection area";
                 logger.LogWarning(errorMessage);
                 return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
             }
 
-            if (deck.DefaultLocalizationPose is null)
+            if (inspectionArea.DefaultLocalizationPose is null)
             {
                 string errorMessage =
-                    $"Deck with id '{deck.Id}' does not have a default localization pose";
+                    $"InspectionArea with id '{inspectionArea.Id}' does not have a default localization pose";
                 logger.LogInformation("{ErrorMessage}", errorMessage);
                 return NotFound(errorMessage);
             }
 
             MapMetadata? mapMetadata;
-            var positions = new List<Position> { deck.DefaultLocalizationPose.Pose.Position };
+            var positions = new List<Position>
+            {
+                inspectionArea.DefaultLocalizationPose.Pose.Position,
+            };
             try
             {
                 mapMetadata = await mapService.ChooseMapFromPositions(
                     positions,
-                    deck.Installation.InstallationCode
+                    inspectionArea.Installation.InstallationCode
                 );
             }
             catch (RequestFailedException e)
             {
                 string errorMessage =
-                    $"An error occurred while retrieving the map for deck {deck.Id}";
+                    $"An error occurred while retrieving the map for inspection area {inspectionArea.Id}";
                 logger.LogError(e, "{ErrorMessage}", errorMessage);
                 return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
             }
             catch (ArgumentOutOfRangeException e)
             {
-                string errorMessage = $"Could not find a suitable map for deck {deck.Id}";
+                string errorMessage =
+                    $"Could not find a suitable map for inspection area {inspectionArea.Id}";
                 logger.LogError(e, "{ErrorMessage}", errorMessage);
                 return NotFound(errorMessage);
             }

@@ -28,7 +28,7 @@ namespace Api.Database.Models
 
         public virtual MissionRun? LastSuccessfulRun { get; set; }
 
-        public Deck? InspectionArea { get; set; }
+        public InspectionArea? InspectionArea { get; set; }
 
         public MapMetadata? Map { get; set; }
 

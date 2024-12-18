@@ -11,7 +11,7 @@ namespace Api.Database.Models
         public string Id { get; set; }
 
         [Required]
-        public virtual Deck Deck { get; set; }
+        public virtual InspectionArea InspectionArea { get; set; }
 
         [Required]
         public virtual Plant Plant { get; set; }

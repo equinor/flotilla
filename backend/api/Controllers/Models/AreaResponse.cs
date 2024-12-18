@@ -7,7 +7,7 @@ namespace Api.Controllers.Models
     {
         public string Id { get; set; } = string.Empty;
 
-        public string DeckName { get; set; }
+        public string InspectionAreaName { get; set; }
 
         public string PlantCode { get; set; }
 
@@ -30,7 +30,7 @@ namespace Api.Controllers.Models
         public AreaResponse(Area area)
         {
             Id = area.Id;
-            DeckName = area.Deck!.Name;
+            InspectionAreaName = area.InspectionArea!.Name;
             PlantCode = area.Plant.PlantCode;
             PlantName = area.Plant.Name;
             InstallationCode = area.Installation.InstallationCode;

@@ -238,7 +238,7 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context
                 .MissionDefinitions.Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(deck => deck!.Plant)
+                .ThenInclude(inspectionArea => inspectionArea!.Plant)
                 .ThenInclude(plant => plant.Installation)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                 .ThenInclude(area => area!.Installation)
@@ -250,7 +250,7 @@ namespace Api.Services
                     inspection != null ? inspection.InspectionFindings : null
                 )
                 .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(deck => deck!.DefaultLocalizationPose)
+                .ThenInclude(inspectionArea => inspectionArea!.DefaultLocalizationPose)
                 .ThenInclude(defaultLocalizationPose =>
                     defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null
                 )

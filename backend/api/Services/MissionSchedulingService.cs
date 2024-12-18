@@ -138,14 +138,14 @@ namespace Api.Services
                 );
             }
             else if (
-                !await localizationService.RobotIsOnSameDeckAsMission(
+                !await localizationService.RobotIsOnSameInspectionAreaAsMission(
                     robot.Id,
                     missionRun.InspectionArea!.Id
                 )
             )
             {
                 logger.LogError(
-                    "Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Aborting all mission runs",
+                    "Robot {RobotId} is not on the same inspection area as the mission run {MissionRunId}. Aborting all mission runs",
                     robot.Id,
                     missionRun.Id
                 );
@@ -153,7 +153,7 @@ namespace Api.Services
                 {
                     await AbortAllScheduledMissions(
                         robot.Id,
-                        "Aborted: Robot was at different deck"
+                        "Aborted: Robot was at different inspection area"
                     );
                 }
                 catch (RobotNotFoundException)
@@ -426,7 +426,7 @@ namespace Api.Services
                 string errorMessage =
                     $"Robot with ID {robotId} could return home as it did not have an inspection area";
                 logger.LogError("{Message}", errorMessage);
-                throw new DeckNotFoundException(errorMessage);
+                throw new InspectionAreaNotFoundException(errorMessage);
             }
 
             // Cloning to avoid tracking same object

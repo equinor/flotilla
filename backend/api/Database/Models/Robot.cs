@@ -24,7 +24,7 @@ namespace Api.Database.Models
             CreateRobotQuery createQuery,
             Installation installation,
             RobotModel model,
-            Deck? inspectionArea = null
+            InspectionArea? inspectionArea = null
         )
         {
             var documentation = new List<DocumentInfo>();
@@ -76,7 +76,7 @@ namespace Api.Database.Models
         [Required]
         public Installation CurrentInstallation { get; set; }
 
-        public Deck? CurrentInspectionArea { get; set; }
+        public InspectionArea? CurrentInspectionArea { get; set; }
 
         public float BatteryLevel { get; set; }
 

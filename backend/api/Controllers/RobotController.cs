@@ -17,7 +17,7 @@ namespace Api.Controllers
         IIsarService isarService,
         IMissionSchedulingService missionSchedulingService,
         IRobotModelService robotModelService,
-        IDeckService deckService,
+        IInspectionAreaService inspectionAreaService,
         IErrorHandlingService errorHandlingService
     ) : ControllerBase
     {
@@ -232,7 +232,7 @@ namespace Api.Controllers
                         }
                         else
                         {
-                            var inspectionArea = await deckService.ReadById(
+                            var inspectionArea = await inspectionAreaService.ReadById(
                                 query.InspectionAreaId,
                                 readOnly: true
                             );

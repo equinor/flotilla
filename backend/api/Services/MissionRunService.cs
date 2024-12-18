@@ -104,7 +104,7 @@ namespace Api.Services
         ILogger<MissionRunService> logger,
         IAccessRoleService accessRoleService,
         IMissionTaskService missionTaskService,
-        IDeckService deckService,
+        IInspectionAreaService inspectionAreaService,
         IRobotService robotService,
         IUserInfoService userInfoService
     ) : IMissionRunService
@@ -340,7 +340,7 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context
                 .MissionRuns.Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(deck => deck != null ? deck.Plant : null)
+                .ThenInclude(inspectionArea => inspectionArea != null ? inspectionArea.Plant : null)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionRun => missionRun.InspectionArea)
                 .ThenInclude(area => area != null ? area.Plant : null)
@@ -348,7 +348,9 @@ namespace Api.Services
                 .Include(missionRun => missionRun.InspectionArea)
                 .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
+                .ThenInclude(inspectionArea =>
+                    inspectionArea != null ? inspectionArea.DefaultLocalizationPose : null
+                )
                 .ThenInclude(defaultLocalizationPose =>
                     defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null
                 )
@@ -769,7 +771,7 @@ namespace Api.Services
                 missionTaskService.DetachTracking(task);
             }
             if (missionRun.InspectionArea != null)
-                deckService.DetachTracking(missionRun.InspectionArea);
+                inspectionAreaService.DetachTracking(missionRun.InspectionArea);
             if (missionRun.Robot != null)
                 robotService.DetachTracking(missionRun.Robot);
             context.Entry(missionRun).State = EntityState.Detached;

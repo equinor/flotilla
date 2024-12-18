@@ -1,9 +1,9 @@
-import { Deck } from 'models/Deck'
-import { DeckInspectionTuple, Inspection } from './InspectionSection'
+import { InspectionArea } from 'models/InspectionArea'
+import { InspectionAreaInspectionTuple, Inspection } from './InspectionSection'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import {
     CardMissionInformation,
-    DeckCardColors,
+    InspectionAreaCardColors,
     StyledDict,
     compareInspections,
     getDeadlineInspection,
@@ -14,62 +14,75 @@ import { tokens } from '@equinor/eds-tokens'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 
-interface IDeckCardProps {
-    deckMissions: DeckInspectionTuple[]
-    onClickDeck: (deck: Deck) => void
-    selectedDeck: Deck | undefined
+interface IInspectionAreaCardProps {
+    inspectionAreaMissions: InspectionAreaInspectionTuple[]
+    onClickInspectionArea: (inspectionArea: InspectionArea) => void
+    selectedInspectionArea: InspectionArea | undefined
     handleScheduleAll: (inspections: Inspection[]) => void
 }
 
-interface DeckCardProps {
-    deckData: DeckInspectionTuple
-    onClickDeck: (deck: Deck) => void
-    selectedDeck: Deck | undefined
+interface InspectionAreaCardProps {
+    inspectionAreaData: InspectionAreaInspectionTuple
+    onClickInspectionArea: (inspectionArea: InspectionArea) => void
+    selectedInspectionArea: InspectionArea | undefined
     handleScheduleAll: (inspections: Inspection[]) => void
 }
 
-const DeckCard = ({ deckData, onClickDeck, selectedDeck, handleScheduleAll }: DeckCardProps) => {
+const InspectionAreaCard = ({
+    inspectionAreaData,
+    onClickInspectionArea,
+    selectedInspectionArea,
+    handleScheduleAll,
+}: InspectionAreaCardProps) => {
     const { TranslateText } = useLanguageContext()
     const { ongoingMissions } = useMissionsContext()
     const { enabledRobots } = useRobotContext()
 
-    const isScheduleMissionsDisabled = enabledRobots.length === 0 || deckData.inspections.length === 0
+    const isScheduleMissionsDisabled = enabledRobots.length === 0 || inspectionAreaData.inspections.length === 0
 
-    const getCardColorFromInspections = (inspections: Inspection[]): DeckCardColors => {
-        if (inspections.length === 0) return DeckCardColors.Gray
+    const getCardColorFromInspections = (inspections: Inspection[]): InspectionAreaCardColors => {
+        if (inspections.length === 0) return InspectionAreaCardColors.Gray
         const sortedInspections = inspections.sort(compareInspections)
 
-        if (sortedInspections.length === 0) return DeckCardColors.Green
+        if (sortedInspections.length === 0) return InspectionAreaCardColors.Green
 
         const nextInspection = sortedInspections[0]
         if (!nextInspection.deadline) {
-            if (!nextInspection.missionDefinition.inspectionFrequency) return DeckCardColors.Green
-            else return DeckCardColors.Red
+            if (!nextInspection.missionDefinition.inspectionFrequency) return InspectionAreaCardColors.Green
+            else return InspectionAreaCardColors.Red
         }
 
         return getDeadlineInspection(nextInspection.deadline)
     }
 
     let queueMissionsTooltip = ''
-    if (deckData.inspections.length === 0) queueMissionsTooltip = TranslateText('No planned inspection')
+    if (inspectionAreaData.inspections.length === 0) queueMissionsTooltip = TranslateText('No planned inspection')
     else if (isScheduleMissionsDisabled) queueMissionsTooltip = TranslateText('No robot available')
 
     return (
-        <StyledDict.DeckCard key={deckData.deck.deckName}>
-            <StyledDict.Rectangle style={{ background: `${getCardColorFromInspections(deckData.inspections)}` }} />
+        <StyledDict.InspectionAreaCard key={inspectionAreaData.inspectionArea.inspectionAreaName}>
+            <StyledDict.Rectangle
+                style={{ background: `${getCardColorFromInspections(inspectionAreaData.inspections)}` }}
+            />
             <StyledDict.Card
-                key={deckData.deck.deckName}
-                onClick={deckData.inspections.length > 0 ? () => onClickDeck(deckData.deck) : undefined}
+                key={inspectionAreaData.inspectionArea.inspectionAreaName}
+                onClick={
+                    inspectionAreaData.inspections.length > 0
+                        ? () => onClickInspectionArea(inspectionAreaData.inspectionArea)
+                        : undefined
+                }
                 style={
-                    selectedDeck === deckData.deck
-                        ? { border: `solid ${getCardColorFromInspections(deckData.inspections)} 2px` }
+                    selectedInspectionArea === inspectionAreaData.inspectionArea
+                        ? { border: `solid ${getCardColorFromInspections(inspectionAreaData.inspections)} 2px` }
                         : {}
                 }
             >
-                <StyledDict.DeckText>
-                    <StyledDict.TopDeckText>
-                        <Typography variant={'body_short_bold'}>{deckData.deck.deckName.toString()}</Typography>
-                        {deckData.inspections
+                <StyledDict.InspectionAreaText>
+                    <StyledDict.TopInspectionAreaText>
+                        <Typography variant={'body_short_bold'}>
+                            {inspectionAreaData.inspectionArea.inspectionAreaName.toString()}
+                        </Typography>
+                        {inspectionAreaData.inspections
                             .filter((i) => ongoingMissions.find((m) => m.missionId === i.missionDefinition.id))
                             .map((inspection) => (
                                 <StyledDict.Content key={inspection.missionDefinition.id}>
@@ -77,20 +90,26 @@ const DeckCard = ({ deckData, onClickDeck, selectedDeck, handleScheduleAll }: De
                                     {TranslateText('InProgress')}
                                 </StyledDict.Content>
                             ))}
-                    </StyledDict.TopDeckText>
-                    {deckData.inspections && (
-                        <CardMissionInformation deckName={deckData.deck.deckName} inspections={deckData.inspections} />
+                    </StyledDict.TopInspectionAreaText>
+                    {inspectionAreaData.inspections && (
+                        <CardMissionInformation
+                            inspectionAreaName={inspectionAreaData.inspectionArea.inspectionAreaName}
+                            inspections={inspectionAreaData.inspections}
+                        />
                     )}
-                </StyledDict.DeckText>
+                </StyledDict.InspectionAreaText>
                 <StyledDict.CardComponent>
                     <Tooltip placement="top" title={queueMissionsTooltip}>
                         <Button
                             disabled={isScheduleMissionsDisabled}
                             variant="outlined"
-                            onClick={() => handleScheduleAll(deckData.inspections)}
+                            onClick={() => handleScheduleAll(inspectionAreaData.inspections)}
                             color="secondary"
                         >
-                            <Icon name={Icons.LibraryAdd} color={deckData.inspections.length > 0 ? '' : 'grey'} />
+                            <Icon
+                                name={Icons.LibraryAdd}
+                                color={inspectionAreaData.inspections.length > 0 ? '' : 'grey'}
+                            />
                             <Typography color={tokens.colors.text.static_icons__secondary.rgba}>
                                 {TranslateText('Queue the missions')}
                             </Typography>
@@ -98,31 +117,36 @@ const DeckCard = ({ deckData, onClickDeck, selectedDeck, handleScheduleAll }: De
                     </Tooltip>
                 </StyledDict.CardComponent>
             </StyledDict.Card>
-        </StyledDict.DeckCard>
+        </StyledDict.InspectionAreaCard>
     )
 }
 
-export const DeckCards = ({ deckMissions, onClickDeck, selectedDeck, handleScheduleAll }: IDeckCardProps) => {
+export const InspectionAreaCards = ({
+    inspectionAreaMissions,
+    onClickInspectionArea,
+    selectedInspectionArea,
+    handleScheduleAll,
+}: IInspectionAreaCardProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (
         <>
-            {Object.keys(deckMissions).length > 0 ? (
-                <StyledDict.DeckCards>
-                    {deckMissions.map((deckMission) => (
-                        <DeckCard
-                            key={'deckCard' + deckMission.deck.deckName}
-                            deckData={deckMission}
-                            onClickDeck={onClickDeck}
-                            selectedDeck={selectedDeck}
+            {Object.keys(inspectionAreaMissions).length > 0 ? (
+                <StyledDict.InspectionAreaCards>
+                    {inspectionAreaMissions.map((inspectionAreaMission) => (
+                        <InspectionAreaCard
+                            key={'inspectionAreaCard' + inspectionAreaMission.inspectionArea.inspectionAreaName}
+                            inspectionAreaData={inspectionAreaMission}
+                            onClickInspectionArea={onClickInspectionArea}
+                            selectedInspectionArea={selectedInspectionArea}
                             handleScheduleAll={handleScheduleAll}
                         />
                     ))}
-                </StyledDict.DeckCards>
+                </StyledDict.InspectionAreaCards>
             ) : (
                 <StyledDict.Placeholder>
                     <Typography variant="h4" color="disabled">
-                        {TranslateText('No deck inspections available')}
+                        {TranslateText('No inspections available')}
                     </Typography>
                 </StyledDict.Placeholder>
             )}

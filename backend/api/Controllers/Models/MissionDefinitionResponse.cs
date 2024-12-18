@@ -26,7 +26,7 @@ namespace Api.Controllers.Models
         public virtual MissionRun? LastSuccessfulRun { get; set; }
 
         [JsonPropertyName("inspectionArea")]
-        public DeckResponse? InspectionArea { get; set; }
+        public InspectionAreaResponse? InspectionArea { get; set; }
 
         [JsonPropertyName("isDeprecated")]
         public bool IsDeprecated { get; set; }
@@ -49,7 +49,7 @@ namespace Api.Controllers.Models
             InspectionFrequency = missionDefinition.InspectionFrequency;
             InspectionArea =
                 missionDefinition.InspectionArea != null
-                    ? new DeckResponse(missionDefinition.InspectionArea)
+                    ? new InspectionAreaResponse(missionDefinition.InspectionArea)
                     : null;
             LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
             IsDeprecated = missionDefinition.IsDeprecated;
@@ -86,7 +86,7 @@ namespace Api.Controllers.Models
         public virtual MissionRun? LastSuccessfulRun { get; } = missionDefinition.LastSuccessfulRun;
 
         [JsonPropertyName("inspectionArea")]
-        public Deck? InspectionArea { get; } = missionDefinition.InspectionArea;
+        public InspectionArea? InspectionArea { get; } = missionDefinition.InspectionArea;
 
         [JsonPropertyName("isDeprecated")]
         public bool IsDeprecated { get; } = missionDefinition.IsDeprecated;

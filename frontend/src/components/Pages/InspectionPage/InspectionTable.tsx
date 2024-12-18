@@ -1,7 +1,7 @@
 import { Table, Typography, Icon, Button } from '@equinor/eds-core-react'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { Deck } from 'models/Deck'
+import { InspectionArea } from 'models/InspectionArea'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { useNavigate } from 'react-router-dom'
@@ -81,7 +81,7 @@ const Centered = styled.div`
 `
 
 interface IProps {
-    deck: Deck
+    inspectionArea: InspectionArea
     inspections: Inspection[]
     scrollOnToggle: boolean
     openDialog: () => void
@@ -244,7 +244,13 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
     )
 }
 
-export const InspectionTable = ({ deck, inspections, scrollOnToggle, openDialog, setSelectedMissions }: IProps) => {
+export const InspectionTable = ({
+    inspectionArea,
+    inspections,
+    scrollOnToggle,
+    openDialog,
+    setSelectedMissions,
+}: IProps) => {
     const { TranslateText } = useLanguageContext()
 
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
@@ -284,7 +290,11 @@ export const InspectionTable = ({ deck, inspections, scrollOnToggle, openDialog,
                 <Table>
                     <Table.Caption>
                         <Typography variant="h3" style={{ marginBottom: '14px' }}>
-                            {TranslateText('Inspection Missions') + ' ' + TranslateText('for') + ' ' + deck.deckName}
+                            {TranslateText('Inspection Missions') +
+                                ' ' +
+                                TranslateText('for') +
+                                ' ' +
+                                inspectionArea.inspectionAreaName}
                         </Typography>
                         <SmallScreenInfoText />
                     </Table.Caption>

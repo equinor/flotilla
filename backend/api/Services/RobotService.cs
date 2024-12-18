@@ -50,7 +50,7 @@ namespace Api.Services
         ISignalRService signalRService,
         IAccessRoleService accessRoleService,
         IInstallationService installationService,
-        IDeckService deckService
+        IInspectionAreaService inspectionAreaService
     ) : IRobotService
     {
         public async Task<Robot> Create(Robot newRobot)
@@ -91,10 +91,10 @@ namespace Api.Services
                     );
                 }
 
-                Deck? inspectionArea = null;
+                InspectionArea? inspectionArea = null;
                 if (robotQuery.CurrentInspectionAreaName is not null)
                 {
-                    inspectionArea = await deckService.ReadByInstallationAndName(
+                    inspectionArea = await inspectionAreaService.ReadByInstallationAndName(
                         robotQuery.CurrentInstallationCode,
                         robotQuery.CurrentInspectionAreaName,
                         readOnly: true
@@ -102,7 +102,7 @@ namespace Api.Services
                     if (inspectionArea is null)
                     {
                         logger.LogError(
-                            "Inspection area '{CurrentDeckName}' does not exist in installation {CurrentInstallation}",
+                            "Inspection area '{CurrentInspectionAreaName}' does not exist in installation {CurrentInstallation}",
                             robotQuery.CurrentInspectionAreaName,
                             robotQuery.CurrentInstallationCode
                         );
@@ -270,7 +270,7 @@ namespace Api.Services
                 return;
             }
 
-            var area = await deckService.ReadById(inspectionAreaId, readOnly: true);
+            var area = await inspectionAreaService.ReadById(inspectionAreaId, readOnly: true);
             if (area is null)
             {
                 logger.LogError(
@@ -383,7 +383,9 @@ namespace Api.Services
                 .Include(r => r.Model)
                 .Include(r => r.CurrentInstallation)
                 .Include(r => r.CurrentInspectionArea)
-                .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
+                .ThenInclude(inspectionArea =>
+                    inspectionArea != null ? inspectionArea.DefaultLocalizationPose : null
+                )
                 .ThenInclude(defaultLocalizationPose =>
                     defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null
                 )
@@ -503,7 +505,7 @@ namespace Api.Services
             if (robot.CurrentInstallation != null)
                 installationService.DetachTracking(robot.CurrentInstallation);
             if (robot.CurrentInspectionArea != null)
-                deckService.DetachTracking(robot.CurrentInspectionArea);
+                inspectionAreaService.DetachTracking(robot.CurrentInspectionArea);
             if (robot.Model != null)
                 robotModelService.DetachTracking(robot.Model);
             context.Entry(robot).State = EntityState.Detached;

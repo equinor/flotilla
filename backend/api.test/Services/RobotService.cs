@@ -24,7 +24,7 @@ namespace Api.Test.Services
         private readonly IInstallationService _installationService;
         private readonly IPlantService _plantService;
         private readonly IDefaultLocalizationPoseService _defaultLocalizationPoseService;
-        private readonly IDeckService _deckService;
+        private readonly IInspectionAreaService _inspectionAreaService;
         private readonly IAreaService _areaService;
         private readonly DatabaseUtilities _databaseUtilities;
 
@@ -39,7 +39,7 @@ namespace Api.Test.Services
             _installationService = new InstallationService(_context, _accessRoleService);
             _plantService = new PlantService(_context, _installationService, _accessRoleService);
             _defaultLocalizationPoseService = new DefaultLocalizationPoseService(_context);
-            _deckService = new DeckService(
+            _inspectionAreaService = new InspectionAreaService(
                 _context,
                 _defaultLocalizationPoseService,
                 _installationService,
@@ -51,7 +51,7 @@ namespace Api.Test.Services
                 _context,
                 _installationService,
                 _plantService,
-                _deckService,
+                _inspectionAreaService,
                 _defaultLocalizationPoseService,
                 _accessRoleService
             );
@@ -75,7 +75,7 @@ namespace Api.Test.Services
                 _signalRService,
                 _accessRoleService,
                 _installationService,
-                _deckService
+                _inspectionAreaService
             );
             var robots = await robotService.ReadAll();
 
@@ -92,7 +92,7 @@ namespace Api.Test.Services
                 _signalRService,
                 _accessRoleService,
                 _installationService,
-                _deckService
+                _inspectionAreaService
             );
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
@@ -111,7 +111,7 @@ namespace Api.Test.Services
                 _signalRService,
                 _accessRoleService,
                 _installationService,
-                _deckService
+                _inspectionAreaService
             );
             var robot = await robotService.ReadById("some_id_that_does_not_exist", readOnly: true);
             Assert.Null(robot);
@@ -127,7 +127,7 @@ namespace Api.Test.Services
                 _signalRService,
                 _accessRoleService,
                 _installationService,
-                _deckService
+                _inspectionAreaService
             );
             var installationService = new InstallationService(_context, _accessRoleService);
 
