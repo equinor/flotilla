@@ -3,11 +3,11 @@ using Api.Database.Models;
 
 namespace Api.Controllers.Models
 {
-    public class DeckResponse
+    public class InspectionAreaResponse
     {
         public string Id { get; set; }
 
-        public string DeckName { get; set; }
+        public string InspectionAreaName { get; set; }
 
         public string PlantCode { get; set; }
 
@@ -17,17 +17,17 @@ namespace Api.Controllers.Models
 
         [JsonConstructor]
 #nullable disable
-        public DeckResponse() { }
+        public InspectionAreaResponse() { }
 
 #nullable enable
 
-        public DeckResponse(Deck deck)
+        public InspectionAreaResponse(InspectionArea inspectionArea)
         {
-            Id = deck.Id;
-            DeckName = deck.Name;
-            PlantCode = deck.Plant.PlantCode;
-            InstallationCode = deck.Installation.InstallationCode;
-            DefaultLocalizationPose = deck.DefaultLocalizationPose?.Pose;
+            Id = inspectionArea.Id;
+            InspectionAreaName = inspectionArea.Name;
+            PlantCode = inspectionArea.Plant.PlantCode;
+            InstallationCode = inspectionArea.Installation.InstallationCode;
+            DefaultLocalizationPose = inspectionArea.DefaultLocalizationPose?.Pose;
         }
     }
 }

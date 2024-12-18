@@ -23,7 +23,7 @@ namespace Api.Test.Services
         private readonly IAccessRoleService _accessRoleService;
         private readonly UserInfoService _userInfoService;
         private readonly IMissionTaskService _missionTaskService;
-        private readonly IDeckService _deckService;
+        private readonly IInspectionAreaService _inspectionAreaService;
         private readonly IInstallationService _installationService;
         private readonly IPlantService _plantService;
         private readonly IRobotModelService _robotModelService;
@@ -47,7 +47,7 @@ namespace Api.Test.Services
             );
             _installationService = new InstallationService(_context, _accessRoleService);
             _plantService = new PlantService(_context, _installationService, _accessRoleService);
-            _deckService = new DeckService(
+            _inspectionAreaService = new InspectionAreaService(
                 _context,
                 defaultLocalizationPoseService,
                 _installationService,
@@ -63,7 +63,7 @@ namespace Api.Test.Services
                 new MockSignalRService(),
                 _accessRoleService,
                 _installationService,
-                _deckService
+                _inspectionAreaService
             );
             _missionRunService = new MissionRunService(
                 _context,
@@ -71,7 +71,7 @@ namespace Api.Test.Services
                 _logger,
                 _accessRoleService,
                 _missionTaskService,
-                _deckService,
+                _inspectionAreaService,
                 _robotService,
                 _userInfoService
             );
@@ -105,7 +105,7 @@ namespace Api.Test.Services
 
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(
+            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
@@ -113,7 +113,7 @@ namespace Api.Test.Services
             var missionRun = await _databaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
-                deck
+                inspectionArea
             );
 
             await _missionRunService.Create(missionRun);

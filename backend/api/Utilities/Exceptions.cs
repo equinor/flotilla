@@ -24,7 +24,7 @@
 
     public class PlantNotFoundException(string message) : Exception(message) { }
 
-    public class DeckNotFoundException(string message) : Exception(message) { }
+    public class InspectionAreaNotFoundException(string message) : Exception(message) { }
 
     public class AreaNotFoundException(string message) : Exception(message) { }
 
@@ -48,7 +48,7 @@
 
     public class AreaExistsException(string message) : Exception(message) { }
 
-    public class DeckExistsException(string message) : Exception(message) { }
+    public class InspectionAreaExistsException(string message) : Exception(message) { }
 
     public class DockException(string message) : Exception(message) { }
 

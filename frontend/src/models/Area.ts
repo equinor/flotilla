@@ -4,5 +4,5 @@ export interface Area {
     plantCode: string
     plantName: string
     installationCode: string
-    deckName: string
+    inspectionAreaName: string
 }

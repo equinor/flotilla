@@ -10,7 +10,7 @@ namespace Api.Database.Context
         private static readonly List<Installation> installations = GetInstallations();
         private static readonly List<Robot> robots = GetRobots();
         private static readonly List<Plant> plants = GetPlants();
-        private static readonly List<Deck> decks = GetDecks();
+        private static readonly List<InspectionArea> inspectionAreas = GetInspectionAreas();
         private static readonly List<Area> areas = GetAreas();
         private static readonly List<Source> sources = GetSources();
         private static readonly List<MissionTask> tasks = GetMissionTasks();
@@ -80,54 +80,54 @@ namespace Api.Database.Context
             return new List<Plant>([plant1, plant2]);
         }
 
-        private static List<Deck> GetDecks()
+        private static List<InspectionArea> GetInspectionAreas()
         {
-            var deck1 = new Deck
+            var inspectionArea1 = new InspectionArea
             {
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                Name = "TestDeck",
+                Name = "TestInspectionArea",
             };
 
-            var deck2 = new Deck
+            var inspectionArea2 = new InspectionArea
             {
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                Name = "TestDeck2",
+                Name = "TestInspectionArea2",
             };
 
-            var deck3 = new Deck
+            var inspectionArea3 = new InspectionArea
             {
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                Name = "TestDeck3",
+                Name = "TestInspectionArea3",
             };
 
-            var deck4 = new Deck
+            var inspectionArea4 = new InspectionArea
             {
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                Name = "TestDeck4",
+                Name = "TestInspectionArea4",
             };
 
-            var deckHuldraMezzanine = new Deck
+            var inspectionAreaHuldraMezzanine = new InspectionArea
             {
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                Name = "Huldra Mezzanine Deck",
+                Name = "Huldra Mezzanine InspectionArea",
             };
 
-            var deckKLab = new Deck
+            var inspectionAreaKLab = new InspectionArea
             {
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[1],
@@ -136,7 +136,16 @@ namespace Api.Database.Context
                 Name = "K-Lab",
             };
 
-            return new List<Deck>([deck1, deck2, deck3, deck4, deckHuldraMezzanine, deckKLab]);
+            return new List<InspectionArea>(
+                [
+                    inspectionArea1,
+                    inspectionArea2,
+                    inspectionArea3,
+                    inspectionArea4,
+                    inspectionAreaHuldraMezzanine,
+                    inspectionAreaKLab,
+                ]
+            );
         }
 
         private static List<Area> GetAreas()
@@ -144,9 +153,9 @@ namespace Api.Database.Context
             var area1 = new Area
             {
                 Id = Guid.NewGuid().ToString(),
-                Deck = decks[0],
-                Plant = decks[0].Plant,
-                Installation = decks[0].Installation,
+                InspectionArea = inspectionAreas[0],
+                Plant = inspectionAreas[0].Plant,
+                Installation = inspectionAreas[0].Installation,
                 Name = "testArea",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
@@ -155,9 +164,9 @@ namespace Api.Database.Context
             var area2 = new Area
             {
                 Id = Guid.NewGuid().ToString(),
-                Deck = decks[0],
-                Plant = decks[0].Plant,
-                Installation = decks[0].Installation,
+                InspectionArea = inspectionAreas[0],
+                Plant = inspectionAreas[0].Plant,
+                Installation = inspectionAreas[0].Installation,
                 Name = "testArea2",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
@@ -166,9 +175,9 @@ namespace Api.Database.Context
             var area3 = new Area
             {
                 Id = Guid.NewGuid().ToString(),
-                Deck = decks[0],
-                Plant = decks[0].Plant,
-                Installation = decks[0].Installation,
+                InspectionArea = inspectionAreas[0],
+                Plant = inspectionAreas[0].Plant,
+                Installation = inspectionAreas[0].Installation,
                 Name = "testArea3",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
@@ -177,9 +186,9 @@ namespace Api.Database.Context
             var area4 = new Area
             {
                 Id = Guid.NewGuid().ToString(),
-                Deck = decks[1],
-                Plant = decks[1].Plant,
-                Installation = decks[1].Installation,
+                InspectionArea = inspectionAreas[1],
+                Plant = inspectionAreas[1].Plant,
+                Installation = inspectionAreas[1].Installation,
                 Name = "testArea4",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
@@ -188,9 +197,9 @@ namespace Api.Database.Context
             var area5 = new Area
             {
                 Id = Guid.NewGuid().ToString(),
-                Deck = decks[2],
-                Plant = decks[2].Plant,
-                Installation = decks[2].Installation,
+                InspectionArea = inspectionAreas[2],
+                Plant = inspectionAreas[2].Plant,
+                Installation = inspectionAreas[2].Installation,
                 Name = "testArea5",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
@@ -199,9 +208,9 @@ namespace Api.Database.Context
             var area6 = new Area
             {
                 Id = Guid.NewGuid().ToString(),
-                Deck = decks[3],
-                Plant = decks[3].Plant,
-                Installation = decks[3].Installation,
+                InspectionArea = inspectionAreas[3],
+                Plant = inspectionAreas[3].Plant,
+                Installation = inspectionAreas[3].Installation,
                 Name = "testArea6",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
@@ -210,9 +219,9 @@ namespace Api.Database.Context
             var areaHuldraHB = new Area
             {
                 Id = Guid.NewGuid().ToString(),
-                Deck = decks[4],
-                Plant = decks[4].Plant,
-                Installation = decks[4].Installation,
+                InspectionArea = inspectionAreas[4],
+                Plant = inspectionAreas[4].Plant,
+                Installation = inspectionAreas[4].Installation,
                 Name = "HB",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
@@ -221,9 +230,9 @@ namespace Api.Database.Context
             var areaKLab = new Area
             {
                 Id = Guid.NewGuid().ToString(),
-                Deck = decks[5],
-                Plant = decks[5].Plant,
-                Installation = decks[5].Installation,
+                InspectionArea = inspectionAreas[5],
+                Plant = inspectionAreas[5].Plant,
+                Installation = inspectionAreas[5].Installation,
                 Name = "K-lab",
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
@@ -295,8 +304,8 @@ namespace Api.Database.Context
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Placeholder Mission 1",
-                InstallationCode = decks[0].Installation!.InstallationCode,
-                InspectionArea = decks[0],
+                InstallationCode = inspectionAreas[0].Installation!.InstallationCode,
+                InspectionArea = inspectionAreas[0],
                 Source = sources[0],
                 Comment = "Interesting comment",
                 InspectionFrequency = new DateTime().AddDays(12) - new DateTime(),
@@ -307,8 +316,8 @@ namespace Api.Database.Context
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Placeholder Mission 2",
-                InstallationCode = decks[1].Installation!.InstallationCode,
-                InspectionArea = decks[1],
+                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
+                InspectionArea = inspectionAreas[1],
                 Source = sources[1],
                 InspectionFrequency = new DateTime().AddDays(7) - new DateTime(),
                 LastSuccessfulRun = null,
@@ -318,8 +327,8 @@ namespace Api.Database.Context
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Placeholder Mission 3",
-                InstallationCode = decks[1].Installation!.InstallationCode,
-                InspectionArea = decks[1],
+                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
+                InspectionArea = inspectionAreas[1],
                 Source = sources[2],
                 LastSuccessfulRun = null,
             };
@@ -328,9 +337,9 @@ namespace Api.Database.Context
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Placeholder Mission 4",
-                InstallationCode = decks[2].Installation.InstallationCode,
+                InstallationCode = inspectionAreas[2].Installation.InstallationCode,
                 InspectionFrequency = new DateTime().AddDays(90) - new DateTime(),
-                InspectionArea = decks[2],
+                InspectionArea = inspectionAreas[2],
                 Source = sources[2],
                 LastSuccessfulRun = null,
             };
@@ -339,9 +348,9 @@ namespace Api.Database.Context
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Placeholder Mission 5",
-                InstallationCode = decks[2].Installation.InstallationCode,
+                InstallationCode = inspectionAreas[2].Installation.InstallationCode,
                 InspectionFrequency = new DateTime().AddDays(35) - new DateTime(),
-                InspectionArea = decks[2],
+                InspectionArea = inspectionAreas[2],
                 Source = sources[2],
                 LastSuccessfulRun = null,
             };
@@ -350,9 +359,9 @@ namespace Api.Database.Context
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Placeholder Mission 6",
-                InstallationCode = decks[3].Installation.InstallationCode,
+                InstallationCode = inspectionAreas[3].Installation.InstallationCode,
                 InspectionFrequency = new DateTime().AddDays(4) - new DateTime(),
-                InspectionArea = decks[3],
+                InspectionArea = inspectionAreas[3],
                 Source = sources[2],
                 LastSuccessfulRun = null,
             };
@@ -360,8 +369,8 @@ namespace Api.Database.Context
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "Placeholder Mission 7",
-                InstallationCode = decks[3].Installation.InstallationCode,
-                InspectionArea = decks[4],
+                InstallationCode = inspectionAreas[3].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[4],
                 Source = sources[2],
                 LastSuccessfulRun = null,
             };
@@ -467,8 +476,8 @@ namespace Api.Database.Context
             {
                 Name = "Placeholder Mission 1",
                 Robot = robots[0],
-                InstallationCode = decks[0].Installation!.InstallationCode,
-                InspectionArea = decks[0],
+                InstallationCode = inspectionAreas[0].Installation!.InstallationCode,
+                InspectionArea = inspectionAreas[0],
                 MissionId = missionDefinitions[0].Id,
                 Status = MissionStatus.Successful,
                 DesiredStartTime = DateTime.UtcNow,
@@ -479,8 +488,8 @@ namespace Api.Database.Context
             {
                 Name = "Placeholder Mission 2",
                 Robot = robots[1],
-                InstallationCode = decks[1].Installation!.InstallationCode,
-                InspectionArea = decks[1],
+                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
+                InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[0].Id,
                 Status = MissionStatus.Successful,
                 DesiredStartTime = DateTime.UtcNow,
@@ -492,8 +501,8 @@ namespace Api.Database.Context
             {
                 Name = "Placeholder Mission 3",
                 Robot = robots[2],
-                InstallationCode = decks[1].Installation!.InstallationCode,
-                InspectionArea = decks[1],
+                InstallationCode = inspectionAreas[1].Installation!.InstallationCode,
+                InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Successful,
                 DesiredStartTime = DateTime.UtcNow,
@@ -504,8 +513,8 @@ namespace Api.Database.Context
             {
                 Name = "Placeholder Mission 4",
                 Robot = robots[2],
-                InstallationCode = decks[1].Installation.InstallationCode,
-                InspectionArea = decks[1],
+                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Failed,
                 DesiredStartTime = DateTime.UtcNow,
@@ -516,8 +525,8 @@ namespace Api.Database.Context
             {
                 Name = "Placeholder Mission 5",
                 Robot = robots[2],
-                InstallationCode = decks[1].Installation.InstallationCode,
-                InspectionArea = decks[1],
+                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.PartiallySuccessful,
                 DesiredStartTime = DateTime.UtcNow,
@@ -528,8 +537,8 @@ namespace Api.Database.Context
             {
                 Name = "Placeholder Mission 6",
                 Robot = robots[2],
-                InstallationCode = decks[1].Installation.InstallationCode,
-                InspectionArea = decks[1],
+                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Cancelled,
                 DesiredStartTime = DateTime.UtcNow,
@@ -540,8 +549,8 @@ namespace Api.Database.Context
             {
                 Name = "Some failed tasks",
                 Robot = robots[2],
-                InstallationCode = decks[1].Installation.InstallationCode,
-                InspectionArea = decks[1],
+                InstallationCode = inspectionAreas[1].Installation.InstallationCode,
+                InspectionArea = inspectionAreas[1],
                 MissionId = missionDefinitions[1].Id,
                 Status = MissionStatus.Failed,
                 DesiredStartTime = DateTime.UtcNow,
@@ -599,7 +608,7 @@ namespace Api.Database.Context
 
             context.AddRange(robots);
             context.AddRange(plants);
-            context.AddRange(decks);
+            context.AddRange(inspectionAreas);
             context.AddRange(areas);
             context.AddRange(sources);
 

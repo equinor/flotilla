@@ -83,12 +83,12 @@ namespace Api.Test.Client
                 Name = testPlant,
             };
 
-            string testDeck = "testDeckAreaTest";
-            var deckQuery = new CreateDeckQuery
+            string testInspectionArea = "testInspectionAreaAreaTest";
+            var inspectionAreaQuery = new CreateInspectionAreaQuery
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testDeck,
+                Name = testInspectionArea,
             };
 
             string testArea = "testAreaAreaTest";
@@ -96,7 +96,7 @@ namespace Api.Test.Client
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                DeckName = testDeck,
+                InspectionAreaName = testInspectionArea,
                 AreaName = testArea,
                 DefaultLocalizationPose = testPose,
             };
@@ -113,8 +113,8 @@ namespace Api.Test.Client
                 "application/json"
             );
 
-            var deckContent = new StringContent(
-                JsonSerializer.Serialize(deckQuery),
+            var inspectionAreaContent = new StringContent(
+                JsonSerializer.Serialize(inspectionAreaQuery),
                 null,
                 "application/json"
             );
@@ -133,15 +133,18 @@ namespace Api.Test.Client
             );
             string plantUrl = "/plants";
             var plantResponse = await _client.PostAsync(plantUrl, plantContent);
-            string deckUrl = "/decks";
-            var deckResponse = await _client.PostAsync(deckUrl, deckContent);
+            string inspectionAreaUrl = "/inspectionAreas";
+            var inspectionAreaResponse = await _client.PostAsync(
+                inspectionAreaUrl,
+                inspectionAreaContent
+            );
             string areaUrl = "/areas";
             var areaResponse = await _client.PostAsync(areaUrl, areaContent);
 
             // Assert
             Assert.True(installationResponse.IsSuccessStatusCode);
             Assert.True(plantResponse.IsSuccessStatusCode);
-            Assert.True(deckResponse.IsSuccessStatusCode);
+            Assert.True(inspectionAreaResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(
                 _serializerOptions
@@ -155,7 +158,7 @@ namespace Api.Test.Client
             // Arrange - Initialise area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(
+            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
@@ -187,7 +190,7 @@ namespace Api.Test.Client
                 RobotId = robotId,
                 DesiredStartTime = DateTime.UtcNow,
                 InstallationCode = installation.InstallationCode,
-                InspectionAreaName = deck.Name,
+                InspectionAreaName = inspectionArea.Name,
                 Name = testMissionName,
                 Tasks = tasks,
             };
@@ -208,9 +211,9 @@ namespace Api.Test.Client
             );
             Assert.NotNull(mission);
             Assert.NotNull(mission.MissionId);
-            string inspectionAreaUrl = "/decks";
+            string inspectionAreaUrl = "/inspectionAreas";
             var inspectionareaMissionsResponse = await _client.GetAsync(
-                inspectionAreaUrl + $"/{deck.Id}/mission-definitions"
+                inspectionAreaUrl + $"/{inspectionArea.Id}/mission-definitions"
             );
 
             // Assert
@@ -245,19 +248,19 @@ namespace Api.Test.Client
         }
 
         [Fact]
-        public async Task UpdateDefaultLocalizationPoseOnDeck()
+        public async Task UpdateDefaultLocalizationPoseOnInspectionArea()
         {
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(
+            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
 
-            string deckId = deck.Id;
+            string inspectionAreaId = inspectionArea.Id;
 
-            string url = $"/decks/{deckId}/update-default-localization-pose";
+            string url = $"/inspectionAreas/{inspectionAreaId}/update-default-localization-pose";
             var query = new CreateDefaultLocalizationPose
             {
                 Pose = new Pose
@@ -286,16 +289,21 @@ namespace Api.Test.Client
             // Act
             var putResponse = await _client.PutAsync(url, content);
             Assert.True(putResponse.IsSuccessStatusCode);
-            var putDeck = await putResponse.Content.ReadFromJsonAsync<DeckResponse>(
-                _serializerOptions
-            );
+            var putInspectionArea =
+                await putResponse.Content.ReadFromJsonAsync<InspectionAreaResponse>(
+                    _serializerOptions
+                );
 
             // Assert
-            Assert.NotNull(putDeck);
-            Assert.NotNull(putDeck.DefaultLocalizationPose);
-            Assert.True(putDeck.DefaultLocalizationPose.Position.Z.Equals(query.Pose.Position.Z));
+            Assert.NotNull(putInspectionArea);
+            Assert.NotNull(putInspectionArea.DefaultLocalizationPose);
             Assert.True(
-                putDeck.DefaultLocalizationPose.Orientation.W.Equals(query.Pose.Orientation.W)
+                putInspectionArea.DefaultLocalizationPose.Position.Z.Equals(query.Pose.Position.Z)
+            );
+            Assert.True(
+                putInspectionArea.DefaultLocalizationPose.Orientation.W.Equals(
+                    query.Pose.Orientation.W
+                )
             );
         }
     }

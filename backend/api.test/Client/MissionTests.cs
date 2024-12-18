@@ -169,14 +169,14 @@ namespace Api.Test.Client
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(
+            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
             var _ = await _databaseUtilities.ReadOrNewArea(
                 installation.InstallationCode,
                 plant.PlantCode,
-                deck.Name
+                inspectionArea.Name
             );
 
             var testPose = new Pose
@@ -199,7 +199,7 @@ namespace Api.Test.Client
             {
                 InstallationCode = installation.InstallationCode,
                 PlantCode = plant.PlantCode,
-                DeckName = deck.Name,
+                InspectionAreaName = inspectionArea.Name,
                 AreaName = "AddNonDuplicateAreasToDb_Area",
                 DefaultLocalizationPose = testPose,
             };
@@ -228,14 +228,14 @@ namespace Api.Test.Client
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(
+            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
             var area = await _databaseUtilities.ReadOrNewArea(
                 installation.InstallationCode,
                 plant.PlantCode,
-                deck.Name
+                inspectionArea.Name
             );
 
             var testPose = new Pose
@@ -258,7 +258,7 @@ namespace Api.Test.Client
             {
                 InstallationCode = installation.InstallationCode,
                 PlantCode = plant.PlantCode,
-                DeckName = deck.Name,
+                InspectionAreaName = inspectionArea.Name,
                 AreaName = area.Name,
                 DefaultLocalizationPose = testPose,
             };
@@ -296,7 +296,7 @@ namespace Api.Test.Client
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(
+            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
@@ -312,7 +312,7 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                InspectionAreaName = deck.Name,
+                InspectionAreaName = inspectionArea.Name,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
@@ -381,7 +381,7 @@ namespace Api.Test.Client
             // Arrange - Initialise area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(
+            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
@@ -396,7 +396,7 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                InspectionAreaName = deck.Name,
+                InspectionAreaName = inspectionArea.Name,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
@@ -510,14 +510,14 @@ namespace Api.Test.Client
             // Arrange - Initialise area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(
+            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
             var area = await _databaseUtilities.ReadOrNewArea(
                 installation.InstallationCode,
                 plant.PlantCode,
-                deck.Name
+                inspectionArea.Name
             );
 
             // Arrange - Robot
@@ -574,7 +574,7 @@ namespace Api.Test.Client
             // Arrange - Initialise area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(
+            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
@@ -596,7 +596,7 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                InspectionAreaName = deck.Name,
+                InspectionAreaName = inspectionArea.Name,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
@@ -637,33 +637,35 @@ namespace Api.Test.Client
         }
 
         [Fact]
-        public async Task MissionFailsIfRobotIsNotInSameDeckAsMission()
+        public async Task MissionFailsIfRobotIsNotInSameInspectionAreaAsMission()
         {
             // Arrange - Initialise area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
 
-            string deckName1 = "deckMissionFailsIfRobotIsNotInSameDeckAsMission1";
-            var deck1 = await _databaseUtilities.NewDeck(
+            string inspectionAreaName1 =
+                "inspectionAreaMissionFailsIfRobotIsNotInSameInspectionAreaAsMission1";
+            var inspectionArea1 = await _databaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode,
-                deckName1
+                inspectionAreaName1
             );
 
-            string deckName2 = "deckMissionFailsIfRobotIsNotInSameDeckAsMission2";
-            var deck2 = await _databaseUtilities.NewDeck(
+            string inspectionAreaName2 =
+                "inspectionAreaMissionFailsIfRobotIsNotInSameInspectionAreaAsMission2";
+            var inspectionArea2 = await _databaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode,
-                deckName2
+                inspectionAreaName2
             );
 
-            string testMissionName = "testMissionFailsIfRobotIsNotInSameDeckAsMission";
+            string testMissionName = "testMissionFailsIfRobotIsNotInSameInspectionAreaAsMission";
 
             // Arrange - Robot
             var robot = await _databaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                deck1
+                inspectionArea1
             );
             string robotId = robot.Id;
 
@@ -672,7 +674,7 @@ namespace Api.Test.Client
             {
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
-                InspectionAreaName = deck2.Name,
+                InspectionAreaName = inspectionArea2.Name,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,

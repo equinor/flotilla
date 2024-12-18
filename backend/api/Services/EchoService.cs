@@ -133,16 +133,19 @@ namespace Api.Services
                 .Select(t => stidService.GetTagArea(t.TagId, echoMission.InstallationCode).Result)
                 .ToList();
 
-            var missionDeckNames = missionAreas
+            var missionInspectionAreaNames = missionAreas
                 .Where(a => a != null)
-                .Select(a => a!.Deck.Name)
+                .Select(a => a!.InspectionArea.Name)
                 .Distinct()
                 .ToList();
-            if (missionDeckNames.Count > 1)
+            if (missionInspectionAreaNames.Count > 1)
             {
-                string joinedMissionDeckNames = string.Join(", ", [.. missionDeckNames]);
+                string joinedMissionInspectionAreaNames = string.Join(
+                    ", ",
+                    [.. missionInspectionAreaNames]
+                );
                 logger.LogWarning(
-                    $"Mission {echoMission.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}."
+                    $"Mission {echoMission.Name} has tags on more than one inspection area. The inspection areas are: {joinedMissionInspectionAreaNames}."
                 );
             }
 
@@ -173,7 +176,7 @@ namespace Api.Services
                 Source = source,
                 Name = echoMission.Name,
                 InstallationCode = echoMission.InstallationCode,
-                InspectionArea = area.Deck,
+                InspectionArea = area.InspectionArea,
             };
             return missionDefinition;
         }

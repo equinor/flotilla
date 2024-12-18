@@ -14,8 +14,8 @@
         public string? InstallationCode { get; set; }
 
         /// <summary>
-        /// Filter for the deck of the mission
+        /// Filter for the inspection area of the mission
         /// </summary>
-        public string? Deck { get; set; }
+        public string? InspectionArea { get; set; }
     }
 }

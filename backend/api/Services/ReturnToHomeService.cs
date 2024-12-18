@@ -54,7 +54,7 @@ namespace Api.Services
                 when (ex
                         is RobotNotFoundException
                             or AreaNotFoundException
-                            or DeckNotFoundException
+                            or InspectionAreaNotFoundException
                             or PoseNotFoundException
                             or UnsupportedRobotCapabilityException
                             or MissionRunNotFoundException
@@ -83,7 +83,7 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
             Pose? return_to_home_pose;
-            Deck? currentInspectionArea;
+            InspectionArea? currentInspectionArea;
             if (
                 robot.RobotCapabilities is not null
                 && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_return_to_home)
@@ -113,7 +113,7 @@ namespace Api.Services
                 string errorMessage =
                     $"Robot with ID {robotId} could return home as it did not have an inspection area";
                 logger.LogError("{Message}", errorMessage);
-                throw new DeckNotFoundException(errorMessage);
+                throw new InspectionAreaNotFoundException(errorMessage);
             }
 
             var returnToHomeMissionRun = new MissionRun
@@ -130,7 +130,7 @@ namespace Api.Services
 
             var missionRun = await missionRunService.Create(returnToHomeMissionRun, false);
             logger.LogInformation(
-                "Scheduled a mission for the robot {RobotName} to return to home location on deck {DeckName}",
+                "Scheduled a mission for the robot {RobotName} to return to home location on inspection area {InspectionAreaName}",
                 robot.Name,
                 currentInspectionArea?.Name
             );

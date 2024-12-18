@@ -81,8 +81,10 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
             <StyledDict.FormContainer>
                 <MetadataItem title={TranslateText('Name')} content={missionDefinition.name} onEdit={onEdit('name')} />
                 <MetadataItem
-                    title={TranslateText('Deck')}
-                    content={missionDefinition.inspectionArea ? missionDefinition.inspectionArea.deckName : ''}
+                    title={TranslateText('Inspection area')}
+                    content={
+                        missionDefinition.inspectionArea ? missionDefinition.inspectionArea.inspectionAreaName : ''
+                    }
                 />
                 <MetadataItem
                     title={TranslateText('Plant')}
