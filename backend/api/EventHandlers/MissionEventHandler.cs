@@ -114,7 +114,7 @@ namespace Api.EventHandlers
                 return;
             }
 
-            try { await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus ?? RobotFlotillaStatus.Normal); }
+            try { await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus); }
             catch (Exception ex)
             {
                 _logger.LogError("Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}", e.RobotId, ex.Message);
@@ -179,7 +179,7 @@ namespace Api.EventHandlers
 
             robot.MissionQueueFrozen = false;
 
-            try { await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus ?? RobotFlotillaStatus.Normal); }
+            try { await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus); }
             catch (Exception ex)
             {
                 _logger.LogError("Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}", e.RobotId, ex.Message);
