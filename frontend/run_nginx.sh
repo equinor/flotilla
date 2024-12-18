@@ -1,13 +1,13 @@
 #!/bin/bash
 # Substitute environment variables in the index.html file using the values in the current container environment
 envsubst '
-  ${REACT_APP_AI_CONNECTION_STRING}
-  ${REACT_APP_BACKEND_URL}
-  ${REACT_APP_BACKEND_API_SCOPE}
-  ${REACT_APP_FRONTEND_URL}
-  ${REACT_APP_FRONTEND_BASE_ROUTE}
-  ${REACT_APP_AD_CLIENT_ID}
-  ${REACT_APP_AD_TENANT_ID}
+  ${VITE_AI_CONNECTION_STRING}
+  ${VITE_BACKEND_URL}
+  ${VITE_BACKEND_API_SCOPE}
+  ${VITE_FRONTEND_URL}
+  ${VITE_FRONTEND_BASE_ROUTE}
+  ${VITE_AD_CLIENT_ID}
+  ${VITE_AD_TENANT_ID}
   ' </app/index.html >/app/tmp.html
 mv /app/tmp.html /app/index.html
 # Start Nginx

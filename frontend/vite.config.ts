@@ -1,0 +1,26 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  base: '/',
+  plugins: [react()],
+  resolve: { // To handle absolute imports
+    alias: {
+      'api': '/src/api',
+      'components': '/src/components',
+      'language': '/src/language',
+      'mediaAssets': '/src/mediaAssets',
+      'models': '/src/models',
+      'utils': '/src/utils',
+      'config': '/src/config'
+    }
+  },
+  server: {
+      open: true,
+      port: 3001,
+  },
+  build: {
+    target: 'esnext' // To support "Top-level-await"
+  }
+})
