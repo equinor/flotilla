@@ -7,7 +7,7 @@ namespace Api.Test.Mocks
 {
     public class MockBlobService : IBlobService
     {
-        public async Task<byte[]> DownloadBlob(string blobName, string containerName, string accountName)
+        public async Task<byte[]?> DownloadBlob(string blobName, string containerName, string accountName)
         {
             using var memoryStream = new System.IO.MemoryStream();
             await Task.CompletedTask;

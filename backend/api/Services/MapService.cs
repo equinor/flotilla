@@ -8,7 +8,7 @@ namespace Api.Services
 {
     public interface IMapService
     {
-        public Task<byte[]> FetchMapImage(string mapName, string installationCode);
+        public Task<byte[]?> FetchMapImage(string mapName, string installationCode);
         public Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string installationCode);
         public Task<MapMetadata?> ChooseMapFromMissionRunTasks(MissionRun mission);
     }
@@ -17,7 +17,7 @@ namespace Api.Services
             IOptions<MapBlobOptions> blobOptions,
             IBlobService blobService) : IMapService
     {
-        public async Task<byte[]> FetchMapImage(string mapName, string installationCode)
+        public async Task<byte[]?> FetchMapImage(string mapName, string installationCode)
         {
             return await blobService.DownloadBlob(mapName, installationCode, blobOptions.Value.StorageAccount);
         }

@@ -21,7 +21,7 @@ namespace Api.Test.Mocks
             return new MapMetadata();
         }
 
-        public async Task<byte[]> FetchMapImage(string mapName, string installationCode)
+        public async Task<byte[]?> FetchMapImage(string mapName, string installationCode)
         {
             await Task.Run(() => Thread.Sleep(1));
             string filePath = Directory.GetCurrentDirectory() + "Images/MockMapImage.png";

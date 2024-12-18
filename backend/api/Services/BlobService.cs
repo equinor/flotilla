@@ -11,7 +11,7 @@ namespace Api.Services
 {
     public interface IBlobService
     {
-        public Task<byte[]> DownloadBlob(string blobName, string containerName, string accountName);
+        public Task<byte[]?> DownloadBlob(string blobName, string containerName, string accountName);
 
         public AsyncPageable<BlobItem> FetchAllBlobs(string containerName, string accountName);
 
@@ -20,13 +20,22 @@ namespace Api.Services
 
     public class BlobService(ILogger<BlobService> logger, IOptions<AzureAdOptions> azureOptions) : IBlobService
     {
-        public async Task<byte[]> DownloadBlob(string blobName, string containerName, string accountName)
+        public async Task<byte[]?> DownloadBlob(string blobName, string containerName, string accountName)
         {
             var blobContainerClient = GetBlobContainerClient(containerName, accountName);
             var blobClient = blobContainerClient.GetBlobClient(blobName);
 
             using var memoryStream = new MemoryStream();
-            await blobClient.DownloadToAsync(memoryStream);
+            try
+            {
+                await blobClient.DownloadToAsync(memoryStream);
+            }
+            catch (RequestFailedException)
+            {
+                logger.LogWarning("Failed to download blob {blobName} from container {containerName}", blobName, containerName);
+                return null;
+            }
+
 
             return memoryStream.ToArray();
         }
