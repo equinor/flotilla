@@ -9,15 +9,15 @@ using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
+
 namespace Api.Services
 {
     public interface IInspectionService
     {
-        public Task<byte[]?> FetchInpectionImage(string inpectionName, string installationCode, string storageAccount);
+        public Task<byte[]> FetchInpectionImageFromIsarInspectionId(string isarInspectionId);
         public Task<Inspection> UpdateInspectionStatus(string isarTaskId, IsarTaskStatus isarTaskStatus);
         public Task<Inspection?> ReadByIsarTaskId(string id, bool readOnly = true);
         public Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingsQuery, string isarTaskId);
-        public Task<IDAInspectionDataResponse?> GetInspectionStorageInfo(string inspectionId);
 
     }
 
@@ -31,9 +31,12 @@ namespace Api.Services
     {
         public const string ServiceName = "IDA";
 
-        public async Task<byte[]?> FetchInpectionImage(string inpectionName, string installationCode, string storageAccount)
+        public async Task<byte[]> FetchInpectionImageFromIsarInspectionId(string isarInspectionId)
         {
-            return await blobService.DownloadBlob(inpectionName, installationCode, storageAccount);
+
+            var inspectionData = await GetInspectionStorageInfo(isarInspectionId)
+                ?? throw new InspectionNotFoundException($"Could not find inspection data for inspection with ISAR Inspection Id {isarInspectionId}.");
+            return await blobService.DownloadBlob(inspectionData.BlobName, inspectionData.BlobContainer, inspectionData.StorageAccount);
         }
 
         public async Task<Inspection> UpdateInspectionStatus(string isarTaskId, IsarTaskStatus isarTaskStatus)
@@ -110,7 +113,7 @@ namespace Api.Services
             return inspection;
         }
 
-        public async Task<IDAInspectionDataResponse?> GetInspectionStorageInfo(string inspectionId)
+        private async Task<IDAInspectionDataResponse?> GetInspectionStorageInfo(string inspectionId)
         {
             string relativePath = $"InspectionData/{inspectionId}/inspection-data-storage-location";
 
@@ -123,6 +126,12 @@ namespace Api.Services
                 }
             );
 
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                var inspectionData = await response.Content.ReadFromJsonAsync<IDAInspectionDataResponse>() ?? throw new JsonException("Failed to deserialize inspection data from IDA.");
+                return inspectionData;
+            }
+
             if (response.StatusCode == HttpStatusCode.Accepted)
             {
                 logger.LogInformation("Inspection data storage location for inspection with Id {inspectionId} is not yet available", inspectionId);
@@ -131,7 +140,7 @@ namespace Api.Services
 
             if (response.StatusCode == HttpStatusCode.InternalServerError)
             {
-                logger.LogError("Inetrnal server error when trying to get inspection data for inspection with Id {inspectionId}", inspectionId);
+                logger.LogError("Internal server error when trying to get inspection data for inspection with Id {inspectionId}", inspectionId);
                 return null;
             }
 
@@ -141,11 +150,15 @@ namespace Api.Services
                 return null;
             }
 
-            var inspectionData = await response.Content.ReadFromJsonAsync<
-                IDAInspectionDataResponse
-            >() ?? throw new JsonException("Failed to deserialize inspection data from IDA.");
+            if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
+            {
+                logger.LogError("Anonymization workflow failed for inspection with Id {inspectionId}", inspectionId);
+                return null;
+            }
 
-            return inspectionData;
+            logger.LogError("Unexpected error when trying to get inspection data for inspection with Id {inspectionId}", inspectionId);
+            return null;
+
         }
     }
 }
