@@ -35,23 +35,21 @@ export const TaskTable = ({ tasks }: TaskTableProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (
-        <>
-            <StyledTable>
-                <StyledTableCaptionGray>
-                    <StyledTypography variant="h2">{TranslateText('Tasks')}</StyledTypography>
-                </StyledTableCaptionGray>
-                <Table.Head>
-                    <Table.Row>
-                        <StyledTableCell>#</StyledTableCell>
-                        <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
-                        <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
-                        <StyledTableCell>{TranslateText('Inspection Types')}</StyledTableCell>
-                        <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
-                    </Table.Row>
-                </Table.Head>
-                <StyledTableBody>{tasks && <TaskTableRows tasks={tasks} />}</StyledTableBody>
-            </StyledTable>
-        </>
+        <StyledTable>
+            <StyledTableCaptionGray>
+                <StyledTypography variant="h2">{TranslateText('Tasks')}</StyledTypography>
+            </StyledTableCaptionGray>
+            <Table.Head>
+                <Table.Row>
+                    <StyledTableCell>#</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Tag-ID')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Description')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Inspection Types')}</StyledTableCell>
+                    <StyledTableCell>{TranslateText('Status')}</StyledTableCell>
+                </Table.Row>
+            </Table.Head>
+            <StyledTableBody>{tasks && <TaskTableRows tasks={tasks} />}</StyledTableBody>
+        </StyledTable>
     )
 }
 

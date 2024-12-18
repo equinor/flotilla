@@ -51,8 +51,8 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         Object.values(selectedInspectionTasksToFetch).forEach((task, index) => {
-            if (task.isarTaskId) {
-                BackendAPICaller.getInspection(installationCode, task.isarTaskId!)
+            if (task.inspection.isarInspectionId && task.isarTaskId) {
+                BackendAPICaller.getInspection(installationCode, task.inspection.isarInspectionId)
                     .then((imageBlob) => {
                         imageObjectURL.current = URL.createObjectURL(imageBlob)
                     })
