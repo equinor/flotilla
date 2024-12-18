@@ -13,7 +13,7 @@ namespace Api.Services
 {
     public interface IInspectionService
     {
-        public Task<byte[]> FetchInpectionImage(string inpectionName, string installationCode, string storageAccount);
+        public Task<byte[]?> FetchInpectionImage(string inpectionName, string installationCode, string storageAccount);
         public Task<Inspection> UpdateInspectionStatus(string isarTaskId, IsarTaskStatus isarTaskStatus);
         public Task<Inspection?> ReadByIsarTaskId(string id, bool readOnly = true);
         public Task<Inspection?> AddFinding(InspectionFindingQuery inspectionFindingsQuery, string isarTaskId);
@@ -31,7 +31,7 @@ namespace Api.Services
     {
         public const string ServiceName = "IDA";
 
-        public async Task<byte[]> FetchInpectionImage(string inpectionName, string installationCode, string storageAccount)
+        public async Task<byte[]?> FetchInpectionImage(string inpectionName, string installationCode, string storageAccount)
         {
             return await blobService.DownloadBlob(inpectionName, installationCode, storageAccount);
         }

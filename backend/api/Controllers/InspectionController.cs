@@ -96,7 +96,10 @@ namespace Api.Controllers
 
             try
             {
-                byte[] inspectionStream = await inspectionService.FetchInpectionImage(inspectionData.BlobName, inspectionData.BlobContainer, inspectionData.StorageAccount);
+                byte[]? inspectionStream = await inspectionService.FetchInpectionImage(inspectionData.BlobName, inspectionData.BlobContainer, inspectionData.StorageAccount);
+
+                if (inspectionStream == null) return NotFound($"Could not retrieve inspection with task Id {taskId}");
+
                 return File(inspectionStream, "image/png");
             }
             catch (Azure.RequestFailedException)
