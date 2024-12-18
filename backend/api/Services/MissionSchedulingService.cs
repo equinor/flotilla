@@ -74,6 +74,12 @@ namespace Api.Services
                 return;
             }
 
+            if (missionRun.InspectionArea == null)
+            {
+                logger.LogWarning("Mission {MissionRunId} does not have an inspection area and was therefore not started", missionRun.Id);
+                return;
+            }
+
             if (robot.CurrentInspectionArea == null && missionRun.InspectionArea != null)
             {
                 await robotService.UpdateCurrentInspectionArea(robot.Id, missionRun.InspectionArea.Id);
