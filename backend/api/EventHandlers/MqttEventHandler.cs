@@ -183,7 +183,7 @@ namespace Api.EventHandlers
 
             try
             {
-                var robot = await RobotService.ReadByIsarId(isarRobotInfo.IsarId, readOnly: false);
+                var robot = await RobotService.ReadByIsarId(isarRobotInfo.IsarId, readOnly: true);
 
                 if (robot == null)
                 {
