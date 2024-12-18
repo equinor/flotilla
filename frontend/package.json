@@ -14,9 +14,8 @@
         "@microsoft/signalr": "^8.0.0",
         "@tanstack/react-query": "^5.62.8",
         "@testing-library/jest-dom": "^6.4.2",
-        "@testing-library/react": "^14.3.0",
+        "@testing-library/react": "^16.1.0",
         "@testing-library/user-event": "^14.5.2",
-        "@types/jest": "^29.5.12",
         "@types/node": "^20.12.7",
         "@types/react": "^18.2.75",
         "@types/react-dom": "^18.2.24",
@@ -44,6 +43,7 @@
         "start": "vite",
         "build": "tsc && vite build",
         "serve": "vite preview",
+        "test": "vitest",
         "prettier_check": "npx prettier --check src"
     },
     "eslintConfig": {
