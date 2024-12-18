@@ -303,6 +303,11 @@ namespace Api.Controllers
                 Map = new MapMetadata()
             };
 
+            if (scheduledMissionDefinition.InspectionArea == null)
+            {
+                logger.LogWarning("Mission definition with ID {id} does not have an inspection area when scheduling", scheduledMissionDefinition.Id);
+            }
+
             var missionRun = new MissionRun
             {
                 Name = missionDefinition.Name,
