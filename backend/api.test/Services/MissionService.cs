@@ -22,7 +22,7 @@ namespace Api.Test.Services
         private readonly IAccessRoleService _accessRoleService;
         private readonly UserInfoService _userInfoService;
         private readonly IMissionTaskService _missionTaskService;
-        private readonly IDeckService _deckService;
+        private readonly IInspectionAreaService _inspectionAreaService;
         private readonly IInstallationService _installationService;
         private readonly IPlantService _plantService;
         private readonly IRobotModelService _robotModelService;
@@ -39,10 +39,10 @@ namespace Api.Test.Services
             _missionTaskService = new MissionTaskService(_context, new Mock<ILogger<MissionTaskService>>().Object);
             _installationService = new InstallationService(_context, _accessRoleService);
             _plantService = new PlantService(_context, _installationService, _accessRoleService);
-            _deckService = new DeckService(_context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, new MockSignalRService());
+            _inspectionAreaService = new InspectionAreaService(_context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, new MockSignalRService());
             _robotModelService = new RobotModelService(_context);
-            _robotService = new RobotService(_context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _deckService);
-            _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService, _missionTaskService, _deckService, _robotService, _userInfoService);
+            _robotService = new RobotService(_context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _inspectionAreaService);
+            _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService, _missionTaskService, _inspectionAreaService, _robotService, _userInfoService);
             _databaseUtilities = new DatabaseUtilities(_context);
         }
 
@@ -70,9 +70,9 @@ namespace Api.Test.Services
 
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var inspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(installation.InstallationCode, plant.PlantCode);
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
-            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck);
+            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, inspectionArea);
 
             await _missionRunService.Create(missionRun);
 

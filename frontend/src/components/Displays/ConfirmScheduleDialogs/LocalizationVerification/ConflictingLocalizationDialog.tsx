@@ -2,34 +2,35 @@ import { Button, Dialog, List, Typography } from '@equinor/eds-core-react'
 import { StyledDialog, VerticalContent } from './ScheduleMissionStyles'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
-interface ConflictingRobotDeckDialogProps {
+interface ConflictingRobotInspectionAreaDialogProps {
     closeDialog: () => void
-    robotDeckName: string
-    desiredDeckName: string
+    robotInspectionAreaName: string
+    desiredInspectionAreaName: string
 }
 
-interface ConflictingMissionDecksDialogProps {
+interface ConflictingMissionInspectionAreasDialogProps {
     closeDialog: () => void
-    missionDeckNames: string[]
+    missionInspectionAreaNames: string[]
 }
 
-export const ConflictingRobotDeckDialog = ({
+export const ConflictingRobotInspectionAreaDialog = ({
     closeDialog,
-    robotDeckName,
-    desiredDeckName,
-}: ConflictingRobotDeckDialogProps) => {
+    robotInspectionAreaName,
+    desiredInspectionAreaName,
+}: ConflictingRobotInspectionAreaDialogProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (
         <StyledDialog open={true} onClose={closeDialog}>
             <Dialog.Header>
-                <Typography variant="h5">{TranslateText('Conflicting decks')}</Typography>
+                <Typography variant="h5">{TranslateText('Conflicting inspection areas')}</Typography>
             </Dialog.Header>
             <Dialog.Content>
                 <VerticalContent>
                     <Typography>
-                        {TranslateText('The missions you are trying to add are on')} <b>{desiredDeckName}</b>{' '}
-                        {TranslateText('but the robot is currently running missions on')} {<b>{robotDeckName}</b>}.
+                        {TranslateText('The missions you are trying to add are on')} <b>{desiredInspectionAreaName}</b>{' '}
+                        {TranslateText('but the robot is currently running missions on')}{' '}
+                        {<b>{robotInspectionAreaName}</b>}.
                     </Typography>
                     <Typography>{TranslateText('Will not be added dialog text')}</Typography>
                 </VerticalContent>
@@ -43,17 +44,17 @@ export const ConflictingRobotDeckDialog = ({
     )
 }
 
-export const ConflictingMissionDecksDialog = ({
+export const ConflictingMissionInspectionAreasDialog = ({
     closeDialog,
-    missionDeckNames,
-}: ConflictingMissionDecksDialogProps) => {
+    missionInspectionAreaNames,
+}: ConflictingMissionInspectionAreasDialogProps) => {
     const { TranslateText } = useLanguageContext()
 
-    const MissionDeckNamesList = (
+    const MissionInspectionAreaNamesList = (
         <List>
-            {missionDeckNames.map((deckName) => (
+            {missionInspectionAreaNames.map((inspectionAreaName) => (
                 <List.Item>
-                    <b>{deckName}</b>
+                    <b>{inspectionAreaName}</b>
                 </List.Item>
             ))}
         </List>
@@ -62,15 +63,15 @@ export const ConflictingMissionDecksDialog = ({
     return (
         <StyledDialog open={true} onClose={closeDialog}>
             <Dialog.Header>
-                <Typography variant="h5">{TranslateText('Conflicting decks')}</Typography>
+                <Typography variant="h5">{TranslateText('Conflicting inspection areas')}</Typography>
             </Dialog.Header>
             <Dialog.Content>
                 <VerticalContent>
                     <Typography>
-                        {TranslateText('The missions you are trying to add are on these decks:')}
-                        {MissionDeckNamesList}
+                        {TranslateText('The missions you are trying to add are on these inspection areas:')}
+                        {MissionInspectionAreaNamesList}
                     </Typography>
-                    <Typography>{TranslateText('You can only add missions from one deck.')}</Typography>
+                    <Typography>{TranslateText('You can only add missions from one inspection area.')}</Typography>
                 </VerticalContent>
             </Dialog.Content>
             <Dialog.Actions>

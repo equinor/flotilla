@@ -11,7 +11,7 @@ import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 import { MapMetadata } from 'models/MapMetadata'
 import { MissionDefinition, PlantInfo } from 'models/MissionDefinition'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
-import { Deck } from 'models/Deck'
+import { InspectionArea } from 'models/InspectionArea'
 import { ApiError, isApiError } from './ApiError'
 import { MediaStreamConfig } from 'models/VideoStream'
 
@@ -234,8 +234,8 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getMissionDefinitionsInDeck(deck: Deck): Promise<MissionDefinition[]> {
-        let path: string = 'decks/' + deck.id + '/mission-definitions'
+    static async getMissionDefinitionsInInspectionArea(inspectionArea: InspectionArea): Promise<MissionDefinition[]> {
+        let path: string = 'inspectionAreas/' + inspectionArea.id + '/mission-definitions'
 
         const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)
@@ -355,29 +355,29 @@ export class BackendAPICaller {
         return result.content
     }
 
-    static async getAreasByDeckId(deckId: string): Promise<Area[]> {
-        const path: string = 'areas/deck/' + deckId
+    static async getAreasByInspectionAreaId(inspectionAreaId: string): Promise<Area[]> {
+        const path: string = 'areas/inspectionArea/' + inspectionAreaId
         const result = await this.GET<Area[]>(path).catch(BackendAPICaller.handleError('GET', path))
         return result.content
     }
 
-    static async getDecks(): Promise<Deck[]> {
-        const path: string = 'decks'
-        const result = await this.GET<Deck[]>(path).catch(BackendAPICaller.handleError('GET', path))
+    static async getInspectionAreas(): Promise<InspectionArea[]> {
+        const path: string = 'inspectionAreas'
+        const result = await this.GET<InspectionArea[]>(path).catch(BackendAPICaller.handleError('GET', path))
         return result.content
     }
 
-    static async getDecksByInstallationCode(installationCode: string): Promise<Deck[]> {
-        const path: string = 'decks/installation/' + installationCode
-        const result = await this.GET<Deck[]>(path).catch((e) => {
+    static async getInspectionAreasByInstallationCode(installationCode: string): Promise<InspectionArea[]> {
+        const path: string = 'inspectionAreas/installation/' + installationCode
+        const result = await this.GET<InspectionArea[]>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })
         return result.content
     }
 
-    static async getDeckMapMetadata(id: string): Promise<MapMetadata> {
-        const path: string = 'decks/' + id + '/map-metadata'
+    static async getInspectionAreaMapMetadata(id: string): Promise<MapMetadata> {
+        const path: string = 'inspectionAreas/' + id + '/map-metadata'
         const result = await this.GET<MapMetadata>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e

@@ -2,21 +2,23 @@ import { Button, Dialog, Typography } from '@equinor/eds-core-react'
 import { StyledDialog, VerticalContent } from './ScheduleMissionStyles'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
-interface UnknownDeckDialogProps {
+interface UnknownInspectionAreaDialogProps {
     closeDialog: () => void
 }
 
-export const UnknownDeckDialog = ({ closeDialog }: UnknownDeckDialogProps) => {
+export const UnknownInspectionAreaDialog = ({ closeDialog }: UnknownInspectionAreaDialogProps) => {
     const { TranslateText } = useLanguageContext()
 
     return (
         <StyledDialog open={true} onClose={closeDialog}>
             <Dialog.Header>
-                <Typography variant="h5">{TranslateText('Unknown deck')}</Typography>
+                <Typography variant="h5">{TranslateText('Unknown inspection area')}</Typography>
             </Dialog.Header>
             <Dialog.Content>
                 <VerticalContent>
-                    <Typography>{TranslateText('Cannot start selected mission as it has unknown deck.')}</Typography>
+                    <Typography>
+                        {TranslateText('Cannot start selected mission as it has unknown inspection area.')}
+                    </Typography>
                 </VerticalContent>
             </Dialog.Content>
             <Dialog.Actions>

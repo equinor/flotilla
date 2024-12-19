@@ -315,7 +315,7 @@ The access matrix looks like this:
 |                            | **Read Only** | **User** | **Admin** |
 | -------------------------- | ------------- | -------- | --------- |
 | Area                       | Read          | Read     | CRUD      |
-| Deck                       | Read          | Read     | CRUD      |
+| InspectionArea             | Read          | Read     | CRUD      |
 | Plant                      | Read          | Read     | CRUD      |
 | Installation               | Read          | Read     | CRUD      |
 | MissionLoader              | Read          | Read     | CRUD      |

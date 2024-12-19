@@ -1,4 +1,4 @@
-import { Deck } from './Deck'
+import { InspectionArea } from './InspectionArea'
 import { BatteryStatus } from './Battery'
 import { DocumentInfo } from './DocumentInfo'
 import { Installation, placeholderInstallation } from './Installation'
@@ -40,7 +40,7 @@ export interface Robot {
     port?: number
     documentation?: DocumentInfo[]
     isarUri?: string
-    currentInspectionArea?: Deck
+    currentInspectionArea?: InspectionArea
     flotillaStatus?: RobotFlotillaStatus
 }
 export const placeholderRobot: Robot = {

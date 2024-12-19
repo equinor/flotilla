@@ -1,6 +1,6 @@
 ﻿namespace Api.Controllers.Models
 {
-    public struct CreateDeckQuery
+    public struct CreateInspectionAreaQuery
     {
         public string InstallationCode { get; set; }
         public string PlantCode { get; set; }

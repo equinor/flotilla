@@ -1,4 +1,4 @@
-import { Deck } from './Deck'
+import { InspectionArea } from './InspectionArea'
 import { Mission } from './Mission'
 
 export interface MissionDefinition {
@@ -8,7 +8,7 @@ export interface MissionDefinition {
     comment?: string
     inspectionFrequency?: string
     lastSuccessfulRun?: Mission
-    inspectionArea?: Deck
+    inspectionArea?: InspectionArea
     isDeprecated: boolean
     sourceId: string
 }

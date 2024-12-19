@@ -66,7 +66,7 @@ namespace Api.Controllers
         /// Updates default localization pose
         /// </summary>
         /// <remarks>
-        /// <para> This query updates the default localization pose for a deck </para>
+        /// <para> This query updates the default localization pose for an inspection area </para>
         /// </remarks>
         [HttpPut]
         [Authorize(Roles = Role.Admin)]
@@ -127,9 +127,9 @@ namespace Api.Controllers
             if (area is null)
                 return NotFound($"Area with id {id} not found");
 
-            if (area.Deck == null || area.Plant == null || area.Installation == null)
+            if (area.InspectionArea == null || area.Plant == null || area.Installation == null)
             {
-                string errorMessage = "Deck, plant or installation missing from area";
+                string errorMessage = "Inspection area, plant or installation missing from area";
                 logger.LogWarning(errorMessage);
                 return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
             }
@@ -186,9 +186,9 @@ namespace Api.Controllers
                 if (area == null)
                     return NotFound($"Could not find area with id {id}");
 
-                if (area.Deck == null || area.Plant == null || area.Installation == null)
+                if (area.InspectionArea == null || area.Plant == null || area.Installation == null)
                 {
-                    string errorMessage = "Deck, plant or installation missing from area";
+                    string errorMessage = "Inspection area, plant or installation missing from area";
                     logger.LogWarning(errorMessage);
                     return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
                 }
@@ -204,23 +204,23 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// Lookup area by specified deck id.
+        /// Lookup area by specified inspection area id.
         /// </summary>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
-        [Route("deck/{deckId}")]
+        [Route("inspection-area/{inspectionAreaId}")]
         [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<AreaResponse>>> GetAreaByDeckId([FromRoute] string deckId)
+        public async Task<ActionResult<IList<AreaResponse>>> GetAreaByInspectionAreaId([FromRoute] string inspectionAreaId)
         {
             try
             {
-                var areas = await areaService.ReadByDeckId(deckId, readOnly: true);
+                var areas = await areaService.ReadByInspectionAreaId(inspectionAreaId, readOnly: true);
                 if (!areas.Any())
-                    return NotFound($"Could not find area for deck with id {deckId}");
+                    return NotFound($"Could not find area for inspection area with id {inspectionAreaId}");
 
                 var response = areas.Select(area => new AreaResponse(area!));
                 return Ok(response);
@@ -251,7 +251,7 @@ namespace Api.Controllers
                 if (area == null)
                     return NotFound($"Could not find area with id {id}");
 
-                var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(area.Deck.Id, readOnly: true);
+                var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(area.InspectionArea.Id, readOnly: true);
                 var missionDefinitionResponses = missionDefinitions.FindAll(m => !m.IsDeprecated).Select(m => new MissionDefinitionResponse(m));
                 return Ok(missionDefinitionResponses);
             }

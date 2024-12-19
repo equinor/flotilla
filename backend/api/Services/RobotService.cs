@@ -46,7 +46,7 @@ namespace Api.Services
         ISignalRService signalRService,
         IAccessRoleService accessRoleService,
         IInstallationService installationService,
-        IDeckService deckService) : IRobotService
+        IInspectionAreaService inspectionAreaService) : IRobotService
     {
 
         public async Task<Robot> Create(Robot newRobot)
@@ -73,13 +73,13 @@ namespace Api.Services
                     throw new DbUpdateException($"Could not create new robot in database as installation {robotQuery.CurrentInstallationCode} doesn't exist");
                 }
 
-                Deck? inspectionArea = null;
+                InspectionArea? inspectionArea = null;
                 if (robotQuery.CurrentInspectionAreaName is not null)
                 {
-                    inspectionArea = await deckService.ReadByInstallationAndName(robotQuery.CurrentInstallationCode, robotQuery.CurrentInspectionAreaName, readOnly: true);
+                    inspectionArea = await inspectionAreaService.ReadByInstallationAndName(robotQuery.CurrentInstallationCode, robotQuery.CurrentInspectionAreaName, readOnly: true);
                     if (inspectionArea is null)
                     {
-                        logger.LogError("Inspection area '{CurrentDeckName}' does not exist in installation {CurrentInstallation}", robotQuery.CurrentInspectionAreaName, robotQuery.CurrentInstallationCode);
+                        logger.LogError("Inspection area '{CurrentInspectionAreaName}' does not exist in installation {CurrentInstallation}", robotQuery.CurrentInspectionAreaName, robotQuery.CurrentInstallationCode);
                         throw new DbUpdateException($"Could not create new robot in database as inspection area '{robotQuery.CurrentInspectionAreaName}' does not exist in installation {robotQuery.CurrentInstallationCode}");
                     }
                 }
@@ -222,7 +222,7 @@ namespace Api.Services
                 return;
             }
 
-            var area = await deckService.ReadById(inspectionAreaId, readOnly: true);
+            var area = await inspectionAreaService.ReadById(inspectionAreaId, readOnly: true);
             if (area is null)
             {
                 logger.LogError("Could not find inspection area '{InspectionAreaId}' setting robot '{IsarId}' inspection area to null", inspectionAreaId, robotId);
@@ -300,7 +300,7 @@ namespace Api.Services
                 .Include(r => r.Model)
                 .Include(r => r.CurrentInstallation)
                 .Include(r => r.CurrentInspectionArea)
-                .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
+                .ThenInclude(inspectionArea => inspectionArea != null ? inspectionArea.DefaultLocalizationPose : null)
                 .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null)
                 .Include(r => r.CurrentInspectionArea)
                 .ThenInclude(area => area != null ? area.Plant : null)
@@ -364,7 +364,7 @@ namespace Api.Services
         public void DetachTracking(Robot robot)
         {
             if (robot.CurrentInstallation != null) installationService.DetachTracking(robot.CurrentInstallation);
-            if (robot.CurrentInspectionArea != null) deckService.DetachTracking(robot.CurrentInspectionArea);
+            if (robot.CurrentInspectionArea != null) inspectionAreaService.DetachTracking(robot.CurrentInspectionArea);
             if (robot.Model != null) robotModelService.DetachTracking(robot.Model);
             context.Entry(robot).State = EntityState.Detached;
         }

@@ -17,8 +17,8 @@ namespace Api.Services
             string testAreaName = "StidServiceMockArea";
 
             var area = context.Areas
-                .Include(a => a.Deck).ThenInclude(d => d.Installation)
-                .Include(a => a.Deck).ThenInclude(d => d.Plant).ThenInclude(p => p.Installation)
+                .Include(a => a.InspectionArea).ThenInclude(d => d.Installation)
+                .Include(a => a.InspectionArea).ThenInclude(d => d.Plant).ThenInclude(p => p.Installation)
                 .Include(d => d.Plant)
                 .Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
                 .Where(area => area.Name.Contains(testAreaName)).ToList().FirstOrDefault();
@@ -39,21 +39,21 @@ namespace Api.Services
                 PlantCode = "TTT"
             };
 
-            var testDeck = new Deck
+            var testInspectionArea = new InspectionArea
             {
                 Id = Guid.NewGuid().ToString(),
                 Plant = testPlant,
                 Installation = testPlant.Installation,
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                Name = "StidServiceMockDeck"
+                Name = "StidServiceMockInspectionArea"
             };
 
             var testArea = new Area
             {
                 Id = Guid.NewGuid().ToString(),
-                Deck = testDeck,
-                Plant = testDeck.Plant,
-                Installation = testDeck.Plant.Installation,
+                InspectionArea = testInspectionArea,
+                Plant = testInspectionArea.Plant,
+                Installation = testInspectionArea.Plant.Installation,
                 Name = testAreaName,
                 MapMetadata = new MapMetadata(),
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
@@ -61,7 +61,7 @@ namespace Api.Services
 
             context.Add(testInstallation);
             context.Add(testPlant);
-            context.Add(testDeck);
+            context.Add(testInspectionArea);
             context.Add(testArea);
 
             await context.SaveChangesAsync();

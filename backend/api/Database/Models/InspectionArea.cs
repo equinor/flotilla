@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 #pragma warning disable CS8618
 namespace Api.Database.Models
 {
-    public class Deck
+    public class InspectionArea
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

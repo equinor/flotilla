@@ -23,18 +23,18 @@ export const StyledDict = {
         gap: 10px;
         width: 100%;
     `,
-    DeckCards: styled.div`
+    InspectionAreaCards: styled.div`
         display: grid;
         grid-template-columns: repeat(auto-fill, 450px);
         grid-auto-rows: 1fr;
         gap: 24px;
     `,
-    DeckText: styled.div`
+    InspectionAreaText: styled.div`
         display: grid;
         grid-template-rows: 25px 35px;
         align-self: stretch;
     `,
-    TopDeckText: styled.div`
+    TopInspectionAreaText: styled.div`
         display: flex;
         justify-content: space-between;
         margin-right: 5px;
@@ -45,7 +45,7 @@ export const StyledDict = {
         height: 100%;
         border-radius: 6px 0px 0px 6px;
     `,
-    DeckCard: styled.div`
+    InspectionAreaCard: styled.div`
         display: flex;
         @media (max-width: 800px) {
             max-width: calc(100vw - 30px);
@@ -67,7 +67,7 @@ export const StyledDict = {
         align-items: center;
         gap: 4px;
     `,
-    DeckOverview: styled.div`
+    InspectionAreaOverview: styled.div`
         display: flex;
         flex-direction: column;
         gap: 25px;
@@ -95,26 +95,26 @@ export const StyledDict = {
     `,
 }
 
-export enum DeckCardColors {
+export enum InspectionAreaCardColors {
     Gray = 'gray',
     Green = 'green',
     Red = 'red',
     Orange = 'orange',
 }
 
-export const getDeadlineInspection = (deadline: Date): DeckCardColors => {
+export const getDeadlineInspection = (deadline: Date): InspectionAreaCardColors => {
     const deadlineDays = getDeadlineInDays(deadline)
     switch (true) {
         case deadlineDays <= 1:
-            return DeckCardColors.Red
+            return InspectionAreaCardColors.Red
         case deadlineDays > 1 && deadlineDays <= 7:
-            return DeckCardColors.Red
+            return InspectionAreaCardColors.Red
         case deadlineDays > 7 && deadlineDays <= 14:
-            return DeckCardColors.Orange
+            return InspectionAreaCardColors.Orange
         case deadlineDays > 7 && deadlineDays <= 30:
-            return DeckCardColors.Green
+            return InspectionAreaCardColors.Green
     }
-    return DeckCardColors.Green
+    return InspectionAreaCardColors.Green
 }
 
 /**
@@ -147,21 +147,21 @@ export const compareInspections = (inspection1: Inspection, inspection2: Inspect
 }
 
 interface ICardMissionInformationProps {
-    deckName: string
+    inspectionAreaName: string
     inspections: Inspection[]
 }
 
-interface DeckMissionCount {
+interface InspectionAreaMissionCount {
     [color: string]: {
         count: number
         message: string
     }
 }
 
-export const CardMissionInformation = ({ deckName, inspections }: ICardMissionInformationProps) => {
+export const CardMissionInformation = ({ inspectionAreaName, inspections }: ICardMissionInformationProps) => {
     const { TranslateText } = useLanguageContext()
 
-    var colorsCount: DeckMissionCount = {
+    var colorsCount: InspectionAreaMissionCount = {
         red: { count: 0, message: 'Must be inspected this week' },
         orange: { count: 0, message: 'Must be inspected within two weeks' },
         green: { count: 0, message: 'Up to date' },

@@ -20,7 +20,7 @@ namespace Api.Controllers.Models
 
         public string InstallationCode { get; set; }
 
-        public DeckResponse? InspectionArea { get; set; }
+        public InspectionAreaResponse? InspectionArea { get; set; }
 
         public virtual RobotResponse Robot { get; set; }
 
@@ -55,7 +55,7 @@ namespace Api.Controllers.Models
             StatusReason = mission.StatusReason;
             Comment = mission.Comment;
             InstallationCode = mission.InstallationCode;
-            InspectionArea = mission.InspectionArea != null ? new DeckResponse(mission.InspectionArea) : null;
+            InspectionArea = mission.InspectionArea != null ? new InspectionAreaResponse(mission.InspectionArea) : null;
             Robot = new RobotResponse(mission.Robot);
             Status = mission.Status;
             IsCompleted = mission.IsCompleted;
