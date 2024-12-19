@@ -53,13 +53,13 @@ interface Props {
 
 const defaultAlertInterface = {
     alerts: {},
-    setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => {},
+    setAlert: () => {},
     clearAlerts: () => {},
-    clearAlert: (source: AlertType) => {},
+    clearAlert: () => {},
     listAlerts: {},
-    setListAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => {},
+    setListAlert: () => {},
     clearListAlerts: () => {},
-    clearListAlert: (source: AlertType) => {},
+    clearListAlert: () => {},
 }
 
 const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
@@ -157,7 +157,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     if (newRecentFailedMissions.length > 0) setNewFailedMissions(newRecentFailedMissions)
                     setRecentFailedMissions(newRecentFailedMissions)
                 })
-                .catch((e) => {
+                .catch(() => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent

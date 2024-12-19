@@ -33,7 +33,7 @@ const defaultMissionRunsContext: IMissionRunsContext = {
     ongoingMissions: [],
     missionQueue: [],
     loadingRobotMissionSet: new Set(),
-    setLoadingRobotMissionSet: (newLoadingRobotMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => {},
+    setLoadingRobotMissionSet: () => {},
 }
 
 const MissionRunsContext = createContext<IMissionRunsContext>(defaultMissionRunsContext)
@@ -132,7 +132,7 @@ const useMissionRuns = (): IMissionRunsContext => {
                 statuses: [MissionStatus.Ongoing, MissionStatus.Paused],
                 pageSize: 100,
                 orderBy: 'StartTime desc',
-            }).catch((e) => {
+            }).catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
@@ -153,7 +153,7 @@ const useMissionRuns = (): IMissionRunsContext => {
                 statuses: [MissionStatus.Pending],
                 pageSize: 100,
                 orderBy: 'DesiredStartTime',
-            }).catch((e) => {
+            }).catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,

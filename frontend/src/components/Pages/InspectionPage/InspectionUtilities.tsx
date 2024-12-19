@@ -158,7 +158,7 @@ interface DeckMissionCount {
     }
 }
 
-export const CardMissionInformation = ({ deckName, inspections }: ICardMissionInformationProps) => {
+export const CardMissionInformation = ({ inspections }: ICardMissionInformationProps) => {
     const { TranslateText } = useLanguageContext()
 
     const colorsCount: DeckMissionCount = {

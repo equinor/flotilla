@@ -22,7 +22,7 @@ interface Props {
 
 const defaultMediaStreamInterface = {
     mediaStreams: {},
-    addMediaStreamConfigIfItDoesNotExist: (robotId: string) => {},
+    addMediaStreamConfigIfItDoesNotExist: () => {},
 }
 
 const MediaStreamContext = createContext<IMediaStreamContext>(defaultMediaStreamInterface)

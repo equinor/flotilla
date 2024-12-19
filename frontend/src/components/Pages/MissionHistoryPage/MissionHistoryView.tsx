@@ -182,7 +182,7 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                 }
                 setIsLoading(false)
             })
-            .catch((e) => {
+            .catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent

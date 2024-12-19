@@ -45,7 +45,7 @@ interface Props {
 
 const defaultSignalRInterface = {
     connection: undefined,
-    registerEvent: (eventName: string, onMessageReceived: (username: string, message: string) => void) => {},
+    registerEvent: () => {},
     connectionReady: false,
 }
 
