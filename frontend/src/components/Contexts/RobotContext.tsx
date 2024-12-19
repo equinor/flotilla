@@ -9,7 +9,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useInstallationContext } from './InstallationContext'
 
 const upsertRobotList = (list: Robot[], mission: Robot) => {
-    let newList = [...list]
+    const newList = [...list]
     const i = newList.findIndex((e) => e.id === mission.id)
     if (i > -1) newList[i] = mission
     else newList.push(mission)
@@ -40,7 +40,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.robotAdded, (username: string, message: string) => {
-                let updatedRobot: Robot = JSON.parse(message)
+                const updatedRobot: Robot = JSON.parse(message)
                 setEnabledRobots((oldRobotList) => {
                     let oldRobotListCopy = [...oldRobotList]
                     oldRobotListCopy = upsertRobotList(oldRobotListCopy, updatedRobot)
@@ -48,7 +48,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
                 })
             })
             registerEvent(SignalREventLabels.robotUpdated, (username: string, message: string) => {
-                let updatedRobot: Robot = JSON.parse(message)
+                const updatedRobot: Robot = JSON.parse(message)
                 // The check below makes it so that it is not treated as null in the code.
                 if (updatedRobot.model.type == null) {
                     console.warn('Received robot update with model type null')
@@ -61,9 +61,9 @@ export const RobotProvider: FC<Props> = ({ children }) => {
                 })
             })
             registerEvent(SignalREventLabels.robotDeleted, (username: string, message: string) => {
-                let updatedRobot: Robot = JSON.parse(message)
+                const updatedRobot: Robot = JSON.parse(message)
                 setEnabledRobots((oldRobotList) => {
-                    let newRobotList = [...oldRobotList]
+                    const newRobotList = [...oldRobotList]
                     const index = newRobotList.findIndex((r) => r.id === updatedRobot.id)
                     if (index !== -1) newRobotList.splice(index, 1) // Remove deleted robot
                     return newRobotList

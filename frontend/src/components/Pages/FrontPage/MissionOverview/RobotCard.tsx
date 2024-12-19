@@ -97,7 +97,7 @@ const HiddenOnLargeScreen = styled.div`
 `
 
 export const RobotCard = ({ robot }: { robot: Robot }) => {
-    let navigate = useNavigate()
+    const navigate = useNavigate()
     const { TranslateText } = useLanguageContext()
     const goToRobot = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/robot/${robot.id}`

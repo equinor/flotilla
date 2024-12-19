@@ -173,7 +173,7 @@ const InstallationPicker = () => {
 }
 
 const mapInstallationCodeToName = (plantInfoArray: PlantInfo[]): Map<string, string> => {
-    var mapping = new Map<string, string>()
+    const mapping = new Map<string, string>()
     plantInfoArray.forEach((plantInfo: PlantInfo) => {
         mapping.set(plantInfo.projectDescription, plantInfo.plantCode)
     })

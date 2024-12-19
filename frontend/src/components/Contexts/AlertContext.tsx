@@ -97,7 +97,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
 
         setAlerts((oldAlerts) => {
-            let newAlerts = { ...oldAlerts }
+            const newAlerts = { ...oldAlerts }
             delete newAlerts[source]
             return newAlerts
         })
@@ -123,7 +123,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
 
         setListAlerts((oldListAlerts) => {
-            let newListAlerts = { ...oldListAlerts }
+            const newListAlerts = { ...oldListAlerts }
             delete newListAlerts[source]
             return newListAlerts
         })
@@ -196,7 +196,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     // Ignore missions shortly after the user dismissed the last one
                     if (convertUTCDateToLocalDate(new Date(newFailedMission.endTime!)) <= lastDismissTime)
                         return failedMissions
-                    let isDuplicate = failedMissions.filter((m) => m.id === newFailedMission.id).length > 0
+                    const isDuplicate = failedMissions.filter((m) => m.id === newFailedMission.id).length > 0
                     if (isDuplicate) return failedMissions // Ignore duplicate failed missions
                     return [...failedMissions, newFailedMission]
                 })

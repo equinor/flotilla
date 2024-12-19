@@ -270,8 +270,8 @@ export const InspectionTable = ({ deck, inspections, scrollOnToggle, openDialog,
         ))
 
     useEffect(() => {
-        let inspectionTable = document.getElementById(FrontPageSectionId.InspectionTable)
-        let topBarHeight = document.getElementById(FrontPageSectionId.TopBar)?.offsetHeight ?? 0
+        const inspectionTable = document.getElementById(FrontPageSectionId.InspectionTable)
+        const topBarHeight = document.getElementById(FrontPageSectionId.TopBar)?.offsetHeight ?? 0
 
         if (inspectionTable) {
             window.scroll({ top: inspectionTable.offsetTop - topBarHeight, behavior: 'smooth' })

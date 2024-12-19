@@ -10,7 +10,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useInstallationContext } from './InstallationContext'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
-    let newMissionList = [...list]
+    const newMissionList = [...list]
     const i = newMissionList.findIndex((e) => e.id === mission.id)
     if (i > -1) newMissionList[i] = mission
     else newMissionList.push(mission)
@@ -92,12 +92,12 @@ const useMissionRuns = (): IMissionRunsContext => {
             registerEvent(SignalREventLabels.missionRunCreated, (username: string, message: string) => {
                 const newMission: Mission = JSON.parse(message)
                 setMissionQueue((oldQueue) => {
-                    let missionQueueCopy = upsertMissionList(oldQueue, newMission)
+                    const missionQueueCopy = upsertMissionList(oldQueue, newMission)
                     return [...missionQueueCopy]
                 })
             })
             registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
-                let updatedMission: Mission = JSON.parse(message)
+                const updatedMission: Mission = JSON.parse(message)
 
                 setMissionQueue((oldQueue) => {
                     const oldQueueCopy = [...oldQueue]
@@ -109,7 +109,7 @@ const useMissionRuns = (): IMissionRunsContext => {
                 })
             })
             registerEvent(SignalREventLabels.missionRunDeleted, (username: string, message: string) => {
-                let deletedMission: Mission = JSON.parse(message)
+                const deletedMission: Mission = JSON.parse(message)
                 setOngoingMissions((missions) => {
                     const oldMissionListCopy = [...missions]
                     const ongoingIndex = oldMissionListCopy.findIndex((m) => m.id === deletedMission.id)

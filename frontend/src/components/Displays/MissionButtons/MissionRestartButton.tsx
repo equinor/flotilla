@@ -41,7 +41,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
     const [selectedRerunOption, setSelectedRerunOption] = useState<ReRunOptions>()
     const anchorRef = useRef<HTMLButtonElement>(null)
 
-    let navigate = useNavigate()
+    const navigate = useNavigate()
     const navigateToHome = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
         navigate(path)

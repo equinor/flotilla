@@ -147,7 +147,7 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
             // to explicitly use the Date type in the filter context instead
             return filterFunctions.dateTimeIntToPrettyString(value)
         } else if (Array.isArray(value)) {
-            let valueArray = value as any[]
+            const valueArray = value as any[]
             if (valueArray.length === 0) {
                 return <>{TranslateText('None')}</>
             }

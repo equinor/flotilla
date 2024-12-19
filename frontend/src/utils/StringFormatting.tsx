@@ -24,7 +24,7 @@ export const getInspectionDeadline = (
     const minutes: number = +dayHourSecondsArray[2]
 
     lastSuccessfulRunTime = formatBackendDateTimeToDate(lastSuccessfulRunTime)
-    let deadline = lastSuccessfulRunTime
+    const deadline = lastSuccessfulRunTime
     deadline.setDate(deadline.getDate() + days)
     deadline.setHours(deadline.getHours() + hours)
     deadline.setMinutes(deadline.getMinutes() + minutes)
