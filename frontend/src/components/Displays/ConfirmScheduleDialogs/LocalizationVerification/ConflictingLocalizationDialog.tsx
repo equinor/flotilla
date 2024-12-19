@@ -51,8 +51,8 @@ export const ConflictingMissionDecksDialog = ({
 
     const MissionDeckNamesList = (
         <List>
-            {missionDeckNames.map((deckName) => (
-                <List.Item>
+            {missionDeckNames.map((deckName, index) => (
+                <List.Item key={index}>
                     <b>{deckName}</b>
                 </List.Item>
             ))}
