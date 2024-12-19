@@ -1,22 +1,27 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
+
 namespace Api.Services.MissionLoaders
 {
     public class EchoInspection
     {
-
         public EchoInspection()
         {
             InspectionType = InspectionType.Image;
             InspectionPoint = new Position();
         }
 
-        public EchoInspection(SensorType echoSensorType, Position inspectionPoint, string? inspectionPointName)
+        public EchoInspection(
+            SensorType echoSensorType,
+            Position inspectionPoint,
+            string? inspectionPointName
+        )
         {
             InspectionType = InspectionTypeFromEchoSensorType(echoSensorType.Key);
             TimeInSeconds = (float?)echoSensorType.TimeInSeconds;
             InspectionPoint = inspectionPoint;
-            InspectionPointName = inspectionPointName != "Stid Coordinate" ? inspectionPointName : null;
+            InspectionPointName =
+                inspectionPointName != "Stid Coordinate" ? inspectionPointName : null;
         }
 
         public InspectionType InspectionType { get; set; }
@@ -38,10 +43,9 @@ namespace Api.Services.MissionLoaders
                 "Video" => InspectionType.Video,
                 "ThermicVideo" => InspectionType.ThermalVideo,
                 "ThermalVideo" => InspectionType.ThermalVideo,
-                _
-                    => throw new InvalidDataException(
-                        $"Echo sensor type '{sensorType}' not supported"
-                    )
+                _ => throw new InvalidDataException(
+                    $"Echo sensor type '{sensorType}' not supported"
+                ),
             };
         }
     }
@@ -50,13 +54,19 @@ namespace Api.Services.MissionLoaders
     {
         public bool Equals(EchoInspection? e1, EchoInspection? e2)
         {
-            if (ReferenceEquals(e1, e2)) { return true; }
+            if (ReferenceEquals(e1, e2))
+            {
+                return true;
+            }
 
-            if (e2 is null || e1 is null) { return false; }
+            if (e2 is null || e1 is null)
+            {
+                return false;
+            }
 
             return e1.InspectionType == e2.InspectionType
-                   && e1.TimeInSeconds == e2.TimeInSeconds
-                   && e1.InspectionPoint.Equals(e2.InspectionPoint);
+                && e1.TimeInSeconds == e2.TimeInSeconds
+                && e1.InspectionPoint.Equals(e2.InspectionPoint);
         }
 
         public int GetHashCode(EchoInspection e)

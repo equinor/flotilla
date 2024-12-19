@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Identity.Web;
+
 var builder = WebApplication.CreateBuilder(args);
 
 Console.WriteLine($"\nENVIRONMENT IS SET TO '{builder.Environment.EnvironmentName}'\n");
@@ -32,10 +33,7 @@ if (builder.Configuration.GetSection("KeyVault").GetValue<bool>("UseKeyVault"))
         builder.Configuration.AddAzureKeyVault(
             new Uri(vaultUri),
             new DefaultAzureCredential(
-                new DefaultAzureCredentialOptions
-                {
-                    ExcludeSharedTokenCacheCredential = true
-                }
+                new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
             )
         );
     }
@@ -57,7 +55,6 @@ builder.Services.AddApplicationInsightsTelemetry();
 #if DEBUG
 TelemetryDebugWriter.IsTracingDisabled = true;
 #endif
-
 
 builder.Services.AddScoped<IAccessRoleService, AccessRoleService>();
 
@@ -97,8 +94,8 @@ builder.Services.AddScoped<IBatteryTimeseriesService, BatteryTimeseriesService>(
 builder.Services.AddScoped<IPressureTimeseriesService, PressureTimeseriesService>();
 builder.Services.AddScoped<IPoseTimeseriesService, PoseTimeseriesService>();
 
-bool useInMemoryDatabase = builder.Configuration
-    .GetSection("Database")
+bool useInMemoryDatabase = builder
+    .Configuration.GetSection("Database")
     .GetValue<bool>("UseInMemoryDatabase");
 
 if (useInMemoryDatabase)
@@ -121,23 +118,20 @@ builder.Services.AddHostedService<TeamsMessageEventHandler>();
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));
 builder.Services.Configure<MapBlobOptions>(builder.Configuration.GetSection("Maps"));
 
-
-builder.Services
-    .AddControllers()
-    .AddJsonOptions(
-        options =>
-        {
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        }
-    );
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureSwagger(builder.Configuration);
 
-builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder
+    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
     .EnableTokenAcquisitionToCallDownstreamApi()
     .AddInMemoryTokenCaches()
@@ -146,66 +140,57 @@ builder.Services
     .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("IDA"))
     .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 
-builder.Services.AddAuthorizationBuilder().AddFallbackPolicy(
-    "RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser()
-);
+builder
+    .Services.AddAuthorizationBuilder()
+    .AddFallbackPolicy("RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser());
 
 builder.Services.AddSignalR();
 
 var app = builder.Build();
 string basePath = builder.Configuration["BackendBaseRoute"] ?? "";
-app.UseSwagger(
-    c =>
-    {
-        c.PreSerializeFilters.Add(
-            (swaggerDoc, httpReq) =>
+app.UseSwagger(c =>
+{
+    c.PreSerializeFilters.Add(
+        (swaggerDoc, httpReq) =>
+        {
+            swaggerDoc.Servers =
+            [
+                new() { Url = $"https://{httpReq.Host.Value}{basePath}" },
+                new() { Url = $"http://{httpReq.Host.Value}{basePath}" },
+            ];
+        }
+    );
+});
+app.UseSwaggerUI(c =>
+{
+    c.OAuthClientId(builder.Configuration["AzureAd:ClientId"]);
+    // The following parameter represents the "audience" of the access token.
+    c.OAuthAdditionalQueryStringParams(
+        new Dictionary<string, string>
+        {
             {
-                swaggerDoc.Servers =
-                [
-                    new()
-                    {
-                        Url = $"https://{httpReq.Host.Value}{basePath}"
-                    },
-                    new()
-                    {
-                        Url = $"http://{httpReq.Host.Value}{basePath}"
-                    }
-                ];
-            }
-        );
-    }
-);
-app.UseSwaggerUI(
-    c =>
-    {
-        c.OAuthClientId(builder.Configuration["AzureAd:ClientId"]);
-        // The following parameter represents the "audience" of the access token.
-        c.OAuthAdditionalQueryStringParams(
-            new Dictionary<string, string>
-            {
-                {
-                    "Resource", builder.Configuration["AzureAd:ClientId"] ?? throw new ArgumentException("No Azure Ad ClientId")
-                }
-            }
-        );
-        c.OAuthUsePkce();
-    }
-);
+                "Resource",
+                builder.Configuration["AzureAd:ClientId"]
+                    ?? throw new ArgumentException("No Azure Ad ClientId")
+            },
+        }
+    );
+    c.OAuthUsePkce();
+});
 
 var option = new RewriteOptions();
 option.AddRedirect("^$", "swagger");
 app.UseRewriter(option);
 
 string[] allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
-app.UseCors(
-    corsBuilder =>
-        corsBuilder
-            .WithOrigins(allowedOrigins)
-            .SetIsOriginAllowedToAllowWildcardSubdomains()
-            .WithExposedHeaders(QueryStringParameters.PaginationHeader)
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
+app.UseCors(corsBuilder =>
+    corsBuilder
+        .WithOrigins(allowedOrigins)
+        .SetIsOriginAllowedToAllowWildcardSubdomains()
+        .WithExposedHeaders(QueryStringParameters.PaginationHeader)
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
 );
 
 app.UseHttpsRedirection();
@@ -213,10 +198,13 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<SignalRHub>("/hub", options =>
-{
-    options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
-});
+app.MapHub<SignalRHub>(
+    "/hub",
+    options =>
+    {
+        options.Transports = HttpTransportType.WebSockets | HttpTransportType.LongPolling;
+    }
+);
 
 app.MapControllers();
 

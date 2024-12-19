@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using Api.Database.Models;
 using Microsoft.EntityFrameworkCore;
+
 namespace Api.Services.Models
 {
     /// <summary>
@@ -31,15 +32,30 @@ namespace Api.Services.Models
             Tasks = tasks;
         }
 
-        public IsarMissionDefinition(MissionRun missionRun, bool includeStartPose = false, string? mapName = null)
+        public IsarMissionDefinition(
+            MissionRun missionRun,
+            bool includeStartPose = false,
+            string? mapName = null
+        )
         {
             Name = missionRun.Name;
-            Tasks = missionRun.Tasks.Select(task => new IsarTaskDefinition(task, missionRun, mapName)).ToList();
+            Tasks = missionRun
+                .Tasks.Select(task => new IsarTaskDefinition(task, missionRun, mapName))
+                .ToList();
             if (missionRun.InspectionArea != null)
             {
-                StartPose = includeStartPose && missionRun.InspectionArea.DefaultLocalizationPose != null ? new IsarPose(missionRun.InspectionArea.DefaultLocalizationPose.Pose) : null;
-                Undock = includeStartPose && missionRun.InspectionArea.DefaultLocalizationPose != null && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled;
-                Dock = missionRun.InspectionArea.DefaultLocalizationPose != null && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled && missionRun.IsReturnHomeMission();
+                StartPose =
+                    includeStartPose && missionRun.InspectionArea.DefaultLocalizationPose != null
+                        ? new IsarPose(missionRun.InspectionArea.DefaultLocalizationPose.Pose)
+                        : null;
+                Undock =
+                    includeStartPose
+                    && missionRun.InspectionArea.DefaultLocalizationPose != null
+                    && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled;
+                Dock =
+                    missionRun.InspectionArea.DefaultLocalizationPose != null
+                    && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled
+                    && missionRun.IsReturnHomeMission();
             }
         }
     }
@@ -64,7 +80,11 @@ namespace Api.Services.Models
         [JsonPropertyName("zoom")]
         public IsarZoomDescription? Zoom { get; set; }
 
-        public IsarTaskDefinition(MissionTask missionTask, MissionRun missionRun, string? mapName = null)
+        public IsarTaskDefinition(
+            MissionTask missionTask,
+            MissionRun missionRun,
+            string? mapName = null
+        )
         {
             Id = missionTask.IsarTaskId;
             Type = MissionTask.ConvertMissionTaskTypeToIsarTaskType(missionTask.Type);
@@ -72,7 +92,12 @@ namespace Api.Services.Models
             Tag = missionTask.TagId;
             Zoom = missionTask.IsarZoomDescription;
 
-            if (missionTask.Inspection != null) Inspection = new IsarInspectionDefinition(missionTask.Inspection, missionRun, mapName);
+            if (missionTask.Inspection != null)
+                Inspection = new IsarInspectionDefinition(
+                    missionTask.Inspection,
+                    missionRun,
+                    mapName
+                );
         }
     }
 
@@ -90,25 +115,35 @@ namespace Api.Services.Models
         [JsonPropertyName("metadata")]
         public Dictionary<string, string?>? Metadata { get; set; }
 
-        public IsarInspectionDefinition(Inspection inspection, MissionRun missionRun, string? mapName = null)
+        public IsarInspectionDefinition(
+            Inspection inspection,
+            MissionRun missionRun,
+            string? mapName = null
+        )
         {
             Type = inspection.InspectionType.ToString();
-            InspectionTarget = inspection.InspectionTarget != null ? new IsarPosition(
-                inspection.InspectionTarget.X,
-                inspection.InspectionTarget.Y,
-                inspection.InspectionTarget.Z,
-                "asset"
-            ) : null;
+            InspectionTarget =
+                inspection.InspectionTarget != null
+                    ? new IsarPosition(
+                        inspection.InspectionTarget.X,
+                        inspection.InspectionTarget.Y,
+                        inspection.InspectionTarget.Z,
+                        "asset"
+                    )
+                    : null;
             Duration = inspection.VideoDuration;
             Metadata = new Dictionary<string, string?>
             {
                 { "map", mapName },
                 { "description", missionRun.Description },
-                { "estimated_duration", missionRun.EstimatedDuration?.ToString("D", CultureInfo.InvariantCulture) },
+                {
+                    "estimated_duration",
+                    missionRun.EstimatedDuration?.ToString("D", CultureInfo.InvariantCulture)
+                },
                 { "asset_code", missionRun.InstallationCode },
                 { "mission_name", missionRun.Name },
                 { "status_reason", missionRun.StatusReason },
-                { "analysis_type", inspection.AnalysisType?.ToString() }
+                { "analysis_type", inspection.AnalysisType?.ToString() },
             };
         }
     }
@@ -149,10 +184,12 @@ namespace Api.Services.Models
     public readonly struct IsarPose(Pose pose)
     {
         [JsonPropertyName("position")]
-        public IsarPosition Position { get; } = new IsarPosition(pose.Position.X, pose.Position.Y, pose.Position.Z, "asset");
+        public IsarPosition Position { get; } =
+            new IsarPosition(pose.Position.X, pose.Position.Y, pose.Position.Z, "asset");
 
         [JsonPropertyName("orientation")]
-        public IsarOrientation Orientation { get; } = new IsarOrientation(
+        public IsarOrientation Orientation { get; } =
+            new IsarOrientation(
                 pose.Orientation.X,
                 pose.Orientation.Y,
                 pose.Orientation.Z,

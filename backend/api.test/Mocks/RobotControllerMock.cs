@@ -2,6 +2,7 @@
 using Api.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
+
 namespace Api.Test.Mocks
 {
     internal class RobotControllerMock
@@ -38,7 +39,7 @@ namespace Api.Test.Mocks
                 ErrorHandlingServiceMock.Object
             )
             {
-                CallBase = true
+                CallBase = true,
             };
         }
     }

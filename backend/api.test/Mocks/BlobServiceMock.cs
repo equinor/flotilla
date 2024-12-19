@@ -7,7 +7,11 @@ namespace Api.Test.Mocks
 {
     public class MockBlobService : IBlobService
     {
-        public async Task<byte[]?> DownloadBlob(string blobName, string containerName, string accountName)
+        public async Task<byte[]?> DownloadBlob(
+            string blobName,
+            string containerName,
+            string accountName
+        )
         {
             using var memoryStream = new System.IO.MemoryStream();
             await Task.CompletedTask;
@@ -21,7 +25,13 @@ namespace Api.Test.Mocks
             return pages;
         }
 
-        public async Task UploadJsonToBlob(string json, string path, string containerName, string accountName, bool overwrite = false)
+        public async Task UploadJsonToBlob(
+            string json,
+            string path,
+            string containerName,
+            string accountName,
+            bool overwrite = false
+        )
         {
             await Task.CompletedTask;
         }

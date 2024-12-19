@@ -74,10 +74,10 @@ namespace Api.Database.Models
         public bool IsCompleted =>
             _status
                 is MissionStatus.Aborted
-                or MissionStatus.Cancelled
-                or MissionStatus.Successful
-                or MissionStatus.PartiallySuccessful
-                or MissionStatus.Failed;
+                    or MissionStatus.Cancelled
+                    or MissionStatus.Successful
+                    or MissionStatus.PartiallySuccessful
+                    or MissionStatus.Failed;
 
         public DateTime? StartTime { get; private set; }
 
@@ -106,10 +106,9 @@ namespace Api.Database.Models
 
         public MissionTask? GetTaskByIsarId(string isarTaskId)
         {
-            return Tasks.FirstOrDefault(
-                task =>
-                    task.IsarTaskId != null
-                    && task.IsarTaskId.Equals(isarTaskId, StringComparison.Ordinal)
+            return Tasks.FirstOrDefault(task =>
+                task.IsarTaskId != null
+                && task.IsarTaskId.Equals(isarTaskId, StringComparison.Ordinal)
             );
         }
 
@@ -124,10 +123,9 @@ namespace Api.Database.Models
                 "cancelled" => MissionStatus.Cancelled,
                 "paused" => MissionStatus.Paused,
                 "partially_successful" => MissionStatus.PartiallySuccessful,
-                _
-                    => throw new ArgumentException(
-                        $"Failed to parse mission status '{status}' as it's not supported"
-                    )
+                _ => throw new ArgumentException(
+                    $"Failed to parse mission status '{status}' as it's not supported"
+                ),
             };
         }
 
@@ -135,8 +133,8 @@ namespace Api.Database.Models
         {
             if (Robot.Model.AverageDurationPerTag is not null)
             {
-                float totalInspectionDuration = Tasks.Sum(
-                    task => task.Inspection?.VideoDuration ?? 0
+                float totalInspectionDuration = Tasks.Sum(task =>
+                    task.Inspection?.VideoDuration ?? 0
                 );
                 EstimatedDuration = (uint)(
                     (Robot.Model.AverageDurationPerTag * Tasks.Count) + totalInspectionDuration
@@ -164,16 +162,21 @@ namespace Api.Database.Models
                     prevPosition = currentPosition;
                 }
                 int estimate = (int)(
-                    (distance / (RobotVelocity * EfficiencyFactor))
-                    + InspectionTime
+                    (distance / (RobotVelocity * EfficiencyFactor)) + InspectionTime
                 );
                 EstimatedDuration = (uint)estimate * 60;
             }
         }
 
-        public bool IsReturnHomeMission() { return MissionRunType == MissionRunType.ReturnHome; }
+        public bool IsReturnHomeMission()
+        {
+            return MissionRunType == MissionRunType.ReturnHome;
+        }
 
-        public bool IsEmergencyMission() { return MissionRunType == MissionRunType.Emergency; }
+        public bool IsEmergencyMission()
+        {
+            return MissionRunType == MissionRunType.Emergency;
+        }
     }
 
     public enum MissionStatus
@@ -185,13 +188,13 @@ namespace Api.Database.Models
         Cancelled,
         Failed,
         Successful,
-        PartiallySuccessful
+        PartiallySuccessful,
     }
 
     public enum MissionRunType
     {
         Normal,
         ReturnHome,
-        Emergency
+        Emergency,
     }
 }

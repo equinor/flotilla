@@ -1,30 +1,46 @@
 ﻿using Api.Database.Models;
 using Api.Utilities;
+
 namespace Api.Services
 {
     public interface ILocalizationService
     {
-        public Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition);
+        public Task EnsureRobotIsOnSameInstallationAsMission(
+            Robot robot,
+            MissionDefinition missionDefinition
+        );
         public Task<bool> RobotIsOnSameDeckAsMission(string robotId, string inspectionAreaId);
     }
 
-    public class LocalizationService(ILogger<LocalizationService> logger, IRobotService robotService, IInstallationService installationService, IDeckService deckService) : ILocalizationService
+    public class LocalizationService(
+        ILogger<LocalizationService> logger,
+        IRobotService robotService,
+        IInstallationService installationService,
+        IDeckService deckService
+    ) : ILocalizationService
     {
-
-        public async Task EnsureRobotIsOnSameInstallationAsMission(Robot robot, MissionDefinition missionDefinition)
+        public async Task EnsureRobotIsOnSameInstallationAsMission(
+            Robot robot,
+            MissionDefinition missionDefinition
+        )
         {
-            var missionInstallation = await installationService.ReadByInstallationCode(missionDefinition.InstallationCode, readOnly: true);
+            var missionInstallation = await installationService.ReadByInstallationCode(
+                missionDefinition.InstallationCode,
+                readOnly: true
+            );
 
             if (missionInstallation is null)
             {
-                string errorMessage = $"Could not find installation for installation code {missionDefinition.InstallationCode}";
+                string errorMessage =
+                    $"Could not find installation for installation code {missionDefinition.InstallationCode}";
                 logger.LogError("{Message}", errorMessage);
                 throw new InstallationNotFoundException(errorMessage);
             }
 
             if (robot.CurrentInstallation.Id != missionInstallation.Id)
             {
-                string errorMessage = $"The robot {robot.Name} is on installation {robot.CurrentInstallation.Name} which is not the same as the mission installation {missionInstallation.Name}";
+                string errorMessage =
+                    $"The robot {robot.Name} is on installation {robot.CurrentInstallation.Name} which is not the same as the mission installation {missionInstallation.Name}";
                 logger.LogError("{Message}", errorMessage);
                 throw new RobotNotInSameInstallationAsMissionException(errorMessage);
             }
@@ -40,19 +56,30 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            if (robot.RobotCapabilities is not null && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_localize)) { return true; }
+            if (
+                robot.RobotCapabilities is not null
+                && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_localize)
+            )
+            {
+                return true;
+            }
 
             if (robot.CurrentInspectionArea is null)
             {
-                const string ErrorMessage = "The robot is not associated with an inspection area and a mission may not be started";
+                const string ErrorMessage =
+                    "The robot is not associated with an inspection area and a mission may not be started";
                 logger.LogError("{Message}", ErrorMessage);
                 throw new RobotCurrentAreaMissingException(ErrorMessage);
             }
 
-            var missionInspectionArea = await deckService.ReadById(inspectionAreaId, readOnly: true);
+            var missionInspectionArea = await deckService.ReadById(
+                inspectionAreaId,
+                readOnly: true
+            );
             if (missionInspectionArea is null)
             {
-                const string ErrorMessage = "The mission does not have an associated inspection area";
+                const string ErrorMessage =
+                    "The mission does not have an associated inspection area";
                 logger.LogError("{Message}", ErrorMessage);
                 throw new DeckNotFoundException(ErrorMessage);
             }

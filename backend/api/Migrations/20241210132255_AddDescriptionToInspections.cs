@@ -14,15 +14,14 @@ namespace Api.Migrations
                 name: "InspectionTargetName",
                 table: "Inspections",
                 type: "text",
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "InspectionTargetName",
-                table: "Inspections");
+            migrationBuilder.DropColumn(name: "InspectionTargetName", table: "Inspections");
         }
     }
 }

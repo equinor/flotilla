@@ -25,10 +25,22 @@ namespace Api.Test.Mocks
             byte[] key = new byte[32];
             rng.GetBytes(key);
             var securityKey = new SymmetricSecurityKey(key) { KeyId = Guid.NewGuid().ToString() };
-            var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var signingCredentials = new SigningCredentials(
+                securityKey,
+                SecurityAlgorithms.HmacSha256
+            );
 
             string issuer = Guid.NewGuid().ToString();
-            string jwtToken = tokenHandler.WriteToken(new JwtSecurityToken(issuer, null, claims, null, DateTime.UtcNow.AddMinutes(20), signingCredentials));
+            string jwtToken = tokenHandler.WriteToken(
+                new JwtSecurityToken(
+                    issuer,
+                    null,
+                    claims,
+                    null,
+                    DateTime.UtcNow.AddMinutes(20),
+                    signingCredentials
+                )
+            );
             context.Request.Headers.Authorization = jwtToken;
             return context;
         }
@@ -42,7 +54,8 @@ namespace Api.Test.Mocks
         {
             get
             {
-                if (CustomRolesHttpContext is not null) return CustomRolesHttpContext;
+                if (CustomRolesHttpContext is not null)
+                    return CustomRolesHttpContext;
 
                 return GetHttpContextWithRoles(["Role.Admin"]);
             }

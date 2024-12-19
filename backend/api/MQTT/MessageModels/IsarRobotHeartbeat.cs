@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+
 namespace Api.Mqtt.MessageModels
 {
 #nullable disable

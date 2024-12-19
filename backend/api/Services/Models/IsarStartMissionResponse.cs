@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 
-
 namespace Api.Services.Models
 {
     public class IsarStartMissionResponse
@@ -25,7 +24,5 @@ namespace Api.Services.Models
 
         [JsonPropertyName("type")]
         public required string TaskType { get; set; }
-
-
     }
 }

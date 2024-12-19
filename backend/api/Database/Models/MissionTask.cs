@@ -11,7 +11,6 @@ namespace Api.Database.Models
 {
     public class MissionTask
     {
-
         private TaskStatus _status;
 
         // ReSharper disable once NotNullOrRequiredMemberIsNotInitialized
@@ -28,7 +27,8 @@ namespace Api.Database.Models
             string? taskDescription,
             IsarZoomDescription? zoomDescription = null,
             TaskStatus status = TaskStatus.NotStarted,
-            MissionTaskType type = MissionTaskType.Inspection)
+            MissionTaskType type = MissionTaskType.Inspection
+        )
         {
             TagLink = tagLink;
             TagId = tagId;
@@ -39,7 +39,8 @@ namespace Api.Database.Models
             Status = status;
             Type = type;
             IsarZoomDescription = zoomDescription;
-            if (inspection != null) Inspection = new Inspection(inspection);
+            if (inspection != null)
+                Inspection = new Inspection(inspection);
         }
 
         public MissionTask(CustomTaskQuery taskQuery)
@@ -81,7 +82,9 @@ namespace Api.Database.Models
                     Inspection = new Inspection();
                     break;
                 default:
-                    throw new MissionTaskNotFoundException("MissionTaskType should be ReturnHome or Inspection");
+                    throw new MissionTaskNotFoundException(
+                        "MissionTaskType should be ReturnHome or Inspection"
+                    );
             }
         }
 
@@ -138,18 +141,24 @@ namespace Api.Database.Models
             set
             {
                 _status = value;
-                if (IsCompleted && EndTime is null) { EndTime = DateTime.UtcNow; }
+                if (IsCompleted && EndTime is null)
+                {
+                    EndTime = DateTime.UtcNow;
+                }
 
-                if (_status is TaskStatus.InProgress && StartTime is null) { StartTime = DateTime.UtcNow; }
+                if (_status is TaskStatus.InProgress && StartTime is null)
+                {
+                    StartTime = DateTime.UtcNow;
+                }
             }
         }
 
         public bool IsCompleted =>
             _status
                 is TaskStatus.Cancelled
-                or TaskStatus.Successful
-                or TaskStatus.Failed
-                or TaskStatus.PartiallySuccessful;
+                    or TaskStatus.Successful
+                    or TaskStatus.Failed
+                    or TaskStatus.PartiallySuccessful;
 
         public DateTime? StartTime { get; private set; }
 
@@ -162,7 +171,10 @@ namespace Api.Database.Models
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
             UpdateStatus(isarTask.TaskStatus);
-            if (isarTask.TaskType != IsarTaskType.ReturnToHome && isarTask.TaskType != IsarTaskType.MoveArm)
+            if (
+                isarTask.TaskType != IsarTaskType.ReturnToHome
+                && isarTask.TaskType != IsarTaskType.MoveArm
+            )
             {
                 Inspection?.UpdateWithIsarInfo(isarTask);
             }
@@ -179,7 +191,7 @@ namespace Api.Database.Models
                 IsarTaskStatus.Cancelled => TaskStatus.Cancelled,
                 IsarTaskStatus.Paused => TaskStatus.Paused,
                 IsarTaskStatus.Failed => TaskStatus.Failed,
-                _ => throw new ArgumentException($"ISAR Task status '{isarStatus}' not supported")
+                _ => throw new ArgumentException($"ISAR Task status '{isarStatus}' not supported"),
             };
         }
 
@@ -189,7 +201,9 @@ namespace Api.Database.Models
             {
                 MissionTaskType.ReturnHome => "return_to_home",
                 MissionTaskType.Inspection => "inspection",
-                _ => throw new ArgumentException($"ISAR Mission task type '{missionTaskType}' not supported"),
+                _ => throw new ArgumentException(
+                    $"ISAR Mission task type '{missionTaskType}' not supported"
+                ),
             };
             ;
         }
@@ -199,19 +213,19 @@ namespace Api.Database.Models
             var genericTasks = new List<MissionTask>();
             foreach (var task in tasks)
             {
-                var taskCopy = new MissionTask(task)
-                {
-                    Id = "",
-                    IsarTaskId = "",
-                };
-                if (taskCopy.Inspection is not null) taskCopy.Inspection = new Inspection(taskCopy.Inspection, useEmptyID: true);
+                var taskCopy = new MissionTask(task) { Id = "", IsarTaskId = "" };
+                if (taskCopy.Inspection is not null)
+                    taskCopy.Inspection = new Inspection(taskCopy.Inspection, useEmptyID: true);
 
                 genericTasks.Add(taskCopy);
             }
 
             string json = JsonSerializer.Serialize(genericTasks);
             byte[] hash = SHA256.HashData(Encoding.UTF8.GetBytes(json));
-            return BitConverter.ToString(hash).Replace("-", "", StringComparison.CurrentCulture).ToUpperInvariant();
+            return BitConverter
+                .ToString(hash)
+                .Replace("-", "", StringComparison.CurrentCulture)
+                .ToUpperInvariant();
         }
     }
 
@@ -223,12 +237,12 @@ namespace Api.Database.Models
         InProgress,
         Failed,
         Cancelled,
-        Paused
+        Paused,
     }
 
     public enum MissionTaskType
     {
         Inspection,
-        ReturnHome
+        ReturnHome,
     }
 }

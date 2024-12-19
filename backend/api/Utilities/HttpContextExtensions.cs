@@ -17,7 +17,13 @@ namespace Api.Utilities
         public static List<System.Security.Claims.Claim> GetRequestedRoles(this HttpContext client)
         {
             var claims = client.GetRequestedClaims();
-            var roles = claims.Where((c) => c.Type == "roles" || c.Type.EndsWith("role", StringComparison.CurrentCulture)).ToList();
+            var roles = claims
+                .Where(
+                    (c) =>
+                        c.Type == "roles"
+                        || c.Type.EndsWith("role", StringComparison.CurrentCulture)
+                )
+                .ToList();
             return roles;
         }
 
@@ -39,7 +45,10 @@ namespace Api.Utilities
         {
             var claims = client.GetRequestedClaims();
             var objectIdClaim = claims.FirstOrDefault(c => c.Type == "oid");
-            if (objectIdClaim is null) { return null; }
+            if (objectIdClaim is null)
+            {
+                return null;
+            }
             return objectIdClaim.Value;
         }
     }

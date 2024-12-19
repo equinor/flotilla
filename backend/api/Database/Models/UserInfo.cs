@@ -9,6 +9,7 @@ namespace Api.Database.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
+
         [Required]
         public string Oid { get; set; }
     }

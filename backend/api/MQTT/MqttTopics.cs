@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Api.Mqtt.MessageModels;
+
 namespace Api.Mqtt
 {
     /// <summary>
@@ -13,33 +14,15 @@ namespace Api.Mqtt
         public static readonly Dictionary<string, Type> TopicsToMessages =
             new()
             {
-                {
-                    "isar/+/status", typeof(IsarStatusMessage)
-                },
-                {
-                    "isar/+/robot_info", typeof(IsarRobotInfoMessage)
-                },
-                {
-                    "isar/+/robot_heartbeat", typeof(IsarRobotHeartbeatMessage)
-                },
-                {
-                    "isar/+/mission", typeof(IsarMissionMessage)
-                },
-                {
-                    "isar/+/task", typeof(IsarTaskMessage)
-                },
-                {
-                    "isar/+/battery", typeof(IsarBatteryMessage)
-                },
-                {
-                    "isar/+/pressure", typeof(IsarPressureMessage)
-                },
-                {
-                    "isar/+/pose", typeof(IsarPoseMessage)
-                },
-                {
-                    "isar/+/cloud_health", typeof(IsarCloudHealthMessage)
-                }
+                { "isar/+/status", typeof(IsarStatusMessage) },
+                { "isar/+/robot_info", typeof(IsarRobotInfoMessage) },
+                { "isar/+/robot_heartbeat", typeof(IsarRobotHeartbeatMessage) },
+                { "isar/+/mission", typeof(IsarMissionMessage) },
+                { "isar/+/task", typeof(IsarTaskMessage) },
+                { "isar/+/battery", typeof(IsarBatteryMessage) },
+                { "isar/+/pressure", typeof(IsarPressureMessage) },
+                { "isar/+/pose", typeof(IsarPoseMessage) },
+                { "isar/+/cloud_health", typeof(IsarCloudHealthMessage) },
             };
 
         /// <summary>

@@ -3,15 +3,16 @@ using Api.Database.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace Api.Controllers
 {
     [ApiController]
     [Route("return-to-home")]
     public class ReturnToHomeController(
-            ILogger<RobotController> logger,
-            IReturnToHomeService returnToHomeService,
-            IRobotService robotService
-        ) : ControllerBase
+        ILogger<RobotController> logger,
+        IReturnToHomeService returnToHomeService,
+        IRobotService robotService
+    ) : ControllerBase
     {
         /// <summary>
         ///     Sends the robots to their home.
@@ -34,7 +35,10 @@ namespace Api.Controllers
                 return NotFound();
             }
 
-            var returnToHomeMission = await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id);
+            var returnToHomeMission =
+                await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(
+                    robot.Id
+                );
             if (returnToHomeMission is null)
             {
                 string errorMessage = "Error while scheduling Return to Home mission";

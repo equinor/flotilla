@@ -8,10 +8,8 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("sources")]
-public class SourceController(
-        ISourceService sourceService,
-        ILogger<SourceController> logger
-    ) : ControllerBase
+public class SourceController(ISourceService sourceService, ILogger<SourceController> logger)
+    : ControllerBase
 {
     /// <summary>
     /// List all sources in the Flotilla database

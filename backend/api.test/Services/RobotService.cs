@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+
 namespace Api.Test.Services
 {
     [Collection("Database collection")]
@@ -38,8 +39,22 @@ namespace Api.Test.Services
             _installationService = new InstallationService(_context, _accessRoleService);
             _plantService = new PlantService(_context, _installationService, _accessRoleService);
             _defaultLocalizationPoseService = new DefaultLocalizationPoseService(_context);
-            _deckService = new DeckService(_context, _defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, _signalRService);
-            _areaService = new AreaService(_context, _installationService, _plantService, _deckService, _defaultLocalizationPoseService, _accessRoleService);
+            _deckService = new DeckService(
+                _context,
+                _defaultLocalizationPoseService,
+                _installationService,
+                _plantService,
+                _accessRoleService,
+                _signalRService
+            );
+            _areaService = new AreaService(
+                _context,
+                _installationService,
+                _plantService,
+                _deckService,
+                _defaultLocalizationPoseService,
+                _accessRoleService
+            );
         }
 
         public void Dispose()
@@ -53,7 +68,15 @@ namespace Api.Test.Services
         {
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var _ = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _deckService);
+            var robotService = new RobotService(
+                _context,
+                _logger,
+                _robotModelService,
+                _signalRService,
+                _accessRoleService,
+                _installationService,
+                _deckService
+            );
             var robots = await robotService.ReadAll();
 
             Assert.True(robots.Any());
@@ -62,7 +85,15 @@ namespace Api.Test.Services
         [Fact]
         public async Task Read()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _deckService);
+            var robotService = new RobotService(
+                _context,
+                _logger,
+                _robotModelService,
+                _signalRService,
+                _accessRoleService,
+                _installationService,
+                _deckService
+            );
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
             var robotById = await robotService.ReadById(robot.Id, readOnly: false);
@@ -73,7 +104,15 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _deckService);
+            var robotService = new RobotService(
+                _context,
+                _logger,
+                _robotModelService,
+                _signalRService,
+                _accessRoleService,
+                _installationService,
+                _deckService
+            );
             var robot = await robotService.ReadById("some_id_that_does_not_exist", readOnly: true);
             Assert.Null(robot);
         }
@@ -81,14 +120,20 @@ namespace Api.Test.Services
         [Fact]
         public async Task Create()
         {
-            var robotService = new RobotService(_context, _logger, _robotModelService, _signalRService, _accessRoleService, _installationService, _deckService);
+            var robotService = new RobotService(
+                _context,
+                _logger,
+                _robotModelService,
+                _signalRService,
+                _accessRoleService,
+                _installationService,
+                _deckService
+            );
             var installationService = new InstallationService(_context, _accessRoleService);
 
-            var installation = await installationService.Create(new CreateInstallationQuery
-            {
-                Name = "Johan Sverdrup",
-                InstallationCode = "JSV"
-            });
+            var installation = await installationService.Create(
+                new CreateInstallationQuery { Name = "Johan Sverdrup", InstallationCode = "JSV" }
+            );
 
             var robotsBefore = await robotService.ReadAll(readOnly: true);
             int nRobotsBefore = robotsBefore.Count();
@@ -102,15 +147,12 @@ namespace Api.Test.Services
                 Name = "",
                 IsarId = "",
                 SerialNumber = "",
-                Documentation =
-                [
-                    documentationQuery
-                ],
+                Documentation = [documentationQuery],
                 CurrentInstallationCode = installation.InstallationCode,
                 RobotType = RobotType.Robot,
                 Host = "",
                 Port = 1,
-                Status = RobotStatus.Available
+                Status = RobotStatus.Available,
             };
 
             var robotModel = _context.RobotModels.First();

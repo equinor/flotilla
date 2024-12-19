@@ -1,5 +1,6 @@
 ﻿using Api.Database.Models;
 using Api.Services.Models;
+
 namespace Api.Controllers.Models
 {
     public struct CustomInspectionQuery
