@@ -18,7 +18,7 @@ const StyledButton = styled(Button)`
 export const MissionHistoryButton = (): JSX.Element => {
     const { TranslateText } = useLanguageContext()
 
-    let navigate = useNavigate()
+    const navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/history`
         navigate(path)

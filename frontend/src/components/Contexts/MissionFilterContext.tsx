@@ -217,7 +217,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 setFilterState({ ...filterState, [filterName]: defaultValue })
             },
             removeFilters: () => {
-                let localFilter: IMissionFilterContext['filterState'] = { ...filterState }
+                const localFilter: IMissionFilterContext['filterState'] = { ...filterState }
                 for (const key of Object.keys(localFilter)) localFilter[key as keyof typeof localFilter] = undefined
 
                 setFilterState(localFilter)
@@ -231,7 +231,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 if (!Object.keys(filterState).includes(filterName)) return
                 const currentArray = filterState[filterName as keyof typeof filterState] as any[]
                 if (!Array.isArray(currentArray)) return
-                let newArray = currentArray.filter((val) => val !== value)
+                const newArray = currentArray.filter((val) => val !== value)
                 setFilterState({ ...filterState, [filterName]: newArray })
             },
             isDefault: (filterName: string, value: any) => {
@@ -276,7 +276,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 return iso.slice(0, -3) // Removes :00 at the end
             },
             getFormattedFilter: () => {
-                let localFilter = { ...filterState }
+                const localFilter = { ...filterState }
                 // This way we avoid sending an empty filter which allows ongoing missions
                 if (!localFilter.statuses || localFilter.statuses.length === 0)
                     localFilter.statuses = Object.assign([], missionStatusFilterOptionsIterable)

@@ -71,7 +71,7 @@ const StyledGhostButton = styled(StyledButton)`
 export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
     const { TranslateText } = useLanguageContext()
 
-    let navigate = useNavigate()
+    const navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)

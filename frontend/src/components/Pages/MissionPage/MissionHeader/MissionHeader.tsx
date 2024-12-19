@@ -79,11 +79,11 @@ const getStartUsedAndRemainingTime = (
     usedTime: string
     remainingTime: string
 } => {
-    var startTime: string
-    var startDate: string
-    var remainingTime: string
-    var usedTimeInMinutes: number
-    var estimatedDurationInMinutes: number | undefined
+    let startTime: string
+    let startDate: string
+    let remainingTime: string
+    let usedTimeInMinutes: number
+    let estimatedDurationInMinutes: number | undefined
     if (mission.estimatedDuration) {
         // Convert from seconds to minutes, rounding up
         estimatedDurationInMinutes = Math.ceil(mission.estimatedDuration / 60)

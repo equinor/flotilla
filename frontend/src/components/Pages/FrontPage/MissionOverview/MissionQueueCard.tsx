@@ -64,7 +64,7 @@ const StyledButton = styled(Button)`
 `
 
 export const MissionQueueCard = ({ order, mission, onDeleteMission }: MissionQueueCardProps): JSX.Element => {
-    let navigate = useNavigate()
+    const navigate = useNavigate()
     const routeChange = () => {
         const path = `${config.FRONTEND_BASE_ROUTE}/mission/${mission.id}`
         navigate(path)
