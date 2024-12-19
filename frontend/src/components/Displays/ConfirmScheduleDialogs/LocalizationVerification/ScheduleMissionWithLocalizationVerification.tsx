@@ -78,8 +78,6 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
             setDialogToOpen(DialogTypes.conflictingRobotDeck)
             return
         }
-        // To ignore scheduleMissions dependency
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [unikMissionDeckNames, selectedRobot?.currentInspectionArea?.deckName])
 
     return (

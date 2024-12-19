@@ -61,7 +61,6 @@ export const DockProvider: FC<Props> = ({ children }) => {
                 AlertCategory.INFO
             )
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [enabledRobots])
 
     return (
