@@ -80,29 +80,33 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     displayedMapName = displayedMapName ? displayedMapName.charAt(0).toUpperCase() + displayedMapName.slice(1) : ' '
 
     useEffect(() => {
-        BackendAPICaller.getMap(mission.installationCode!, mission.map?.mapName!)
-            .then((imageBlob) => {
-                imageObjectURL.current = URL.createObjectURL(imageBlob)
-            })
-            .catch(() => {
-                imageObjectURL.current = NoMap
-            })
-            .then(() => {
-                getMeta(imageObjectURL.current).then((img) => {
-                    const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement
-                    if (mapCanvas) {
-                        mapCanvas.width = img.width
-                        mapCanvas.height = img.height
-                        const context = mapCanvas?.getContext('2d')
-                        if (context) {
-                            setMapContext(context)
-                            context.drawImage(img, 0, 0)
-                        }
-                        setMapCanvas(mapCanvas)
-                    }
-                    setMapImage(img)
+        if (mission.map?.mapName) {
+            BackendAPICaller.getMap(mission.installationCode!, mission.map?.mapName)
+                .then((imageBlob) => {
+                    imageObjectURL.current = URL.createObjectURL(imageBlob)
                 })
-            })
+                .catch(() => {
+                    imageObjectURL.current = NoMap
+                })
+                .then(() => {
+                    getMeta(imageObjectURL.current).then((img) => {
+                        const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement
+                        if (mapCanvas) {
+                            mapCanvas.width = img.width
+                            mapCanvas.height = img.height
+                            const context = mapCanvas?.getContext('2d')
+                            if (context) {
+                                setMapContext(context)
+                                context.drawImage(img, 0, 0)
+                            }
+                            setMapCanvas(mapCanvas)
+                        }
+                        setMapImage(img)
+                    })
+                })
+        } else {
+            imageObjectURL.current = NoMap
+        }
     }, [mission.installationCode, mission.id, mission.map?.mapName])
 
     useEffect(() => {
