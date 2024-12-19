@@ -78,7 +78,7 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
                 installationCode: installationCode,
                 pageSize: 100,
                 orderBy: 'InstallationCode installationCode',
-            }).catch((e) => {
+            }).catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent

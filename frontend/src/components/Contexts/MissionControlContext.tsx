@@ -22,7 +22,7 @@ interface IMissionControlContext {
 
 const defaultMissionControlInterface = {
     missionControlState: { isRobotMissionWaitingForResponseDict: {} },
-    updateRobotMissionState: (newState: MissionStatusRequest, robotId: string) => {},
+    updateRobotMissionState: () => {},
 }
 
 const MissionControlContext = createContext<IMissionControlContext>(defaultMissionControlInterface)
@@ -67,8 +67,8 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
             case MissionStatusRequest.Pause: {
                 setIsWaitingForResponse(robotId, true)
                 BackendAPICaller.pauseMission(robotId)
-                    .then((_) => setIsWaitingForResponse(robotId, false))
-                    .catch((_) => {
+                    .then(() => setIsWaitingForResponse(robotId, false))
+                    .catch(() => {
                         setAlert(
                             AlertType.RequestFail,
                             <FailedRequestAlertContent
@@ -89,8 +89,8 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
             case MissionStatusRequest.Resume: {
                 setIsWaitingForResponse(robotId, true)
                 BackendAPICaller.resumeMission(robotId)
-                    .then((_) => setIsWaitingForResponse(robotId, false))
-                    .catch((_) => {
+                    .then(() => setIsWaitingForResponse(robotId, false))
+                    .catch(() => {
                         setAlert(
                             AlertType.RequestFail,
                             <FailedRequestAlertContent
@@ -111,8 +111,8 @@ export const MissionControlProvider: FC<Props> = ({ children }) => {
             case MissionStatusRequest.Stop: {
                 setIsWaitingForResponse(robotId, true)
                 BackendAPICaller.stopMission(robotId)
-                    .then((_) => setIsWaitingForResponse(robotId, false))
-                    .catch((_) => {
+                    .then(() => setIsWaitingForResponse(robotId, false))
+                    .catch(() => {
                         setAlert(
                             AlertType.RequestFail,
                             <FailedRequestAlertContent

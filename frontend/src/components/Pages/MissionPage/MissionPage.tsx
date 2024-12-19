@@ -74,7 +74,7 @@ export const MissionPage = () => {
                 .then((mission) => {
                     setSelectedMission(mission)
                 })
-                .catch((e) => {
+                .catch(() => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent

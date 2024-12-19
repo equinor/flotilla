@@ -84,7 +84,7 @@ export const RobotPage = () => {
 
     const returnRobotToHome = () => {
         if (robotId) {
-            BackendAPICaller.returnRobotToHome(robotId).catch((e) => {
+            BackendAPICaller.returnRobotToHome(robotId).catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent

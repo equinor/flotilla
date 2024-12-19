@@ -110,7 +110,7 @@ const InstallationPicker = () => {
                     const mapping = mapInstallationCodeToName(response)
                     setAllPlantsMap(mapping)
                 })
-                .catch((e) => {
+                .catch(() => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent

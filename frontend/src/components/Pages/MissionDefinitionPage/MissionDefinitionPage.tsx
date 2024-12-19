@@ -177,7 +177,7 @@ const MissionDefinitionEditDialog = ({
                 closeEditDialog()
                 if (missionDefinition.isDeprecated) navigate(`${config.FRONTEND_BASE_ROUTE}/FrontPage`)
             })
-            .catch((e) => {
+            .catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to update inspection')} />,

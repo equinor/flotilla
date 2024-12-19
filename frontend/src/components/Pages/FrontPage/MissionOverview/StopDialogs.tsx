@@ -156,7 +156,7 @@ export const StopRobotDialog = (): JSX.Element => {
     }
 
     const stopAll = () => {
-        BackendAPICaller.sendRobotsToDockingPosition(installationCode).catch((e) => {
+        BackendAPICaller.sendRobotsToDockingPosition(installationCode).catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent translatedMessage={TranslateText('Failed to send robots to a dock')} />,
@@ -173,7 +173,7 @@ export const StopRobotDialog = (): JSX.Element => {
     }
 
     const resetRobots = () => {
-        BackendAPICaller.clearEmergencyState(installationCode).catch((e) => {
+        BackendAPICaller.clearEmergencyState(installationCode).catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent translatedMessage={TranslateText('Failed to release robots from dock')} />,
