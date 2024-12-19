@@ -1,14 +1,17 @@
 ﻿using System.Threading.Tasks;
 using Api.Database.Models;
+
 namespace Api.Services
 {
     public class MockSignalRService : ISignalRService
     {
-        public MockSignalRService()
-        {
-        }
+        public MockSignalRService() { }
 
-        public async Task SendMessageAsync<T>(string label, Installation? installation, T messageObject)
+        public async Task SendMessageAsync<T>(
+            string label,
+            Installation? installation,
+            T messageObject
+        )
         {
             await Task.CompletedTask;
         }
@@ -22,7 +25,6 @@ namespace Api.Services
         {
             return;
         }
-
 
         public void ReportDockSuccessToSignalR(Robot robot, string message)
         {

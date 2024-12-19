@@ -1,4 +1,5 @@
 ﻿using Api.Services.Events;
+
 namespace Api.Services
 {
     public interface IEmergencyActionService
@@ -10,10 +11,7 @@ namespace Api.Services
 
     public class EmergencyActionService : IEmergencyActionService
     {
-
-        public EmergencyActionService()
-        {
-        }
+        public EmergencyActionService() { }
 
         public void SendRobotToDock(RobotEmergencyEventArgs e)
         {
@@ -38,6 +36,5 @@ namespace Api.Services
         {
             ReleaseRobotFromDockTriggered?.Invoke(this, e);
         }
-
     }
 }

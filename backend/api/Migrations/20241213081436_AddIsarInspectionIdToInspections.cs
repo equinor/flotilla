@@ -16,15 +16,14 @@ namespace Api.Migrations
                 type: "character varying(200)",
                 maxLength: 200,
                 nullable: false,
-                defaultValue: "");
+                defaultValue: ""
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "IsarInspectionId",
-                table: "Inspections");
+            migrationBuilder.DropColumn(name: "IsarInspectionId", table: "Inspections");
         }
     }
 }

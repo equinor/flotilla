@@ -12,7 +12,10 @@ namespace Api.Services
 
         public abstract Task<Installation?> ReadById(string id, bool readOnly = true);
 
-        public abstract Task<Installation?> ReadByInstallationCode(string installation, bool readOnly = true);
+        public abstract Task<Installation?> ReadByInstallationCode(
+            string installation,
+            bool readOnly = true
+        );
 
         public abstract Task<Installation> Create(CreateInstallationQuery newInstallation);
 
@@ -33,7 +36,10 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class InstallationService(FlotillaDbContext context, IAccessRoleService accessRoleService) : IInstallationService
+    public class InstallationService(
+        FlotillaDbContext context,
+        IAccessRoleService accessRoleService
+    ) : IInstallationService
     {
         public async Task<IEnumerable<Installation>> ReadAll(bool readOnly = true)
         {
@@ -43,8 +49,9 @@ namespace Api.Services
         private IQueryable<Installation> GetInstallations(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            var query = context.Installations
-                .Where((i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper()));
+            var query = context.Installations.Where(
+                (i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper())
+            );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
@@ -56,10 +63,17 @@ namespace Api.Services
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
-            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+            if (
+                installation == null
+                || accessibleInstallationCodes.Contains(
+                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
+                )
+            )
                 await context.SaveChangesAsync();
             else
-                throw new UnauthorizedAccessException($"User does not have permission to update installation in installation {installation.Name}");
+                throw new UnauthorizedAccessException(
+                    $"User does not have permission to update installation in installation {installation.Name}"
+                );
         }
 
         public async Task<Installation?> ReadById(string id, bool readOnly = true)
@@ -68,24 +82,30 @@ namespace Api.Services
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<Installation?> ReadByInstallationCode(string installationCode, bool readOnly = true)
+        public async Task<Installation?> ReadByInstallationCode(
+            string installationCode,
+            bool readOnly = true
+        )
         {
             if (installationCode == null)
                 return null;
-            return await GetInstallations(readOnly: readOnly).Where(a =>
-                a.InstallationCode.ToLower().Equals(installationCode.ToLower())
-            ).FirstOrDefaultAsync();
+            return await GetInstallations(readOnly: readOnly)
+                .Where(a => a.InstallationCode.ToLower().Equals(installationCode.ToLower()))
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Installation> Create(CreateInstallationQuery newInstallationQuery)
         {
-            var installation = await ReadByInstallationCode(newInstallationQuery.InstallationCode, readOnly: true);
+            var installation = await ReadByInstallationCode(
+                newInstallationQuery.InstallationCode,
+                readOnly: true
+            );
             if (installation == null)
             {
                 installation = new Installation
                 {
                     Name = newInstallationQuery.Name,
-                    InstallationCode = newInstallationQuery.InstallationCode
+                    InstallationCode = newInstallationQuery.InstallationCode,
                 };
                 await context.Installations.AddAsync(installation);
                 await ApplyUnprotectedDatabaseUpdate();
@@ -104,8 +124,7 @@ namespace Api.Services
 
         public async Task<Installation?> Delete(string id)
         {
-            var installation = await GetInstallations()
-                .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            var installation = await GetInstallations().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (installation is null)
             {
                 return null;

@@ -9,9 +9,9 @@ namespace Api.Controllers
     [ApiController]
     [Route("inspection-findings")]
     public class InspectionFindingController(
-            ILogger<InspectionFindingController> logger,
-            IInspectionService inspectionService
-        ) : ControllerBase
+        ILogger<InspectionFindingController> logger,
+        IInspectionService inspectionService
+    ) : ControllerBase
     {
         /// <summary>
         /// Associate a new inspection finding with the inspection corresponding to isarTaskId
@@ -27,9 +27,15 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionFinding>> AddFinding([FromBody] InspectionFindingQuery inspectionFinding, [FromRoute] string isarTaskId)
+        public async Task<ActionResult<InspectionFinding>> AddFinding(
+            [FromBody] InspectionFindingQuery inspectionFinding,
+            [FromRoute] string isarTaskId
+        )
         {
-            logger.LogInformation("Add inspection finding for inspection with isarTaskId '{Id}'", isarTaskId);
+            logger.LogInformation(
+                "Add inspection finding for inspection with isarTaskId '{Id}'",
+                isarTaskId
+            );
             try
             {
                 var inspection = await inspectionService.AddFinding(inspectionFinding, isarTaskId);
@@ -38,11 +44,14 @@ namespace Api.Controllers
                 {
                     return Ok(inspection.InspectionFindings);
                 }
-
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error while adding inspection finding to inspection with IsarTaskId '{Id}'", isarTaskId);
+                logger.LogError(
+                    e,
+                    "Error while adding inspection finding to inspection with IsarTaskId '{Id}'",
+                    isarTaskId
+                );
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
             return NotFound($"Could not find any inspection with the provided '{isarTaskId}'");
@@ -72,17 +81,17 @@ namespace Api.Controllers
                 {
                     return Ok(inspection);
                 }
-
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error while finding an inspection with inspection id '{id}'", id);
+                logger.LogError(
+                    e,
+                    "Error while finding an inspection with inspection id '{id}'",
+                    id
+                );
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
             return NotFound("Could not find any inspection with the provided '{id}'");
         }
-
     }
-
-
 }

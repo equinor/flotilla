@@ -13,6 +13,7 @@ using Api.Database.Models;
 using Api.Test.Database;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
+
 namespace Api.Test.Client
 {
     [Collection("Database collection")]
@@ -23,27 +24,27 @@ namespace Api.Test.Client
         private readonly JsonSerializerOptions _serializerOptions =
             new()
             {
-                Converters =
-                {
-                    new JsonStringEnumConverter()
-                },
-                PropertyNameCaseInsensitive = true
+                Converters = { new JsonStringEnumConverter() },
+                PropertyNameCaseInsensitive = true,
             };
 
         public AreaTests(TestWebApplicationFactory<Program> factory)
         {
-            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
-            {
-                AllowAutoRedirect = false,
-                BaseAddress = new Uri("https://localhost:8000")
-            });
+            _client = factory.CreateClient(
+                new WebApplicationFactoryClientOptions
+                {
+                    AllowAutoRedirect = false,
+                    BaseAddress = new Uri("https://localhost:8000"),
+                }
+            );
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 TestAuthHandler.AuthenticationScheme
             );
 
-            object? context = factory.Services.GetService(typeof(FlotillaDbContext)) as FlotillaDbContext ?? throw new ArgumentNullException(nameof(factory));
+            object? context =
+                factory.Services.GetService(typeof(FlotillaDbContext)) as FlotillaDbContext
+                ?? throw new ArgumentNullException(nameof(factory));
             _databaseUtilities = new DatabaseUtilities((FlotillaDbContext)context);
-
         }
 
         [Fact]
@@ -56,22 +57,22 @@ namespace Api.Test.Client
                 {
                     X = 1,
                     Y = 2,
-                    Z = 2
+                    Z = 2,
                 },
                 Orientation = new Orientation
                 {
                     X = 0,
                     Y = 0,
                     Z = 0,
-                    W = 1
-                }
+                    W = 1,
+                },
             };
 
             string testInstallation = "TestInstallationAreaTest";
             var installationQuery = new CreateInstallationQuery
             {
                 InstallationCode = testInstallation,
-                Name = testInstallation
+                Name = testInstallation,
             };
 
             string testPlant = "TestPlantAreaTest";
@@ -79,7 +80,7 @@ namespace Api.Test.Client
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testPlant
+                Name = testPlant,
             };
 
             string testDeck = "testDeckAreaTest";
@@ -87,7 +88,7 @@ namespace Api.Test.Client
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testDeck
+                Name = testDeck,
             };
 
             string testArea = "testAreaAreaTest";
@@ -97,7 +98,7 @@ namespace Api.Test.Client
                 PlantCode = testPlant,
                 DeckName = testDeck,
                 AreaName = testArea,
-                DefaultLocalizationPose = testPose
+                DefaultLocalizationPose = testPose,
             };
 
             var installationContent = new StringContent(
@@ -126,7 +127,10 @@ namespace Api.Test.Client
 
             // Act
             string installationUrl = "/installations";
-            var installationResponse = await _client.PostAsync(installationUrl, installationContent);
+            var installationResponse = await _client.PostAsync(
+                installationUrl,
+                installationContent
+            );
             string plantUrl = "/plants";
             var plantResponse = await _client.PostAsync(plantUrl, plantContent);
             string deckUrl = "/decks";
@@ -139,7 +143,9 @@ namespace Api.Test.Client
             Assert.True(plantResponse.IsSuccessStatusCode);
             Assert.True(deckResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
-            var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
+            var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(
+                _serializerOptions
+            );
             Assert.NotNull(area);
         }
 
@@ -149,7 +155,10 @@ namespace Api.Test.Client
             // Arrange - Initialise area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
 
             // Arrange - Robot
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
@@ -161,7 +170,7 @@ namespace Api.Test.Client
             {
                 AnalysisType = AnalysisType.CarSeal,
                 InspectionTarget = new Position(),
-                InspectionType = InspectionType.Image
+                InspectionType = InspectionType.Image,
             };
             var tasks = new List<CustomTaskQuery>
             {
@@ -170,8 +179,8 @@ namespace Api.Test.Client
                     Inspection = inspection,
                     TagId = "test",
                     RobotPose = new Pose(),
-                    TaskOrder = 0
-                }
+                    TaskOrder = 0,
+                },
             };
             var missionQuery = new CustomMissionQuery
             {
@@ -180,7 +189,7 @@ namespace Api.Test.Client
                 InstallationCode = installation.InstallationCode,
                 InspectionAreaName = deck.Name,
                 Name = testMissionName,
-                Tasks = tasks
+                Tasks = tasks,
             };
 
             var missionContent = new StringContent(
@@ -194,17 +203,25 @@ namespace Api.Test.Client
             var missionResponse = await _client.PostAsync(missionUrl, missionContent);
 
             Assert.True(missionResponse.IsSuccessStatusCode);
-            var mission = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var mission = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
             Assert.NotNull(mission);
             Assert.NotNull(mission.MissionId);
             string inspectionAreaUrl = "/decks";
-            var inspectionareaMissionsResponse = await _client.GetAsync(inspectionAreaUrl + $"/{deck.Id}/mission-definitions");
+            var inspectionareaMissionsResponse = await _client.GetAsync(
+                inspectionAreaUrl + $"/{deck.Id}/mission-definitions"
+            );
 
             // Assert
             Assert.True(inspectionareaMissionsResponse.IsSuccessStatusCode);
-            var missions = await inspectionareaMissionsResponse.Content.ReadFromJsonAsync<IList<MissionDefinitionResponse>>(_serializerOptions);
+            var missions = await inspectionareaMissionsResponse.Content.ReadFromJsonAsync<
+                IList<MissionDefinitionResponse>
+            >(_serializerOptions);
             Assert.NotNull(missions);
-            Assert.Single(missions.Where(m => m.Id.Equals(mission.MissionId, StringComparison.Ordinal)));
+            Assert.Single(
+                missions.Where(m => m.Id.Equals(mission.MissionId, StringComparison.Ordinal))
+            );
         }
 
         [Fact]
@@ -214,9 +231,9 @@ namespace Api.Test.Client
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             string installationCode = installation.InstallationCode;
 
-
             // Act
-            string goToDockingPositionUrl = $"/emergency-action/{installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone";
+            string goToDockingPositionUrl =
+                $"/emergency-action/{installationCode}/abort-current-missions-and-send-all-robots-to-safe-zone";
             var missionResponse = await _client.PostAsync(goToDockingPositionUrl, null);
 
             // Assert
@@ -233,7 +250,10 @@ namespace Api.Test.Client
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
 
             string deckId = deck.Id;
 
@@ -246,16 +266,16 @@ namespace Api.Test.Client
                     {
                         X = 1,
                         Y = 2,
-                        Z = 3
+                        Z = 3,
                     },
                     Orientation = new Orientation
                     {
                         X = 0,
                         Y = 0,
                         Z = 0,
-                        W = 1
-                    }
-                }
+                        W = 1,
+                    },
+                },
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -266,13 +286,17 @@ namespace Api.Test.Client
             // Act
             var putResponse = await _client.PutAsync(url, content);
             Assert.True(putResponse.IsSuccessStatusCode);
-            var putDeck = await putResponse.Content.ReadFromJsonAsync<DeckResponse>(_serializerOptions);
+            var putDeck = await putResponse.Content.ReadFromJsonAsync<DeckResponse>(
+                _serializerOptions
+            );
 
             // Assert
             Assert.NotNull(putDeck);
             Assert.NotNull(putDeck.DefaultLocalizationPose);
             Assert.True(putDeck.DefaultLocalizationPose.Position.Z.Equals(query.Pose.Position.Z));
-            Assert.True(putDeck.DefaultLocalizationPose.Orientation.W.Equals(query.Pose.Orientation.W));
+            Assert.True(
+                putDeck.DefaultLocalizationPose.Orientation.W.Equals(query.Pose.Orientation.W)
+            );
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
+
 namespace Api.Services.MissionLoaders
 {
     public interface IMissionLoader

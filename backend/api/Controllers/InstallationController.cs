@@ -9,9 +9,9 @@ namespace Api.Controllers
     [ApiController]
     [Route("installations")]
     public class InstallationController(
-            ILogger<InstallationController> logger,
-            IInstallationService installationService
-        ) : ControllerBase
+        ILogger<InstallationController> logger,
+        IInstallationService installationService
+    ) : ControllerBase
     {
         /// <summary>
         /// List all installations in the Flotilla database
@@ -65,7 +65,6 @@ namespace Api.Controllers
                 logger.LogError(e, "Error during GET of installation from database");
                 throw;
             }
-
         }
 
         /// <summary>
@@ -81,15 +80,22 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Installation>> Create([FromBody] CreateInstallationQuery installation)
+        public async Task<ActionResult<Installation>> Create(
+            [FromBody] CreateInstallationQuery installation
+        )
         {
             logger.LogInformation("Creating new installation");
             try
             {
-                var existingInstallation = await installationService.ReadByInstallationCode(installation.InstallationCode, readOnly: true);
+                var existingInstallation = await installationService.ReadByInstallationCode(
+                    installation.InstallationCode,
+                    readOnly: true
+                );
                 if (existingInstallation != null)
                 {
-                    logger.LogInformation("An installation for given name and installation already exists");
+                    logger.LogInformation(
+                        "An installation for given name and installation already exists"
+                    );
                     return BadRequest($"Installation already exists");
                 }
 

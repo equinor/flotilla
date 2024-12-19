@@ -11,7 +11,11 @@ namespace Api.Services
         public abstract Task<Area?> GetTagArea(string tag, string installationCode);
     }
 
-    public class StidService(ILogger<StidService> logger, IDownstreamApi stidApi, IAreaService areaService) : IStidService
+    public class StidService(
+        ILogger<StidService> logger,
+        IDownstreamApi stidApi,
+        IAreaService areaService
+    ) : IStidService
     {
         public const string ServiceName = "StidApi";
 
@@ -30,7 +34,8 @@ namespace Api.Services
             response.EnsureSuccessStatusCode();
 
             var stidTagAreaResponse =
-                await response.Content.ReadFromJsonAsync<StidTagAreaResponse>() ?? throw new JsonException("Failed to deserialize tag position from STID");
+                await response.Content.ReadFromJsonAsync<StidTagAreaResponse>()
+                ?? throw new JsonException("Failed to deserialize tag position from STID");
 
             if (stidTagAreaResponse.LocationCode == null)
             {
@@ -39,11 +44,16 @@ namespace Api.Services
                 return null;
             }
 
-            var area = await areaService.ReadByInstallationAndName(installationCode, stidTagAreaResponse.LocationCode, readOnly: true);
+            var area = await areaService.ReadByInstallationAndName(
+                installationCode,
+                stidTagAreaResponse.LocationCode,
+                readOnly: true
+            );
 
             if (area == null)
             {
-                string errorMessage = $"Could not find area for area name {stidTagAreaResponse.LocationCode}";
+                string errorMessage =
+                    $"Could not find area for area name {stidTagAreaResponse.LocationCode}";
                 logger.LogError("{Message}", errorMessage);
                 return null;
             }

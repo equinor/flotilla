@@ -11,9 +11,13 @@ namespace Api.Services
 
         public abstract Task<DefaultLocalizationPose?> ReadById(string id, bool readOnly = true);
 
-        public abstract Task<DefaultLocalizationPose> Create(DefaultLocalizationPose defaultLocalizationPose);
+        public abstract Task<DefaultLocalizationPose> Create(
+            DefaultLocalizationPose defaultLocalizationPose
+        );
 
-        public abstract Task<DefaultLocalizationPose> Update(DefaultLocalizationPose defaultLocalizationPose);
+        public abstract Task<DefaultLocalizationPose> Update(
+            DefaultLocalizationPose defaultLocalizationPose
+        );
 
         public abstract Task<DefaultLocalizationPose?> Delete(string id);
 
@@ -25,16 +29,21 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class DefaultLocalizationPoseService(FlotillaDbContext context) : IDefaultLocalizationPoseService
+    public class DefaultLocalizationPoseService(FlotillaDbContext context)
+        : IDefaultLocalizationPoseService
     {
         public async Task<IEnumerable<DefaultLocalizationPose>> ReadAll(bool readOnly = true)
         {
             return await GetDefaultLocalizationPoses(readOnly: readOnly).ToListAsync();
         }
 
-        private IQueryable<DefaultLocalizationPose> GetDefaultLocalizationPoses(bool readOnly = true)
+        private IQueryable<DefaultLocalizationPose> GetDefaultLocalizationPoses(
+            bool readOnly = true
+        )
         {
-            return readOnly ? context.DefaultLocalizationPoses.AsNoTracking() : context.DefaultLocalizationPoses.AsTracking();
+            return readOnly
+                ? context.DefaultLocalizationPoses.AsNoTracking()
+                : context.DefaultLocalizationPoses.AsTracking();
         }
 
         public async Task<DefaultLocalizationPose?> ReadById(string id, bool readOnly = true)
@@ -43,9 +52,10 @@ namespace Api.Services
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<DefaultLocalizationPose> Create(DefaultLocalizationPose defaultLocalizationPose)
+        public async Task<DefaultLocalizationPose> Create(
+            DefaultLocalizationPose defaultLocalizationPose
+        )
         {
-
             await context.DefaultLocalizationPoses.AddAsync(defaultLocalizationPose);
             await context.SaveChangesAsync();
 
@@ -53,7 +63,9 @@ namespace Api.Services
             return defaultLocalizationPose;
         }
 
-        public async Task<DefaultLocalizationPose> Update(DefaultLocalizationPose defaultLocalizationPose)
+        public async Task<DefaultLocalizationPose> Update(
+            DefaultLocalizationPose defaultLocalizationPose
+        )
         {
             var entry = context.Update(defaultLocalizationPose);
             await context.SaveChangesAsync();

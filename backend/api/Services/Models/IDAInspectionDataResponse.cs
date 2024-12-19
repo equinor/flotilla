@@ -12,6 +12,5 @@ namespace Api.Services.Models
 
         [JsonPropertyName("blobName")]
         public required string BlobName { get; set; }
-
     }
 }

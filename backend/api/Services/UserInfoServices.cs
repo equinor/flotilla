@@ -25,7 +25,11 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class UserInfoService(FlotillaDbContext context, IHttpContextAccessor httpContextAccessor, ILogger<UserInfoService> logger) : IUserInfoService
+    public class UserInfoService(
+        FlotillaDbContext context,
+        IHttpContextAccessor httpContextAccessor,
+        ILogger<UserInfoService> logger
+    ) : IUserInfoService
     {
         public async Task<IEnumerable<UserInfo>> ReadAll(bool readOnly = true)
         {
@@ -39,8 +43,7 @@ namespace Api.Services
 
         public async Task<UserInfo?> ReadById(string id, bool readOnly = true)
         {
-            return await GetUsersInfo(readOnly: readOnly)
-                .FirstOrDefaultAsync(a => a.Id.Equals(id));
+            return await GetUsersInfo(readOnly: readOnly).FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
         public async Task<UserInfo?> ReadByOid(string oid, bool readOnly = true)
@@ -92,10 +95,7 @@ namespace Api.Services
             var userInfo = await ReadByOid(objectId, readOnly: false);
             if (userInfo is null)
             {
-                var newUserInfo = new UserInfo
-                {
-                    Oid = objectId
-                };
+                var newUserInfo = new UserInfo { Oid = objectId };
                 userInfo = await Create(newUserInfo);
             }
             return userInfo;

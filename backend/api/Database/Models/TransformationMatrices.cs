@@ -48,7 +48,11 @@ namespace Api.Database.Models
 
         public List<double[]> AsMatrix()
         {
-            return [[C1, C2], [D1, D2]];
+            return
+            [
+                [C1, C2],
+                [D1, D2],
+            ];
         }
     }
 }

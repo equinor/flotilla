@@ -6,6 +6,5 @@ namespace Api.Services.Models
     {
         [JsonPropertyName("locationCode")]
         public string? LocationCode { get; set; }
-
     }
 }

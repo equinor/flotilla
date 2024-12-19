@@ -14,15 +14,14 @@ namespace Api.Migrations
                 name: "BatteryState",
                 table: "Robots",
                 type: "text",
-                nullable: true);
+                nullable: true
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "BatteryState",
-                table: "Robots");
+            migrationBuilder.DropColumn(name: "BatteryState", table: "Robots");
         }
     }
 }

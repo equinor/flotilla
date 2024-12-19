@@ -5,6 +5,7 @@ using Api.Database.Models;
 using Api.Services.Models;
 using Api.SignalRHubs;
 using Microsoft.AspNetCore.SignalR;
+
 namespace Api.Services
 {
     public interface ISignalRService
@@ -28,7 +29,11 @@ namespace Api.Services
             _serializerOptions.Converters.Add(new JsonStringEnumConverter());
         }
 
-        public async Task SendMessageAsync<T>(string label, Installation? installation, T messageObject)
+        public async Task SendMessageAsync<T>(
+            string label,
+            Installation? installation,
+            T messageObject
+        )
         {
             string json = JsonSerializer.Serialize(messageObject, _serializerOptions);
             await SendMessageAsync(label, installation, json);
@@ -39,21 +44,30 @@ namespace Api.Services
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")
             {
                 string? localDevUser = Environment.GetEnvironmentVariable("LOCAL_DEVUSERID");
-                if (localDevUser is null || localDevUser.Equals("", StringComparison.Ordinal)) return;
+                if (localDevUser is null || localDevUser.Equals("", StringComparison.Ordinal))
+                    return;
 
                 if (installation != null)
-                    await _signalRHub.Clients.Group(localDevUser + installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)).SendAsync(label, "all", message);
+                    await _signalRHub
+                        .Clients.Group(
+                            localDevUser
+                                + installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
+                        )
+                        .SendAsync(label, "all", message);
                 else
                     await _signalRHub.Clients.Group(localDevUser).SendAsync(label, "all", message);
             }
             else
             {
                 if (installation != null)
-                    await _signalRHub.Clients.Group(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)).SendAsync(label, "all", message);
+                    await _signalRHub
+                        .Clients.Group(
+                            installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
+                        )
+                        .SendAsync(label, "all", message);
                 else
                     await _signalRHub.Clients.All.SendAsync(label, "all", message);
             }
-
 
             await Task.CompletedTask;
         }
@@ -63,23 +77,44 @@ namespace Api.Services
             _ = SendMessageAsync(
                 "Alert",
                 robot.CurrentInstallation,
-                new AlertResponse("DockFailure", "Dock failure", message, robot.CurrentInstallation.InstallationCode, robot.Id));
+                new AlertResponse(
+                    "DockFailure",
+                    "Dock failure",
+                    message,
+                    robot.CurrentInstallation.InstallationCode,
+                    robot.Id
+                )
+            );
         }
 
         public void ReportDockSuccessToSignalR(Robot robot, string message)
         {
             _ = SendMessageAsync(
-               "Alert",
-               robot.CurrentInstallation,
-               new AlertResponse("DockSuccess", "Successful drive to Dock", message, robot.CurrentInstallation.InstallationCode, robot.Id));
+                "Alert",
+                robot.CurrentInstallation,
+                new AlertResponse(
+                    "DockSuccess",
+                    "Successful drive to Dock",
+                    message,
+                    robot.CurrentInstallation.InstallationCode,
+                    robot.Id
+                )
+            );
         }
 
         public void ReportGeneralFailToSignalR(Robot robot, string title, string message)
         {
-            _ = SendMessageAsync("Alert",
+            _ = SendMessageAsync(
+                "Alert",
                 robot.CurrentInstallation,
-                new AlertResponse("generalFailure", title, message, robot.CurrentInstallation.InstallationCode, robot.Id));
+                new AlertResponse(
+                    "generalFailure",
+                    title,
+                    message,
+                    robot.CurrentInstallation.InstallationCode,
+                    robot.Id
+                )
+            );
         }
-
     }
 }

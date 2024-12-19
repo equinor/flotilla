@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Database.Models;
+
 namespace Api.Controllers.Models
 {
     public class AreaResponse
@@ -23,6 +24,7 @@ namespace Api.Controllers.Models
         [JsonConstructor]
 #nullable disable
         public AreaResponse() { }
+
 #nullable enable
 
         public AreaResponse(Area area)
