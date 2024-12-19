@@ -27,46 +27,33 @@ namespace Api.EventHandlers
             while (!stoppingToken.IsCancellationRequested)
             {
                 var now = DateTime.UtcNow;
-
                 var nextExecutionTime = CrontabSchedule.Parse(_cronExpression).GetNextOccurrence(now);
-
                 var delay = nextExecutionTime - now;
 
                 if (delay.TotalMilliseconds > 0)
-                {
                     await Task.Delay(delay, stoppingToken);
-                }
 
                 var lastReportingTime = DateTime.UtcNow - _timeSpan;
 
                 var inspectionFindings = await InspectionFindingService.RetrieveInspectionFindings(lastReportingTime, readOnly: true);
-
                 logger.LogInformation("Found {count} inspection findings in last {interval}", inspectionFindings.Count, _timeSpan);
 
                 if (inspectionFindings.Count > 0)
                 {
                     var findingsList = await GenerateFindingsList(inspectionFindings);
-
                     string adaptiveCardJson = GenerateAdaptiveCard($"Rapport {DateTime.UtcNow:yyyy-MM-dd HH}", inspectionFindings.Count, findingsList);
-
                     string url = GetWebhookURL(configuration, "TeamsInspectionFindingsWebhook");
 
                     var client = new HttpClient();
-
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                     var content = new StringContent(adaptiveCardJson, Encoding.UTF8, "application/json");
-
                     var response = await client.PostAsync(url, content, stoppingToken);
 
-                    if (response.StatusCode == HttpStatusCode.OK)
-                    {
-                        logger.LogInformation("Post request via teams incomming webhook was successful, Status Code: {response.StatusCode}", response.StatusCode);
-                    }
-                    else
+                    if (response.StatusCode != HttpStatusCode.OK)
                     {
                         string errorBody = await response.Content.ReadAsStringAsync(stoppingToken);
-                        logger.LogError($"Webhook request failed with status code {response.StatusCode}. Response body: {errorBody}");
+                        logger.LogWarning($"Webhook request failed with status code {response.StatusCode}. Response body: {errorBody}");
                     }
                 }
             }
@@ -93,13 +80,7 @@ namespace Api.EventHandlers
 
                     findingsList.Add(finding);
                 }
-                else
-                {
-                    logger.LogInformation("Failed to generate a finding since TagId in missionTask or Area in MissionRun is null");
-                    continue;
-                }
             }
-            logger.LogInformation("Findings List sucessfully generated, adaptive Card will be generated next");
             return findingsList;
         }
 
@@ -109,7 +90,6 @@ namespace Api.EventHandlers
 
             foreach (var finding in findingsReports)
             {
-
                 var factsArray = new JArray(
                     new JObject(new JProperty("name", "Anlegg"), new JProperty("value", finding.PlantName)),
                     new JObject(new JProperty("name", "Område"), new JProperty("value", finding.InspectionAreaName)),
@@ -136,9 +116,7 @@ namespace Api.EventHandlers
                     new JProperty("activityTitle", "The following inspection findings were identified:")));
 
             foreach (var findingObj in findingsJsonArray)
-            {
                 sections.Add(findingObj);
-            }
 
             var adaptiveCardObj = new JObject(
                 new JProperty("summary", "Inspection Findings Report"),
@@ -146,8 +124,7 @@ namespace Api.EventHandlers
                 new JProperty("title", $"Inspection Findings: \"{title}\""),
                 new JProperty("sections", sections));
 
-            string adaptiveCardJson = adaptiveCardObj.ToString(Formatting.Indented);
-            return adaptiveCardJson;
+            return adaptiveCardObj.ToString(Formatting.Indented);
         }
 
         public static string GetWebhookURL(IConfiguration configuration, string secretName)
@@ -171,10 +148,10 @@ namespace Api.EventHandlers
 
     public class Finding(string tagId, string plantName, string inspectionAreaName, string findingDescription, DateTime timestamp)
     {
-        public string TagId { get; set; } = tagId ?? throw new ArgumentNullException(nameof(tagId));
-        public string PlantName { get; set; } = plantName ?? throw new ArgumentNullException(nameof(plantName));
-        public string InspectionAreaName { get; set; } = inspectionAreaName ?? throw new ArgumentNullException(nameof(inspectionAreaName));
-        public string FindingDescription { get; set; } = findingDescription ?? throw new ArgumentNullException(nameof(findingDescription));
+        public string TagId { get; set; } = tagId;
+        public string PlantName { get; set; } = plantName;
+        public string InspectionAreaName { get; set; } = inspectionAreaName;
+        public string FindingDescription { get; set; } = findingDescription;
         public DateTime Timestamp { get; set; } = timestamp;
     }
 }
