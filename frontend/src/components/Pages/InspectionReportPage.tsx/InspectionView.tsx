@@ -156,16 +156,18 @@ export const InspectionsViewSection = ({ tasks, dialogView }: InspectionsViewSec
 }
 
 const FetchImageData = (task: Task) => {
-    const { installationCode } = useInstallationContext()
     const data = useQuery({
         queryKey: [task.isarTaskId],
         queryFn: async () => {
-            const imageBlob = await BackendAPICaller.getInspection(installationCode, task.isarTaskId!)
+            const imageBlob = await BackendAPICaller.getInspection(task.inspection.isarInspectionId)
             return URL.createObjectURL(imageBlob)
         },
         retryDelay: 60 * 1000, // Will always wait 1 min to retry, regardless of how many retries
         staleTime: 10 * 60 * 1000, //  I don't want an API call for 10 min after the first time I get data
-        enabled: task.status === TaskStatus.Successful && task.isarTaskId !== undefined,
+        enabled:
+            task.status === TaskStatus.Successful &&
+            task.isarTaskId !== undefined &&
+            task.inspection.isarInspectionId !== undefined,
     })
     return data
 }
