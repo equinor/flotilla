@@ -45,8 +45,8 @@ export const InspectionDialogView = ({ task, tasks }: InspectionDialogViewProps)
     const { switchSelectedInspectionTask, mappingInspectionTasksObjectURL } = useInspectionsContext()
 
     const updateImage = useCallback(() => {
-        if (task.isarTaskId && mappingInspectionTasksObjectURL[task.isarTaskId]) {
-            imageObjectURL.current = mappingInspectionTasksObjectURL[task.isarTaskId]
+        if (task.isarInspectionId && mappingInspectionTasksObjectURL[task.isarInspectionId]) {
+            imageObjectURL.current = mappingInspectionTasksObjectURL[task.isarInspectionId]
 
             getMeta(imageObjectURL.current).then((img) => {
                 const inspectionCanvas = document.getElementById('inspectionCanvas') as HTMLCanvasElement
@@ -201,11 +201,11 @@ const GetInspectionImage = ({ task, tasks }: GetInspectionImageProps) => {
     }, [tasks])
 
     const updateImage = useCallback(() => {
-        if (task.isarTaskId && mappingInspectionTasksObjectURL[task.isarTaskId]) {
-            imageObjectURL.current = mappingInspectionTasksObjectURL[task.isarTaskId]
+        if (task.isarInspectionId && mappingInspectionTasksObjectURL[task.isarInspectionId]) {
+            imageObjectURL.current = mappingInspectionTasksObjectURL[task.isarInspectionId]
 
             getMeta(imageObjectURL.current).then((img) => {
-                const inspectionCanvas = document.getElementById(task.isarTaskId!) as HTMLCanvasElement
+                const inspectionCanvas = document.getElementById(task.isarInspectionId!) as HTMLCanvasElement
                 if (inspectionCanvas) {
                     inspectionCanvas.width = img.width
                     inspectionCanvas.height = img.height
@@ -225,5 +225,5 @@ const GetInspectionImage = ({ task, tasks }: GetInspectionImageProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mappingInspectionTasksObjectURL, inspectionImage])
 
-    return <StyledInspectionImage id={task.isarTaskId} />
+    return <StyledInspectionImage id={task.isarInspectionId} />
 }

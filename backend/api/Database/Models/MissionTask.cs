@@ -111,6 +111,8 @@ namespace Api.Database.Models
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
         public string? IsarTaskId { get; set; } = Guid.NewGuid().ToString();
 
+        // TODO: Add the IsarInspectionId here
+
         [Required]
         public int TaskOrder { get; set; }
 

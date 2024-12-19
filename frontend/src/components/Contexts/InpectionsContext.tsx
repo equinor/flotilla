@@ -1,14 +1,13 @@
 import { createContext, FC, useContext, useState, useEffect, useRef } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Task } from 'models/Task'
-import { useInstallationContext } from './InstallationContext'
 
 interface IInspectionsContext {
     selectedInspectionTask: Task | undefined
     selectedInspectionTasks: Task[]
     switchSelectedInspectionTask: (selectedInspectionTask: Task | undefined) => void
     switchSelectedInspectionTasks: (selectedInspectionTask: Task[]) => void
-    mappingInspectionTasksObjectURL: { [taskIsarId: string]: string }
+    mappingInspectionTasksObjectURL: { [isarInspectionId: string]: string }
 }
 
 interface Props {
@@ -26,8 +25,6 @@ const defaultInspectionsContext = {
 const InspectionsContext = createContext<IInspectionsContext>(defaultInspectionsContext)
 
 export const InspectionsProvider: FC<Props> = ({ children }) => {
-    const { installationCode } = useInstallationContext()
-
     const [selectedInspectionTask, setSelectedInspectionTask] = useState<Task>()
     const [selectedInspectionTasks, setSelectedInspectionTasks] = useState<Task[]>([])
     const [selectedInspectionTasksToFetch, setSelectedInspectionTasksToFetch] = useState<Task[]>([])
@@ -51,14 +48,14 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         Object.values(selectedInspectionTasksToFetch).forEach((task, index) => {
-            if (task.isarTaskId) {
-                BackendAPICaller.getInspection(installationCode, task.isarTaskId!)
+            if (task.isarInspectionId) {
+                BackendAPICaller.getInspection(task.isarInspectionId!)
                     .then((imageBlob) => {
                         imageObjectURL.current = URL.createObjectURL(imageBlob)
                     })
                     .then(() => {
                         setMappingInspectionTasksObjectURL((oldMappingInspectionTasksObjectURL) => {
-                            return { ...oldMappingInspectionTasksObjectURL, [task.isarTaskId!]: imageObjectURL.current }
+                            return { ...oldMappingInspectionTasksObjectURL, [task.isarInspectionId!]: imageObjectURL.current }
                         })
                         setSelectedInspectionTasksToFetch((oldSelectedInspectionTasksToFetch) => {
                             let newInspectionTaksToFetch = { ...oldSelectedInspectionTasksToFetch }
@@ -72,7 +69,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
             }
         })
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [installationCode, selectedInspectionTasksToFetch, triggerFetch])
+    }, [selectedInspectionTasksToFetch, triggerFetch])
 
     const switchSelectedInspectionTask = (selectedName: Task | undefined) => {
         setSelectedInspectionTask(selectedName)
