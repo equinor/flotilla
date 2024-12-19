@@ -1,12 +1,14 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
+
 namespace Api.Services.MissionLoaders
 {
-    public class EchoAndCustomMissionLoader(
-        IEchoService echoService,
-        ISourceService sourceService) : IMissionLoader
+    public class EchoAndCustomMissionLoader(IEchoService echoService, ISourceService sourceService)
+        : IMissionLoader
     {
-        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(string? installationCode)
+        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(
+            string? installationCode
+        )
         {
             return await echoService.GetAvailableMissions(installationCode);
         }
@@ -18,7 +20,9 @@ namespace Api.Services.MissionLoaders
 
         public async Task<List<MissionTask>> GetTasksForMission(string missionSourceId)
         {
-            var customMissionTasks = await sourceService.GetMissionTasksFromSourceId(missionSourceId);
+            var customMissionTasks = await sourceService.GetMissionTasksFromSourceId(
+                missionSourceId
+            );
             if (customMissionTasks != null)
             {
                 return customMissionTasks;

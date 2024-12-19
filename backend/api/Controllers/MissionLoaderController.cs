@@ -7,12 +7,17 @@ using Api.Services.MissionLoaders;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace Api.Controllers
 {
     [ApiController]
     [Route("mission-loader")]
     [Authorize(Roles = Role.Any)]
-    public class MissionLoaderController(ILogger<MissionLoaderController> logger, IMissionLoader missionLoader, IRobotService robotService) : ControllerBase
+    public class MissionLoaderController(
+        ILogger<MissionLoaderController> logger,
+        IMissionLoader missionLoader,
+        IRobotService robotService
+    ) : ControllerBase
     {
         /// <summary>
         ///     List all available missions for the installation
@@ -29,7 +34,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
         public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetAvailableMissions(
-            [FromRoute] string? installationCode)
+            [FromRoute] string? installationCode
+        )
         {
             IQueryable<MissionDefinition> missionDefinitions;
             try
@@ -52,7 +58,9 @@ namespace Api.Controllers
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
 
-            var missionDefinitionResponses = missionDefinitions.Select(m => new MissionDefinitionResponse(m)).ToList();
+            var missionDefinitionResponses = missionDefinitions
+                .Select(m => new MissionDefinitionResponse(m))
+                .ToList();
             return Ok(missionDefinitionResponses);
         }
 
@@ -71,7 +79,9 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
-        public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinition([FromRoute] string missionSourceId)
+        public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinition(
+            [FromRoute] string missionSourceId
+        )
         {
             try
             {
@@ -154,7 +164,9 @@ namespace Api.Controllers
             if (plants == null)
             {
                 logger.LogWarning("Could not retrieve robot plants information");
-                throw new RobotInformationNotAvailableException("Could not retrieve robot plants information");
+                throw new RobotInformationNotAvailableException(
+                    "Could not retrieve robot plants information"
+                );
             }
 
             plants = plants.Select(p => p.ToLower(CultureInfo.CurrentCulture));
@@ -163,7 +175,9 @@ namespace Api.Controllers
             {
                 var plantInfos = await missionLoader.GetPlantInfos();
 
-                plantInfos = plantInfos.Where(p => plants.Contains(p.PlantCode.ToLower(CultureInfo.CurrentCulture))).ToList();
+                plantInfos = plantInfos
+                    .Where(p => plants.Contains(p.PlantCode.ToLower(CultureInfo.CurrentCulture)))
+                    .ToList();
                 return Ok(plantInfos);
             }
             catch (HttpRequestException e)

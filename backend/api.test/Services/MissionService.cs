@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+
 namespace Api.Test.Services
 {
     [Collection("Database collection")]
@@ -35,14 +36,45 @@ namespace Api.Test.Services
             _logger = new Mock<ILogger<MissionRunService>>().Object;
             _signalRService = new MockSignalRService();
             _accessRoleService = new AccessRoleService(_context, new HttpContextAccessor());
-            _userInfoService = new UserInfoService(_context, new HttpContextAccessor(), new Mock<ILogger<UserInfoService>>().Object);
-            _missionTaskService = new MissionTaskService(_context, new Mock<ILogger<MissionTaskService>>().Object);
+            _userInfoService = new UserInfoService(
+                _context,
+                new HttpContextAccessor(),
+                new Mock<ILogger<UserInfoService>>().Object
+            );
+            _missionTaskService = new MissionTaskService(
+                _context,
+                new Mock<ILogger<MissionTaskService>>().Object
+            );
             _installationService = new InstallationService(_context, _accessRoleService);
             _plantService = new PlantService(_context, _installationService, _accessRoleService);
-            _deckService = new DeckService(_context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, new MockSignalRService());
+            _deckService = new DeckService(
+                _context,
+                defaultLocalizationPoseService,
+                _installationService,
+                _plantService,
+                _accessRoleService,
+                new MockSignalRService()
+            );
             _robotModelService = new RobotModelService(_context);
-            _robotService = new RobotService(_context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _deckService);
-            _missionRunService = new MissionRunService(_context, _signalRService, _logger, _accessRoleService, _missionTaskService, _deckService, _robotService, _userInfoService);
+            _robotService = new RobotService(
+                _context,
+                new Mock<ILogger<RobotService>>().Object,
+                _robotModelService,
+                new MockSignalRService(),
+                _accessRoleService,
+                _installationService,
+                _deckService
+            );
+            _missionRunService = new MissionRunService(
+                _context,
+                _signalRService,
+                _logger,
+                _accessRoleService,
+                _missionTaskService,
+                _deckService,
+                _robotService,
+                _userInfoService
+            );
             _databaseUtilities = new DatabaseUtilities(_context);
         }
 
@@ -55,7 +87,10 @@ namespace Api.Test.Services
         [Fact]
         public async Task ReadIdDoesNotExist()
         {
-            var missionRun = await _missionRunService.ReadById("some_id_that_does_not_exist", readOnly: true);
+            var missionRun = await _missionRunService.ReadById(
+                "some_id_that_does_not_exist",
+                readOnly: true
+            );
             Assert.Null(missionRun);
         }
 
@@ -70,9 +105,16 @@ namespace Api.Test.Services
 
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
-            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck);
+            var missionRun = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck
+            );
 
             await _missionRunService.Create(missionRun);
 

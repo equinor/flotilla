@@ -10,7 +10,10 @@ namespace Api.Services
 
         public abstract Task<RobotModel?> ReadById(string id, bool readOnly = true);
 
-        public abstract Task<RobotModel?> ReadByRobotType(RobotType robotType, bool readOnly = true);
+        public abstract Task<RobotModel?> ReadByRobotType(
+            RobotType robotType,
+            bool readOnly = true
+        );
 
         public abstract Task<RobotModel> Create(RobotModel newRobotModel);
 
@@ -52,7 +55,9 @@ namespace Api.Services
 
         private IQueryable<RobotModel> GetRobotModels(bool readOnly = true)
         {
-            return readOnly ? _context.RobotModels.AsNoTracking() : _context.RobotModels.AsTracking();
+            return readOnly
+                ? _context.RobotModels.AsNoTracking()
+                : _context.RobotModels.AsTracking();
         }
 
         public async Task<RobotModel?> ReadById(string id, bool readOnly = true)

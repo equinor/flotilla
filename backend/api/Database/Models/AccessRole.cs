@@ -8,7 +8,7 @@ namespace Api.Database.Models
     {
         READ_ONLY,
         USER,
-        ADMIN
+        ADMIN,
     }
 
     public class AccessRole

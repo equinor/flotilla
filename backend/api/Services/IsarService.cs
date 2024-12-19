@@ -4,6 +4,7 @@ using Api.Database.Models;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.Identity.Abstractions;
+
 namespace Api.Services
 {
     public interface IIsarService
@@ -21,7 +22,11 @@ namespace Api.Services
         public Task<MediaConfig> GetMediaStreamConfig(Robot robot);
     }
 
-    public class IsarService(IDownstreamApi isarApi, IMissionDefinitionService missionDefinitionService, ILogger<IsarService> logger) : IIsarService
+    public class IsarService(
+        IDownstreamApi isarApi,
+        IMissionDefinitionService missionDefinitionService,
+        ILogger<IsarService> logger
+    ) : IIsarService
     {
         public const string ServiceName = "IsarApi";
 
@@ -30,13 +35,19 @@ namespace Api.Services
             string? mapName = null;
             if (missionRun.MissionId != null)
             {
-                var missionDefinition = await missionDefinitionService.ReadById(missionRun.MissionId);
+                var missionDefinition = await missionDefinitionService.ReadById(
+                    missionRun.MissionId
+                );
                 mapName = missionDefinition?.Map?.MapName;
             }
 
             var isarMissionDefinition = new
             {
-                mission_definition = new IsarMissionDefinition(missionRun, mapName: mapName, includeStartPose: true)
+                mission_definition = new IsarMissionDefinition(
+                    missionRun,
+                    mapName: mapName,
+                    includeStartPose: true
+                ),
             };
 
             HttpResponseMessage? response;
@@ -51,7 +62,10 @@ namespace Api.Services
             }
             catch (Exception e)
             {
-                logger.LogError("Encountered an exception when making an API call to ISAR: {Message}", e.Message);
+                logger.LogError(
+                    "Encountered an exception when making an API call to ISAR: {Message}",
+                    e.Message
+                );
                 throw new IsarCommunicationException(e.Message);
             }
 
@@ -102,10 +116,15 @@ namespace Api.Services
             {
                 (string message, int statusCode) = GetErrorDescriptionFoFailedIsarRequest(response);
                 string errorResponse = await response.Content.ReadAsStringAsync();
-                if (response.StatusCode == HttpStatusCode.Conflict && errorResponse.Contains("idle", StringComparison.CurrentCultureIgnoreCase))
+                if (
+                    response.StatusCode == HttpStatusCode.Conflict
+                    && errorResponse.Contains("idle", StringComparison.CurrentCultureIgnoreCase)
+                )
                 {
                     logger.LogError("No mission was running for robot '{Id}", robot.Id);
-                    throw new MissionNotFoundException($"No mission was running for robot {robot.Id}");
+                    throw new MissionNotFoundException(
+                        $"No mission was running for robot {robot.Id}"
+                    );
                 }
 
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
@@ -196,11 +215,7 @@ namespace Api.Services
         public async Task<IsarMission> StartMoveArm(Robot robot, string armPosition)
         {
             string armPositionPath = $"schedule/move_arm/{armPosition}";
-            var response = await CallApi(
-                HttpMethod.Post,
-                robot.IsarUri,
-                armPositionPath
-            );
+            var response = await CallApi(HttpMethod.Post, robot.IsarUri, armPositionPath);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -270,19 +285,21 @@ namespace Api.Services
             return response;
         }
 
-        private static (string, int) GetErrorDescriptionFoFailedIsarRequest(HttpResponseMessage response)
+        private static (string, int) GetErrorDescriptionFoFailedIsarRequest(
+            HttpResponseMessage response
+        )
         {
             var statusCode = response.StatusCode;
             string description = (int)statusCode switch
             {
-                StatusCodes.Status408RequestTimeout
-                    => "A timeout occurred when communicating with the ISAR state machine",
-                StatusCodes.Status409Conflict
-                    => "A conflict occurred when interacting with the ISAR state machine. This could imply the state machine is in a state that does not allow the current action you attempted.",
-                StatusCodes.Status500InternalServerError
-                    => "An internal server error occurred in ISAR",
+                StatusCodes.Status408RequestTimeout =>
+                    "A timeout occurred when communicating with the ISAR state machine",
+                StatusCodes.Status409Conflict =>
+                    "A conflict occurred when interacting with the ISAR state machine. This could imply the state machine is in a state that does not allow the current action you attempted.",
+                StatusCodes.Status500InternalServerError =>
+                    "An internal server error occurred in ISAR",
                 StatusCodes.Status401Unauthorized => "Flotilla failed to authorize towards ISAR",
-                _ => $"An unexpected status code '{statusCode}' was received from ISAR"
+                _ => $"An unexpected status code '{statusCode}' was received from ISAR",
             };
 
             return (description, (int)statusCode);
@@ -291,11 +308,7 @@ namespace Api.Services
         public async Task<MediaConfig> GetMediaStreamConfig(Robot robot)
         {
             string mediaStreamPath = $"/media/media-stream-config";
-            var response = await CallApi(
-                HttpMethod.Get,
-                robot.IsarUri,
-                mediaStreamPath
-            );
+            var response = await CallApi(HttpMethod.Get, robot.IsarUri, mediaStreamPath);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -314,27 +327,34 @@ namespace Api.Services
             IsarMediaConfigMessage? isarMediaConfigResponse;
             try
             {
-                isarMediaConfigResponse = await response.Content.ReadFromJsonAsync<IsarMediaConfigMessage>();
+                isarMediaConfigResponse =
+                    await response.Content.ReadFromJsonAsync<IsarMediaConfigMessage>();
             }
             catch (JsonException)
             {
-                string errorMessage = $"Could not parse content from new robot media stream config. {await response.Content.ReadAsStringAsync()}";
+                string errorMessage =
+                    $"Could not parse content from new robot media stream config. {await response.Content.ReadAsStringAsync()}";
                 logger.LogError("{ErrorMessage}", errorMessage);
                 throw new ConfigException(errorMessage);
             }
 
             if (isarMediaConfigResponse == null)
             {
-                string errorMessage = $"Parsing of robot media stream config resulted in empty config. {await response.Content.ReadAsStringAsync()}";
+                string errorMessage =
+                    $"Parsing of robot media stream config resulted in empty config. {await response.Content.ReadAsStringAsync()}";
                 logger.LogError("{ErrorMessage}", errorMessage);
                 throw new ConfigException(errorMessage);
             }
 
-            bool parseSuccess = Enum.TryParse(isarMediaConfigResponse.MediaConnectionType, out MediaConnectionType connectionType);
+            bool parseSuccess = Enum.TryParse(
+                isarMediaConfigResponse.MediaConnectionType,
+                out MediaConnectionType connectionType
+            );
 
             if (!parseSuccess)
             {
-                string errorMessage = $"Could not parse connection type from new robot media stream config. {isarMediaConfigResponse.MediaConnectionType}";
+                string errorMessage =
+                    $"Could not parse connection type from new robot media stream config. {isarMediaConfigResponse.MediaConnectionType}";
                 logger.LogError("{ErrorMessage}", errorMessage);
                 throw new ConfigException(errorMessage);
             }
@@ -344,7 +364,7 @@ namespace Api.Services
                 Url = isarMediaConfigResponse.Url,
                 Token = isarMediaConfigResponse.Token,
                 RobotId = robot.Id,
-                MediaConnectionType = connectionType
+                MediaConnectionType = connectionType,
             };
         }
     }

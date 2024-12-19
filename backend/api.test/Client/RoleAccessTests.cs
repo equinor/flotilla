@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+
 namespace Api.Test
 {
     [Collection("Database collection")]
@@ -22,23 +23,23 @@ namespace Api.Test
         private readonly JsonSerializerOptions _serializerOptions =
             new()
             {
-                Converters =
-                {
-                    new JsonStringEnumConverter()
-                },
-                PropertyNameCaseInsensitive = true
+                Converters = { new JsonStringEnumConverter() },
+                PropertyNameCaseInsensitive = true,
             };
 
         public RoleAccessTests(TestWebApplicationFactory<Program> factory)
         {
-            _httpContextAccessor = (MockHttpContextAccessor)factory.Services.GetService<IHttpContextAccessor>()!;
+            _httpContextAccessor = (MockHttpContextAccessor)
+                factory.Services.GetService<IHttpContextAccessor>()!;
             _httpContextAccessor.SetHttpContextRoles(["Role.Admin"]);
             //var x = new HttpContextAccessor();
-            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
-            {
-                AllowAutoRedirect = false,
-                BaseAddress = new Uri("https://localhost:8000")
-            });
+            _client = factory.CreateClient(
+                new WebApplicationFactoryClientOptions
+                {
+                    AllowAutoRedirect = false,
+                    BaseAddress = new Uri("https://localhost:8000"),
+                }
+            );
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 TestAuthHandler.AuthenticationScheme
             );
@@ -52,7 +53,7 @@ namespace Api.Test
             {
                 InstallationCode = "AuthorisedGetPlantTest_NotFoundInstallation",
                 RoleName = "User.AuthorisedGetPlantTest_NotFoundInstallation",
-                AccessLevel = RoleAccessLevel.USER
+                AccessLevel = RoleAccessLevel.USER,
             };
             var accessRoleContent = new StringContent(
                 JsonSerializer.Serialize(accessRoleQuery),
@@ -64,7 +65,7 @@ namespace Api.Test
             var installationQuery = new CreateInstallationQuery
             {
                 InstallationCode = testInstallation,
-                Name = testInstallation
+                Name = testInstallation,
             };
 
             string testPlant = "AuthorisedGetPlantTest_NotFoundPlant";
@@ -72,7 +73,7 @@ namespace Api.Test
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testPlant
+                Name = testPlant,
             };
 
             var installationContent = new StringContent(
@@ -89,7 +90,10 @@ namespace Api.Test
 
             // Act
             string installationUrl = "/installations";
-            var installationResponse = await _client.PostAsync(installationUrl, installationContent);
+            var installationResponse = await _client.PostAsync(
+                installationUrl,
+                installationContent
+            );
             string accessRoleUrl = "/access-roles";
             var accessRoleResponse = await _client.PostAsync(accessRoleUrl, accessRoleContent);
             string plantUrl = "/plants";
@@ -121,9 +125,11 @@ namespace Api.Test
             // Arrange
             var accessRoleQuery = new CreateAccessRoleQuery
             {
-                InstallationCode = "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation",
-                RoleName = "User.ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation",
-                AccessLevel = RoleAccessLevel.USER
+                InstallationCode =
+                    "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation",
+                RoleName =
+                    "User.ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation",
+                AccessLevel = RoleAccessLevel.USER,
             };
             var accessRoleContent = new StringContent(
                 JsonSerializer.Serialize(accessRoleQuery),
@@ -137,22 +143,23 @@ namespace Api.Test
                 {
                     X = 1,
                     Y = 2,
-                    Z = 2
+                    Z = 2,
                 },
                 Orientation = new Orientation
                 {
                     X = 0,
                     Y = 0,
                     Z = 0,
-                    W = 1
-                }
+                    W = 1,
+                },
             };
 
-            string testInstallation = "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation";
+            string testInstallation =
+                "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation";
             var installationQuery = new CreateInstallationQuery
             {
                 InstallationCode = testInstallation,
-                Name = testInstallation
+                Name = testInstallation,
             };
 
             string testPlant = "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestPlant";
@@ -160,7 +167,7 @@ namespace Api.Test
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testPlant
+                Name = testPlant,
             };
 
             string testDeck = "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestDeck";
@@ -168,7 +175,7 @@ namespace Api.Test
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testDeck
+                Name = testDeck,
             };
 
             string testArea = "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestArea";
@@ -178,7 +185,7 @@ namespace Api.Test
                 PlantCode = testPlant,
                 DeckName = testDeck,
                 AreaName = testArea,
-                DefaultLocalizationPose = testPose
+                DefaultLocalizationPose = testPose,
             };
 
             var installationContent = new StringContent(
@@ -207,7 +214,10 @@ namespace Api.Test
 
             // Act
             string installationUrl = "/installations";
-            var installationResponse = await _client.PostAsync(installationUrl, installationContent);
+            var installationResponse = await _client.PostAsync(
+                installationUrl,
+                installationContent
+            );
             string accessRoleUrl = "/access-roles";
             var accessRoleResponse = await _client.PostAsync(accessRoleUrl, accessRoleContent);
             string plantUrl = "/plants";
@@ -218,7 +228,9 @@ namespace Api.Test
             var areaResponse = await _client.PostAsync(areaUrl, areaContent);
 
             // Only restrict ourselves to non-admin role after doing POSTs
-            _httpContextAccessor.SetHttpContextRoles(["User.ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation"]);
+            _httpContextAccessor.SetHttpContextRoles(
+                ["User.ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation"]
+            );
 
             // Assert
             Assert.True(accessRoleResponse.IsSuccessStatusCode);
@@ -226,7 +238,9 @@ namespace Api.Test
             Assert.True(plantResponse.IsSuccessStatusCode);
             Assert.True(deckResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
-            var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
+            var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(
+                _serializerOptions
+            );
             Assert.NotNull(area);
 
             // Act
@@ -235,7 +249,9 @@ namespace Api.Test
 
             // Assert
             Assert.True(sameAreaResponse.IsSuccessStatusCode);
-            var sameArea = await sameAreaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
+            var sameArea = await sameAreaResponse.Content.ReadFromJsonAsync<AreaResponse>(
+                _serializerOptions
+            );
             Assert.NotNull(sameArea);
             Assert.Equal(sameArea.Id, area.Id);
         }
@@ -250,22 +266,23 @@ namespace Api.Test
                 {
                     X = 1,
                     Y = 2,
-                    Z = 2
+                    Z = 2,
                 },
                 Orientation = new Orientation
                 {
                     X = 0,
                     Y = 0,
                     Z = 0,
-                    W = 1
-                }
+                    W = 1,
+                },
             };
 
-            string testInstallation = "AdminAuthorisedPostInstallationPlantDeckAndAreaTestInstallation";
+            string testInstallation =
+                "AdminAuthorisedPostInstallationPlantDeckAndAreaTestInstallation";
             var installationQuery = new CreateInstallationQuery
             {
                 InstallationCode = testInstallation,
-                Name = testInstallation
+                Name = testInstallation,
             };
 
             string testPlant = "AdminAuthorisedPostInstallationPlantDeckAndAreaTestPlant";
@@ -273,7 +290,7 @@ namespace Api.Test
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testPlant
+                Name = testPlant,
             };
 
             string testDeck = "AdminAuthorisedPostInstallationPlantDeckAndAreaTestDeck";
@@ -281,7 +298,7 @@ namespace Api.Test
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testDeck
+                Name = testDeck,
             };
 
             string testArea = "AdminAuthorisedPostInstallationPlantDeckAndAreaTestArea";
@@ -291,7 +308,7 @@ namespace Api.Test
                 PlantCode = testPlant,
                 DeckName = testDeck,
                 AreaName = testArea,
-                DefaultLocalizationPose = testPose
+                DefaultLocalizationPose = testPose,
             };
 
             var installationContent = new StringContent(
@@ -320,7 +337,10 @@ namespace Api.Test
 
             // Act
             string installationUrl = "/installations";
-            var installationResponse = await _client.PostAsync(installationUrl, installationContent);
+            var installationResponse = await _client.PostAsync(
+                installationUrl,
+                installationContent
+            );
             string plantUrl = "/plants";
             var plantResponse = await _client.PostAsync(plantUrl, plantContent);
             string deckUrl = "/decks";
@@ -333,7 +353,9 @@ namespace Api.Test
             Assert.True(plantResponse.IsSuccessStatusCode);
             Assert.True(deckResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
-            var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
+            var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(
+                _serializerOptions
+            );
             Assert.NotNull(area);
         }
     }

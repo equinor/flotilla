@@ -5,11 +5,15 @@ using Api.Services;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace Api.Controllers
 {
     [ApiController]
     [Route("missions/runs")]
-    public class MissionRunController(ILogger<MissionRunController> logger, IMissionRunService missionRunService) : ControllerBase
+    public class MissionRunController(
+        ILogger<MissionRunController> logger,
+        IMissionRunService missionRunService
+    ) : ControllerBase
     {
         /// <summary>
         ///     List all mission runs in the Flotilla database
@@ -59,7 +63,7 @@ namespace Api.Controllers
                 missionRuns.CurrentPage,
                 missionRuns.TotalPages,
                 missionRuns.HasNext,
-                missionRuns.HasPrevious
+                missionRuns.HasPrevious,
             };
 
             Response.Headers.Append(
@@ -67,9 +71,12 @@ namespace Api.Controllers
                 JsonSerializer.Serialize(metadata)
             );
 
-            var missionRunResponses = missionRuns.Select(mission => new MissionRunResponse(mission));
+            var missionRunResponses = missionRuns.Select(mission => new MissionRunResponse(
+                mission
+            ));
             return Ok(missionRunResponses);
         }
+
         /// <summary>
         ///     Lookup mission run by specified id.
         /// </summary>
@@ -92,6 +99,7 @@ namespace Api.Controllers
             var missionRunResponse = new MissionRunResponse(missionRun);
             return Ok(missionRunResponse);
         }
+
         /// <summary>
         ///     Deletes the mission run with the specified id from the database.
         /// </summary>

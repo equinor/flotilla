@@ -23,7 +23,7 @@ namespace Api.Database.Models
             string? inspectionTargetName,
             InspectionStatus status = InspectionStatus.NotStarted,
             AnalysisType? analysisType = null
-            )
+        )
         {
             InspectionType = inspectionType;
             VideoDuration = videoDuration;
@@ -43,7 +43,11 @@ namespace Api.Database.Models
         }
 
         // Creates a blank deepcopy of the provided inspection
-        public Inspection(Inspection copy, InspectionStatus? inspectionStatus = null, bool useEmptyID = false)
+        public Inspection(
+            Inspection copy,
+            InspectionStatus? inspectionStatus = null,
+            bool useEmptyID = false
+        )
         {
             Id = useEmptyID ? "" : Guid.NewGuid().ToString();
             IsarTaskId = useEmptyID ? "" : copy.IsarTaskId;
@@ -96,8 +100,8 @@ namespace Api.Database.Models
         public bool IsCompleted =>
             _status
                 is InspectionStatus.Cancelled
-                or InspectionStatus.Successful
-                or InspectionStatus.Failed;
+                    or InspectionStatus.Successful
+                    or InspectionStatus.Failed;
 
         [Required]
         public InspectionType InspectionType { get; set; }
@@ -125,13 +129,15 @@ namespace Api.Database.Models
                 IsarTaskType.TakeThermalImage => InspectionType.ThermalImage,
                 IsarTaskType.TakeVideo => InspectionType.Video,
                 IsarTaskType.TakeThermalVideo => InspectionType.ThermalVideo,
-                _
-                    => throw new ArgumentException(
-                        $"ISAR task type '{isarTask.TaskType}' not supported for inspections"
-                    )
+                _ => throw new ArgumentException(
+                    $"ISAR task type '{isarTask.TaskType}' not supported for inspections"
+                ),
             };
             IsarTaskId = isarTask.IsarTaskId;
-            if (isarTask.IsarInspectionId != null) { IsarInspectionId = isarTask.IsarInspectionId; }
+            if (isarTask.IsarInspectionId != null)
+            {
+                IsarInspectionId = isarTask.IsarInspectionId;
+            }
         }
 
         public void UpdateStatus(IsarTaskStatus isarStatus)
@@ -144,10 +150,9 @@ namespace Api.Database.Models
                 IsarTaskStatus.Cancelled => InspectionStatus.Cancelled,
                 IsarTaskStatus.Failed => InspectionStatus.Failed,
                 IsarTaskStatus.Paused => InspectionStatus.InProgress,
-                _
-                    => throw new ArgumentException(
-                        $"ISAR task status '{isarStatus}' not supported for inspection status"
-                    )
+                _ => throw new ArgumentException(
+                    $"ISAR task status '{isarStatus}' not supported for inspection status"
+                ),
             };
         }
 
@@ -156,9 +161,13 @@ namespace Api.Database.Models
             return InspectionType switch
             {
                 InspectionType.Image => capabilities.Contains(RobotCapabilitiesEnum.take_image),
-                InspectionType.ThermalImage => capabilities.Contains(RobotCapabilitiesEnum.take_thermal_image),
+                InspectionType.ThermalImage => capabilities.Contains(
+                    RobotCapabilitiesEnum.take_thermal_image
+                ),
                 InspectionType.Video => capabilities.Contains(RobotCapabilitiesEnum.take_video),
-                InspectionType.ThermalVideo => capabilities.Contains(RobotCapabilitiesEnum.take_thermal_video),
+                InspectionType.ThermalVideo => capabilities.Contains(
+                    RobotCapabilitiesEnum.take_thermal_video
+                ),
                 InspectionType.Audio => capabilities.Contains(RobotCapabilitiesEnum.record_audio),
                 _ => false,
             };
@@ -171,7 +180,7 @@ namespace Api.Database.Models
         InProgress,
         NotStarted,
         Failed,
-        Cancelled
+        Cancelled,
     }
 
     public enum InspectionType
@@ -180,12 +189,12 @@ namespace Api.Database.Models
         ThermalImage,
         Video,
         ThermalVideo,
-        Audio
+        Audio,
     }
 
     public enum AnalysisType
     {
         CarSeal,
-        RtjFlange
+        RtjFlange,
     }
 }

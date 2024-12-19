@@ -20,7 +20,12 @@ namespace Api.Database.Models
             Pose = new Pose();
         }
 
-        public Robot(CreateRobotQuery createQuery, Installation installation, RobotModel model, Deck? inspectionArea = null)
+        public Robot(
+            CreateRobotQuery createQuery,
+            Installation installation,
+            RobotModel model,
+            Deck? inspectionArea = null
+        )
         {
             var documentation = new List<DocumentInfo>();
             foreach (var documentQuery in createQuery.Documentation)
@@ -28,7 +33,7 @@ namespace Api.Database.Models
                 var document = new DocumentInfo
                 {
                     Name = documentQuery.Name,
-                    Url = documentQuery.Url
+                    Url = documentQuery.Url,
                 };
                 documentation.Add(document);
             }
@@ -48,6 +53,7 @@ namespace Api.Database.Models
             Pose = new Pose();
             Model = model;
         }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
@@ -80,26 +86,40 @@ namespace Api.Database.Models
 
         public bool IsRobotPressureTooLow()
         {
-            if (Model.LowerPressureWarningThreshold == null) { return false; }
+            if (Model.LowerPressureWarningThreshold == null)
+            {
+                return false;
+            }
             return PressureLevel == null || Model.LowerPressureWarningThreshold >= PressureLevel;
         }
 
         public bool IsRobotPressureTooHigh()
         {
-            if (Model.UpperPressureWarningThreshold == null) { return false; }
+            if (Model.UpperPressureWarningThreshold == null)
+            {
+                return false;
+            }
             return PressureLevel == null || Model.UpperPressureWarningThreshold <= PressureLevel;
         }
 
         public bool IsRobotBatteryTooLow()
         {
-            if (Model.BatteryWarningThreshold == null) { return false; }
+            if (Model.BatteryWarningThreshold == null)
+            {
+                return false;
+            }
             return Model.BatteryWarningThreshold >= BatteryLevel;
         }
 
         public bool IsRobotReadyToStartMissions()
         {
-            if (IsRobotBatteryTooLow()) return false;
-            if (Model.BatteryMissionStartThreshold != null && Model.BatteryMissionStartThreshold > BatteryLevel) return false;
+            if (IsRobotBatteryTooLow())
+                return false;
+            if (
+                Model.BatteryMissionStartThreshold != null
+                && Model.BatteryMissionStartThreshold > BatteryLevel
+            )
+                return false;
             return !IsRobotPressureTooHigh() && !IsRobotPressureTooLow();
         }
 

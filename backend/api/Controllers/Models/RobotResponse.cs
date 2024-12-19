@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Database.Models;
+
 namespace Api.Controllers.Models
 {
     public class RobotResponse
@@ -49,6 +50,7 @@ namespace Api.Controllers.Models
         [JsonConstructor]
 #nullable disable
         public RobotResponse() { }
+
 #nullable enable
 
         public RobotResponse(Robot robot)
@@ -59,7 +61,10 @@ namespace Api.Controllers.Models
             Model = robot.Model;
             SerialNumber = robot.SerialNumber;
             CurrentInstallation = robot.CurrentInstallation;
-            CurrentInspectionArea = robot.CurrentInspectionArea != null ? new DeckResponse(robot.CurrentInspectionArea) : null;
+            CurrentInspectionArea =
+                robot.CurrentInspectionArea != null
+                    ? new DeckResponse(robot.CurrentInspectionArea)
+                    : null;
             BatteryLevel = robot.BatteryLevel;
             BatteryState = robot.BatteryState;
             PressureLevel = robot.PressureLevel;

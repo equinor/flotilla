@@ -10,8 +10,7 @@ namespace Api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "VideoStream");
+            migrationBuilder.DropTable(name: "VideoStream");
         }
 
         /// <inheritdoc />
@@ -22,11 +21,23 @@ namespace Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Name = table.Column<string>(
+                        type: "character varying(200)",
+                        maxLength: 200,
+                        nullable: false
+                    ),
                     RobotId = table.Column<string>(type: "text", nullable: false),
                     ShouldRotate270Clockwise = table.Column<bool>(type: "boolean", nullable: false),
-                    Type = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    Url = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false)
+                    Type = table.Column<string>(
+                        type: "character varying(64)",
+                        maxLength: 64,
+                        nullable: false
+                    ),
+                    Url = table.Column<string>(
+                        type: "character varying(200)",
+                        maxLength: 200,
+                        nullable: false
+                    ),
                 },
                 constraints: table =>
                 {
@@ -36,13 +47,16 @@ namespace Api.Migrations
                         column: x => x.RobotId,
                         principalTable: "Robots",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
 
             migrationBuilder.CreateIndex(
                 name: "IX_VideoStream_RobotId",
                 table: "VideoStream",
-                column: "RobotId");
+                column: "RobotId"
+            );
         }
     }
 }

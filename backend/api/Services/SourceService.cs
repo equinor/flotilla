@@ -18,7 +18,10 @@ namespace Api.Services
 
         public abstract Task<Source?> CheckForExistingSourceFromTasks(IList<MissionTask> tasks);
 
-        public abstract Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks, bool readOnly = true);
+        public abstract Task<Source> CreateSourceIfDoesNotExist(
+            List<MissionTask> tasks,
+            bool readOnly = true
+        );
 
         public abstract Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id);
 
@@ -32,9 +35,8 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    public class SourceService(
-        FlotillaDbContext context,
-        ILogger<SourceService> logger) : ISourceService
+    public class SourceService(FlotillaDbContext context, ILogger<SourceService> logger)
+        : ISourceService
     {
         public async Task<Source> Create(Source source)
         {
@@ -58,8 +60,7 @@ namespace Api.Services
 
         public async Task<Source?> ReadById(string id, bool readOnly = true)
         {
-            return await GetSources(readOnly: readOnly)
-                .FirstOrDefaultAsync(s => s.Id.Equals(id));
+            return await GetSources(readOnly: readOnly).FirstOrDefaultAsync(s => s.Id.Equals(id));
         }
 
         public async Task<Source?> ReadBySourceId(string sourceId, bool readOnly = true)
@@ -82,13 +83,17 @@ namespace Api.Services
         public async Task<List<MissionTask>?> GetMissionTasksFromSourceId(string id)
         {
             var existingSource = await ReadBySourceId(id, readOnly: true);
-            if (existingSource == null || existingSource.CustomMissionTasks == null) return null;
+            if (existingSource == null || existingSource.CustomMissionTasks == null)
+                return null;
 
             try
             {
-                var content = JsonSerializer.Deserialize<List<MissionTask>>(existingSource.CustomMissionTasks);
+                var content = JsonSerializer.Deserialize<List<MissionTask>>(
+                    existingSource.CustomMissionTasks
+                );
 
-                if (content == null) return null;
+                if (content == null)
+                    return null;
 
                 foreach (var task in content)
                 {
@@ -99,27 +104,29 @@ namespace Api.Services
             }
             catch (Exception e)
             {
-                logger.LogWarning("Unable to deserialize custom mission tasks with ID {Id}. {ErrorMessage}", id, e);
+                logger.LogWarning(
+                    "Unable to deserialize custom mission tasks with ID {Id}. {ErrorMessage}",
+                    id,
+                    e
+                );
                 return null;
             }
         }
 
-        public async Task<Source> CreateSourceIfDoesNotExist(List<MissionTask> tasks, bool readOnly = true)
+        public async Task<Source> CreateSourceIfDoesNotExist(
+            List<MissionTask> tasks,
+            bool readOnly = true
+        )
         {
             string json = JsonSerializer.Serialize(tasks);
             string hash = MissionTask.CalculateHashFromTasks(tasks);
 
             var existingSource = await ReadById(hash, readOnly: readOnly);
 
-            if (existingSource != null) return existingSource;
+            if (existingSource != null)
+                return existingSource;
 
-            var newSource = await Create(
-                new Source
-                {
-                    SourceId = hash,
-                    CustomMissionTasks = json
-                }
-            );
+            var newSource = await Create(new Source { SourceId = hash, CustomMissionTasks = json });
 
             DetachTracking(newSource);
             return newSource;
@@ -127,8 +134,7 @@ namespace Api.Services
 
         public async Task<Source?> Delete(string id)
         {
-            var source = await GetSources()
-                .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            var source = await GetSources().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (source is null)
             {
                 return null;

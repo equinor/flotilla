@@ -9,13 +9,20 @@ using Api.Services.Events;
 using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
+
 namespace Api.Services
 {
     public interface IMissionRunService
     {
-        public Task<MissionRun> Create(MissionRun missionRun, bool triggerCreatedMissionRunEvent = true);
+        public Task<MissionRun> Create(
+            MissionRun missionRun,
+            bool triggerCreatedMissionRunEvent = true
+        );
 
-        public Task<PagedList<MissionRun>> ReadAll(MissionRunQueryStringParameters parameters, bool readOnly = true);
+        public Task<PagedList<MissionRun>> ReadAll(
+            MissionRunQueryStringParameters parameters,
+            bool readOnly = true
+        );
 
         public Task<MissionRun?> ReadById(string id, bool readOnly = true);
 
@@ -23,21 +30,38 @@ namespace Api.Services
 
         public Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = true);
 
-        public Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId, bool readOnly = true);
+        public Task<MissionRun?> ReadNextScheduledRunByMissionId(
+            string missionId,
+            bool readOnly = true
+        );
 
         public Task<MissionRun?> ReadNextScheduledMissionRun(string robotId, bool readOnly = true);
 
-        public Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(string robotId, bool readOnly = true);
+        public Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(
+            string robotId,
+            bool readOnly = true
+        );
 
-        public Task<IList<MissionRun>> ReadMissionRuns(string robotId, MissionRunType? missionRunType, IList<MissionStatus>? filterStatuses = null, bool readOnly = true);
+        public Task<IList<MissionRun>> ReadMissionRuns(
+            string robotId,
+            MissionRunType? missionRunType,
+            IList<MissionStatus>? filterStatuses = null,
+            bool readOnly = true
+        );
 
-        public Task<MissionRun?> ReadLastExecutedMissionRunByRobot(string robotId, bool readOnly = true);
+        public Task<MissionRun?> ReadLastExecutedMissionRunByRobot(
+            string robotId,
+            bool readOnly = true
+        );
 
         public Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId);
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun);
 
-        public Task<MissionRun> UpdateMissionRunType(string missionRunId, MissionRunType missionRunType);
+        public Task<MissionRun> UpdateMissionRunType(
+            string missionRunId,
+            MissionRunType missionRunType
+        );
 
         public Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
             string isarMissionId,
@@ -46,11 +70,18 @@ namespace Api.Services
 
         public Task<MissionRun?> Delete(string id);
 
-        public Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value);
+        public Task<MissionRun> UpdateMissionRunProperty(
+            string missionRunId,
+            string propertyName,
+            object? value
+        );
 
         public Task<MissionRun> UpdateWithIsarInfo(string missionRunId, IsarMission isarMission);
 
-        public Task<MissionRun> SetMissionRunToFailed(string missionRunId, string failureDescription);
+        public Task<MissionRun> SetMissionRunToFailed(
+            string missionRunId,
+            string failureDescription
+        );
 
         public Task UpdateCurrentRobotMissionToFailed(string robotId);
 
@@ -75,23 +106,39 @@ namespace Api.Services
         IMissionTaskService missionTaskService,
         IDeckService deckService,
         IRobotService robotService,
-        IUserInfoService userInfoService) : IMissionRunService
+        IUserInfoService userInfoService
+    ) : IMissionRunService
     {
-        public async Task<MissionRun> Create(MissionRun missionRun, bool triggerCreatedMissionRunEvent = true)
+        public async Task<MissionRun> Create(
+            MissionRun missionRun,
+            bool triggerCreatedMissionRunEvent = true
+        )
         {
             missionRun.Id ??= Guid.NewGuid().ToString(); // Useful for signalR messages
 
             if (IncludesUnsupportedInspectionType(missionRun))
             {
-                throw new UnsupportedRobotCapabilityException($"Mission {missionRun.Name} contains inspection types not supported by robot: {missionRun.Robot.Name}.");
+                throw new UnsupportedRobotCapabilityException(
+                    $"Mission {missionRun.Name} contains inspection types not supported by robot: {missionRun.Robot.Name}."
+                );
             }
 
-            if (missionRun.InspectionArea is not null) { context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged; }
-            if (missionRun.Robot is not null) { context.Entry(missionRun.Robot).State = EntityState.Unchanged; }
+            if (missionRun.InspectionArea is not null)
+            {
+                context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
+            }
+            if (missionRun.Robot is not null)
+            {
+                context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+            }
             await context.MissionRuns.AddAsync(missionRun);
             await ApplyDatabaseUpdate(missionRun.InspectionArea?.Installation);
 
-            _ = signalRService.SendMessageAsync("Mission run created", missionRun.InspectionArea?.Installation, new MissionRunResponse(missionRun));
+            _ = signalRService.SendMessageAsync(
+                "Mission run created",
+                missionRun.InspectionArea?.Installation,
+                new MissionRunResponse(missionRun)
+            );
 
             if (triggerCreatedMissionRunEvent)
             {
@@ -100,14 +147,20 @@ namespace Api.Services
             }
 
             var userInfo = await userInfoService.GetRequestedUserInfo();
-            if (userInfo != null) { logger.LogInformation($"Mission run created by user with Id {userInfo.Id}"); }
+            if (userInfo != null)
+            {
+                logger.LogInformation($"Mission run created by user with Id {userInfo.Id}");
+            }
 
             DetachTracking(missionRun);
 
             return missionRun;
         }
 
-        public async Task<PagedList<MissionRun>> ReadAll(MissionRunQueryStringParameters parameters, bool readOnly = true)
+        public async Task<PagedList<MissionRun>> ReadAll(
+            MissionRunQueryStringParameters parameters,
+            bool readOnly = true
+        )
         {
             var query = GetMissionRunsWithSubModels(readOnly: readOnly);
             var filter = ConstructFilter(parameters);
@@ -133,38 +186,61 @@ namespace Api.Services
                 .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
         }
 
-        public async Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = true)
+        public async Task<IList<MissionRun>> ReadMissionRunQueue(
+            string robotId,
+            bool readOnly = true
+        )
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
-                .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending)
+                .Where(missionRun =>
+                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending
+                )
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
         }
 
-        public async Task<MissionRun?> ReadNextScheduledMissionRun(string robotId, bool readOnly = true)
-        {
-            return await GetMissionRunsWithSubModels(readOnly: readOnly)
-                .OrderBy(missionRun => missionRun.DesiredStartTime)
-                .FirstOrDefaultAsync(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending);
-        }
-
-        public async Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(string robotId, bool readOnly = true)
+        public async Task<MissionRun?> ReadNextScheduledMissionRun(
+            string robotId,
+            bool readOnly = true
+        )
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .FirstOrDefaultAsync(missionRun =>
-                    missionRun.Robot.Id == robotId && missionRun.MissionRunType == MissionRunType.Emergency && missionRun.Status == MissionStatus.Pending);
+                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending
+                );
         }
 
-        public async Task<IList<MissionRun>> ReadMissionRuns(string robotId, MissionRunType? missionRunType, IList<MissionStatus>? filterStatuses = null, bool readOnly = true)
+        public async Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(
+            string robotId,
+            bool readOnly = true
+        )
         {
-            var missionFilter = ConstructFilter(new MissionRunQueryStringParameters
-            {
-                Statuses = filterStatuses as List<MissionStatus> ?? null,
-                RobotId = robotId,
-                MissionRunType = missionRunType,
-                PageSize = 100
-            });
+            return await GetMissionRunsWithSubModels(readOnly: readOnly)
+                .OrderBy(missionRun => missionRun.DesiredStartTime)
+                .FirstOrDefaultAsync(missionRun =>
+                    missionRun.Robot.Id == robotId
+                    && missionRun.MissionRunType == MissionRunType.Emergency
+                    && missionRun.Status == MissionStatus.Pending
+                );
+        }
+
+        public async Task<IList<MissionRun>> ReadMissionRuns(
+            string robotId,
+            MissionRunType? missionRunType,
+            IList<MissionStatus>? filterStatuses = null,
+            bool readOnly = true
+        )
+        {
+            var missionFilter = ConstructFilter(
+                new MissionRunQueryStringParameters
+                {
+                    Statuses = filterStatuses as List<MissionStatus> ?? null,
+                    RobotId = robotId,
+                    MissionRunType = missionRunType,
+                    PageSize = 100,
+                }
+            );
 
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(missionFilter)
@@ -172,7 +248,10 @@ namespace Api.Services
                 .ToListAsync();
         }
 
-        public async Task<MissionRun?> ReadNextScheduledRunByMissionId(string missionId, bool readOnly = true)
+        public async Task<MissionRun?> ReadNextScheduledRunByMissionId(
+            string missionId,
+            bool readOnly = true
+        )
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(m => m.MissionId == missionId && m.EndTime == null)
@@ -180,7 +259,10 @@ namespace Api.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<MissionRun?> ReadLastExecutedMissionRunByRobot(string robotId, bool readOnly = true)
+        public async Task<MissionRun?> ReadLastExecutedMissionRunByRobot(
+            string robotId,
+            bool readOnly = true
+        )
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(m => m.Robot.Id == robotId)
@@ -192,10 +274,13 @@ namespace Api.Services
         public async Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId)
         {
             var pendingMissionRuns = await ReadMissionRunQueue(robotId, readOnly: true);
-            if (pendingMissionRuns.Any((m) => m.IsReturnHomeMission())) return true;
+            if (pendingMissionRuns.Any((m) => m.IsReturnHomeMission()))
+                return true;
 
             var ongoingMissionRuns = await GetMissionRunsWithSubModels(readOnly: true)
-                .Where(missionRun => missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing)
+                .Where(missionRun =>
+                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing
+                )
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
             return ongoingMissionRuns.Any((m) => m.IsReturnHomeMission());
@@ -203,19 +288,30 @@ namespace Api.Services
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun)
         {
-            if (missionRun.Robot.RobotCapabilities == null) return false;
+            if (missionRun.Robot.RobotCapabilities == null)
+                return false;
 
-            return missionRun.Tasks.Any(task => task.Inspection != null && !task.Inspection.IsSupportedInspectionType(missionRun.Robot.RobotCapabilities));
+            return missionRun.Tasks.Any(task =>
+                task.Inspection != null
+                && !task.Inspection.IsSupportedInspectionType(missionRun.Robot.RobotCapabilities)
+            );
         }
 
         public async Task<MissionRun> Update(MissionRun missionRun)
         {
             context.Entry(missionRun.Robot).State = EntityState.Unchanged;
-            if (missionRun.InspectionArea is not null) { context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged; }
+            if (missionRun.InspectionArea is not null)
+            {
+                context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
+            }
 
             var entry = context.Update(missionRun);
             await ApplyDatabaseUpdate(missionRun.InspectionArea?.Installation);
-            _ = signalRService.SendMessageAsync("Mission run updated", missionRun?.InspectionArea?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
+            _ = signalRService.SendMessageAsync(
+                "Mission run updated",
+                missionRun?.InspectionArea?.Installation,
+                missionRun != null ? new MissionRunResponse(missionRun) : null
+            );
             DetachTracking(missionRun!);
             return entry.Entity;
         }
@@ -230,7 +326,11 @@ namespace Api.Services
             }
 
             await UpdateMissionRunProperty(missionRun.Id, "IsDeprecated", true);
-            _ = signalRService.SendMessageAsync("Mission run deleted", missionRun?.InspectionArea?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null);
+            _ = signalRService.SendMessageAsync(
+                "Mission run deleted",
+                missionRun?.InspectionArea?.Installation,
+                missionRun != null ? new MissionRunResponse(missionRun) : null
+            );
 
             return missionRun;
         }
@@ -238,8 +338,8 @@ namespace Api.Services
         private IQueryable<MissionRun> GetMissionRunsWithSubModels(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            var query = context.MissionRuns
-                .Include(missionRun => missionRun.InspectionArea)
+            var query = context
+                .MissionRuns.Include(missionRun => missionRun.InspectionArea)
                 .ThenInclude(deck => deck != null ? deck.Plant : null)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(missionRun => missionRun.InspectionArea)
@@ -249,7 +349,9 @@ namespace Api.Services
                 .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(missionRun => missionRun.InspectionArea)
                 .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
-                .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null)
+                .ThenInclude(defaultLocalizationPose =>
+                    defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null
+                )
                 .Include(missionRun => missionRun.Robot)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.CurrentInspectionArea)
@@ -262,10 +364,18 @@ namespace Api.Services
                 .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspection)
-                .ThenInclude(inspections => inspections != null ? inspections.InspectionFindings : null)
+                .ThenInclude(inspections =>
+                    inspections != null ? inspections.InspectionFindings : null
+                )
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.CurrentInstallation)
-                .Where((m) => m.InspectionArea == null || accessibleInstallationCodes.Result.Contains(m.InspectionArea.Installation.InstallationCode.ToUpper()))
+                .Where(
+                    (m) =>
+                        m.InspectionArea == null
+                        || accessibleInstallationCodes.Result.Contains(
+                            m.InspectionArea.Installation.InstallationCode.ToUpper()
+                        )
+                )
                 .Where((m) => m.IsDeprecated == false);
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
@@ -280,10 +390,17 @@ namespace Api.Services
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
-            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+            if (
+                installation == null
+                || accessibleInstallationCodes.Contains(
+                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
+                )
+            )
                 await context.SaveChangesAsync();
             else
-                throw new UnauthorizedAccessException($"User does not have permission to update mission run in installation {installation.Name}");
+                throw new UnauthorizedAccessException(
+                    $"User does not have permission to update mission run in installation {installation.Name}"
+                );
         }
 
         private static void SearchByName(ref IQueryable<MissionRun> missionRuns, string? name)
@@ -294,37 +411,42 @@ namespace Api.Services
             }
 
 #pragma warning disable CA1862
-            missionRuns = missionRuns.Where(
-                missionRun =>
-                    missionRun.Name != null && missionRun.Name.ToLower().Contains(name.ToLower().Trim())
+            missionRuns = missionRuns.Where(missionRun =>
+                missionRun.Name != null && missionRun.Name.ToLower().Contains(name.ToLower().Trim())
             );
 #pragma warning restore CA1862
         }
 
-        private static void SearchByRobotName(ref IQueryable<MissionRun> missionRuns, string? robotName)
+        private static void SearchByRobotName(
+            ref IQueryable<MissionRun> missionRuns,
+            string? robotName
+        )
         {
-            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(robotName)) { return; }
+            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(robotName))
+            {
+                return;
+            }
 
 #pragma warning disable CA1862
-            missionRuns = missionRuns.Where(
-                missionRun => missionRun.Robot.Name.ToLower().Contains(robotName.ToLower().Trim())
+            missionRuns = missionRuns.Where(missionRun =>
+                missionRun.Robot.Name.ToLower().Contains(robotName.ToLower().Trim())
             );
 #pragma warning restore CA1862
         }
 
         private static void SearchByTag(ref IQueryable<MissionRun> missionRuns, string? tag)
         {
-            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(tag)) { return; }
+            if (!missionRuns.Any() || string.IsNullOrWhiteSpace(tag))
+            {
+                return;
+            }
 
-            missionRuns = missionRuns.Where(
-                missionRun =>
-                    missionRun.Tasks.Any(
-                        task =>
+            missionRuns = missionRuns.Where(missionRun =>
+                missionRun.Tasks.Any(task =>
 #pragma warning disable CA1307
-                            task.TagId != null
-                            && task.TagId.Contains(tag.Trim())
+                    task.TagId != null && task.TagId.Contains(tag.Trim())
 #pragma warning restore CA1307
-                    )
+                )
             );
         }
 
@@ -355,16 +477,22 @@ namespace Api.Services
             MissionRunQueryStringParameters parameters
         )
         {
-            Expression<Func<MissionRun, bool>> inspectionAreaFilter = parameters.InspectionArea is null
+            Expression<Func<MissionRun, bool>> inspectionAreaFilter = parameters.InspectionArea
+                is null
                 ? missionRun => true
                 : missionRun =>
-                    missionRun.InspectionArea != null &&
-                    missionRun.InspectionArea.Name.ToLower().Equals(parameters.InspectionArea.Trim().ToLower());
+                    missionRun.InspectionArea != null
+                    && missionRun
+                        .InspectionArea.Name.ToLower()
+                        .Equals(parameters.InspectionArea.Trim().ToLower());
 
-            Expression<Func<MissionRun, bool>> installationFilter = parameters.InstallationCode is null
+            Expression<Func<MissionRun, bool>> installationFilter = parameters.InstallationCode
+                is null
                 ? missionRun => true
                 : missionRun =>
-                    missionRun.InstallationCode.ToLower().Equals(parameters.InstallationCode.Trim().ToLower());
+                    missionRun
+                        .InstallationCode.ToLower()
+                        .Equals(parameters.InstallationCode.Trim().ToLower());
 
             Expression<Func<MissionRun, bool>> statusFilter = parameters.Statuses is null
                 ? mission => true
@@ -380,38 +508,55 @@ namespace Api.Services
 
             Expression<Func<MissionRun, bool>> missionIdFilter = parameters.MissionId is null
                 ? missionRun => true
-                : missionRun => missionRun.MissionId != null && missionRun.MissionId.Equals(parameters.MissionId);
+                : missionRun =>
+                    missionRun.MissionId != null
+                    && missionRun.MissionId.Equals(parameters.MissionId);
 
             Expression<Func<MissionRun, bool>> missionTypeFilter = parameters.MissionRunType is null
                 ? missionRun => true
                 : missionRun => missionRun.MissionRunType.Equals(parameters.MissionRunType);
 
-            Expression<Func<MissionRun, bool>> inspectionTypeFilter = parameters.InspectionTypes is null
+            Expression<Func<MissionRun, bool>> inspectionTypeFilter = parameters.InspectionTypes
+                is null
                 ? mission => true
-                : mission => mission.Tasks.Any(
-                    task => task.Inspection != null && parameters.InspectionTypes.Contains(task.Inspection.InspectionType)
-                );
+                : mission =>
+                    mission.Tasks.Any(task =>
+                        task.Inspection != null
+                        && parameters.InspectionTypes.Contains(task.Inspection.InspectionType)
+                    );
 
             Expression<Func<MissionRun, bool>> returnTohomeFilter = !parameters.ExcludeReturnToHome
                 ? missionRun => true
-                : missionRun => !(missionRun.Tasks.Count() == 1 && missionRun.Tasks.All(task => task.Type == MissionTaskType.ReturnHome));
+                : missionRun =>
+                    !(
+                        missionRun.Tasks.Count() == 1
+                        && missionRun.Tasks.All(task => task.Type == MissionTaskType.ReturnHome)
+                    );
 
             var minStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinStartTime);
             var maxStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxStartTime);
             Expression<Func<MissionRun, bool>> startTimeFilter = missionRun =>
                 missionRun.StartTime == null
-                || (DateTime.Compare(missionRun.StartTime.Value, minStartTime) >= 0
-                && DateTime.Compare(missionRun.StartTime.Value, maxStartTime) <= 0);
+                || (
+                    DateTime.Compare(missionRun.StartTime.Value, minStartTime) >= 0
+                    && DateTime.Compare(missionRun.StartTime.Value, maxStartTime) <= 0
+                );
 
             var minEndTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinEndTime);
             var maxEndTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxEndTime);
             Expression<Func<MissionRun, bool>> endTimeFilter = missionRun =>
                 missionRun.EndTime == null
-                || (DateTime.Compare(missionRun.EndTime.Value, minEndTime) >= 0
-                && DateTime.Compare(missionRun.EndTime.Value, maxEndTime) <= 0);
+                || (
+                    DateTime.Compare(missionRun.EndTime.Value, minEndTime) >= 0
+                    && DateTime.Compare(missionRun.EndTime.Value, maxEndTime) <= 0
+                );
 
-            var minDesiredStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MinDesiredStartTime);
-            var maxDesiredStartTime = DateTimeUtilities.UnixTimeStampToDateTime(parameters.MaxDesiredStartTime);
+            var minDesiredStartTime = DateTimeUtilities.UnixTimeStampToDateTime(
+                parameters.MinDesiredStartTime
+            );
+            var maxDesiredStartTime = DateTimeUtilities.UnixTimeStampToDateTime(
+                parameters.MaxDesiredStartTime
+            );
             Expression<Func<MissionRun, bool>> desiredStartTimeFilter = missionRun =>
                 DateTime.Compare(missionRun.DesiredStartTime, minDesiredStartTime) >= 0
                 && DateTime.Compare(missionRun.DesiredStartTime, maxDesiredStartTime) <= 0;
@@ -441,8 +586,14 @@ namespace Api.Services
                                                 Expression.AndAlso(
                                                     Expression.Invoke(endTimeFilter, missionRun),
                                                     Expression.AndAlso(
-                                                        Expression.Invoke(robotTypeFilter, missionRun),
-                                                        Expression.Invoke(inspectionAreaFilter, missionRun)
+                                                        Expression.Invoke(
+                                                            robotTypeFilter,
+                                                            missionRun
+                                                        ),
+                                                        Expression.Invoke(
+                                                            inspectionAreaFilter,
+                                                            missionRun
+                                                        )
                                                     )
                                                 )
                                             )
@@ -461,16 +612,22 @@ namespace Api.Services
 
         #region ISAR Specific methods
 
-        public async Task<MissionRun?> ReadByIsarMissionId(string isarMissionId, bool readOnly = true)
+        public async Task<MissionRun?> ReadByIsarMissionId(
+            string isarMissionId,
+            bool readOnly = true
+        )
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
-                .FirstOrDefaultAsync(
-                    missionRun =>
-                        missionRun.IsarMissionId != null && missionRun.IsarMissionId.Equals(isarMissionId)
+                .FirstOrDefaultAsync(missionRun =>
+                    missionRun.IsarMissionId != null
+                    && missionRun.IsarMissionId.Equals(isarMissionId)
                 );
         }
 
-        public async Task<MissionRun> UpdateMissionRunType(string missionRunId, MissionRunType missionRunType)
+        public async Task<MissionRun> UpdateMissionRunType(
+            string missionRunId,
+            MissionRunType missionRunType
+        )
         {
             var missionRun = await ReadById(missionRunId, readOnly: false);
             if (missionRun is null)
@@ -483,8 +640,10 @@ namespace Api.Services
             return await UpdateMissionRunProperty(missionRun.Id, "MissionRunType", missionRunType);
         }
 
-
-        public async Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(string isarMissionId, MissionStatus missionStatus)
+        public async Task<MissionRun> UpdateMissionRunStatusByIsarMissionId(
+            string isarMissionId,
+            MissionStatus missionStatus
+        )
         {
             var missionRun = await ReadByIsarMissionId(isarMissionId, readOnly: false);
             if (missionRun is null)
@@ -496,21 +655,37 @@ namespace Api.Services
 
             missionRun.Status = missionStatus;
 
-            missionRun = await UpdateMissionRunProperty(missionRun.Id, "MissionStatus", missionStatus);
+            missionRun = await UpdateMissionRunProperty(
+                missionRun.Id,
+                "MissionStatus",
+                missionStatus
+            );
 
-            if (missionRun.Status == MissionStatus.Failed) { _ = signalRService.SendMessageAsync("Mission run failed", missionRun?.InspectionArea?.Installation, missionRun != null ? new MissionRunResponse(missionRun) : null); }
+            if (missionRun.Status == MissionStatus.Failed)
+            {
+                _ = signalRService.SendMessageAsync(
+                    "Mission run failed",
+                    missionRun?.InspectionArea?.Installation,
+                    missionRun != null ? new MissionRunResponse(missionRun) : null
+                );
+            }
             return missionRun!;
         }
 
         #endregion ISAR Specific methods
 
 
-        public async Task<MissionRun> UpdateMissionRunProperty(string missionRunId, string propertyName, object? value)
+        public async Task<MissionRun> UpdateMissionRunProperty(
+            string missionRunId,
+            string propertyName,
+            object? value
+        )
         {
             var missionRun = await ReadById(missionRunId, readOnly: false);
             if (missionRun is null)
             {
-                string errorMessage = $"Mission with ID {missionRunId} was not found in the database";
+                string errorMessage =
+                    $"Mission with ID {missionRunId} was not found in the database";
                 logger.LogError("{Message}", errorMessage);
                 throw new MissionRunNotFoundException(errorMessage);
             }
@@ -519,22 +694,42 @@ namespace Api.Services
             {
                 if (property.Name == propertyName)
                 {
-                    logger.LogDebug("Setting {missionRunName} field {propertyName} from {oldValue} to {NewValue}", missionRun.Name, propertyName, property.GetValue(missionRun), value);
+                    logger.LogDebug(
+                        "Setting {missionRunName} field {propertyName} from {oldValue} to {NewValue}",
+                        missionRun.Name,
+                        propertyName,
+                        property.GetValue(missionRun),
+                        value
+                    );
                     property.SetValue(missionRun, value);
                 }
             }
 
-            try { missionRun = await Update(missionRun); }
-            catch (InvalidOperationException e) { logger.LogError(e, "Failed to update {missionRunName}", missionRun.Name); };
+            try
+            {
+                missionRun = await Update(missionRun);
+            }
+            catch (InvalidOperationException e)
+            {
+                logger.LogError(e, "Failed to update {missionRunName}", missionRun.Name);
+            }
+            ;
             return missionRun;
         }
 
         public async Task UpdateCurrentRobotMissionToFailed(string robotId)
         {
-            var robot = await robotService.ReadById(robotId, readOnly: true) ?? throw new RobotNotFoundException($"Robot with ID: {robotId} was not found in the database");
+            var robot =
+                await robotService.ReadById(robotId, readOnly: true)
+                ?? throw new RobotNotFoundException(
+                    $"Robot with ID: {robotId} was not found in the database"
+                );
             if (robot.CurrentMissionId != null)
             {
-                var missionRun = await SetMissionRunToFailed(robot.CurrentMissionId, "Lost connection to ISAR during mission");
+                var missionRun = await SetMissionRunToFailed(
+                    robot.CurrentMissionId,
+                    "Lost connection to ISAR during mission"
+                );
                 logger.LogWarning(
                     "Mission '{Id}' failed because ISAR could not be reached",
                     missionRun.Id
@@ -542,9 +737,16 @@ namespace Api.Services
             }
         }
 
-        public async Task<MissionRun> SetMissionRunToFailed(string missionRunId, string failureDescription)
+        public async Task<MissionRun> SetMissionRunToFailed(
+            string missionRunId,
+            string failureDescription
+        )
         {
-            var missionRun = await ReadById(missionRunId, readOnly: false) ?? throw new MissionRunNotFoundException($"Could not find mission run with ID {missionRunId}");
+            var missionRun =
+                await ReadById(missionRunId, readOnly: false)
+                ?? throw new MissionRunNotFoundException(
+                    $"Could not find mission run with ID {missionRunId}"
+                );
 
             missionRun.Status = MissionStatus.Failed;
             missionRun.StatusReason = failureDescription;
@@ -566,14 +768,23 @@ namespace Api.Services
             {
                 missionTaskService.DetachTracking(task);
             }
-            if (missionRun.InspectionArea != null) deckService.DetachTracking(missionRun.InspectionArea);
-            if (missionRun.Robot != null) robotService.DetachTracking(missionRun.Robot);
+            if (missionRun.InspectionArea != null)
+                deckService.DetachTracking(missionRun.InspectionArea);
+            if (missionRun.Robot != null)
+                robotService.DetachTracking(missionRun.Robot);
             context.Entry(missionRun).State = EntityState.Detached;
         }
 
-        public async Task<MissionRun> UpdateWithIsarInfo(string missionRunId, IsarMission isarMission)
+        public async Task<MissionRun> UpdateWithIsarInfo(
+            string missionRunId,
+            IsarMission isarMission
+        )
         {
-            var missionRun = await ReadById(missionRunId, readOnly: false) ?? throw new MissionRunNotFoundException($"Could not find mission run with ID {missionRunId}");
+            var missionRun =
+                await ReadById(missionRunId, readOnly: false)
+                ?? throw new MissionRunNotFoundException(
+                    $"Could not find mission run with ID {missionRunId}"
+                );
 
             missionRun.IsarMissionId = isarMission.IsarMissionId;
             foreach (var isarTask in isarMission.Tasks)

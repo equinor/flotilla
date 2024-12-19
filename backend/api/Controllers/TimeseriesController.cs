@@ -10,9 +10,9 @@ namespace Api.Controllers
     [Route("timeseries")]
     [Authorize(Roles = Role.Any)]
     public class TimeseriesController(
-            ILogger<TimeseriesController> logger,
-            ITimeseriesService timeseriesService
-        ) : ControllerBase
+        ILogger<TimeseriesController> logger,
+        ITimeseriesService timeseriesService
+    ) : ControllerBase
     {
         /// <summary>
         /// Get pressure timeseries
@@ -35,9 +35,7 @@ namespace Api.Controllers
             try
             {
                 var robotPressureTimeseries =
-                    await timeseriesService.ReadAll<RobotPressureTimeseries>(
-                        queryStringParameters
-                    );
+                    await timeseriesService.ReadAll<RobotPressureTimeseries>(queryStringParameters);
                 return Ok(robotPressureTimeseries);
             }
             catch (Exception e)

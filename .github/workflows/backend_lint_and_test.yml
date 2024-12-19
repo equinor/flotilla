@@ -63,4 +63,4 @@ jobs:
       - name: Run csharpier format
         run: |
           dotnet tool restore
-          dotnet csharpier --check
+          dotnet csharpier . --check

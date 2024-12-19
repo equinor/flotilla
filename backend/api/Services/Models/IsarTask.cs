@@ -21,10 +21,9 @@
                 "failed" => IsarTaskStatus.Failed,
                 "cancelled" => IsarTaskStatus.Cancelled,
                 "paused" => IsarTaskStatus.Paused,
-                _
-                  => throw new ArgumentException(
-                      $"Failed to parse task status '{status}' - not supported"
-                  )
+                _ => throw new ArgumentException(
+                    $"Failed to parse task status '{status}' - not supported"
+                ),
             };
         }
 
@@ -39,14 +38,12 @@
                 "take_thermal_video" => IsarTaskType.TakeThermalVideo,
                 "return_to_home" => IsarTaskType.ReturnToHome,
                 "move_arm" => IsarTaskType.MoveArm,
-                _
-                  => throw new ArgumentException(
-                      $"Failed to parse step type '{isarClassName}' - not supported"
-                  )
+                _ => throw new ArgumentException(
+                    $"Failed to parse step type '{isarClassName}' - not supported"
+                ),
             };
         }
     }
-
 
     public enum IsarTaskStatus
     {
@@ -67,6 +64,6 @@
         TakeThermalImage,
         TakeThermalVideo,
         RecordAudio,
-        MoveArm
+        MoveArm,
     }
 }

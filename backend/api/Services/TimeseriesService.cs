@@ -6,18 +6,21 @@ using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+
 namespace Api.Services
 {
     public interface ITimeseriesService
     {
         public Task<IEnumerable<T>> ReadAll<T>(
             TimeseriesQueryStringParameters queryStringParameters
-        ) where T : TimeseriesBase;
+        )
+            where T : TimeseriesBase;
 
         public Task AddBatteryEntry(string currentMissionId, float batteryLevel, string robotId);
         public Task AddPressureEntry(string currentMissionId, float pressureLevel, string robotId);
         public Task AddPoseEntry(string currentMissionId, Pose robotPose, string robotId);
-        public Task<T> Create<T>(T newTimeseries) where T : TimeseriesBase;
+        public Task<T> Create<T>(T newTimeseries)
+            where T : TimeseriesBase;
     }
 
     [SuppressMessage(
@@ -33,16 +36,22 @@ namespace Api.Services
 
         public TimeseriesService(FlotillaDbContext context, ILogger<TimeseriesService> logger)
         {
-            string? connectionString = context.Database.GetConnectionString() ?? throw new NotSupportedException(
-                "Could not get connection string from EF core Database context - Cannot connect to Timeseries"
-            );
+            string? connectionString =
+                context.Database.GetConnectionString()
+                ?? throw new NotSupportedException(
+                    "Could not get connection string from EF core Database context - Cannot connect to Timeseries"
+                );
             var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
             _dataSource = dataSourceBuilder.Build();
             _logger = logger;
             _context = context;
         }
 
-        public async Task AddBatteryEntry(string currentMissionId, float batteryLevel, string robotId)
+        public async Task AddBatteryEntry(
+            string currentMissionId,
+            float batteryLevel,
+            string robotId
+        )
         {
             try
             {
@@ -52,17 +61,24 @@ namespace Api.Services
                         MissionId = currentMissionId,
                         BatteryLevel = batteryLevel,
                         RobotId = robotId,
-                        Time = DateTime.UtcNow
+                        Time = DateTime.UtcNow,
                     }
                 );
             }
             catch (NpgsqlException e)
             {
-                _logger.LogError(e, "An error occurred setting battery level while connecting to the timeseries database");
+                _logger.LogError(
+                    e,
+                    "An error occurred setting battery level while connecting to the timeseries database"
+                );
             }
         }
 
-        public async Task AddPressureEntry(string currentMissionId, float pressureLevel, string robotId)
+        public async Task AddPressureEntry(
+            string currentMissionId,
+            float pressureLevel,
+            string robotId
+        )
         {
             try
             {
@@ -72,13 +88,16 @@ namespace Api.Services
                         MissionId = currentMissionId,
                         Pressure = pressureLevel,
                         RobotId = robotId,
-                        Time = DateTime.UtcNow
+                        Time = DateTime.UtcNow,
                     }
                 );
             }
             catch (NpgsqlException e)
             {
-                _logger.LogError(e, "An error occurred setting pressure level while connecting to the timeseries database");
+                _logger.LogError(
+                    e,
+                    "An error occurred setting pressure level while connecting to the timeseries database"
+                );
             }
         }
 
@@ -91,19 +110,23 @@ namespace Api.Services
                     {
                         MissionId = currentMissionId,
                         RobotId = robotId,
-                        Time = DateTime.UtcNow
+                        Time = DateTime.UtcNow,
                     }
                 );
             }
             catch (NpgsqlException e)
             {
-                _logger.LogError(e, "An error occurred setting pose while connecting to the timeseries database");
+                _logger.LogError(
+                    e,
+                    "An error occurred setting pose while connecting to the timeseries database"
+                );
             }
         }
 
         public async Task<IEnumerable<T>> ReadAll<T>(
             TimeseriesQueryStringParameters queryStringParameters
-        ) where T : TimeseriesBase
+        )
+            where T : TimeseriesBase
         {
             var query = _context.Set<T>().AsQueryable();
             var filter = ConstructFilter<T>(queryStringParameters);
@@ -122,7 +145,8 @@ namespace Api.Services
         // https://gibinfrancis.medium.com/timescale-db-with-ef-core-94c948829608
         // https://github.com/npgsql/npgsql
         // Unfortunately need to use npgsql framework with heavy statements for this.
-        public async Task<T> Create<T>(T newTimeseries) where T : TimeseriesBase
+        public async Task<T> Create<T>(T newTimeseries)
+            where T : TimeseriesBase
         {
             await using var connection = await _dataSource.OpenConnectionAsync();
 
@@ -180,7 +204,8 @@ namespace Api.Services
 
         private static Expression<Func<T, bool>> ConstructFilter<T>(
             TimeseriesQueryStringParameters parameters
-        ) where T : TimeseriesBase
+        )
+            where T : TimeseriesBase
         {
             Expression<Func<T, bool>> robotIdFilter = parameters.RobotId is null
                 ? timeseries => true
@@ -272,12 +297,14 @@ namespace Api.Services
             }
         }
 
-        private static string GetColumnNames<T>(T entity) where T : TimeseriesBase
+        private static string GetColumnNames<T>(T entity)
+            where T : TimeseriesBase
         {
             return GetContentNames(entity, "\"", "\"");
         }
 
-        private static string GetValueNames<T>(T entity) where T : TimeseriesBase
+        private static string GetValueNames<T>(T entity)
+            where T : TimeseriesBase
         {
             return GetContentNames(entity, "@");
         }
@@ -286,7 +313,8 @@ namespace Api.Services
             T entity,
             string namePrefix = "",
             string namePostfix = ""
-        ) where T : TimeseriesBase
+        )
+            where T : TimeseriesBase
         {
             if (entity is RobotPressureTimeseries robotPressureTimeseries)
             {
@@ -300,8 +328,7 @@ namespace Api.Services
 
             if (entity is RobotPoseTimeseries robotPoseTimeseries)
             {
-                return
-                    $"{namePrefix}{nameof(robotPoseTimeseries.PositionX)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.PositionY)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.PositionZ)}{namePostfix},"
+                return $"{namePrefix}{nameof(robotPoseTimeseries.PositionX)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.PositionY)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.PositionZ)}{namePostfix},"
                     + $"{namePrefix}{nameof(robotPoseTimeseries.OrientationX)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.OrientationY)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.OrientationZ)}{namePostfix},{namePrefix}{nameof(robotPoseTimeseries.OrientationW)}{namePostfix},";
             }
 

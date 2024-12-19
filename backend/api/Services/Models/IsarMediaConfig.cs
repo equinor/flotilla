@@ -13,6 +13,5 @@ namespace Api.Services.Models
 
         [JsonPropertyName("media_connection_type")]
         public string MediaConnectionType { get; set; }
-
     }
 }
