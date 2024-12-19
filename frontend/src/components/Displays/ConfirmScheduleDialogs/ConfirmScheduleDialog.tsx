@@ -53,7 +53,6 @@ export const ScheduleMissionWithConfirmDialogs = ({
             scheduleMissions()
             closeDialog()
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [shouldScheduleWithoutLocalization])
 
     if (!robot) {

@@ -108,7 +108,6 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
                 setMapMetadata(undefined)
                 processImageURL(NoMap)
             })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {

@@ -49,7 +49,6 @@ export const MissionPage = () => {
     useEffect(() => {
         if (selectedMission && !Object.keys(mediaStreams).includes(selectedMission?.robot.id))
             addMediaStreamConfigIfItDoesNotExist(selectedMission?.robot.id)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedMission])
 
     useEffect(() => {
@@ -59,7 +58,6 @@ export const MissionPage = () => {
                 setSelectedMission((oldMission) => (updatedMission.id === oldMission?.id ? updatedMission : oldMission))
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connectionReady])
 
     useEffect(() => {
@@ -92,7 +90,6 @@ export const MissionPage = () => {
                         AlertCategory.ERROR
                     )
                 })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionId])
 
     return (

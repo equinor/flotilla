@@ -124,7 +124,6 @@ const useMissionRuns = (): IMissionRunsContext => {
                 })
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady])
 
     useEffect(() => {
@@ -172,7 +171,6 @@ const useMissionRuns = (): IMissionRunsContext => {
             setMissionQueue(queue ?? [])
         }
         if (BackendAPICaller.accessToken) fetchAndUpdateMissions()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [BackendAPICaller.accessToken])
 
     const [filteredMissionQueue, setFilteredMissionQueue] = useState<Mission[]>([])
@@ -182,7 +180,6 @@ const useMissionRuns = (): IMissionRunsContext => {
             ongoingMissions.filter((m) => m.inspectionArea?.installationCode === installationCode)
         )
         setFilteredMissionQueue(missionQueue.filter((m) => m.inspectionArea?.installationCode === installationCode))
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [installationCode, ongoingMissions, missionQueue])
 
     return {

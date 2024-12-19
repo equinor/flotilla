@@ -50,7 +50,6 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
             }
         })
         window.localStorage.setItem('mediaConfigs', JSON.stringify(updatedConfigs))
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mediaStreams])
 
     const addTrackToConnection = (newTrack: MediaStreamTrack, robotId: string) => {

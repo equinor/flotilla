@@ -72,7 +72,6 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                     AlertCategory.ERROR
                 )
             })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
@@ -136,7 +135,6 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                         AlertCategory.ERROR
                     )
                 })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [installationCode])
 
     useEffect(() => {
@@ -176,7 +174,6 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                 })
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady])
 
     const switchInstallation = (selectedName: string) => {
@@ -191,7 +188,6 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         setFilteredInstallationDecks(installationDecks.filter((d) => d.installationCode === installationCode))
         setFilteredInstallationAreas(installationAreas.filter((a) => a.installationCode === installationCode))
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [installationCode, installationDecks, installationAreas])
 
     return (
