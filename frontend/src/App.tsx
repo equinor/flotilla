@@ -16,6 +16,7 @@ import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitio
 import { MediaStreamProvider } from 'components/Contexts/MediaStreamContext'
 import { DockProvider } from 'components/Contexts/DockContext'
 import { InspectionsProvider } from 'components/Contexts/InpectionsContext'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const appInsights = new ApplicationInsights({
     config: {
@@ -28,40 +29,44 @@ if (config.AI_CONNECTION_STRING.length > 0) {
     appInsights.trackPageView()
 }
 
+const queryClient = new QueryClient()
+
 const App = () => (
     <AuthProvider>
         <LanguageProvider>
             <SignalRProvider>
-                <InstallationProvider>
-                    <InspectionsProvider>
-                        <MissionDefinitionsProvider>
-                            <RobotProvider>
-                                <MissionRunsProvider>
-                                    <AlertProvider>
-                                        <DockProvider>
-                                            <MissionRunsProvider>
-                                                <MissionControlProvider>
-                                                    <UnauthenticatedTemplate>
-                                                        <div className="sign-in-page">
-                                                            <AssetSelectionPage></AssetSelectionPage>
-                                                        </div>
-                                                    </UnauthenticatedTemplate>
-                                                    <AuthenticatedTemplate>
-                                                        <MissionFilterProvider>
-                                                            <MediaStreamProvider>
-                                                                <FlotillaSite />
-                                                            </MediaStreamProvider>
-                                                        </MissionFilterProvider>
-                                                    </AuthenticatedTemplate>
-                                                </MissionControlProvider>
-                                            </MissionRunsProvider>
-                                        </DockProvider>
-                                    </AlertProvider>
-                                </MissionRunsProvider>
-                            </RobotProvider>
-                        </MissionDefinitionsProvider>
-                    </InspectionsProvider>
-                </InstallationProvider>
+                <QueryClientProvider client={queryClient}>
+                    <InstallationProvider>
+                        <InspectionsProvider>
+                            <MissionDefinitionsProvider>
+                                <RobotProvider>
+                                    <MissionRunsProvider>
+                                        <AlertProvider>
+                                            <DockProvider>
+                                                <MissionRunsProvider>
+                                                    <MissionControlProvider>
+                                                        <UnauthenticatedTemplate>
+                                                            <div className="sign-in-page">
+                                                                <AssetSelectionPage></AssetSelectionPage>
+                                                            </div>
+                                                        </UnauthenticatedTemplate>
+                                                        <AuthenticatedTemplate>
+                                                            <MissionFilterProvider>
+                                                                <MediaStreamProvider>
+                                                                    <FlotillaSite />
+                                                                </MediaStreamProvider>
+                                                            </MissionFilterProvider>
+                                                        </AuthenticatedTemplate>
+                                                    </MissionControlProvider>
+                                                </MissionRunsProvider>
+                                            </DockProvider>
+                                        </AlertProvider>
+                                    </MissionRunsProvider>
+                                </RobotProvider>
+                            </MissionDefinitionsProvider>
+                        </InspectionsProvider>
+                    </InstallationProvider>
+                </QueryClientProvider>
             </SignalRProvider>
         </LanguageProvider>
     </AuthProvider>

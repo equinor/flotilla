@@ -1,5 +1,4 @@
 import { Icon, Typography } from '@equinor/eds-core-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
 import { Task, TaskStatus } from 'models/Task'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Icons } from 'utils/icons'
@@ -23,55 +22,23 @@ import {
     StyledInspectionImage,
     StyledSection,
 } from './InspectionStyles'
+import { BackendAPICaller } from 'api/ApiCaller'
+import { useQuery } from '@tanstack/react-query'
 
 interface InspectionDialogViewProps {
     task: Task
     tasks: Task[]
 }
 
-const getMeta = async (url: string) => {
-    const image = new Image()
-    image.src = url
-    await image.decode()
-    return image
-}
-
 export const InspectionDialogView = ({ task, tasks }: InspectionDialogViewProps) => {
     const { TranslateText } = useLanguageContext()
     const { installationName } = useInstallationContext()
-    const [inspectionImage, setInspectionImage] = useState<HTMLImageElement>(document.createElement('img'))
-    const imageObjectURL = useRef<string>('')
-
-    const { switchSelectedInspectionTask, mappingInspectionTasksObjectURL } = useInspectionsContext()
-
-    const updateImage = useCallback(() => {
-        if (task.isarTaskId && mappingInspectionTasksObjectURL[task.isarTaskId]) {
-            imageObjectURL.current = mappingInspectionTasksObjectURL[task.isarTaskId]
-
-            getMeta(imageObjectURL.current).then((img) => {
-                const inspectionCanvas = document.getElementById('inspectionCanvas') as HTMLCanvasElement
-                if (inspectionCanvas) {
-                    inspectionCanvas.width = img.width
-                    inspectionCanvas.height = img.height
-                    let context = inspectionCanvas.getContext('2d')
-                    if (context) {
-                        context.drawImage(img, 0, 0)
-                    }
-                }
-                setInspectionImage(img)
-            })
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mappingInspectionTasksObjectURL])
-
-    useEffect(() => {
-        updateImage()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mappingInspectionTasksObjectURL, inspectionImage])
+    const { switchSelectedInspectionTask } = useInspectionsContext()
+    const { data } = FetchImageData(task)
 
     return (
         <>
-            {imageObjectURL.current !== '' && (
+            {data !== undefined && (
                 <StyledDialog open={true}>
                     <StyledDialogContent>
                         <StyledDialogHeader>
@@ -84,7 +51,7 @@ export const InspectionDialogView = ({ task, tasks }: InspectionDialogViewProps)
                         </StyledDialogHeader>
                         <StyledDialogInspectionView>
                             <div>
-                                <StyledInspection id="inspectionCanvas" />
+                                {data !== undefined && <StyledInspection src={data} />}
                                 <StyledBottomContent>
                                     <StyledInfoContent>
                                         <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>
@@ -153,7 +120,7 @@ export const InspectionsViewSection = ({ tasks, dialogView }: InspectionsViewSec
                                             key={task.isarTaskId}
                                             onClick={() => switchSelectedInspectionTask(task)}
                                         >
-                                            <GetInspectionImage task={task} tasks={tasks} />
+                                            <GetInspectionImage task={task} />
                                             <StyledInspectionData>
                                                 {task.tagId && (
                                                     <StyledInspectionContent>
@@ -184,46 +151,26 @@ export const InspectionsViewSection = ({ tasks, dialogView }: InspectionsViewSec
     )
 }
 
-interface GetInspectionImageProps {
-    task: Task
-    tasks: Task[]
+const FetchImageData = (task: Task) => {
+    const { installationCode } = useInstallationContext()
+    const data = useQuery({
+        queryKey: [task.isarTaskId],
+        queryFn: async () => {
+            const imageBlob = await BackendAPICaller.getInspection(installationCode, task.isarTaskId!)
+            return URL.createObjectURL(imageBlob)
+        },
+        retryDelay: 60 * 1000, // Will always wait 1 min to retry, regardless of how many retries
+        staleTime: 10 * 60 * 1000, //  I don't want an API call for 10 min after the first time I get data
+        enabled: task.status === TaskStatus.Successful && task.isarTaskId !== undefined,
+    })
+    return data
 }
 
-const GetInspectionImage = ({ task, tasks }: GetInspectionImageProps) => {
-    const imageObjectURL = useRef<string>('')
-    const [inspectionImage, setInspectionImage] = useState<HTMLImageElement>(document.createElement('img'))
+interface IGetInspectionImageProps {
+    task: Task
+}
 
-    const { switchSelectedInspectionTasks, mappingInspectionTasksObjectURL } = useInspectionsContext()
-
-    useEffect(() => {
-        switchSelectedInspectionTasks(tasks)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [tasks])
-
-    const updateImage = useCallback(() => {
-        if (task.isarTaskId && mappingInspectionTasksObjectURL[task.isarTaskId]) {
-            imageObjectURL.current = mappingInspectionTasksObjectURL[task.isarTaskId]
-
-            getMeta(imageObjectURL.current).then((img) => {
-                const inspectionCanvas = document.getElementById(task.isarTaskId!) as HTMLCanvasElement
-                if (inspectionCanvas) {
-                    inspectionCanvas.width = img.width
-                    inspectionCanvas.height = img.height
-                    let context = inspectionCanvas.getContext('2d')
-                    if (context) {
-                        context.drawImage(img, 0, 0)
-                    }
-                }
-                setInspectionImage(img)
-            })
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mappingInspectionTasksObjectURL])
-
-    useEffect(() => {
-        updateImage()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [mappingInspectionTasksObjectURL, inspectionImage])
-
-    return <StyledInspectionImage id={task.isarTaskId} />
+const GetInspectionImage = ({ task }: IGetInspectionImageProps) => {
+    const { data } = FetchImageData(task)
+    return <>{data !== undefined && <StyledInspectionImage src={data} />}</>
 }
