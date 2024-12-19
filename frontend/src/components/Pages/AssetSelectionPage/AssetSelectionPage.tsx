@@ -110,7 +110,7 @@ const InstallationPicker = () => {
                     const mapping = mapInstallationCodeToName(response)
                     setAllPlantsMap(mapping)
                 })
-                .catch((e) => {
+                .catch(() => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent
@@ -127,7 +127,6 @@ const InstallationPicker = () => {
                     )
                 })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showActivePlants, updateListOfActivePlants])
 
     return (
@@ -173,7 +172,7 @@ const InstallationPicker = () => {
 }
 
 const mapInstallationCodeToName = (plantInfoArray: PlantInfo[]): Map<string, string> => {
-    var mapping = new Map<string, string>()
+    const mapping = new Map<string, string>()
     plantInfoArray.forEach((plantInfo: PlantInfo) => {
         mapping.set(plantInfo.projectDescription, plantInfo.plantCode)
     })

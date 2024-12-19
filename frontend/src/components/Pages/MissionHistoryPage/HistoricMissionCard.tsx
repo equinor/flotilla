@@ -42,7 +42,7 @@ const MissionEndTimeDisplay = ({ mission }: MissionProps) => {
 }
 
 export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => {
-    let navigate = useNavigate()
+    const navigate = useNavigate()
 
     const missionHasFailedTasks = mission.tasks.some(
         (t) => t.status !== TaskStatus.PartiallySuccessful && t.status !== TaskStatus.Successful

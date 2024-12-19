@@ -33,7 +33,7 @@ export const RobotMissionQueueView = ({ robot }: { robot: Robot }): JSX.Element 
     )
 
     const onDeleteMission = (mission: Mission) =>
-        BackendAPICaller.deleteMission(mission.id).catch((_) => {
+        BackendAPICaller.deleteMission(mission.id).catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent translatedMessage={TranslateText('Failed to delete mission from queue')} />,
@@ -55,7 +55,6 @@ export const RobotMissionQueueView = ({ robot }: { robot: Robot }): JSX.Element 
             robotOngoingMissions.forEach((mission) => updatedLoadingMissionNames.delete(mission.name + robot.id))
             return updatedLoadingMissionNames
         })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionQueue, ongoingMissions])
 
     const missionQueueDisplay = robotMissionQueue.map((mission, index) => (

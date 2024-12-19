@@ -147,7 +147,7 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
             // to explicitly use the Date type in the filter context instead
             return filterFunctions.dateTimeIntToPrettyString(value)
         } else if (Array.isArray(value)) {
-            let valueArray = value as any[]
+            const valueArray = value as any[]
             if (valueArray.length === 0) {
                 return <>{TranslateText('None')}</>
             }
@@ -182,7 +182,7 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                 }
                 setIsLoading(false)
             })
-            .catch((e) => {
+            .catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent
@@ -198,7 +198,6 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                     AlertCategory.ERROR
                 )
             })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize, switchPage, filterFunctions])
 
     useEffect(() => {
