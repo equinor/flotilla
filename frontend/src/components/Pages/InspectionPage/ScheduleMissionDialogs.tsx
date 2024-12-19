@@ -118,8 +118,8 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         })
 
         if (missionsToSchedule.length > 0) {
-            let robotCard = document.getElementById(FrontPageSectionId.RobotCard + selectedRobot.id)
-            let topBarHeight = document.getElementById(FrontPageSectionId.TopBar)?.offsetHeight ?? 0
+            const robotCard = document.getElementById(FrontPageSectionId.RobotCard + selectedRobot.id)
+            const topBarHeight = document.getElementById(FrontPageSectionId.TopBar)?.offsetHeight ?? 0
 
             if (robotCard) {
                 window.scroll({ top: robotCard.offsetTop - topBarHeight, behavior: 'smooth' })

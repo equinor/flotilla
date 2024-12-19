@@ -71,7 +71,7 @@ export class BackendAPICaller {
 
         if (!response.ok) throw ApiError.fromCode(response.status, response.statusText, await response.text())
 
-        var responseContent
+        let responseContent
         // Status code 204 means no content
         if (response.status !== 204) {
             if (contentType === 'image/png') {
@@ -226,7 +226,7 @@ export class BackendAPICaller {
     }
 
     static async getMissionDefinitionsInArea(area: Area): Promise<MissionDefinition[]> {
-        let path: string = 'areas/' + area.id + '/mission-definitions'
+        const path: string = 'areas/' + area.id + '/mission-definitions'
 
         const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)
@@ -235,7 +235,7 @@ export class BackendAPICaller {
     }
 
     static async getMissionDefinitionsInDeck(deck: Deck): Promise<MissionDefinition[]> {
-        let path: string = 'decks/' + deck.id + '/mission-definitions'
+        const path: string = 'decks/' + deck.id + '/mission-definitions'
 
         const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
             BackendAPICaller.handleError('GET', path)
@@ -386,7 +386,7 @@ export class BackendAPICaller {
     }
 
     static async reRunMission(missionId: string, failedTasksOnly: boolean = false): Promise<Mission> {
-        let mission = await this.getMissionRunById(missionId)
+        const mission = await this.getMissionRunById(missionId)
 
         if (failedTasksOnly) {
             const path = `missions/rerun/${mission.id}`

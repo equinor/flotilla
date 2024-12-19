@@ -66,7 +66,6 @@ export const RobotPage = () => {
 
     useEffect(() => {
         if (robotId && !Object.keys(mediaStreams).includes(robotId)) addMediaStreamConfigIfItDoesNotExist(robotId)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [robotId])
 
     const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
@@ -85,7 +84,7 @@ export const RobotPage = () => {
 
     const returnRobotToHome = () => {
         if (robotId) {
-            BackendAPICaller.returnRobotToHome(robotId).catch((e) => {
+            BackendAPICaller.returnRobotToHome(robotId).catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent

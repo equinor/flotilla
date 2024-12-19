@@ -53,7 +53,7 @@ interface Props {
 
 const defaultMissionFilterInterface: IMissionFilterContext = {
     page: 1,
-    switchPage: (newPage: number) => {},
+    switchPage: () => {},
     filterIsSet: true,
     filterError: '',
     clearFilterError: () => {},
@@ -69,25 +69,25 @@ const defaultMissionFilterInterface: IMissionFilterContext = {
         maxEndTime: undefined,
     },
     filterFunctions: {
-        switchMissionName: (newMissionName: string | undefined) => {},
-        switchStatuses: (newStatuses: MissionStatusFilterOptions[]) => {},
-        switchRobotName: (newRobotName: string | undefined) => {},
-        switchTagId: (newTagId: string | undefined) => {},
-        switchInspectionTypes: (newInspectionTypes: InspectionType[]) => {},
-        switchMinStartTime: (newMinStartTime: number | undefined) => {},
-        switchMaxStartTime: (newMaxStartTime: number | undefined) => {},
-        switchMinEndTime: (newMinEndTime: number | undefined) => {},
-        switchMaxEndTime: (newMaxEndTime: number | undefined) => {},
+        switchMissionName: () => {},
+        switchStatuses: () => {},
+        switchRobotName: () => {},
+        switchTagId: () => {},
+        switchInspectionTypes: () => {},
+        switchMinStartTime: () => {},
+        switchMaxStartTime: () => {},
+        switchMinEndTime: () => {},
+        switchMaxEndTime: () => {},
         resetFilters: () => {},
-        resetFilter: (s: string) => {},
-        removeFilter: (s: string) => {},
+        resetFilter: () => {},
+        removeFilter: () => {},
         removeFilters: () => {},
-        isDefault: (filterName: string, value: any) => true,
-        isSet: (filterName: string, value: any) => true,
-        removeFilterElement: (filterName: string, value: any) => {},
-        dateTimeStringToInt: (dateTimeString: string | undefined) => 0,
-        dateTimeIntToString: (dateTimeNumber: number | undefined) => '',
-        dateTimeIntToPrettyString: (dateTimeNumber: number | undefined) => '',
+        isDefault: () => true,
+        isSet: () => true,
+        removeFilterElement: () => {},
+        dateTimeStringToInt: () => 0,
+        dateTimeIntToString: () => '',
+        dateTimeIntToPrettyString: () => '',
         getFormattedFilter: () => undefined,
     },
 }
@@ -217,7 +217,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 setFilterState({ ...filterState, [filterName]: defaultValue })
             },
             removeFilters: () => {
-                let localFilter: IMissionFilterContext['filterState'] = { ...filterState }
+                const localFilter: IMissionFilterContext['filterState'] = { ...filterState }
                 for (const key of Object.keys(localFilter)) localFilter[key as keyof typeof localFilter] = undefined
 
                 setFilterState(localFilter)
@@ -231,7 +231,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 if (!Object.keys(filterState).includes(filterName)) return
                 const currentArray = filterState[filterName as keyof typeof filterState] as any[]
                 if (!Array.isArray(currentArray)) return
-                let newArray = currentArray.filter((val) => val !== value)
+                const newArray = currentArray.filter((val) => val !== value)
                 setFilterState({ ...filterState, [filterName]: newArray })
             },
             isDefault: (filterName: string, value: any) => {
@@ -276,7 +276,7 @@ export const MissionFilterProvider: FC<Props> = ({ children }) => {
                 return iso.slice(0, -3) // Removes :00 at the end
             },
             getFormattedFilter: () => {
-                let localFilter = { ...filterState }
+                const localFilter = { ...filterState }
                 // This way we avoid sending an empty filter which allows ongoing missions
                 if (!localFilter.statuses || localFilter.statuses.length === 0)
                     localFilter.statuses = Object.assign([], missionStatusFilterOptionsIterable)

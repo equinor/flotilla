@@ -17,7 +17,7 @@ interface MissionProps {
 export const StatusReason = ({ statusReason, status }: MissionProps) => {
     if (!statusReason) return <></>
 
-    var warningLevel: 'default' | 'info' | 'warning' | 'danger' = 'info'
+    let warningLevel: 'default' | 'info' | 'warning' | 'danger' = 'info'
     switch (status) {
         case MissionStatus.Failed:
             warningLevel = 'danger'

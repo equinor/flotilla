@@ -30,8 +30,8 @@ const LongTypography = styled(Typography)<{ $fontSize?: 24 | 16 | 18 | 32 | 40 |
 export const RobotStatusChip = ({ status, flotillaStatus, isarConnected, itemSize }: StatusProps) => {
     const { TranslateText } = useLanguageContext()
 
-    var iconColor = tokens.colors.text.static_icons__default.hex
-    var statusIcon = Icons.CloudOff
+    let iconColor = tokens.colors.text.static_icons__default.hex
+    let statusIcon = Icons.CloudOff
     switch (status) {
         case RobotStatus.Available: {
             statusIcon = Icons.Successful

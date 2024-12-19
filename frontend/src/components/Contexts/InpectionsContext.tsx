@@ -12,7 +12,7 @@ interface Props {
 
 const defaultInspectionsContext = {
     selectedInspectionTask: undefined,
-    switchSelectedInspectionTask: (selectedInspectionTask: Task | undefined) => undefined,
+    switchSelectedInspectionTask: () => undefined,
 }
 
 const InspectionsContext = createContext<IInspectionsContext>(defaultInspectionsContext)

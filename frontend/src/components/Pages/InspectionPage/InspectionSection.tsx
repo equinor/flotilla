@@ -86,7 +86,6 @@ export const InspectionSection = () => {
     useEffect(() => {
         if (selectedMissions && selectedMissions.some((mission) => isOngoing(mission) || isScheduled(mission)))
             setIsAlreadyScheduled(true)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ongoingMissions, missionQueue, selectedMissions])
 
     const unscheduledMissions = selectedMissions?.filter((m) => !isOngoing(m) && !isScheduled(m))

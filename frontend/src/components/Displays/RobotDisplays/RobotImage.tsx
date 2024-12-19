@@ -33,7 +33,7 @@ const ContainIcon = styled.div`
 `
 
 export const RobotImage = ({ robotType, height = '200px' }: TypeProps) => {
-    var robotImage
+    let robotImage
     switch (robotType) {
         case RobotType.TaurobInspector: {
             robotImage = taurobInspector

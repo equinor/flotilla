@@ -25,7 +25,7 @@ interface IVideoStreamCardProps {
     videoStream: MediaStream
     videoStreamName?: string
     toggleFullScreenMode: VoidFunction
-    setFullScreenStream: Function
+    setFullScreenStream: (videoStream: MediaStream) => void
 }
 
 export const VideoStreamCard = ({

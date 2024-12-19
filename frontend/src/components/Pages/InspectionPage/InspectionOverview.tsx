@@ -69,7 +69,7 @@ export const InspectionOverviewSection = () => {
                 setMissions(missions)
                 setIsFetchingMissions(false)
             })
-            .catch((_) => {
+            .catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve missions')} />,

@@ -22,7 +22,7 @@ interface Props {
 
 const defaultMediaStreamInterface = {
     mediaStreams: {},
-    addMediaStreamConfigIfItDoesNotExist: (robotId: string) => {},
+    addMediaStreamConfigIfItDoesNotExist: () => {},
 }
 
 const MediaStreamContext = createContext<IMediaStreamContext>(defaultMediaStreamInterface)
@@ -37,7 +37,7 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         // Here we maintain the localstorage with the connection details
-        let updatedConfigs: MediaStreamConfigDictionaryType = {}
+        const updatedConfigs: MediaStreamConfigDictionaryType = {}
         Object.keys(mediaStreams).forEach((robotId) => {
             const conf = mediaStreams[robotId]
 
@@ -50,7 +50,6 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
             }
         })
         window.localStorage.setItem('mediaConfigs', JSON.stringify(updatedConfigs))
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mediaStreams])
 
     const addTrackToConnection = (newTrack: MediaStreamTrack, robotId: string) => {
@@ -81,11 +80,11 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
         room.on(RoomEvent.TrackSubscribed, (track) => addTrackToConnection(track.mediaStreamTrack, config.robotId))
         room.on(RoomEvent.TrackUnpublished, (e) => {
             setMediaStreams((oldStreams) => {
-                let streamsCopy = { ...oldStreams }
+                const streamsCopy = { ...oldStreams }
                 if (!Object.keys(streamsCopy).includes(config.robotId) || streamsCopy[config.robotId].isLoading)
                     return streamsCopy
 
-                let streamList = streamsCopy[config.robotId].streams
+                const streamList = streamsCopy[config.robotId].streams
                 const streamIndex = streamList.findIndex((s) => s.id === e.trackSid)
 
                 if (streamIndex < 0) return streamsCopy

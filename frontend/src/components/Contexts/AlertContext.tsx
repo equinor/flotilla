@@ -53,11 +53,11 @@ interface Props {
 
 const defaultAlertInterface = {
     alerts: {},
-    setAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => {},
+    setAlert: () => {},
     clearAlerts: () => {},
-    clearAlert: (source: AlertType) => {},
+    clearAlert: () => {},
     listAlerts: {},
-    setListAlert: (source: AlertType, alert: ReactNode, category: AlertCategory) => {},
+    setListAlert: () => {},
     clearListAlerts: () => {},
     clearListAlert: (source: AlertType) => {},
 }
@@ -97,7 +97,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
 
         setAlerts((oldAlerts) => {
-            let newAlerts = { ...oldAlerts }
+            const newAlerts = { ...oldAlerts }
             delete newAlerts[source]
             return newAlerts
         })
@@ -123,7 +123,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
 
         setListAlerts((oldListAlerts) => {
-            let newListAlerts = { ...oldListAlerts }
+            const newListAlerts = { ...oldListAlerts }
             delete newListAlerts[source]
             return newListAlerts
         })
@@ -157,7 +157,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     if (newRecentFailedMissions.length > 0) setNewFailedMissions(newRecentFailedMissions)
                     setRecentFailedMissions(newRecentFailedMissions)
                 })
-                .catch((e) => {
+                .catch(() => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent
@@ -175,7 +175,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 })
         }
         if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [installationCode])
 
     // Register a signalR event handler that listens for new failed missions
@@ -196,13 +195,12 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                     // Ignore missions shortly after the user dismissed the last one
                     if (convertUTCDateToLocalDate(new Date(newFailedMission.endTime!)) <= lastDismissTime)
                         return failedMissions
-                    let isDuplicate = failedMissions.filter((m) => m.id === newFailedMission.id).length > 0
+                    const isDuplicate = failedMissions.filter((m) => m.id === newFailedMission.id).length > 0
                     if (isDuplicate) return failedMissions // Ignore duplicate failed missions
                     return [...failedMissions, newFailedMission]
                 })
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady, installationCode])
 
     useEffect(() => {
@@ -240,7 +238,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 }
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady, installationCode, enabledRobots])
 
     useEffect(() => {
@@ -257,7 +254,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             )
             setNewFailedMissions([])
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [newFailedMissions])
 
     useEffect(() => {
@@ -287,7 +283,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             }
         }
         setBlockedRobotNames(newBlockedRobotNames)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [enabledRobots, installationCode])
 
     return (

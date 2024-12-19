@@ -10,7 +10,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useInstallationContext } from './InstallationContext'
 
 const upsertMissionList = (list: Mission[], mission: Mission) => {
-    let newMissionList = [...list]
+    const newMissionList = [...list]
     const i = newMissionList.findIndex((e) => e.id === mission.id)
     if (i > -1) newMissionList[i] = mission
     else newMissionList.push(mission)
@@ -33,7 +33,7 @@ const defaultMissionRunsContext: IMissionRunsContext = {
     ongoingMissions: [],
     missionQueue: [],
     loadingRobotMissionSet: new Set(),
-    setLoadingRobotMissionSet: (newLoadingRobotMissionSet: Set<string> | ((mission: Set<string>) => Set<string>)) => {},
+    setLoadingRobotMissionSet: () => {},
 }
 
 const MissionRunsContext = createContext<IMissionRunsContext>(defaultMissionRunsContext)
@@ -92,12 +92,12 @@ const useMissionRuns = (): IMissionRunsContext => {
             registerEvent(SignalREventLabels.missionRunCreated, (username: string, message: string) => {
                 const newMission: Mission = JSON.parse(message)
                 setMissionQueue((oldQueue) => {
-                    let missionQueueCopy = upsertMissionList(oldQueue, newMission)
+                    const missionQueueCopy = upsertMissionList(oldQueue, newMission)
                     return [...missionQueueCopy]
                 })
             })
             registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
-                let updatedMission: Mission = JSON.parse(message)
+                const updatedMission: Mission = JSON.parse(message)
 
                 setMissionQueue((oldQueue) => {
                     const oldQueueCopy = [...oldQueue]
@@ -109,7 +109,7 @@ const useMissionRuns = (): IMissionRunsContext => {
                 })
             })
             registerEvent(SignalREventLabels.missionRunDeleted, (username: string, message: string) => {
-                let deletedMission: Mission = JSON.parse(message)
+                const deletedMission: Mission = JSON.parse(message)
                 setOngoingMissions((missions) => {
                     const oldMissionListCopy = [...missions]
                     const ongoingIndex = oldMissionListCopy.findIndex((m) => m.id === deletedMission.id)
@@ -124,7 +124,6 @@ const useMissionRuns = (): IMissionRunsContext => {
                 })
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady])
 
     useEffect(() => {
@@ -133,7 +132,7 @@ const useMissionRuns = (): IMissionRunsContext => {
                 statuses: [MissionStatus.Ongoing, MissionStatus.Paused],
                 pageSize: 100,
                 orderBy: 'StartTime desc',
-            }).catch((e) => {
+            }).catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
@@ -154,7 +153,7 @@ const useMissionRuns = (): IMissionRunsContext => {
                 statuses: [MissionStatus.Pending],
                 pageSize: 100,
                 orderBy: 'DesiredStartTime',
-            }).catch((e) => {
+            }).catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve mission runs')} />,
@@ -172,7 +171,6 @@ const useMissionRuns = (): IMissionRunsContext => {
             setMissionQueue(queue ?? [])
         }
         if (BackendAPICaller.accessToken) fetchAndUpdateMissions()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [BackendAPICaller.accessToken])
 
     const [filteredMissionQueue, setFilteredMissionQueue] = useState<Mission[]>([])
@@ -182,7 +180,6 @@ const useMissionRuns = (): IMissionRunsContext => {
             ongoingMissions.filter((m) => m.inspectionArea?.installationCode === installationCode)
         )
         setFilteredMissionQueue(missionQueue.filter((m) => m.inspectionArea?.installationCode === installationCode))
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [installationCode, ongoingMissions, missionQueue])
 
     return {

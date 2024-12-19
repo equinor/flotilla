@@ -10,7 +10,7 @@ const StyledButton = styled(Button)`
 
 export const BackButton = () => {
     const { TranslateText } = useLanguageContext()
-    let navigate = useNavigate()
+    const navigate = useNavigate()
     return (
         <StyledButton variant="ghost" onClick={() => navigate(-1)}>
             <Icon name={Icons.ArrowBack} size={16} />
