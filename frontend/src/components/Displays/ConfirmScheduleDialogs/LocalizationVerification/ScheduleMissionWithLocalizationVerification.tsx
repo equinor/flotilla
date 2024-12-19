@@ -93,10 +93,10 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
             {dialogToOpen === DialogTypes.conflictingMissionDecks && (
                 <ConflictingMissionDecksDialog closeDialog={closeDialog} missionDeckNames={unikMissionDeckNames!} />
             )}
-            {dialogToOpen === DialogTypes.conflictingRobotDeck && (
+            {dialogToOpen === DialogTypes.conflictingRobotDeck && selectedRobot?.currentInspectionArea?.deckName && (
                 <ConflictingRobotDeckDialog
                     closeDialog={closeDialog}
-                    robotDeckName={selectedRobot?.currentInspectionArea?.deckName!}
+                    robotDeckName={selectedRobot?.currentInspectionArea?.deckName}
                     desiredDeckName={unikMissionDeckNames![0]}
                 />
             )}
