@@ -64,8 +64,8 @@ const calculateObjectPixelPosition = (mapMetadata: MapMetadata, objectPosition: 
 }
 
 const orderTasksByDrawOrder = (tasks: Task[], currentTaskOrder: number, maxTaskOrder: number) => {
-    let tasksWithDrawOrder = tasks.map((task) => {
-        var drawOrder
+    const tasksWithDrawOrder = tasks.map((task) => {
+        let drawOrder
         if (task.taskOrder === currentTaskOrder) {
             drawOrder = maxTaskOrder
         } else if (task.taskOrder < currentTaskOrder) {
@@ -131,7 +131,7 @@ const drawRobotMarker = (p1: number, p2: number, map: HTMLCanvasElement, circleS
     context.fillStyle = tokens.colors.text.static_icons__primary_white.hex
     context.fill(outerCircle)
 
-    let innerCircle = new Path2D()
+    const innerCircle = new Path2D()
     innerCircle.arc(p1, map.height - p2, circleSize, 0, 2 * Math.PI)
     context.fillStyle = tokens.colors.interactive.primary__resting.hex
     context.fill(innerCircle)

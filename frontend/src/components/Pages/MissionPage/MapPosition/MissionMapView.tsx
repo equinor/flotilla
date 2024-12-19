@@ -49,7 +49,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     const imageObjectURL = useRef<string>('')
 
     const updateMap = useCallback(() => {
-        let context = mapCanvas.getContext('2d')
+        const context = mapCanvas.getContext('2d')
         if (!context || !mission.map) {
             return
         }
@@ -93,7 +93,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
                     if (mapCanvas) {
                         mapCanvas.width = img.width
                         mapCanvas.height = img.height
-                        let context = mapCanvas?.getContext('2d')
+                        const context = mapCanvas?.getContext('2d')
                         if (context) {
                             setMapContext(context)
                             context.drawImage(img, 0, 0)

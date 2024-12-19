@@ -55,7 +55,7 @@ export const MissionPage = () => {
     useEffect(() => {
         if (connectionReady) {
             registerEvent(SignalREventLabels.missionRunUpdated, (username: string, message: string) => {
-                let updatedMission: Mission = JSON.parse(message)
+                const updatedMission: Mission = JSON.parse(message)
                 setSelectedMission((oldMission) => (updatedMission.id === oldMission?.id ? updatedMission : oldMission))
             })
         }

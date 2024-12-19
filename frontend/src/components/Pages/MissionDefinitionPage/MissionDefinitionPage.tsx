@@ -56,13 +56,13 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
     const { TranslateText } = useLanguageContext()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
     const [selectedField, setSelectedField] = useState<string>('')
-    let navigate = useNavigate()
+    const navigate = useNavigate()
 
     const displayInspectionFrequency = (inspectionFrequency: string | undefined | null) => {
         if (!inspectionFrequency) return TranslateText('No inspection frequency set')
         const timeArray = inspectionFrequency.split(':')
         const days: number = +timeArray[0] // [1] is hours and [2] is minutes
-        let returnStringArray: string[] = []
+        const returnStringArray: string[] = []
         if (days > 0) returnStringArray.push(days + ' ' + TranslateText('days'))
         if (returnStringArray.length === 0) return TranslateText('No inspection frequency set')
 

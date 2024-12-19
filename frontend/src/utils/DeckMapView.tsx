@@ -51,7 +51,7 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
     const { TranslateText } = useLanguageContext()
 
     const updateMap = useCallback(() => {
-        let context = mapCanvas.getContext('2d')
+        const context = mapCanvas.getContext('2d')
         if (context === null) {
             return
         }
@@ -82,7 +82,7 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
                 if (!mapCanvas) return
                 mapCanvas.width = img.width
                 mapCanvas.height = img.height
-                let context = mapCanvas?.getContext('2d')
+                const context = mapCanvas?.getContext('2d')
                 if (context) {
                     setMapContext(context)
                     context.drawImage(img, 0, 0)

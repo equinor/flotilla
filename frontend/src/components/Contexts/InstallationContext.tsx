@@ -18,7 +18,7 @@ interface IInstallationContext {
 }
 
 const mapInstallationCodeToName = (plantInfoArray: PlantInfo[]): Map<string, string> => {
-    var mapping = new Map<string, string>()
+    const mapping = new Map<string, string>()
     plantInfoArray.forEach((plantInfo: PlantInfo) => {
         mapping.set(plantInfo.projectDescription, plantInfo.plantCode)
     })
@@ -84,7 +84,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                         BackendAPICaller.getAreasByDeckId(deck.id)
                             .then((areas) =>
                                 setInstallationAreas((oldAreas) => {
-                                    let areasCopy = [...oldAreas]
+                                    const areasCopy = [...oldAreas]
                                     let newAreas: Area[] = []
                                     areas.forEach((area) => {
                                         const indexBeUpdated = areasCopy.findIndex((a) => a.id === area.id)
@@ -156,7 +156,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                     const deckIndex = oldDecks.findIndex((d) => d.id === updatedDeck.id)
                     if (deckIndex === -1) return [...oldDecks, updatedDeck]
                     else {
-                        let oldDecksCopy = [...oldDecks]
+                        const oldDecksCopy = [...oldDecks]
                         oldDecksCopy[deckIndex] = updatedDeck
                         return oldDecksCopy
                     }
@@ -168,7 +168,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                 setInstallationDecks((oldDecks) => {
                     const deckIndex = oldDecks.findIndex((d) => d.id === deletedDeck.id)
                     if (deckIndex !== -1) {
-                        let oldDecksCopy = [...oldDecks]
+                        const oldDecksCopy = [...oldDecks]
                         oldDecksCopy.splice(deckIndex, 1)
                         return oldDecksCopy
                     }

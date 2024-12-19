@@ -61,7 +61,7 @@ export const SignalRProvider: FC<Props> = ({ children }) => {
     useEffect(() => {
         if (accessToken) {
             console.log('Attempting to create signalR connection...')
-            var newConnection = new signalR.HubConnectionBuilder()
+            const newConnection = new signalR.HubConnectionBuilder()
                 .withUrl(URL, {
                     accessTokenFactory: () => accessToken,
                     transport: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.LongPolling,

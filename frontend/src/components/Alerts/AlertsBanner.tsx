@@ -42,7 +42,7 @@ interface AlertProps {
 
 export const AlertBanner = ({ children, dismissAlert, alertCategory }: AlertProps) => {
     let bannerColor = tokens.colors.ui.background__danger.hex
-    let hoverColor = tokens.colors.ui.background__light.hex
+    const hoverColor = tokens.colors.ui.background__light.hex
 
     if (alertCategory === AlertCategory.WARNING) bannerColor = tokens.colors.interactive.warning__highlight.hex
     if (alertCategory === AlertCategory.INFO) bannerColor = tokens.colors.infographic.primary__mist_blue.hex
