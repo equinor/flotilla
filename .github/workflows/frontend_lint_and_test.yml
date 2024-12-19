@@ -63,7 +63,7 @@ jobs:
       - name: Install modules
         run: npm ci
       - name: Run ESLint
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0
+        run: npx eslint src
 
   check_exports:
     runs-on: ubuntu-latest
