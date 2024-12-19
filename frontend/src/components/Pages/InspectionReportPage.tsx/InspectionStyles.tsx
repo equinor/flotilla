@@ -2,7 +2,7 @@ import { Button, Card, Dialog } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { styled } from 'styled-components'
 
-export const StyledInspection = styled.canvas`
+export const StyledInspection = styled.img`
     flex: 1 0 0;
     align-self: stretch;
     width: 80vh;
@@ -12,7 +12,7 @@ export const StyledInspection = styled.canvas`
     }
 `
 
-export const StyledInspectionImage = styled.canvas`
+export const StyledInspectionImage = styled.img`
     flex: 1 0 0;
     align-self: center;
     max-width: 100%;

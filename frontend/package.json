@@ -12,6 +12,7 @@
         "@livekit/components-styles": "^1.0.12",
         "@microsoft/applicationinsights-web": "^3.1.2",
         "@microsoft/signalr": "^8.0.0",
+        "@tanstack/react-query": "^5.62.8",
         "@testing-library/jest-dom": "^6.4.2",
         "@testing-library/react": "^14.3.0",
         "@testing-library/user-event": "^14.5.2",
