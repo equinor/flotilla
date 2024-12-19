@@ -33,7 +33,7 @@ export const RobotMissionQueueView = ({ robot }: { robot: Robot }): JSX.Element 
     )
 
     const onDeleteMission = (mission: Mission) =>
-        BackendAPICaller.deleteMission(mission.id).catch((_) => {
+        BackendAPICaller.deleteMission(mission.id).catch(() => {
             setAlert(
                 AlertType.RequestFail,
                 <FailedRequestAlertContent translatedMessage={TranslateText('Failed to delete mission from queue')} />,
