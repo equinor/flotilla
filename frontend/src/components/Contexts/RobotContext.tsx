@@ -78,7 +78,7 @@ export const RobotProvider: FC<Props> = ({ children }) => {
                 .then((robots) => {
                     setEnabledRobots(robots)
                 })
-                .catch((e) => {
+                .catch(() => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve robots')} />,

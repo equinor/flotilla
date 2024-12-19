@@ -34,7 +34,7 @@ const defaultInstallation = {
     installationName: '',
     installationDecks: [],
     installationAreas: [],
-    switchInstallation: (selectedInstallation: string) => {},
+    switchInstallation: () => {},
 }
 
 export const InstallationContext = createContext<IInstallationContext>(defaultInstallation)
@@ -58,7 +58,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                 const mapping = mapInstallationCodeToName(response)
                 setAllPlantsMap(mapping)
             })
-            .catch((e) => {
+            .catch(() => {
                 setAlert(
                     AlertType.RequestFail,
                     <FailedRequestAlertContent translatedMessage={TranslateText('Failed to retrieve installations')} />,
@@ -93,7 +93,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                                     return areasCopy.concat(newAreas)
                                 })
                             )
-                            .catch((e) => {
+                            .catch(() => {
                                 setAlert(
                                     AlertType.RequestFail,
                                     <FailedRequestAlertContent
@@ -115,7 +115,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                             })
                     )
                 })
-                .catch((e) => {
+                .catch(() => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent
