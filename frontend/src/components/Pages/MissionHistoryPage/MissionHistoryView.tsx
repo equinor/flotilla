@@ -198,7 +198,6 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                     AlertCategory.ERROR
                 )
             })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page, pageSize, switchPage, filterFunctions])
 
     useEffect(() => {

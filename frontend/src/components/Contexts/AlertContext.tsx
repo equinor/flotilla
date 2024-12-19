@@ -175,7 +175,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 })
         }
         if (!recentFailedMissions || recentFailedMissions.length === 0) updateRecentFailedMissions()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [installationCode])
 
     // Register a signalR event handler that listens for new failed missions
@@ -202,7 +201,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 })
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady, installationCode])
 
     useEffect(() => {
@@ -240,7 +238,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 }
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady, installationCode, enabledRobots])
 
     useEffect(() => {
@@ -257,7 +254,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             )
             setNewFailedMissions([])
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [newFailedMissions])
 
     useEffect(() => {
@@ -287,7 +283,6 @@ export const AlertProvider: FC<Props> = ({ children }) => {
             }
         }
         setBlockedRobotNames(newBlockedRobotNames)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [enabledRobots, installationCode])
 
     return (

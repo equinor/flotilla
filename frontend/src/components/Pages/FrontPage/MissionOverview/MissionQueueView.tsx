@@ -55,7 +55,6 @@ export const RobotMissionQueueView = ({ robot }: { robot: Robot }): JSX.Element 
             robotOngoingMissions.forEach((mission) => updatedLoadingMissionNames.delete(mission.name + robot.id))
             return updatedLoadingMissionNames
         })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [missionQueue, ongoingMissions])
 
     const missionQueueDisplay = robotMissionQueue.map((mission, index) => (

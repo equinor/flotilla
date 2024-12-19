@@ -127,7 +127,6 @@ const InstallationPicker = () => {
                     )
                 })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showActivePlants, updateListOfActivePlants])
 
     return (

@@ -70,7 +70,6 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
                 })
             })
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [registerEvent, connectionReady])
 
     useEffect(() => {
@@ -98,7 +97,6 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
             setMissionDefinitions(missionDefinitionsInInstallation ?? [])
         }
         if (BackendAPICaller.accessToken) fetchAndUpdateMissionDefinitions()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [BackendAPICaller.accessToken, installationCode])
 
     const [filteredMissionDefinitions, setFilteredMissionDefinitions] = useState<MissionDefinition[]>([])
@@ -107,7 +105,6 @@ const useMissionDefinitions = (): IMissionDefinitionsContext => {
         setFilteredMissionDefinitions(
             missionDefinitions.filter((m) => m.installationCode.toLowerCase() === installationCode.toLowerCase())
         )
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [installationCode, missionDefinitions])
 
     return { missionDefinitions: filteredMissionDefinitions }

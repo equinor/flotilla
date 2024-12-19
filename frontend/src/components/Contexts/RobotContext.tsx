@@ -92,7 +92,6 @@ export const RobotProvider: FC<Props> = ({ children }) => {
                         AlertCategory.ERROR
                     )
                 })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const [filteredRobots, setFilteredRobots] = useState<Robot[]>([])
@@ -103,7 +102,6 @@ export const RobotProvider: FC<Props> = ({ children }) => {
                 (r) => r.currentInstallation.installationCode.toLowerCase() === installationCode.toLowerCase()
             )
         )
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [installationCode, enabledRobots])
 
     return (
