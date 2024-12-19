@@ -57,15 +57,12 @@ namespace Api.EventHandlers
                 _logger.LogError(ex, "Failed to send message to Teams");
                 return;
             }
-            if (response.IsSuccessStatusCode)
+
+            if (!response.IsSuccessStatusCode)
             {
-                _logger.LogInformation("Post request via teams incomming webhook was successful, Status Code: {response.StatusCode}", response.StatusCode);
-                return;
+                string errorBody = await response.Content.ReadAsStringAsync();
+                _logger.LogError($"Webhook request failed with status code {response.StatusCode}. Response body: {errorBody}");
             }
-
-            string errorBody = await response.Content.ReadAsStringAsync();
-            _logger.LogError($"Webhook request failed with status code {response.StatusCode}. Response body: {errorBody}");
-
         }
 
         private static StringContent CreateTeamsMessageCard(string message)
