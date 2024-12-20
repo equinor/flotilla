@@ -9,25 +9,40 @@ namespace Api.Services
     public interface IMapService
     {
         public Task<byte[]?> FetchMapImage(string mapName, string installationCode);
-        public Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string installationCode);
+        public Task<MapMetadata?> ChooseMapFromPositions(
+            IList<Position> positions,
+            string installationCode
+        );
         public Task<MapMetadata?> ChooseMapFromMissionRunTasks(MissionRun mission);
     }
 
-    public class MapService(ILogger<MapService> logger,
-            IOptions<MapBlobOptions> blobOptions,
-            IBlobService blobService) : IMapService
+    public class MapService(
+        ILogger<MapService> logger,
+        IOptions<MapBlobOptions> blobOptions,
+        IBlobService blobService
+    ) : IMapService
     {
         public async Task<byte[]?> FetchMapImage(string mapName, string installationCode)
         {
-            return await blobService.DownloadBlob(mapName, installationCode, blobOptions.Value.StorageAccount);
+            return await blobService.DownloadBlob(
+                mapName,
+                installationCode,
+                blobOptions.Value.StorageAccount
+            );
         }
 
-        public async Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string installationCode)
+        public async Task<MapMetadata?> ChooseMapFromPositions(
+            IList<Position> positions,
+            string installationCode
+        )
         {
             var boundaries = new Dictionary<string, Boundary>();
             var imageSizes = new Dictionary<string, int[]>();
 
-            var blobs = blobService.FetchAllBlobs(installationCode, blobOptions.Value.StorageAccount);
+            var blobs = blobService.FetchAllBlobs(
+                installationCode,
+                blobOptions.Value.StorageAccount
+            );
 
             await foreach (var blob in blobs)
             {
@@ -38,7 +53,11 @@ namespace Api.Services
                 }
                 catch (Exception e) when (e is FormatException || e is KeyNotFoundException)
                 {
-                    logger.LogWarning(e, "Failed to extract boundary and image size for {MapName}", blob.Name);
+                    logger.LogWarning(
+                        e,
+                        "Failed to extract boundary and image size for {MapName}",
+                        blob.Name
+                    );
                 }
             }
 
@@ -52,7 +71,7 @@ namespace Api.Services
                     boundaries[mostSuitableMap].As2DMatrix()[1],
                     imageSizes[mostSuitableMap][0],
                     imageSizes[mostSuitableMap][1]
-                )
+                ),
             };
             return map;
         }
@@ -89,7 +108,11 @@ namespace Api.Services
                 return null;
             }
 
-            logger.LogInformation("Assigned map {map} to mission {mission}", mapMetadata.MapName, missionRun.Name);
+            logger.LogInformation(
+                "Assigned map {map} to mission {mission}",
+                mapMetadata.MapName,
+                missionRun.Name
+            );
             return mapMetadata;
         }
 
@@ -165,7 +188,10 @@ namespace Api.Services
             var mapCoverage = new Dictionary<string, float>();
             foreach (var boundary in boundaries)
             {
-                mapCoverage.Add(boundary.Key, FractionOfTagsWithinBoundary(boundary.Value, positions));
+                mapCoverage.Add(
+                    boundary.Key,
+                    FractionOfTagsWithinBoundary(boundary.Value, positions)
+                );
             }
             string keyOfMaxValue = mapCoverage.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
 
@@ -180,9 +206,11 @@ namespace Api.Services
         private static bool TagWithinBoundary(Boundary boundary, Position position)
         {
             return position.X > boundary.X1
-                   && position.X < boundary.X2 && position.Y > boundary.Y1
-                   && position.Y < boundary.Y2 && position.Z > boundary.Z1
-                   && position.Z < boundary.Z2;
+                && position.X < boundary.X2
+                && position.Y > boundary.Y1
+                && position.Y < boundary.Y2
+                && position.Z > boundary.Z1
+                && position.Z < boundary.Z2;
         }
 
         private float FractionOfTagsWithinBoundary(Boundary boundary, IList<Position> positions)
@@ -199,7 +227,9 @@ namespace Api.Services
                 }
                 catch
                 {
-                    logger.LogWarning("An error occurred while checking if tag was within boundary");
+                    logger.LogWarning(
+                        "An error occurred while checking if tag was within boundary"
+                    );
                 }
             }
 

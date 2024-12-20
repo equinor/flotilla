@@ -8,11 +8,11 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Packets;
+
 namespace Api.Mqtt
 {
     public class MqttService : BackgroundService
     {
-
         private readonly ILogger<MqttService> _logger;
         private readonly int _maxRetryAttempts;
 
@@ -28,13 +28,8 @@ namespace Api.Mqtt
         private readonly int _serverPort;
         private readonly bool _shouldFailOnMaxRetries;
 
-        private static readonly JsonSerializerOptions serializerOptions = new()
-        {
-            Converters =
-                {
-                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
-                }
-        };
+        private static readonly JsonSerializerOptions serializerOptions =
+            new() { Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) } };
 
         private CancellationToken _cancellationToken;
         private int _reconnectAttempts;
@@ -58,13 +53,12 @@ namespace Api.Mqtt
             _maxRetryAttempts = mqttConfig.GetValue<int>("MaxRetryAttempts");
             _shouldFailOnMaxRetries = mqttConfig.GetValue<bool>("ShouldFailOnMaxRetries");
 
-
             var tlsOptions = new MqttClientTlsOptions
             {
                 UseTls = true,
                 /* Currently disabled to use self-signed certificate in the internal broker communication */
                 //if (_notProduction)
-                IgnoreCertificateChainErrors = true
+                IgnoreCertificateChainErrors = true,
             };
             var builder = new MqttClientOptionsBuilder()
                 .WithTcpServer(_serverHost, _serverPort)
@@ -81,6 +75,7 @@ namespace Api.Mqtt
             var topics = mqttConfig.GetSection("Topics").Get<List<string>>() ?? [];
             SubscribeToTopics(topics);
         }
+
         public static event EventHandler<MqttReceivedArgs>? MqttIsarStatusReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotInfoReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarRobotHeartbeatReceived;
@@ -246,21 +241,17 @@ namespace Api.Mqtt
             List<MqttTopicFilter> topicFilters = [];
             StringBuilder sb = new();
             sb.AppendLine("Mqtt service subscribing to the following topics:");
-            topics.ForEach(
-                topic =>
-                {
-                    topicFilters.Add(new MqttTopicFilter
-                    {
-                        Topic = topic
-                    });
-                    sb.AppendLine(topic);
-                }
-            );
+            topics.ForEach(topic =>
+            {
+                topicFilters.Add(new MqttTopicFilter { Topic = topic });
+                sb.AppendLine(topic);
+            });
             _logger.LogInformation("{topicContent}", sb.ToString());
             _mqttClient.SubscribeAsync(topicFilters).Wait();
         }
 
-        private void OnIsarTopicReceived<T>(string content) where T : MqttMessage
+        private void OnIsarTopicReceived<T>(string content)
+            where T : MqttMessage
         {
             T? message;
 
@@ -289,17 +280,17 @@ namespace Api.Mqtt
                 {
                     _ when type == typeof(IsarStatusMessage) => MqttIsarStatusReceived,
                     _ when type == typeof(IsarRobotInfoMessage) => MqttIsarRobotInfoReceived,
-                    _ when type == typeof(IsarRobotHeartbeatMessage) => MqttIsarRobotHeartbeatReceived,
+                    _ when type == typeof(IsarRobotHeartbeatMessage) =>
+                        MqttIsarRobotHeartbeatReceived,
                     _ when type == typeof(IsarMissionMessage) => MqttIsarMissionReceived,
                     _ when type == typeof(IsarTaskMessage) => MqttIsarTaskReceived,
                     _ when type == typeof(IsarBatteryMessage) => MqttIsarBatteryReceived,
                     _ when type == typeof(IsarPressureMessage) => MqttIsarPressureReceived,
                     _ when type == typeof(IsarPoseMessage) => MqttIsarPoseReceived,
                     _ when type == typeof(IsarCloudHealthMessage) => MqttIsarCloudHealthReceived,
-                    _
-                        => throw new NotImplementedException(
-                            $"No event defined for message type '{typeof(T).Name}'"
-                        )
+                    _ => throw new NotImplementedException(
+                        $"No event defined for message type '{typeof(T).Name}'"
+                    ),
                 };
                 // Event will be null if there are no subscribers
                 if (raiseEvent is not null)

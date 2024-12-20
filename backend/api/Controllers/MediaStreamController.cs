@@ -9,10 +9,10 @@ namespace Api.Controllers
     [ApiController]
     [Route("media-stream")]
     public class MediaStreamController(
-            ILogger<MediaStreamController> logger,
-            IIsarService isarService,
-            IRobotService robotService
-        ) : ControllerBase
+        ILogger<MediaStreamController> logger,
+        IIsarService isarService,
+        IRobotService robotService
+    ) : ControllerBase
     {
         /// <summary>
         /// Request the config for a new media stream connection from ISAR

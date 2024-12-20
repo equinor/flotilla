@@ -9,7 +9,10 @@ namespace Api.Test.Mocks
 {
     public class MockMapService : IMapService
     {
-        public async Task<MapMetadata?> ChooseMapFromPositions(IList<Position> positions, string installationCode)
+        public async Task<MapMetadata?> ChooseMapFromPositions(
+            IList<Position> positions,
+            string installationCode
+        )
         {
             await Task.Run(() => Thread.Sleep(1));
             return new MapMetadata();

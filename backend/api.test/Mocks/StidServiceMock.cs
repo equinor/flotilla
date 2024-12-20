@@ -16,19 +16,28 @@ namespace Api.Services
             await Task.CompletedTask;
             string testAreaName = "StidServiceMockArea";
 
-            var area = context.Areas
-                .Include(a => a.Deck).ThenInclude(d => d.Installation)
-                .Include(a => a.Deck).ThenInclude(d => d.Plant).ThenInclude(p => p.Installation)
+            var area = context
+                .Areas.Include(a => a.Deck)
+                .ThenInclude(d => d.Installation)
+                .Include(a => a.Deck)
+                .ThenInclude(d => d.Plant)
+                .ThenInclude(p => p.Installation)
                 .Include(d => d.Plant)
-                .Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
-                .Where(area => area.Name.Contains(testAreaName)).ToList().FirstOrDefault();
-            if (area != null) { return area; }
+                .Include(i => i.Installation)
+                .Include(d => d.DefaultLocalizationPose)
+                .Where(area => area.Name.Contains(testAreaName))
+                .ToList()
+                .FirstOrDefault();
+            if (area != null)
+            {
+                return area;
+            }
 
             var testInstallation = new Installation
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = "StidServiceMockInstallation",
-                InstallationCode = "TTT"
+                InstallationCode = "TTT",
             };
 
             var testPlant = new Plant
@@ -36,7 +45,7 @@ namespace Api.Services
                 Id = Guid.NewGuid().ToString(),
                 Installation = testInstallation,
                 Name = "StidServiceMockPlant",
-                PlantCode = "TTT"
+                PlantCode = "TTT",
             };
 
             var testDeck = new Deck
@@ -45,7 +54,7 @@ namespace Api.Services
                 Plant = testPlant,
                 Installation = testPlant.Installation,
                 DefaultLocalizationPose = new DefaultLocalizationPose(),
-                Name = "StidServiceMockDeck"
+                Name = "StidServiceMockDeck",
             };
 
             var testArea = new Area

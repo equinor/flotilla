@@ -16,11 +16,15 @@ namespace Api.Test.EventHandlers
             var findingsReports = new List<Finding>
             {
                 new("Tag1", "Plant1", "Area1", "Finding1", DateTime.UtcNow),
-                new("Tag2", "Plant1", "Area2", "Finding2", DateTime.UtcNow)
+                new("Tag2", "Plant1", "Area2", "Finding2", DateTime.UtcNow),
             };
 
             // Act
-            string adaptiveCardJson = InspectionFindingEventHandler.GenerateAdaptiveCard("Rapport", numberOfFindings, findingsReports);
+            string adaptiveCardJson = InspectionFindingEventHandler.GenerateAdaptiveCard(
+                "Rapport",
+                numberOfFindings,
+                findingsReports
+            );
 
             // Assert
             Assert.NotNull(adaptiveCardJson);

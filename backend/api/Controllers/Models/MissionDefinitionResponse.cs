@@ -47,7 +47,10 @@ namespace Api.Controllers.Models
             InstallationCode = missionDefinition.InstallationCode;
             Comment = missionDefinition.Comment;
             InspectionFrequency = missionDefinition.InspectionFrequency;
-            InspectionArea = missionDefinition.InspectionArea != null ? new DeckResponse(missionDefinition.InspectionArea) : null;
+            InspectionArea =
+                missionDefinition.InspectionArea != null
+                    ? new DeckResponse(missionDefinition.InspectionArea)
+                    : null;
             LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
             IsDeprecated = missionDefinition.IsDeprecated;
             SourceId = missionDefinition.Source.SourceId;
@@ -55,13 +58,17 @@ namespace Api.Controllers.Models
         }
     }
 
-    public class MissionDefinitionWithTasksResponse(IMissionDefinitionService service, MissionDefinition missionDefinition)
+    public class MissionDefinitionWithTasksResponse(
+        IMissionDefinitionService service,
+        MissionDefinition missionDefinition
+    )
     {
         [JsonPropertyName("id")]
         public string Id { get; } = missionDefinition.Id;
 
         [JsonPropertyName("tasks")]
-        public List<MissionTask> Tasks { get; } = service.GetTasksFromSource(missionDefinition.Source).Result!;
+        public List<MissionTask> Tasks { get; } =
+            service.GetTasksFromSource(missionDefinition.Source).Result!;
 
         [JsonPropertyName("name")]
         public string Name { get; } = missionDefinition.Name;

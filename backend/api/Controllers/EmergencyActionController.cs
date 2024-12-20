@@ -3,11 +3,15 @@ using Api.Services;
 using Api.Services.Events;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace Api.Controllers
 {
     [ApiController]
     [Route("emergency-action")]
-    public class EmergencyActionController(IRobotService robotService, IEmergencyActionService emergencyActionService) : ControllerBase
+    public class EmergencyActionController(
+        IRobotService robotService,
+        IEmergencyActionService emergencyActionService
+    ) : ControllerBase
     {
         /// <summary>
         ///     This endpoint will abort the current running mission run and attempt to return the robot to the docking station in the
@@ -27,19 +31,25 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<string>> AbortCurrentMissionAndSendAllRobotsToDock(
-            [FromRoute] string installationCode)
+            [FromRoute] string installationCode
+        )
         {
-
-            var robots = await robotService.ReadRobotsForInstallation(installationCode, readOnly: true);
+            var robots = await robotService.ReadRobotsForInstallation(
+                installationCode,
+                readOnly: true
+            );
 
             foreach (var robot in robots)
             {
-                emergencyActionService.SendRobotToDock(new RobotEmergencyEventArgs(robot.Id, Database.Models.RobotFlotillaStatus.Docked));
-
+                emergencyActionService.SendRobotToDock(
+                    new RobotEmergencyEventArgs(
+                        robot.Id,
+                        Database.Models.RobotFlotillaStatus.Docked
+                    )
+                );
             }
 
             return NoContent();
-
         }
 
         /// <summary>
@@ -56,13 +66,22 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<string>> ClearEmergencyStateForAllRobots(
-            [FromRoute] string installationCode)
+            [FromRoute] string installationCode
+        )
         {
-            var robots = await robotService.ReadRobotsForInstallation(installationCode, readOnly: true);
+            var robots = await robotService.ReadRobotsForInstallation(
+                installationCode,
+                readOnly: true
+            );
 
             foreach (var robot in robots)
             {
-                emergencyActionService.ReleaseRobotFromDock(new RobotEmergencyEventArgs(robot.Id, Database.Models.RobotFlotillaStatus.Normal));
+                emergencyActionService.ReleaseRobotFromDock(
+                    new RobotEmergencyEventArgs(
+                        robot.Id,
+                        Database.Models.RobotFlotillaStatus.Normal
+                    )
+                );
             }
 
             return NoContent();

@@ -23,7 +23,7 @@ namespace Api.Test
             string connectionString = new SqliteConnectionStringBuilder
             {
                 DataSource = ":memory:",
-                Cache = SqliteCacheMode.Shared
+                Cache = SqliteCacheMode.Shared,
             }.ToString();
             _connection = new SqliteConnection(connectionString);
             _connection.Open();
@@ -67,9 +67,11 @@ namespace Api.Test
     }
 
     // Class for mocking authentication handler
-    public class TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options,
-                               ILoggerFactory logger,
-                               UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
+    public class TestAuthHandler(
+        IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder
+    ) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
     {
         public const string AuthenticationScheme = "Test";
 
@@ -78,7 +80,7 @@ namespace Api.Test
             var claims = new[]
             {
                 new Claim(ClaimTypes.Name, "Test.User"),
-                new Claim(ClaimTypes.Role, "Role.Admin")
+                new Claim(ClaimTypes.Role, "Role.Admin"),
             };
             var identity = new ClaimsIdentity(claims, AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);

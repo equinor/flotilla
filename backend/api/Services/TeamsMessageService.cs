@@ -10,7 +10,12 @@ namespace Api.Services
     public class TeamsMessageService() : ITeamsMessageService
     {
         public static event EventHandler<TeamsMessageEventArgs>? TeamsMessage;
-        protected virtual void OnTeamsMessageReceived(TeamsMessageEventArgs e) { TeamsMessage?.Invoke(this, e); }
+
+        protected virtual void OnTeamsMessageReceived(TeamsMessageEventArgs e)
+        {
+            TeamsMessage?.Invoke(this, e);
+        }
+
         public void TriggerTeamsMessageReceived(TeamsMessageEventArgs e)
         {
             OnTeamsMessageReceived(e);

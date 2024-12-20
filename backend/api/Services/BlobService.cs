@@ -7,20 +7,36 @@ using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Options;
+
 namespace Api.Services
 {
     public interface IBlobService
     {
-        public Task<byte[]?> DownloadBlob(string blobName, string containerName, string accountName);
+        public Task<byte[]?> DownloadBlob(
+            string blobName,
+            string containerName,
+            string accountName
+        );
 
         public AsyncPageable<BlobItem> FetchAllBlobs(string containerName, string accountName);
 
-        public Task UploadJsonToBlob(string json, string path, string containerName, string accountName, bool overwrite);
+        public Task UploadJsonToBlob(
+            string json,
+            string path,
+            string containerName,
+            string accountName,
+            bool overwrite
+        );
     }
 
-    public class BlobService(ILogger<BlobService> logger, IOptions<AzureAdOptions> azureOptions) : IBlobService
+    public class BlobService(ILogger<BlobService> logger, IOptions<AzureAdOptions> azureOptions)
+        : IBlobService
     {
-        public async Task<byte[]?> DownloadBlob(string blobName, string containerName, string accountName)
+        public async Task<byte[]?> DownloadBlob(
+            string blobName,
+            string containerName,
+            string accountName
+        )
         {
             var blobContainerClient = GetBlobContainerClient(containerName, accountName);
             var blobClient = blobContainerClient.GetBlobClient(blobName);
@@ -32,10 +48,13 @@ namespace Api.Services
             }
             catch (RequestFailedException)
             {
-                logger.LogWarning("Failed to download blob {blobName} from container {containerName}", blobName, containerName);
+                logger.LogWarning(
+                    "Failed to download blob {blobName} from container {containerName}",
+                    blobName,
+                    containerName
+                );
                 return null;
             }
-
 
             return memoryStream.ToArray();
         }
@@ -55,7 +74,13 @@ namespace Api.Services
             }
         }
 
-        public async Task UploadJsonToBlob(string json, string path, string containerName, string accountName, bool overwrite = false)
+        public async Task UploadJsonToBlob(
+            string json,
+            string path,
+            string containerName,
+            string accountName,
+            bool overwrite = false
+        )
         {
             var blobContainerClient = GetBlobContainerClient(containerName, accountName);
 
@@ -63,12 +88,19 @@ namespace Api.Services
 
             using var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
-            try { await blobClient.UploadAsync(memoryStream, overwrite); }
+            try
+            {
+                await blobClient.UploadAsync(memoryStream, overwrite);
+            }
             catch (RequestFailedException e)
             {
                 if (e.Status == 404 && e.ErrorCode == "ContainerNotFound")
                 {
-                    logger.LogError(e, "{ErrorMessage}", $"Unable to find blob container {containerName}");
+                    logger.LogError(
+                        e,
+                        "{ErrorMessage}",
+                        $"Unable to find blob container {containerName}"
+                    );
                     throw new ConfigException($"Unable to find blob container {containerName}");
                 }
                 else
@@ -90,7 +122,9 @@ namespace Api.Services
                     azureOptions.Value.ClientSecret
                 )
             );
-            var containerClient = serviceClient.GetBlobContainerClient(containerName.ToLower(CultureInfo.CurrentCulture));
+            var containerClient = serviceClient.GetBlobContainerClient(
+                containerName.ToLower(CultureInfo.CurrentCulture)
+            );
             return containerClient;
         }
     }

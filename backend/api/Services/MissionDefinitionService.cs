@@ -7,6 +7,7 @@ using Api.Database.Models;
 using Api.Services.MissionLoaders;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
+
 namespace Api.Services
 {
     public interface IMissionDefinitionService
@@ -15,15 +16,24 @@ namespace Api.Services
 
         public Task<MissionDefinition?> ReadById(string id, bool readOnly = true);
 
-        public Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters, bool readOnly = true);
+        public Task<PagedList<MissionDefinition>> ReadAll(
+            MissionDefinitionQueryStringParameters parameters,
+            bool readOnly = true
+        );
 
-        public Task<List<MissionDefinition>> ReadByInspectionAreaId(string inspectionAreaId, bool readOnly = true);
+        public Task<List<MissionDefinition>> ReadByInspectionAreaId(
+            string inspectionAreaId,
+            bool readOnly = true
+        );
 
         public Task<List<MissionTask>?> GetTasksFromSource(Source source);
 
         public Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = true);
 
-        public Task<MissionDefinition> UpdateLastSuccessfulMissionRun(string missionRunId, string missionDefinitionId);
+        public Task<MissionDefinition> UpdateLastSuccessfulMissionRun(
+            string missionRunId,
+            string missionDefinitionId
+        );
 
         public Task<MissionDefinition> Update(MissionDefinition missionDefinition);
 
@@ -42,36 +52,56 @@ namespace Api.Services
         "CA1304:Specify CultureInfo",
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
-    public class MissionDefinitionService(FlotillaDbContext context,
-            IMissionLoader missionLoader,
-            ISignalRService signalRService,
-            IAccessRoleService accessRoleService,
-            ILogger<IMissionDefinitionService> logger,
-            IMissionRunService missionRunService,
-            ISourceService sourceService) : IMissionDefinitionService
+    public class MissionDefinitionService(
+        FlotillaDbContext context,
+        IMissionLoader missionLoader,
+        ISignalRService signalRService,
+        IAccessRoleService accessRoleService,
+        ILogger<IMissionDefinitionService> logger,
+        IMissionRunService missionRunService,
+        ISourceService sourceService
+    ) : IMissionDefinitionService
     {
         public async Task<MissionDefinition> Create(MissionDefinition missionDefinition)
         {
-            if (missionDefinition.LastSuccessfulRun is not null) { context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged; }
-            if (missionDefinition.InspectionArea is not null) { context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged; }
-            if (missionDefinition.Source is not null) { context.Entry(missionDefinition.Source).State = EntityState.Unchanged; }
+            if (missionDefinition.LastSuccessfulRun is not null)
+            {
+                context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged;
+            }
+            if (missionDefinition.InspectionArea is not null)
+            {
+                context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
+            }
+            if (missionDefinition.Source is not null)
+            {
+                context.Entry(missionDefinition.Source).State = EntityState.Unchanged;
+            }
 
             await context.MissionDefinitions.AddAsync(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.InspectionArea?.Installation);
-            _ = signalRService.SendMessageAsync("Mission definition created", missionDefinition.InspectionArea?.Installation, new MissionDefinitionResponse(missionDefinition));
+            _ = signalRService.SendMessageAsync(
+                "Mission definition created",
+                missionDefinition.InspectionArea?.Installation,
+                new MissionDefinitionResponse(missionDefinition)
+            );
             DetachTracking(missionDefinition);
             return missionDefinition;
         }
 
         public async Task<MissionDefinition?> ReadById(string id, bool readOnly = true)
         {
-            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(m => m.IsDeprecated == false)
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+                .Where(m => m.IsDeprecated == false)
                 .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
         }
 
-        public async Task<PagedList<MissionDefinition>> ReadAll(MissionDefinitionQueryStringParameters parameters, bool readOnly = true)
+        public async Task<PagedList<MissionDefinition>> ReadAll(
+            MissionDefinitionQueryStringParameters parameters,
+            bool readOnly = true
+        )
         {
-            var query = GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(m => m.IsDeprecated == false);
+            var query = GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+                .Where(m => m.IsDeprecated == false);
             var filter = ConstructFilter(parameters);
 
             query = query.Where(filter);
@@ -87,19 +117,38 @@ namespace Api.Services
             );
         }
 
-        public async Task<List<MissionDefinition>> ReadByInspectionAreaId(string inspectionAreaId, bool readOnly = true)
+        public async Task<List<MissionDefinition>> ReadByInspectionAreaId(
+            string inspectionAreaId,
+            bool readOnly = true
+        )
         {
-            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
-                m => m.IsDeprecated == false && m.InspectionArea != null && m.InspectionArea.Id == inspectionAreaId).ToListAsync();
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+                .Where(m =>
+                    m.IsDeprecated == false
+                    && m.InspectionArea != null
+                    && m.InspectionArea.Id == inspectionAreaId
+                )
+                .ToListAsync();
         }
 
-        public async Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = true)
+        public async Task<List<MissionDefinition>> ReadBySourceId(
+            string sourceId,
+            bool readOnly = true
+        )
         {
-            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly).Where(
-                m => m.IsDeprecated == false && m.Source.SourceId != null && m.Source.SourceId == sourceId).ToListAsync();
+            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+                .Where(m =>
+                    m.IsDeprecated == false
+                    && m.Source.SourceId != null
+                    && m.Source.SourceId == sourceId
+                )
+                .ToListAsync();
         }
 
-        public async Task<MissionDefinition> UpdateLastSuccessfulMissionRun(string missionRunId, string missionDefinitionId)
+        public async Task<MissionDefinition> UpdateLastSuccessfulMissionRun(
+            string missionRunId,
+            string missionDefinitionId
+        )
         {
             var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
             if (missionRun is null)
@@ -118,19 +167,31 @@ namespace Api.Services
             if (missionRun.Status == MissionStatus.Successful)
             {
                 missionDefinition.LastSuccessfulRun = missionRun;
-                logger.LogInformation($"Updated last successful mission run on mission definition {missionDefinitionId} to mission run {missionRunId}");
+                logger.LogInformation(
+                    $"Updated last successful mission run on mission definition {missionDefinitionId} to mission run {missionRunId}"
+                );
             }
             return await Update(missionDefinition);
         }
 
         public async Task<MissionDefinition> Update(MissionDefinition missionDefinition)
         {
-            if (missionDefinition.LastSuccessfulRun is not null) { context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged; }
-            if (missionDefinition.InspectionArea is not null) { context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged; }
+            if (missionDefinition.LastSuccessfulRun is not null)
+            {
+                context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged;
+            }
+            if (missionDefinition.InspectionArea is not null)
+            {
+                context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
+            }
 
             var entry = context.Update(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.InspectionArea?.Installation);
-            _ = signalRService.SendMessageAsync("Mission definition updated", missionDefinition?.InspectionArea?.Installation, missionDefinition != null ? new MissionDefinitionResponse(missionDefinition) : null);
+            _ = signalRService.SendMessageAsync(
+                "Mission definition updated",
+                missionDefinition?.InspectionArea?.Installation,
+                missionDefinition != null ? new MissionDefinitionResponse(missionDefinition) : null
+            );
             return entry.Entity;
         }
 
@@ -138,7 +199,10 @@ namespace Api.Services
         {
             // We do not delete the source here as more than one mission definition may be using it
             var missionDefinition = await ReadById(id);
-            if (missionDefinition is null) { return null; }
+            if (missionDefinition is null)
+            {
+                return null;
+            }
 
             missionDefinition.IsDeprecated = true;
             await ApplyDatabaseUpdate(missionDefinition.InspectionArea?.Installation);
@@ -154,18 +218,26 @@ namespace Api.Services
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
-            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+            if (
+                installation == null
+                || accessibleInstallationCodes.Contains(
+                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
+                )
+            )
                 await context.SaveChangesAsync();
             else
-                throw new UnauthorizedAccessException($"User does not have permission to update mission definition in installation {installation.Name}");
-
+                throw new UnauthorizedAccessException(
+                    $"User does not have permission to update mission definition in installation {installation.Name}"
+                );
         }
 
-        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels(bool readOnly = true)
+        private IQueryable<MissionDefinition> GetMissionDefinitionsWithSubModels(
+            bool readOnly = true
+        )
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            var query = context.MissionDefinitions
-                .Include(missionDefinition => missionDefinition.InspectionArea)
+            var query = context
+                .MissionDefinitions.Include(missionDefinition => missionDefinition.InspectionArea)
                 .ThenInclude(deck => deck!.Plant)
                 .ThenInclude(plant => plant.Installation)
                 .Include(missionDefinition => missionDefinition.InspectionArea)
@@ -174,23 +246,35 @@ namespace Api.Services
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
                 .ThenInclude(missionTask => missionTask.Inspection)
-                .ThenInclude(inspection => inspection != null ? inspection.InspectionFindings : null)
+                .ThenInclude(inspection =>
+                    inspection != null ? inspection.InspectionFindings : null
+                )
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                 .ThenInclude(deck => deck!.DefaultLocalizationPose)
-                .ThenInclude(defaultLocalizationPose => defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null)
-                .Where((m) => m.InspectionArea == null || accessibleInstallationCodes.Result.Contains(m.InspectionArea.Installation.InstallationCode.ToUpper()));
+                .ThenInclude(defaultLocalizationPose =>
+                    defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null
+                )
+                .Where(
+                    (m) =>
+                        m.InspectionArea == null
+                        || accessibleInstallationCodes.Result.Contains(
+                            m.InspectionArea.Installation.InstallationCode.ToUpper()
+                        )
+                );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
-        private static void SearchByName(ref IQueryable<MissionDefinition> missionDefinitions, string? name)
+        private static void SearchByName(
+            ref IQueryable<MissionDefinition> missionDefinitions,
+            string? name
+        )
         {
             if (!missionDefinitions.Any() || string.IsNullOrWhiteSpace(name))
                 return;
 
 #pragma warning disable CA1862
-            missionDefinitions = missionDefinitions.Where(
-                missionDefinition =>
-                    missionDefinition.Name != null && missionDefinition.Name.Contains(name.Trim())
+            missionDefinitions = missionDefinitions.Where(missionDefinition =>
+                missionDefinition.Name != null && missionDefinition.Name.Contains(name.Trim())
             );
 #pragma warning restore CA1862
         }
@@ -209,15 +293,22 @@ namespace Api.Services
             MissionDefinitionQueryStringParameters parameters
         )
         {
-            Expression<Func<MissionDefinition, bool>> inspectionAreaFilter = parameters.InspectionArea is null
-                ? missionDefinition => true
-                : missionDefinition =>
-                    missionDefinition.InspectionArea != null && missionDefinition.InspectionArea.Name.ToLower().Equals(parameters.InspectionArea.Trim().ToLower());
+            Expression<Func<MissionDefinition, bool>> inspectionAreaFilter =
+                parameters.InspectionArea is null
+                    ? missionDefinition => true
+                    : missionDefinition =>
+                        missionDefinition.InspectionArea != null
+                        && missionDefinition
+                            .InspectionArea.Name.ToLower()
+                            .Equals(parameters.InspectionArea.Trim().ToLower());
 
-            Expression<Func<MissionDefinition, bool>> installationFilter = parameters.InstallationCode is null
-                ? missionDefinition => true
-                : missionDefinition =>
-                    missionDefinition.InstallationCode.ToLower().Equals(parameters.InstallationCode.Trim().ToLower());
+            Expression<Func<MissionDefinition, bool>> installationFilter =
+                parameters.InstallationCode is null
+                    ? missionDefinition => true
+                    : missionDefinition =>
+                        missionDefinition
+                            .InstallationCode.ToLower()
+                            .Equals(parameters.InstallationCode.Trim().ToLower());
 
             // The parameter of the filter expression
             var missionDefinitionExpression = Expression.Parameter(typeof(MissionDefinition));
@@ -229,13 +320,18 @@ namespace Api.Services
             );
 
             // Constructing the resulting lambda expression by combining parameter and body
-            return Expression.Lambda<Func<MissionDefinition, bool>>(body, missionDefinitionExpression);
+            return Expression.Lambda<Func<MissionDefinition, bool>>(
+                body,
+                missionDefinitionExpression
+            );
         }
 
         public void DetachTracking(MissionDefinition missionDefinition)
         {
-            if (missionDefinition.LastSuccessfulRun != null) missionRunService.DetachTracking(missionDefinition.LastSuccessfulRun);
-            if (missionDefinition.Source != null) sourceService.DetachTracking(missionDefinition.Source);
+            if (missionDefinition.LastSuccessfulRun != null)
+                missionRunService.DetachTracking(missionDefinition.LastSuccessfulRun);
+            if (missionDefinition.Source != null)
+                sourceService.DetachTracking(missionDefinition.Source);
             context.Entry(missionDefinition).State = EntityState.Detached;
         }
     }

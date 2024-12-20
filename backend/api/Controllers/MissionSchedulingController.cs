@@ -8,25 +8,23 @@ using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace Api.Controllers
 {
     [ApiController]
     [Route("missions")]
     public class MissionSchedulingController(
-            IMissionDefinitionService missionDefinitionService,
-            IMissionRunService missionRunService,
-            IInstallationService installationService,
-            IMissionLoader missionLoader,
-            ILogger<MissionSchedulingController> logger,
-            IMapService mapService,
-            IStidService stidService,
-            ILocalizationService localizationService,
-            IRobotService robotService,
-            ISourceService sourceService,
-            IDeckService deckService
-        ) : ControllerBase
-
+        IMissionDefinitionService missionDefinitionService,
+        IMissionRunService missionRunService,
+        IInstallationService installationService,
+        IMissionLoader missionLoader,
+        ILogger<MissionSchedulingController> logger,
+        IMapService mapService,
+        IStidService stidService,
+        ILocalizationService localizationService,
+        IRobotService robotService,
+        ISourceService sourceService,
+        IDeckService deckService
+    ) : ControllerBase
     {
         /// <summary>
         ///     Rerun a mission run, running only the parts that did not previously complete
@@ -48,21 +46,43 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId, readOnly: true); }
-            catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
-            catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
+            try
+            {
+                robot = await robotService.GetRobotWithPreCheck(
+                    scheduledMissionQuery.RobotId,
+                    readOnly: true
+                );
+            }
+            catch (Exception e) when (e is RobotNotFoundException)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e) when (e is RobotPreCheckFailedException)
+            {
+                return BadRequest(e.Message);
+            }
 
             var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
-            if (missionRun == null) return NotFound("Mission run not found");
+            if (missionRun == null)
+                return NotFound("Mission run not found");
 
-            var missionTasks = missionRun.Tasks.Where((t) => t.Status != Database.Models.TaskStatus.Successful && t.Status != Database.Models.TaskStatus.PartiallySuccessful).Select((t) => new MissionTask(t, Database.Models.TaskStatus.NotStarted)).ToList();
+            var missionTasks = missionRun
+                .Tasks.Where(
+                    (t) =>
+                        t.Status != Database.Models.TaskStatus.Successful
+                        && t.Status != Database.Models.TaskStatus.PartiallySuccessful
+                )
+                .Select((t) => new MissionTask(t, Database.Models.TaskStatus.NotStarted))
+                .ToList();
 
-            if (missionTasks == null || missionTasks.Count == 0) return NotFound("No unfinished mission tasks were found for the requested mission");
+            if (missionTasks == null || missionTasks.Count == 0)
+                return NotFound("No unfinished mission tasks were found for the requested mission");
 
             foreach (var task in missionTasks)
             {
                 task.Id = Guid.NewGuid().ToString();
-                if (task.Inspection != null) task.Inspection.Id = Guid.NewGuid().ToString();
+                if (task.Inspection != null)
+                    task.Inspection.Id = Guid.NewGuid().ToString();
             }
 
             var newMissionRun = new MissionRun
@@ -75,7 +95,7 @@ namespace Api.Controllers
                 Tasks = missionTasks,
                 DesiredStartTime = scheduledMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
                 InstallationCode = missionRun.InstallationCode,
-                InspectionArea = missionRun.InspectionArea
+                InspectionArea = missionRun.InspectionArea,
             };
 
             if (newMissionRun.Tasks.Any())
@@ -91,13 +111,12 @@ namespace Api.Controllers
             }
             catch (UnsupportedRobotCapabilityException)
             {
-                return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission.");
+                return BadRequest(
+                    $"The robot {robot.Name} does not have the necessary sensors to run the mission."
+                );
             }
 
-            return CreatedAtAction(nameof(Rerun), new
-            {
-                id = newMissionRun.Id
-            }, newMissionRun);
+            return CreatedAtAction(nameof(Rerun), new { id = newMissionRun.Id }, newMissionRun);
         }
 
         /// <summary>
@@ -120,26 +139,59 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId, readOnly: true); }
-            catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
-            catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
+            try
+            {
+                robot = await robotService.GetRobotWithPreCheck(
+                    scheduledMissionQuery.RobotId,
+                    readOnly: true
+                );
+            }
+            catch (Exception e) when (e is RobotNotFoundException)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e) when (e is RobotPreCheckFailedException)
+            {
+                return BadRequest(e.Message);
+            }
 
-            var missionDefinition = await missionDefinitionService.ReadById(missionDefinitionId, readOnly: true);
+            var missionDefinition = await missionDefinitionService.ReadById(
+                missionDefinitionId,
+                readOnly: true
+            );
             if (missionDefinition == null)
             {
                 return NotFound("Mission definition not found");
             }
             else if (missionDefinition.InspectionArea == null)
             {
-                logger.LogWarning("Mission definition with ID {id} does not have an inspection area when scheduling", missionDefinition.Id);
+                logger.LogWarning(
+                    "Mission definition with ID {id} does not have an inspection area when scheduling",
+                    missionDefinition.Id
+                );
             }
 
-            try { await localizationService.EnsureRobotIsOnSameInstallationAsMission(robot, missionDefinition); }
-            catch (InstallationNotFoundException e) { return NotFound(e.Message); }
-            catch (RobotNotInSameInstallationAsMissionException e) { return Conflict(e.Message); }
+            try
+            {
+                await localizationService.EnsureRobotIsOnSameInstallationAsMission(
+                    robot,
+                    missionDefinition
+                );
+            }
+            catch (InstallationNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (RobotNotInSameInstallationAsMissionException e)
+            {
+                return Conflict(e.Message);
+            }
 
-            var missionTasks = await missionLoader.GetTasksForMission(missionDefinition.Source.SourceId);
-            if (missionTasks == null) return NotFound("No mission tasks were found for the requested mission");
+            var missionTasks = await missionLoader.GetTasksForMission(
+                missionDefinition.Source.SourceId
+            );
+            if (missionTasks == null)
+                return NotFound("No mission tasks were found for the requested mission");
 
             var missionRun = new MissionRun
             {
@@ -151,7 +203,7 @@ namespace Api.Controllers
                 DesiredStartTime = scheduledMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
                 Tasks = missionTasks,
                 InstallationCode = missionDefinition.InstallationCode,
-                InspectionArea = missionDefinition.InspectionArea
+                InspectionArea = missionDefinition.InspectionArea,
             };
 
             if (missionRun.Tasks.Any())
@@ -166,13 +218,12 @@ namespace Api.Controllers
             }
             catch (UnsupportedRobotCapabilityException)
             {
-                return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission.");
+                return BadRequest(
+                    $"The robot {robot.Name} does not have the necessary sensors to run the mission."
+                );
             }
 
-            return CreatedAtAction(nameof(Schedule), new
-            {
-                id = newMissionRun.Id
-            }, newMissionRun);
+            return CreatedAtAction(nameof(Schedule), new { id = newMissionRun.Id }, newMissionRun);
         }
 
         /// <summary>
@@ -195,10 +246,24 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await robotService.GetRobotWithPreCheck(scheduledMissionQuery.RobotId, readOnly: true); }
-            catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
-            catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
-            string missionSourceId = scheduledMissionQuery.MissionSourceId.ToString(CultureInfo.CurrentCulture);
+            try
+            {
+                robot = await robotService.GetRobotWithPreCheck(
+                    scheduledMissionQuery.RobotId,
+                    readOnly: true
+                );
+            }
+            catch (Exception e) when (e is RobotNotFoundException)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e) when (e is RobotPreCheckFailedException)
+            {
+                return BadRequest(e.Message);
+            }
+            string missionSourceId = scheduledMissionQuery.MissionSourceId.ToString(
+                CultureInfo.CurrentCulture
+            );
             MissionDefinition? missionDefinition;
             try
             {
@@ -212,10 +277,7 @@ namespace Api.Controllers
             {
                 if (e.StatusCode.HasValue && (int)e.StatusCode.Value == 404)
                 {
-                    logger.LogWarning(
-                        "Could not find mission with id={Id}",
-                        missionSourceId
-                    );
+                    logger.LogWarning("Could not find mission with id={Id}", missionSourceId);
                     return NotFound("Mission not found");
                 }
 
@@ -236,51 +298,66 @@ namespace Api.Controllers
                 return StatusCode(StatusCodes.Status502BadGateway, Message);
             }
 
-
             var missionTasks = await missionLoader.GetTasksForMission(missionSourceId);
 
             List<Area?> missionAreas;
             missionAreas = missionTasks
                 .Where(t => t.TagId != null)
-                .Select(t => stidService.GetTagArea(t.TagId!, scheduledMissionQuery.InstallationCode).Result)
+                .Select(t =>
+                    stidService.GetTagArea(t.TagId!, scheduledMissionQuery.InstallationCode).Result
+                )
                 .ToList();
 
-            var missionDeckNames = missionAreas.Where(a => a != null).Select(a => a!.Deck.Name).Distinct().ToList();
+            var missionDeckNames = missionAreas
+                .Where(a => a != null)
+                .Select(a => a!.Deck.Name)
+                .Distinct()
+                .ToList();
             if (missionDeckNames.Count > 1)
             {
                 string joinedMissionDeckNames = string.Join(", ", [.. missionDeckNames]);
-                logger.LogWarning($"Mission {missionDefinition.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}.");
+                logger.LogWarning(
+                    $"Mission {missionDefinition.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}."
+                );
             }
 
-            var sortedAreas = missionAreas.GroupBy(i => i).OrderByDescending(grp => grp.Count()).Select(grp => grp.Key);
+            var sortedAreas = missionAreas
+                .GroupBy(i => i)
+                .OrderByDescending(grp => grp.Count())
+                .Select(grp => grp.Key);
             var area = sortedAreas.First();
 
             if (area == null && sortedAreas.Count() > 1)
             {
-                logger.LogWarning($"Most common area in mission {missionDefinition.Name} is null. Will use second most common area.");
+                logger.LogWarning(
+                    $"Most common area in mission {missionDefinition.Name} is null. Will use second most common area."
+                );
                 area = sortedAreas.Skip(1).First();
-
             }
             if (area == null)
             {
-                logger.LogError($"Mission {missionDefinition.Name} doesn't have any tags with valid area.");
+                logger.LogError(
+                    $"Mission {missionDefinition.Name} doesn't have any tags with valid area."
+                );
                 return NotFound($"No area found for mission '{missionDefinition.Name}'.");
             }
 
-            var source = await sourceService.CheckForExistingSource(scheduledMissionQuery.MissionSourceId);
+            var source = await sourceService.CheckForExistingSource(
+                scheduledMissionQuery.MissionSourceId
+            );
             MissionDefinition? existingMissionDefinition = null;
             if (source == null)
             {
                 source = await sourceService.Create(
-                    new Source
-                    {
-                        SourceId = $"{missionDefinition.Id}",
-                    }
+                    new Source { SourceId = $"{missionDefinition.Id}" }
                 );
             }
             else
             {
-                var missionDefinitions = await missionDefinitionService.ReadBySourceId(source.SourceId, readOnly: true);
+                var missionDefinitions = await missionDefinitionService.ReadBySourceId(
+                    source.SourceId,
+                    readOnly: true
+                );
                 if (missionDefinitions.Count > 0)
                 {
                     existingMissionDefinition = missionDefinitions.First();
@@ -292,20 +369,25 @@ namespace Api.Controllers
                 }
             }
 
-            var scheduledMissionDefinition = existingMissionDefinition ?? new MissionDefinition
-            {
-                Id = Guid.NewGuid().ToString(),
-                Source = source,
-                Name = missionDefinition.Name,
-                InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
-                InstallationCode = scheduledMissionQuery.InstallationCode,
-                InspectionArea = area.Deck,
-                Map = new MapMetadata()
-            };
+            var scheduledMissionDefinition =
+                existingMissionDefinition
+                ?? new MissionDefinition
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Source = source,
+                    Name = missionDefinition.Name,
+                    InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
+                    InstallationCode = scheduledMissionQuery.InstallationCode,
+                    InspectionArea = area.Deck,
+                    Map = new MapMetadata(),
+                };
 
             if (scheduledMissionDefinition.InspectionArea == null)
             {
-                logger.LogWarning("Mission definition with ID {id} does not have an inspection area when scheduling", scheduledMissionDefinition.Id);
+                logger.LogWarning(
+                    "Mission definition with ID {id} does not have an inspection area when scheduling",
+                    scheduledMissionDefinition.Id
+                );
             }
 
             var missionRun = new MissionRun
@@ -318,10 +400,12 @@ namespace Api.Controllers
                 DesiredStartTime = scheduledMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
                 Tasks = missionTasks,
                 InstallationCode = scheduledMissionQuery.InstallationCode,
-                InspectionArea = scheduledMissionDefinition.InspectionArea
+                InspectionArea = scheduledMissionDefinition.InspectionArea,
             };
 
-            scheduledMissionDefinition.Map = await mapService.ChooseMapFromMissionRunTasks(missionRun);
+            scheduledMissionDefinition.Map = await mapService.ChooseMapFromMissionRunTasks(
+                missionRun
+            );
 
             if (missionRun.Tasks.Any())
             {
@@ -333,9 +417,17 @@ namespace Api.Controllers
                 await missionDefinitionService.Create(scheduledMissionDefinition);
             }
 
-            if (missionRun.Robot.CurrentInspectionArea != null && !await localizationService.RobotIsOnSameDeckAsMission(missionRun.Robot.Id, missionRun.InspectionArea!.Id))
+            if (
+                missionRun.Robot.CurrentInspectionArea != null
+                && !await localizationService.RobotIsOnSameDeckAsMission(
+                    missionRun.Robot.Id,
+                    missionRun.InspectionArea!.Id
+                )
+            )
             {
-                return Conflict($"The robot {missionRun.Robot.Name} is assumed to be in a different inspection area so the mission was not scheduled.");
+                return Conflict(
+                    $"The robot {missionRun.Robot.Name} is assumed to be in a different inspection area so the mission was not scheduled."
+                );
             }
 
             MissionRun newMissionRun;
@@ -345,13 +437,12 @@ namespace Api.Controllers
             }
             catch (UnsupportedRobotCapabilityException)
             {
-                return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission.");
+                return BadRequest(
+                    $"The robot {robot.Name} does not have the necessary sensors to run the mission."
+                );
             }
 
-            return CreatedAtAction(nameof(Create), new
-            {
-                id = newMissionRun.Id
-            }, newMissionRun);
+            return CreatedAtAction(nameof(Create), new { id = newMissionRun.Id }, newMissionRun);
         }
 
         /// <summary>
@@ -375,23 +466,54 @@ namespace Api.Controllers
         )
         {
             Robot robot;
-            try { robot = await robotService.GetRobotWithPreCheck(customMissionQuery.RobotId, readOnly: true); }
-            catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
-            catch (Exception e) when (e is RobotPreCheckFailedException) { return BadRequest(e.Message); }
+            try
+            {
+                robot = await robotService.GetRobotWithPreCheck(
+                    customMissionQuery.RobotId,
+                    readOnly: true
+                );
+            }
+            catch (Exception e) when (e is RobotNotFoundException)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e) when (e is RobotPreCheckFailedException)
+            {
+                return BadRequest(e.Message);
+            }
 
-            var installation = await installationService.ReadByInstallationCode(customMissionQuery.InstallationCode, readOnly: true);
-            if (installation == null) { return NotFound($"Could not find installation with name {customMissionQuery.InstallationCode}"); }
+            var installation = await installationService.ReadByInstallationCode(
+                customMissionQuery.InstallationCode,
+                readOnly: true
+            );
+            if (installation == null)
+            {
+                return NotFound(
+                    $"Could not find installation with name {customMissionQuery.InstallationCode}"
+                );
+            }
 
-            var missionTasks = customMissionQuery.Tasks.Select(task => new MissionTask(task)).ToList();
+            var missionTasks = customMissionQuery
+                .Tasks.Select(task => new MissionTask(task))
+                .ToList();
 
             MissionDefinition? customMissionDefinition;
             Deck? inspectionArea = null;
             try
             {
-                if (customMissionQuery.InspectionAreaName != null) { inspectionArea = await deckService.ReadByInstallationAndName(customMissionQuery.InstallationCode, customMissionQuery.InspectionAreaName, readOnly: true); }
+                if (customMissionQuery.InspectionAreaName != null)
+                {
+                    inspectionArea = await deckService.ReadByInstallationAndName(
+                        customMissionQuery.InstallationCode,
+                        customMissionQuery.InspectionAreaName,
+                        readOnly: true
+                    );
+                }
                 if (inspectionArea == null)
                 {
-                    throw new AreaNotFoundException($"No inspection area with name {customMissionQuery.InspectionAreaName} in installation {customMissionQuery.InstallationCode} was found");
+                    throw new AreaNotFoundException(
+                        $"No inspection area with name {customMissionQuery.InspectionAreaName} in installation {customMissionQuery.InstallationCode} was found"
+                    );
                 }
 
                 var source = await sourceService.CheckForExistingSourceFromTasks(missionTasks);
@@ -403,33 +525,64 @@ namespace Api.Controllers
                 }
                 else
                 {
-                    var missionDefinitions = await missionDefinitionService.ReadBySourceId(source.SourceId, readOnly: true);
-                    if (missionDefinitions.Count > 0) { existingMissionDefinition = missionDefinitions.First(); }
+                    var missionDefinitions = await missionDefinitionService.ReadBySourceId(
+                        source.SourceId,
+                        readOnly: true
+                    );
+                    if (missionDefinitions.Count > 0)
+                    {
+                        existingMissionDefinition = missionDefinitions.First();
+                    }
                 }
 
-                customMissionDefinition = existingMissionDefinition ?? new MissionDefinition
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Source = source,
-                    Name = customMissionQuery.Name,
-                    InspectionFrequency = customMissionQuery.InspectionFrequency,
-                    InstallationCode = customMissionQuery.InstallationCode,
-                    InspectionArea = inspectionArea,
-                    Map = new MapMetadata()
-                };
+                customMissionDefinition =
+                    existingMissionDefinition
+                    ?? new MissionDefinition
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Source = source,
+                        Name = customMissionQuery.Name,
+                        InspectionFrequency = customMissionQuery.InspectionFrequency,
+                        InstallationCode = customMissionQuery.InstallationCode,
+                        InspectionArea = inspectionArea,
+                        Map = new MapMetadata(),
+                    };
 
                 if (existingMissionDefinition == null)
                 {
-                    customMissionDefinition.Map = await mapService.ChooseMapFromPositions(missionTasks.Select(t => t.RobotPose.Position).ToList(), customMissionQuery.InstallationCode);
+                    customMissionDefinition.Map = await mapService.ChooseMapFromPositions(
+                        missionTasks.Select(t => t.RobotPose.Position).ToList(),
+                        customMissionQuery.InstallationCode
+                    );
                     await missionDefinitionService.Create(customMissionDefinition);
                 }
             }
-            catch (SourceException e) { return StatusCode(StatusCodes.Status502BadGateway, e.Message); }
-            catch (AreaNotFoundException) { return NotFound($"No area with name {customMissionQuery.InspectionAreaName} in installation {customMissionQuery.InstallationCode} was found"); }
+            catch (SourceException e)
+            {
+                return StatusCode(StatusCodes.Status502BadGateway, e.Message);
+            }
+            catch (AreaNotFoundException)
+            {
+                return NotFound(
+                    $"No area with name {customMissionQuery.InspectionAreaName} in installation {customMissionQuery.InstallationCode} was found"
+                );
+            }
 
-            try { await localizationService.EnsureRobotIsOnSameInstallationAsMission(robot, customMissionDefinition); }
-            catch (InstallationNotFoundException e) { return NotFound(e.Message); }
-            catch (RobotNotInSameInstallationAsMissionException e) { return Conflict(e.Message); }
+            try
+            {
+                await localizationService.EnsureRobotIsOnSameInstallationAsMission(
+                    robot,
+                    customMissionDefinition
+                );
+            }
+            catch (InstallationNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (RobotNotInSameInstallationAsMissionException e)
+            {
+                return Conflict(e.Message);
+            }
 
             MissionRun? newMissionRun;
             try
@@ -446,27 +599,49 @@ namespace Api.Controllers
                     DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
                     Tasks = missionTasks,
                     InstallationCode = customMissionQuery.InstallationCode,
-                    InspectionArea = inspectionArea
+                    InspectionArea = inspectionArea,
                 };
 
-                if (scheduledMission.Tasks.Any()) { scheduledMission.CalculateEstimatedDuration(); }
-
-                if (scheduledMission.Robot.CurrentInspectionArea != null && !await localizationService.RobotIsOnSameDeckAsMission(scheduledMission.Robot.Id, scheduledMission.InspectionArea.Id))
+                if (scheduledMission.Tasks.Any())
                 {
-                    return Conflict($"The robot {scheduledMission.Robot.Name} is assumed to be in a different inspection area so the mission was not scheduled.");
+                    scheduledMission.CalculateEstimatedDuration();
+                }
+
+                if (
+                    scheduledMission.Robot.CurrentInspectionArea != null
+                    && !await localizationService.RobotIsOnSameDeckAsMission(
+                        scheduledMission.Robot.Id,
+                        scheduledMission.InspectionArea.Id
+                    )
+                )
+                {
+                    return Conflict(
+                        $"The robot {scheduledMission.Robot.Name} is assumed to be in a different inspection area so the mission was not scheduled."
+                    );
                 }
 
                 newMissionRun = await missionRunService.Create(scheduledMission);
             }
-            catch (Exception e) when (e is UnsupportedRobotCapabilityException) { return BadRequest(e.Message); }
-            catch (Exception e) when (e is MissionNotFoundException) { return NotFound(e.Message); }
-            catch (Exception e) when (e is RobotNotFoundException) { return NotFound(e.Message); }
-            catch (Exception e) when (e is UnsupportedRobotCapabilityException) { return BadRequest($"The robot {robot.Name} does not have the necessary sensors to run the mission."); }
-
-            return CreatedAtAction(nameof(Create), new
+            catch (Exception e) when (e is UnsupportedRobotCapabilityException)
             {
-                id = newMissionRun.Id
-            }, newMissionRun);
+                return BadRequest(e.Message);
+            }
+            catch (Exception e) when (e is MissionNotFoundException)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e) when (e is RobotNotFoundException)
+            {
+                return NotFound(e.Message);
+            }
+            catch (Exception e) when (e is UnsupportedRobotCapabilityException)
+            {
+                return BadRequest(
+                    $"The robot {robot.Name} does not have the necessary sensors to run the mission."
+                );
+            }
+
+            return CreatedAtAction(nameof(Create), new { id = newMissionRun.Id }, newMissionRun);
         }
     }
 }

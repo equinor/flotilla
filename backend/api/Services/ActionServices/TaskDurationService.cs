@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using Api.Controllers.Models;
 using Api.Database.Models;
+
 namespace Api.Services.ActionServices
 {
     public interface ITaskDurationService
@@ -8,63 +9,82 @@ namespace Api.Services.ActionServices
         public Task UpdateAverageDurationPerTask(RobotType robotType);
     }
 
-    public class TaskDurationService(ILogger<TaskDurationService> logger, IConfiguration configuration, IRobotModelService robotModelService, IMissionRunService missionRunService) : ITaskDurationService
+    public class TaskDurationService(
+        ILogger<TaskDurationService> logger,
+        IConfiguration configuration,
+        IRobotModelService robotModelService,
+        IMissionRunService missionRunService
+    ) : ITaskDurationService
     {
         public async Task UpdateAverageDurationPerTask(RobotType robotType)
         {
-            int timeRangeInDays = configuration.GetValue<int>("TimeRangeForMissionDurationEstimationInDays");
-            long minEpochTime = DateTimeOffset.Now
-                .AddDays(-timeRangeInDays)
-                .ToUnixTimeSeconds();
+            int timeRangeInDays = configuration.GetValue<int>(
+                "TimeRangeForMissionDurationEstimationInDays"
+            );
+            long minEpochTime = DateTimeOffset.Now.AddDays(-timeRangeInDays).ToUnixTimeSeconds();
 
             var missionRunsForEstimation = await missionRunService.ReadAll(
                 new MissionRunQueryStringParameters
                 {
                     MinDesiredStartTime = minEpochTime,
                     RobotModelType = robotType,
-                    PageSize = QueryStringParameters.MaxPageSize
+                    PageSize = QueryStringParameters.MaxPageSize,
                 },
-                readOnly: true);
+                readOnly: true
+            );
 
             var model = await robotModelService.ReadByRobotType(robotType, readOnly: true);
             if (model is null)
             {
-                logger.LogWarning("Could not update average duration for robot model {RobotType} as the model was not found", robotType);
+                logger.LogWarning(
+                    "Could not update average duration for robot model {RobotType} as the model was not found",
+                    robotType
+                );
                 return;
             }
 
             await UpdateAverageDuration(missionRunsForEstimation, model);
         }
 
-        private async Task UpdateAverageDuration(List<MissionRun> recentMissionRunsForModelType, RobotModel robotModel)
+        private async Task UpdateAverageDuration(
+            List<MissionRun> recentMissionRunsForModelType,
+            RobotModel robotModel
+        )
         {
-            if (recentMissionRunsForModelType.Any(missionRun => missionRun.Robot.Model.Type != robotModel.Type))
+            if (
+                recentMissionRunsForModelType.Any(missionRun =>
+                    missionRun.Robot.Model.Type != robotModel.Type
+                )
+            )
             {
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         "{0} should only include missions for this model type ('{1}')",
-                        nameof(recentMissionRunsForModelType), robotModel.Type),
+                        nameof(recentMissionRunsForModelType),
+                        robotModel.Type
+                    ),
                     nameof(recentMissionRunsForModelType)
                 );
             }
 
             // The time spent on each tasks, not including the duration of video/audio recordings
             var timeSpentPerTask = recentMissionRunsForModelType
-                .SelectMany(
-                    missionRun =>
-                        missionRun.Tasks
-                            .Where(task => task.EndTime is not null && task.StartTime is not null)
-                            .Select(
-                                task =>
-                                    (task.EndTime! - task.StartTime!).Value.TotalSeconds
-                                    - (task.Inspection?.VideoDuration ?? 0)
-                                    )
-                            )
+                .SelectMany(missionRun =>
+                    missionRun
+                        .Tasks.Where(task => task.EndTime is not null && task.StartTime is not null)
+                        .Select(task =>
+                            (task.EndTime! - task.StartTime!).Value.TotalSeconds
+                            - (task.Inspection?.VideoDuration ?? 0)
+                        )
+                )
                 .ToList();
 
             // If no valid task times, return
-            if (timeSpentPerTask.All(time => time < 0)) { return; }
+            if (timeSpentPerTask.All(time => time < 0))
+            {
+                return;
+            }
 
             // Percentiles to exclude when calculating average
             const double P1 = 0.1;
@@ -78,14 +98,22 @@ namespace Api.Services.ActionServices
 
             // Calculate average, excluding outliers by using percentiles
             double result = timeSpentPerTask
-                .Select(d => d < percentile1 ? percentile1 : d > percentile9 ? percentile9 : d)
+                .Select(d =>
+                    d < percentile1 ? percentile1
+                    : d > percentile9 ? percentile9
+                    : d
+                )
                 .Average();
 
             robotModel.AverageDurationPerTag = (float)result;
 
             await robotModelService.Update(robotModel);
 
-            logger.LogInformation("Robot model '{ModelType}' - Updated average time spent per tag to {AverageTimeSpent}s", robotModel.Type, robotModel.AverageDurationPerTag);
+            logger.LogInformation(
+                "Robot model '{ModelType}' - Updated average time spent per tag to {AverageTimeSpent}s",
+                robotModel.Type,
+                robotModel.AverageDurationPerTag
+            );
         }
     }
 }

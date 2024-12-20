@@ -14,6 +14,7 @@ using Api.Test.Database;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+
 namespace Api.Test.Client
 {
     [Collection("Database collection")]
@@ -24,24 +25,25 @@ namespace Api.Test.Client
         private readonly JsonSerializerOptions _serializerOptions =
             new()
             {
-                Converters =
-                {
-                    new JsonStringEnumConverter()
-                },
-                PropertyNameCaseInsensitive = true
+                Converters = { new JsonStringEnumConverter() },
+                PropertyNameCaseInsensitive = true,
             };
 
         public RobotTests(TestWebApplicationFactory<Program> factory)
         {
-            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
-            {
-                AllowAutoRedirect = false,
-                BaseAddress = new Uri("https://localhost:8000")
-            });
+            _client = factory.CreateClient(
+                new WebApplicationFactoryClientOptions
+                {
+                    AllowAutoRedirect = false,
+                    BaseAddress = new Uri("https://localhost:8000"),
+                }
+            );
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 TestAuthHandler.AuthenticationScheme
             );
-            object? context = factory.Services.GetService(typeof(FlotillaDbContext)) as FlotillaDbContext ?? throw new ArgumentNullException(nameof(factory));
+            object? context =
+                factory.Services.GetService(typeof(FlotillaDbContext)) as FlotillaDbContext
+                ?? throw new ArgumentNullException(nameof(factory));
             _databaseUtilities = new DatabaseUtilities((FlotillaDbContext)context);
         }
 
@@ -50,7 +52,9 @@ namespace Api.Test.Client
         {
             string url = "/robots";
             var response = await _client.GetAsync(url);
-            var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(_serializerOptions);
+            var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(
+                _serializerOptions
+            );
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(robots);
         }
@@ -72,21 +76,26 @@ namespace Api.Test.Client
 
             string url = "/robots";
             var response = await _client.GetAsync(url);
-            var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(_serializerOptions);
+            var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(
+                _serializerOptions
+            );
             Assert.NotNull(robots);
 
             string robotId = robots[0].Id;
 
             var robotResponse = await _client.GetAsync("/robots/" + robotId);
-            var robot = await robotResponse.Content.ReadFromJsonAsync<RobotResponse>(_serializerOptions);
+            var robot = await robotResponse.Content.ReadFromJsonAsync<RobotResponse>(
+                _serializerOptions
+            );
             Assert.Equal(HttpStatusCode.OK, robotResponse.StatusCode);
             Assert.NotNull(robot);
             Assert.Equal(robot.Id, robotId);
         }
 
-
 #pragma warning disable xUnit1004
-        [Fact(Skip = "Runs inconcistently as it is tied to the database interactions of other tests")]
+        [Fact(
+            Skip = "Runs inconcistently as it is tied to the database interactions of other tests"
+        )]
 #pragma warning restore xUnit1004
         public async Task RobotIsNotCreatedWithAreaNotInInstallation()
         {
@@ -94,8 +103,13 @@ namespace Api.Test.Client
             var installation = await _databaseUtilities.ReadOrNewInstallation();
 
             var wrongInstallation = await _databaseUtilities.NewInstallation("wrongInstallation");
-            var wrongPlant = await _databaseUtilities.ReadOrNewPlant(wrongInstallation.InstallationCode);
-            var wrongDeck = await _databaseUtilities.ReadOrNewDeck(wrongInstallation.InstallationCode, wrongPlant.PlantCode);
+            var wrongPlant = await _databaseUtilities.ReadOrNewPlant(
+                wrongInstallation.InstallationCode
+            );
+            var wrongDeck = await _databaseUtilities.ReadOrNewDeck(
+                wrongInstallation.InstallationCode,
+                wrongPlant.PlantCode
+            );
 
             // Arrange - Create robot
             var robotQuery = new CreateRobotQuery
@@ -124,7 +138,10 @@ namespace Api.Test.Client
             }
             catch (DbUpdateException ex)
             {
-                Assert.True(ex.Message == $"Could not create new robot in database as inspection area '{wrongDeck.Name}' does not exist in installation {installation.InstallationCode}");
+                Assert.True(
+                    ex.Message
+                        == $"Could not create new robot in database as inspection area '{wrongDeck.Name}' does not exist in installation {installation.InstallationCode}"
+                );
             }
         }
     }

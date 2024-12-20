@@ -15,7 +15,7 @@ namespace Api.Test.Mocks
                 new IsarStartMissionResponse
                 {
                     MissionId = System.Guid.NewGuid().ToString(),
-                    Tasks = []
+                    Tasks = [],
                 }
             );
             return isarServiceMissionResponse;
@@ -43,11 +43,7 @@ namespace Api.Test.Mocks
         {
             await Task.Run(() => Thread.Sleep(1));
             var isarServiceMissionResponse = new IsarMission(
-                new IsarStartMissionResponse
-                {
-                    MissionId = "testStartMoveArm",
-                    Tasks = []
-                }
+                new IsarStartMissionResponse { MissionId = "testStartMoveArm", Tasks = [] }
             );
             return isarServiceMissionResponse;
         }
@@ -60,7 +56,7 @@ namespace Api.Test.Mocks
                 Url = "mockURL",
                 Token = "mockToken",
                 RobotId = robot.Id,
-                MediaConnectionType = MediaConnectionType.LiveKit
+                MediaConnectionType = MediaConnectionType.LiveKit,
             };
         }
     }

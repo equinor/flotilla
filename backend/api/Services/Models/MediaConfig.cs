@@ -8,5 +8,8 @@
         public MediaConnectionType MediaConnectionType { get; set; }
     }
 
-    public enum MediaConnectionType { LiveKit };
+    public enum MediaConnectionType
+    {
+        LiveKit,
+    };
 }

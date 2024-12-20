@@ -9,10 +9,10 @@ namespace Api.Controllers
     [ApiController]
     [Route("plants")]
     public class PlantController(
-            ILogger<PlantController> logger,
-            IPlantService plantService,
-            IInstallationService installationService
-        ) : ControllerBase
+        ILogger<PlantController> logger,
+        IPlantService plantService,
+        IInstallationService installationService
+    ) : ControllerBase
     {
         /// <summary>
         /// List all plants in the Flotilla database
@@ -66,7 +66,6 @@ namespace Api.Controllers
                 logger.LogError(e, "Error during GET of plant from database");
                 throw;
             }
-
         }
 
         /// <summary>
@@ -87,12 +86,21 @@ namespace Api.Controllers
             logger.LogInformation("Creating new plant");
             try
             {
-                var existingInstallation = await installationService.ReadByInstallationCode(plant.InstallationCode, readOnly: true);
+                var existingInstallation = await installationService.ReadByInstallationCode(
+                    plant.InstallationCode,
+                    readOnly: true
+                );
                 if (existingInstallation == null)
                 {
-                    return NotFound($"Installation with installation code {plant.InstallationCode} not found");
+                    return NotFound(
+                        $"Installation with installation code {plant.InstallationCode} not found"
+                    );
                 }
-                var existingPlant = await plantService.ReadByInstallationAndPlantCode(existingInstallation, plant.PlantCode, readOnly: true);
+                var existingPlant = await plantService.ReadByInstallationAndPlantCode(
+                    existingInstallation,
+                    plant.PlantCode,
+                    readOnly: true
+                );
                 if (existingPlant != null)
                 {
                     logger.LogInformation("A plant for given name and plant already exists");
@@ -104,11 +112,7 @@ namespace Api.Controllers
                     "Succesfully created new plant with id '{plantId}'",
                     newPlant.Id
                 );
-                return CreatedAtAction(
-                    nameof(GetPlantById),
-                    new { id = newPlant.Id },
-                    newPlant
-                );
+                return CreatedAtAction(nameof(GetPlantById), new { id = newPlant.Id }, newPlant);
             }
             catch (Exception e)
             {
