@@ -11,12 +11,12 @@ interface ConfirmScheduleDialogProps {
     scheduleMissions: () => void
     closeDialog: () => void
     robotId: string
-    missionDeckNames: string[]
+    missionInspectionAreaNames: string[]
 }
 
 export const ScheduleMissionWithConfirmDialogs = ({
     robotId,
-    missionDeckNames,
+    missionInspectionAreaNames,
     scheduleMissions,
     closeDialog,
 }: ConfirmScheduleDialogProps) => {
@@ -76,7 +76,7 @@ export const ScheduleMissionWithConfirmDialogs = ({
                 scheduleMissions={scheduleMissions}
                 closeDialog={closeDialog}
                 robotId={robot!.id}
-                missionDeckNames={missionDeckNames}
+                missionInspectionAreaNames={missionInspectionAreaNames}
             />
         )
     }

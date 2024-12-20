@@ -7,11 +7,11 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { MapMetadata } from 'models/MapMetadata'
 import { Pose } from 'models/Pose'
 import { MapCompass } from 'utils/MapCompass'
-import { Deck } from 'models/Deck'
+import { InspectionArea } from 'models/InspectionArea'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 
-interface DeckProps {
-    deck: Deck
+interface InspectionAreaProps {
+    inspectionArea: InspectionArea
     markedRobotPosition: Pose
 }
 
@@ -42,7 +42,7 @@ const StyledCaption = styled.div`
     gap: 10px;
 `
 
-export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
+export const InspectionAreaMapView = ({ inspectionArea, markedRobotPosition }: InspectionAreaProps) => {
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
@@ -78,7 +78,7 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
             if (!imageObjectURL) return
 
             getMeta(imageObjectURL as string).then((img) => {
-                const mapCanvas = document.getElementById('deckMapCanvas') as HTMLCanvasElement
+                const mapCanvas = document.getElementById('inspectionAreaMapCanvas') as HTMLCanvasElement
                 if (!mapCanvas) return
                 mapCanvas.width = img.width
                 mapCanvas.height = img.height
@@ -94,10 +94,10 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
         }
 
         setIsLoading(true)
-        BackendAPICaller.getDeckMapMetadata(deck.id)
+        BackendAPICaller.getInspectionAreaMapMetadata(inspectionArea.id)
             .then((mapMetadata) => {
                 setMapMetadata(mapMetadata)
-                BackendAPICaller.getMap(deck.installationCode, mapMetadata.mapName)
+                BackendAPICaller.getMap(inspectionArea.installationCode, mapMetadata.mapName)
                     .then(processImageURL)
                     .catch(() => {
                         setIsLoading(false)
@@ -134,7 +134,7 @@ export const DeckMapView = ({ deck, markedRobotPosition }: DeckProps) => {
                 <StyledMapLimits>
                     <StyledCaption>
                         <StyledMapCompass>
-                            <StyledMap id="deckMapCanvas" />
+                            <StyledMap id="inspectionAreaMapCanvas" />
                             {mapMetadata && <MapCompass />}
                         </StyledMapCompass>
                         <Typography italic variant="body_short">

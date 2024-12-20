@@ -116,13 +116,13 @@ namespace Api.Test
         }
 
         [Fact]
-        public async Task ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTest()
+        public async Task ExplicitlyAuthorisedPostInstallationPlantInspectionAreaAndAreaTest()
         {
             // Arrange
             var accessRoleQuery = new CreateAccessRoleQuery
             {
-                InstallationCode = "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation",
-                RoleName = "User.ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation",
+                InstallationCode = "ExplicitlyAuthorisedPostInstallationPlantInspectionAreaAndAreaTestInstallation",
+                RoleName = "User.ExplicitlyAuthorisedPostInstallationPlantInspectionAreaAndAreaTestInstallation",
                 AccessLevel = RoleAccessLevel.USER
             };
             var accessRoleContent = new StringContent(
@@ -148,14 +148,14 @@ namespace Api.Test
                 }
             };
 
-            string testInstallation = "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation";
+            string testInstallation = "ExplicitlyAuthorisedPostInstallationPlantInspectionAreaAndAreaTestInstallation";
             var installationQuery = new CreateInstallationQuery
             {
                 InstallationCode = testInstallation,
                 Name = testInstallation
             };
 
-            string testPlant = "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestPlant";
+            string testPlant = "ExplicitlyAuthorisedPostInstallationPlantInspectionAreaAndAreaTestPlant";
             var plantQuery = new CreatePlantQuery
             {
                 InstallationCode = testInstallation,
@@ -163,20 +163,20 @@ namespace Api.Test
                 Name = testPlant
             };
 
-            string testDeck = "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestDeck";
-            var deckQuery = new CreateDeckQuery
+            string testInspectionArea = "ExplicitlyAuthorisedPostInstallationPlantInspectionAreaAndAreaTestInspectionArea";
+            var inspectionAreaQuery = new CreateInspectionAreaQuery
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testDeck
+                Name = testInspectionArea
             };
 
-            string testArea = "ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestArea";
+            string testArea = "ExplicitlyAuthorisedPostInstallationPlantInspectionAreaAndAreaTestArea";
             var areaQuery = new CreateAreaQuery
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                DeckName = testDeck,
+                InspectionAreaName = testInspectionArea,
                 AreaName = testArea,
                 DefaultLocalizationPose = testPose
             };
@@ -193,8 +193,8 @@ namespace Api.Test
                 "application/json"
             );
 
-            var deckContent = new StringContent(
-                JsonSerializer.Serialize(deckQuery),
+            var inspectionAreaContent = new StringContent(
+                JsonSerializer.Serialize(inspectionAreaQuery),
                 null,
                 "application/json"
             );
@@ -212,19 +212,19 @@ namespace Api.Test
             var accessRoleResponse = await _client.PostAsync(accessRoleUrl, accessRoleContent);
             string plantUrl = "/plants";
             var plantResponse = await _client.PostAsync(plantUrl, plantContent);
-            string deckUrl = "/decks";
-            var deckResponse = await _client.PostAsync(deckUrl, deckContent);
+            string inspectionAreaUrl = "/inspectionAreas";
+            var inspectionAreaResponse = await _client.PostAsync(inspectionAreaUrl, inspectionAreaContent);
             string areaUrl = "/areas";
             var areaResponse = await _client.PostAsync(areaUrl, areaContent);
 
             // Only restrict ourselves to non-admin role after doing POSTs
-            _httpContextAccessor.SetHttpContextRoles(["User.ExplicitlyAuthorisedPostInstallationPlantDeckAndAreaTestInstallation"]);
+            _httpContextAccessor.SetHttpContextRoles(["User.ExplicitlyAuthorisedPostInstallationPlantInspectionAreaAndAreaTestInstallation"]);
 
             // Assert
             Assert.True(accessRoleResponse.IsSuccessStatusCode);
             Assert.True(installationResponse.IsSuccessStatusCode);
             Assert.True(plantResponse.IsSuccessStatusCode);
-            Assert.True(deckResponse.IsSuccessStatusCode);
+            Assert.True(inspectionAreaResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
             Assert.NotNull(area);
@@ -241,7 +241,7 @@ namespace Api.Test
         }
 
         [Fact]
-        public async Task AdminAuthorisedPostInstallationPlantDeckAndAreaTest()
+        public async Task AdminAuthorisedPostInstallationPlantInspectionAreaAndAreaTest()
         {
             // Arrange
             var testPose = new Pose
@@ -261,14 +261,14 @@ namespace Api.Test
                 }
             };
 
-            string testInstallation = "AdminAuthorisedPostInstallationPlantDeckAndAreaTestInstallation";
+            string testInstallation = "AdminAuthorisedPostInstallationPlantInspectionAreaAndAreaTestInstallation";
             var installationQuery = new CreateInstallationQuery
             {
                 InstallationCode = testInstallation,
                 Name = testInstallation
             };
 
-            string testPlant = "AdminAuthorisedPostInstallationPlantDeckAndAreaTestPlant";
+            string testPlant = "AdminAuthorisedPostInstallationPlantInspectionAreaAndAreaTestPlant";
             var plantQuery = new CreatePlantQuery
             {
                 InstallationCode = testInstallation,
@@ -276,20 +276,20 @@ namespace Api.Test
                 Name = testPlant
             };
 
-            string testDeck = "AdminAuthorisedPostInstallationPlantDeckAndAreaTestDeck";
-            var deckQuery = new CreateDeckQuery
+            string testInspectionArea = "AdminAuthorisedPostInstallationPlantInspectionAreaAndAreaTestInspectionArea";
+            var inspectionAreaQuery = new CreateInspectionAreaQuery
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                Name = testDeck
+                Name = testInspectionArea
             };
 
-            string testArea = "AdminAuthorisedPostInstallationPlantDeckAndAreaTestArea";
+            string testArea = "AdminAuthorisedPostInstallationPlantInspectionAreaAndAreaTestArea";
             var areaQuery = new CreateAreaQuery
             {
                 InstallationCode = testInstallation,
                 PlantCode = testPlant,
-                DeckName = testDeck,
+                InspectionAreaName = testInspectionArea,
                 AreaName = testArea,
                 DefaultLocalizationPose = testPose
             };
@@ -306,8 +306,8 @@ namespace Api.Test
                 "application/json"
             );
 
-            var deckContent = new StringContent(
-                JsonSerializer.Serialize(deckQuery),
+            var inspectionAreaContent = new StringContent(
+                JsonSerializer.Serialize(inspectionAreaQuery),
                 null,
                 "application/json"
             );
@@ -323,15 +323,15 @@ namespace Api.Test
             var installationResponse = await _client.PostAsync(installationUrl, installationContent);
             string plantUrl = "/plants";
             var plantResponse = await _client.PostAsync(plantUrl, plantContent);
-            string deckUrl = "/decks";
-            var deckResponse = await _client.PostAsync(deckUrl, deckContent);
+            string inspectionAreaUrl = "/inspectionAreas";
+            var inspectionAreaResponse = await _client.PostAsync(inspectionAreaUrl, inspectionAreaContent);
             string areaUrl = "/areas";
             var areaResponse = await _client.PostAsync(areaUrl, areaContent);
 
             // Assert
             Assert.True(installationResponse.IsSuccessStatusCode);
             Assert.True(plantResponse.IsSuccessStatusCode);
-            Assert.True(deckResponse.IsSuccessStatusCode);
+            Assert.True(inspectionAreaResponse.IsSuccessStatusCode);
             Assert.True(areaResponse.IsSuccessStatusCode);
             var area = await areaResponse.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
             Assert.NotNull(area);

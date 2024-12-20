@@ -95,7 +95,7 @@ namespace Api.Test.Client
 
             var wrongInstallation = await _databaseUtilities.NewInstallation("wrongInstallation");
             var wrongPlant = await _databaseUtilities.ReadOrNewPlant(wrongInstallation.InstallationCode);
-            var wrongDeck = await _databaseUtilities.ReadOrNewDeck(wrongInstallation.InstallationCode, wrongPlant.PlantCode);
+            var wrongInspectionArea = await _databaseUtilities.ReadOrNewInspectionArea(wrongInstallation.InstallationCode, wrongPlant.PlantCode);
 
             // Arrange - Create robot
             var robotQuery = new CreateRobotQuery
@@ -108,7 +108,7 @@ namespace Api.Test.Client
                 Host = "localhost",
                 Port = 3000,
                 CurrentInstallationCode = installation.InstallationCode,
-                CurrentInspectionAreaName = wrongDeck.Name,
+                CurrentInspectionAreaName = wrongInspectionArea.Name,
             };
 
             string robotUrl = "/robots";
@@ -124,7 +124,7 @@ namespace Api.Test.Client
             }
             catch (DbUpdateException ex)
             {
-                Assert.True(ex.Message == $"Could not create new robot in database as inspection area '{wrongDeck.Name}' does not exist in installation {installation.InstallationCode}");
+                Assert.True(ex.Message == $"Could not create new robot in database as inspection area '{wrongInspectionArea.Name}' does not exist in installation {installation.InstallationCode}");
             }
         }
     }

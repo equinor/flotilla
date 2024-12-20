@@ -31,7 +31,7 @@
     {
     }
 
-    public class DeckNotFoundException(string message) : Exception(message)
+    public class InspectionAreaNotFoundException(string message) : Exception(message)
     {
     }
 
@@ -79,7 +79,7 @@
     {
     }
 
-    public class DeckExistsException(string message) : Exception(message)
+    public class InspectionAreaExistsException(string message) : Exception(message)
     {
     }
 

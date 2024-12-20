@@ -81,7 +81,7 @@ builder.Services.AddScoped<IBlobService, BlobService>();
 
 builder.Services.AddScoped<IInstallationService, InstallationService>();
 builder.Services.AddScoped<IPlantService, PlantService>();
-builder.Services.AddScoped<IDeckService, DeckService>();
+builder.Services.AddScoped<IInspectionAreaService, InspectionAreaService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 
 builder.Services.AddScoped<IErrorHandlingService, ErrorHandlingService>();

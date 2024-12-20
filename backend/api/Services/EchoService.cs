@@ -116,11 +116,11 @@ namespace Api.Services
                 .Select(t => stidService.GetTagArea(t.TagId, echoMission.InstallationCode).Result)
                 .ToList();
 
-            var missionDeckNames = missionAreas.Where(a => a != null).Select(a => a!.Deck.Name).Distinct().ToList();
-            if (missionDeckNames.Count > 1)
+            var missionInspectionAreaNames = missionAreas.Where(a => a != null).Select(a => a!.InspectionArea.Name).Distinct().ToList();
+            if (missionInspectionAreaNames.Count > 1)
             {
-                string joinedMissionDeckNames = string.Join(", ", [.. missionDeckNames]);
-                logger.LogWarning($"Mission {echoMission.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}.");
+                string joinedMissionInspectionAreaNames = string.Join(", ", [.. missionInspectionAreaNames]);
+                logger.LogWarning($"Mission {echoMission.Name} has tags on more than one inspection area. The inspection areas are: {joinedMissionInspectionAreaNames}.");
             }
 
             var sortedAreas = missionAreas.GroupBy(i => i).OrderByDescending(grp => grp.Count()).Select(grp => grp.Key);
@@ -144,7 +144,7 @@ namespace Api.Services
                 Source = source,
                 Name = echoMission.Name,
                 InstallationCode = echoMission.InstallationCode,
-                InspectionArea = area.Deck
+                InspectionArea = area.InspectionArea
             };
             return missionDefinition;
         }

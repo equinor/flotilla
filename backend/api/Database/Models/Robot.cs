@@ -20,7 +20,7 @@ namespace Api.Database.Models
             Pose = new Pose();
         }
 
-        public Robot(CreateRobotQuery createQuery, Installation installation, RobotModel model, Deck? inspectionArea = null)
+        public Robot(CreateRobotQuery createQuery, Installation installation, RobotModel model, InspectionArea? inspectionArea = null)
         {
             var documentation = new List<DocumentInfo>();
             foreach (var documentQuery in createQuery.Documentation)
@@ -70,7 +70,7 @@ namespace Api.Database.Models
         [Required]
         public Installation CurrentInstallation { get; set; }
 
-        public Deck? CurrentInspectionArea { get; set; }
+        public InspectionArea? CurrentInspectionArea { get; set; }
 
         public float BatteryLevel { get; set; }
 

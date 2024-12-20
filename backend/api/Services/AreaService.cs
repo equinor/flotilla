@@ -14,7 +14,7 @@ namespace Api.Services
 
         public Task<Area?> ReadById(string id, bool readOnly = true);
 
-        public Task<IEnumerable<Area?>> ReadByDeckId(string deckId, bool readOnly = true);
+        public Task<IEnumerable<Area?>> ReadByInspectionAreaId(string inspectionAreaId, bool readOnly = true);
 
         public Task<Area?> ReadByInstallationAndName(string installationCode, string areaName, bool readOnly = true);
 
@@ -38,7 +38,7 @@ namespace Api.Services
         Justification = "Entity framework does not support translating culture info to SQL calls"
     )]
     public class AreaService(
-            FlotillaDbContext context, IInstallationService installationService, IPlantService plantService, IDeckService deckService,
+            FlotillaDbContext context, IInstallationService installationService, IPlantService plantService, IInspectionAreaService inspectionAreaService,
             IDefaultLocalizationPoseService defaultLocalizationPoseService, IAccessRoleService accessRoleService) : IAreaService
     {
         public async Task<PagedList<Area>> ReadAll(AreaQueryStringParameters parameters, bool readOnly = true)
@@ -61,10 +61,10 @@ namespace Api.Services
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
-        public async Task<IEnumerable<Area?>> ReadByDeckId(string deckId, bool readOnly = true)
+        public async Task<IEnumerable<Area?>> ReadByInspectionAreaId(string inspectionAreaId, bool readOnly = true)
         {
-            if (deckId == null) { return []; }
-            return await GetAreas(readOnly: readOnly).Where(a => a.Deck != null && a.Deck.Id.Equals(deckId)).ToListAsync();
+            if (inspectionAreaId == null) { return []; }
+            return await GetAreas(readOnly: readOnly).Where(a => a.InspectionArea != null && a.InspectionArea.Id.Equals(inspectionAreaId)).ToListAsync();
         }
 
         public async Task<Area?> ReadByInstallationAndName(string installationCode, string areaName, bool readOnly = true)
@@ -91,11 +91,11 @@ namespace Api.Services
             var plant = await plantService.ReadByInstallationAndPlantCode(installation, newAreaQuery.PlantCode, readOnly: true) ??
                         throw new PlantNotFoundException($"No plant with name {newAreaQuery.PlantCode} could be found");
 
-            var deck = await deckService.ReadByInstallationAndPlantAndName(installation, plant, newAreaQuery.DeckName, readOnly: true) ??
-                       throw new DeckNotFoundException($"No deck with name {newAreaQuery.DeckName} could be found");
+            var inspectionArea = await inspectionAreaService.ReadByInstallationAndPlantAndName(installation, plant, newAreaQuery.InspectionAreaName, readOnly: true) ??
+                       throw new InspectionAreaNotFoundException($"No inspection area with name {newAreaQuery.InspectionAreaName} could be found");
 
-            var existingArea = await ReadByInstallationAndPlantAndDeckAndName(
-                installation, plant, deck, newAreaQuery.AreaName, readOnly: true);
+            var existingArea = await ReadByInstallationAndPlantAndInspectionAreaAndName(
+                installation, plant, inspectionArea, newAreaQuery.AreaName, readOnly: true);
             if (existingArea != null)
             {
                 throw new AreaExistsException($"Area with name {newAreaQuery.AreaName} already exists");
@@ -112,14 +112,14 @@ namespace Api.Services
                 Name = newAreaQuery.AreaName,
                 DefaultLocalizationPose = defaultLocalizationPose,
                 MapMetadata = new MapMetadata(),
-                Deck = deck!,
+                InspectionArea = inspectionArea!,
                 Plant = plant!,
                 Installation = installation!
             };
 
             context.Entry(newArea.Installation).State = EntityState.Unchanged;
             context.Entry(newArea.Plant).State = EntityState.Unchanged;
-            context.Entry(newArea.Deck).State = EntityState.Unchanged;
+            context.Entry(newArea.InspectionArea).State = EntityState.Unchanged;
 
             if (newArea.DefaultLocalizationPose is not null) { context.Entry(newArea.DefaultLocalizationPose).State = EntityState.Modified; }
 
@@ -166,13 +166,13 @@ namespace Api.Services
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Areas
                 .Include(area => area.DefaultLocalizationPose)
-                .Include(area => area.Deck)
-                .ThenInclude(deck => deck != null ? deck.DefaultLocalizationPose : null)
-                .Include(area => area.Deck)
-                .ThenInclude(deck => deck.Plant)
+                .Include(area => area.InspectionArea)
+                .ThenInclude(inspectionArea => inspectionArea != null ? inspectionArea.DefaultLocalizationPose : null)
+                .Include(area => area.InspectionArea)
+                .ThenInclude(inspectionArea => inspectionArea.Plant)
                 .ThenInclude(plant => plant.Installation)
-                .Include(area => area.Deck)
-                .ThenInclude(deck => deck.Installation)
+                .Include(area => area.InspectionArea)
+                .ThenInclude(inspectionArea => inspectionArea.Installation)
                 .Include(area => area.Plant)
                 .ThenInclude(plant => plant.Installation)
                 .Include(area => area.Installation)
@@ -186,8 +186,8 @@ namespace Api.Services
 
             // Include related entities using the Include method
             var query = context.Areas
-             .Include(a => a.Deck)
-                 .ThenInclude(deck => deck != null ? deck.Plant : null)
+             .Include(a => a.InspectionArea)
+                 .ThenInclude(inspectionArea => inspectionArea != null ? inspectionArea.Plant : null)
                  .ThenInclude(plant => plant != null ? plant.Installation : null)
              .Include(a => a.Plant)
                  .ThenInclude(plant => plant != null ? plant.Installation : null)
@@ -197,10 +197,10 @@ namespace Api.Services
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
-        public async Task<Area?> ReadByInstallationAndPlantAndDeckAndName(Installation installation, Plant plant, Deck deck, string areaName, bool readOnly = true)
+        public async Task<Area?> ReadByInstallationAndPlantAndInspectionAreaAndName(Installation installation, Plant plant, InspectionArea inspectionArea, string areaName, bool readOnly = true)
         {
             return await GetAreas(readOnly: readOnly).Where(a =>
-                    a.Deck != null && a.Deck.Id.Equals(deck.Id) &&
+                    a.InspectionArea != null && a.InspectionArea.Id.Equals(inspectionArea.Id) &&
                     a.Plant.Id.Equals(plant.Id) &&
                     a.Installation.Id.Equals(installation.Id) &&
                     a.Name.ToLower().Equals(areaName.ToLower())
@@ -213,21 +213,21 @@ namespace Api.Services
         {
             Expression<Func<Area, bool>> installationFilter = string.IsNullOrEmpty(parameters.InstallationCode)
                 ? area => true
-                : area => area.Deck != null &&
-                    area.Deck.Plant != null &&
-                    area.Deck.Plant.Installation != null &&
-                    area.Deck.Plant.Installation.InstallationCode.ToLower().Equals(parameters.InstallationCode.ToLower().Trim());
+                : area => area.InspectionArea != null &&
+                    area.InspectionArea.Plant != null &&
+                    area.InspectionArea.Plant.Installation != null &&
+                    area.InspectionArea.Plant.Installation.InstallationCode.ToLower().Equals(parameters.InstallationCode.ToLower().Trim());
 
-            Expression<Func<Area, bool>> deckFilter = area => string.IsNullOrEmpty(parameters.Deck) ||
-                (area.Deck != null &&
-                    area.Deck.Name != null &&
-                    area.Deck.Name.ToLower().Equals(parameters.Deck.ToLower().Trim()));
+            Expression<Func<Area, bool>> inspectionAreaFilter = area => string.IsNullOrEmpty(parameters.InspectionArea) ||
+                (area.InspectionArea != null &&
+                    area.InspectionArea.Name != null &&
+                    area.InspectionArea.Name.ToLower().Equals(parameters.InspectionArea.ToLower().Trim()));
 
             var area = Expression.Parameter(typeof(Area));
 
             Expression body = Expression.AndAlso(
                 Expression.Invoke(installationFilter, area),
-                Expression.Invoke(deckFilter, area)
+                Expression.Invoke(inspectionAreaFilter, area)
             );
 
             return Expression.Lambda<Func<Area, bool>>(body, area);
@@ -237,7 +237,7 @@ namespace Api.Services
         {
             if (area.Installation != null) installationService.DetachTracking(area.Installation);
             if (area.Plant != null) plantService.DetachTracking(area.Plant);
-            if (area.Deck != null) deckService.DetachTracking(area.Deck);
+            if (area.InspectionArea != null) inspectionAreaService.DetachTracking(area.InspectionArea);
             if (area.DefaultLocalizationPose != null) defaultLocalizationPoseService.DetachTracking(area.DefaultLocalizationPose);
             context.Entry(area).State = EntityState.Detached;
         }

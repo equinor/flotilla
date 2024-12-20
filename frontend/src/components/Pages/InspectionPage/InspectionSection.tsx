@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Deck } from 'models/Deck'
+import { InspectionArea } from 'models/InspectionArea'
 import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { MissionDefinition } from 'models/MissionDefinition'
 import { ScheduleMissionDialog } from './ScheduleMissionDialogs'
 import { getInspectionDeadline } from 'utils/StringFormatting'
 import { InspectionTable } from './InspectionTable'
 import { StyledDict, compareInspections } from './InspectionUtilities'
-import { DeckCards } from './DeckCards'
+import { InspectionAreaCards } from './InspectionAreaCards'
 import { Area } from 'models/Area'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
@@ -16,41 +16,41 @@ export interface Inspection {
     deadline: Date | undefined
 }
 
-export interface DeckInspectionTuple {
+export interface InspectionAreaInspectionTuple {
     areas: Area[]
     inspections: Inspection[]
-    deck: Deck
+    inspectionArea: InspectionArea
 }
 
-interface DeckAreaTuple {
+interface InspectionAreaAreaTuple {
     areas: Area[]
-    deck: Deck
+    inspectionArea: InspectionArea
 }
 
 export const InspectionSection = () => {
     const { ongoingMissions, missionQueue } = useMissionsContext()
-    const { installationDecks, installationAreas } = useInstallationContext()
+    const { installationInspectionAreas, installationAreas } = useInstallationContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
     const [isAlreadyScheduled, setIsAlreadyScheduled] = useState<boolean>(false)
-    const [selectedDeck, setSelectedDeck] = useState<Deck>()
+    const [selectedInspectionArea, setSelectedInspectionArea] = useState<InspectionArea>()
     const [scrollOnToggle, setScrollOnToggle] = useState<boolean>(true)
 
-    const decks: DeckAreaTuple[] = installationDecks.map((deck) => {
+    const inspectionAreas: InspectionAreaAreaTuple[] = installationInspectionAreas.map((inspectionArea) => {
         return {
-            areas: installationAreas.filter((a) => a.deckName === deck.deckName),
-            deck: deck,
+            areas: installationAreas.filter((a) => a.inspectionAreaName === inspectionArea.inspectionAreaName),
+            inspectionArea: inspectionArea,
         }
     })
 
-    const deckInspections: DeckInspectionTuple[] =
-        decks?.map(({ areas, deck }) => {
-            const missionDefinitionsInDeck = missionDefinitions.filter(
-                (m) => m.inspectionArea?.deckName === deck.deckName
+    const inspectionAreaInspections: InspectionAreaInspectionTuple[] =
+        inspectionAreas?.map(({ areas, inspectionArea }) => {
+            const missionDefinitionsInInspectionArea = missionDefinitions.filter(
+                (m) => m.inspectionArea?.inspectionAreaName === inspectionArea.inspectionAreaName
             )
             return {
-                inspections: missionDefinitionsInDeck.map((m) => {
+                inspections: missionDefinitionsInInspectionArea.map((m) => {
                     return {
                         missionDefinition: m,
                         deadline: m.lastSuccessfulRun
@@ -59,12 +59,12 @@ export const InspectionSection = () => {
                     }
                 }),
                 areas: areas,
-                deck: deck,
+                inspectionArea: inspectionArea,
             }
         }) ?? []
 
-    const onClickDeck = (clickedDeck: Deck) => {
-        setSelectedDeck(clickedDeck)
+    const onClickInspectionArea = (clickedInspectionArea: InspectionArea) => {
+        setSelectedInspectionArea(clickedInspectionArea)
         setScrollOnToggle(!scrollOnToggle)
     }
 
@@ -91,37 +91,38 @@ export const InspectionSection = () => {
 
     const unscheduledMissions = selectedMissions?.filter((m) => !isOngoing(m) && !isScheduled(m))
 
-    const deck = installationDecks.length === 1 ? installationDecks[0] : selectedDeck
+    const inspectionArea =
+        installationInspectionAreas.length === 1 ? installationInspectionAreas[0] : selectedInspectionArea
     const inspections =
-        deckInspections.length === 1
-            ? deckInspections[0].inspections
-            : deckInspections.find((d) => d.deck === deck)?.inspections
+        inspectionAreaInspections.length === 1
+            ? inspectionAreaInspections[0].inspections
+            : inspectionAreaInspections.find((d) => d.inspectionArea === inspectionArea)?.inspections
 
-    const DeckSelection = () => (
-        <StyledDict.DeckOverview>
-            <DeckCards
-                deckMissions={deckInspections}
-                onClickDeck={onClickDeck}
-                selectedDeck={selectedDeck}
+    const InspectionAreaSelection = () => (
+        <StyledDict.InspectionAreaOverview>
+            <InspectionAreaCards
+                inspectionAreaMissions={inspectionAreaInspections}
+                onClickInspectionArea={onClickInspectionArea}
+                selectedInspectionArea={selectedInspectionArea}
                 handleScheduleAll={handleScheduleAll}
             />
-        </StyledDict.DeckOverview>
+        </StyledDict.InspectionAreaOverview>
     )
 
     return (
         <>
-            <StyledDict.DeckOverview>
-                {installationDecks.length !== 1 && <DeckSelection />}
-                {deck && inspections && (
+            <StyledDict.InspectionAreaOverview>
+                {installationInspectionAreas.length !== 1 && <InspectionAreaSelection />}
+                {inspectionArea && inspections && (
                     <InspectionTable
-                        deck={deck}
+                        inspectionArea={inspectionArea}
                         scrollOnToggle={scrollOnToggle}
                         openDialog={() => setIsDialogOpen(true)}
                         setSelectedMissions={setSelectedMissions}
                         inspections={inspections}
                     />
                 )}
-            </StyledDict.DeckOverview>
+            </StyledDict.InspectionAreaOverview>
             {isDialogOpen && (
                 <ScheduleMissionDialog
                     selectedMissions={selectedMissions!}

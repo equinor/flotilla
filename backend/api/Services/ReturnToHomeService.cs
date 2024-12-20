@@ -23,7 +23,7 @@ namespace Api.Services
 
             MissionRun missionRun;
             try { missionRun = await ScheduleReturnToHomeMissionRun(robotId); }
-            catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or DeckNotFoundException or PoseNotFoundException or UnsupportedRobotCapabilityException or MissionRunNotFoundException)
+            catch (Exception ex) when (ex is RobotNotFoundException or AreaNotFoundException or InspectionAreaNotFoundException or PoseNotFoundException or UnsupportedRobotCapabilityException or MissionRunNotFoundException)
             {
                 // TODO: if we make ISAR aware of return to home missions, we can avoid scheduling them when the robot does not need them
                 throw new ReturnToHomeMissionFailedToScheduleException(ex.Message);
@@ -47,7 +47,7 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
             Pose? return_to_home_pose;
-            Deck? currentInspectionArea;
+            InspectionArea? currentInspectionArea;
             if (robot.RobotCapabilities is not null && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_return_to_home))
             {
                 var previousMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robot.Id, readOnly: true);
@@ -64,7 +64,7 @@ namespace Api.Services
             {
                 string errorMessage = $"Robot with ID {robotId} could return home as it did not have an inspection area";
                 logger.LogError("{Message}", errorMessage);
-                throw new DeckNotFoundException(errorMessage);
+                throw new InspectionAreaNotFoundException(errorMessage);
             }
 
             var returnToHomeMissionRun = new MissionRun
@@ -84,7 +84,7 @@ namespace Api.Services
 
             var missionRun = await missionRunService.Create(returnToHomeMissionRun, false);
             logger.LogInformation(
-                "Scheduled a mission for the robot {RobotName} to return to home location on deck {DeckName}",
+                "Scheduled a mission for the robot {RobotName} to return to home location on inspection area {InspectionAreaName}",
                 robot.Name, currentInspectionArea?.Name);
             return missionRun;
         }

@@ -84,10 +84,10 @@ namespace Api.Services
             {
                 await robotService.UpdateCurrentInspectionArea(robot.Id, missionRun.InspectionArea.Id);
             }
-            else if (!await localizationService.RobotIsOnSameDeckAsMission(robot.Id, missionRun.InspectionArea!.Id))
+            else if (!await localizationService.RobotIsOnSameInspectionAreaAsMission(robot.Id, missionRun.InspectionArea!.Id))
             {
-                logger.LogError("Robot {RobotId} is not on the same deck as the mission run {MissionRunId}. Aborting all mission runs", robot.Id, missionRun.Id);
-                try { await AbortAllScheduledMissions(robot.Id, "Aborted: Robot was at different deck"); }
+                logger.LogError("Robot {RobotId} is not on the same inspection area as the mission run {MissionRunId}. Aborting all mission runs", robot.Id, missionRun.Id);
+                try { await AbortAllScheduledMissions(robot.Id, "Aborted: Robot was at different inspection area"); }
                 catch (RobotNotFoundException) { logger.LogError("Failed to abort scheduled missions for robot {RobotId}", robot.Id); }
 
                 try { await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(robot.Id); }
@@ -271,7 +271,7 @@ namespace Api.Services
             {
                 string errorMessage = $"Robot with ID {robotId} could return home as it did not have an inspection area";
                 logger.LogError("{Message}", errorMessage);
-                throw new DeckNotFoundException(errorMessage);
+                throw new InspectionAreaNotFoundException(errorMessage);
             }
 
             // Cloning to avoid tracking same object

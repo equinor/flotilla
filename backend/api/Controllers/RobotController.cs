@@ -16,7 +16,7 @@ namespace Api.Controllers
             IIsarService isarService,
             IMissionSchedulingService missionSchedulingService,
             IRobotModelService robotModelService,
-            IDeckService deckService,
+            IInspectionAreaService inspectionAreaService,
             IErrorHandlingService errorHandlingService
         ) : ControllerBase
     {
@@ -225,7 +225,7 @@ namespace Api.Controllers
                         }
                         else
                         {
-                            var inspectionArea = await deckService.ReadById(query.InspectionAreaId, readOnly: true);
+                            var inspectionArea = await inspectionAreaService.ReadById(query.InspectionAreaId, readOnly: true);
                             if (inspectionArea == null) return NotFound($"No inspection area with ID {query.InspectionAreaId} was found");
                             await robotService.UpdateCurrentInspectionArea(id, inspectionArea.Id);
                             robot.CurrentInspectionArea = inspectionArea;

@@ -1,7 +1,7 @@
 import { createContext, FC, useContext, useState, useEffect } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { PlantInfo } from 'models/MissionDefinition'
-import { Deck } from 'models/Deck'
+import { InspectionArea } from 'models/InspectionArea'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
 import { Area } from 'models/Area'
 import { useLanguageContext } from './LanguageContext'
@@ -12,7 +12,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 interface IInstallationContext {
     installationCode: string
     installationName: string
-    installationDecks: Deck[]
+    installationInspectionAreas: InspectionArea[]
     installationAreas: Area[]
     switchInstallation: (selectedName: string) => void
 }
@@ -32,7 +32,7 @@ interface Props {
 const defaultInstallation = {
     installationCode: '',
     installationName: '',
-    installationDecks: [],
+    installationInspectionAreas: [],
     installationAreas: [],
     switchInstallation: (selectedInstallation: string) => {},
 }
@@ -47,7 +47,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
     const [installationName, setInstallationName] = useState<string>(
         window.localStorage.getItem('installationName') || ''
     )
-    const [installationDecks, setInstallationDecks] = useState<Deck[]>([])
+    const [installationInspectionAreas, setInstallationInspectionAreas] = useState<InspectionArea[]>([])
     const [installationAreas, setInstallationAreas] = useState<Area[]>([])
 
     const installationCode = (allPlantsMap.get(installationName) || '').toUpperCase()
@@ -77,11 +77,11 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (installationCode)
-            BackendAPICaller.getDecksByInstallationCode(installationCode)
-                .then((decks: Deck[]) => {
-                    setInstallationDecks(decks)
-                    decks.forEach((deck) =>
-                        BackendAPICaller.getAreasByDeckId(deck.id)
+            BackendAPICaller.getInspectionAreasByInstallationCode(installationCode)
+                .then((inspectionAreas: InspectionArea[]) => {
+                    setInstallationInspectionAreas(inspectionAreas)
+                    inspectionAreas.forEach((inspectionArea) =>
+                        BackendAPICaller.getAreasByInspectionAreaId(inspectionArea.id)
                             .then((areas) =>
                                 setInstallationAreas((oldAreas) => {
                                     let areasCopy = [...oldAreas]
@@ -98,18 +98,20 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                                 setAlert(
                                     AlertType.RequestFail,
                                     <FailedRequestAlertContent
-                                        translatedMessage={TranslateText('Failed to retrieve areas on deck {0}', [
-                                            deck.deckName,
-                                        ])}
+                                        translatedMessage={TranslateText(
+                                            'Failed to retrieve areas on inspectionArea {0}',
+                                            [inspectionArea.inspectionAreaName]
+                                        )}
                                     />,
                                     AlertCategory.ERROR
                                 )
                                 setListAlert(
                                     AlertType.RequestFail,
                                     <FailedRequestAlertListContent
-                                        translatedMessage={TranslateText('Failed to retrieve areas on deck {0}', [
-                                            deck.deckName,
-                                        ])}
+                                        translatedMessage={TranslateText(
+                                            'Failed to retrieve areas on inspectionArea {0}',
+                                            [inspectionArea.inspectionAreaName]
+                                        )}
                                     />,
                                     AlertCategory.ERROR
                                 )
@@ -120,18 +122,20 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                     setAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertContent
-                            translatedMessage={TranslateText('Failed to retrieve decks on installation {0}', [
-                                installationCode,
-                            ])}
+                            translatedMessage={TranslateText(
+                                'Failed to retrieve inspection areas on installation {0}',
+                                [installationCode]
+                            )}
                         />,
                         AlertCategory.ERROR
                     )
                     setListAlert(
                         AlertType.RequestFail,
                         <FailedRequestAlertListContent
-                            translatedMessage={TranslateText('Failed to retrieve decks on installation {0}', [
-                                installationCode,
-                            ])}
+                            translatedMessage={TranslateText(
+                                'Failed to retrieve inspection areas on installation {0}',
+                                [installationCode]
+                            )}
                         />,
                         AlertCategory.ERROR
                     )
@@ -141,38 +145,38 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
 
     useEffect(() => {
         if (connectionReady) {
-            registerEvent(SignalREventLabels.deckCreated, (username: string, message: string) => {
-                const newDeck: Deck = JSON.parse(message)
-                if (newDeck.installationCode !== installationCode) return
-                setInstallationDecks((oldDecks) => {
-                    return [...oldDecks, newDeck]
+            registerEvent(SignalREventLabels.inspectionAreaCreated, (username: string, message: string) => {
+                const newInspectionArea: InspectionArea = JSON.parse(message)
+                if (newInspectionArea.installationCode !== installationCode) return
+                setInstallationInspectionAreas((oldInspectionAreas) => {
+                    return [...oldInspectionAreas, newInspectionArea]
                 })
             })
-            registerEvent(SignalREventLabels.deckUpdated, (username: string, message: string) => {
-                const updatedDeck: Deck = JSON.parse(message)
-                if (updatedDeck.installationCode !== installationCode) return
+            registerEvent(SignalREventLabels.inspectionAreaUpdated, (username: string, message: string) => {
+                const updatedInspectionArea: InspectionArea = JSON.parse(message)
+                if (updatedInspectionArea.installationCode !== installationCode) return
 
-                setInstallationDecks((oldDecks) => {
-                    const deckIndex = oldDecks.findIndex((d) => d.id === updatedDeck.id)
-                    if (deckIndex === -1) return [...oldDecks, updatedDeck]
+                setInstallationInspectionAreas((oldInspectionAreas) => {
+                    const inspectionAreaIndex = oldInspectionAreas.findIndex((d) => d.id === updatedInspectionArea.id)
+                    if (inspectionAreaIndex === -1) return [...oldInspectionAreas, updatedInspectionArea]
                     else {
-                        let oldDecksCopy = [...oldDecks]
-                        oldDecksCopy[deckIndex] = updatedDeck
-                        return oldDecksCopy
+                        let oldInspectionAreasCopy = [...oldInspectionAreas]
+                        oldInspectionAreasCopy[inspectionAreaIndex] = updatedInspectionArea
+                        return oldInspectionAreasCopy
                     }
                 })
             })
-            registerEvent(SignalREventLabels.deckDeleted, (username: string, message: string) => {
-                const deletedDeck: Deck = JSON.parse(message)
-                if (deletedDeck.installationCode !== installationCode) return
-                setInstallationDecks((oldDecks) => {
-                    const deckIndex = oldDecks.findIndex((d) => d.id === deletedDeck.id)
-                    if (deckIndex !== -1) {
-                        let oldDecksCopy = [...oldDecks]
-                        oldDecksCopy.splice(deckIndex, 1)
-                        return oldDecksCopy
+            registerEvent(SignalREventLabels.inspectionAreaDeleted, (username: string, message: string) => {
+                const deletedInspectionArea: InspectionArea = JSON.parse(message)
+                if (deletedInspectionArea.installationCode !== installationCode) return
+                setInstallationInspectionAreas((oldInspectionAreas) => {
+                    const inspectionAreaIndex = oldInspectionAreas.findIndex((d) => d.id === deletedInspectionArea.id)
+                    if (inspectionAreaIndex !== -1) {
+                        let oldInspectionAreasCopy = [...oldInspectionAreas]
+                        oldInspectionAreasCopy.splice(inspectionAreaIndex, 1)
+                        return oldInspectionAreasCopy
                     }
-                    return oldDecks
+                    return oldInspectionAreas
                 })
             })
         }
@@ -186,20 +190,22 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
         window.localStorage.setItem('installationCode', derivedCode)
     }
 
-    const [filteredInstallationDecks, setFilteredInstallationDecks] = useState<Deck[]>([])
+    const [filteredInstallationInspectionAreas, setFilteredInstallationInspectionAreas] = useState<InspectionArea[]>([])
     const [filteredInstallationAreas, setFilteredInstallationAreas] = useState<Area[]>([])
     useEffect(() => {
-        setFilteredInstallationDecks(installationDecks.filter((d) => d.installationCode === installationCode))
+        setFilteredInstallationInspectionAreas(
+            installationInspectionAreas.filter((d) => d.installationCode === installationCode)
+        )
         setFilteredInstallationAreas(installationAreas.filter((a) => a.installationCode === installationCode))
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [installationCode, installationDecks, installationAreas])
+    }, [installationCode, installationInspectionAreas, installationAreas])
 
     return (
         <InstallationContext.Provider
             value={{
                 installationCode,
                 installationName,
-                installationDecks: filteredInstallationDecks,
+                installationInspectionAreas: filteredInstallationInspectionAreas,
                 installationAreas: filteredInstallationAreas,
                 switchInstallation,
             }}

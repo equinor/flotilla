@@ -1,5 +1,5 @@
 import { Button, Checkbox, Dialog, Typography } from '@equinor/eds-core-react'
-import { DeckMapView } from 'utils/DeckMapView'
+import { InspectionAreaMapView } from 'utils/InspectionAreaMapView'
 import { HorizontalContent, StyledDialog, VerticalContent } from './ScheduleMissionStyles'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Robot } from 'models/Robot'
@@ -10,20 +10,22 @@ interface ConfirmLocalizationDialogProps {
     closeDialog: () => void
     scheduleMissions: () => void
     robot: Robot
-    newDeckName: string
+    newInspectionAreaName: string
 }
 
 export const ConfirmLocalizationDialog = ({
     closeDialog,
     scheduleMissions,
     robot,
-    newDeckName,
+    newInspectionAreaName,
 }: ConfirmLocalizationDialogProps) => {
     const { TranslateText } = useLanguageContext()
-    const { installationDecks } = useInstallationContext()
+    const { installationInspectionAreas } = useInstallationContext()
     const [isCheckboxClicked, setIsCheckboxClicked] = useState<boolean>(false)
 
-    const newDeck = installationDecks.find((deck) => deck.deckName === newDeckName)
+    const newInspectionArea = installationInspectionAreas.find(
+        (inspectionArea) => inspectionArea.inspectionAreaName === newInspectionAreaName
+    )
 
     return (
         <StyledDialog open={true} onClose={closeDialog}>
@@ -35,12 +37,15 @@ export const ConfirmLocalizationDialog = ({
                     <Typography>
                         {`${robot.name} (${robot.model.type}) ${TranslateText(
                             'needs to be placed on marked position on'
-                        )} ${newDeckName} `}
+                        )} ${newInspectionAreaName} `}
                         <b>{TranslateText('before')}</b>
                         {` ${TranslateText('clicking confirm')}.`}
                     </Typography>
-                    {newDeck && newDeck.defaultLocalizationPose && (
-                        <DeckMapView deck={newDeck} markedRobotPosition={newDeck.defaultLocalizationPose}></DeckMapView>
+                    {newInspectionArea && newInspectionArea.defaultLocalizationPose && (
+                        <InspectionAreaMapView
+                            inspectionArea={newInspectionArea}
+                            markedRobotPosition={newInspectionArea.defaultLocalizationPose}
+                        ></InspectionAreaMapView>
                     )}
                     <HorizontalContent>
                         <Checkbox
@@ -50,7 +55,7 @@ export const ConfirmLocalizationDialog = ({
                             {`${TranslateText('I confirm that')} ${robot.name} (${robot.model.type}) ${TranslateText(
                                 'has been placed on marked position on'
                             )} `}
-                            <b>{newDeckName}</b>
+                            <b>{newInspectionAreaName}</b>
                         </Typography>
                     </HorizontalContent>
                 </VerticalContent>

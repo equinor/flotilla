@@ -1,8 +1,11 @@
 import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
 import { ConfirmLocalizationDialog } from './ConfirmLocalizationDialog'
-import { ConflictingMissionDecksDialog, ConflictingRobotDeckDialog } from './ConflictingLocalizationDialog'
-import { UnknownDeckDialog } from './UnknownDeckDialog'
+import {
+    ConflictingMissionInspectionAreasDialog,
+    ConflictingRobotInspectionAreaDialog,
+} from './ConflictingLocalizationDialog'
+import { UnknownInspectionAreaDialog } from './UnknownInspectionAreaDialog'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
@@ -10,20 +13,20 @@ interface IProps {
     scheduleMissions: () => void
     closeDialog: () => void
     robotId: string
-    missionDeckNames: string[]
+    missionInspectionAreaNames: string[]
 }
 
 enum DialogTypes {
-    verifyDeck,
-    unknownNewDeck,
-    conflictingMissionDecks,
-    conflictingRobotDeck,
+    verifyInspectionArea,
+    unknownNewInspectionArea,
+    conflictingMissionInspectionAreas,
+    conflictingRobotInspectionArea,
     unknown,
 }
 
 export const ScheduleMissionWithLocalizationVerificationDialog = ({
     robotId,
-    missionDeckNames,
+    missionInspectionAreaNames,
     scheduleMissions,
     closeDialog,
 }: IProps): JSX.Element => {
@@ -32,14 +35,16 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
     const { ongoingMissions } = useMissionsContext()
 
-    const unikMissionDeckNames = missionDeckNames.filter(
-        (deckName, index) => deckName !== '' && missionDeckNames.indexOf(deckName) === index
+    const unikMissionInspectionAreaNames = missionInspectionAreaNames.filter(
+        (inspectionAreaName, index) =>
+            inspectionAreaName !== '' && missionInspectionAreaNames.indexOf(inspectionAreaName) === index
     )
 
-    const ongoingLocalizationMissionOnSameDeckExists =
+    const ongoingLocalizationMissionOnSameInspectionAreaExists =
         ongoingMissions.filter(
             (mission) =>
-                mission.robot?.id === selectedRobot?.id && mission.inspectionArea?.deckName === unikMissionDeckNames[0]
+                mission.robot?.id === selectedRobot?.id &&
+                mission.inspectionArea?.inspectionAreaName === unikMissionInspectionAreaNames[0]
         ).length > 0
 
     useEffect(() => {
@@ -50,59 +55,67 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
         if (!selectedRobot) return
 
         if (
-            (unikMissionDeckNames.length === 1 &&
-                selectedRobot.currentInspectionArea?.deckName &&
-                unikMissionDeckNames[0] === selectedRobot?.currentInspectionArea?.deckName) ||
-            ongoingLocalizationMissionOnSameDeckExists
+            (unikMissionInspectionAreaNames.length === 1 &&
+                selectedRobot.currentInspectionArea?.inspectionAreaName &&
+                unikMissionInspectionAreaNames[0] === selectedRobot?.currentInspectionArea?.inspectionAreaName) ||
+            ongoingLocalizationMissionOnSameInspectionAreaExists
         ) {
             scheduleMissions()
             return
         }
 
-        if (unikMissionDeckNames.length > 1) {
-            setDialogToOpen(DialogTypes.conflictingMissionDecks)
+        if (unikMissionInspectionAreaNames.length > 1) {
+            setDialogToOpen(DialogTypes.conflictingMissionInspectionAreas)
             return
         }
 
-        if (unikMissionDeckNames.length === 0) {
-            setDialogToOpen(DialogTypes.unknownNewDeck)
+        if (unikMissionInspectionAreaNames.length === 0) {
+            setDialogToOpen(DialogTypes.unknownNewInspectionArea)
             return
         }
 
-        if (!selectedRobot.currentInspectionArea?.deckName && !ongoingLocalizationMissionOnSameDeckExists) {
-            setDialogToOpen(DialogTypes.verifyDeck)
+        if (
+            !selectedRobot.currentInspectionArea?.inspectionAreaName &&
+            !ongoingLocalizationMissionOnSameInspectionAreaExists
+        ) {
+            setDialogToOpen(DialogTypes.verifyInspectionArea)
             return
         }
 
-        if (unikMissionDeckNames[0] !== selectedRobot.currentInspectionArea?.deckName) {
-            setDialogToOpen(DialogTypes.conflictingRobotDeck)
+        if (unikMissionInspectionAreaNames[0] !== selectedRobot.currentInspectionArea?.inspectionAreaName) {
+            setDialogToOpen(DialogTypes.conflictingRobotInspectionArea)
             return
         }
         // To ignore scheduleMissions dependency
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [unikMissionDeckNames, selectedRobot?.currentInspectionArea?.deckName])
+    }, [unikMissionInspectionAreaNames, selectedRobot?.currentInspectionArea?.inspectionAreaName])
 
     return (
         <>
-            {dialogToOpen === DialogTypes.verifyDeck && (
+            {dialogToOpen === DialogTypes.verifyInspectionArea && (
                 <ConfirmLocalizationDialog
                     closeDialog={closeDialog}
                     scheduleMissions={scheduleMissions}
                     robot={selectedRobot!}
-                    newDeckName={unikMissionDeckNames![0]}
+                    newInspectionAreaName={unikMissionInspectionAreaNames![0]}
                 />
             )}
-            {dialogToOpen === DialogTypes.conflictingMissionDecks && (
-                <ConflictingMissionDecksDialog closeDialog={closeDialog} missionDeckNames={unikMissionDeckNames!} />
-            )}
-            {dialogToOpen === DialogTypes.conflictingRobotDeck && (
-                <ConflictingRobotDeckDialog
+            {dialogToOpen === DialogTypes.conflictingMissionInspectionAreas && (
+                <ConflictingMissionInspectionAreasDialog
                     closeDialog={closeDialog}
-                    robotDeckName={selectedRobot?.currentInspectionArea?.deckName!}
-                    desiredDeckName={unikMissionDeckNames![0]}
+                    missionInspectionAreaNames={unikMissionInspectionAreaNames!}
                 />
             )}
-            {dialogToOpen === DialogTypes.unknownNewDeck && <UnknownDeckDialog closeDialog={closeDialog} />}
+            {dialogToOpen === DialogTypes.conflictingRobotInspectionArea && (
+                <ConflictingRobotInspectionAreaDialog
+                    closeDialog={closeDialog}
+                    robotInspectionAreaName={selectedRobot?.currentInspectionArea?.inspectionAreaName!}
+                    desiredInspectionAreaName={unikMissionInspectionAreaNames![0]}
+                />
+            )}
+            {dialogToOpen === DialogTypes.unknownNewInspectionArea && (
+                <UnknownInspectionAreaDialog closeDialog={closeDialog} />
+            )}
         </>
     )
 }

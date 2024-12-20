@@ -1,8 +1,8 @@
 import { Pose } from './Pose'
 
-export interface Deck {
+export interface InspectionArea {
     id: string
-    deckName: string
+    inspectionAreaName: string
     plantName: string
     installationCode: string
     defaultLocalizationPose?: Pose
