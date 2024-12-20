@@ -9,6 +9,7 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
 import { MapCompass } from 'utils/MapCompass'
 import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 interface MissionProps {
     mission: Mission
@@ -39,6 +40,7 @@ const SyledContainer = styled.div`
 
 export const MissionMapView = ({ mission }: MissionProps) => {
     const { enabledRobots } = useRobotContext()
+    const { installationCode } = useInstallationContext()
     const [mapCanvas, setMapCanvas] = useState<HTMLCanvasElement>(document.createElement('canvas'))
     const [mapImage, setMapImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [mapContext, setMapContext] = useState<CanvasRenderingContext2D>()
@@ -80,7 +82,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     displayedMapName = displayedMapName ? displayedMapName.charAt(0).toUpperCase() + displayedMapName.slice(1) : ' '
 
     useEffect(() => {
-        BackendAPICaller.getMap(mission.installationCode!, mission.map?.mapName!)
+        BackendAPICaller.getMap(installationCode, mission.map?.mapName!)
             .then((imageBlob) => {
                 imageObjectURL.current = URL.createObjectURL(imageBlob)
             })

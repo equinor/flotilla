@@ -105,7 +105,7 @@ export const MissionPage = () => {
                         <MissionHeader mission={selectedMission} />
                         <TaskAndMapSection>
                             <TaskTable tasks={selectedMission?.tasks} />
-                            <MissionMapView mission={selectedMission} />
+                            {selectedMission.map?.mapName && <MissionMapView mission={selectedMission} />}
                         </TaskAndMapSection>
                         <VideoStreamSection>
                             {videoMediaStreams && videoMediaStreams.length > 0 && (
