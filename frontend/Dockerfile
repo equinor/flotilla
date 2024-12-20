@@ -11,7 +11,7 @@ FROM nginxinc/nginx-unprivileged:1.23-alpine
 
 WORKDIR /app
 
-COPY --from=build /app/build . 
+COPY --from=build /app/dist .
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # The nginx script substitutes the global variables in 'index.html' with the current environment variables when executed
