@@ -103,6 +103,5 @@ namespace Api.Controllers.Models
         public long MaxDesiredStartTime { get; set; } = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
 
         #endregion Time Filters
-
     }
 }

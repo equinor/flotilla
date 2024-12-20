@@ -30,7 +30,9 @@ namespace Api.Database.Context
                 .AddEnvironmentVariables()
                 .Build();
 
-            string? keyVaultUri = config.GetSection("KeyVault")["VaultUri"] ?? throw new KeyNotFoundException("No key vault in config");
+            string? keyVaultUri =
+                config.GetSection("KeyVault")["VaultUri"]
+                ?? throw new KeyNotFoundException("No key vault in config");
 
             // Connect to keyvault
             var keyVault = new SecretClient(

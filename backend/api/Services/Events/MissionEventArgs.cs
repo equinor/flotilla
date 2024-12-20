@@ -12,7 +12,8 @@ namespace Api.Services.Events
         public string RobotId { get; } = robotId;
     }
 
-    public class RobotEmergencyEventArgs(string robotId, RobotFlotillaStatus robotFlotillaStatus) : EventArgs
+    public class RobotEmergencyEventArgs(string robotId, RobotFlotillaStatus robotFlotillaStatus)
+        : EventArgs
     {
         public string RobotId { get; } = robotId;
         public RobotFlotillaStatus RobotFlotillaStatus { get; } = robotFlotillaStatus;

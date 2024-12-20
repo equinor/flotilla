@@ -4,6 +4,7 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
+
 namespace Api.Services
 {
     /// <summary>
@@ -19,7 +20,8 @@ namespace Api.Services
     {
         public async Task<IEnumerable<T>> ReadAll<T>(
             TimeseriesQueryStringParameters queryStringParameters
-        ) where T : TimeseriesBase
+        )
+            where T : TimeseriesBase
         {
             var query = context.Set<T>().AsQueryable();
             var filter = ConstructFilter<T>(queryStringParameters);
@@ -34,13 +36,31 @@ namespace Api.Services
             );
         }
 
-        public async Task AddBatteryEntry(string currentMissionId, float batteryLevel, string robotId) { await Task.CompletedTask; }
+        public async Task AddBatteryEntry(
+            string currentMissionId,
+            float batteryLevel,
+            string robotId
+        )
+        {
+            await Task.CompletedTask;
+        }
 
-        public async Task AddPressureEntry(string currentMissionId, float pressureLevel, string robotId) { await Task.CompletedTask; }
+        public async Task AddPressureEntry(
+            string currentMissionId,
+            float pressureLevel,
+            string robotId
+        )
+        {
+            await Task.CompletedTask;
+        }
 
-        public async Task AddPoseEntry(string currentMissionId, Pose robotPose, string robotId) { await Task.CompletedTask; }
+        public async Task AddPoseEntry(string currentMissionId, Pose robotPose, string robotId)
+        {
+            await Task.CompletedTask;
+        }
 
-        public async Task<T> Create<T>(T newTimeseries) where T : TimeseriesBase
+        public async Task<T> Create<T>(T newTimeseries)
+            where T : TimeseriesBase
         {
             await Task.CompletedTask;
             return newTimeseries;
@@ -48,7 +68,8 @@ namespace Api.Services
 
         private static Expression<Func<T, bool>> ConstructFilter<T>(
             TimeseriesQueryStringParameters parameters
-        ) where T : TimeseriesBase
+        )
+            where T : TimeseriesBase
         {
             Expression<Func<T, bool>> robotIdFilter = parameters.RobotId is null
                 ? timeseries => true

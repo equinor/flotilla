@@ -6,19 +6,20 @@ using Api.Services.Events;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace Api.Controllers
 {
     [ApiController]
     [Route("robots")]
     public class RobotController(
-            ILogger<RobotController> logger,
-            IRobotService robotService,
-            IIsarService isarService,
-            IMissionSchedulingService missionSchedulingService,
-            IRobotModelService robotModelService,
-            IDeckService deckService,
-            IErrorHandlingService errorHandlingService
-        ) : ControllerBase
+        ILogger<RobotController> logger,
+        IRobotService robotService,
+        IIsarService isarService,
+        IMissionSchedulingService missionSchedulingService,
+        IRobotModelService robotModelService,
+        IDeckService deckService,
+        IErrorHandlingService errorHandlingService
+    ) : ControllerBase
     {
         /// <summary>
         ///     List all robots on the installation.
@@ -97,12 +98,17 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<RobotResponse>> CreateRobot([FromBody] CreateRobotQuery robotQuery)
+        public async Task<ActionResult<RobotResponse>> CreateRobot(
+            [FromBody] CreateRobotQuery robotQuery
+        )
         {
             logger.LogInformation("Creating new robot");
             try
             {
-                var robotModel = await robotModelService.ReadByRobotType(robotQuery.RobotType, readOnly: true);
+                var robotModel = await robotModelService.ReadByRobotType(
+                    robotQuery.RobotType,
+                    readOnly: true
+                );
                 if (robotModel == null)
                 {
                     return BadRequest(
@@ -114,10 +120,11 @@ namespace Api.Controllers
                 var robotResponses = new RobotResponse(newRobot);
 
                 logger.LogInformation("Succesfully created new robot");
-                return CreatedAtAction(nameof(GetRobotById), new
-                {
-                    id = newRobot.Id
-                }, robotResponses);
+                return CreatedAtAction(
+                    nameof(GetRobotById),
+                    new { id = newRobot.Id },
+                    robotResponses
+                );
             }
             catch (Exception e)
             {
@@ -225,14 +232,21 @@ namespace Api.Controllers
                         }
                         else
                         {
-                            var inspectionArea = await deckService.ReadById(query.InspectionAreaId, readOnly: true);
-                            if (inspectionArea == null) return NotFound($"No inspection area with ID {query.InspectionAreaId} was found");
+                            var inspectionArea = await deckService.ReadById(
+                                query.InspectionAreaId,
+                                readOnly: true
+                            );
+                            if (inspectionArea == null)
+                                return NotFound(
+                                    $"No inspection area with ID {query.InspectionAreaId} was found"
+                                );
                             await robotService.UpdateCurrentInspectionArea(id, inspectionArea.Id);
                             robot.CurrentInspectionArea = inspectionArea;
                         }
                         break;
                     case "pose":
-                        if (query.Pose == null) return BadRequest("Cannot set robot pose to null");
+                        if (query.Pose == null)
+                            return BadRequest("Cannot set robot pose to null");
                         await robotService.UpdateRobotPose(id, query.Pose);
                         robot.Pose = query.Pose;
                         break;
@@ -277,7 +291,11 @@ namespace Api.Controllers
             [FromRoute] bool deprecated
         )
         {
-            logger.LogInformation("Updating deprecated on robot with id={Id} to deprecated={Deprecated}", id, deprecated);
+            logger.LogInformation(
+                "Updating deprecated on robot with id={Id} to deprecated={Deprecated}",
+                id,
+                deprecated
+            );
 
             try
             {
@@ -350,7 +368,8 @@ namespace Api.Controllers
         {
             logger.LogInformation("Updating robot status with id={Id}", id);
 
-            if (!ModelState.IsValid) return BadRequest("Invalid data");
+            if (!ModelState.IsValid)
+                return BadRequest("Invalid data");
 
             var robot = await robotService.ReadById(id, readOnly: true);
             if (robot == null)
@@ -368,7 +387,10 @@ namespace Api.Controllers
 
                 var robotResponse = new RobotResponse(robot);
 
-                if (robotStatus == RobotStatus.Available) missionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+                if (robotStatus == RobotStatus.Available)
+                    missionSchedulingService.TriggerRobotAvailable(
+                        new RobotAvailableEventArgs(robot.Id)
+                    );
 
                 return Ok(robotResponse);
             }
@@ -403,7 +425,10 @@ namespace Api.Controllers
                 return NotFound();
             }
 
-            try { await isarService.StopMission(robot); }
+            try
+            {
+                await isarService.StopMission(robot);
+            }
             catch (HttpRequestException e)
             {
                 const string Message = "Error connecting to ISAR while stopping mission";
@@ -425,12 +450,23 @@ namespace Api.Controllers
             catch (MissionNotFoundException)
             {
                 logger.LogWarning($"No mission was runnning for robot {robot.Id}");
-                try { await robotService.UpdateCurrentMissionId(robotId, null); }
-                catch (RobotNotFoundException e) { return NotFound(e.Message); }
-
+                try
+                {
+                    await robotService.UpdateCurrentMissionId(robotId, null);
+                }
+                catch (RobotNotFoundException e)
+                {
+                    return NotFound(e.Message);
+                }
             }
-            try { await robotService.UpdateCurrentMissionId(robotId, null); }
-            catch (RobotNotFoundException e) { return NotFound(e.Message); }
+            try
+            {
+                await robotService.UpdateCurrentMissionId(robotId, null);
+            }
+            catch (RobotNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
 
             return NoContent();
         }
@@ -535,7 +571,6 @@ namespace Api.Controllers
             return NoContent();
         }
 
-
         /// <summary>
         ///     Post new arm position ("battery_change", "transport", "lookout") for the robot with id 'robotId'
         /// </summary>
@@ -566,19 +601,24 @@ namespace Api.Controllers
 
             if (robot.Status is not RobotStatus.Available)
             {
-                string errorMessage = $"Robot {robotId} has status ({robot.Status}) and is not available";
+                string errorMessage =
+                    $"Robot {robotId} has status ({robot.Status}) and is not available";
                 logger.LogWarning("{Message}", errorMessage);
                 return Conflict(errorMessage);
             }
 
             if (robot.Deprecated)
             {
-                string errorMessage = $"Robot {robotId} is deprecated ({robot.Status}) and cannot run missions";
+                string errorMessage =
+                    $"Robot {robotId} is deprecated ({robot.Status}) and cannot run missions";
                 logger.LogWarning("{Message}", errorMessage);
                 return Conflict(errorMessage);
             }
 
-            try { await isarService.StartMoveArm(robot, armPosition); }
+            try
+            {
+                await isarService.StartMoveArm(robot, armPosition);
+            }
             catch (HttpRequestException e)
             {
                 string errorMessage = $"Error connecting to ISAR at {robot.IsarUri}";
@@ -588,7 +628,8 @@ namespace Api.Controllers
             }
             catch (MissionException e)
             {
-                const string ErrorMessage = "An error occurred while setting the arm position mission";
+                const string ErrorMessage =
+                    "An error occurred while setting the arm position mission";
                 logger.LogError(e, "{Message}", ErrorMessage);
                 return StatusCode(StatusCodes.Status502BadGateway, ErrorMessage);
             }
@@ -617,9 +658,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> ResetRobot(
-            [FromRoute] string robotId
-        )
+        public async Task<ActionResult> ResetRobot([FromRoute] string robotId)
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
@@ -629,24 +668,36 @@ namespace Api.Controllers
                 return NotFound(errorMessage);
             }
 
-            try { await missionSchedulingService.AbortAllScheduledMissions(robot.Id, "Aborted: Robot was reset"); }
+            try
+            {
+                await missionSchedulingService.AbortAllScheduledMissions(
+                    robot.Id,
+                    "Aborted: Robot was reset"
+                );
+            }
             catch (RobotNotFoundException)
             {
-                string errorMessage = $"Failed to abort scheduled missions for robot with id {robotId}";
+                string errorMessage =
+                    $"Failed to abort scheduled missions for robot with id {robotId}";
                 logger.LogWarning("{Message}", errorMessage);
                 return NotFound(errorMessage);
             }
 
-            try { await missionSchedulingService.StopCurrentMissionRun(robot.Id); }
+            try
+            {
+                await missionSchedulingService.StopCurrentMissionRun(robot.Id);
+            }
             catch (RobotNotFoundException)
             {
-                string errorMessage = $"Failed to stop current mission for robot with id {robotId} because the robot was not found";
+                string errorMessage =
+                    $"Failed to stop current mission for robot with id {robotId} because the robot was not found";
                 logger.LogWarning("{Message}", errorMessage);
                 return NotFound(errorMessage);
             }
             catch (MissionRunNotFoundException)
             {
-                string errorMessage = $"Failed to stop current mission for robot with id {robotId} because the mission was not found";
+                string errorMessage =
+                    $"Failed to stop current mission for robot with id {robotId} because the mission was not found";
                 logger.LogWarning("{Message}", errorMessage);
                 return Conflict(errorMessage);
             }

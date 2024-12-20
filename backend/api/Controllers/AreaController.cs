@@ -10,11 +10,11 @@ namespace Api.Controllers
     [ApiController]
     [Route("areas")]
     public class AreaController(
-            ILogger<AreaController> logger,
-            IAreaService areaService,
-            IDefaultLocalizationPoseService defaultLocalizationPoseService,
-            IMissionDefinitionService missionDefinitionService
-        ) : ControllerBase
+        ILogger<AreaController> logger,
+        IAreaService areaService,
+        IDefaultLocalizationPoseService defaultLocalizationPoseService,
+        IMissionDefinitionService missionDefinitionService
+    ) : ControllerBase
     {
         /// <summary>
         /// Add a new area
@@ -35,7 +35,11 @@ namespace Api.Controllers
             logger.LogInformation("Creating new area");
             try
             {
-                var existingArea = await areaService.ReadByInstallationAndName(area.InstallationCode, area.AreaName, readOnly: true);
+                var existingArea = await areaService.ReadByInstallationAndName(
+                    area.InstallationCode,
+                    area.AreaName,
+                    readOnly: true
+                );
                 if (existingArea != null)
                 {
                     logger.LogWarning("An area for given name and installation already exists");
@@ -48,11 +52,7 @@ namespace Api.Controllers
                     newArea.Id
                 );
                 var response = new AreaResponse(newArea);
-                return CreatedAtAction(
-                    nameof(GetAreaById),
-                    new { id = newArea.Id },
-                    response
-                );
+                return CreatedAtAction(nameof(GetAreaById), new { id = newArea.Id }, response);
             }
             catch (Exception e)
             {
@@ -60,7 +60,6 @@ namespace Api.Controllers
                 throw;
             }
         }
-
 
         /// <summary>
         /// Updates default localization pose
@@ -76,7 +75,10 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<AreaResponse>> UpdateDefaultLocalizationPose([FromRoute] string areaId, [FromBody] Pose newDefaultLocalizationPose)
+        public async Task<ActionResult<AreaResponse>> UpdateDefaultLocalizationPose(
+            [FromRoute] string areaId,
+            [FromBody] Pose newDefaultLocalizationPose
+        )
         {
             logger.LogInformation("Updating default localization pose on area '{areaId}'", areaId);
             try
@@ -95,10 +97,11 @@ namespace Api.Controllers
                 }
                 else
                 {
-                    area.DefaultLocalizationPose = new DefaultLocalizationPose(newDefaultLocalizationPose);
+                    area.DefaultLocalizationPose = new DefaultLocalizationPose(
+                        newDefaultLocalizationPose
+                    );
                     area = await areaService.Update(area);
                 }
-
 
                 return Ok(new AreaResponse(area));
             }
@@ -108,7 +111,6 @@ namespace Api.Controllers
                 throw;
             }
         }
-
 
         /// <summary>
         /// Deletes the area with the specified id from the database.
@@ -151,7 +153,9 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<AreaResponse>>> GetAreas([FromQuery] AreaQueryStringParameters parameters)
+        public async Task<ActionResult<IList<AreaResponse>>> GetAreas(
+            [FromQuery] AreaQueryStringParameters parameters
+        )
         {
             PagedList<Area> areas;
             try
@@ -214,7 +218,9 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<AreaResponse>>> GetAreaByDeckId([FromRoute] string deckId)
+        public async Task<ActionResult<IList<AreaResponse>>> GetAreaByDeckId(
+            [FromRoute] string deckId
+        )
         {
             try
             {
@@ -243,7 +249,9 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetMissionDefinitionsInArea([FromRoute] string id)
+        public async Task<
+            ActionResult<IList<MissionDefinitionResponse>>
+        > GetMissionDefinitionsInArea([FromRoute] string id)
         {
             try
             {
@@ -251,8 +259,13 @@ namespace Api.Controllers
                 if (area == null)
                     return NotFound($"Could not find area with id {id}");
 
-                var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(area.Deck.Id, readOnly: true);
-                var missionDefinitionResponses = missionDefinitions.FindAll(m => !m.IsDeprecated).Select(m => new MissionDefinitionResponse(m));
+                var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(
+                    area.Deck.Id,
+                    readOnly: true
+                );
+                var missionDefinitionResponses = missionDefinitions
+                    .FindAll(m => !m.IsDeprecated)
+                    .Select(m => new MissionDefinitionResponse(m));
                 return Ok(missionDefinitionResponses);
             }
             catch (Exception e)

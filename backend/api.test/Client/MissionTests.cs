@@ -14,6 +14,7 @@ using Api.Database.Models;
 using Api.Test.Database;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
+
 namespace Api.Test.Client
 {
     [Collection("Database collection")]
@@ -24,25 +25,26 @@ namespace Api.Test.Client
         private readonly JsonSerializerOptions _serializerOptions =
             new()
             {
-                Converters =
-                {
-                    new JsonStringEnumConverter()
-                },
-                PropertyNameCaseInsensitive = true
+                Converters = { new JsonStringEnumConverter() },
+                PropertyNameCaseInsensitive = true,
             };
 
         public MissionTests(TestWebApplicationFactory<Program> factory)
         {
-            _client = factory.CreateClient(new WebApplicationFactoryClientOptions
-            {
-                AllowAutoRedirect = false,
-                BaseAddress = new Uri("https://localhost:8000")
-            });
+            _client = factory.CreateClient(
+                new WebApplicationFactoryClientOptions
+                {
+                    AllowAutoRedirect = false,
+                    BaseAddress = new Uri("https://localhost:8000"),
+                }
+            );
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
                 TestAuthHandler.AuthenticationScheme
             );
 
-            object? context = factory.Services.GetService(typeof(FlotillaDbContext)) as FlotillaDbContext ?? throw new ArgumentNullException(nameof(factory));
+            object? context =
+                factory.Services.GetService(typeof(FlotillaDbContext)) as FlotillaDbContext
+                ?? throw new ArgumentNullException(nameof(factory));
             _databaseUtilities = new DatabaseUtilities((FlotillaDbContext)context);
         }
 
@@ -65,7 +67,7 @@ namespace Api.Test.Client
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
                 MissionSourceId = missionSourceId,
-                DesiredStartTime = DateTime.UtcNow
+                DesiredStartTime = DateTime.UtcNow,
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -77,7 +79,9 @@ namespace Api.Test.Client
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
             Assert.NotNull(missionRun);
             Assert.NotNull(missionRun.Id);
             Assert.Equal(MissionStatus.Pending, missionRun.Status);
@@ -101,7 +105,7 @@ namespace Api.Test.Client
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
                 MissionSourceId = missionSourceId,
-                DesiredStartTime = DateTime.UtcNow
+                DesiredStartTime = DateTime.UtcNow,
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -126,17 +130,23 @@ namespace Api.Test.Client
             Assert.True(response.IsSuccessStatusCode);
 
             response = await _client.PostAsync(missionsUrl, content);
-            var missionRun1 = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun1 = await response.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(missionRun1);
 
             response = await _client.PostAsync(missionsUrl, content);
-            var missionRun2 = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun2 = await response.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(missionRun2);
 
             response = await _client.PostAsync(missionsUrl, content);
-            var missionRun3 = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun3 = await response.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(missionRun3);
 
@@ -159,8 +169,15 @@ namespace Api.Test.Client
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var _ = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var _ = await _databaseUtilities.ReadOrNewArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                deck.Name
+            );
 
             var testPose = new Pose
             {
@@ -168,15 +185,15 @@ namespace Api.Test.Client
                 {
                     X = 1,
                     Y = 2,
-                    Z = 2
+                    Z = 2,
                 },
                 Orientation = new Orientation
                 {
                     X = 0,
                     Y = 0,
                     Z = 0,
-                    W = 1
-                }
+                    W = 1,
+                },
             };
             var areaQuery = new CreateAreaQuery
             {
@@ -184,7 +201,7 @@ namespace Api.Test.Client
                 PlantCode = plant.PlantCode,
                 DeckName = deck.Name,
                 AreaName = "AddNonDuplicateAreasToDb_Area",
-                DefaultLocalizationPose = testPose
+                DefaultLocalizationPose = testPose,
             };
             var areaContent = new StringContent(
                 JsonSerializer.Serialize(areaQuery),
@@ -193,10 +210,15 @@ namespace Api.Test.Client
             );
             string areaUrl = "/areas";
             var response = await _client.PostAsync(areaUrl, areaContent);
-            Assert.True(response.IsSuccessStatusCode, $"Failed to post to {areaUrl}. Status code: {response.StatusCode}");
+            Assert.True(
+                response.IsSuccessStatusCode,
+                $"Failed to post to {areaUrl}. Status code: {response.StatusCode}"
+            );
 
             Assert.True(response != null, $"Failed to post to {areaUrl}. Null returned");
-            var responseObject = await response.Content.ReadFromJsonAsync<AreaResponse>(_serializerOptions);
+            var responseObject = await response.Content.ReadFromJsonAsync<AreaResponse>(
+                _serializerOptions
+            );
             Assert.True(responseObject != null, $"No object returned from post to {areaUrl}");
         }
 
@@ -206,8 +228,15 @@ namespace Api.Test.Client
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var area = await _databaseUtilities.ReadOrNewArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                deck.Name
+            );
 
             var testPose = new Pose
             {
@@ -215,15 +244,15 @@ namespace Api.Test.Client
                 {
                     X = 1,
                     Y = 2,
-                    Z = 2
+                    Z = 2,
                 },
                 Orientation = new Orientation
                 {
                     X = 0,
                     Y = 0,
                     Z = 0,
-                    W = 1
-                }
+                    W = 1,
+                },
             };
             var areaQuery = new CreateAreaQuery
             {
@@ -231,7 +260,7 @@ namespace Api.Test.Client
                 PlantCode = plant.PlantCode,
                 DeckName = deck.Name,
                 AreaName = area.Name,
-                DefaultLocalizationPose = testPose
+                DefaultLocalizationPose = testPose,
             };
             var areaContent = new StringContent(
                 JsonSerializer.Serialize(areaQuery),
@@ -267,7 +296,10 @@ namespace Api.Test.Client
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
 
             string testMissionName = "testMissionScheduleDuplicateCustomMissionDefinitions";
 
@@ -284,16 +316,17 @@ namespace Api.Test.Client
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
-                Tasks = [
+                Tasks =
+                [
                     new()
                     {
                         RobotPose = new Pose(new Position(23, 14, 4), new Orientation()),
                         Inspection = new CustomInspectionQuery
                         {
                             InspectionTarget = new Position(),
-                            InspectionType = InspectionType.Image
+                            InspectionType = InspectionType.Image,
                         },
-                        TaskOrder = 0
+                        TaskOrder = 0,
                     },
                     new()
                     {
@@ -301,11 +334,11 @@ namespace Api.Test.Client
                         Inspection = new CustomInspectionQuery
                         {
                             InspectionTarget = new Position(),
-                            InspectionType = InspectionType.Image
+                            InspectionType = InspectionType.Image,
                         },
-                        TaskOrder = 1
-                    }
-                ]
+                        TaskOrder = 1,
+                    },
+                ],
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -321,8 +354,12 @@ namespace Api.Test.Client
             // Assert
             Assert.True(response1.IsSuccessStatusCode);
             Assert.True(response2.IsSuccessStatusCode);
-            var missionRun1 = await response1.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            var missionRun2 = await response2.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun1 = await response1.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
+            var missionRun2 = await response2.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
             Assert.NotNull(missionRun1);
             Assert.NotNull(missionRun2);
             string? missionId1 = missionRun1.MissionId;
@@ -331,7 +368,9 @@ namespace Api.Test.Client
             // Increasing pageSize to 50 to ensure the missions we are looking for is included
             string missionDefinitionsUrl = "/missions/definitions?pageSize=50";
             var missionDefinitionsResponse = await _client.GetAsync(missionDefinitionsUrl);
-            var missionDefinitions = await missionDefinitionsResponse.Content.ReadFromJsonAsync<List<MissionDefinition>>(_serializerOptions);
+            var missionDefinitions = await missionDefinitionsResponse.Content.ReadFromJsonAsync<
+                List<MissionDefinition>
+            >(_serializerOptions);
             Assert.NotNull(missionDefinitions);
             Assert.Single(missionDefinitions.Where(m => m.Id == missionId1));
         }
@@ -342,7 +381,10 @@ namespace Api.Test.Client
             // Arrange - Initialise area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
 
             // Arrange - Robot
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
@@ -358,18 +400,19 @@ namespace Api.Test.Client
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
-                Tasks = [
+                Tasks =
+                [
                     new()
                     {
                         RobotPose = new Pose(),
                         Inspection = new CustomInspectionQuery
                         {
                             InspectionTarget = new Position(),
-                            InspectionType = InspectionType.Image
+                            InspectionType = InspectionType.Image,
                         },
-                        TaskOrder = 0
-                    }
-                ]
+                        TaskOrder = 0,
+                    },
+                ],
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -380,7 +423,9 @@ namespace Api.Test.Client
             string customMissionsUrl = "/missions/custom";
             var response = await _client.PostAsync(customMissionsUrl, content);
             Assert.True(response.IsSuccessStatusCode);
-            var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun = await response.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
             Assert.NotNull(missionRun);
             Assert.NotNull(missionRun.MissionId);
             Assert.NotNull(missionRun.Id);
@@ -418,12 +463,27 @@ namespace Api.Test.Client
                 "application/json"
             );
             string scheduleMissionsUrl = $"/missions/schedule/{missionRun.MissionId}";
-            var missionRun1Response = await _client.PostAsync(scheduleMissionsUrl, scheduleContent1);
-            var missionRun2Response = await _client.PostAsync(scheduleMissionsUrl, scheduleContent2);
-            var missionRun3Response = await _client.PostAsync(scheduleMissionsUrl, scheduleContent3);
-            var missionRun1 = await missionRun1Response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            var missionRun2 = await missionRun2Response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            var missionRun3 = await missionRun3Response.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun1Response = await _client.PostAsync(
+                scheduleMissionsUrl,
+                scheduleContent1
+            );
+            var missionRun2Response = await _client.PostAsync(
+                scheduleMissionsUrl,
+                scheduleContent2
+            );
+            var missionRun3Response = await _client.PostAsync(
+                scheduleMissionsUrl,
+                scheduleContent3
+            );
+            var missionRun1 = await missionRun1Response.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
+            var missionRun2 = await missionRun2Response.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
+            var missionRun3 = await missionRun3Response.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
 
             // Act
             string nextMissionUrl = $"missions/definitions/{missionRun.MissionId}/next-run";
@@ -431,7 +491,9 @@ namespace Api.Test.Client
 
             // Assert
             Assert.True(nextMissionResponse.IsSuccessStatusCode);
-            var nextMissionRun = await nextMissionResponse.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var nextMissionRun = await nextMissionResponse.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
             Assert.NotNull(nextMissionRun);
             Assert.NotNull(missionRun1);
             Assert.NotNull(missionRun2);
@@ -448,8 +510,15 @@ namespace Api.Test.Client
             // Arrange - Initialise area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var area = await _databaseUtilities.ReadOrNewArea(installation.InstallationCode, plant.PlantCode, deck.Name);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var area = await _databaseUtilities.ReadOrNewArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                deck.Name
+            );
 
             // Arrange - Robot
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
@@ -463,7 +532,7 @@ namespace Api.Test.Client
                 RobotId = robotId,
                 InstallationCode = installation.InstallationCode,
                 MissionSourceId = missionSourceId,
-                DesiredStartTime = DateTime.UtcNow
+                DesiredStartTime = DateTime.UtcNow,
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -479,8 +548,12 @@ namespace Api.Test.Client
             // Assert
             Assert.True(response1.IsSuccessStatusCode);
             Assert.True(response2.IsSuccessStatusCode);
-            var missionRun1 = await response1.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
-            var missionRun2 = await response2.Content.ReadFromJsonAsync<MissionRun>(_serializerOptions);
+            var missionRun1 = await response1.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
+            var missionRun2 = await response2.Content.ReadFromJsonAsync<MissionRun>(
+                _serializerOptions
+            );
             Assert.NotNull(missionRun1);
             Assert.NotNull(missionRun2);
             string? missionId1 = missionRun1.MissionId;
@@ -488,7 +561,9 @@ namespace Api.Test.Client
             Assert.Equal(missionId1, missionId2);
             string missionDefinitionsUrl = "/missions/definitions?pageSize=50";
             var missionDefinitionsResponse = await _client.GetAsync(missionDefinitionsUrl);
-            var missionDefinitions = await missionDefinitionsResponse.Content.ReadFromJsonAsync<List<MissionDefinition>>(_serializerOptions);
+            var missionDefinitions = await missionDefinitionsResponse.Content.ReadFromJsonAsync<
+                List<MissionDefinition>
+            >(_serializerOptions);
             Assert.NotNull(missionDefinitions);
             Assert.NotNull(missionDefinitions.Find(m => m.Id == missionId1));
         }
@@ -499,12 +574,17 @@ namespace Api.Test.Client
             // Arrange - Initialise area
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
 
-            string testMissionName = "testMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission";
+            string testMissionName =
+                "testMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission";
 
             // Arrange - Get different installation
-            string otherInstallationCode = "installationMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission_Other";
+            string otherInstallationCode =
+                "installationMissionDoesNotStartIfRobotIsNotInSameInstallationAsMission_Other";
             var otherInstallation = await _databaseUtilities.NewInstallation(otherInstallationCode);
 
             // Arrange - Robot
@@ -520,16 +600,17 @@ namespace Api.Test.Client
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
-                Tasks = [
+                Tasks =
+                [
                     new()
                     {
                         RobotPose = new Pose(),
                         Inspection = new CustomInspectionQuery
                         {
                             InspectionTarget = new Position(),
-                            InspectionType = InspectionType.Image
+                            InspectionType = InspectionType.Image,
                         },
-                        TaskOrder = 0
+                        TaskOrder = 0,
                     },
                     new()
                     {
@@ -537,11 +618,11 @@ namespace Api.Test.Client
                         Inspection = new CustomInspectionQuery
                         {
                             InspectionTarget = new Position(),
-                            InspectionType = InspectionType.Image
+                            InspectionType = InspectionType.Image,
                         },
-                        TaskOrder = 1
-                    }
-                ]
+                        TaskOrder = 1,
+                    },
+                ],
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -563,15 +644,27 @@ namespace Api.Test.Client
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
 
             string deckName1 = "deckMissionFailsIfRobotIsNotInSameDeckAsMission1";
-            var deck1 = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode, deckName1);
+            var deck1 = await _databaseUtilities.NewDeck(
+                installation.InstallationCode,
+                plant.PlantCode,
+                deckName1
+            );
 
             string deckName2 = "deckMissionFailsIfRobotIsNotInSameDeckAsMission2";
-            var deck2 = await _databaseUtilities.NewDeck(installation.InstallationCode, plant.PlantCode, deckName2);
+            var deck2 = await _databaseUtilities.NewDeck(
+                installation.InstallationCode,
+                plant.PlantCode,
+                deckName2
+            );
 
             string testMissionName = "testMissionFailsIfRobotIsNotInSameDeckAsMission";
 
             // Arrange - Robot
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, deck1);
+            var robot = await _databaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                deck1
+            );
             string robotId = robot.Id;
 
             // Arrange - Mission Run Query
@@ -583,16 +676,17 @@ namespace Api.Test.Client
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = testMissionName,
-                Tasks = [
+                Tasks =
+                [
                     new()
                     {
                         RobotPose = new Pose(new Position(1, 9, 4), new Orientation()),
                         Inspection = new CustomInspectionQuery
                         {
                             InspectionTarget = new Position(),
-                            InspectionType = InspectionType.Image
+                            InspectionType = InspectionType.Image,
                         },
-                        TaskOrder = 0
+                        TaskOrder = 0,
                     },
                     new()
                     {
@@ -600,11 +694,11 @@ namespace Api.Test.Client
                         Inspection = new CustomInspectionQuery
                         {
                             InspectionTarget = new Position(),
-                            InspectionType = InspectionType.Image
+                            InspectionType = InspectionType.Image,
                         },
-                        TaskOrder = 1
-                    }
-                ]
+                        TaskOrder = 1,
+                    },
+                ],
             };
             var content = new StringContent(
                 JsonSerializer.Serialize(query),

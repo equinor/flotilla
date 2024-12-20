@@ -42,9 +42,14 @@ namespace Api.EventHandlers
 
         private async void OnTeamsMessageReceived(object? sender, TeamsMessageEventArgs e)
         {
-            string url = InspectionFindingEventHandler.GetWebhookURL(_configuration, "TeamsSystemStatusNotification");
+            string url = InspectionFindingEventHandler.GetWebhookURL(
+                _configuration,
+                "TeamsSystemStatusNotification"
+            );
             var client = new HttpClient();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json")
+            );
 
             var content = CreateTeamsMessageCard(e.TeamsMessage);
             HttpResponseMessage? response;
@@ -61,7 +66,9 @@ namespace Api.EventHandlers
             if (!response.IsSuccessStatusCode)
             {
                 string errorBody = await response.Content.ReadAsStringAsync();
-                _logger.LogError($"Webhook request failed with status code {response.StatusCode}. Response body: {errorBody}");
+                _logger.LogError(
+                    $"Webhook request failed with status code {response.StatusCode}. Response body: {errorBody}"
+                );
             }
         }
 
@@ -70,8 +77,18 @@ namespace Api.EventHandlers
             string jsonMessage = new JObject(
                 new JProperty("title", "System Status:"),
                 new JProperty("text", message),
-                new JProperty("sections", new JArray(new JObject(new JProperty("activitySubtitle", $"Generated on: {DateTime.UtcNow.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture)}"))))
-                ).ToString(Formatting.Indented);
+                new JProperty(
+                    "sections",
+                    new JArray(
+                        new JObject(
+                            new JProperty(
+                                "activitySubtitle",
+                                $"Generated on: {DateTime.UtcNow.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture)}"
+                            )
+                        )
+                    )
+                )
+            ).ToString(Formatting.Indented);
 
             var content = new StringContent(jsonMessage, Encoding.UTF8, "application/json");
 

@@ -19,12 +19,11 @@ namespace Api.Database.Models
         Robot,
         Turtlebot,
         AnymalX,
-        AnymalD
+        AnymalD,
     }
 
     public class RobotModel
     {
-
         public RobotModel() { }
 
         public RobotModel(CreateRobotModelQuery query)
@@ -34,6 +33,7 @@ namespace Api.Database.Models
             UpperPressureWarningThreshold = query.UpperPressureWarningThreshold;
             LowerPressureWarningThreshold = query.LowerPressureWarningThreshold;
         }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }

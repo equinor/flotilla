@@ -18,7 +18,7 @@ namespace Api.Test.Database
                 X = 0,
                 Y = 0,
                 Z = 0.7071F,
-                W = 0.7071F
+                W = 0.7071F,
             };
 
             Assert.Equal(
@@ -39,16 +39,12 @@ namespace Api.Test.Database
                 X = 0,
                 Y = 0,
                 Z = -0.7071F,
-                W = 0.7071F
+                W = 0.7071F,
             };
 
             var pose = new Pose(mockAngleAxisParameters, mockAngle);
 
-            Assert.Equal(
-                expected.Z,
-                pose.Orientation.Z,
-                3.0
-            );
+            Assert.Equal(expected.Z, pose.Orientation.Z, 3.0);
         }
 
         [Fact]
@@ -62,7 +58,7 @@ namespace Api.Test.Database
                 X = 0,
                 Y = 0,
                 Z = 1F,
-                W = 0
+                W = 0,
             };
 
             Assert.Equal(

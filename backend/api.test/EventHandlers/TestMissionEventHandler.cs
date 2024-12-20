@@ -44,13 +44,17 @@ namespace Api.Test.EventHandlers
             var mqttServiceLogger = new Mock<ILogger<MqttService>>().Object;
             var mqttEventHandlerLogger = new Mock<ILogger<MqttEventHandler>>().Object;
             var missionLogger = new Mock<ILogger<MissionRunService>>().Object;
-            var missionSchedulingServiceLogger = new Mock<ILogger<MissionSchedulingService>>().Object;
+            var missionSchedulingServiceLogger = new Mock<
+                ILogger<MissionSchedulingService>
+            >().Object;
             var robotServiceLogger = new Mock<ILogger<RobotService>>().Object;
             var localizationServiceLogger = new Mock<ILogger<LocalizationService>>().Object;
             var mapServiceLogger = new Mock<ILogger<MapService>>().Object;
             var mapBlobOptions = new Mock<IOptions<MapBlobOptions>>().Object;
             var returnToHomeServiceLogger = new Mock<ILogger<ReturnToHomeService>>().Object;
-            var missionDefinitionServiceLogger = new Mock<ILogger<MissionDefinitionService>>().Object;
+            var missionDefinitionServiceLogger = new Mock<
+                ILogger<MissionDefinitionService>
+            >().Object;
             var lastMissionRunServiceLogger = new Mock<ILogger<LastMissionRunService>>().Object;
             var sourceServiceLogger = new Mock<ILogger<SourceService>>().Object;
             var errorHandlingServiceLogger = new Mock<ILogger<ErrorHandlingService>>().Object;
@@ -62,7 +66,11 @@ namespace Api.Test.EventHandlers
 
             var signalRService = new MockSignalRService();
             var accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
-            var userInfoService = new UserInfoService(context, new HttpContextAccessor(), new Mock<ILogger<UserInfoService>>().Object);
+            var userInfoService = new UserInfoService(
+                context,
+                new HttpContextAccessor(),
+                new Mock<ILogger<UserInfoService>>().Object
+            );
 
             _mqttService = new MqttService(mqttServiceLogger, configuration);
 
@@ -77,17 +85,77 @@ namespace Api.Test.EventHandlers
             var installationService = new InstallationService(context, accessRoleService);
             var defaultLocalizationPoseService = new DefaultLocalizationPoseService(context);
             var plantService = new PlantService(context, installationService, accessRoleService);
-            var deckService = new DeckService(context, defaultLocalizationPoseService, installationService, plantService, accessRoleService, signalRService);
-            var areaService = new AreaService(context, installationService, plantService, deckService, defaultLocalizationPoseService, accessRoleService);
+            var deckService = new DeckService(
+                context,
+                defaultLocalizationPoseService,
+                installationService,
+                plantService,
+                accessRoleService,
+                signalRService
+            );
+            var areaService = new AreaService(
+                context,
+                installationService,
+                plantService,
+                deckService,
+                defaultLocalizationPoseService,
+                accessRoleService
+            );
             var mapServiceMock = new MockMapService();
-            _robotService = new RobotService(context, robotServiceLogger, robotModelService, signalRService, accessRoleService, installationService, deckService);
-            _missionRunService = new MissionRunService(context, signalRService, missionLogger, accessRoleService, missionTaskService, deckService, _robotService, userInfoService);
-            var missionDefinitionService = new MissionDefinitionService(context, missionLoader, signalRService, accessRoleService, missionDefinitionServiceLogger, _missionRunService, sourceService);
-            _localizationService = new LocalizationService(localizationServiceLogger, _robotService, installationService, deckService);
-            var errorHandlingService = new ErrorHandlingService(errorHandlingServiceLogger, _robotService, _missionRunService);
-            var returnToHomeService = new ReturnToHomeService(returnToHomeServiceLogger, _robotService, _missionRunService);
-            _missionSchedulingService = new MissionSchedulingService(missionSchedulingServiceLogger, _missionRunService, _robotService,
-                isarServiceMock, _localizationService, returnToHomeService, signalRService, errorHandlingService);
+            _robotService = new RobotService(
+                context,
+                robotServiceLogger,
+                robotModelService,
+                signalRService,
+                accessRoleService,
+                installationService,
+                deckService
+            );
+            _missionRunService = new MissionRunService(
+                context,
+                signalRService,
+                missionLogger,
+                accessRoleService,
+                missionTaskService,
+                deckService,
+                _robotService,
+                userInfoService
+            );
+            var missionDefinitionService = new MissionDefinitionService(
+                context,
+                missionLoader,
+                signalRService,
+                accessRoleService,
+                missionDefinitionServiceLogger,
+                _missionRunService,
+                sourceService
+            );
+            _localizationService = new LocalizationService(
+                localizationServiceLogger,
+                _robotService,
+                installationService,
+                deckService
+            );
+            var errorHandlingService = new ErrorHandlingService(
+                errorHandlingServiceLogger,
+                _robotService,
+                _missionRunService
+            );
+            var returnToHomeService = new ReturnToHomeService(
+                returnToHomeServiceLogger,
+                _robotService,
+                _missionRunService
+            );
+            _missionSchedulingService = new MissionSchedulingService(
+                missionSchedulingServiceLogger,
+                _missionRunService,
+                _robotService,
+                isarServiceMock,
+                _localizationService,
+                returnToHomeService,
+                signalRService,
+                errorHandlingService
+            );
             var lastMissionRunService = new LastMissionRunService(missionDefinitionService);
 
             _databaseUtilities = new DatabaseUtilities(context);
@@ -123,16 +191,13 @@ namespace Api.Test.EventHandlers
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(ILastMissionRunService)))
                 .Returns(lastMissionRunService);
-            mockServiceProvider
-                .Setup(p => p.GetService(typeof(IAreaService)))
-                .Returns(areaService);
+            mockServiceProvider.Setup(p => p.GetService(typeof(IAreaService))).Returns(areaService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(ISignalRService)))
                 .Returns(signalRService);
             mockServiceProvider
                 .Setup(p => p.GetService(typeof(IEmergencyActionService)))
                 .Returns(_emergencyActionService);
-
 
             // Mock service injector
             var mockScope = new Mock<IServiceScope>();
@@ -141,7 +206,10 @@ namespace Api.Test.EventHandlers
             mockFactory.Setup(f => f.CreateScope()).Returns(mockScope.Object);
 
             // Instantiating the event handlers are required for the event subscribers to be activated
-            _missionEventHandler = new MissionEventHandler(missionEventHandlerLogger, mockFactory.Object);
+            _missionEventHandler = new MissionEventHandler(
+                missionEventHandlerLogger,
+                mockFactory.Object
+            );
             _mqttEventHandler = new MqttEventHandler(mqttEventHandlerLogger, mockFactory.Object);
         }
 
@@ -157,16 +225,30 @@ namespace Api.Test.EventHandlers
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, deck);
-            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await _databaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                deck
+            );
+            var missionRun = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck
+            );
 
             // Act
             await _missionRunService.Create(missionRun);
             Thread.Sleep(100);
 
             // Assert
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, readOnly: true);
+            var postTestMissionRun = await _missionRunService.ReadById(
+                missionRun.Id,
+                readOnly: true
+            );
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
@@ -176,10 +258,25 @@ namespace Api.Test.EventHandlers
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, deck);
-            var missionRunOne = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck);
-            var missionRunTwo = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await _databaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                deck
+            );
+            var missionRunOne = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck
+            );
+            var missionRunTwo = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck
+            );
 
             // Act
             await _missionRunService.Create(missionRunOne);
@@ -187,8 +284,14 @@ namespace Api.Test.EventHandlers
             await _missionRunService.Create(missionRunTwo);
 
             // Assert
-            var postTestMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id, readOnly: true);
-            var postTestMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id, readOnly: true);
+            var postTestMissionRunOne = await _missionRunService.ReadById(
+                missionRunOne.Id,
+                readOnly: true
+            );
+            var postTestMissionRunTwo = await _missionRunService.ReadById(
+                missionRunTwo.Id,
+                readOnly: true
+            );
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRunOne!.Status);
             Assert.Equal(MissionStatus.Pending, postTestMissionRunTwo!.Status);
         }
@@ -199,9 +302,16 @@ namespace Api.Test.EventHandlers
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, deck);
-            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck);
+            var missionRun = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck
+            );
 
             await _missionRunService.Create(missionRun);
             Thread.Sleep(100);
@@ -212,15 +322,19 @@ namespace Api.Test.EventHandlers
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
                     Status = RobotStatus.Available,
-                    Timestamp = DateTime.UtcNow
-                });
+                    Timestamp = DateTime.UtcNow,
+                }
+            );
 
             // Act
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
             Thread.Sleep(500);
 
             // Assert
-            var postTestMissionRun = await _missionRunService.ReadById(missionRun.Id, readOnly: true);
+            var postTestMissionRun = await _missionRunService.ReadById(
+                missionRun.Id,
+                readOnly: true
+            );
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun!.Status);
         }
 
@@ -230,7 +344,10 @@ namespace Api.Test.EventHandlers
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, deck);
 
             var mqttEventArgs = new MqttReceivedArgs(
@@ -239,8 +356,9 @@ namespace Api.Test.EventHandlers
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
                     Status = RobotStatus.Available,
-                    Timestamp = DateTime.UtcNow
-                });
+                    Timestamp = DateTime.UtcNow,
+                }
+            );
 
             // Act
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
@@ -250,12 +368,12 @@ namespace Api.Test.EventHandlers
             var ongoingMission = await _missionRunService.ReadAll(
                 new MissionRunQueryStringParameters
                 {
-                    Statuses = [
-                        MissionStatus.Ongoing
-                    ],
+                    Statuses = [MissionStatus.Ongoing],
                     OrderBy = "DesiredStartTime",
-                    PageSize = 100
-                }, readOnly: true);
+                    PageSize = 100,
+                },
+                readOnly: true
+            );
             Assert.True(ongoingMission.Any());
         }
 
@@ -265,7 +383,10 @@ namespace Api.Test.EventHandlers
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, deck);
             robot.RobotCapabilities!.Remove(RobotCapabilitiesEnum.return_to_home);
             await _robotService.Update(robot);
@@ -276,8 +397,9 @@ namespace Api.Test.EventHandlers
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
                     Status = RobotStatus.Available,
-                    Timestamp = DateTime.UtcNow
-                });
+                    Timestamp = DateTime.UtcNow,
+                }
+            );
 
             // Act
             _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
@@ -287,12 +409,12 @@ namespace Api.Test.EventHandlers
             var ongoingMission = await _missionRunService.ReadAll(
                 new MissionRunQueryStringParameters
                 {
-                    Statuses = [
-                        MissionStatus.Ongoing
-                    ],
+                    Statuses = [MissionStatus.Ongoing],
                     OrderBy = "DesiredStartTime",
-                    PageSize = 100
-                }, readOnly: true);
+                    PageSize = 100,
+                },
+                readOnly: true
+            );
             Assert.False(ongoingMission.Any());
         }
 
@@ -302,18 +424,40 @@ namespace Api.Test.EventHandlers
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var robotOne = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, deck);
-            var robotTwo = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, deck);
-            var missionRunOne = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robotOne, deck);
-            var missionRunTwo = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robotTwo, deck);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robotOne = await _databaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                deck
+            );
+            var robotTwo = await _databaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                deck
+            );
+            var missionRunOne = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robotOne,
+                deck
+            );
+            var missionRunTwo = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robotTwo,
+                deck
+            );
 
             // Act (Ensure first mission is started)
             await _missionRunService.Create(missionRunOne);
             Thread.Sleep(100);
 
             // Assert
-            var postStartMissionRunOne = await _missionRunService.ReadById(missionRunOne.Id, readOnly: true);
+            var postStartMissionRunOne = await _missionRunService.ReadById(
+                missionRunOne.Id,
+                readOnly: true
+            );
             Assert.NotNull(postStartMissionRunOne);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunOne.Status);
 
@@ -322,7 +466,10 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             // Assert
-            var postStartMissionRunTwo = await _missionRunService.ReadById(missionRunTwo.Id, readOnly: true);
+            var postStartMissionRunTwo = await _missionRunService.ReadById(
+                missionRunTwo.Id,
+                readOnly: true
+            );
             Assert.NotNull(postStartMissionRunTwo);
             Assert.Equal(MissionStatus.Ongoing, postStartMissionRunTwo.Status);
         }
@@ -333,18 +480,41 @@ namespace Api.Test.EventHandlers
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, null);
-            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck, true);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await _databaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                null
+            );
+            var missionRun1 = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck,
+                true
+            );
             Thread.Sleep(100);
-            var missionRun2 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck, true);
+            var missionRun2 = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck,
+                true
+            );
             Thread.Sleep(100);
 
             var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1.Id);
-            _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), missionRunCreatedEventArgs);
+            _missionRunService.RaiseEvent(
+                nameof(MissionRunService.MissionRunCreated),
+                missionRunCreatedEventArgs
+            );
             Thread.Sleep(100);
 
-            var missionRun1PostCreation = await _missionRunService.ReadById(missionRun1.Id, readOnly: true);
+            var missionRun1PostCreation = await _missionRunService.ReadById(
+                missionRun1.Id,
+                readOnly: true
+            );
             Assert.NotNull(missionRun1PostCreation);
 
             // Act
@@ -355,19 +525,32 @@ namespace Api.Test.EventHandlers
                     IsarId = robot.IsarId,
                     MissionId = missionRun1PostCreation.IsarMissionId,
                     Status = "successful",
-                    Timestamp = DateTime.UtcNow
-                });
+                    Timestamp = DateTime.UtcNow,
+                }
+            );
 
             var robotAvailableEventArgs = new RobotAvailableEventArgs(robot.Id);
 
-            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarMissionReceived), mqttIsarMissionEventArgs);
-            _missionSchedulingService.RaiseEvent(nameof(MissionSchedulingService.RobotAvailable), robotAvailableEventArgs);
+            _mqttService.RaiseEvent(
+                nameof(MqttService.MqttIsarMissionReceived),
+                mqttIsarMissionEventArgs
+            );
+            _missionSchedulingService.RaiseEvent(
+                nameof(MissionSchedulingService.RobotAvailable),
+                robotAvailableEventArgs
+            );
             Thread.Sleep(500);
 
             // Assert
-            var postTestMissionRun1 = await _missionRunService.ReadById(missionRun1.Id, readOnly: true);
+            var postTestMissionRun1 = await _missionRunService.ReadById(
+                missionRun1.Id,
+                readOnly: true
+            );
             Assert.Equal(MissionStatus.Successful, postTestMissionRun1!.Status);
-            var postTestMissionRun2 = await _missionRunService.ReadById(missionRun2.Id, readOnly: true);
+            var postTestMissionRun2 = await _missionRunService.ReadById(
+                missionRun2.Id,
+                readOnly: true
+            );
             Assert.Equal(MissionStatus.Pending, postTestMissionRun2!.Status);
         }
 
@@ -379,14 +562,37 @@ namespace Api.Test.EventHandlers
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
-            var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation, deck);
-            var missionRun1 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck, true, MissionRunType.Normal, MissionStatus.Ongoing, Guid.NewGuid().ToString());
-            var missionRun2 = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck, true);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await _databaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                deck
+            );
+            var missionRun1 = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck,
+                true,
+                MissionRunType.Normal,
+                MissionStatus.Ongoing,
+                Guid.NewGuid().ToString()
+            );
+            var missionRun2 = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck,
+                true
+            );
             Thread.Sleep(100);
 
             var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1.Id);
-            _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), missionRunCreatedEventArgs);
+            _missionRunService.RaiseEvent(
+                nameof(MissionRunService.MissionRunCreated),
+                missionRunCreatedEventArgs
+            );
             Thread.Sleep(100);
 
             // Act
@@ -397,8 +603,9 @@ namespace Api.Test.EventHandlers
                     IsarId = robot.IsarId,
                     MissionId = missionRun1.IsarMissionId,
                     Status = "successful",
-                    Timestamp = DateTime.UtcNow
-                });
+                    Timestamp = DateTime.UtcNow,
+                }
+            );
 
             var mqttIsarStatusEventArgs = new MqttReceivedArgs(
                 new IsarStatusMessage
@@ -406,17 +613,33 @@ namespace Api.Test.EventHandlers
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
                     Status = RobotStatus.Available,
-                    Timestamp = DateTime.UtcNow
-                });
+                    Timestamp = DateTime.UtcNow,
+                }
+            );
 
-            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarMissionReceived), mqttIsarMissionEventArgs);
-            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttIsarStatusEventArgs);
+            _mqttService.RaiseEvent(
+                nameof(MqttService.MqttIsarMissionReceived),
+                mqttIsarMissionEventArgs
+            );
+            _mqttService.RaiseEvent(
+                nameof(MqttService.MqttIsarStatusReceived),
+                mqttIsarStatusEventArgs
+            );
             Thread.Sleep(2500); // Accommodate for sleep in OnIsarStatus
 
             // Assert
-            var postTestMissionRun1 = await _missionRunService.ReadById(missionRun1.Id, readOnly: true);
-            Assert.Equal(Api.Database.Models.TaskStatus.Successful, postTestMissionRun1!.Tasks[0].Status);
-            var postTestMissionRun2 = await _missionRunService.ReadById(missionRun2.Id, readOnly: true);
+            var postTestMissionRun1 = await _missionRunService.ReadById(
+                missionRun1.Id,
+                readOnly: true
+            );
+            Assert.Equal(
+                Api.Database.Models.TaskStatus.Successful,
+                postTestMissionRun1!.Tasks[0].Status
+            );
+            var postTestMissionRun2 = await _missionRunService.ReadById(
+                missionRun2.Id,
+                readOnly: true
+            );
             Assert.Equal(MissionStatus.Ongoing, postTestMissionRun2!.Status);
         }
 
@@ -426,10 +649,29 @@ namespace Api.Test.EventHandlers
             // Arrange
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var plant = await _databaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var deck = await _databaseUtilities.ReadOrNewDeck(installation.InstallationCode, plant.PlantCode);
+            var deck = await _databaseUtilities.ReadOrNewDeck(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Busy, installation, deck);
-            var returnToHomeMission = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck, true, MissionRunType.ReturnHome, MissionStatus.Ongoing, Guid.NewGuid().ToString());
-            var missionRun = await _databaseUtilities.NewMissionRun(installation.InstallationCode, robot, deck, true, MissionRunType.Normal, MissionStatus.Pending, Guid.NewGuid().ToString());
+            var returnToHomeMission = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck,
+                true,
+                MissionRunType.ReturnHome,
+                MissionStatus.Ongoing,
+                Guid.NewGuid().ToString()
+            );
+            var missionRun = await _databaseUtilities.NewMissionRun(
+                installation.InstallationCode,
+                robot,
+                deck,
+                true,
+                MissionRunType.Normal,
+                MissionStatus.Pending,
+                Guid.NewGuid().ToString()
+            );
 
             Thread.Sleep(100);
 
@@ -439,7 +681,10 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(500);
 
             // Assert
-            var updatedReturnHomeMission = await _missionRunService.ReadById(returnToHomeMission.Id, readOnly: true);
+            var updatedReturnHomeMission = await _missionRunService.ReadById(
+                returnToHomeMission.Id,
+                readOnly: true
+            );
             Assert.True(updatedReturnHomeMission?.Status.Equals(MissionStatus.Aborted));
 
             // Act
@@ -450,8 +695,9 @@ namespace Api.Test.EventHandlers
                     IsarId = robot.IsarId,
                     MissionId = returnToHomeMission.IsarMissionId,
                     Status = "cancelled",
-                    Timestamp = DateTime.UtcNow
-                });
+                    Timestamp = DateTime.UtcNow,
+                }
+            );
 
             var mqttIsarStatusEventArgs = new MqttReceivedArgs(
                 new IsarStatusMessage
@@ -459,14 +705,24 @@ namespace Api.Test.EventHandlers
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
                     Status = RobotStatus.Available,
-                    Timestamp = DateTime.UtcNow
-                });
+                    Timestamp = DateTime.UtcNow,
+                }
+            );
 
-            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarMissionReceived), mqttIsarMissionEventArgs);
-            _mqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttIsarStatusEventArgs);
+            _mqttService.RaiseEvent(
+                nameof(MqttService.MqttIsarMissionReceived),
+                mqttIsarMissionEventArgs
+            );
+            _mqttService.RaiseEvent(
+                nameof(MqttService.MqttIsarStatusReceived),
+                mqttIsarStatusEventArgs
+            );
             Thread.Sleep(500);
 
-            var updatedMissionRun = await _missionRunService.ReadById(missionRun.Id, readOnly: true);
+            var updatedMissionRun = await _missionRunService.ReadById(
+                missionRun.Id,
+                readOnly: true
+            );
             Assert.True(updatedMissionRun?.Status.Equals(MissionStatus.Ongoing));
         }
     }

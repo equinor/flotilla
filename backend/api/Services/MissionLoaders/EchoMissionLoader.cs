@@ -1,12 +1,13 @@
 ﻿using Api.Controllers.Models;
 using Api.Database.Models;
+
 namespace Api.Services.MissionLoaders
 {
-    public class EchoMissionLoader(
-        IEchoService echoService
-        ) : IMissionLoader
+    public class EchoMissionLoader(IEchoService echoService) : IMissionLoader
     {
-        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(string? installationCode)
+        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(
+            string? installationCode
+        )
         {
             return await echoService.GetAvailableMissions(installationCode);
         }

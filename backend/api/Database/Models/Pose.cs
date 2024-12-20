@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Api.Mqtt.MessageModels;
 using Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
+
 namespace Api.Database.Models
 {
     [Owned]
@@ -34,21 +35,39 @@ namespace Api.Database.Models
 
         [Required]
         public float X { get; set; }
+
         [Required]
         public float Y { get; set; }
+
         [Required]
         public float Z { get; set; }
+
         [Required]
         public float W { get; set; }
 
         public override bool Equals(object obj)
         {
-            if (obj is not Orientation orientation) { return false; }
+            if (obj is not Orientation orientation)
+            {
+                return false;
+            }
             const float Tolerance = 1e-6F;
-            if (MathF.Abs(orientation.X - X) > Tolerance) { return false; }
-            if (MathF.Abs(orientation.Y - Y) > Tolerance) { return false; }
-            if (MathF.Abs(orientation.Z - Z) > Tolerance) { return false; }
-            if (MathF.Abs(orientation.W - W) > Tolerance) { return false; }
+            if (MathF.Abs(orientation.X - X) > Tolerance)
+            {
+                return false;
+            }
+            if (MathF.Abs(orientation.Y - Y) > Tolerance)
+            {
+                return false;
+            }
+            if (MathF.Abs(orientation.Z - Z) > Tolerance)
+            {
+                return false;
+            }
+            if (MathF.Abs(orientation.W - W) > Tolerance)
+            {
+                return false;
+            }
 
             return true;
         }
@@ -62,7 +81,6 @@ namespace Api.Database.Models
     [Owned]
     public class Position
     {
-
         public Position()
         {
             X = 0;
@@ -86,19 +104,33 @@ namespace Api.Database.Models
 
         [Required]
         public float X { get; set; }
+
         [Required]
         public float Y { get; set; }
+
         [Required]
         public float Z { get; set; }
 
         public override bool Equals(object obj)
         {
-            if (obj is not Position position) { return false; }
+            if (obj is not Position position)
+            {
+                return false;
+            }
             const float Tolerance = 1e-6F;
 
-            if (MathF.Abs(position.X - X) > Tolerance) { return false; }
-            if (MathF.Abs(position.Y - Y) > Tolerance) { return false; }
-            if (MathF.Abs(position.Z - Z) > Tolerance) { return false; }
+            if (MathF.Abs(position.X - X) > Tolerance)
+            {
+                return false;
+            }
+            if (MathF.Abs(position.Y - Y) > Tolerance)
+            {
+                return false;
+            }
+            if (MathF.Abs(position.Z - Z) > Tolerance)
+            {
+                return false;
+            }
 
             return true;
         }
@@ -112,7 +144,6 @@ namespace Api.Database.Models
     [Owned]
     public class Pose
     {
-
         public Pose()
         {
             Position = new Position();
@@ -128,7 +159,12 @@ namespace Api.Database.Models
         public Pose(IsarPoseMqtt isarPose)
         {
             Position = new Position(isarPose.Position.X, isarPose.Position.Y, isarPose.Position.Z);
-            Orientation = new Orientation(isarPose.Orientation.X, isarPose.Orientation.Y, isarPose.Orientation.Z, isarPose.Orientation.W);
+            Orientation = new Orientation(
+                isarPose.Orientation.X,
+                isarPose.Orientation.Y,
+                isarPose.Orientation.Z,
+                isarPose.Orientation.W
+            );
         }
 
         public Pose(
@@ -156,6 +192,7 @@ namespace Api.Database.Models
             Position = position;
             Orientation = orientation;
         }
+
         [Required]
         public Position Position { get; set; }
 
@@ -171,7 +208,10 @@ namespace Api.Database.Models
             float angle;
             echoAngle %= 2F * MathF.PI;
 
-            if (echoAngle < 0) { echoAngle += 2F * MathF.PI; }
+            if (echoAngle < 0)
+            {
+                echoAngle += 2F * MathF.PI;
+            }
 
             angle = (450 * MathF.PI / 180) - echoAngle;
 
@@ -180,7 +220,7 @@ namespace Api.Database.Models
                 X = 0,
                 Y = 0,
                 Z = MathF.Sin(angle / 2),
-                W = MathF.Cos(angle / 2)
+                W = MathF.Cos(angle / 2),
             };
 
             return quaternion;

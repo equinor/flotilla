@@ -9,10 +9,10 @@ namespace Api.Controllers
     [ApiController]
     [Route("access-roles")]
     public class AccessRoleController(
-            ILogger<AccessRoleController> logger,
-            IAccessRoleService accessRoleService,
-            IInstallationService installationService
-        ) : ControllerBase
+        ILogger<AccessRoleController> logger,
+        IAccessRoleService accessRoleService,
+        IInstallationService installationService
+    ) : ControllerBase
     {
         /// <summary>
         /// List all access roles in the Flotilla database
@@ -54,7 +54,9 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<AccessRole>> Create([FromBody] CreateAccessRoleQuery accessRoleQuery)
+        public async Task<ActionResult<AccessRole>> Create(
+            [FromBody] CreateAccessRoleQuery accessRoleQuery
+        )
         {
             logger.LogInformation("Creating new access role");
             try
@@ -62,7 +64,10 @@ namespace Api.Controllers
                 if (accessRoleQuery.AccessLevel == RoleAccessLevel.ADMIN)
                     return Unauthorized("Cannot create admin roles using API endpoints");
 
-                var installation = await installationService.ReadByInstallationCode(accessRoleQuery.InstallationCode, readOnly: true);
+                var installation = await installationService.ReadByInstallationCode(
+                    accessRoleQuery.InstallationCode,
+                    readOnly: true
+                );
                 if (installation is null)
                 {
                     logger.LogInformation("Installation not found when creating new access roles");
@@ -70,13 +75,22 @@ namespace Api.Controllers
                 }
 
                 var existingAccessRole = await accessRoleService.ReadByInstallation(installation!);
-                if (existingAccessRole != null && existingAccessRole.RoleName == accessRoleQuery.RoleName)
+                if (
+                    existingAccessRole != null
+                    && existingAccessRole.RoleName == accessRoleQuery.RoleName
+                )
                 {
-                    logger.LogInformation("An access role for the given installation and role name already exists");
+                    logger.LogInformation(
+                        "An access role for the given installation and role name already exists"
+                    );
                     return BadRequest($"Access role already exists");
                 }
 
-                var newAccessRole = await accessRoleService.Create(installation, accessRoleQuery.RoleName, accessRoleQuery.AccessLevel);
+                var newAccessRole = await accessRoleService.Create(
+                    installation,
+                    accessRoleQuery.RoleName,
+                    accessRoleQuery.AccessLevel
+                );
                 logger.LogInformation(
                     "Succesfully created new access role for installation '{installationCode}'",
                     installation.InstallationCode

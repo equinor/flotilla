@@ -11,8 +11,8 @@
         /// <returns></returns>
         public static void AddAppSettingsEnvironmentVariables(this WebApplicationBuilder builder)
         {
-            string? clientId = builder.Configuration
-                .GetSection("AzureAd")
+            string? clientId = builder
+                .Configuration.GetSection("AzureAd")
                 .GetValue<string?>("ClientId");
             if (clientId is not null)
             {
@@ -20,8 +20,8 @@
                 Console.WriteLine("'AZURE_CLIENT_ID' set to " + clientId);
             }
 
-            string? tenantId = builder.Configuration
-                .GetSection("AzureAd")
+            string? tenantId = builder
+                .Configuration.GetSection("AzureAd")
                 .GetValue<string?>("TenantId");
             if (tenantId is not null)
             {
@@ -31,10 +31,9 @@
 
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Local")
             {
-
-                string? userId = builder.Configuration
-                .GetSection("Local")
-                .GetValue<string?>("DevUserId");
+                string? userId = builder
+                    .Configuration.GetSection("Local")
+                    .GetValue<string?>("DevUserId");
                 if (tenantId is not null)
                 {
                     Environment.SetEnvironmentVariable("LOCAL_DEVUSERID", userId);
@@ -51,15 +50,17 @@
         /// <param name="builder"></param>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public static void AddDotEnvironmentVariables(this WebApplicationBuilder builder, string filePath)
+        public static void AddDotEnvironmentVariables(
+            this WebApplicationBuilder builder,
+            string filePath
+        )
         {
-            if (!File.Exists(filePath)) return;
+            if (!File.Exists(filePath))
+                return;
 
             foreach (string line in File.ReadAllLines(filePath))
             {
-                string[] parts = line.Split(
-                    '=',
-                    StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = line.Split('=', StringSplitOptions.RemoveEmptyEntries);
 
                 if (parts.Length == 0 || parts[0].StartsWith('#'))
                     continue;
@@ -77,19 +78,17 @@
         /// <returns></returns>
         public static void ConfigureLogger(this WebApplicationBuilder builder)
         {
-            builder.Logging.AddSimpleConsole(
-                options =>
-                {
-                    options.IncludeScopes = true;
-                    options.TimestampFormat = "yyyy-MM-dd HH:mm:ss - ";
-                    options.ColorBehavior = Microsoft
-                        .Extensions
-                        .Logging
-                        .Console
-                        .LoggerColorBehavior
-                        .Enabled;
-                }
-            );
+            builder.Logging.AddSimpleConsole(options =>
+            {
+                options.IncludeScopes = true;
+                options.TimestampFormat = "yyyy-MM-dd HH:mm:ss - ";
+                options.ColorBehavior = Microsoft
+                    .Extensions
+                    .Logging
+                    .Console
+                    .LoggerColorBehavior
+                    .Enabled;
+            });
         }
     }
 }

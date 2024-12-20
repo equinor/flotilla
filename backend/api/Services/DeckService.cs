@@ -5,6 +5,7 @@ using Api.Database.Context;
 using Api.Database.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
+
 namespace Api.Services
 {
     public interface IDeckService
@@ -13,11 +14,23 @@ namespace Api.Services
 
         public Task<Deck?> ReadById(string id, bool readOnly = true);
 
-        public Task<IEnumerable<Deck>> ReadByInstallation(string installationCode, bool readOnly = true);
+        public Task<IEnumerable<Deck>> ReadByInstallation(
+            string installationCode,
+            bool readOnly = true
+        );
 
-        public Task<Deck?> ReadByInstallationAndName(string installationCode, string deckName, bool readOnly = true);
+        public Task<Deck?> ReadByInstallationAndName(
+            string installationCode,
+            string deckName,
+            bool readOnly = true
+        );
 
-        public Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string deckName, bool readOnly = true);
+        public Task<Deck?> ReadByInstallationAndPlantAndName(
+            Installation installation,
+            Plant plant,
+            string deckName,
+            bool readOnly = true
+        );
 
         public Task<Deck> Create(CreateDeckQuery newDeck);
 
@@ -44,7 +57,8 @@ namespace Api.Services
         IInstallationService installationService,
         IPlantService plantService,
         IAccessRoleService accessRoleService,
-        ISignalRService signalRService) : IDeckService
+        ISignalRService signalRService
+    ) : IDeckService
     {
         public async Task<IEnumerable<Deck>> ReadAll(bool readOnly = true)
         {
@@ -53,42 +67,91 @@ namespace Api.Services
 
         public async Task<Deck?> ReadById(string id, bool readOnly = true)
         {
+            return await GetDecks(readOnly: readOnly).FirstOrDefaultAsync(a => a.Id.Equals(id));
+        }
+
+        public async Task<IEnumerable<Deck>> ReadByInstallation(
+            string installationCode,
+            bool readOnly = true
+        )
+        {
+            var installation = await installationService.ReadByInstallationCode(
+                installationCode,
+                readOnly: true
+            );
+            if (installation == null)
+            {
+                return [];
+            }
             return await GetDecks(readOnly: readOnly)
-                .FirstOrDefaultAsync(a => a.Id.Equals(id));
+                .Where(a => a.Installation != null && a.Installation.Id.Equals(installation.Id))
+                .ToListAsync();
         }
 
-        public async Task<IEnumerable<Deck>> ReadByInstallation(string installationCode, bool readOnly = true)
+        public async Task<Deck?> ReadByInstallationAndName(
+            string installationCode,
+            string deckName,
+            bool readOnly = true
+        )
         {
-            var installation = await installationService.ReadByInstallationCode(installationCode, readOnly: true);
-            if (installation == null) { return []; }
-            return await GetDecks(readOnly: readOnly).Where(a =>
-                a.Installation != null && a.Installation.Id.Equals(installation.Id)).ToListAsync();
+            if (deckName == null)
+            {
+                return null;
+            }
+            return await GetDecks(readOnly: readOnly)
+                .Where(a =>
+                    a.Installation != null
+                    && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower())
+                    && a.Name.ToLower().Equals(deckName.ToLower())
+                )
+                .FirstOrDefaultAsync();
         }
 
-        public async Task<Deck?> ReadByInstallationAndName(string installationCode, string deckName, bool readOnly = true)
+        public async Task<Deck?> ReadByInstallationAndPlantAndName(
+            Installation installation,
+            Plant plant,
+            string name,
+            bool readOnly = true
+        )
         {
-            if (deckName == null) { return null; }
-            return await GetDecks(readOnly: readOnly).Where(a =>
-                a.Installation != null && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower()) && a.Name.ToLower().Equals(deckName.ToLower())
-            ).FirstOrDefaultAsync();
-        }
-
-        public async Task<Deck?> ReadByInstallationAndPlantAndName(Installation installation, Plant plant, string name, bool readOnly = true)
-        {
-            return await GetDecks(readOnly: readOnly).Where(a =>
-                a.Plant != null && a.Plant.Id.Equals(plant.Id) &&
-                a.Installation != null && a.Installation.Id.Equals(installation.Id) &&
-                a.Name.ToLower().Equals(name.ToLower())
-            ).Include(d => d.Plant).Include(i => i.Installation).FirstOrDefaultAsync();
+            return await GetDecks(readOnly: readOnly)
+                .Where(a =>
+                    a.Plant != null
+                    && a.Plant.Id.Equals(plant.Id)
+                    && a.Installation != null
+                    && a.Installation.Id.Equals(installation.Id)
+                    && a.Name.ToLower().Equals(name.ToLower())
+                )
+                .Include(d => d.Plant)
+                .Include(i => i.Installation)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Deck> Create(CreateDeckQuery newDeckQuery)
         {
-            var installation = await installationService.ReadByInstallationCode(newDeckQuery.InstallationCode, readOnly: true) ??
-                               throw new InstallationNotFoundException($"No installation with name {newDeckQuery.InstallationCode} could be found");
-            var plant = await plantService.ReadByInstallationAndPlantCode(installation, newDeckQuery.PlantCode, readOnly: true) ??
-                        throw new PlantNotFoundException($"No plant with name {newDeckQuery.PlantCode} could be found");
-            var existingDeck = await ReadByInstallationAndPlantAndName(installation, plant, newDeckQuery.Name, readOnly: true);
+            var installation =
+                await installationService.ReadByInstallationCode(
+                    newDeckQuery.InstallationCode,
+                    readOnly: true
+                )
+                ?? throw new InstallationNotFoundException(
+                    $"No installation with name {newDeckQuery.InstallationCode} could be found"
+                );
+            var plant =
+                await plantService.ReadByInstallationAndPlantCode(
+                    installation,
+                    newDeckQuery.PlantCode,
+                    readOnly: true
+                )
+                ?? throw new PlantNotFoundException(
+                    $"No plant with name {newDeckQuery.PlantCode} could be found"
+                );
+            var existingDeck = await ReadByInstallationAndPlantAndName(
+                installation,
+                plant,
+                newDeckQuery.Name,
+                readOnly: true
+            );
 
             if (existingDeck != null)
             {
@@ -98,7 +161,12 @@ namespace Api.Services
             DefaultLocalizationPose? defaultLocalizationPose = null;
             if (newDeckQuery.DefaultLocalizationPose != null)
             {
-                defaultLocalizationPose = await defaultLocalizationPoseService.Create(new DefaultLocalizationPose(newDeckQuery.DefaultLocalizationPose.Value.Pose, newDeckQuery.DefaultLocalizationPose.Value.IsDockingStation));
+                defaultLocalizationPose = await defaultLocalizationPoseService.Create(
+                    new DefaultLocalizationPose(
+                        newDeckQuery.DefaultLocalizationPose.Value.Pose,
+                        newDeckQuery.DefaultLocalizationPose.Value.IsDockingStation
+                    )
+                );
             }
 
             var deck = new Deck
@@ -106,16 +174,23 @@ namespace Api.Services
                 Name = newDeckQuery.Name,
                 Installation = installation,
                 Plant = plant,
-                DefaultLocalizationPose = defaultLocalizationPose
+                DefaultLocalizationPose = defaultLocalizationPose,
             };
 
             context.Entry(deck.Installation).State = EntityState.Unchanged;
             context.Entry(deck.Plant).State = EntityState.Unchanged;
-            if (deck.DefaultLocalizationPose is not null) { context.Entry(deck.DefaultLocalizationPose).State = EntityState.Modified; }
+            if (deck.DefaultLocalizationPose is not null)
+            {
+                context.Entry(deck.DefaultLocalizationPose).State = EntityState.Modified;
+            }
 
             await context.Decks.AddAsync(deck);
             await ApplyDatabaseUpdate(deck.Installation);
-            _ = signalRService.SendMessageAsync("Deck created", deck.Installation, new DeckResponse(deck));
+            _ = signalRService.SendMessageAsync(
+                "Deck created",
+                deck.Installation,
+                new DeckResponse(deck)
+            );
             DetachTracking(deck);
             return deck!;
         }
@@ -124,14 +199,17 @@ namespace Api.Services
         {
             var entry = context.Update(deck);
             await ApplyDatabaseUpdate(deck.Installation);
-            _ = signalRService.SendMessageAsync("Deck updated", deck.Installation, new DeckResponse(deck));
+            _ = signalRService.SendMessageAsync(
+                "Deck updated",
+                deck.Installation,
+                new DeckResponse(deck)
+            );
             return entry.Entity;
         }
 
         public async Task<Deck?> Delete(string id)
         {
-            var deck = await GetDecks()
-                .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
+            var deck = await GetDecks().FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (deck is null)
             {
                 return null;
@@ -139,7 +217,11 @@ namespace Api.Services
 
             context.Decks.Remove(deck);
             await ApplyDatabaseUpdate(deck.Installation);
-            _ = signalRService.SendMessageAsync("Deck deleted", deck.Installation, new DeckResponse(deck));
+            _ = signalRService.SendMessageAsync(
+                "Deck deleted",
+                deck.Installation,
+                new DeckResponse(deck)
+            );
 
             return deck;
         }
@@ -147,25 +229,44 @@ namespace Api.Services
         private IQueryable<Deck> GetDecks(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
-            var query = context.Decks.Include(p => p.Plant).ThenInclude(p => p.Installation).Include(i => i.Installation).Include(d => d.DefaultLocalizationPose)
-                .Where((d) => accessibleInstallationCodes.Result.Contains(d.Installation.InstallationCode.ToUpper()));
+            var query = context
+                .Decks.Include(p => p.Plant)
+                .ThenInclude(p => p.Installation)
+                .Include(i => i.Installation)
+                .Include(d => d.DefaultLocalizationPose)
+                .Where(
+                    (d) =>
+                        accessibleInstallationCodes.Result.Contains(
+                            d.Installation.InstallationCode.ToUpper()
+                        )
+                );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
         {
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
-            if (installation == null || accessibleInstallationCodes.Contains(installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)))
+            if (
+                installation == null
+                || accessibleInstallationCodes.Contains(
+                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
+                )
+            )
                 await context.SaveChangesAsync();
             else
-                throw new UnauthorizedAccessException($"User does not have permission to update deck in installation {installation.Name}");
+                throw new UnauthorizedAccessException(
+                    $"User does not have permission to update deck in installation {installation.Name}"
+                );
         }
 
         public void DetachTracking(Deck deck)
         {
-            if (deck.Installation != null) installationService.DetachTracking(deck.Installation);
-            if (deck.Plant != null) plantService.DetachTracking(deck.Plant);
-            if (deck.DefaultLocalizationPose != null) defaultLocalizationPoseService.DetachTracking(deck.DefaultLocalizationPose);
+            if (deck.Installation != null)
+                installationService.DetachTracking(deck.Installation);
+            if (deck.Plant != null)
+                plantService.DetachTracking(deck.Plant);
+            if (deck.DefaultLocalizationPose != null)
+                defaultLocalizationPoseService.DetachTracking(deck.DefaultLocalizationPose);
             context.Entry(deck).State = EntityState.Detached;
         }
     }

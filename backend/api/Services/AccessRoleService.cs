@@ -11,13 +11,20 @@ namespace Api.Services
         public Task<List<string>> GetAllowedInstallationCodes(List<string> roles);
         public bool IsUserAdmin();
         public bool IsAuthenticationAvailable();
-        public Task<AccessRole> Create(Installation installation, string roleName, RoleAccessLevel accessLevel);
+        public Task<AccessRole> Create(
+            Installation installation,
+            string roleName,
+            RoleAccessLevel accessLevel
+        );
         public Task<AccessRole?> ReadByInstallation(Installation installation);
         public Task<List<AccessRole>> ReadAll();
         public void DetachTracking(AccessRole accessRole);
     }
 
-    public class AccessRoleService(FlotillaDbContext context, IHttpContextAccessor httpContextAccessor) : IAccessRoleService
+    public class AccessRoleService(
+        FlotillaDbContext context,
+        IHttpContextAccessor httpContextAccessor
+    ) : IAccessRoleService
     {
         private const string SUPER_ADMIN_ROLE_NAME = "Role.Admin";
 
@@ -29,7 +36,10 @@ namespace Api.Services
         public async Task<List<string>> GetAllowedInstallationCodes()
         {
             if (httpContextAccessor.HttpContext == null)
-                return await context.Installations.AsNoTracking().Select((i) => i.InstallationCode.ToUpperInvariant()).ToListAsync();
+                return await context
+                    .Installations.AsNoTracking()
+                    .Select((i) => i.InstallationCode.ToUpperInvariant())
+                    .ToListAsync();
 
             var roles = httpContextAccessor.HttpContext.GetRequestedRoleNames();
 
@@ -39,23 +49,42 @@ namespace Api.Services
         public async Task<List<string>> GetAllowedInstallationCodes(List<string> roles)
         {
             if (roles.Contains(SUPER_ADMIN_ROLE_NAME))
-                return await context.Installations.AsNoTracking().Select((i) => i.InstallationCode.ToUpperInvariant()).ToListAsync();
+                return await context
+                    .Installations.AsNoTracking()
+                    .Select((i) => i.InstallationCode.ToUpperInvariant())
+                    .ToListAsync();
             else
-                return await GetAccessRoles(readOnly: true).Include((r) => r.Installation)
-                    .Where((r) => roles.Contains(r.RoleName)).Select((r) => r.Installation != null ? r.Installation.InstallationCode.ToUpperInvariant() : "").ToListAsync();
+                return await GetAccessRoles(readOnly: true)
+                    .Include((r) => r.Installation)
+                    .Where((r) => roles.Contains(r.RoleName))
+                    .Select(
+                        (r) =>
+                            r.Installation != null
+                                ? r.Installation.InstallationCode.ToUpperInvariant()
+                                : ""
+                    )
+                    .ToListAsync();
         }
 
         private void ThrowExceptionIfNotAdmin()
         {
             if (httpContextAccessor.HttpContext == null)
-                throw new HttpRequestException("Access roles can only be created in authenticated HTTP requests");
+                throw new HttpRequestException(
+                    "Access roles can only be created in authenticated HTTP requests"
+                );
 
             var roles = httpContextAccessor.HttpContext.GetRequestedRoleNames();
             if (!roles.Contains(SUPER_ADMIN_ROLE_NAME))
-                throw new HttpRequestException("This user is not authorised to create a new access role");
+                throw new HttpRequestException(
+                    "This user is not authorised to create a new access role"
+                );
         }
 
-        public async Task<AccessRole> Create(Installation installation, string roleName, RoleAccessLevel accessLevel)
+        public async Task<AccessRole> Create(
+            Installation installation,
+            string roleName,
+            RoleAccessLevel accessLevel
+        )
         {
             if (accessLevel == RoleAccessLevel.ADMIN)
                 throw new HttpRequestException("Cannot create admin roles using database services");
@@ -67,7 +96,7 @@ namespace Api.Services
             {
                 Installation = installation,
                 RoleName = roleName,
-                AccessLevel = accessLevel
+                AccessLevel = accessLevel,
             };
 
             await context.AccessRoles.AddAsync(newAccessRole);
@@ -79,13 +108,18 @@ namespace Api.Services
         public async Task<AccessRole?> ReadByInstallation(Installation installation)
         {
             ThrowExceptionIfNotAdmin();
-            return await GetAccessRoles(readOnly: true).Include((r) => r.Installation).Where((r) => r.Installation.Id == installation.Id).FirstOrDefaultAsync();
+            return await GetAccessRoles(readOnly: true)
+                .Include((r) => r.Installation)
+                .Where((r) => r.Installation.Id == installation.Id)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<List<AccessRole>> ReadAll()
         {
             ThrowExceptionIfNotAdmin();
-            return await GetAccessRoles(readOnly: true).Include((r) => r.Installation).ToListAsync();
+            return await GetAccessRoles(readOnly: true)
+                .Include((r) => r.Installation)
+                .ToListAsync();
         }
 
         public bool IsUserAdmin()

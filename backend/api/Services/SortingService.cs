@@ -7,7 +7,8 @@ namespace Api.Services
 {
     public class SortingService
     {
-        public static void ApplySort<T>(ref IQueryable<T> missions, string orderByQueryString) where T : SortableRecord
+        public static void ApplySort<T>(ref IQueryable<T> missions, string orderByQueryString)
+            where T : SortableRecord
         {
             if (string.IsNullOrWhiteSpace(orderByQueryString))
             {
@@ -32,18 +33,16 @@ namespace Api.Services
                     continue;
 
                 string propertyFromQueryName = param.Split(" ")[0];
-                var objectProperty = propertyInfos.FirstOrDefault(
-                    pi =>
-                        pi.Name.Equals(
-                            propertyFromQueryName,
-                            StringComparison.Ordinal
-                        )
-                ) ?? throw new InvalidDataException(
+                var objectProperty =
+                    propertyInfos.FirstOrDefault(pi =>
+                        pi.Name.Equals(propertyFromQueryName, StringComparison.Ordinal)
+                    )
+                    ?? throw new InvalidDataException(
                         $"Mission has no property '{propertyFromQueryName}' for ordering"
                     );
                 string sortingOrder = param.EndsWith(" desc", StringComparison.OrdinalIgnoreCase)
-                  ? "descending"
-                  : "ascending";
+                    ? "descending"
+                    : "ascending";
 
                 string sortParameter = $"{objectProperty.Name} {sortingOrder}, ";
                 orderQueryBuilder.Append(sortParameter);
@@ -52,8 +51,8 @@ namespace Api.Services
             string orderQuery = orderQueryBuilder.ToString().TrimEnd(',', ' ');
 
             missions = string.IsNullOrWhiteSpace(orderQuery)
-              ? missions.OrderBy(mission => mission.Name)
-              : missions.OrderBy(orderQuery);
+                ? missions.OrderBy(mission => mission.Name)
+                : missions.OrderBy(orderQuery);
         }
     }
 }

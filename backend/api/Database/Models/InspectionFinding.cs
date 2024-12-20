@@ -32,5 +32,4 @@ namespace Api.Database.Models
             Finding = "string";
         }
     }
-
 }

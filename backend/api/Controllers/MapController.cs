@@ -2,6 +2,7 @@
 using Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace Api.Controllers
 {
     [ApiController]
@@ -21,11 +22,17 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(StatusCodes.Status502BadGateway)]
-        public async Task<ActionResult<byte[]>> GetMap([FromRoute] string installationCode, string mapName)
+        public async Task<ActionResult<byte[]>> GetMap(
+            [FromRoute] string installationCode,
+            string mapName
+        )
         {
             byte[]? mapStream = await mapService.FetchMapImage(mapName, installationCode);
 
-            if (mapStream == null) return NotFound($"Could not retrieve map '{mapName}' in installation {installationCode}");
+            if (mapStream == null)
+                return NotFound(
+                    $"Could not retrieve map '{mapName}' in installation {installationCode}"
+                );
 
             return File(mapStream, "image/png");
         }

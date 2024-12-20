@@ -18,6 +18,7 @@ namespace Api.Controllers.Models
         [JsonConstructor]
 #nullable disable
         public DeckResponse() { }
+
 #nullable enable
 
         public DeckResponse(Deck deck)

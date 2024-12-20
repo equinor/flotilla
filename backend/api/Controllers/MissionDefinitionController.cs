@@ -5,11 +5,16 @@ using Api.Services;
 using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 namespace Api.Controllers
 {
     [ApiController]
     [Route("missions/definitions")]
-    public class MissionDefinitionController(ILogger<MissionDefinitionController> logger, IMissionDefinitionService missionDefinitionService, IMissionRunService missionRunService) : ControllerBase
+    public class MissionDefinitionController(
+        ILogger<MissionDefinitionController> logger,
+        IMissionDefinitionService missionDefinitionService,
+        IMissionRunService missionRunService
+    ) : ControllerBase
     {
         /// <summary>
         ///     List all mission definitions in the Flotilla database
@@ -31,7 +36,10 @@ namespace Api.Controllers
             PagedList<MissionDefinition> missionDefinitions;
             try
             {
-                missionDefinitions = await missionDefinitionService.ReadAll(parameters, readOnly: true);
+                missionDefinitions = await missionDefinitionService.ReadAll(
+                    parameters,
+                    readOnly: true
+                );
             }
             catch (InvalidDataException e)
             {
@@ -46,7 +54,7 @@ namespace Api.Controllers
                 missionDefinitions.CurrentPage,
                 missionDefinitions.TotalPages,
                 missionDefinitions.HasNext,
-                missionDefinitions.HasPrevious
+                missionDefinitions.HasPrevious,
             };
 
             Response.Headers.Append(
@@ -54,7 +62,9 @@ namespace Api.Controllers
                 JsonSerializer.Serialize(metadata)
             );
 
-            var missionDefinitionResponses = missionDefinitions.Select(m => new MissionDefinitionResponse(m));
+            var missionDefinitionResponses = missionDefinitions.Select(
+                m => new MissionDefinitionResponse(m)
+            );
             return Ok(missionDefinitionResponses);
         }
 
@@ -69,14 +79,19 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MissionDefinitionResponse>> GetMissionDefinitionWithTasksById([FromRoute] string id)
+        public async Task<
+            ActionResult<MissionDefinitionResponse>
+        > GetMissionDefinitionWithTasksById([FromRoute] string id)
         {
             var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: true);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id {id}");
             }
-            var missionDefinitionResponse = new MissionDefinitionWithTasksResponse(missionDefinitionService, missionDefinition);
+            var missionDefinitionResponse = new MissionDefinitionWithTasksResponse(
+                missionDefinitionService,
+                missionDefinition
+            );
             return Ok(missionDefinitionResponse);
         }
 
@@ -98,7 +113,10 @@ namespace Api.Controllers
             {
                 return NotFound($"Could not find mission definition with id {id}");
             }
-            var nextRun = await missionRunService.ReadNextScheduledRunByMissionId(id, readOnly: true);
+            var nextRun = await missionRunService.ReadNextScheduledRunByMissionId(
+                id,
+                readOnly: true
+            );
             return Ok(nextRun);
         }
 
@@ -163,12 +181,17 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MissionDefinitionResponse>> UpdateMissionDefinitionIsDeprecatedById(
+        public async Task<
+            ActionResult<MissionDefinitionResponse>
+        > UpdateMissionDefinitionIsDeprecatedById(
             [FromRoute] string id,
             [FromBody] UpdateMissionDefinitionIsDeprecatedQuery missionDefinitionIsDeprecatedQuery
         )
         {
-            logger.LogInformation("Updating mission definition IsDeprected value for id '{Id}'", id);
+            logger.LogInformation(
+                "Updating mission definition IsDeprected value for id '{Id}'",
+                id
+            );
 
             if (!ModelState.IsValid)
             {
@@ -197,14 +220,19 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MissionDefinitionResponse>> DeleteMissionDefinitionWithTasks([FromRoute] string id)
+        public async Task<ActionResult<MissionDefinitionResponse>> DeleteMissionDefinitionWithTasks(
+            [FromRoute] string id
+        )
         {
             var missionDefinition = await missionDefinitionService.Delete(id);
             if (missionDefinition is null)
             {
                 return NotFound($"Mission definition with id {id} not found");
             }
-            var missionDefinitionResponse = new MissionDefinitionWithTasksResponse(missionDefinitionService, missionDefinition);
+            var missionDefinitionResponse = new MissionDefinitionWithTasksResponse(
+                missionDefinitionService,
+                missionDefinition
+            );
             return Ok(missionDefinitionResponse);
         }
     }

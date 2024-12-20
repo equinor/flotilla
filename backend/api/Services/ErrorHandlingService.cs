@@ -1,5 +1,6 @@
 ﻿using Api.Database.Models;
 using Api.Utilities;
+
 namespace Api.Services
 {
     public interface IErrorHandlingService
@@ -7,9 +8,12 @@ namespace Api.Services
         public Task HandleLosingConnectionToIsar(string robotId);
     }
 
-    public class ErrorHandlingService(ILogger<ErrorHandlingService> logger, IRobotService robotService, IMissionRunService missionRunService) : IErrorHandlingService
+    public class ErrorHandlingService(
+        ILogger<ErrorHandlingService> logger,
+        IRobotService robotService,
+        IMissionRunService missionRunService
+    ) : IErrorHandlingService
     {
-
         public async Task HandleLosingConnectionToIsar(string robotId)
         {
             try

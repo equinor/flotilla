@@ -8,6 +8,7 @@ using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Abstractions;
+
 namespace Api.Services
 {
     public interface IEchoService
@@ -16,16 +17,24 @@ namespace Api.Services
         public Task<MissionDefinition?> GetMissionById(string sourceMissionId);
         public Task<List<MissionTask>> GetTasksForMission(string missionSourceId);
         public Task<List<PlantInfo>> GetPlantInfos();
-        public Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(TagInspectionMetadata metadata);
+        public Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
+            TagInspectionMetadata metadata
+        );
     }
 
     public class EchoService(
-            ILogger<EchoService> logger, IDownstreamApi echoApi, ISourceService sourceService, IStidService stidService, FlotillaDbContext context) : IEchoService
+        ILogger<EchoService> logger,
+        IDownstreamApi echoApi,
+        ISourceService sourceService,
+        IStidService stidService,
+        FlotillaDbContext context
+    ) : IEchoService
     {
-
         public const string ServiceName = "EchoApi";
 
-        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(string? installationCode)
+        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(
+            string? installationCode
+        )
         {
             string relativePath = string.IsNullOrEmpty(installationCode)
                 ? "robots/robot-plan?Status=Ready"
@@ -42,9 +51,9 @@ namespace Api.Services
 
             response.EnsureSuccessStatusCode();
 
-            var echoMissions = await response.Content.ReadFromJsonAsync<
-                List<EchoMissionResponse>
-            >() ?? throw new JsonException("Failed to deserialize missions from Echo");
+            var echoMissions =
+                await response.Content.ReadFromJsonAsync<List<EchoMissionResponse>>()
+                ?? throw new JsonException("Failed to deserialize missions from Echo");
 
             var availableMissions = new List<MissionDefinition>();
 
@@ -89,26 +98,34 @@ namespace Api.Services
 
             response.EnsureSuccessStatusCode();
 
-            var echoMission = await response.Content.ReadFromJsonAsync<EchoMissionResponse>() ?? throw new JsonException("Failed to deserialize mission from Echo");
-            var processedEchoMission = ProcessEchoMission(echoMission) ?? throw new InvalidDataException($"EchoMission with id: {echoMissionId} is invalid");
+            var echoMission =
+                await response.Content.ReadFromJsonAsync<EchoMissionResponse>()
+                ?? throw new JsonException("Failed to deserialize mission from Echo");
+            var processedEchoMission =
+                ProcessEchoMission(echoMission)
+                ?? throw new InvalidDataException(
+                    $"EchoMission with id: {echoMissionId} is invalid"
+                );
             return processedEchoMission;
         }
 
         public async Task<List<MissionTask>> GetTasksForMission(string missionSourceId)
         {
             var echoMission = await GetEchoMission(missionSourceId);
-            var missionTasks = echoMission.Tags.Select(t => MissionTasksFromEchoTag(t)).SelectMany(task => task.Result).ToList();
+            var missionTasks = echoMission
+                .Tags.Select(t => MissionTasksFromEchoTag(t))
+                .SelectMany(task => task.Result)
+                .ToList();
             return missionTasks;
         }
 
-        private async Task<MissionDefinition?> EchoMissionToMissionDefinition(EchoMission echoMission)
+        private async Task<MissionDefinition?> EchoMissionToMissionDefinition(
+            EchoMission echoMission
+        )
         {
-            var source = await sourceService.CheckForExistingSource(echoMission.Id) ?? await sourceService.Create(
-                    new Source
-                    {
-                        SourceId = $"{echoMission.Id}",
-                    }
-                );
+            var source =
+                await sourceService.CheckForExistingSource(echoMission.Id)
+                ?? await sourceService.Create(new Source { SourceId = $"{echoMission.Id}" });
             var missionTasks = echoMission.Tags;
             List<Area?> missionAreas;
             missionAreas = missionTasks
@@ -116,25 +133,37 @@ namespace Api.Services
                 .Select(t => stidService.GetTagArea(t.TagId, echoMission.InstallationCode).Result)
                 .ToList();
 
-            var missionDeckNames = missionAreas.Where(a => a != null).Select(a => a!.Deck.Name).Distinct().ToList();
+            var missionDeckNames = missionAreas
+                .Where(a => a != null)
+                .Select(a => a!.Deck.Name)
+                .Distinct()
+                .ToList();
             if (missionDeckNames.Count > 1)
             {
                 string joinedMissionDeckNames = string.Join(", ", [.. missionDeckNames]);
-                logger.LogWarning($"Mission {echoMission.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}.");
+                logger.LogWarning(
+                    $"Mission {echoMission.Name} has tags on more than one deck. The decks are: {joinedMissionDeckNames}."
+                );
             }
 
-            var sortedAreas = missionAreas.GroupBy(i => i).OrderByDescending(grp => grp.Count()).Select(grp => grp.Key);
+            var sortedAreas = missionAreas
+                .GroupBy(i => i)
+                .OrderByDescending(grp => grp.Count())
+                .Select(grp => grp.Key);
             var area = sortedAreas.First();
 
             if (area == null && sortedAreas.Count() > 1)
             {
-                logger.LogWarning($"Most common area in mission {echoMission.Name} is null. Will use second most common area.");
+                logger.LogWarning(
+                    $"Most common area in mission {echoMission.Name} is null. Will use second most common area."
+                );
                 area = sortedAreas.Skip(1).First();
-
             }
             if (area == null)
             {
-                logger.LogError($"Mission {echoMission.Name} doesn't have any tags with valid area.");
+                logger.LogError(
+                    $"Mission {echoMission.Name} doesn't have any tags with valid area."
+                );
                 return null;
             }
 
@@ -144,7 +173,7 @@ namespace Api.Services
                 Source = source,
                 Name = echoMission.Name,
                 InstallationCode = echoMission.InstallationCode,
-                InspectionArea = area.Deck
+                InspectionArea = area.Deck,
             };
             return missionDefinition;
         }
@@ -162,14 +191,17 @@ namespace Api.Services
             );
 
             response.EnsureSuccessStatusCode();
-            var echoPlantInfoResponse = await response.Content.ReadFromJsonAsync<
-                List<EchoPlantInfoResponse>
-            >() ?? throw new JsonException("Failed to deserialize plant information from Echo");
+            var echoPlantInfoResponse =
+                await response.Content.ReadFromJsonAsync<List<EchoPlantInfoResponse>>()
+                ?? throw new JsonException("Failed to deserialize plant information from Echo");
             var installations = ProcessEchoPlantInfos(echoPlantInfoResponse);
             return installations;
         }
 
-        private static List<EchoTag> ProcessPlanItems(List<PlanItem> planItems, string installationCode)
+        private static List<EchoTag> ProcessPlanItems(
+            List<PlanItem> planItems,
+            string installationCode
+        )
         {
             var tags = new List<EchoTag>();
 
@@ -179,13 +211,18 @@ namespace Api.Services
             for (int i = 0; i < planItems.Count; i++)
             {
                 var planItem = planItems[i];
-                if (planItem.SortingOrder < 0 || planItem.SortingOrder >= planItems.Count || indices.Contains(planItem.SortingOrder))
+                if (
+                    planItem.SortingOrder < 0
+                    || planItem.SortingOrder >= planItems.Count
+                    || indices.Contains(planItem.SortingOrder)
+                )
                     inconsistentIndices = true;
                 indices.Add(planItem.SortingOrder);
 
                 if (planItem.PoseId is null)
                 {
-                    string message = $"Invalid EchoMission {planItem.Tag} has no associated pose id";
+                    string message =
+                        $"Invalid EchoMission {planItem.Tag} has no associated pose id";
                     throw new InvalidDataException(message);
                 }
 
@@ -202,8 +239,14 @@ namespace Api.Services
                     URL = new Uri(
                         $"https://stid.equinor.com/{installationCode}/tag?tagNo={planItem.Tag}"
                     ),
-                    Inspections = planItem.SensorTypes
-                        .Select(sensor => new EchoInspection(sensor, planItem.InspectionPoint.EnuPosition.ToPosition(), planItem.InspectionPoint.Name)).Distinct(new EchoInspectionComparer()).ToList()
+                    Inspections = planItem
+                        .SensorTypes.Select(sensor => new EchoInspection(
+                            sensor,
+                            planItem.InspectionPoint.EnuPosition.ToPosition(),
+                            planItem.InspectionPoint.Name
+                        ))
+                        .Distinct(new EchoInspectionComparer())
+                        .ToList(),
                 };
 
                 if (tag.Inspections.Count < 1)
@@ -235,7 +278,7 @@ namespace Api.Services
                     Name = echoMission.Name,
                     InstallationCode = echoMission.InstallationCode,
                     URL = new Uri($"https://echo.equinor.com/mp?editId={echoMission.Id}"),
-                    Tags = ProcessPlanItems(echoMission.PlanItems, echoMission.InstallationCode)
+                    Tags = ProcessPlanItems(echoMission.PlanItems, echoMission.InstallationCode),
                 };
                 return mission;
             }
@@ -265,7 +308,7 @@ namespace Api.Services
                 var echoPlantInfo = new PlantInfo
                 {
                     PlantCode = plant.InstallationCode,
-                    ProjectDescription = plant.ProjectDescription
+                    ProjectDescription = plant.ProjectDescription,
                 };
 
                 echoPlantInfos.Add(echoPlantInfo);
@@ -275,13 +318,14 @@ namespace Api.Services
 
         public async Task<IList<MissionTask>> MissionTasksFromEchoTag(EchoTag echoTag)
         {
-            var inspections = echoTag.Inspections
-                .Select(inspection => new Inspection(
+            var inspections = echoTag
+                .Inspections.Select(inspection => new Inspection(
                     inspectionType: inspection.InspectionType,
                     videoDuration: inspection.TimeInSeconds,
                     inspectionTarget: inspection.InspectionPoint,
                     inspectionTargetName: inspection.InspectionPointName,
-                    status: InspectionStatus.NotStarted))
+                    status: InspectionStatus.NotStarted
+                ))
                 .ToList();
 
             var missionTasks = new List<MissionTask>();
@@ -289,8 +333,7 @@ namespace Api.Services
             foreach (var inspection in inspections)
             {
                 missionTasks.Add(
-                    new MissionTask
-                    (
+                    new MissionTask(
                         inspection: inspection,
                         tagLink: echoTag.URL,
                         tagId: echoTag.TagId,
@@ -301,15 +344,20 @@ namespace Api.Services
                         zoomDescription: await FindInspectionZoom(echoTag),
                         status: Database.Models.TaskStatus.NotStarted,
                         type: MissionTaskType.Inspection
-                    ));
+                    )
+                );
             }
 
             return missionTasks;
         }
 
-        public async Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(TagInspectionMetadata metadata)
+        public async Task<TagInspectionMetadata> CreateOrUpdateTagInspectionMetadata(
+            TagInspectionMetadata metadata
+        )
         {
-            var existingMetadata = await context.TagInspectionMetadata.Where(e => e.TagId == metadata.TagId).FirstOrDefaultAsync();
+            var existingMetadata = await context
+                .TagInspectionMetadata.Where(e => e.TagId == metadata.TagId)
+                .FirstOrDefaultAsync();
             if (existingMetadata == null)
             {
                 await context.TagInspectionMetadata.AddAsync(metadata);
@@ -326,7 +374,11 @@ namespace Api.Services
 
         private async Task<IsarZoomDescription?> FindInspectionZoom(EchoTag echoTag)
         {
-            return (await context.TagInspectionMetadata.Where((e) => e.TagId == echoTag.TagId).FirstOrDefaultAsync())?.ZoomDescription;
+            return (
+                await context
+                    .TagInspectionMetadata.Where((e) => e.TagId == echoTag.TagId)
+                    .FirstOrDefaultAsync()
+            )?.ZoomDescription;
         }
     }
 }

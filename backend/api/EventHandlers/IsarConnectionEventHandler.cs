@@ -7,6 +7,7 @@ using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
 using Timer = System.Timers.Timer;
+
 namespace Api.EventHandlers
 {
     /// <summary>
@@ -14,7 +15,6 @@ namespace Api.EventHandlers
     /// </summary>
     public class IsarConnectionEventHandler : EventHandlerBase
     {
-
         private readonly int _isarConnectionTimeout;
 
         private readonly ConcurrentDictionary<string, Timer> _isarConnectionTimers = new();
@@ -44,7 +44,9 @@ namespace Api.EventHandlers
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
 
         private IMissionSchedulingService MissionSchedulingService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionSchedulingService>();
+            _scopeFactory
+                .CreateScope()
+                .ServiceProvider.GetRequiredService<IMissionSchedulingService>();
 
         public override void Subscribe()
         {
@@ -76,7 +78,10 @@ namespace Api.EventHandlers
                 return;
             }
 
-            if (!_isarConnectionTimers.ContainsKey(robot.IsarId)) { AddTimerForRobot(isarRobotHeartbeat, robot); }
+            if (!_isarConnectionTimers.ContainsKey(robot.IsarId))
+            {
+                AddTimerForRobot(isarRobotHeartbeat, robot);
+            }
 
             _logger.LogDebug(
                 "Reset connection timer for ISAR '{IsarId}' ('{RobotName}')",
@@ -86,7 +91,10 @@ namespace Api.EventHandlers
 
             _isarConnectionTimers[robot.IsarId].Reset();
 
-            if (robot.IsarConnected) { return; }
+            if (robot.IsarConnected)
+            {
+                return;
+            }
             try
             {
                 await RobotService.UpdateRobotIsarConnected(robot.Id, true);
@@ -104,7 +112,10 @@ namespace Api.EventHandlers
 
             // If the robot became available while the connection was not active, then this will not be triggered
             // It will however be triggered if the robot lost connection while restarting or while idle
-            if (robot.Status == RobotStatus.Available) MissionSchedulingService.TriggerRobotAvailable(new RobotAvailableEventArgs(robot.Id));
+            if (robot.Status == RobotStatus.Available)
+                MissionSchedulingService.TriggerRobotAvailable(
+                    new RobotAvailableEventArgs(robot.Id)
+                );
         }
 
         private void AddTimerForRobot(IsarRobotHeartbeatMessage isarRobotHeartbeat, Robot robot)
@@ -113,17 +124,31 @@ namespace Api.EventHandlers
             timer.Elapsed += (_, _) => OnTimeoutEvent(isarRobotHeartbeat);
             timer.Start();
 
-            if (_isarConnectionTimers.TryAdd(robot.IsarId, timer)) { _logger.LogInformation("Added new timer for ISAR '{IsarId}' ('{RobotName}')", robot.IsarId, robot.Name); }
+            if (_isarConnectionTimers.TryAdd(robot.IsarId, timer))
+            {
+                _logger.LogInformation(
+                    "Added new timer for ISAR '{IsarId}' ('{RobotName}')",
+                    robot.IsarId,
+                    robot.Name
+                );
+            }
             else
             {
-                _logger.LogWarning("Failed to add new timer for ISAR '{IsarId}' ('{RobotName})'", robot.IsarId, robot.Name);
+                _logger.LogWarning(
+                    "Failed to add new timer for ISAR '{IsarId}' ('{RobotName})'",
+                    robot.IsarId,
+                    robot.Name
+                );
                 timer.Close();
             }
         }
 
         private async void OnTimeoutEvent(IsarRobotHeartbeatMessage robotHeartbeatMessage)
         {
-            var robot = await RobotService.ReadByIsarId(robotHeartbeatMessage.IsarId, readOnly: true);
+            var robot = await RobotService.ReadByIsarId(
+                robotHeartbeatMessage.IsarId,
+                readOnly: true
+            );
             if (robot is null)
             {
                 _logger.LogError(
@@ -141,7 +166,10 @@ namespace Api.EventHandlers
 
                 if (robot.CurrentMissionId != null)
                 {
-                    var missionRun = await MissionRunService.ReadById(robot.CurrentMissionId, readOnly: true);
+                    var missionRun = await MissionRunService.ReadById(
+                        robot.CurrentMissionId,
+                        readOnly: true
+                    );
                     if (missionRun != null)
                     {
                         _logger.LogError(
@@ -149,7 +177,10 @@ namespace Api.EventHandlers
                             missionRun.Id,
                             missionRun.Name
                         );
-                        await MissionRunService.SetMissionRunToFailed(missionRun.Id, "Lost connection to ISAR during mission");
+                        await MissionRunService.SetMissionRunToFailed(
+                            missionRun.Id,
+                            "Lost connection to ISAR during mission"
+                        );
                     }
                 }
 
@@ -158,13 +189,23 @@ namespace Api.EventHandlers
                     await RobotService.UpdateRobotIsarConnected(robot.Id, false);
                     await RobotService.UpdateCurrentMissionId(robot.Id, null);
                 }
-                catch (RobotNotFoundException) { return; }
+                catch (RobotNotFoundException)
+                {
+                    return;
+                }
             }
 
-            if (!_isarConnectionTimers.TryGetValue(robotHeartbeatMessage.IsarId, out var timer)) { return; }
+            if (!_isarConnectionTimers.TryGetValue(robotHeartbeatMessage.IsarId, out var timer))
+            {
+                return;
+            }
             timer.Close();
             _isarConnectionTimers.Remove(robotHeartbeatMessage.IsarId, out _);
-            _logger.LogError("Removed timer for ISAR instance {RobotName} with ID '{Id}'", robotHeartbeatMessage.RobotName, robotHeartbeatMessage.IsarId);
+            _logger.LogError(
+                "Removed timer for ISAR instance {RobotName} with ID '{Id}'",
+                robotHeartbeatMessage.RobotName,
+                robotHeartbeatMessage.IsarId
+            );
         }
     }
 }

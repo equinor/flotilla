@@ -9,9 +9,9 @@ namespace Api.Controllers;
 [ApiController]
 [Route("robot-models")]
 public class RobotModelController(
-        ILogger<RobotModelController> logger,
-        IRobotModelService robotModelService
-    ) : ControllerBase
+    ILogger<RobotModelController> logger,
+    IRobotModelService robotModelService
+) : ControllerBase
 {
     /// <summary>
     /// List all robot models in the Flotilla database

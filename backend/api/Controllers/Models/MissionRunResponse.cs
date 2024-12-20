@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using Api.Database.Models;
+
 namespace Api.Controllers.Models
 {
     public class MissionRunResponse
@@ -43,6 +44,7 @@ namespace Api.Controllers.Models
         [JsonConstructor]
 #nullable disable
         public MissionRunResponse() { }
+
 #nullable enable
 
         public MissionRunResponse(MissionRun mission)
@@ -55,7 +57,8 @@ namespace Api.Controllers.Models
             StatusReason = mission.StatusReason;
             Comment = mission.Comment;
             InstallationCode = mission.InstallationCode;
-            InspectionArea = mission.InspectionArea != null ? new DeckResponse(mission.InspectionArea) : null;
+            InspectionArea =
+                mission.InspectionArea != null ? new DeckResponse(mission.InspectionArea) : null;
             Robot = new RobotResponse(mission.Robot);
             Status = mission.Status;
             IsCompleted = mission.IsCompleted;
@@ -66,6 +69,5 @@ namespace Api.Controllers.Models
             Tasks = mission.Tasks;
             MissionRunType = mission.MissionRunType;
         }
-
     }
 }

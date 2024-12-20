@@ -6,24 +6,23 @@ using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services.MissionLoaders;
+
 namespace Api.Test.Mocks
 {
     public class MockMissionLoader() : IMissionLoader
     {
-        private readonly List<PlantInfo> _mockPlantInfo = [
+        private readonly List<PlantInfo> _mockPlantInfo =
+        [
             new PlantInfo
             {
                 PlantCode = "testInstallation",
-                ProjectDescription = "testInstallation"
+                ProjectDescription = "testInstallation",
             },
-            new PlantInfo
-            {
-                PlantCode = "JSV",
-                ProjectDescription = "JSVtestInstallation"
-            }
+            new PlantInfo { PlantCode = "JSV", ProjectDescription = "JSVtestInstallation" },
         ];
 
-        private readonly List<MissionTask> _mockMissionTasks = [
+        private readonly List<MissionTask> _mockMissionTasks =
+        [
             new MissionTask(
                 inspection: new Inspection(),
                 taskOrder: 0,
@@ -33,8 +32,19 @@ namespace Api.Test.Mocks
                 taskDescription: "description",
                 robotPose: new Pose
                 {
-                    Position = new Position { X = 0, Y = 0, Z = 0 },
-                    Orientation = new Orientation { X = 0, Y = 0, Z = 0, W = 1 }
+                    Position = new Position
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                    },
+                    Orientation = new Orientation
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                        W = 1,
+                    },
                 }
             ),
             new MissionTask(
@@ -46,22 +56,34 @@ namespace Api.Test.Mocks
                 taskDescription: "description",
                 robotPose: new Pose
                 {
-                    Position = new Position { X = 0, Y = 0, Z = 0 },
-                    Orientation = new Orientation { X = 0, Y = 0, Z = 0, W = 1 }
+                    Position = new Position
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                    },
+                    Orientation = new Orientation
+                    {
+                        X = 0,
+                        Y = 0,
+                        Z = 0,
+                        W = 1,
+                    },
                 }
             ),
         ];
 
-        private readonly MissionDefinition _mockMissionDefinition = new()
-        {
-            InspectionArea = new Deck(),
-            Comment = "",
-            Id = "",
-            InstallationCode = "TTT",
-            IsDeprecated = false,
-            Name = "test",
-            Source = new Source { Id = "", SourceId = "" }
-        };
+        private readonly MissionDefinition _mockMissionDefinition =
+            new()
+            {
+                InspectionArea = new Deck(),
+                Comment = "",
+                Id = "",
+                InstallationCode = "TTT",
+                IsDeprecated = false,
+                Name = "test",
+                Source = new Source { Id = "", SourceId = "" },
+            };
 
         public async Task<MissionDefinition?> GetMissionById(string sourceMissionId)
         {
@@ -69,7 +91,9 @@ namespace Api.Test.Mocks
             return _mockMissionDefinition;
         }
 
-        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(string? installationCode)
+        public async Task<IQueryable<MissionDefinition>> GetAvailableMissions(
+            string? installationCode
+        )
         {
             await Task.Run(() => Thread.Sleep(1));
             return new List<MissionDefinition>([_mockMissionDefinition]).AsQueryable();

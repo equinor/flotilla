@@ -10,14 +10,14 @@ namespace Api.Controllers
     [ApiController]
     [Route("decks")]
     public class DeckController(
-            ILogger<DeckController> logger,
-            IMapService mapService,
-            IDeckService deckService,
-            IDefaultLocalizationPoseService defaultLocalizationPoseService,
-            IInstallationService installationService,
-            IPlantService plantService,
-            IMissionDefinitionService missionDefinitionService
-        ) : ControllerBase
+        ILogger<DeckController> logger,
+        IMapService mapService,
+        IDeckService deckService,
+        IDefaultLocalizationPoseService defaultLocalizationPoseService,
+        IInstallationService installationService,
+        IPlantService plantService,
+        IMissionDefinitionService missionDefinitionService
+    ) : ControllerBase
     {
         /// <summary>
         /// List all decks in the Flotilla database
@@ -60,7 +60,9 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<DeckResponse>>> GetDecksByInstallationCode([FromRoute] string installationCode)
+        public async Task<ActionResult<IList<DeckResponse>>> GetDecksByInstallationCode(
+            [FromRoute] string installationCode
+        )
         {
             try
             {
@@ -113,7 +115,9 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<MissionDefinitionResponse>>> GetMissionDefinitionsInDeck([FromRoute] string deckId)
+        public async Task<
+            ActionResult<IList<MissionDefinitionResponse>>
+        > GetMissionDefinitionsInDeck([FromRoute] string deckId)
         {
             try
             {
@@ -121,8 +125,13 @@ namespace Api.Controllers
                 if (deck == null)
                     return NotFound($"Could not find deck with id {deckId}");
 
-                var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(deck.Id, readOnly: true);
-                var missionDefinitionResponses = missionDefinitions.FindAll(m => !m.IsDeprecated).Select(m => new MissionDefinitionResponse(m));
+                var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(
+                    deck.Id,
+                    readOnly: true
+                );
+                var missionDefinitionResponses = missionDefinitions
+                    .FindAll(m => !m.IsDeprecated)
+                    .Select(m => new MissionDefinitionResponse(m));
                 return Ok(missionDefinitionResponses);
             }
             catch (Exception e)
@@ -150,17 +159,31 @@ namespace Api.Controllers
             logger.LogInformation("Creating new deck");
             try
             {
-                var existingInstallation = await installationService.ReadByInstallationCode(deck.InstallationCode, readOnly: true);
+                var existingInstallation = await installationService.ReadByInstallationCode(
+                    deck.InstallationCode,
+                    readOnly: true
+                );
                 if (existingInstallation == null)
                 {
-                    return NotFound($"Could not find installation with name {deck.InstallationCode}");
+                    return NotFound(
+                        $"Could not find installation with name {deck.InstallationCode}"
+                    );
                 }
-                var existingPlant = await plantService.ReadByInstallationAndPlantCode(existingInstallation, deck.PlantCode, readOnly: true);
+                var existingPlant = await plantService.ReadByInstallationAndPlantCode(
+                    existingInstallation,
+                    deck.PlantCode,
+                    readOnly: true
+                );
                 if (existingPlant == null)
                 {
                     return NotFound($"Could not find plant with name {deck.PlantCode}");
                 }
-                var existingDeck = await deckService.ReadByInstallationAndPlantAndName(existingInstallation, existingPlant, deck.Name, readOnly: true);
+                var existingDeck = await deckService.ReadByInstallationAndPlantAndName(
+                    existingInstallation,
+                    existingPlant,
+                    deck.Name,
+                    readOnly: true
+                );
                 if (existingDeck != null)
                 {
                     logger.LogInformation("An deck for given name and deck already exists");
@@ -199,7 +222,10 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<DeckResponse>> UpdateDefaultLocalizationPose([FromRoute] string deckId, [FromBody] CreateDefaultLocalizationPose newDefaultLocalizationPose)
+        public async Task<ActionResult<DeckResponse>> UpdateDefaultLocalizationPose(
+            [FromRoute] string deckId,
+            [FromBody] CreateDefaultLocalizationPose newDefaultLocalizationPose
+        )
         {
             logger.LogInformation("Updating default localization pose on deck '{deckId}'", deckId);
             try
@@ -214,12 +240,16 @@ namespace Api.Controllers
                 if (deck.DefaultLocalizationPose != null)
                 {
                     deck.DefaultLocalizationPose.Pose = newDefaultLocalizationPose.Pose;
-                    deck.DefaultLocalizationPose.DockingEnabled = newDefaultLocalizationPose.IsDockingStation;
+                    deck.DefaultLocalizationPose.DockingEnabled =
+                        newDefaultLocalizationPose.IsDockingStation;
                     _ = await defaultLocalizationPoseService.Update(deck.DefaultLocalizationPose);
                 }
                 else
                 {
-                    deck.DefaultLocalizationPose = new DefaultLocalizationPose(newDefaultLocalizationPose.Pose, newDefaultLocalizationPose.IsDockingStation);
+                    deck.DefaultLocalizationPose = new DefaultLocalizationPose(
+                        newDefaultLocalizationPose.Pose,
+                        newDefaultLocalizationPose.IsDockingStation
+                    );
                     deck = await deckService.Update(deck);
                 }
 
@@ -280,23 +310,25 @@ namespace Api.Controllers
 
             if (deck.DefaultLocalizationPose is null)
             {
-                string errorMessage = $"Deck with id '{deck.Id}' does not have a default localization pose";
+                string errorMessage =
+                    $"Deck with id '{deck.Id}' does not have a default localization pose";
                 logger.LogInformation("{ErrorMessage}", errorMessage);
                 return NotFound(errorMessage);
             }
 
             MapMetadata? mapMetadata;
-            var positions = new List<Position>
-            {
-                deck.DefaultLocalizationPose.Pose.Position
-            };
+            var positions = new List<Position> { deck.DefaultLocalizationPose.Pose.Position };
             try
             {
-                mapMetadata = await mapService.ChooseMapFromPositions(positions, deck.Installation.InstallationCode);
+                mapMetadata = await mapService.ChooseMapFromPositions(
+                    positions,
+                    deck.Installation.InstallationCode
+                );
             }
             catch (RequestFailedException e)
             {
-                string errorMessage = $"An error occurred while retrieving the map for deck {deck.Id}";
+                string errorMessage =
+                    $"An error occurred while retrieving the map for deck {deck.Id}";
                 logger.LogError(e, "{ErrorMessage}", errorMessage);
                 return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
             }
@@ -309,7 +341,9 @@ namespace Api.Controllers
 
             if (mapMetadata == null)
             {
-                return NotFound("A map which contained at least half of the points in this mission could not be found");
+                return NotFound(
+                    "A map which contained at least half of the points in this mission could not be found"
+                );
             }
             return Ok(mapMetadata);
         }

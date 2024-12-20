@@ -7,6 +7,7 @@ using Api.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
+
 namespace Api.Test.Database
 {
     public class DatabaseUtilities
@@ -28,21 +29,58 @@ namespace Api.Test.Database
         private readonly string _testDeckName = "testDeck";
         private readonly string _testAreaName = "testArea";
 
-
         public DatabaseUtilities(FlotillaDbContext context)
         {
             var defaultLocalizationPoseService = new DefaultLocalizationPoseService(context);
 
             _accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
             _installationService = new InstallationService(context, _accessRoleService);
-            _missionTaskService = new MissionTaskService(context, new Mock<ILogger<MissionTaskService>>().Object);
+            _missionTaskService = new MissionTaskService(
+                context,
+                new Mock<ILogger<MissionTaskService>>().Object
+            );
             _plantService = new PlantService(context, _installationService, _accessRoleService);
-            _deckService = new DeckService(context, defaultLocalizationPoseService, _installationService, _plantService, _accessRoleService, new MockSignalRService());
-            _areaService = new AreaService(context, _installationService, _plantService, _deckService, defaultLocalizationPoseService, _accessRoleService);
-            _userInfoService = new UserInfoService(context, new HttpContextAccessor(), new Mock<ILogger<UserInfoService>>().Object);
+            _deckService = new DeckService(
+                context,
+                defaultLocalizationPoseService,
+                _installationService,
+                _plantService,
+                _accessRoleService,
+                new MockSignalRService()
+            );
+            _areaService = new AreaService(
+                context,
+                _installationService,
+                _plantService,
+                _deckService,
+                defaultLocalizationPoseService,
+                _accessRoleService
+            );
+            _userInfoService = new UserInfoService(
+                context,
+                new HttpContextAccessor(),
+                new Mock<ILogger<UserInfoService>>().Object
+            );
             _robotModelService = new RobotModelService(context);
-            _robotService = new RobotService(context, new Mock<ILogger<RobotService>>().Object, _robotModelService, new MockSignalRService(), _accessRoleService, _installationService, _deckService);
-            _missionRunService = new MissionRunService(context, new MockSignalRService(), new Mock<ILogger<MissionRunService>>().Object, _accessRoleService, _missionTaskService, _deckService, _robotService, _userInfoService);
+            _robotService = new RobotService(
+                context,
+                new Mock<ILogger<RobotService>>().Object,
+                _robotModelService,
+                new MockSignalRService(),
+                _accessRoleService,
+                _installationService,
+                _deckService
+            );
+            _missionRunService = new MissionRunService(
+                context,
+                new MockSignalRService(),
+                new Mock<ILogger<MissionRunService>>().Object,
+                _accessRoleService,
+                _missionTaskService,
+                _deckService,
+                _robotService,
+                _userInfoService
+            );
             _sourceService = new SourceService(context, new Mock<ILogger<SourceService>>().Object);
         }
 
@@ -57,7 +95,8 @@ namespace Api.Test.Database
             Api.Database.Models.TaskStatus taskStatus = Api.Database.Models.TaskStatus.Successful
         )
         {
-            if (string.IsNullOrEmpty(isarMissionId)) isarMissionId = Guid.NewGuid().ToString();
+            if (string.IsNullOrEmpty(isarMissionId))
+                isarMissionId = Guid.NewGuid().ToString();
             var missionRun = new MissionRun
             {
                 Name = "testMission",
@@ -69,22 +108,16 @@ namespace Api.Test.Database
                 DesiredStartTime = DateTime.Now,
                 InspectionArea = inspectionArea,
                 Tasks = [],
-                InstallationCode = installationCode
+                InstallationCode = installationCode,
             };
 
             if (missionRunType == MissionRunType.ReturnHome)
             {
-                missionRun.Tasks =
-                [
-                    new(new Pose(), MissionTaskType.ReturnHome)
-                ];
+                missionRun.Tasks = [new(new Pose(), MissionTaskType.ReturnHome)];
             }
             else
             {
-                missionRun.Tasks =
-                [
-                    new(new Pose(), MissionTaskType.Inspection)
-                ];
+                missionRun.Tasks = [new(new Pose(), MissionTaskType.Inspection)];
             }
             if (writeToDatabase)
             {
@@ -95,24 +128,30 @@ namespace Api.Test.Database
 
         public async Task<Installation> ReadOrNewInstallation()
         {
-            if (await _installationService.ReadByInstallationCode(_testInstallationCode) is Installation installation) return installation;
+            if (
+                await _installationService.ReadByInstallationCode(_testInstallationCode)
+                is Installation installation
+            )
+                return installation;
             return await NewInstallation();
         }
 
         public async Task<Installation> NewInstallation(string installationCode = "")
         {
-            if (string.IsNullOrEmpty(installationCode)) installationCode = _testInstallationCode;
+            if (string.IsNullOrEmpty(installationCode))
+                installationCode = _testInstallationCode;
             var createInstallationQuery = new CreateInstallationQuery
             {
                 InstallationCode = installationCode,
-                Name = _testInstallationName
+                Name = _testInstallationName,
             };
             return await _installationService.Create(createInstallationQuery);
         }
 
         public async Task<Plant> ReadOrNewPlant(string installationCode)
         {
-            if (await _plantService.ReadByPlantCode(_testPlantCode) is Plant plant) return plant;
+            if (await _plantService.ReadByPlantCode(_testPlantCode) is Plant plant)
+                return plant;
             return await NewPlant(installationCode);
         }
 
@@ -122,7 +161,7 @@ namespace Api.Test.Database
             {
                 InstallationCode = installationCode,
                 PlantCode = _testPlantCode,
-                Name = "testPlant"
+                Name = "testPlant",
             };
 
             return await _plantService.Create(createPlantQuery);
@@ -130,49 +169,73 @@ namespace Api.Test.Database
 
         public async Task<Deck> ReadOrNewDeck(string installationCode, string plantCode)
         {
-            if (await _deckService.ReadByInstallationAndName(installationCode, _testDeckName) is Deck deck) return deck;
+            if (
+                await _deckService.ReadByInstallationAndName(installationCode, _testDeckName)
+                is Deck deck
+            )
+                return deck;
             return await NewDeck(installationCode, plantCode);
         }
 
-        public async Task<Deck> NewDeck(string installationCode, string plantCode, string deckName = "")
+        public async Task<Deck> NewDeck(
+            string installationCode,
+            string plantCode,
+            string deckName = ""
+        )
         {
-            if (string.IsNullOrEmpty(deckName)) deckName = _testDeckName;
+            if (string.IsNullOrEmpty(deckName))
+                deckName = _testDeckName;
             var createDeckQuery = new CreateDeckQuery
             {
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
                 Name = deckName,
-                DefaultLocalizationPose = new CreateDefaultLocalizationPose()
-                {
-                    Pose = new Pose()
-                }
+                DefaultLocalizationPose = new CreateDefaultLocalizationPose() { Pose = new Pose() },
             };
 
             return await _deckService.Create(createDeckQuery);
         }
 
-        public async Task<Area> ReadOrNewArea(string installationCode, string plantCode, string deckName)
+        public async Task<Area> ReadOrNewArea(
+            string installationCode,
+            string plantCode,
+            string deckName
+        )
         {
-            if (await _areaService.ReadByInstallationAndName(_testInstallationCode, _testAreaName) is Area area) return area;
+            if (
+                await _areaService.ReadByInstallationAndName(_testInstallationCode, _testAreaName)
+                is Area area
+            )
+                return area;
             return await NewArea(installationCode, plantCode, deckName);
         }
 
-        public async Task<Area> NewArea(string installationCode, string plantCode, string deckName, string areaName = "")
+        public async Task<Area> NewArea(
+            string installationCode,
+            string plantCode,
+            string deckName,
+            string areaName = ""
+        )
         {
-            if (string.IsNullOrEmpty(areaName)) areaName = _testAreaName;
+            if (string.IsNullOrEmpty(areaName))
+                areaName = _testAreaName;
             var createAreaQuery = new CreateAreaQuery
             {
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
                 DeckName = deckName,
                 AreaName = areaName,
-                DefaultLocalizationPose = new Pose()
+                DefaultLocalizationPose = new Pose(),
             };
 
             return await _areaService.Create(createAreaQuery);
         }
 
-        public async Task<Robot> NewRobot(RobotStatus status, Installation installation, Deck? inspectionArea = null)
+        public async Task<Robot> NewRobot(
+            RobotStatus status,
+            Installation installation,
+            Deck? inspectionArea = null
+        )
         {
             var createRobotQuery = new CreateRobotQuery
             {
@@ -186,20 +249,25 @@ namespace Api.Test.Database
                 Host = "localhost",
                 Port = 3000,
                 Status = status,
-                RobotCapabilities = [RobotCapabilitiesEnum.take_image, RobotCapabilitiesEnum.return_to_home, RobotCapabilitiesEnum.localize]
+                RobotCapabilities =
+                [
+                    RobotCapabilitiesEnum.take_image,
+                    RobotCapabilitiesEnum.return_to_home,
+                    RobotCapabilitiesEnum.localize,
+                ],
             };
 
-            var robotModel = await _robotModelService.ReadByRobotType(createRobotQuery.RobotType, readOnly: true);
+            var robotModel = await _robotModelService.ReadByRobotType(
+                createRobotQuery.RobotType,
+                readOnly: true
+            );
             var robot = new Robot(createRobotQuery, installation, robotModel!, inspectionArea);
             return await _robotService.Create(robot);
         }
 
         public async Task<Source> NewSource(string sourceId)
         {
-            return await _sourceService.Create(new Source
-            {
-                SourceId = sourceId
-            });
+            return await _sourceService.Create(new Source { SourceId = sourceId });
         }
     }
 }
