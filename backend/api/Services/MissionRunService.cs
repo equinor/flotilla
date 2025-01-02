@@ -140,9 +140,11 @@ namespace Api.Services
                 new MissionRunResponse(missionRun)
             );
 
+            DetachTracking(missionRun);
+
             if (triggerCreatedMissionRunEvent)
             {
-                var args = new MissionRunCreatedEventArgs(missionRun.Id);
+                var args = new MissionRunCreatedEventArgs(missionRun);
                 OnMissionRunCreated(args);
             }
 
@@ -151,8 +153,6 @@ namespace Api.Services
             {
                 logger.LogInformation($"Mission run created by user with Id {userInfo.Id}");
             }
-
-            DetachTracking(missionRun);
 
             return missionRun;
         }

@@ -507,16 +507,14 @@ namespace Api.Test.EventHandlers
                 inspectionArea,
                 true
             );
-            Thread.Sleep(100);
             var missionRun2 = await _databaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
                 inspectionArea,
                 true
             );
-            Thread.Sleep(100);
 
-            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1.Id);
+            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1);
             _missionRunService.RaiseEvent(
                 nameof(MissionRunService.MissionRunCreated),
                 missionRunCreatedEventArgs
@@ -599,7 +597,7 @@ namespace Api.Test.EventHandlers
             );
             Thread.Sleep(100);
 
-            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1.Id);
+            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1);
             _missionRunService.RaiseEvent(
                 nameof(MissionRunService.MissionRunCreated),
                 missionRunCreatedEventArgs
@@ -691,7 +689,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             // Act
-            var eventArgs = new MissionRunCreatedEventArgs(missionRun.Id);
+            var eventArgs = new MissionRunCreatedEventArgs(missionRun);
             _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), eventArgs);
             Thread.Sleep(500);
 
