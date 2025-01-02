@@ -109,24 +109,16 @@ namespace Api.EventHandlers
 
         private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
         {
-            _logger.LogInformation(
-                "Triggered RobotAvailable event for robot ID: {RobotId}",
-                e.RobotId
-            );
-            var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
-            if (robot == null)
+            if (e.Robot == null)
             {
-                _logger.LogError(
-                    "Robot with ID: {RobotId} was not found in the database",
-                    e.RobotId
-                );
+                _logger.LogError("OnRobotAvailable was triggered with null Robot value");
                 return;
             }
 
             _startMissionSemaphore.WaitOne();
             try
             {
-                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot);
+                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(e.Robot);
             }
             catch (MissionRunNotFoundException)
             {

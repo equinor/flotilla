@@ -541,7 +541,7 @@ namespace Api.Test.EventHandlers
                 }
             );
 
-            var robotAvailableEventArgs = new RobotAvailableEventArgs(robot.Id);
+            var robotAvailableEventArgs = new RobotAvailableEventArgs(robot);
 
             _mqttService.RaiseEvent(
                 nameof(MqttService.MqttIsarMissionReceived),
@@ -551,7 +551,6 @@ namespace Api.Test.EventHandlers
                 nameof(MissionSchedulingService.RobotAvailable),
                 robotAvailableEventArgs
             );
-            Thread.Sleep(500);
 
             // Assert
             var postTestMissionRun1 = await _missionRunService.ReadById(
