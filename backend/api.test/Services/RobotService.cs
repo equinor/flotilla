@@ -96,7 +96,7 @@ namespace Api.Test.Services
             );
             var installation = await _databaseUtilities.ReadOrNewInstallation();
             var robot = await _databaseUtilities.NewRobot(RobotStatus.Available, installation);
-            var robotById = await robotService.ReadById(robot.Id, readOnly: false);
+            var robotById = await robotService.ReadById(robot.Id, readOnly: true);
             Assert.NotNull(robotById);
             Assert.Equal(robot.Id, robotById.Id);
         }
