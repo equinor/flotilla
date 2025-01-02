@@ -14,7 +14,7 @@ namespace Api.Database.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        //[Required] // See "Drive to Docking Station" mission in RobotController.cs
+        //[Required] // Return home missions do not have a corresponding MissionDefinition
         public string? MissionId { get; set; }
 
         [Required]

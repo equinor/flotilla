@@ -68,7 +68,7 @@ namespace Api.Database.Models
             {
                 case MissionTaskType.ReturnHome:
                     Type = type;
-                    Description = "Return to home";
+                    Description = "Return home";
                     RobotPose = robotPose;
                     TaskOrder = 0;
                     Status = TaskStatus.NotStarted;
