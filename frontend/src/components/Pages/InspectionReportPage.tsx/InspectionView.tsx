@@ -157,7 +157,7 @@ export const InspectionsViewSection = ({ tasks, dialogView }: InspectionsViewSec
 
 const FetchImageData = (task: Task) => {
     const data = useQuery({
-        queryKey: ["fetchInspectionData", task.isarTaskId],
+        queryKey: ['fetchInspectionData', task.isarTaskId],
         queryFn: async () => {
             const imageBlob = await BackendAPICaller.getInspection(task.inspection.isarInspectionId)
             return URL.createObjectURL(imageBlob)
