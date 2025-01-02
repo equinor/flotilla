@@ -126,23 +126,16 @@ namespace Api.EventHandlers
 
         private async void OnSendRobotToDockTriggered(object? sender, RobotEmergencyEventArgs e)
         {
+            var robot = e.Robot;
+
             _logger.LogInformation(
                 "Triggered EmergencyButtonPressed event for robot ID: {RobotId}",
-                e.RobotId
+                robot.Id
             );
-            var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
-            if (robot == null)
-            {
-                _logger.LogError(
-                    "Robot with ID: {RobotId} was not found in the database",
-                    e.RobotId
-                );
-                return;
-            }
 
             try
             {
-                await MissionScheduling.FreezeMissionRunQueueForRobot(e.RobotId);
+                await MissionScheduling.FreezeMissionRunQueueForRobot(robot.Id);
             }
             catch (RobotNotFoundException)
             {
@@ -153,20 +146,20 @@ namespace Api.EventHandlers
             {
                 _logger.LogInformation(
                     "Did not send robot to Dock since robot {RobotId} was already in the correct state",
-                    e.RobotId
+                    robot.Id
                 );
                 return;
             }
 
             try
             {
-                await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus);
+                await RobotService.UpdateFlotillaStatus(robot.Id, e.RobotFlotillaStatus);
             }
             catch (Exception ex)
             {
                 _logger.LogError(
                     "Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}",
-                    e.RobotId,
+                    robot.Id,
                     ex.Message
                 );
                 return;
@@ -174,7 +167,7 @@ namespace Api.EventHandlers
 
             try
             {
-                await MissionScheduling.ScheduleMissionToDriveToDockPosition(e.RobotId);
+                await MissionScheduling.ScheduleMissionToDriveToDockPosition(robot.Id);
             }
             catch (DockException ex)
             {
@@ -192,7 +185,7 @@ namespace Api.EventHandlers
 
             try
             {
-                await MissionScheduling.StopCurrentMissionRun(e.RobotId);
+                await MissionScheduling.StopCurrentMissionRun(robot.Id);
             }
             catch (RobotNotFoundException)
             {
@@ -252,28 +245,12 @@ namespace Api.EventHandlers
             RobotEmergencyEventArgs e
         )
         {
+            var robot = e.Robot;
+
             _logger.LogInformation(
                 "Triggered EmergencyButtonPressed event for robot ID: {RobotId}",
-                e.RobotId
+                e.Robot.Id
             );
-            var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
-            if (robot == null)
-            {
-                _logger.LogError(
-                    "Robot with ID: {RobotId} was not found in the database",
-                    e.RobotId
-                );
-                return;
-            }
-
-            if (robot.FlotillaStatus == e.RobotFlotillaStatus)
-            {
-                _logger.LogInformation(
-                    "Did not release robot from Dock since robot {RobotId} was already in the correct state",
-                    e.RobotId
-                );
-                return;
-            }
 
             try
             {
@@ -288,13 +265,13 @@ namespace Api.EventHandlers
 
             try
             {
-                await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus);
+                await RobotService.UpdateFlotillaStatus(robot.Id, e.RobotFlotillaStatus);
             }
             catch (Exception ex)
             {
                 _logger.LogError(
                     "Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}",
-                    e.RobotId,
+                    robot.Id,
                     ex.Message
                 );
                 return;
