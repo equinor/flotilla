@@ -42,10 +42,7 @@ namespace Api.Controllers
             foreach (var robot in robots)
             {
                 emergencyActionService.SendRobotToDock(
-                    new RobotEmergencyEventArgs(
-                        robot.Id,
-                        Database.Models.RobotFlotillaStatus.Docked
-                    )
+                    new RobotEmergencyEventArgs(robot, Database.Models.RobotFlotillaStatus.Docked)
                 );
             }
 
@@ -77,10 +74,7 @@ namespace Api.Controllers
             foreach (var robot in robots)
             {
                 emergencyActionService.ReleaseRobotFromDock(
-                    new RobotEmergencyEventArgs(
-                        robot.Id,
-                        Database.Models.RobotFlotillaStatus.Normal
-                    )
+                    new RobotEmergencyEventArgs(robot, Database.Models.RobotFlotillaStatus.Normal)
                 );
             }
 
