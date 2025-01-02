@@ -1,5 +1,11 @@
 #!/bin/bash
 # Substitute environment variables in the index.html file using the values in the current container environment
+
+# Check if index.html exists in the correct location
+if [ ! -f /app/index.html ]; then
+  echo "Couldn't find index.html"
+fi
+
 envsubst '
   ${VITE_AI_CONNECTION_STRING}
   ${VITE_BACKEND_URL}
