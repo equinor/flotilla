@@ -7,9 +7,9 @@ namespace Api.Services.Events
         public string MissionRunId { get; } = missionRunId;
     }
 
-    public class RobotAvailableEventArgs(string robotId) : EventArgs
+    public class RobotAvailableEventArgs(Robot robot) : EventArgs
     {
-        public string RobotId { get; } = robotId;
+        public Robot Robot { get; } = robot;
     }
 
     public class RobotEmergencyEventArgs(string robotId, RobotFlotillaStatus robotFlotillaStatus)

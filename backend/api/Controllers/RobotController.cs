@@ -389,7 +389,7 @@ namespace Api.Controllers
 
                 if (robotStatus == RobotStatus.Available)
                     missionSchedulingService.TriggerRobotAvailable(
-                        new RobotAvailableEventArgs(robot.Id)
+                        new RobotAvailableEventArgs(robot)
                     );
 
                 return Ok(robotResponse);
