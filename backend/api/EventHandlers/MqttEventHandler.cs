@@ -573,7 +573,7 @@ namespace Api.EventHandlers
                     robot.Name
                 );
                 EmergencyActionService.SendRobotToDock(
-                    new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Recharging)
+                    new RobotEmergencyEventArgs(robot, RobotFlotillaStatus.Recharging)
                 );
             }
             else if (
@@ -586,7 +586,7 @@ namespace Api.EventHandlers
                     robot.Name
                 );
                 EmergencyActionService.ReleaseRobotFromDock(
-                    new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Normal)
+                    new RobotEmergencyEventArgs(robot, RobotFlotillaStatus.Normal)
                 );
             }
         }
@@ -620,7 +620,7 @@ namespace Api.EventHandlers
                     robot.Name
                 );
                 EmergencyActionService.SendRobotToDock(
-                    new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Recharging)
+                    new RobotEmergencyEventArgs(robot, RobotFlotillaStatus.Recharging)
                 );
             }
             else if (
@@ -633,7 +633,7 @@ namespace Api.EventHandlers
                     robot.Name
                 );
                 EmergencyActionService.ReleaseRobotFromDock(
-                    new RobotEmergencyEventArgs(robot.Id, RobotFlotillaStatus.Normal)
+                    new RobotEmergencyEventArgs(robot, RobotFlotillaStatus.Normal)
                 );
             }
         }
