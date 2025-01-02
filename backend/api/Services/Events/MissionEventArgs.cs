@@ -2,9 +2,9 @@
 
 namespace Api.Services.Events
 {
-    public class MissionRunCreatedEventArgs(string missionRunId) : EventArgs
+    public class MissionRunCreatedEventArgs(MissionRun missionRun) : EventArgs
     {
-        public string MissionRunId { get; } = missionRunId;
+        public MissionRun MissionRun { get; } = missionRun;
     }
 
     public class RobotAvailableEventArgs(Robot robot) : EventArgs

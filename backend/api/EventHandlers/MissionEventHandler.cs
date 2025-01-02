@@ -25,9 +25,6 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
-        private IMissionRunService MissionService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionRunService>();
-
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
 
@@ -65,20 +62,12 @@ namespace Api.EventHandlers
 
         private async void OnMissionRunCreated(object? sender, MissionRunCreatedEventArgs e)
         {
+            var missionRun = e.MissionRun;
+
             _logger.LogInformation(
                 "Triggered MissionRunCreated event for mission run ID: {MissionRunId}",
-                e.MissionRunId
+                missionRun.Id
             );
-
-            var missionRun = await MissionService.ReadById(e.MissionRunId, readOnly: true);
-            if (missionRun == null)
-            {
-                _logger.LogError(
-                    "Mission run with ID: {MissionRunId} was not found in the database",
-                    e.MissionRunId
-                );
-                return;
-            }
 
             _startMissionSemaphore.WaitOne();
 
