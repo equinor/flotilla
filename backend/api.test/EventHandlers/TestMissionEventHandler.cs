@@ -507,16 +507,14 @@ namespace Api.Test.EventHandlers
                 inspectionArea,
                 true
             );
-            Thread.Sleep(100);
             var missionRun2 = await _databaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
                 inspectionArea,
                 true
             );
-            Thread.Sleep(100);
 
-            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1.Id);
+            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1);
             _missionRunService.RaiseEvent(
                 nameof(MissionRunService.MissionRunCreated),
                 missionRunCreatedEventArgs
@@ -541,7 +539,7 @@ namespace Api.Test.EventHandlers
                 }
             );
 
-            var robotAvailableEventArgs = new RobotAvailableEventArgs(robot.Id);
+            var robotAvailableEventArgs = new RobotAvailableEventArgs(robot);
 
             _mqttService.RaiseEvent(
                 nameof(MqttService.MqttIsarMissionReceived),
@@ -551,7 +549,6 @@ namespace Api.Test.EventHandlers
                 nameof(MissionSchedulingService.RobotAvailable),
                 robotAvailableEventArgs
             );
-            Thread.Sleep(500);
 
             // Assert
             var postTestMissionRun1 = await _missionRunService.ReadById(
@@ -600,7 +597,7 @@ namespace Api.Test.EventHandlers
             );
             Thread.Sleep(100);
 
-            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1.Id);
+            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1);
             _missionRunService.RaiseEvent(
                 nameof(MissionRunService.MissionRunCreated),
                 missionRunCreatedEventArgs
@@ -692,7 +689,7 @@ namespace Api.Test.EventHandlers
             Thread.Sleep(100);
 
             // Act
-            var eventArgs = new MissionRunCreatedEventArgs(missionRun.Id);
+            var eventArgs = new MissionRunCreatedEventArgs(missionRun);
             _missionRunService.RaiseEvent(nameof(MissionRunService.MissionRunCreated), eventArgs);
             Thread.Sleep(500);
 

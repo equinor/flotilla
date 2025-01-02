@@ -65,20 +65,18 @@ namespace Api.EventHandlers
 
         private async void OnMissionRunCreated(object? sender, MissionRunCreatedEventArgs e)
         {
-            _logger.LogInformation(
-                "Triggered MissionRunCreated event for mission run ID: {MissionRunId}",
-                e.MissionRunId
-            );
+            var missionRun = e.MissionRun;
 
-            var missionRun = await MissionService.ReadById(e.MissionRunId, readOnly: true);
             if (missionRun == null)
             {
-                _logger.LogError(
-                    "Mission run with ID: {MissionRunId} was not found in the database",
-                    e.MissionRunId
-                );
+                _logger.LogError("OnMissionRunCreated was triggered with null Robot value");
                 return;
             }
+
+            _logger.LogInformation(
+                "Triggered MissionRunCreated event for mission run ID: {MissionRunId}",
+                missionRun.Id
+            );
 
             _startMissionSemaphore.WaitOne();
 
@@ -109,24 +107,16 @@ namespace Api.EventHandlers
 
         private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
         {
-            _logger.LogInformation(
-                "Triggered RobotAvailable event for robot ID: {RobotId}",
-                e.RobotId
-            );
-            var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
-            if (robot == null)
+            if (e.Robot == null)
             {
-                _logger.LogError(
-                    "Robot with ID: {RobotId} was not found in the database",
-                    e.RobotId
-                );
+                _logger.LogError("OnRobotAvailable was triggered with null Robot value");
                 return;
             }
 
             _startMissionSemaphore.WaitOne();
             try
             {
-                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(robot);
+                await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(e.Robot);
             }
             catch (MissionRunNotFoundException)
             {
@@ -140,23 +130,22 @@ namespace Api.EventHandlers
 
         private async void OnSendRobotToDockTriggered(object? sender, RobotEmergencyEventArgs e)
         {
-            _logger.LogInformation(
-                "Triggered EmergencyButtonPressed event for robot ID: {RobotId}",
-                e.RobotId
-            );
-            var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
+            var robot = e.Robot;
+
             if (robot == null)
             {
-                _logger.LogError(
-                    "Robot with ID: {RobotId} was not found in the database",
-                    e.RobotId
-                );
+                _logger.LogError("OnSendRobotToDockTriggered was triggered with null Robot value");
                 return;
             }
 
+            _logger.LogInformation(
+                "Triggered EmergencyButtonPressed event for robot ID: {RobotId}",
+                robot.Id
+            );
+
             try
             {
-                await MissionScheduling.FreezeMissionRunQueueForRobot(e.RobotId);
+                await MissionScheduling.FreezeMissionRunQueueForRobot(robot.Id);
             }
             catch (RobotNotFoundException)
             {
@@ -167,20 +156,20 @@ namespace Api.EventHandlers
             {
                 _logger.LogInformation(
                     "Did not send robot to Dock since robot {RobotId} was already in the correct state",
-                    e.RobotId
+                    robot.Id
                 );
                 return;
             }
 
             try
             {
-                await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus);
+                await RobotService.UpdateFlotillaStatus(robot.Id, e.RobotFlotillaStatus);
             }
             catch (Exception ex)
             {
                 _logger.LogError(
                     "Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}",
-                    e.RobotId,
+                    robot.Id,
                     ex.Message
                 );
                 return;
@@ -188,7 +177,7 @@ namespace Api.EventHandlers
 
             try
             {
-                await MissionScheduling.ScheduleMissionToDriveToDockPosition(e.RobotId);
+                await MissionScheduling.ScheduleMissionToDriveToDockPosition(robot.Id);
             }
             catch (DockException ex)
             {
@@ -206,7 +195,7 @@ namespace Api.EventHandlers
 
             try
             {
-                await MissionScheduling.StopCurrentMissionRun(e.RobotId);
+                await MissionScheduling.StopCurrentMissionRun(robot.Id);
             }
             catch (RobotNotFoundException)
             {
@@ -266,25 +255,17 @@ namespace Api.EventHandlers
             RobotEmergencyEventArgs e
         )
         {
+            var robot = e.Robot;
+
             _logger.LogInformation(
                 "Triggered EmergencyButtonPressed event for robot ID: {RobotId}",
-                e.RobotId
+                e.Robot.Id
             );
-            var robot = await RobotService.ReadById(e.RobotId, readOnly: true);
+
             if (robot == null)
             {
                 _logger.LogError(
-                    "Robot with ID: {RobotId} was not found in the database",
-                    e.RobotId
-                );
-                return;
-            }
-
-            if (robot.FlotillaStatus == e.RobotFlotillaStatus)
-            {
-                _logger.LogInformation(
-                    "Did not release robot from Dock since robot {RobotId} was already in the correct state",
-                    e.RobotId
+                    "OnReleaseRobotFromDockTriggered was triggered with null Robot value"
                 );
                 return;
             }
@@ -302,13 +283,13 @@ namespace Api.EventHandlers
 
             try
             {
-                await RobotService.UpdateFlotillaStatus(e.RobotId, e.RobotFlotillaStatus);
+                await RobotService.UpdateFlotillaStatus(robot.Id, e.RobotFlotillaStatus);
             }
             catch (Exception ex)
             {
                 _logger.LogError(
                     "Was not able to update Robot Flotilla status for robot {RobotId}, {ErrorMessage}",
-                    e.RobotId,
+                    robot.Id,
                     ex.Message
                 );
                 return;
