@@ -96,11 +96,11 @@ namespace Api.Services
                     {
                         signalRService.ReportGeneralFailToSignalR(
                             robot,
-                            $"Failed to schedule return to home for robot {robot.Name}",
+                            $"Failed to schedule return home for robot {robot.Name}",
                             ""
                         );
                         logger.LogError(
-                            "Failed to schedule a return to home mission for robot {RobotId}",
+                            "Failed to schedule a return home mission for robot {RobotId}",
                             robot.Id
                         );
                     }
@@ -173,7 +173,7 @@ namespace Api.Services
                 catch (ReturnToHomeMissionFailedToScheduleException)
                 {
                     logger.LogError(
-                        "Failed to schedule a return to home mission for robot {RobotId}",
+                        "Failed to schedule a return home mission for robot {RobotId}",
                         robot.Id
                     );
                 }
@@ -269,7 +269,7 @@ namespace Api.Services
             catch (ReturnToHomeMissionFailedToScheduleException)
             {
                 logger.LogError(
-                    "Failed to schedule a return to home mission for robot {RobotId}",
+                    "Failed to schedule a return home mission for robot {RobotId}",
                     robot.Id
                 );
                 return null;
@@ -435,7 +435,7 @@ namespace Api.Services
 
             var missionRun = new MissionRun
             {
-                Name = "Drive to Docking Station",
+                Name = "Return home",
                 Robot = robot,
                 MissionRunType = MissionRunType.Emergency,
                 InstallationCode = robot.CurrentInstallation.InstallationCode,
@@ -501,9 +501,7 @@ namespace Api.Services
 
                 if (missionRun.IsReturnHomeMission())
                 {
-                    logger.LogWarning(
-                        "Return to home mission will not be added back to the queue."
-                    );
+                    logger.LogWarning("Return home mission will not be added back to the queue.");
                     return;
                 }
 
@@ -671,7 +669,7 @@ namespace Api.Services
             if (activeReturnToHomeMission == null)
             {
                 logger.LogWarning(
-                    "Attempted to abort active Return to Home mission for robot with Id {RobotId} but none was found",
+                    "Attempted to abort active Return home mission for robot with Id {RobotId} but none was found",
                     robotId
                 );
                 return;

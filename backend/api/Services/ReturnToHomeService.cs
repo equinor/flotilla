@@ -25,7 +25,7 @@ namespace Api.Services
         )
         {
             logger.LogInformation(
-                "Scheduling return to home mission if not already scheduled or the robot is home for robot {RobotId}",
+                "Scheduling return home mission if not already scheduled or the robot is home for robot {RobotId}",
                 robotId
             );
             var lastMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robotId);
@@ -60,7 +60,6 @@ namespace Api.Services
                             or MissionRunNotFoundException
                 )
             {
-                // TODO: if we make ISAR aware of return to home missions, we can avoid scheduling them when the robot does not need them
                 throw new ReturnToHomeMissionFailedToScheduleException(ex.Message);
             }
 
@@ -118,7 +117,7 @@ namespace Api.Services
 
             var returnToHomeMissionRun = new MissionRun
             {
-                Name = "Return to home mission",
+                Name = "Return home",
                 Robot = robot,
                 InstallationCode = robot.CurrentInstallation.InstallationCode,
                 MissionRunType = MissionRunType.ReturnHome,
@@ -163,7 +162,7 @@ namespace Api.Services
             if (activeReturnToHomeMissions.Count > 1)
             {
                 logger.LogError(
-                    $"Two Return to Home missions should not be queued or ongoing simoultaneously for robot with Id {robotId}."
+                    $"Two Return home missions should not be queued or ongoing simoultaneously for robot with Id {robotId}."
                 );
             }
 

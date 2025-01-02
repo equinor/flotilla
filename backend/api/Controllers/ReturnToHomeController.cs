@@ -41,7 +41,7 @@ namespace Api.Controllers
                 );
             if (returnToHomeMission is null)
             {
-                string errorMessage = "Error while scheduling Return to Home mission";
+                string errorMessage = "Error while scheduling Return home mission";
                 logger.LogError(errorMessage);
                 return StatusCode(StatusCodes.Status502BadGateway, $"{errorMessage}");
             }
