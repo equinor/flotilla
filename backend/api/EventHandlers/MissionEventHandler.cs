@@ -65,20 +65,18 @@ namespace Api.EventHandlers
 
         private async void OnMissionRunCreated(object? sender, MissionRunCreatedEventArgs e)
         {
-            _logger.LogInformation(
-                "Triggered MissionRunCreated event for mission run ID: {MissionRunId}",
-                e.MissionRunId
-            );
+            var missionRun = e.MissionRun;
 
-            var missionRun = await MissionService.ReadById(e.MissionRunId, readOnly: true);
             if (missionRun == null)
             {
-                _logger.LogError(
-                    "Mission run with ID: {MissionRunId} was not found in the database",
-                    e.MissionRunId
-                );
+                _logger.LogError("OnMissionRunCreated was triggered with null Robot value");
                 return;
             }
+
+            _logger.LogInformation(
+                "Triggered MissionRunCreated event for mission run ID: {MissionRunId}",
+                missionRun.Id
+            );
 
             _startMissionSemaphore.WaitOne();
 
