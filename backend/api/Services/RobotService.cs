@@ -413,7 +413,7 @@ namespace Api.Services
             bool isLogLevelDebug = false
         )
         {
-            var robot = await ReadById(robotId, readOnly: false);
+            var robot = await ReadById(robotId, readOnly: true);
             if (robot is null)
             {
                 string errorMessage = $"Robot with ID {robotId} was not found in the database";
