@@ -22,6 +22,12 @@ export enum RobotFlotillaStatus {
     Recharging = 'Recharging',
 }
 
+export interface RobotAttributeUpdate {
+    id: string
+    propertyName: string
+    value: any
+}
+
 export interface Robot {
     id: string
     name?: string
