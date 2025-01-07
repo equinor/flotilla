@@ -77,40 +77,38 @@ const OngoingMissionButton = ({ missionName, robotId, missionTaskType }: Mission
     }
 
     return (
-        <>
-            <ButtonStyle>
-                <ButtonText>
-                    <Button variant="ghost_icon" onClick={toggleStopMissionDialog}>
-                        <Icon
-                            name={Icons.StopButton}
-                            style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
-                            size={40}
-                        />
-                        <StopMissionDialog
-                            missionName={missionName}
-                            robotId={robotId}
-                            missionTaskType={missionTaskType}
-                            isStopMissionDialogOpen={isDialogOpen}
-                            toggleDialog={toggleStopMissionDialog}
-                        />
-                    </Button>
-                    <Typography variant="caption">{TranslateText('Stop')}</Typography>
-                </ButtonText>
-                <ButtonText>
-                    <Button
-                        variant="ghost_icon"
-                        onClick={() => updateRobotMissionState(MissionStatusRequest.Pause, robotId)}
-                    >
-                        <Icon
-                            name={Icons.PauseButton}
-                            style={{ color: tokens.colors.interactive.secondary__resting.hex }}
-                            size={40}
-                        />
-                    </Button>
-                    <Typography variant="caption">{TranslateText('Pause')}</Typography>
-                </ButtonText>
-            </ButtonStyle>
-        </>
+        <ButtonStyle>
+            <ButtonText>
+                <Button variant="ghost_icon" onClick={toggleStopMissionDialog}>
+                    <Icon
+                        name={Icons.StopButton}
+                        style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                        size={40}
+                    />
+                </Button>
+                <Typography variant="caption">{TranslateText('Stop')}</Typography>
+                <StopMissionDialog
+                    missionName={missionName}
+                    robotId={robotId}
+                    missionTaskType={missionTaskType}
+                    isStopMissionDialogOpen={isDialogOpen}
+                    toggleDialog={toggleStopMissionDialog}
+                />
+            </ButtonText>
+            <ButtonText>
+                <Button
+                    variant="ghost_icon"
+                    onClick={() => updateRobotMissionState(MissionStatusRequest.Pause, robotId)}
+                >
+                    <Icon
+                        name={Icons.PauseButton}
+                        style={{ color: tokens.colors.interactive.secondary__resting.hex }}
+                        size={40}
+                    />
+                </Button>
+                <Typography variant="caption">{TranslateText('Pause')}</Typography>
+            </ButtonText>
+        </ButtonStyle>
     )
 }
 
@@ -123,39 +121,37 @@ const PausedMissionButton = ({ missionName, robotId, missionTaskType }: MissionP
     }
 
     return (
-        <>
-            <ButtonStyle>
-                <ButtonText>
-                    <Button variant="ghost_icon" onClick={toggleStopMissionDialog}>
-                        <Icon
-                            name={Icons.StopButton}
-                            style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
-                            size={40}
-                        />
-                        <StopMissionDialog
-                            missionName={missionName}
-                            robotId={robotId}
-                            missionTaskType={missionTaskType}
-                            isStopMissionDialogOpen={isDialogOpen}
-                            toggleDialog={toggleStopMissionDialog}
-                        />
-                    </Button>
-                    <Typography variant="caption">{TranslateText('Stop')}</Typography>
-                </ButtonText>
-                <ButtonText>
-                    <Button
-                        variant="ghost_icon"
-                        onClick={() => updateRobotMissionState(MissionStatusRequest.Resume, robotId)}
-                    >
-                        <Icon
-                            name={Icons.PlayButton}
-                            style={{ color: tokens.colors.interactive.secondary__resting.hex }}
-                            size={40}
-                        />
-                    </Button>
-                    <Typography variant="caption">{TranslateText('Start')}</Typography>
-                </ButtonText>
-            </ButtonStyle>
-        </>
+        <ButtonStyle>
+            <ButtonText>
+                <Button variant="ghost_icon" onClick={toggleStopMissionDialog}>
+                    <Icon
+                        name={Icons.StopButton}
+                        style={{ color: tokens.colors.interactive.secondary__resting.rgba }}
+                        size={40}
+                    />
+                </Button>
+                <Typography variant="caption">{TranslateText('Stop')}</Typography>
+                <StopMissionDialog
+                    missionName={missionName}
+                    robotId={robotId}
+                    missionTaskType={missionTaskType}
+                    isStopMissionDialogOpen={isDialogOpen}
+                    toggleDialog={toggleStopMissionDialog}
+                />
+            </ButtonText>
+            <ButtonText>
+                <Button
+                    variant="ghost_icon"
+                    onClick={() => updateRobotMissionState(MissionStatusRequest.Resume, robotId)}
+                >
+                    <Icon
+                        name={Icons.PlayButton}
+                        style={{ color: tokens.colors.interactive.secondary__resting.hex }}
+                        size={40}
+                    />
+                </Button>
+                <Typography variant="caption">{TranslateText('Start')}</Typography>
+            </ButtonText>
+        </ButtonStyle>
     )
 }
