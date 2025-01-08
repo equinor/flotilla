@@ -36,22 +36,26 @@ export const InspectionDialogView = ({ task, tasks }: InspectionDialogViewProps)
     const { switchSelectedInspectionTask } = useInspectionsContext()
     const { data } = FetchImageData(task)
 
+    const closeDialog = () => {
+        switchSelectedInspectionTask(undefined)
+    }
+
     return (
         <>
             {data !== undefined && (
-                <StyledDialog open={true}>
+                <StyledDialog open={true} isDismissable onClose={closeDialog}>
                     <StyledDialogContent>
                         <StyledDialogHeader>
                             <Typography variant="accordion_header" group="ui">
                                 {TranslateText('Inspection report')}
                             </Typography>
-                            <StyledCloseButton variant="ghost" onClick={() => switchSelectedInspectionTask(undefined)}>
+                            <StyledCloseButton variant="ghost" onClick={closeDialog}>
                                 <Icon name={Icons.Clear} size={24} />
                             </StyledCloseButton>
                         </StyledDialogHeader>
                         <StyledDialogInspectionView>
                             <div>
-                                {data !== undefined && <StyledInspection src={data} />}
+                                <StyledInspection src={data} />
                                 <StyledBottomContent>
                                     <StyledInfoContent>
                                         <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>
