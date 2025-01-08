@@ -260,7 +260,8 @@ namespace Api.Services
                         || accessibleInstallationCodes.Result.Contains(
                             m.InspectionArea.Installation.InstallationCode.ToUpper()
                         )
-                );
+                )
+                .Include(missionDefinition => missionDefinition.Map);
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 

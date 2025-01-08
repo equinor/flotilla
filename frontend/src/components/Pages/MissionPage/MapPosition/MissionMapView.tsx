@@ -9,6 +9,7 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { TaskStatus } from 'models/Task'
 import { MapCompass } from 'utils/MapCompass'
 import { useRobotContext } from 'components/Contexts/RobotContext'
+import { useQuery } from '@tanstack/react-query'
 
 interface MissionProps {
     mission: Mission
@@ -48,16 +49,32 @@ export const MissionMapView = ({ mission }: MissionProps) => {
 
     const imageObjectURL = useRef<string>('')
 
+    const fetchMapInfo = (mission: Mission) => {
+        const map = useQuery({
+            queryKey: [mission.missionId],
+            queryFn: async () => {
+                const missionDefinition = await BackendAPICaller.getMissionDefinitionById(mission.missionId!)
+                return missionDefinition.map
+            },
+            retryDelay: 60 * 1000,
+            staleTime: 60 * 1000,
+            enabled: mission.missionId !== undefined,
+        })
+        return map.data
+    }
+
+    const mapInfo = fetchMapInfo(mission)
+
     const updateMap = useCallback(() => {
         const context = mapCanvas.getContext('2d')
-        if (!context || !mission.map) {
+        if (!context || !mapInfo) {
             return
         }
         context.clearRect(0, 0, mapCanvas.width, mapCanvas.height)
         context.drawImage(mapImage, 0, 0)
-        placeTagsInMap(mission.tasks, mission.map!, mapCanvas, currentTaskOrder)
-        if (missionRobot?.pose && mission.map) {
-            placeRobotInMap(mission.map, mapCanvas, missionRobot.pose)
+        placeTagsInMap(mission.tasks, mapInfo, mapCanvas, currentTaskOrder)
+        if (missionRobot?.pose && mapInfo) {
+            placeRobotInMap(mapInfo, mapCanvas, missionRobot.pose)
         }
     }, [currentTaskOrder, mapCanvas, mapImage, mission, missionRobot?.pose])
 
@@ -76,12 +93,12 @@ export const MissionMapView = ({ mission }: MissionProps) => {
         [mission.tasks]
     )
 
-    let displayedMapName = mission.map?.mapName.split('.')[0].replace(/[^0-9a-z-A-Z ]/g, ' ')
+    let displayedMapName = mapInfo?.mapName.split('.')[0].replace(/[^0-9a-z-A-Z ]/g, ' ')
     displayedMapName = displayedMapName ? displayedMapName.charAt(0).toUpperCase() + displayedMapName.slice(1) : ' '
 
     useEffect(() => {
-        if (mission.map?.mapName) {
-            BackendAPICaller.getMap(mission.installationCode!, mission.map?.mapName)
+        if (mapInfo?.mapName) {
+            BackendAPICaller.getMap(mission.installationCode!, mapInfo.mapName)
                 .then((imageBlob) => {
                     imageObjectURL.current = URL.createObjectURL(imageBlob)
                 })
@@ -107,7 +124,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
         } else {
             imageObjectURL.current = NoMap
         }
-    }, [mission.installationCode, mission.id, mission.map?.mapName])
+    }, [mission.installationCode, mission.id, mapInfo?.mapName])
 
     useEffect(() => {
         if (mission.isCompleted) {

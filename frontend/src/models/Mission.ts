@@ -1,4 +1,3 @@
-import { MapMetadata } from './MapMetadata'
 import { InspectionArea } from './InspectionArea'
 import { Robot, placeholderRobot } from './Robot'
 import { Task } from './Task'
@@ -41,8 +40,8 @@ export interface Mission {
     endTime?: Date
     estimatedDuration?: number
     tasks: Task[]
-    map?: MapMetadata
 }
+
 export const placeholderMission: Mission = {
     id: 'placeholderId',
     name: 'placeholderMission',
