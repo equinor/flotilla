@@ -548,15 +548,15 @@ namespace Api.Controllers
                         InspectionFrequency = customMissionQuery.InspectionFrequency,
                         InstallationCode = customMissionQuery.InstallationCode,
                         InspectionArea = inspectionArea,
-                        Map = new MapMetadata(),
                     };
+
+                customMissionDefinition.Map ??= await mapService.ChooseMapFromPositions(
+                    missionTasks.Select(t => t.RobotPose.Position).ToList(),
+                    customMissionQuery.InstallationCode
+                );
 
                 if (existingMissionDefinition == null)
                 {
-                    customMissionDefinition.Map = await mapService.ChooseMapFromPositions(
-                        missionTasks.Select(t => t.RobotPose.Position).ToList(),
-                        customMissionQuery.InstallationCode
-                    );
                     await missionDefinitionService.Create(customMissionDefinition);
                 }
             }
