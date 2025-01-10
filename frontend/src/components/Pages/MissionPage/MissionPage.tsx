@@ -45,7 +45,7 @@ const StyledTableAndMap = styled.div`
     display: flex;
     flex-wrap: wrap;
     align-items: top;
-    gap: 24px;
+    gap: 30px;
 `
 const StyledMissionPageContent = styled.div`
     display: flex;

@@ -1,5 +1,3 @@
-import { Card, Typography } from '@equinor/eds-core-react'
-import { tokens } from '@equinor/eds-tokens'
 import { Mission } from 'models/Mission'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
@@ -15,12 +13,11 @@ interface MissionProps {
     mission: Mission
 }
 
-const MapCard = styled(Card)`
+const MapCard = styled.div`
     display: flex;
+    flex-direction: column;
     max-width: 600px;
-    padding: 16px;
     justify-items: center;
-    gap: 5px;
 `
 const StyledMap = styled.canvas`
     object-fit: contain;
@@ -86,9 +83,6 @@ export const MissionMapView = ({ mission }: MissionProps) => {
         [mission.tasks]
     )
 
-    let displayedMapName = mapInfo?.mapName.split('.')[0].replace(/[^0-9a-z-A-Z ]/g, ' ')
-    displayedMapName = displayedMapName ? displayedMapName.charAt(0).toUpperCase() + displayedMapName.slice(1) : ' '
-
     useEffect(() => {
         if (mapInfo?.mapName) {
             BackendAPICaller.getMap(mission.installationCode!, mapInfo.mapName)
@@ -143,8 +137,7 @@ export const MissionMapView = ({ mission }: MissionProps) => {
     }, [updateMap, mapContext])
 
     return (
-        <MapCard style={{ boxShadow: tokens.elevation.raised }}>
-            <Typography variant="h4">{displayedMapName}</Typography>
+        <MapCard>
             <StyledElements>
                 <StyledMap id="mapCanvas" />
                 {imageObjectURL.current !== NoMap && mapContext && <MapCompass />}
