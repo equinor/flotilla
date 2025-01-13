@@ -126,16 +126,6 @@ namespace Api.Test.Database
             return missionRun;
         }
 
-        public async Task<Installation> ReadOrNewInstallation()
-        {
-            if (
-                await _installationService.ReadByInstallationCode(_testInstallationCode)
-                is Installation installation
-            )
-                return installation;
-            return await NewInstallation();
-        }
-
         public async Task<Installation> NewInstallation(string installationCode = "")
         {
             if (string.IsNullOrEmpty(installationCode))
@@ -148,13 +138,6 @@ namespace Api.Test.Database
             return await _installationService.Create(createInstallationQuery);
         }
 
-        public async Task<Plant> ReadOrNewPlant(string installationCode)
-        {
-            if (await _plantService.ReadByPlantCode(_testPlantCode) is Plant plant)
-                return plant;
-            return await NewPlant(installationCode);
-        }
-
         public async Task<Plant> NewPlant(string installationCode)
         {
             var createPlantQuery = new CreatePlantQuery
@@ -165,22 +148,6 @@ namespace Api.Test.Database
             };
 
             return await _plantService.Create(createPlantQuery);
-        }
-
-        public async Task<InspectionArea> ReadOrNewInspectionArea(
-            string installationCode,
-            string plantCode
-        )
-        {
-            if (
-                await _inspectionAreaService.ReadByInstallationAndName(
-                    installationCode,
-                    _testInspectionAreaName
-                )
-                is InspectionArea inspectionArea
-            )
-                return inspectionArea;
-            return await NewInspectionArea(installationCode, plantCode);
         }
 
         public async Task<InspectionArea> NewInspectionArea(
@@ -200,20 +167,6 @@ namespace Api.Test.Database
             };
 
             return await _inspectionAreaService.Create(createInspectionAreaQuery);
-        }
-
-        public async Task<Area> ReadOrNewArea(
-            string installationCode,
-            string plantCode,
-            string inspectionAreaName
-        )
-        {
-            if (
-                await _areaService.ReadByInstallationAndName(_testInstallationCode, _testAreaName)
-                is Area area
-            )
-                return area;
-            return await NewArea(installationCode, plantCode, inspectionAreaName);
         }
 
         public async Task<Area> NewArea(

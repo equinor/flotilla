@@ -61,7 +61,7 @@ namespace Api.Test.Client
         [Fact]
         public async Task GetRobotById_ShouldReturnRobot()
         {
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
+            var installation = await DatabaseUtilities.NewInstallation();
             _ = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
 
             string url = "/robots";
@@ -90,13 +90,11 @@ namespace Api.Test.Client
         public async Task RobotIsNotCreatedWithAreaNotInInstallation()
         {
             // Arrange - Area
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
+            var installation = await DatabaseUtilities.NewInstallation();
 
             var wrongInstallation = await DatabaseUtilities.NewInstallation("wrongInstallation");
-            var wrongPlant = await DatabaseUtilities.ReadOrNewPlant(
-                wrongInstallation.InstallationCode
-            );
-            var wrongInspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var wrongPlant = await DatabaseUtilities.NewPlant(wrongInstallation.InstallationCode);
+            var wrongInspectionArea = await DatabaseUtilities.NewInspectionArea(
                 wrongInstallation.InstallationCode,
                 wrongPlant.PlantCode
             );

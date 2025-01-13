@@ -415,9 +415,9 @@ namespace Api.Test.EventHandlers
         public async Task QueuedContinuesWhenOnIsarStatusHappensAtTheSameTimeAsOnIsarMissionCompleted()
         {
             // Arrange
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
