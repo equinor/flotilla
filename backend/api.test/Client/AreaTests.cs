@@ -142,9 +142,9 @@ namespace Api.Test.Client
         public async Task MissionIsCreatedInInspectionArea()
         {
             // Arrange - Initialise area
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
@@ -217,7 +217,7 @@ namespace Api.Test.Client
         public async Task EmergencyDockTest()
         {
             // Arrange
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
+            var installation = await DatabaseUtilities.NewInstallation();
             string installationCode = installation.InstallationCode;
 
             // Act
@@ -237,9 +237,9 @@ namespace Api.Test.Client
         public async Task UpdateDefaultLocalizationPoseOnInspectionArea()
         {
             // Arrange
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );

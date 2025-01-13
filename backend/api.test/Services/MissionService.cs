@@ -50,9 +50,9 @@ namespace Api.Test.Services
             );
             int nReportsBefore = reportsBefore.Count;
 
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );

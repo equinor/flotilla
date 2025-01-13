@@ -41,7 +41,7 @@ namespace Api.Test.Client
         public async Task ScheduleOneMissionTest()
         {
             // Arrange - Area
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
+            var installation = await DatabaseUtilities.NewInstallation();
 
             // Arrange - Robot
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
@@ -80,7 +80,7 @@ namespace Api.Test.Client
         public async Task Schedule3MissionsTest()
         {
             // Arrange - Area
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
+            var installation = await DatabaseUtilities.NewInstallation();
 
             // Arrange - Robot
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
@@ -156,13 +156,13 @@ namespace Api.Test.Client
         public async Task AddNonDuplicateAreasToDb()
         {
             // Arrange
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
-            var _ = await DatabaseUtilities.ReadOrNewArea(
+            var _ = await DatabaseUtilities.NewArea(
                 installation.InstallationCode,
                 plant.PlantCode,
                 inspectionArea.Name
@@ -215,13 +215,13 @@ namespace Api.Test.Client
         public async Task AddDuplicateAreasToDb_Fails()
         {
             // Arrange
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
-            var area = await DatabaseUtilities.ReadOrNewArea(
+            var area = await DatabaseUtilities.NewArea(
                 installation.InstallationCode,
                 plant.PlantCode,
                 inspectionArea.Name
@@ -283,9 +283,9 @@ namespace Api.Test.Client
         public async Task ScheduleDuplicateCustomMissionDefinitions()
         {
             // Arrange
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
@@ -368,9 +368,9 @@ namespace Api.Test.Client
         public async Task GetNextRun()
         {
             // Arrange - Initialise area
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
@@ -488,13 +488,13 @@ namespace Api.Test.Client
         public async Task ScheduleDuplicatMissionDefinitions()
         {
             // Arrange - Initialise area
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
-            var area = await DatabaseUtilities.ReadOrNewArea(
+            var area = await DatabaseUtilities.NewArea(
                 installation.InstallationCode,
                 plant.PlantCode,
                 inspectionArea.Name
@@ -552,9 +552,9 @@ namespace Api.Test.Client
         public async Task MissionDoesNotStartIfRobotIsNotInSameInstallationAsMission()
         {
             // Arrange - Initialise area
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.ReadOrNewInspectionArea(
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode
             );
@@ -620,8 +620,8 @@ namespace Api.Test.Client
         public async Task MissionFailsIfRobotIsNotInSameInspectionAreaAsMission()
         {
             // Arrange - Initialise area
-            var installation = await DatabaseUtilities.ReadOrNewInstallation();
-            var plant = await DatabaseUtilities.ReadOrNewPlant(installation.InstallationCode);
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
 
             string inspectionAreaName1 =
                 "inspectionAreaMissionFailsIfRobotIsNotInSameInspectionAreaAsMission1";
