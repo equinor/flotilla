@@ -447,7 +447,10 @@ namespace Api.Services
 
             try
             {
-                await missionRunService.Create(missionRun);
+                await missionRunService.Create(
+                    missionRun: missionRun,
+                    triggerCreatedMissionRunEvent: false
+                );
             }
             catch (UnsupportedRobotCapabilityException)
             {
