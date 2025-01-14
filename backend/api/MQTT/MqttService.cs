@@ -85,6 +85,7 @@ namespace Api.Mqtt
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPressureReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarPoseReceived;
         public static event EventHandler<MqttReceivedArgs>? MqttIsarCloudHealthReceived;
+        public static event EventHandler<MqttReceivedArgs>? MqttIdaInspectionResultReceived;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -142,6 +143,9 @@ namespace Api.Mqtt
                     break;
                 case Type type when type == typeof(IsarCloudHealthMessage):
                     OnIsarTopicReceived<IsarCloudHealthMessage>(content);
+                    break;
+                case Type type when type == typeof(IdaInspectionResultMessage):
+                    OnIdaTopicReceived<IdaInspectionResultMessage>(content);
                     break;
                 default:
                     _logger.LogWarning(
@@ -288,6 +292,52 @@ namespace Api.Mqtt
                     _ when type == typeof(IsarPressureMessage) => MqttIsarPressureReceived,
                     _ when type == typeof(IsarPoseMessage) => MqttIsarPoseReceived,
                     _ when type == typeof(IsarCloudHealthMessage) => MqttIsarCloudHealthReceived,
+                    _ => throw new NotImplementedException(
+                        $"No event defined for message type '{typeof(T).Name}'"
+                    ),
+                };
+                // Event will be null if there are no subscribers
+                if (raiseEvent is not null)
+                {
+                    raiseEvent(this, new MqttReceivedArgs(message));
+                }
+            }
+            catch (NotImplementedException e)
+            {
+                _logger.LogWarning("{msg}", e.Message);
+            }
+        }
+
+        private void OnIdaTopicReceived<T>(string content)
+            where T : MqttMessage
+        {
+            T? message;
+
+            try
+            {
+                message = JsonSerializer.Deserialize<T>(content, serializerOptions);
+                if (message is null)
+                {
+                    throw new JsonException();
+                }
+            }
+            catch (Exception ex)
+                when (ex is JsonException or NotSupportedException or ArgumentException)
+            {
+                _logger.LogError(
+                    "Could not create '{className}' object from MQTT message json",
+                    typeof(T).Name
+                );
+                return;
+            }
+
+            var type = typeof(T);
+            try
+            {
+                var raiseEvent = type switch
+                {
+                    _ when type == typeof(IdaInspectionResultMessage) =>
+                        MqttIdaInspectionResultReceived,
                     _ => throw new NotImplementedException(
                         $"No event defined for message type '{typeof(T).Name}'"
                     ),

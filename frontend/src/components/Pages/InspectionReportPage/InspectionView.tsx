@@ -16,9 +16,7 @@ import {
     StyledInspection,
 } from './InspectionStyles'
 import { InspectionOverviewDialogView } from './InspectionOverview'
-import { fetchImageData } from './InspectionReportUtilities'
 import { useState } from 'react'
-
 interface InspectionDialogViewProps {
     selectedTask: Task
     tasks: Task[]
@@ -28,8 +26,8 @@ export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogVi
     const { TranslateText } = useLanguageContext()
     const { installationName } = useInstallationContext()
     const { switchSelectedInspectionTask } = useInspectionsContext()
-    const { data } = fetchImageData(selectedTask)
-
+    const { fetchImageData } = useInspectionsContext()
+    const { data } = fetchImageData(selectedTask.inspection.isarInspectionId)
     const [switchImageDirection, setSwitchImageDirection] = useState<number>(0)
 
     const closeDialog = () => {

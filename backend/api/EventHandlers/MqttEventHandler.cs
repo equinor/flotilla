@@ -77,6 +77,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived += OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived += OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived += OnIsarCloudHealthUpdate;
+            MqttService.MqttIdaInspectionResultReceived += OnIdaInspectionResultUpdate;
         }
 
         public override void Unsubscribe()
@@ -89,6 +90,7 @@ namespace Api.EventHandlers
             MqttService.MqttIsarPressureReceived -= OnIsarPressureUpdate;
             MqttService.MqttIsarPoseReceived -= OnIsarPoseUpdate;
             MqttService.MqttIsarCloudHealthReceived -= OnIsarCloudHealthUpdate;
+            MqttService.MqttIdaInspectionResultReceived -= OnIdaInspectionResultUpdate;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -667,6 +669,39 @@ namespace Api.EventHandlers
             string message = $"Failed telemetry request for robot {cloudHealthStatus.RobotName}.";
 
             TeamsMessageService.TriggerTeamsMessageReceived(new TeamsMessageEventArgs(message));
+        }
+
+        private async void OnIdaInspectionResultUpdate(object? sender, MqttReceivedArgs mqttArgs)
+        {
+            var inspectionResult = (IdaInspectionResultMessage)mqttArgs.Message;
+
+            var inspectionResultMessage = new InspectionResultMessage
+            {
+                InspectionId = inspectionResult.InspectionId,
+                StorageAccount = inspectionResult.StorageAccount,
+                BlobContainer = inspectionResult.BlobContainer,
+                BlobName = inspectionResult.BlobName,
+            };
+
+            var installation = await InstallationService.ReadByInstallationCode(
+                inspectionResult.BlobContainer,
+                readOnly: true
+            );
+
+            if (installation == null)
+            {
+                _logger.LogError(
+                    "Installation with code {Code} not found when processing IDA inspection result update",
+                    inspectionResult.BlobContainer
+                );
+                return;
+            }
+
+            _ = SignalRService.SendMessageAsync(
+                "Inspection Visulization Ready",
+                installation,
+                inspectionResultMessage
+            );
         }
     }
 }
