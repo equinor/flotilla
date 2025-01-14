@@ -30,3 +30,10 @@ export enum InspectionType {
     ThermalVideo = 'ThermalVideo',
     Audio = 'Audio',
 }
+
+export interface IdaInspectionVisualizationReady {
+    inspectionId: string
+    storageAccount: string
+    blobContainer: string
+    blobName: string
+}

@@ -1,9 +1,15 @@
-import { createContext, FC, useContext, useState } from 'react'
+import { createContext, FC, useContext, useEffect, useState } from 'react'
 import { Task } from 'models/Task'
+import { SignalREventLabels, useSignalRContext } from './SignalRContext'
+import { IdaInspectionVisualizationReady } from 'models/Inspection'
+import { useQuery } from '@tanstack/react-query'
+import { BackendAPICaller } from 'api/ApiCaller'
+import { queryClient } from '../../App'
 
 interface IInspectionsContext {
     selectedInspectionTask: Task | undefined
     switchSelectedInspectionTask: (selectedInspectionTask: Task | undefined) => void
+    fetchImageData: (inspectionId: string) => any
 }
 
 interface Props {
@@ -13,15 +19,43 @@ interface Props {
 const defaultInspectionsContext = {
     selectedInspectionTask: undefined,
     switchSelectedInspectionTask: () => undefined,
+    fetchImageData: () => undefined,
 }
 
 const InspectionsContext = createContext<IInspectionsContext>(defaultInspectionsContext)
 
 export const InspectionsProvider: FC<Props> = ({ children }) => {
+    const { registerEvent, connectionReady } = useSignalRContext()
     const [selectedInspectionTask, setSelectedInspectionTask] = useState<Task>()
+
+    useEffect(() => {
+        if (connectionReady) {
+            registerEvent(SignalREventLabels.inspectionVisualizationReady, (username: string, message: string) => {
+                const inspectionVisualizationData: IdaInspectionVisualizationReady = JSON.parse(message)
+                queryClient.invalidateQueries({
+                    queryKey: ['fetchInspectionData', inspectionVisualizationData.inspectionId],
+                })
+                fetchImageData(inspectionVisualizationData.inspectionId)
+            })
+        }
+    }, [registerEvent, connectionReady])
 
     const switchSelectedInspectionTask = (selectedTask: Task | undefined) => {
         setSelectedInspectionTask(selectedTask)
+    }
+
+    const fetchImageData = (inspectionId: string) => {
+        const data = useQuery({
+            queryKey: ['fetchInspectionData', inspectionId],
+            queryFn: async () => {
+                const imageBlob = await BackendAPICaller.getInspection(inspectionId)
+                return URL.createObjectURL(imageBlob)
+            },
+            retry: 1,
+            staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
+            enabled: inspectionId !== undefined,
+        })
+        return data
     }
 
     return (
@@ -29,6 +63,7 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
             value={{
                 selectedInspectionTask,
                 switchSelectedInspectionTask,
+                fetchImageData,
             }}
         >
             {children}

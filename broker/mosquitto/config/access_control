@@ -7,8 +7,14 @@ topic readwrite isar/#
 user flotilla
 topic read isar/#
 
+user flotilla
+topic read ida/#
+
 user analytics
 topic read isar/+/inspection_result
 
 user ida
 topic read isar/+/inspection_result
+
+user ida
+topic write ida/visualization_available

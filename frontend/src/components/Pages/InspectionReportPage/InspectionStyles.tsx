@@ -80,7 +80,6 @@ export const StyledInspectionOverviewDialogView = styled.div`
     gap: 8px;
     overflow-y: scroll;
 `
-
 export const StyledImagesSection = styled.div`
     display: flex;
     align-items: center;

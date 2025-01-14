@@ -29,7 +29,7 @@ if (config.AI_CONNECTION_STRING.length > 0) {
     appInsights.trackPageView()
 }
 
-const queryClient = new QueryClient()
+export const queryClient = new QueryClient()
 
 const App = () => (
     <AuthProvider>
