@@ -33,8 +33,8 @@ const FailedMission = ({ missions }: MissionsProps) => {
 
     return (
         <StyledButton onClick={goToMission} variant="ghost" color="secondary">
-            <strong>'{mission.name}'</strong> {TranslateText('failed on robot')}{' '}
-            <strong>'{mission.robot.name}':</strong> {mission.statusReason}
+            <strong>{`'${mission.name}'`}</strong> {TranslateText('failed on robot')}{' '}
+            <strong>{`'${mission.robot.name}'`}:</strong> {mission.statusReason}
         </StyledButton>
     )
 }
