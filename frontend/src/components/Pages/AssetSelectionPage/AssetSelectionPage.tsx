@@ -140,14 +140,10 @@ const InstallationPicker = () => {
                 placeholder={TranslateText('Select installation')}
                 onOptionsChange={({ selectedItems }) => {
                     const selectedName = selectedItems[0]
-                    validateInstallation(selectedName)
-                        ? setSelectedInstallation(selectedName)
-                        : setSelectedInstallation('')
+                    setSelectedInstallation(validateInstallation(selectedName) ? selectedName : '')
                 }}
                 onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    validateInstallation(e.target.value)
-                        ? setSelectedInstallation(e.target.value)
-                        : setSelectedInstallation('')
+                    setSelectedInstallation(validateInstallation(e.target.value) ? e.target.value : '')
                 }}
                 autoWidth={true}
                 onFocus={(e) => {

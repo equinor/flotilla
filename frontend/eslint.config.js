@@ -16,7 +16,6 @@ export default [
       "react/react-in-jsx-scope": "off",
       "react/no-unescaped-entities": "off",
       "react/display-name": "off",
-      "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-explicit-any": "off",
     }
   }
