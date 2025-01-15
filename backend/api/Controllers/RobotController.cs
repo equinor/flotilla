@@ -119,7 +119,7 @@ namespace Api.Controllers
                 var newRobot = await robotService.CreateFromQuery(robotQuery);
                 var robotResponses = new RobotResponse(newRobot);
 
-                logger.LogInformation("Succesfully created new robot");
+                logger.LogInformation("Successfully created new robot");
                 return CreatedAtAction(
                     nameof(GetRobotById),
                     new { id = newRobot.Id },
