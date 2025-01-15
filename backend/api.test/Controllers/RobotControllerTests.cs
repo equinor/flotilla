@@ -11,9 +11,9 @@ using Api.Test.Database;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace Api.Test.Client
+namespace Api.Test.Controllers
 {
-    public class RobotTests : IAsyncLifetime
+    public class RobotControllerTests : IAsyncLifetime
     {
         public required DatabaseUtilities DatabaseUtilities;
         public required HttpClient Client;
@@ -38,58 +38,56 @@ namespace Api.Test.Client
         public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
-        public async Task RobotsTest()
+        public async Task CheckThatReadAllRobotsEndpointIsSuccessful()
         {
-            string url = "/robots";
-            var response = await Client.GetAsync(url);
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+
+            _ = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
+            _ = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
+            _ = await DatabaseUtilities.NewRobot(RobotStatus.Offline, installation);
+
+            // Act
+            var response = await Client.GetAsync("/robots");
             var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(
                 SerializerOptions
             );
+
+            // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.NotNull(robots);
+            Assert.Equal(3, robots!.Count);
         }
 
         [Fact]
-        public async Task GetRobotById_ShouldReturnNotFound()
+        public async Task CheckThatReadRobotWithUnknownIdReturnsNotFound()
         {
-            string robotId = "RandomString";
-            string url = "/robots/" + robotId;
-            var response = await Client.GetAsync(url);
+            const string RobotId = "IAmAnUnknownRobot";
+            const string Url = "/robots/" + RobotId;
+            var response = await Client.GetAsync(Url);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
-        public async Task GetRobotById_ShouldReturnRobot()
+        public async Task CheckThatReadRobotByIdEndpointIsSuccessful()
         {
+            // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            _ = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
 
-            string url = "/robots";
-            var response = await Client.GetAsync(url);
-            var robots = await response.Content.ReadFromJsonAsync<List<RobotResponse>>(
+            // Act
+            var robotResponse = await Client.GetAsync("/robots/" + robot.Id);
+            var receivedRobot = await robotResponse.Content.ReadFromJsonAsync<RobotResponse>(
                 SerializerOptions
             );
-            Assert.NotNull(robots);
 
-            string robotId = robots[0].Id;
-
-            var robotResponse = await Client.GetAsync("/robots/" + robotId);
-            var robot = await robotResponse.Content.ReadFromJsonAsync<RobotResponse>(
-                SerializerOptions
-            );
-            Assert.Equal(HttpStatusCode.OK, robotResponse.StatusCode);
-            Assert.NotNull(robot);
-            Assert.Equal(robot.Id, robotId);
+            // Assert
+            Assert.Equal(receivedRobot!.Id, robot.Id);
         }
 
-#pragma warning disable xUnit1004
-        [Fact(
-            Skip = "Runs inconcistently as it is tied to the database interactions of other tests"
-        )]
-#pragma warning restore xUnit1004
-        public async Task RobotIsNotCreatedWithAreaNotInInstallation()
+        [Fact]
+        public async Task CheckThatRobotIsNotCreatedWhenInspectionAreaIsNotInInstallation()
         {
-            // Arrange - Area
+            // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
 
             var wrongInstallation = await DatabaseUtilities.NewInstallation("wrongInstallation");
@@ -99,12 +97,11 @@ namespace Api.Test.Client
                 wrongPlant.PlantCode
             );
 
-            // Arrange - Create robot
             var robotQuery = new CreateRobotQuery
             {
                 IsarId = Guid.NewGuid().ToString(),
-                Name = "RobotGetNextRun",
-                SerialNumber = "GetNextRun",
+                Name = "TestRobot",
+                SerialNumber = "TestRobotSN",
                 RobotType = RobotType.Robot,
                 Status = RobotStatus.Available,
                 Host = "localhost",
@@ -113,24 +110,17 @@ namespace Api.Test.Client
                 CurrentInspectionAreaName = wrongInspectionArea.Name,
             };
 
-            string robotUrl = "/robots";
+            // Act
+            const string RobotUrl = "/robots";
             var content = new StringContent(
                 JsonSerializer.Serialize(robotQuery),
                 null,
                 "application/json"
             );
 
-            try
-            {
-                var response = await Client.PostAsync(robotUrl, content);
-            }
-            catch (DbUpdateException ex)
-            {
-                Assert.True(
-                    ex.Message
-                        == $"Could not create new robot in database as inspection area '{wrongInspectionArea.Name}' does not exist in installation {installation.InstallationCode}"
-                );
-            }
+            // Assert
+            var response = await Client.PostAsync(RobotUrl, content);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
     }
 }
