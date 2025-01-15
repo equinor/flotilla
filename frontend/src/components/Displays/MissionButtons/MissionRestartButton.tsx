@@ -66,6 +66,11 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
         setIsLocationVerificationOpen(false)
     }
 
+    const selectRerunOption = (rerunOption: ReRunOptions) => {
+        setSelectedRerunOption(rerunOption)
+        setIsLocationVerificationOpen(true)
+    }
+
     return (
         <Centered>
             <StyledButton
@@ -76,8 +81,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
                 aria-expanded={isOpen}
                 aria-controls="menu-default"
                 onClick={() => {
-                    hasFailedTasks ? setIsOpen(!isOpen) : setSelectedRerunOption(ReRunOptions.ReRun)
-                    !hasFailedTasks && setIsLocationVerificationOpen(true)
+                    return hasFailedTasks ? setIsOpen(!isOpen) : selectRerunOption(ReRunOptions.ReRun)
                 }}
             >
                 <Icon name={smallButton ? Icons.AddOutlined : Icons.Add} size={24} />
@@ -93,8 +97,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
                 >
                     <Menu.Item
                         onClick={() => {
-                            setSelectedRerunOption(ReRunOptions.ReRun)
-                            setIsLocationVerificationOpen(true)
+                            selectRerunOption(ReRunOptions.ReRun)
                         }}
                     >
                         {TranslateText('Rerun full mission')}
@@ -102,8 +105,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
                     {hasFailedTasks && (
                         <Menu.Item
                             onClick={() => {
-                                setSelectedRerunOption(ReRunOptions.ReRunFailed)
-                                setIsLocationVerificationOpen(true)
+                                selectRerunOption(ReRunOptions.ReRunFailed)
                             }}
                         >
                             {TranslateText('Rerun failed and cancelled tasks in the mission')}
