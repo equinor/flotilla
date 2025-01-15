@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Api.Database.Models;
+using Api.Services;
 
-namespace Api.Services
+namespace Api.Test.Mocks
 {
     public class MockSignalRService : ISignalRService
     {

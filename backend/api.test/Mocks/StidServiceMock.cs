@@ -3,9 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace Api.Services
+namespace Api.Test.Mocks
 {
     public class MockStidService(FlotillaDbContext context) : IStidService
     {
