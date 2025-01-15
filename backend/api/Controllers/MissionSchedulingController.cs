@@ -206,6 +206,19 @@ namespace Api.Controllers
                 InspectionArea = missionDefinition.InspectionArea,
             };
 
+            if (missionDefinition.Map == null)
+            {
+                var newMap = await mapService.ChooseMapFromMissionRunTasks(missionRun);
+                if (newMap != null)
+                {
+                    logger.LogInformation(
+                        $"Assigned map {newMap.MapName} to mission definition with id {missionDefinition.Id}"
+                    );
+                    missionDefinition.Map = newMap;
+                    await missionDefinitionService.Update(missionDefinition);
+                }
+            }
+
             if (missionRun.Tasks.Any())
             {
                 missionRun.CalculateEstimatedDuration();
