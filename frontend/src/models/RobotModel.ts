@@ -13,6 +13,7 @@ export interface RobotModel {
     id: string
     type: RobotType
     batteryWarningThreshold?: number
+    batteryMissionStartThreshold?: number
     upperPressureWarningThreshold?: number
     lowerPressureWarningThreshold?: number
 }
