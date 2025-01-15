@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Api.Mqtt;
 using Xunit;
 
-namespace Api.Test
+namespace Api.Test.MQTT
 {
-    public class TestMqttDictionnary
+    public class TestMqttDictionary
     {
         private readonly Dictionary<string, string> _topics = [];
 
-        public TestMqttDictionnary()
+        public TestMqttDictionary()
         {
             _topics["isar/+/task"] = "leveledTask";
             _topics["isar/task"] = "simpleTask";
@@ -20,15 +20,15 @@ namespace Api.Test
         [Fact]
         public void ShouldErrorWithSeveralMatches()
         {
-            string topic = "many/specific";
-            Assert.Throws<InvalidOperationException>(() => _topics.GetItemByTopic(topic));
+            const string Topic = "many/specific";
+            Assert.Throws<InvalidOperationException>(() => _topics.GetItemByTopic(Topic));
         }
 
         [Fact]
         public void ShouldMatchWildcardTopic()
         {
-            string topic = "isar/extraLevel/task";
-            string? value = _topics.GetItemByTopic(topic);
+            const string Topic = "isar/extraLevel/task";
+            string? value = _topics.GetItemByTopic(Topic);
 
             Assert.NotNull(value);
             Assert.Equal("leveledTask", value);
@@ -37,8 +37,8 @@ namespace Api.Test
         [Fact]
         public void ShouldMatchSimpleTopic()
         {
-            string topic = "isar/task";
-            string? value = _topics.GetItemByTopic(topic);
+            const string Topic = "isar/task";
+            string? value = _topics.GetItemByTopic(Topic);
 
             Assert.NotNull(value);
             Assert.Equal("simpleTask", value);
