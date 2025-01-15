@@ -10,6 +10,7 @@ export enum RobotStatus {
     Busy = 'Busy',
     Offline = 'Offline',
     Blocked = 'Blocked',
+    BlockedProtectiveStop = 'BlockedProtectiveStop',
     Docked = 'Docked',
     Recharging = 'Recharging',
     ConnectionIssues = 'Connection Issues',
