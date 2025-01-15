@@ -140,16 +140,20 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
     )
 }
 
-export const OngoingMissionPlaceholderCard = (): JSX.Element => {
+export const OngoingMissionPlaceholderCard = ({ noMissionReason }: { noMissionReason?: string }): JSX.Element => {
     const { TranslateText } = useLanguageContext()
 
     return (
         <>
-            <StyledSmallScreenMissionCard style={{ backgroundColor: tokens.colors.ui.background__light.hex }}>
+            <StyledSmallScreenMissionCard
+                style={{ backgroundColor: tokens.colors.ui.background__light.hex, gap: '8px' }}
+            >
                 <Typography variant="h5">{TranslateText('No ongoing missions')}</Typography>
+                {noMissionReason && <Typography variant="body_short">{noMissionReason}</Typography>}
             </StyledSmallScreenMissionCard>
             <StyledLargeScreenMissionCard style={{ backgroundColor: tokens.colors.ui.background__light.hex }}>
                 <Typography variant="h5">{TranslateText('No ongoing missions')}</Typography>
+                {noMissionReason && <Typography variant="body_short">{noMissionReason}</Typography>}
             </StyledLargeScreenMissionCard>
         </>
     )

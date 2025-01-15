@@ -6,6 +6,7 @@ import {
     InsufficientPressureDialog,
 } from 'components/Displays/ConfirmScheduleDialogs/InsufficientValueDialogs'
 import { ScheduleMissionWithLocalizationVerificationDialog } from './LocalizationVerification/ScheduleMissionWithLocalizationVerification'
+import { isBatteryTooLow, isRobotPressureTooHigh, isRobotPressureTooLow } from 'utils/IsRobotReadyToRunMissions'
 
 interface ConfirmScheduleDialogProps {
     scheduleMissions: () => void
@@ -24,26 +25,6 @@ export const ScheduleMissionWithConfirmDialogs = ({
     const [robot, setRobot] = useState<Robot>()
     const [shouldScheduleWithoutLocalization, setShouldScheduleWithoutLocalization] = useState<boolean>()
 
-    const isBatteryInsufficient = (currentRobot: Robot) => {
-        const hasBatteryValue = currentRobot.batteryLevel !== null && currentRobot.batteryLevel !== undefined
-        return (
-            hasBatteryValue &&
-            currentRobot.model.batteryWarningThreshold &&
-            currentRobot.batteryLevel! < currentRobot.model.batteryWarningThreshold
-        )
-    }
-
-    const isPressureInsufficient = (currentRobot: Robot) => {
-        const hasPressureValue = currentRobot.pressureLevel !== null && currentRobot.pressureLevel !== undefined
-        return (
-            (hasPressureValue &&
-                currentRobot.model.lowerPressureWarningThreshold &&
-                currentRobot.pressureLevel! < currentRobot.model.lowerPressureWarningThreshold) ||
-            (currentRobot.model.upperPressureWarningThreshold &&
-                currentRobot.pressureLevel! > currentRobot.model.upperPressureWarningThreshold)
-        )
-    }
-
     useEffect(() => {
         setRobot(enabledRobots.find((robot) => robot.id === robotId))
     }, [robotId, enabledRobots])
@@ -57,9 +38,9 @@ export const ScheduleMissionWithConfirmDialogs = ({
 
     if (!robot) {
         return <></>
-    } else if (isBatteryInsufficient(robot)) {
+    } else if (isBatteryTooLow(robot)) {
         return <InsufficientBatteryDialog robot={robot} cancel={closeDialog} />
-    } else if (isPressureInsufficient(robot)) {
+    } else if (isRobotPressureTooLow(robot) || isRobotPressureTooHigh(robot)) {
         return <InsufficientPressureDialog robot={robot} cancel={closeDialog} />
     } else {
         // Auto-localizing robots don't need to confirmation localization. Localization dialog can be skipped
