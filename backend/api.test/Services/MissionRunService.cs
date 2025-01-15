@@ -32,24 +32,16 @@ namespace Api.Test.Services
         public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
-        public async Task ReadIdDoesNotExist()
+        public async Task CheckThatReadByIdWithUnknownIdFails()
         {
-            var missionRun = await MissionRunService.ReadById(
-                "some_id_that_does_not_exist",
-                readOnly: true
-            );
+            var missionRun = await MissionRunService.ReadById("IDoNotExist", readOnly: true);
             Assert.Null(missionRun);
         }
 
         [Fact]
-        public async Task Create()
+        public async Task CheckThatNumberOfMissionRunReportsIncreaseByOneWhenNewMissionRunIsCreated()
         {
-            var reportsBefore = await MissionRunService.ReadAll(
-                new MissionRunQueryStringParameters(),
-                readOnly: true
-            );
-            int nReportsBefore = reportsBefore.Count;
-
+            // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
             var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
             var inspectionArea = await DatabaseUtilities.NewInspectionArea(
@@ -63,12 +55,21 @@ namespace Api.Test.Services
                 inspectionArea
             );
 
+            var reportsBefore = await MissionRunService.ReadAll(
+                new MissionRunQueryStringParameters(),
+                readOnly: true
+            );
+            int nReportsBefore = reportsBefore.Count;
+
+            // Act
             await MissionRunService.Create(missionRun);
 
+            // Assert
             var reportsAfter = await MissionRunService.ReadAll(
                 new MissionRunQueryStringParameters()
             );
             int nReportsAfter = reportsAfter.Count;
+
             Assert.Equal(nReportsBefore + 1, nReportsAfter);
         }
     }
