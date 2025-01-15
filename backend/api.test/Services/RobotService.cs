@@ -36,38 +36,38 @@ namespace Api.Test.Services
         public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
-        public async Task ReadAll()
+        public async Task CheckThatReadAllRobotsReturnsCorrectNumberOfRobots()
         {
             var installation = await DatabaseUtilities.NewInstallation();
             _ = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
+            _ = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
             var robots = await RobotService.ReadAll();
 
-            Assert.True(robots.Any());
+            Assert.Equal(2, robots.Count());
         }
 
         [Fact]
-        public async Task Read()
+        public async Task CheckThatReadByIdReturnsCorrectRobot()
         {
             var installation = await DatabaseUtilities.NewInstallation();
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
+
             var robotById = await RobotService.ReadById(robot.Id, readOnly: false);
-            Assert.NotNull(robotById);
-            Assert.Equal(robot.Id, robotById.Id);
+
+            Assert.Equal(robot.Id, robotById!.Id);
         }
 
         [Fact]
-        public async Task ReadIdDoesNotExist()
+        public async Task CheckThatReadByUnknownIdReturnsNull()
         {
-            var robot = await RobotService.ReadById("some_id_that_does_not_exist", readOnly: true);
+            var robot = await RobotService.ReadById("IDoNotExists", readOnly: true);
             Assert.Null(robot);
         }
 
         [Fact]
-        public async Task Create()
+        public async Task CheckTheNumberOfRobotsIncreaseWhenAddingNewRobotToDatabase()
         {
-            var installation = await InstallationService.Create(
-                new CreateInstallationQuery { Name = "Johan Sverdrup", InstallationCode = "JSV" }
-            );
+            var installation = await DatabaseUtilities.NewInstallation();
 
             var robotsBefore = await RobotService.ReadAll(readOnly: true);
             int nRobotsBefore = robotsBefore.Count();
