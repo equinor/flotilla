@@ -11,19 +11,18 @@ namespace Api.Mqtt
         /// <summary>
         ///     A dictionary linking MQTT topics to their respective message models
         /// </summary>
-        public static readonly Dictionary<string, Type> TopicsToMessages =
-            new()
-            {
-                { "isar/+/status", typeof(IsarStatusMessage) },
-                { "isar/+/robot_info", typeof(IsarRobotInfoMessage) },
-                { "isar/+/robot_heartbeat", typeof(IsarRobotHeartbeatMessage) },
-                { "isar/+/mission", typeof(IsarMissionMessage) },
-                { "isar/+/task", typeof(IsarTaskMessage) },
-                { "isar/+/battery", typeof(IsarBatteryMessage) },
-                { "isar/+/pressure", typeof(IsarPressureMessage) },
-                { "isar/+/pose", typeof(IsarPoseMessage) },
-                { "isar/+/cloud_health", typeof(IsarCloudHealthMessage) },
-            };
+        public static readonly Dictionary<string, Type> TopicsToMessages = new()
+        {
+            { "isar/+/status", typeof(IsarStatusMessage) },
+            { "isar/+/robot_info", typeof(IsarRobotInfoMessage) },
+            { "isar/+/robot_heartbeat", typeof(IsarRobotHeartbeatMessage) },
+            { "isar/+/mission", typeof(IsarMissionMessage) },
+            { "isar/+/task", typeof(IsarTaskMessage) },
+            { "isar/+/battery", typeof(IsarBatteryMessage) },
+            { "isar/+/pressure", typeof(IsarPressureMessage) },
+            { "isar/+/pose", typeof(IsarPoseMessage) },
+            { "isar/+/cloud_health", typeof(IsarCloudHealthMessage) },
+        };
 
         /// <summary>
         ///     Searches a dictionary for a specific topic name and returns the corresponding value from the wildcarded dictionary

@@ -73,17 +73,16 @@ namespace Api.Test.Mocks
             ),
         ];
 
-        private readonly MissionDefinition _mockMissionDefinition =
-            new()
-            {
-                InspectionArea = new InspectionArea(),
-                Comment = "",
-                Id = "",
-                InstallationCode = "TTT",
-                IsDeprecated = false,
-                Name = "test",
-                Source = new Source { Id = "", SourceId = "" },
-            };
+        private readonly MissionDefinition _mockMissionDefinition = new()
+        {
+            InspectionArea = new InspectionArea(),
+            Comment = "",
+            Id = "",
+            InstallationCode = "TTT",
+            IsDeprecated = false,
+            Name = "test",
+            Source = new Source { Id = "", SourceId = "" },
+        };
 
         public async Task<MissionDefinition?> GetMissionById(string sourceMissionId)
         {

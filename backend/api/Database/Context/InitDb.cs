@@ -576,15 +576,14 @@ namespace Api.Database.Context
         {
             foreach (var type in Enum.GetValues<RobotType>())
             {
-                RobotModel model =
-                    new()
-                    {
-                        Type = type,
-                        BatteryWarningThreshold = null,
-                        BatteryMissionStartThreshold = null,
-                        LowerPressureWarningThreshold = null,
-                        UpperPressureWarningThreshold = null,
-                    };
+                RobotModel model = new()
+                {
+                    Type = type,
+                    BatteryWarningThreshold = null,
+                    BatteryMissionStartThreshold = null,
+                    LowerPressureWarningThreshold = null,
+                    UpperPressureWarningThreshold = null,
+                };
                 context.Add(model);
             }
         }

@@ -28,8 +28,10 @@ namespace Api.Mqtt
         private readonly int _serverPort;
         private readonly bool _shouldFailOnMaxRetries;
 
-        private static readonly JsonSerializerOptions serializerOptions =
-            new() { Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) } };
+        private static readonly JsonSerializerOptions serializerOptions = new()
+        {
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+        };
 
         private CancellationToken _cancellationToken;
         private int _reconnectAttempts;
