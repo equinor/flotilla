@@ -347,31 +347,31 @@ namespace Api.Test.EventHandlers
                 plant.PlantCode
             );
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation, null);
-            var missionRun1 = await DatabaseUtilities.NewMissionRun(
+            var missionRunOne = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
                 inspectionArea,
                 true
             );
-            var missionRun2 = await DatabaseUtilities.NewMissionRun(
+            var missionRunTwo = await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
                 inspectionArea,
                 true
             );
 
-            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRun1);
+            var missionRunCreatedEventArgs = new MissionRunCreatedEventArgs(missionRunOne);
             MissionRunService.RaiseEvent(
                 nameof(Api.Services.MissionRunService.MissionRunCreated),
                 missionRunCreatedEventArgs
             );
             Thread.Sleep(1000);
 
-            var missionRun1PostCreation = await MissionRunService.ReadById(
-                missionRun1.Id,
+            var missionRunOnePostCreation = await MissionRunService.ReadById(
+                missionRunOne.Id,
                 readOnly: true
             );
-            Assert.NotNull(missionRun1PostCreation);
+            Assert.NotNull(missionRunOnePostCreation);
 
             // Act
             var mqttIsarMissionEventArgs = new MqttReceivedArgs(
@@ -379,7 +379,7 @@ namespace Api.Test.EventHandlers
                 {
                     RobotName = robot.Name,
                     IsarId = robot.IsarId,
-                    MissionId = missionRun1PostCreation.IsarMissionId,
+                    MissionId = missionRunOnePostCreation.IsarMissionId,
                     Status = "successful",
                     Timestamp = DateTime.UtcNow,
                 }
@@ -397,16 +397,16 @@ namespace Api.Test.EventHandlers
             );
 
             // Assert
-            var postTestMissionRun1 = await MissionRunService.ReadById(
-                missionRun1.Id,
+            var postTestMissionRunOne = await MissionRunService.ReadById(
+                missionRunOne.Id,
                 readOnly: true
             );
-            Assert.Equal(MissionStatus.Successful, postTestMissionRun1!.Status);
-            var postTestMissionRun2 = await MissionRunService.ReadById(
-                missionRun2.Id,
+            Assert.Equal(MissionStatus.Successful, postTestMissionRunOne!.Status);
+            var postTestMissionRunTwo = await MissionRunService.ReadById(
+                missionRunTwo.Id,
                 readOnly: true
             );
-            Assert.Equal(MissionStatus.Pending, postTestMissionRun2!.Status);
+            Assert.Equal(MissionStatus.Pending, postTestMissionRunTwo!.Status);
         }
 
 #pragma warning disable xUnit1004
