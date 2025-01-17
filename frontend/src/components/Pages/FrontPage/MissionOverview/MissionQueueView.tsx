@@ -10,12 +10,12 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { Robot } from 'models/Robot'
 import { tokens } from '@equinor/eds-tokens'
 import { useEffect } from 'react'
+import { Typography } from '@equinor/eds-core-react'
 
 const StyledMissionView = styled.div`
     display: flex;
     padding: 16px;
     flex-direction: column;
-    align-items: flex-end;
     gap: 8px;
     align-self: stretch;
     border-top: 1px solid ${tokens.colors.ui.background__medium.hex};
@@ -74,6 +74,7 @@ export const RobotMissionQueueView = ({ robot }: { robot: Robot }): JSX.Element 
         <>
             {(robotMissionQueue.length > 0 || robotLoadingMissions.length > 0) && (
                 <StyledMissionView>
+                    <Typography variant="h5">{TranslateText('Queued Missions')}</Typography>
                     {missionQueueDisplay}
                     {robotLoadingMissions.length > 0 && loadingQueueDisplay}
                 </StyledMissionView>
