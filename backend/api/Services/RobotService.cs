@@ -13,7 +13,7 @@ namespace Api.Services
     {
         public Task<Robot> Create(Robot newRobot);
         public Task<Robot> CreateFromQuery(CreateRobotQuery robotQuery);
-        public Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = true);
+        public Task<Robot> GetRobotWithSchedulingPreCheck(string robotId, bool readOnly = true);
         public Task<IEnumerable<Robot>> ReadAll(bool readOnly = true);
         public Task<IEnumerable<string>> ReadAllActivePlants(bool readOnly = true);
         public Task<Robot?> ReadById(string id, bool readOnly = true);
@@ -136,7 +136,10 @@ namespace Api.Services
             );
         }
 
-        public async Task<Robot> GetRobotWithPreCheck(string robotId, bool readOnly = true)
+        public async Task<Robot> GetRobotWithSchedulingPreCheck(
+            string robotId,
+            bool readOnly = true
+        )
         {
             var robot = await ReadById(robotId, readOnly: readOnly);
 
@@ -158,30 +161,6 @@ namespace Api.Services
             {
                 string errorMessage =
                     $"The robot with ID {robotId} has connection issues. Isar not connected.";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotPreCheckFailedException(errorMessage);
-            }
-
-            if (robot.IsRobotPressureTooLow())
-            {
-                string errorMessage =
-                    $"The robot pressure on {robot.Name} is too low to start a mission";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotPreCheckFailedException(errorMessage);
-            }
-
-            if (robot.IsRobotPressureTooHigh())
-            {
-                string errorMessage =
-                    $"The robot pressure on {robot.Name} is too high to start a mission";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotPreCheckFailedException(errorMessage);
-            }
-
-            if (robot.IsRobotBatteryTooLow())
-            {
-                string errorMessage =
-                    $"The robot battery level on {robot.Name} is too low to start a mission";
                 logger.LogError("{Message}", errorMessage);
                 throw new RobotPreCheckFailedException(errorMessage);
             }
