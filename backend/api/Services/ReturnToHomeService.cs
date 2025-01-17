@@ -5,9 +5,7 @@ namespace Api.Services
 {
     public interface IReturnToHomeService
     {
-        public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(
-            string robotId
-        );
+        public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(Robot robot);
         public Task<MissionRun?> GetActiveReturnToHomeMissionRun(
             string robotId,
             bool readOnly = true
@@ -16,31 +14,23 @@ namespace Api.Services
 
     public class ReturnToHomeService(
         ILogger<ReturnToHomeService> logger,
-        IRobotService robotService,
         IMissionRunService missionRunService
     ) : IReturnToHomeService
     {
-        public async Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(
-            string robotId
+        public async Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
+            Robot robot
         )
         {
             logger.LogInformation(
                 "Scheduling return home mission if not already scheduled or the robot is home for robot {RobotId}",
-                robotId
+                robot.Id
             );
-            var lastMissionRun = await missionRunService.ReadLastExecutedMissionRunByRobot(robotId);
 
-            if (
-                await IsReturnToHomeMissionAlreadyScheduled(robotId)
-                || (
-                    lastMissionRun != null
-                    && (lastMissionRun.IsReturnHomeMission() || lastMissionRun.IsEmergencyMission())
-                )
-            )
+            if (await IsReturnToHomeMissionAlreadyScheduled(robot.Id))
             {
                 logger.LogInformation(
                     "ReturnToHomeMission is already scheduled for Robot {RobotId}",
-                    robotId
+                    robot.Id
                 );
                 return null;
             }
@@ -48,7 +38,7 @@ namespace Api.Services
             MissionRun missionRun;
             try
             {
-                missionRun = await ScheduleReturnToHomeMissionRun(robotId);
+                missionRun = await ScheduleReturnToHomeMissionRun(robot);
             }
             catch (Exception ex)
                 when (ex
@@ -71,16 +61,8 @@ namespace Api.Services
             return await missionRunService.PendingOrOngoingReturnToHomeMissionRunExists(robotId);
         }
 
-        private async Task<MissionRun> ScheduleReturnToHomeMissionRun(string robotId)
+        private async Task<MissionRun> ScheduleReturnToHomeMissionRun(Robot robot)
         {
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot is null)
-            {
-                string errorMessage =
-                    $"Robot with ID {robotId} could not be retrieved from the database";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
             Pose? return_to_home_pose;
             InspectionArea? currentInspectionArea;
             if (
@@ -110,7 +92,7 @@ namespace Api.Services
             if (currentInspectionArea == null)
             {
                 string errorMessage =
-                    $"Robot with ID {robotId} could return home as it did not have an inspection area";
+                    $"Robot with ID {robot.Id} could return home as it did not have an inspection area";
                 logger.LogError("{Message}", errorMessage);
                 throw new InspectionAreaNotFoundException(errorMessage);
             }
@@ -141,16 +123,15 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            IList<MissionStatus> missionStatuses =
+            IList<MissionStatus> activeMissionStatuses =
             [
                 MissionStatus.Ongoing,
-                MissionStatus.Pending,
                 MissionStatus.Paused,
             ];
             var activeReturnToHomeMissions = await missionRunService.ReadMissionRuns(
                 robotId,
                 MissionRunType.ReturnHome,
-                missionStatuses,
+                activeMissionStatuses,
                 readOnly: readOnly
             );
 

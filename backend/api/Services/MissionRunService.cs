@@ -28,17 +28,20 @@ namespace Api.Services
 
         public Task<MissionRun?> ReadByIsarMissionId(string isarMissionId, bool readOnly = true);
 
-        public Task<IList<MissionRun>> ReadMissionRunQueue(string robotId, bool readOnly = true);
+        public Task<IList<MissionRun>> ReadMissionRunQueue(
+            string robotId,
+            MissionRunType type = MissionRunType.Normal,
+            bool readOnly = true
+        );
 
         public Task<MissionRun?> ReadNextScheduledRunByMissionId(
             string missionId,
             bool readOnly = true
         );
 
-        public Task<MissionRun?> ReadNextScheduledMissionRun(string robotId, bool readOnly = true);
-
-        public Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(
+        public Task<MissionRun?> ReadNextScheduledMissionRun(
             string robotId,
+            MissionRunType type = MissionRunType.Normal,
             bool readOnly = true
         );
 
@@ -188,12 +191,15 @@ namespace Api.Services
 
         public async Task<IList<MissionRun>> ReadMissionRunQueue(
             string robotId,
+            MissionRunType type = MissionRunType.Normal,
             bool readOnly = true
         )
         {
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .Where(missionRun =>
-                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending
+                    missionRun.Robot.Id == robotId
+                    && missionRun.Status == MissionStatus.Pending
+                    && missionRun.MissionRunType == type
                 )
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
@@ -201,18 +207,7 @@ namespace Api.Services
 
         public async Task<MissionRun?> ReadNextScheduledMissionRun(
             string robotId,
-            bool readOnly = true
-        )
-        {
-            return await GetMissionRunsWithSubModels(readOnly: readOnly)
-                .OrderBy(missionRun => missionRun.DesiredStartTime)
-                .FirstOrDefaultAsync(missionRun =>
-                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Pending
-                );
-        }
-
-        public async Task<MissionRun?> ReadNextScheduledEmergencyMissionRun(
-            string robotId,
+            MissionRunType type = MissionRunType.Normal,
             bool readOnly = true
         )
         {
@@ -220,8 +215,8 @@ namespace Api.Services
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .FirstOrDefaultAsync(missionRun =>
                     missionRun.Robot.Id == robotId
-                    && missionRun.MissionRunType == MissionRunType.Emergency
                     && missionRun.Status == MissionStatus.Pending
+                    && missionRun.MissionRunType == type
                 );
         }
 
@@ -273,8 +268,12 @@ namespace Api.Services
 
         public async Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId)
         {
-            var pendingMissionRuns = await ReadMissionRunQueue(robotId, readOnly: true);
-            if (pendingMissionRuns.Any((m) => m.IsReturnHomeMission()))
+            var pendingMissionRuns = await ReadNextScheduledMissionRun(
+                robotId,
+                type: MissionRunType.ReturnHome,
+                readOnly: true
+            );
+            if (pendingMissionRuns != null)
                 return true;
 
             var ongoingMissionRuns = await GetMissionRunsWithSubModels(readOnly: true)
@@ -728,13 +727,23 @@ namespace Api.Services
                 );
             if (robot.CurrentMissionId != null)
             {
-                var missionRun = await SetMissionRunToFailed(
-                    robot.CurrentMissionId,
-                    "Lost connection to ISAR during mission"
-                );
+                try
+                {
+                    await SetMissionRunToFailed(
+                        robot.CurrentMissionId,
+                        "Lost connection to ISAR during mission"
+                    );
+                }
+                catch (MissionRunNotFoundException)
+                {
+                    logger.LogError(
+                        "Mission '{MissionId}' could not be set to failed as it no longer exists",
+                        robot.CurrentMissionId
+                    );
+                }
                 logger.LogWarning(
                     "Mission '{Id}' failed because ISAR could not be reached",
-                    missionRun.Id
+                    robot.CurrentMissionId
                 );
             }
         }

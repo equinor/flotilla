@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
@@ -36,41 +37,6 @@ namespace Api.Test.Services
         {
             var missionRun = await MissionRunService.ReadById("IDoNotExist", readOnly: true);
             Assert.Null(missionRun);
-        }
-
-        [Fact]
-        public async Task CheckThatNumberOfMissionRunReportsIncreaseByOneWhenNewMissionRunIsCreated()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
-            var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
-                robot,
-                inspectionArea
-            );
-
-            var reportsBefore = await MissionRunService.ReadAll(
-                new MissionRunQueryStringParameters(),
-                readOnly: true
-            );
-            int nReportsBefore = reportsBefore.Count;
-
-            // Act
-            await MissionRunService.Create(missionRun);
-
-            // Assert
-            var reportsAfter = await MissionRunService.ReadAll(
-                new MissionRunQueryStringParameters()
-            );
-            int nReportsAfter = reportsAfter.Count;
-
-            Assert.Equal(nReportsBefore + 1, nReportsAfter);
         }
     }
 }

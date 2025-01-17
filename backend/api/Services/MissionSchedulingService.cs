@@ -17,7 +17,7 @@ namespace Api.Services
 
         public Task StopCurrentMissionRun(string robotId);
 
-        public Task AbortAllScheduledMissions(string robotId, string? abortReason = null);
+        public Task AbortAllScheduledNormalMissions(string robotId, string? abortReason = null);
 
         public Task ScheduleMissionToDriveToDockPosition(string robotId);
 
@@ -61,9 +61,11 @@ namespace Api.Services
                 return;
             }
 
+            if (missionRun == null)
+                return;
+
             if (
                 robot.MissionQueueFrozen
-                && missionRun != null
                 && !(missionRun.IsEmergencyMission() || missionRun.IsReturnHomeMission())
             )
             {
@@ -71,44 +73,6 @@ namespace Api.Services
                     "Robot {robotName} was ready to start a mission but its mission queue was frozen",
                     robot.Name
                 );
-                return;
-            }
-
-            if (missionRun == null)
-            {
-                logger.LogInformation(
-                    "The robot was ready to start mission, but no mission is scheduled"
-                );
-
-                if (
-                    robot.RobotCapabilities != null
-                    && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.return_to_home)
-                )
-                {
-                    try
-                    {
-                        missionRun =
-                            await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(
-                                robot.Id
-                            );
-                    }
-                    catch (ReturnToHomeMissionFailedToScheduleException)
-                    {
-                        signalRService.ReportGeneralFailToSignalR(
-                            robot,
-                            $"Failed to schedule return home for robot {robot.Name}",
-                            ""
-                        );
-                        logger.LogError(
-                            "Failed to schedule a return home mission for robot {RobotId}",
-                            robot.Id
-                        );
-                    }
-                }
-            }
-
-            if (missionRun == null)
-            {
                 return;
             }
 
@@ -136,6 +100,7 @@ namespace Api.Services
                     robot.Id,
                     missionRun.InspectionArea.Id
                 );
+                robot.CurrentInspectionArea = missionRun.InspectionArea;
             }
             else if (
                 !await localizationService.RobotIsOnSameInspectionAreaAsMission(
@@ -151,7 +116,7 @@ namespace Api.Services
                 );
                 try
                 {
-                    await AbortAllScheduledMissions(
+                    await AbortAllScheduledNormalMissions(
                         robot.Id,
                         "Aborted: Robot was at different inspection area"
                     );
@@ -164,19 +129,6 @@ namespace Api.Services
                     );
                 }
 
-                try
-                {
-                    await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(
-                        robot.Id
-                    );
-                }
-                catch (ReturnToHomeMissionFailedToScheduleException)
-                {
-                    logger.LogError(
-                        "Failed to schedule a return home mission for robot {RobotId}",
-                        robot.Id
-                    );
-                }
                 return;
             }
 
@@ -185,11 +137,8 @@ namespace Api.Services
                 && !(missionRun.IsReturnHomeMission() || missionRun.IsEmergencyMission())
             )
             {
-                missionRun = await HandleBatteryAndPressureLevel(robot);
-                if (missionRun == null)
-                {
-                    return;
-                }
+                await HandleBatteryAndPressureLevel(robot);
+                return;
             }
 
             try
@@ -211,15 +160,48 @@ namespace Api.Services
                     missionRun.Id,
                     ex.Message
                 );
-                await missionRunService.SetMissionRunToFailed(
-                    missionRun.Id,
-                    $"Mission run '{missionRun.Id}' was not started successfully. '{ex.Message}'"
+                try
+                {
+                    await missionRunService.SetMissionRunToFailed(
+                        missionRun.Id,
+                        $"Mission run '{missionRun.Id}' was not started successfully. '{ex.Message}'"
+                    );
+                }
+                catch (MissionRunNotFoundException)
+                {
+                    logger.LogError(
+                        "Mission '{MissionId}' could not be set to failed as it no longer exists",
+                        robot.CurrentMissionId
+                    );
+                }
+            }
+            catch (RobotBusyException)
+            {
+                return;
+            }
+
+            try
+            {
+                robot.CurrentInspectionArea ??= missionRun.InspectionArea;
+                await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
+                    robot
                 );
             }
-            catch (RobotBusyException) { }
+            catch (ReturnToHomeMissionFailedToScheduleException)
+            {
+                signalRService.ReportGeneralFailToSignalR(
+                    robot,
+                    $"Failed to schedule return home for robot {robot.Name}",
+                    ""
+                );
+                logger.LogError(
+                    "Failed to schedule a return home mission for robot {RobotId}",
+                    robot.Id
+                );
+            }
         }
 
-        public async Task<MissionRun?> HandleBatteryAndPressureLevel(Robot robot)
+        public async Task HandleBatteryAndPressureLevel(Robot robot)
         {
             if (robot.IsRobotPressureTooLow())
             {
@@ -248,7 +230,7 @@ namespace Api.Services
 
             try
             {
-                await AbortAllScheduledMissions(
+                await AbortAllScheduledNormalMissions(
                     robot.Id,
                     "Aborted: Robot pressure or battery values are too low."
                 );
@@ -257,24 +239,6 @@ namespace Api.Services
             {
                 logger.LogError("Failed to abort scheduled missions for robot {RobotId}", robot.Id);
             }
-
-            MissionRun? missionRun;
-            try
-            {
-                missionRun =
-                    await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(
-                        robot.Id
-                    );
-            }
-            catch (ReturnToHomeMissionFailedToScheduleException)
-            {
-                logger.LogError(
-                    "Failed to schedule a return home mission for robot {RobotId}",
-                    robot.Id
-                );
-                return null;
-            }
-            return missionRun;
         }
 
         public async Task<bool> OngoingMission(string robotId)
@@ -358,7 +322,7 @@ namespace Api.Services
             catch (RobotNotFoundException) { }
         }
 
-        public async Task AbortAllScheduledMissions(string robotId, string? abortReason)
+        public async Task AbortAllScheduledNormalMissions(string robotId, string? abortReason)
         {
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot == null)
@@ -370,6 +334,7 @@ namespace Api.Services
 
             var pendingMissionRuns = await missionRunService.ReadMissionRunQueue(
                 robotId,
+                type: MissionRunType.Normal,
                 readOnly: true
             );
             if (pendingMissionRuns is null)
@@ -472,17 +437,24 @@ namespace Api.Services
 
         private async Task<MissionRun?> SelectNextMissionRun(Robot robot)
         {
-            var missionRun = await missionRunService.ReadNextScheduledEmergencyMissionRun(
+            var missionRun = await missionRunService.ReadNextScheduledMissionRun(
                 robot.Id,
+                type: MissionRunType.Emergency,
                 readOnly: true
             );
             if (robot.MissionQueueFrozen == false && missionRun == null)
             {
                 missionRun = await missionRunService.ReadNextScheduledMissionRun(
                     robot.Id,
+                    type: MissionRunType.Normal,
                     readOnly: true
                 );
             }
+            missionRun ??= await missionRunService.ReadNextScheduledMissionRun(
+                robot.Id,
+                type: MissionRunType.ReturnHome,
+                readOnly: true
+            );
             return missionRun;
         }
 
@@ -687,11 +659,6 @@ namespace Api.Services
                 );
             }
             catch (MissionRunNotFoundException)
-            {
-                return;
-            }
-
-            if (activeReturnToHomeMission.Status == MissionStatus.Pending)
             {
                 return;
             }
