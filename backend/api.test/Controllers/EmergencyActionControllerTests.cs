@@ -17,14 +17,13 @@ namespace Api.Test.Controllers
         public async Task InitializeAsync()
         {
             string databaseName = Guid.NewGuid().ToString();
-            (string connectionString, var connection) = await TestSetupHelpers.ConfigureDatabase(
-                databaseName
-            );
+            (string connectionString, var connection) =
+                await TestSetupHelpers.ConfigureSqLiteDatabase(databaseName);
             var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
             Client = TestSetupHelpers.ConfigureHttpClient(factory);
 
             DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigureFlotillaDbContext(connectionString)
+                TestSetupHelpers.ConfigureSqLiteContext(connectionString)
             );
         }
 

@@ -24,11 +24,11 @@ namespace Api.Test.Database
         private readonly RobotService _robotService;
         private readonly UserInfoService _userInfoService;
         private readonly SourceService _sourceService;
-        private readonly string _testInstallationCode = "testInstallationCode";
-        private readonly string _testInstallationName = "testInstallation";
-        private readonly string _testPlantCode = "testPlantCode";
-        private readonly string _testInspectionAreaName = "testInspectionArea";
-        private readonly string _testAreaName = "testArea";
+        private readonly string _testInstallationCode = "InstCode";
+        private readonly string _testInstallationName = "Installation";
+        private readonly string _testPlantCode = "PlantCode";
+        private readonly string _testInspectionAreaName = "InspectionArea";
+        private readonly string _testAreaName = "Area";
 
         public DatabaseUtilities(FlotillaDbContext context)
         {

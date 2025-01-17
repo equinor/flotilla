@@ -37,7 +37,7 @@ namespace Api.Test.EventHandlers
         public async Task InitializeAsync()
         {
             string databaseName = Guid.NewGuid().ToString();
-            (ConnectionString, _) = await TestSetupHelpers.ConfigureDatabase(databaseName);
+            (ConnectionString, _) = await TestSetupHelpers.ConfigureSqLiteDatabase(databaseName);
 
             DatabaseUtilities = new DatabaseUtilities(Context);
 
@@ -66,7 +66,7 @@ namespace Api.Test.EventHandlers
 
         private FlotillaDbContext CreateContext()
         {
-            return TestSetupHelpers.ConfigureFlotillaDbContext(ConnectionString);
+            return TestSetupHelpers.ConfigureSqLiteContext(ConnectionString);
         }
 
         [Fact]

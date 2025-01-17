@@ -9,6 +9,7 @@ using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
 using Microsoft.Extensions.DependencyInjection;
+using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Api.Test.Controllers
@@ -16,6 +17,7 @@ namespace Api.Test.Controllers
     public class AreaControllerTests : IAsyncLifetime
     {
         public required DatabaseUtilities DatabaseUtilities;
+        public required PostgreSqlContainer Container;
         public required HttpClient Client;
         public required JsonSerializerOptions SerializerOptions;
 
@@ -23,24 +25,24 @@ namespace Api.Test.Controllers
 
         public async Task InitializeAsync()
         {
-            string databaseName = Guid.NewGuid().ToString();
-            (string connectionString, var connection) = await TestSetupHelpers.ConfigureDatabase(
-                databaseName
+            (Container, string connectionString, var connection) =
+                await TestSetupHelpers.ConfigurePostgreSqlDatabase();
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(
+                postgreSqlConnectionString: connectionString
             );
-            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
             var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
 
             Client = TestSetupHelpers.ConfigureHttpClient(factory);
             SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
 
             DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigureFlotillaDbContext(connectionString)
+                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
             );
 
             AreaService = serviceProvider.GetRequiredService<IAreaService>();
         }
 
-        public Task DisposeAsync() => Task.CompletedTask;
+        public async Task DisposeAsync() => await Task.CompletedTask;
 
         [Fact]
         public async Task CheckThatAreaIsCorrectlyCreatedThroughEndpoint()

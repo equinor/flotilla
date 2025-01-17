@@ -9,12 +9,13 @@ using Api.Database.Context;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Testcontainers.PostgreSql;
 
 namespace Api.Test;
 
 public static class TestSetupHelpers
 {
-    public static async Task<(string, DbConnection)> ConfigureDatabase(string databaseName)
+    public static async Task<(string, DbConnection)> ConfigureSqLiteDatabase(string databaseName)
     {
         string connectionString = new SqliteConnectionStringBuilder
         {
@@ -22,13 +23,32 @@ public static class TestSetupHelpers
             Cache = SqliteCacheMode.Shared,
         }.ToString();
 
-        var context = ConfigureFlotillaDbContext(connectionString);
+        var context = ConfigureSqLiteContext(connectionString);
         await context.Database.EnsureCreatedAsync();
 
         var connection = context.Database.GetDbConnection();
         await connection.OpenAsync();
 
         return (connectionString, connection);
+    }
+
+    public static async Task<(
+        PostgreSqlContainer,
+        string,
+        DbConnection
+    )> ConfigurePostgreSqlDatabase()
+    {
+        var container = new PostgreSqlBuilder().Build();
+        await container.StartAsync();
+
+        string? connectionString = container.GetConnectionString();
+        var context = ConfigurePostgreSqlContext(connectionString);
+        await context.Database.MigrateAsync();
+
+        var connection = context.Database.GetDbConnection();
+        await connection.OpenAsync();
+
+        return (container, connectionString, connection);
     }
 
     public static JsonSerializerOptions ConfigureJsonSerializerOptions()
@@ -47,7 +67,7 @@ public static class TestSetupHelpers
         return factory.Services;
     }
 
-    public static FlotillaDbContext ConfigureFlotillaDbContext(string connectionString)
+    public static FlotillaDbContext ConfigureSqLiteContext(string connectionString)
     {
         var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
         optionsBuilder.EnableSensitiveDataLogging();
@@ -57,11 +77,23 @@ public static class TestSetupHelpers
         return context;
     }
 
+    public static FlotillaDbContext ConfigurePostgreSqlContext(string connectionString)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<FlotillaDbContext>();
+        optionsBuilder.UseNpgsql(
+            connectionString,
+            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+        );
+        var context = new FlotillaDbContext(optionsBuilder.Options);
+        return context;
+    }
+
     public static TestWebApplicationFactory<Program> ConfigureWebApplicationFactory(
-        string databaseName
+        string? databaseName = null,
+        string? postgreSqlConnectionString = null
     )
     {
-        return new TestWebApplicationFactory<Program>(databaseName);
+        return new TestWebApplicationFactory<Program>(databaseName, postgreSqlConnectionString);
     }
 
     public static HttpClient ConfigureHttpClient(TestWebApplicationFactory<Program> factory)
