@@ -19,7 +19,7 @@ namespace Api.Services
 
         public Task<IsarMission> StartMoveArm(Robot robot, string armPosition);
 
-        public Task<MediaConfig> GetMediaStreamConfig(Robot robot);
+        public Task<MediaConfig?> GetMediaStreamConfig(Robot robot);
     }
 
     public class IsarService(
@@ -305,7 +305,7 @@ namespace Api.Services
             return (description, (int)statusCode);
         }
 
-        public async Task<MediaConfig> GetMediaStreamConfig(Robot robot)
+        public async Task<MediaConfig?> GetMediaStreamConfig(Robot robot)
         {
             string mediaStreamPath = $"/media/media-stream-config";
             var response = await CallApi(HttpMethod.Get, robot.IsarUri, mediaStreamPath);
@@ -317,11 +317,13 @@ namespace Api.Services
                 logger.LogError("{Message}: {ErrorResponse}", message, errorResponse);
                 throw new ConfigException(message);
             }
-            if (response.Content is null)
+
+            if (response.StatusCode == HttpStatusCode.NoContent)
             {
-                string errorMessage = "Could not read content from new robot media stream config";
-                logger.LogError("{ErrorMessage}", errorMessage);
-                throw new ConfigException(errorMessage);
+                logger.LogDebug(
+                    $"Robot with id {robot.Id} did not return any content for media stream config. This is likely because the robot doesn't have a media stream."
+                );
+                return null;
             }
 
             IsarMediaConfigMessage? isarMediaConfigResponse;

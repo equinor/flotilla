@@ -48,7 +48,7 @@ namespace Api.Test.Mocks
             return isarServiceMissionResponse;
         }
 
-        public async Task<MediaConfig> GetMediaStreamConfig(Robot robot)
+        public async Task<MediaConfig?> GetMediaStreamConfig(Robot robot)
         {
             await Task.Run(() => Thread.Sleep(1));
             return new MediaConfig
