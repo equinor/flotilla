@@ -33,13 +33,6 @@ namespace Api.Database.Context
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
         public DbSet<TagInspectionMetadata> TagInspectionMetadata => Set<TagInspectionMetadata>();
 
-        // Timeseries:
-        public DbSet<RobotPressureTimeseries> RobotPressureTimeseries =>
-            Set<RobotPressureTimeseries>();
-        public DbSet<RobotBatteryTimeseries> RobotBatteryTimeseries =>
-            Set<RobotBatteryTimeseries>();
-        public DbSet<RobotPoseTimeseries> RobotPoseTimeseries => Set<RobotPoseTimeseries>();
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             bool isSqlLite = Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
