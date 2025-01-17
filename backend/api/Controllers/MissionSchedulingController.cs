@@ -48,7 +48,7 @@ namespace Api.Controllers
             Robot robot;
             try
             {
-                robot = await robotService.GetRobotWithPreCheck(
+                robot = await robotService.GetRobotWithSchedulingPreCheck(
                     scheduledMissionQuery.RobotId,
                     readOnly: true
                 );
@@ -141,7 +141,7 @@ namespace Api.Controllers
             Robot robot;
             try
             {
-                robot = await robotService.GetRobotWithPreCheck(
+                robot = await robotService.GetRobotWithSchedulingPreCheck(
                     scheduledMissionQuery.RobotId,
                     readOnly: true
                 );
@@ -261,7 +261,7 @@ namespace Api.Controllers
             Robot robot;
             try
             {
-                robot = await robotService.GetRobotWithPreCheck(
+                robot = await robotService.GetRobotWithSchedulingPreCheck(
                     scheduledMissionQuery.RobotId,
                     readOnly: true
                 );
@@ -484,7 +484,7 @@ namespace Api.Controllers
             Robot robot;
             try
             {
-                robot = await robotService.GetRobotWithPreCheck(
+                robot = await robotService.GetRobotWithSchedulingPreCheck(
                     customMissionQuery.RobotId,
                     readOnly: true
                 );
