@@ -15,8 +15,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Test
 {
-    public class TestWebApplicationFactory<TProgram>(string databaseName)
-        : WebApplicationFactory<Program>
+    public class TestWebApplicationFactory<TProgram>(
+        string? sqLiteDatabaseName = null,
+        string? postgresConnectionString = null
+    ) : WebApplicationFactory<Program>
         where TProgram : class
     {
         public IConfiguration? Configuration;
@@ -35,18 +37,36 @@ namespace Api.Test
             );
             builder.ConfigureTestServices(services =>
             {
-                string sqlLiteConnectionString = new SqliteConnectionStringBuilder
+                if (sqLiteDatabaseName != null)
                 {
-                    DataSource = $"file:{databaseName}?mode=memory",
-                    Cache = SqliteCacheMode.Shared,
-                }.ToString();
+                    string sqlLiteConnectionString = new SqliteConnectionStringBuilder
+                    {
+                        DataSource = $"file:{sqLiteDatabaseName}?mode=memory",
+                        Cache = SqliteCacheMode.Shared,
+                    }.ToString();
 
-                services.AddDbContext<FlotillaDbContext>(options =>
-                    options.UseSqlite(
-                        sqlLiteConnectionString,
-                        o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
-                    )
-                );
+                    services.AddDbContext<FlotillaDbContext>(options =>
+                        options.UseSqlite(
+                            sqlLiteConnectionString,
+                            o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                        )
+                    );
+                }
+                else if (postgresConnectionString != null)
+                {
+                    services.AddDbContext<FlotillaDbContext>(
+                        options =>
+                            options.UseNpgsql(
+                                postgresConnectionString,
+                                o =>
+                                {
+                                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery);
+                                    o.EnableRetryOnFailure();
+                                }
+                            ),
+                        ServiceLifetime.Transient
+                    );
+                }
 
                 services.AddScoped<IAccessRoleService, AccessRoleService>();
                 services.AddScoped<IIsarService, MockIsarService>();
