@@ -6,16 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Api.Migrations
 {
     /// <inheritdoc />
-    public partial class ResetStructure : Migration
+    public partial class ResetDatabaseStructure : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // MANUALLY ADDED:
-            // Adding timescale extension to the database
-            migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;");
-            //
-
             migrationBuilder.CreateTable(
                 name: "DefaultLocalizationPoses",
                 columns: table => new
@@ -41,9 +36,11 @@ namespace Api.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     IsarTaskId = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    IsarInspectionId = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     InspectionTarget_X = table.Column<float>(type: "real", nullable: false),
                     InspectionTarget_Y = table.Column<float>(type: "real", nullable: false),
                     InspectionTarget_Z = table.Column<float>(type: "real", nullable: false),
+                    InspectionTargetName = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<string>(type: "text", nullable: false),
                     InspectionType = table.Column<string>(type: "text", nullable: false),
                     VideoDuration = table.Column<float>(type: "real", nullable: true),
@@ -71,19 +68,6 @@ namespace Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RobotBatteryTimeseries",
-                columns: table => new
-                {
-                    BatteryLevel = table.Column<float>(type: "real", nullable: false),
-                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RobotId = table.Column<string>(type: "text", nullable: false),
-                    MissionId = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
                 name: "RobotModels",
                 columns: table => new
                 {
@@ -101,38 +85,6 @@ namespace Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RobotPoseTimeseries",
-                columns: table => new
-                {
-                    PositionX = table.Column<float>(type: "real", nullable: false),
-                    PositionY = table.Column<float>(type: "real", nullable: false),
-                    PositionZ = table.Column<float>(type: "real", nullable: false),
-                    OrientationX = table.Column<float>(type: "real", nullable: false),
-                    OrientationY = table.Column<float>(type: "real", nullable: false),
-                    OrientationZ = table.Column<float>(type: "real", nullable: false),
-                    OrientationW = table.Column<float>(type: "real", nullable: false),
-                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RobotId = table.Column<string>(type: "text", nullable: false),
-                    MissionId = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RobotPressureTimeseries",
-                columns: table => new
-                {
-                    Pressure = table.Column<float>(type: "real", nullable: false),
-                    Time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RobotId = table.Column<string>(type: "text", nullable: false),
-                    MissionId = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Sources",
                 columns: table => new
                 {
@@ -143,6 +95,19 @@ namespace Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Sources", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TagInspectionMetadata",
+                columns: table => new
+                {
+                    TagId = table.Column<string>(type: "text", nullable: false),
+                    ZoomDescription_ObjectWidth = table.Column<double>(type: "double precision", nullable: true),
+                    ZoomDescription_ObjectHeight = table.Column<double>(type: "double precision", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TagInspectionMetadata", x => x.TagId);
                 });
 
             migrationBuilder.CreateTable(
@@ -217,7 +182,7 @@ namespace Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Decks",
+                name: "InspectionAreas",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -228,20 +193,20 @@ namespace Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Decks", x => x.Id);
+                    table.PrimaryKey("PK_InspectionAreas", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Decks_DefaultLocalizationPoses_DefaultLocalizationPoseId",
+                        name: "FK_InspectionAreas_DefaultLocalizationPoses_DefaultLocalizatio~",
                         column: x => x.DefaultLocalizationPoseId,
                         principalTable: "DefaultLocalizationPoses",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Decks_Installations_InstallationId",
+                        name: "FK_InspectionAreas_Installations_InstallationId",
                         column: x => x.InstallationId,
                         principalTable: "Installations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Decks_Plants_PlantId",
+                        name: "FK_InspectionAreas_Plants_PlantId",
                         column: x => x.PlantId,
                         principalTable: "Plants",
                         principalColumn: "Id",
@@ -253,7 +218,7 @@ namespace Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    DeckId = table.Column<string>(type: "text", nullable: false),
+                    InspectionAreaId = table.Column<string>(type: "text", nullable: false),
                     PlantId = table.Column<string>(type: "text", nullable: false),
                     InstallationId = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
@@ -274,16 +239,16 @@ namespace Api.Migrations
                 {
                     table.PrimaryKey("PK_Areas", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Areas_Decks_DeckId",
-                        column: x => x.DeckId,
-                        principalTable: "Decks",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_Areas_DefaultLocalizationPoses_DefaultLocalizationPoseId",
                         column: x => x.DefaultLocalizationPoseId,
                         principalTable: "DefaultLocalizationPoses",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Areas_InspectionAreas_InspectionAreaId",
+                        column: x => x.InspectionAreaId,
+                        principalTable: "InspectionAreas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Areas_Installations_InstallationId",
                         column: x => x.InstallationId,
@@ -308,8 +273,9 @@ namespace Api.Migrations
                     ModelId = table.Column<string>(type: "text", nullable: false),
                     SerialNumber = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     CurrentInstallationId = table.Column<string>(type: "text", nullable: false),
-                    CurrentAreaId = table.Column<string>(type: "text", nullable: true),
+                    CurrentInspectionAreaId = table.Column<string>(type: "text", nullable: true),
                     BatteryLevel = table.Column<float>(type: "real", nullable: false),
+                    BatteryState = table.Column<string>(type: "text", nullable: true),
                     PressureLevel = table.Column<float>(type: "real", nullable: true),
                     Host = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Port = table.Column<int>(type: "integer", nullable: false),
@@ -332,9 +298,9 @@ namespace Api.Migrations
                 {
                     table.PrimaryKey("PK_Robots", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Robots_Areas_CurrentAreaId",
-                        column: x => x.CurrentAreaId,
-                        principalTable: "Areas",
+                        name: "FK_Robots_InspectionAreas_CurrentInspectionAreaId",
+                        column: x => x.CurrentInspectionAreaId,
+                        principalTable: "InspectionAreas",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Robots_Installations_CurrentInstallationId",
@@ -385,18 +351,7 @@ namespace Api.Migrations
                     Description = table.Column<string>(type: "character varying(450)", maxLength: 450, nullable: true),
                     StatusReason = table.Column<string>(type: "character varying(450)", maxLength: 450, nullable: true),
                     Comment = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    AreaId = table.Column<string>(type: "text", nullable: false),
-                    Map_MapName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    Map_Boundary_X1 = table.Column<double>(type: "double precision", nullable: true),
-                    Map_Boundary_X2 = table.Column<double>(type: "double precision", nullable: true),
-                    Map_Boundary_Y1 = table.Column<double>(type: "double precision", nullable: true),
-                    Map_Boundary_Y2 = table.Column<double>(type: "double precision", nullable: true),
-                    Map_Boundary_Z1 = table.Column<double>(type: "double precision", nullable: true),
-                    Map_Boundary_Z2 = table.Column<double>(type: "double precision", nullable: true),
-                    Map_TransformationMatrices_C1 = table.Column<double>(type: "double precision", nullable: true),
-                    Map_TransformationMatrices_C2 = table.Column<double>(type: "double precision", nullable: true),
-                    Map_TransformationMatrices_D1 = table.Column<double>(type: "double precision", nullable: true),
-                    Map_TransformationMatrices_D2 = table.Column<double>(type: "double precision", nullable: true),
+                    InspectionAreaId = table.Column<string>(type: "text", nullable: true),
                     StartTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     EndTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     EstimatedDuration = table.Column<long>(type: "bigint", nullable: true),
@@ -407,35 +362,13 @@ namespace Api.Migrations
                 {
                     table.PrimaryKey("PK_MissionRuns", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MissionRuns_Areas_AreaId",
-                        column: x => x.AreaId,
-                        principalTable: "Areas",
+                        name: "FK_MissionRuns_InspectionAreas_InspectionAreaId",
+                        column: x => x.InspectionAreaId,
+                        principalTable: "InspectionAreas",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_MissionRuns_Robots_RobotId",
-                        column: x => x.RobotId,
-                        principalTable: "Robots",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "VideoStream",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Url = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Type = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    ShouldRotate270Clockwise = table.Column<bool>(type: "boolean", nullable: false),
-                    RobotId = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VideoStream", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_VideoStream_Robots_RobotId",
                         column: x => x.RobotId,
                         principalTable: "Robots",
                         principalColumn: "Id",
@@ -453,18 +386,29 @@ namespace Api.Migrations
                     Comment = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     InspectionFrequency = table.Column<long>(type: "bigint", nullable: true),
                     LastSuccessfulRunId = table.Column<string>(type: "text", nullable: true),
-                    AreaId = table.Column<string>(type: "text", nullable: false),
+                    InspectionAreaId = table.Column<string>(type: "text", nullable: true),
+                    Map_MapName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Map_Boundary_X1 = table.Column<double>(type: "double precision", nullable: true),
+                    Map_Boundary_X2 = table.Column<double>(type: "double precision", nullable: true),
+                    Map_Boundary_Y1 = table.Column<double>(type: "double precision", nullable: true),
+                    Map_Boundary_Y2 = table.Column<double>(type: "double precision", nullable: true),
+                    Map_Boundary_Z1 = table.Column<double>(type: "double precision", nullable: true),
+                    Map_Boundary_Z2 = table.Column<double>(type: "double precision", nullable: true),
+                    Map_TransformationMatrices_C1 = table.Column<double>(type: "double precision", nullable: true),
+                    Map_TransformationMatrices_C2 = table.Column<double>(type: "double precision", nullable: true),
+                    Map_TransformationMatrices_D1 = table.Column<double>(type: "double precision", nullable: true),
+                    Map_TransformationMatrices_D2 = table.Column<double>(type: "double precision", nullable: true),
                     IsDeprecated = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MissionDefinitions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MissionDefinitions_Areas_AreaId",
-                        column: x => x.AreaId,
-                        principalTable: "Areas",
+                        name: "FK_MissionDefinitions_InspectionAreas_InspectionAreaId",
+                        column: x => x.InspectionAreaId,
+                        principalTable: "InspectionAreas",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_MissionDefinitions_MissionRuns_LastSuccessfulRunId",
                         column: x => x.LastSuccessfulRunId,
@@ -500,6 +444,8 @@ namespace Api.Migrations
                     Status = table.Column<string>(type: "text", nullable: false),
                     StartTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     EndTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsarZoomDescription_ObjectWidth = table.Column<double>(type: "double precision", nullable: true),
+                    IsarZoomDescription_ObjectHeight = table.Column<double>(type: "double precision", nullable: true),
                     InspectionId = table.Column<string>(type: "text", nullable: true),
                     MissionRunId = table.Column<string>(type: "text", nullable: true)
                 },
@@ -524,14 +470,14 @@ namespace Api.Migrations
                 column: "InstallationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Areas_DeckId",
-                table: "Areas",
-                column: "DeckId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Areas_DefaultLocalizationPoseId",
                 table: "Areas",
                 column: "DefaultLocalizationPoseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Areas_InspectionAreaId",
+                table: "Areas",
+                column: "InspectionAreaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Areas_InstallationId",
@@ -544,24 +490,24 @@ namespace Api.Migrations
                 column: "PlantId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Decks_DefaultLocalizationPoseId",
-                table: "Decks",
-                column: "DefaultLocalizationPoseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Decks_InstallationId",
-                table: "Decks",
-                column: "InstallationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Decks_PlantId",
-                table: "Decks",
-                column: "PlantId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DocumentInfo_RobotId",
                 table: "DocumentInfo",
                 column: "RobotId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InspectionAreas_DefaultLocalizationPoseId",
+                table: "InspectionAreas",
+                column: "DefaultLocalizationPoseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InspectionAreas_InstallationId",
+                table: "InspectionAreas",
+                column: "InstallationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InspectionAreas_PlantId",
+                table: "InspectionAreas",
+                column: "PlantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InspectionFindings_InspectionId",
@@ -575,9 +521,9 @@ namespace Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_MissionDefinitions_AreaId",
+                name: "IX_MissionDefinitions_InspectionAreaId",
                 table: "MissionDefinitions",
-                column: "AreaId");
+                column: "InspectionAreaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MissionDefinitions_LastSuccessfulRunId",
@@ -590,9 +536,9 @@ namespace Api.Migrations
                 column: "SourceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MissionRuns_AreaId",
+                name: "IX_MissionRuns_InspectionAreaId",
                 table: "MissionRuns",
-                column: "AreaId");
+                column: "InspectionAreaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MissionRuns_RobotId",
@@ -627,9 +573,9 @@ namespace Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Robots_CurrentAreaId",
+                name: "IX_Robots_CurrentInspectionAreaId",
                 table: "Robots",
-                column: "CurrentAreaId");
+                column: "CurrentInspectionAreaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Robots_CurrentInstallationId",
@@ -640,11 +586,6 @@ namespace Api.Migrations
                 name: "IX_Robots_ModelId",
                 table: "Robots",
                 column: "ModelId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_VideoStream_RobotId",
-                table: "VideoStream",
-                column: "RobotId");
         }
 
         /// <inheritdoc />
@@ -652,6 +593,9 @@ namespace Api.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AccessRoles");
+
+            migrationBuilder.DropTable(
+                name: "Areas");
 
             migrationBuilder.DropTable(
                 name: "DocumentInfo");
@@ -666,19 +610,10 @@ namespace Api.Migrations
                 name: "MissionTasks");
 
             migrationBuilder.DropTable(
-                name: "RobotBatteryTimeseries");
-
-            migrationBuilder.DropTable(
-                name: "RobotPoseTimeseries");
-
-            migrationBuilder.DropTable(
-                name: "RobotPressureTimeseries");
+                name: "TagInspectionMetadata");
 
             migrationBuilder.DropTable(
                 name: "UserInfos");
-
-            migrationBuilder.DropTable(
-                name: "VideoStream");
 
             migrationBuilder.DropTable(
                 name: "Sources");
@@ -693,13 +628,10 @@ namespace Api.Migrations
                 name: "Robots");
 
             migrationBuilder.DropTable(
-                name: "Areas");
+                name: "InspectionAreas");
 
             migrationBuilder.DropTable(
                 name: "RobotModels");
-
-            migrationBuilder.DropTable(
-                name: "Decks");
 
             migrationBuilder.DropTable(
                 name: "DefaultLocalizationPoses");

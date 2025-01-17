@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    [Migration("20241217085716_AddBatteryStateToRobot")]
-    partial class AddBatteryStateToRobot
+    [Migration("20250122093518_ResetDatabaseStructure")]
+    partial class ResetDatabaseStructure
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,11 +55,11 @@ namespace Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("text");
 
-                    b.Property<string>("DeckId")
-                        .IsRequired()
+                    b.Property<string>("DefaultLocalizationPoseId")
                         .HasColumnType("text");
 
-                    b.Property<string>("DefaultLocalizationPoseId")
+                    b.Property<string>("InspectionAreaId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("InstallationId")
@@ -77,48 +77,15 @@ namespace Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeckId");
-
                     b.HasIndex("DefaultLocalizationPoseId");
+
+                    b.HasIndex("InspectionAreaId");
 
                     b.HasIndex("InstallationId");
 
                     b.HasIndex("PlantId");
 
                     b.ToTable("Areas");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Deck", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
-
-                    b.Property<string>("DefaultLocalizationPoseId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("InstallationId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("PlantId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DefaultLocalizationPoseId");
-
-                    b.HasIndex("InstallationId");
-
-                    b.HasIndex("PlantId");
-
-                    b.ToTable("Decks");
                 });
 
             modelBuilder.Entity("Api.Database.Models.DefaultLocalizationPose", b =>
@@ -181,6 +148,39 @@ namespace Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Inspections");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.InspectionArea", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DefaultLocalizationPoseId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("InstallationId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("PlantId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DefaultLocalizationPoseId");
+
+                    b.HasIndex("InstallationId");
+
+                    b.HasIndex("PlantId");
+
+                    b.ToTable("InspectionAreas");
                 });
 
             modelBuilder.Entity("Api.Database.Models.InspectionFinding", b =>
@@ -524,24 +524,6 @@ namespace Api.Migrations
                     b.ToTable("Robots");
                 });
 
-            modelBuilder.Entity("Api.Database.Models.RobotBatteryTimeseries", b =>
-                {
-                    b.Property<float>("BatteryLevel")
-                        .HasColumnType("real");
-
-                    b.Property<string>("MissionId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("RobotId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.ToTable("RobotBatteryTimeseries");
-                });
-
             modelBuilder.Entity("Api.Database.Models.RobotModel", b =>
                 {
                     b.Property<string>("Id")
@@ -573,60 +555,6 @@ namespace Api.Migrations
                         .IsUnique();
 
                     b.ToTable("RobotModels");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.RobotPoseTimeseries", b =>
-                {
-                    b.Property<string>("MissionId")
-                        .HasColumnType("text");
-
-                    b.Property<float>("OrientationW")
-                        .HasColumnType("real");
-
-                    b.Property<float>("OrientationX")
-                        .HasColumnType("real");
-
-                    b.Property<float>("OrientationY")
-                        .HasColumnType("real");
-
-                    b.Property<float>("OrientationZ")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PositionX")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PositionY")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PositionZ")
-                        .HasColumnType("real");
-
-                    b.Property<string>("RobotId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.ToTable("RobotPoseTimeseries");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.RobotPressureTimeseries", b =>
-                {
-                    b.Property<string>("MissionId")
-                        .HasColumnType("text");
-
-                    b.Property<float>("Pressure")
-                        .HasColumnType("real");
-
-                    b.Property<string>("RobotId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Time")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.ToTable("RobotPressureTimeseries");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Source", b =>
@@ -683,15 +611,15 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.Area", b =>
                 {
-                    b.HasOne("Api.Database.Models.Deck", "Deck")
-                        .WithMany()
-                        .HasForeignKey("DeckId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Api.Database.Models.DefaultLocalizationPose", "DefaultLocalizationPose")
                         .WithMany()
                         .HasForeignKey("DefaultLocalizationPoseId");
+
+                    b.HasOne("Api.Database.Models.InspectionArea", "InspectionArea")
+                        .WithMany()
+                        .HasForeignKey("InspectionAreaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Api.Database.Models.Installation", "Installation")
                         .WithMany()
@@ -785,39 +713,14 @@ namespace Api.Migrations
                                 .IsRequired();
                         });
 
-                    b.Navigation("Deck");
-
                     b.Navigation("DefaultLocalizationPose");
+
+                    b.Navigation("InspectionArea");
 
                     b.Navigation("Installation");
 
                     b.Navigation("MapMetadata")
                         .IsRequired();
-
-                    b.Navigation("Plant");
-                });
-
-            modelBuilder.Entity("Api.Database.Models.Deck", b =>
-                {
-                    b.HasOne("Api.Database.Models.DefaultLocalizationPose", "DefaultLocalizationPose")
-                        .WithMany()
-                        .HasForeignKey("DefaultLocalizationPoseId");
-
-                    b.HasOne("Api.Database.Models.Installation", "Installation")
-                        .WithMany()
-                        .HasForeignKey("InstallationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Api.Database.Models.Plant", "Plant")
-                        .WithMany()
-                        .HasForeignKey("PlantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("DefaultLocalizationPose");
-
-                    b.Navigation("Installation");
 
                     b.Navigation("Plant");
                 });
@@ -922,6 +825,31 @@ namespace Api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Api.Database.Models.InspectionArea", b =>
+                {
+                    b.HasOne("Api.Database.Models.DefaultLocalizationPose", "DefaultLocalizationPose")
+                        .WithMany()
+                        .HasForeignKey("DefaultLocalizationPoseId");
+
+                    b.HasOne("Api.Database.Models.Installation", "Installation")
+                        .WithMany()
+                        .HasForeignKey("InstallationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Api.Database.Models.Plant", "Plant")
+                        .WithMany()
+                        .HasForeignKey("PlantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DefaultLocalizationPose");
+
+                    b.Navigation("Installation");
+
+                    b.Navigation("Plant");
+                });
+
             modelBuilder.Entity("Api.Database.Models.InspectionFinding", b =>
                 {
                     b.HasOne("Api.Database.Models.Inspection", null)
@@ -931,7 +859,7 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.MissionDefinition", b =>
                 {
-                    b.HasOne("Api.Database.Models.Deck", "InspectionArea")
+                    b.HasOne("Api.Database.Models.InspectionArea", "InspectionArea")
                         .WithMany()
                         .HasForeignKey("InspectionAreaId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -1037,7 +965,7 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.MissionRun", b =>
                 {
-                    b.HasOne("Api.Database.Models.Deck", "InspectionArea")
+                    b.HasOne("Api.Database.Models.InspectionArea", "InspectionArea")
                         .WithMany()
                         .HasForeignKey("InspectionAreaId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -1171,7 +1099,7 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Database.Models.Robot", b =>
                 {
-                    b.HasOne("Api.Database.Models.Deck", "CurrentInspectionArea")
+                    b.HasOne("Api.Database.Models.InspectionArea", "CurrentInspectionArea")
                         .WithMany()
                         .HasForeignKey("CurrentInspectionAreaId");
 
