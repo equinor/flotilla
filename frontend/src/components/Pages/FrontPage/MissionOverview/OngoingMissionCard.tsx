@@ -11,6 +11,8 @@ import { TaskType } from 'models/Task'
 import { StyledButton } from 'components/Styles/StyledComponents'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
+import { Robot } from 'models/Robot'
+import { NoMissionReason } from 'utils/IsRobotReadyToRunMissions'
 
 interface MissionProps {
     mission: Mission
@@ -140,7 +142,7 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
     )
 }
 
-export const OngoingMissionPlaceholderCard = ({ noMissionReason }: { noMissionReason?: string }): JSX.Element => {
+export const OngoingMissionPlaceholderCard = ({ robot }: { robot?: Robot }): JSX.Element => {
     const { TranslateText } = useLanguageContext()
 
     return (
@@ -149,11 +151,11 @@ export const OngoingMissionPlaceholderCard = ({ noMissionReason }: { noMissionRe
                 style={{ backgroundColor: tokens.colors.ui.background__light.hex, gap: '8px' }}
             >
                 <Typography variant="h5">{TranslateText('No ongoing missions')}</Typography>
-                {noMissionReason && <Typography variant="body_short">{noMissionReason}</Typography>}
+                {robot && <NoMissionReason robot={robot} />}
             </StyledSmallScreenMissionCard>
             <StyledLargeScreenMissionCard style={{ backgroundColor: tokens.colors.ui.background__light.hex }}>
                 <Typography variant="h5">{TranslateText('No ongoing missions')}</Typography>
-                {noMissionReason && <Typography variant="body_short">{noMissionReason}</Typography>}
+                {robot && <NoMissionReason robot={robot} />}
             </StyledLargeScreenMissionCard>
         </>
     )
