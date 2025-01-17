@@ -1,12 +1,7 @@
 import { Robot, RobotCapabilitiesEnum } from 'models/Robot'
 import { useEffect, useState } from 'react'
 import { useRobotContext } from 'components/Contexts/RobotContext'
-import {
-    InsufficientBatteryDialog,
-    InsufficientPressureDialog,
-} from 'components/Displays/ConfirmScheduleDialogs/InsufficientValueDialogs'
 import { ScheduleMissionWithLocalizationVerificationDialog } from './LocalizationVerification/ScheduleMissionWithLocalizationVerification'
-import { isBatteryTooLow, isRobotPressureTooHigh, isRobotPressureTooLow } from 'utils/IsRobotReadyToRunMissions'
 
 interface ConfirmScheduleDialogProps {
     scheduleMissions: () => void
@@ -38,10 +33,6 @@ export const ScheduleMissionWithConfirmDialogs = ({
 
     if (!robot) {
         return <></>
-    } else if (isBatteryTooLow(robot)) {
-        return <InsufficientBatteryDialog robot={robot} cancel={closeDialog} />
-    } else if (isRobotPressureTooLow(robot) || isRobotPressureTooHigh(robot)) {
-        return <InsufficientPressureDialog robot={robot} cancel={closeDialog} />
     } else {
         // Auto-localizing robots don't need to confirmation localization. Localization dialog can be skipped
         if (

@@ -1,7 +1,7 @@
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Robot, RobotFlotillaStatus } from 'models/Robot'
 
-export const isBatteryTooLow = (robot: Robot): boolean => {
+const isBatteryTooLow = (robot: Robot): boolean => {
     if (robot.batteryLevel === undefined || robot.batteryLevel === null) return false
 
     if (robot.model.batteryWarningThreshold && robot.batteryLevel < robot.model.batteryWarningThreshold) {
@@ -16,14 +16,14 @@ export const isBatteryTooLow = (robot: Robot): boolean => {
     return false
 }
 
-export const isRobotPressureTooHigh = (robot: Robot): boolean => {
+const isRobotPressureTooHigh = (robot: Robot): boolean => {
     if (robot.model.upperPressureWarningThreshold && robot.pressureLevel) {
         return robot.pressureLevel > robot.model.upperPressureWarningThreshold
     }
     return false
 }
 
-export const isRobotPressureTooLow = (robot: Robot): boolean => {
+const isRobotPressureTooLow = (robot: Robot): boolean => {
     if (robot.model.lowerPressureWarningThreshold && robot.pressureLevel) {
         return robot.pressureLevel < robot.model.lowerPressureWarningThreshold
     }
