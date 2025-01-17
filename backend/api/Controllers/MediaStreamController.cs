@@ -28,7 +28,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<MediaConfig>> GetMediaStreamConfig([FromRoute] string id)
+        public async Task<ActionResult<MediaConfig?>> GetMediaStreamConfig([FromRoute] string id)
         {
             try
             {

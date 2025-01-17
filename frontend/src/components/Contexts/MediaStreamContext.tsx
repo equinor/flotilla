@@ -143,7 +143,9 @@ export const MediaStreamProvider: FC<Props> = ({ children }) => {
 
     const refreshRobotMediaConfig = (robotId: string) => {
         BackendAPICaller.getRobotMediaConfig(robotId)
-            .then((conf: MediaStreamConfig) => addConfigToMediaStreams(conf))
+            .then((conf: MediaStreamConfig | null | undefined) => {
+                if (conf) addConfigToMediaStreams(conf)
+            })
             .catch((e) => console.error(e))
     }
 
