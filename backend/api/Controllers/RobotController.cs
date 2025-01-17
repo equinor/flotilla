@@ -670,7 +670,7 @@ namespace Api.Controllers
 
             try
             {
-                await missionSchedulingService.AbortAllScheduledMissions(
+                await missionSchedulingService.AbortAllScheduledNormalMissions(
                     robot.Id,
                     "Aborted: Robot was reset"
                 );

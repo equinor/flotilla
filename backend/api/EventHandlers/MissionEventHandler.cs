@@ -36,9 +36,6 @@ namespace Api.EventHandlers
         private ISignalRService SignalRService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
 
-        private IReturnToHomeService ReturnToHomeService =>
-            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IReturnToHomeService>();
-
         public override void Subscribe()
         {
             MissionRunService.MissionRunCreated += OnMissionRunCreated;
@@ -71,13 +68,7 @@ namespace Api.EventHandlers
 
             _startMissionSemaphore.WaitOne();
 
-            if (
-                missionRun.MissionRunType != MissionRunType.ReturnHome
-                && await ReturnToHomeService.GetActiveReturnToHomeMissionRun(
-                    missionRun.Robot.Id,
-                    readOnly: true
-                ) != null
-            )
+            if (missionRun.MissionRunType != MissionRunType.ReturnHome)
             {
                 await MissionScheduling.AbortActiveReturnToHomeMission(missionRun.Robot.Id);
             }

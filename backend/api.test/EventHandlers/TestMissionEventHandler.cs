@@ -193,49 +193,6 @@ namespace Api.Test.EventHandlers
         }
 
         [Fact]
-        public async Task ReturnToHomeMissionIsStartedIfQueueIsEmptyWhenRobotBecomesAvailable()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Busy,
-                installation,
-                inspectionArea
-            );
-
-            var mqttEventArgs = new MqttReceivedArgs(
-                new IsarStatusMessage
-                {
-                    RobotName = robot.Name,
-                    IsarId = robot.IsarId,
-                    Status = RobotStatus.Available,
-                    Timestamp = DateTime.UtcNow,
-                }
-            );
-
-            // Act
-            MqttService.RaiseEvent(nameof(MqttService.MqttIsarStatusReceived), mqttEventArgs);
-
-            // Assert
-            Thread.Sleep(1000);
-            var ongoingMission = await MissionRunService.ReadAll(
-                new MissionRunQueryStringParameters
-                {
-                    Statuses = [MissionStatus.Ongoing],
-                    OrderBy = "DesiredStartTime",
-                    PageSize = 100,
-                },
-                readOnly: true
-            );
-            Assert.True(ongoingMission.Any());
-        }
-
-        [Fact]
         public async Task ReturnToHomeMissionIsNotStartedIfReturnToHomeIsNotSupported()
         {
             // Arrange

@@ -175,10 +175,20 @@ namespace Api.EventHandlers
                             missionRun.Id,
                             missionRun.Name
                         );
-                        await MissionRunService.SetMissionRunToFailed(
-                            missionRun.Id,
-                            "Lost connection to ISAR during mission"
-                        );
+                        try
+                        {
+                            await MissionRunService.SetMissionRunToFailed(
+                                missionRun.Id,
+                                "Lost connection to ISAR during mission"
+                            );
+                        }
+                        catch (MissionRunNotFoundException)
+                        {
+                            _logger.LogError(
+                                "Mission '{MissionId}' could not be set to failed as it no longer exists",
+                                missionRun.Id
+                            );
+                        }
                     }
                 }
 

@@ -36,8 +36,8 @@ namespace Api.Controllers
             }
 
             var returnToHomeMission =
-                await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduledOrRobotIsHome(
-                    robot.Id
+                await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
+                    robot
                 );
             if (returnToHomeMission is null)
             {
