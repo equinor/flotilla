@@ -10,7 +10,6 @@ import { MissionHistoryButton } from './MissionHistoryButton'
 import { Robot } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
-import { getNoMissionReason } from 'utils/IsRobotReadyToRunMissions'
 
 const MissionControlStyle = styled.div`
     display: flex;
@@ -93,7 +92,7 @@ const MissionControlCard = ({ robot }: { robot: Robot }) => {
                 {ongoingMission ? (
                     <OngoingMissionCard mission={ongoingMission} />
                 ) : (
-                    <OngoingMissionPlaceholderCard noMissionReason={getNoMissionReason(robot)} />
+                    <OngoingMissionPlaceholderCard robot={robot} />
                 )}
             </OngoingMissionControlCardStyle>
             <RobotMissionQueueView robot={robot} />

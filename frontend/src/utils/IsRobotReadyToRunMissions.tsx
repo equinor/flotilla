@@ -1,3 +1,4 @@
+import { Typography } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Robot, RobotFlotillaStatus } from 'models/Robot'
 
@@ -30,30 +31,33 @@ const isRobotPressureTooLow = (robot: Robot): boolean => {
     return false
 }
 
-export const getNoMissionReason = (robot: Robot): string | undefined => {
+export const NoMissionReason = ({ robot }: { robot: Robot }): JSX.Element => {
     const { TranslateText } = useLanguageContext()
-
+    let message = undefined
     if (isBatteryTooLow(robot)) {
-        return robot.model.batteryMissionStartThreshold
+        message = robot.model.batteryMissionStartThreshold
             ? TranslateText(
                   'Battery is too low to start a mission. Queued missions will start when the battery is over {0}%.',
                   [robot.model.batteryMissionStartThreshold.toString()]
               )
             : TranslateText('Battery is too low to start a mission.')
     } else if (isRobotPressureTooHigh(robot)) {
-        return robot.model.upperPressureWarningThreshold
+        message = robot.model.upperPressureWarningThreshold
             ? TranslateText(
                   'Pressure is too high to start a mission. Queued missions will start when the pressure is under {0}mBar.',
                   [(robot.model.upperPressureWarningThreshold * 1000).toString()]
               )
             : TranslateText('Pressure is too high to start a mission.')
     } else if (isRobotPressureTooLow(robot)) {
-        return robot.model.lowerPressureWarningThreshold
+        message = robot.model.lowerPressureWarningThreshold
             ? TranslateText(
                   'Pressure is too low to start a mission. Queued missions will start when the pressure is over {0}mBar.',
                   [(robot.model.lowerPressureWarningThreshold * 1000).toString()]
               )
             : TranslateText('Pressure is too low to start a mission.')
     }
-    return undefined
+    if (!message) {
+        return <></>
+    }
+    return <Typography variant="body_short">{message}</Typography>
 }
