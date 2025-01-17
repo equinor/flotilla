@@ -12,11 +12,7 @@ import { RobotStatus } from 'models/Robot'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotType } from 'models/RobotModel'
 import { useRobotContext } from 'components/Contexts/RobotContext'
-import { BackendAPICaller } from 'api/ApiCaller'
 import { StyledButton, StyledPage } from 'components/Styles/StyledComponents'
-import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
-import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { DocumentationSection } from './Documentation'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { VideoStreamSection } from '../MissionPage/MissionPage'
@@ -28,6 +24,7 @@ import { tokens } from '@equinor/eds-tokens'
 import { StopMissionDialog } from '../FrontPage/MissionOverview/StopDialogs'
 import { TaskType } from 'models/Task'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
+import { ReturnHomeButton } from './ReturnHomeButton'
 
 const StyledTextButton = styled(StyledButton)`
     text-align: left;
@@ -57,7 +54,6 @@ const StatusContent = styled.div`
 
 export const RobotPage = () => {
     const { TranslateText } = useLanguageContext()
-    const { setAlert, setListAlert } = useAlertContext()
     const { robotId } = useParams()
     const { enabledRobots } = useRobotContext()
     const { mediaStreams, addMediaStreamConfigIfItDoesNotExist } = useMediaStreamContext()
@@ -81,27 +77,6 @@ export const RobotPage = () => {
     if (mission?.tasks.every((task) => task.type === TaskType.Inspection)) missionTaskType = TaskType.Inspection
     if (mission?.tasks.every((task) => task.type === TaskType.ReturnHome)) missionTaskType = TaskType.ReturnHome
     if (mission?.tasks.every((task) => task.type === TaskType.Localization)) missionTaskType = TaskType.Localization
-
-    const returnRobotToHome = () => {
-        if (robotId) {
-            BackendAPICaller.returnRobotToHome(robotId).catch(() => {
-                setAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertContent
-                        translatedMessage={TranslateText('Failed to send robot {0} home', [selectedRobot?.name ?? ''])}
-                    />,
-                    AlertCategory.ERROR
-                )
-                setListAlert(
-                    AlertType.RequestFail,
-                    <FailedRequestAlertListContent
-                        translatedMessage={TranslateText('Failed to send robot {0} home', [selectedRobot?.name ?? ''])}
-                    />,
-                    AlertCategory.ERROR
-                )
-            })
-        }
-    }
 
     useEffect(() => {
         if (robotId && mediaStreams && Object.keys(mediaStreams).includes(robotId)) {
@@ -179,9 +154,7 @@ export const RobotPage = () => {
                                 toggleDialog={toggleStopMissionDialog}
                             />
                         </StyledTextButton>
-                        <StyledTextButton variant="outlined" onClick={returnRobotToHome}>
-                            {TranslateText('Return robot to home')}
-                        </StyledTextButton>
+                        {selectedRobot && <ReturnHomeButton robot={selectedRobot} />}
 
                         {selectedRobot.model.type === RobotType.TaurobInspector && (
                             <MoveRobotArmSection robot={selectedRobot} />
