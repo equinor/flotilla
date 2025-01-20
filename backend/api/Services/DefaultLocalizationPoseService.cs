@@ -21,7 +21,10 @@ namespace Api.Services
 
         public abstract Task<DefaultLocalizationPose?> Delete(string id);
 
-        public void DetachTracking(DefaultLocalizationPose defaultLocalizationPose);
+        public void DetachTracking(
+            FlotillaDbContext context,
+            DefaultLocalizationPose defaultLocalizationPose
+        );
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -59,7 +62,7 @@ namespace Api.Services
             await context.DefaultLocalizationPoses.AddAsync(defaultLocalizationPose);
             await context.SaveChangesAsync();
 
-            DetachTracking(defaultLocalizationPose);
+            DetachTracking(context, defaultLocalizationPose);
             return defaultLocalizationPose;
         }
 
@@ -69,7 +72,7 @@ namespace Api.Services
         {
             var entry = context.Update(defaultLocalizationPose);
             await context.SaveChangesAsync();
-            DetachTracking(defaultLocalizationPose);
+            DetachTracking(context, defaultLocalizationPose);
             return entry.Entity;
         }
 
@@ -88,7 +91,10 @@ namespace Api.Services
             return defaultLocalizationPose;
         }
 
-        public void DetachTracking(DefaultLocalizationPose defaultLocalizationPose)
+        public void DetachTracking(
+            FlotillaDbContext context,
+            DefaultLocalizationPose defaultLocalizationPose
+        )
         {
             context.Entry(defaultLocalizationPose).State = EntityState.Detached;
         }

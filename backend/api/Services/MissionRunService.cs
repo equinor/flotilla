@@ -88,7 +88,7 @@ namespace Api.Services
 
         public Task UpdateCurrentRobotMissionToFailed(string robotId);
 
-        public void DetachTracking(MissionRun missionRun);
+        public void DetachTracking(FlotillaDbContext context, MissionRun missionRun);
     }
 
     [SuppressMessage(
@@ -143,7 +143,7 @@ namespace Api.Services
                 new MissionRunResponse(missionRun)
             );
 
-            DetachTracking(missionRun);
+            DetachTracking(context, missionRun);
 
             if (triggerCreatedMissionRunEvent)
             {
@@ -311,7 +311,7 @@ namespace Api.Services
                 missionRun?.InspectionArea?.Installation,
                 missionRun != null ? new MissionRunResponse(missionRun) : null
             );
-            DetachTracking(missionRun!);
+            DetachTracking(context, missionRun!);
             return entry.Entity;
         }
 
@@ -773,17 +773,24 @@ namespace Api.Services
             return await Update(missionRun);
         }
 
-        public void DetachTracking(MissionRun missionRun)
+        public void DetachTracking(FlotillaDbContext context, MissionRun missionRun)
         {
+            context.Entry(missionRun).State = EntityState.Detached;
             foreach (var task in missionRun.Tasks)
             {
-                missionTaskService.DetachTracking(task);
+                if (context.Entry(task).State != EntityState.Detached)
+                    missionTaskService.DetachTracking(context, task);
             }
-            if (missionRun.InspectionArea != null)
-                inspectionAreaService.DetachTracking(missionRun.InspectionArea);
-            if (missionRun.Robot != null)
-                robotService.DetachTracking(missionRun.Robot);
-            context.Entry(missionRun).State = EntityState.Detached;
+            if (
+                missionRun.InspectionArea != null
+                && context.Entry(missionRun.InspectionArea).State != EntityState.Detached
+            )
+                inspectionAreaService.DetachTracking(context, missionRun.InspectionArea);
+            if (
+                missionRun.Robot != null
+                && context.Entry(missionRun.Robot).State != EntityState.Detached
+            )
+                robotService.DetachTracking(context, missionRun.Robot);
         }
 
         public async Task<MissionRun> UpdateWithIsarInfo(

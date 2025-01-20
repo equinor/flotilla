@@ -21,7 +21,7 @@ namespace Api.Services
 
         public abstract Task<RobotModel?> Delete(string id);
 
-        public void DetachTracking(RobotModel robotModel);
+        public void DetachTracking(FlotillaDbContext context, RobotModel robotModel);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -76,7 +76,7 @@ namespace Api.Services
         {
             await _context.RobotModels.AddAsync(newRobotModel);
             await _context.SaveChangesAsync();
-            DetachTracking(newRobotModel);
+            DetachTracking(_context, newRobotModel);
             return newRobotModel;
         }
 
@@ -84,7 +84,7 @@ namespace Api.Services
         {
             var entry = _context.Update(robotModel);
             await _context.SaveChangesAsync();
-            DetachTracking(robotModel);
+            DetachTracking(_context, robotModel);
             return entry.Entity;
         }
 
@@ -102,7 +102,7 @@ namespace Api.Services
             return robotModel;
         }
 
-        public void DetachTracking(RobotModel robotModel)
+        public void DetachTracking(FlotillaDbContext context, RobotModel robotModel)
         {
             _context.Entry(robotModel).State = EntityState.Detached;
         }

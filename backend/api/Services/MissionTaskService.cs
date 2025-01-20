@@ -14,7 +14,7 @@ namespace Api.Services
             IsarTaskStatus isarTaskStatus
         );
 
-        public void DetachTracking(MissionTask missionTask);
+        public void DetachTracking(FlotillaDbContext context, MissionTask missionTask);
     }
 
     [SuppressMessage(
@@ -49,7 +49,7 @@ namespace Api.Services
 
             var entry = context.Update(missionTask);
             await context.SaveChangesAsync();
-            DetachTracking(missionTask);
+            DetachTracking(context, missionTask);
             return entry.Entity;
         }
 
@@ -72,7 +72,7 @@ namespace Api.Services
                 );
         }
 
-        public void DetachTracking(MissionTask missionTask)
+        public void DetachTracking(FlotillaDbContext context, MissionTask missionTask)
         {
             context.Entry(missionTask).State = EntityState.Detached;
         }

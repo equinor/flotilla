@@ -27,7 +27,7 @@ namespace Api.Services
 
         public abstract Task<Source?> Delete(string id);
 
-        public void DetachTracking(Source source);
+        public void DetachTracking(FlotillaDbContext context, Source source);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -42,7 +42,7 @@ namespace Api.Services
         {
             context.Sources.Add(source);
             await context.SaveChangesAsync();
-            DetachTracking(source);
+            DetachTracking(context, source);
             return source;
         }
 
@@ -128,7 +128,7 @@ namespace Api.Services
 
             var newSource = await Create(new Source { SourceId = hash, CustomMissionTasks = json });
 
-            DetachTracking(newSource);
+            DetachTracking(context, newSource);
             return newSource;
         }
 
@@ -146,7 +146,7 @@ namespace Api.Services
             return source;
         }
 
-        public void DetachTracking(Source source)
+        public void DetachTracking(FlotillaDbContext context, Source source)
         {
             context.Entry(source).State = EntityState.Detached;
         }

@@ -35,7 +35,7 @@ namespace Api.Services
 
         public Task<Area?> Delete(string id);
 
-        public void DetachTracking(Area area);
+        public void DetachTracking(FlotillaDbContext context, Area area);
     }
 
     [SuppressMessage(
@@ -210,7 +210,7 @@ namespace Api.Services
             await context.Areas.AddAsync(newArea);
             await ApplyDatabaseUpdate(installation);
 
-            DetachTracking(newArea);
+            DetachTracking(context, newArea);
             return newArea;
         }
 
@@ -218,7 +218,7 @@ namespace Api.Services
         {
             var entry = context.Update(area);
             await ApplyDatabaseUpdate(area.Installation);
-            DetachTracking(area);
+            DetachTracking(context, area);
             return entry.Entity;
         }
 
@@ -353,16 +353,19 @@ namespace Api.Services
             return Expression.Lambda<Func<Area, bool>>(body, area);
         }
 
-        public void DetachTracking(Area area)
+        public void DetachTracking(FlotillaDbContext context, Area area)
         {
             if (area.Installation != null)
-                installationService.DetachTracking(area.Installation);
+                installationService.DetachTracking(context, area.Installation);
             if (area.Plant != null)
-                plantService.DetachTracking(area.Plant);
+                plantService.DetachTracking(context, area.Plant);
             if (area.InspectionArea != null)
-                inspectionAreaService.DetachTracking(area.InspectionArea);
+                inspectionAreaService.DetachTracking(context, area.InspectionArea);
             if (area.DefaultLocalizationPose != null)
-                defaultLocalizationPoseService.DetachTracking(area.DefaultLocalizationPose);
+                defaultLocalizationPoseService.DetachTracking(
+                    context,
+                    area.DefaultLocalizationPose
+                );
             context.Entry(area).State = EntityState.Detached;
         }
     }

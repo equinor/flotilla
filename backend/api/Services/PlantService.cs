@@ -39,7 +39,7 @@ namespace Api.Services
 
         public Task<Plant?> Delete(string id);
 
-        public void DetachTracking(Plant plant);
+        public void DetachTracking(FlotillaDbContext context, Plant plant);
     }
 
     [SuppressMessage(
@@ -158,7 +158,7 @@ namespace Api.Services
                 context.Entry(plant.Installation).State = EntityState.Unchanged;
                 await context.Plants.AddAsync(plant);
                 await ApplyDatabaseUpdate(plant.Installation);
-                DetachTracking(plant);
+                DetachTracking(context, plant);
             }
             return plant!;
         }
@@ -167,7 +167,7 @@ namespace Api.Services
         {
             var entry = context.Update(plant);
             await ApplyDatabaseUpdate(plant.Installation);
-            DetachTracking(plant);
+            DetachTracking(context, plant);
             return entry.Entity;
         }
 
@@ -215,10 +215,10 @@ namespace Api.Services
                 );
         }
 
-        public void DetachTracking(Plant plant)
+        public void DetachTracking(FlotillaDbContext context, Plant plant)
         {
             if (plant.Installation != null)
-                installationService.DetachTracking(plant.Installation);
+                installationService.DetachTracking(context, plant.Installation);
             context.Entry(plant).State = EntityState.Detached;
         }
     }

@@ -35,7 +35,7 @@ namespace Api.Services
         public Task UpdateMissionQueueFrozen(string robotId, bool missionQueueFrozen);
         public Task UpdateFlotillaStatus(string robotId, RobotFlotillaStatus status);
         public Task<Robot?> Delete(string id);
-        public void DetachTracking(Robot robot);
+        public void DetachTracking(FlotillaDbContext context, Robot robot);
     }
 
     [SuppressMessage(
@@ -64,7 +64,7 @@ namespace Api.Services
 
             await context.Robots.AddAsync(newRobot);
             await ApplyDatabaseUpdate(newRobot.CurrentInstallation);
-            DetachTracking(newRobot);
+            DetachTracking(context, newRobot);
             return newRobot;
         }
 
@@ -128,7 +128,7 @@ namespace Api.Services
                     newRobot!.CurrentInstallation,
                     new RobotResponse(newRobot!)
                 );
-                DetachTracking(newRobot);
+                DetachTracking(context, newRobot);
                 return newRobot!;
             }
             throw new DbUpdateException(
@@ -223,7 +223,7 @@ namespace Api.Services
             robot = await robotQuery.FirstOrDefaultAsync();
             ThrowIfRobotIsNull(robot, robotId);
             NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
-            DetachTracking(robot);
+            DetachTracking(context, robot);
         }
 
         public async Task UpdateRobotIsarConnected(string robotId, bool isarConnected)
@@ -318,7 +318,7 @@ namespace Api.Services
                 robot?.CurrentInstallation,
                 robot != null ? new RobotResponse(robot) : null
             );
-            DetachTracking(robot!);
+            DetachTracking(context, robot!);
         }
 
         public async Task<Robot?> Delete(string id)
@@ -433,7 +433,7 @@ namespace Api.Services
                 logger.LogError(e, "Failed to update {robotName}", robot.Name);
             }
             ;
-            DetachTracking(robot);
+            DetachTracking(context, robot);
         }
 
         private async Task ApplyDatabaseUpdate(Installation? installation)
@@ -479,15 +479,21 @@ namespace Api.Services
             );
         }
 
-        public void DetachTracking(Robot robot)
+        public void DetachTracking(FlotillaDbContext context, Robot robot)
         {
-            if (robot.CurrentInstallation != null)
-                installationService.DetachTracking(robot.CurrentInstallation);
-            if (robot.CurrentInspectionArea != null)
-                inspectionAreaService.DetachTracking(robot.CurrentInspectionArea);
-            if (robot.Model != null)
-                robotModelService.DetachTracking(robot.Model);
             context.Entry(robot).State = EntityState.Detached;
+            if (
+                robot.CurrentInstallation != null
+                && context.Entry(robot.CurrentInstallation).State != EntityState.Detached
+            )
+                installationService.DetachTracking(context, robot.CurrentInstallation);
+            if (
+                robot.CurrentInspectionArea != null
+                && context.Entry(robot.CurrentInspectionArea).State != EntityState.Detached
+            )
+                inspectionAreaService.DetachTracking(context, robot.CurrentInspectionArea);
+            if (robot.Model != null && context.Entry(robot.Model).State != EntityState.Detached)
+                robotModelService.DetachTracking(context, robot.Model);
         }
     }
 }

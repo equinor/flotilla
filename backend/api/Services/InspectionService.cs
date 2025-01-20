@@ -107,7 +107,7 @@ namespace Api.Services
             var installation = missionRun?.InspectionArea?.Installation;
 
             await ApplyDatabaseUpdate(installation);
-            DetachTracking(inspection);
+            DetachTracking(context, inspection);
         }
 
         public async Task<Inspection?> ReadByIsarTaskId(string id, bool readOnly = true)
@@ -227,7 +227,7 @@ namespace Api.Services
             return null;
         }
 
-        public void DetachTracking(Inspection inspection)
+        public void DetachTracking(FlotillaDbContext context, Inspection inspection)
         {
             foreach (var inspectionFinding in inspection.InspectionFindings)
             {
