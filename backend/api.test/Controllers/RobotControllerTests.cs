@@ -9,6 +9,7 @@ using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Test.Database;
 using Microsoft.EntityFrameworkCore;
+using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Api.Test.Controllers
@@ -16,21 +17,22 @@ namespace Api.Test.Controllers
     public class RobotControllerTests : IAsyncLifetime
     {
         public required DatabaseUtilities DatabaseUtilities;
+        public required PostgreSqlContainer Container;
         public required HttpClient Client;
         public required JsonSerializerOptions SerializerOptions;
 
         public async Task InitializeAsync()
         {
-            string databaseName = Guid.NewGuid().ToString();
-            (string connectionString, var connection) =
-                await TestSetupHelpers.ConfigureSqLiteDatabase(databaseName);
-            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
-
+            (Container, string connectionString, var connection) =
+                await TestSetupHelpers.ConfigurePostgreSqlDatabase();
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(
+                postgreSqlConnectionString: connectionString
+            );
             Client = TestSetupHelpers.ConfigureHttpClient(factory);
             SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
 
             DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigureSqLiteContext(connectionString)
+                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
             );
         }
 
@@ -89,7 +91,7 @@ namespace Api.Test.Controllers
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
 
-            var wrongInstallation = await DatabaseUtilities.NewInstallation("wrongInstallation");
+            var wrongInstallation = await DatabaseUtilities.NewInstallation("wrongCode");
             var wrongPlant = await DatabaseUtilities.NewPlant(wrongInstallation.InstallationCode);
             var wrongInspectionArea = await DatabaseUtilities.NewInspectionArea(
                 wrongInstallation.InstallationCode,

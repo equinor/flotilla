@@ -10,6 +10,7 @@ using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
 using Microsoft.Extensions.DependencyInjection;
+using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Api.Test.Controllers
@@ -17,6 +18,7 @@ namespace Api.Test.Controllers
     public class InspectionAreaControllerTests : IAsyncLifetime
     {
         public required DatabaseUtilities DatabaseUtilities;
+        public required PostgreSqlContainer Container;
         public required HttpClient Client;
         public required JsonSerializerOptions SerializerOptions;
 
@@ -26,17 +28,18 @@ namespace Api.Test.Controllers
 
         public async Task InitializeAsync()
         {
-            string databaseName = Guid.NewGuid().ToString();
-            (string connectionString, var connection) =
-                await TestSetupHelpers.ConfigureSqLiteDatabase(databaseName);
-            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
+            (Container, string connectionString, var connection) =
+                await TestSetupHelpers.ConfigurePostgreSqlDatabase();
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(
+                postgreSqlConnectionString: connectionString
+            );
             var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
 
             Client = TestSetupHelpers.ConfigureHttpClient(factory);
             SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
 
             DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigureSqLiteContext(connectionString)
+                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
             );
 
             InspectionAreaService = serviceProvider.GetRequiredService<IInspectionAreaService>();
