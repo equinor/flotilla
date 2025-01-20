@@ -69,7 +69,7 @@ namespace Api.Services
             }
 
             inspection.UpdateStatus(isarTaskStatus);
-            inspection = await Update(inspection);
+            await Update(inspection);
             return inspection;
         }
 
@@ -89,7 +89,7 @@ namespace Api.Services
                 );
         }
 
-        private async Task<Inspection> Update(Inspection inspection)
+        private async Task Update(Inspection inspection)
         {
             var entry = context.Update(inspection);
 
@@ -150,7 +150,7 @@ namespace Api.Services
             };
 
             inspection.InspectionFindings.Add(inspectionFinding);
-            inspection = await Update(inspection);
+            await Update(inspection);
             return inspection;
         }
 
