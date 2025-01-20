@@ -6,6 +6,7 @@ using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
 using Microsoft.Extensions.DependencyInjection;
+using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Api.Test.Services
@@ -13,19 +14,21 @@ namespace Api.Test.Services
     public class RobotServiceTest : IAsyncLifetime
     {
         public required DatabaseUtilities DatabaseUtilities;
+        public required PostgreSqlContainer Container;
         public required IRobotService RobotService;
         public required IInstallationService InstallationService;
 
         public async Task InitializeAsync()
         {
-            string databaseName = Guid.NewGuid().ToString();
-            (string connectionString, var connection) =
-                await TestSetupHelpers.ConfigureSqLiteDatabase(databaseName);
-            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
+            (Container, string connectionString, var connection) =
+                await TestSetupHelpers.ConfigurePostgreSqlDatabase();
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(
+                postgreSqlConnectionString: connectionString
+            );
             var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
 
             DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigureSqLiteContext(connectionString)
+                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
             );
 
             RobotService = serviceProvider.GetRequiredService<IRobotService>();

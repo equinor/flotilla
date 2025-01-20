@@ -106,7 +106,7 @@ namespace Api.Test.Database
                 IsarMissionId = isarMissionId,
                 MissionRunType = missionRunType,
                 Status = missionStatus,
-                DesiredStartTime = DateTime.Now,
+                DesiredStartTime = DateTime.UtcNow,
                 InspectionArea = inspectionArea,
                 Tasks = [],
                 InstallationCode = installationCode,

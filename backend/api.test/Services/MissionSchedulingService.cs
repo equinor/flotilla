@@ -1,11 +1,10 @@
-using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
 using Microsoft.Extensions.DependencyInjection;
+using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Api.Test.Services
@@ -13,21 +12,22 @@ namespace Api.Test.Services
     public class MissionSchedulingServiceTest : IAsyncLifetime
     {
         public required DatabaseUtilities DatabaseUtilities;
+        public required PostgreSqlContainer Container;
         public required IMissionSchedulingService MissionSchedulingService;
 
         public required IMissionRunService MissionRunService;
 
         public async Task InitializeAsync()
         {
-            string databaseName = Guid.NewGuid().ToString();
-            (string connectionString, var connection) = await TestSetupHelpers.ConfigureDatabase(
-                databaseName
+            (Container, string connectionString, var connection) =
+                await TestSetupHelpers.ConfigurePostgreSqlDatabase();
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(
+                postgreSqlConnectionString: connectionString
             );
-            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
             var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
 
             DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigureFlotillaDbContext(connectionString)
+                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
             );
             MissionSchedulingService =
                 serviceProvider.GetRequiredService<IMissionSchedulingService>();

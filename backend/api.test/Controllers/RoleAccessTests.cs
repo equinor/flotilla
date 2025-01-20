@@ -9,6 +9,7 @@ using Api.Test.Database;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Api.Test.Controllers
@@ -16,16 +17,18 @@ namespace Api.Test.Controllers
     public class RoleAccessTests : IAsyncLifetime
     {
         public required DatabaseUtilities DatabaseUtilities;
+        public required PostgreSqlContainer Container;
         public required HttpClient Client;
         public required JsonSerializerOptions SerializerOptions;
         public required MockHttpContextAccessor HttpContextAccessor;
 
         public async Task InitializeAsync()
         {
-            string databaseName = Guid.NewGuid().ToString();
-            (string connectionString, var connection) =
-                await TestSetupHelpers.ConfigureSqLiteDatabase(databaseName);
-            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
+            (Container, string connectionString, var connection) =
+                await TestSetupHelpers.ConfigurePostgreSqlDatabase();
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(
+                postgreSqlConnectionString: connectionString
+            );
             var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
 
             Client = TestSetupHelpers.ConfigureHttpClient(factory);
@@ -34,7 +37,7 @@ namespace Api.Test.Controllers
                 serviceProvider.GetService<IHttpContextAccessor>()!;
 
             DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigureSqLiteContext(connectionString)
+                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
             );
         }
 
@@ -44,7 +47,7 @@ namespace Api.Test.Controllers
         public async Task CheckThatRequestingPlantsWithUnauthorizedUserFails()
         {
             // Arrange
-            var installation = await DatabaseUtilities.NewInstallation("TestInstallationCode");
+            var installation = await DatabaseUtilities.NewInstallation();
             var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
 
             var accessRoleQuery = new CreateAccessRoleQuery

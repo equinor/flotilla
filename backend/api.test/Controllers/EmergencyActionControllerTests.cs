@@ -1,7 +1,7 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Api.Test.Database;
+using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Api.Test.Controllers
@@ -9,18 +9,20 @@ namespace Api.Test.Controllers
     public class EmergencyActionControllerTests : IAsyncLifetime
     {
         public required DatabaseUtilities DatabaseUtilities;
+        public required PostgreSqlContainer Container;
         public required HttpClient Client;
 
         public async Task InitializeAsync()
         {
-            string databaseName = Guid.NewGuid().ToString();
-            (string connectionString, var connection) =
-                await TestSetupHelpers.ConfigureSqLiteDatabase(databaseName);
-            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
+            (Container, string connectionString, var connection) =
+                await TestSetupHelpers.ConfigurePostgreSqlDatabase();
+            var factory = TestSetupHelpers.ConfigureWebApplicationFactory(
+                postgreSqlConnectionString: connectionString
+            );
             Client = TestSetupHelpers.ConfigureHttpClient(factory);
 
             DatabaseUtilities = new DatabaseUtilities(
-                TestSetupHelpers.ConfigureSqLiteContext(connectionString)
+                TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
             );
         }
 
