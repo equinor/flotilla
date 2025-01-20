@@ -84,6 +84,7 @@ namespace Api.Services
         {
             var entry = _context.Update(robotModel);
             await _context.SaveChangesAsync();
+            DetachTracking(robotModel);
             return entry.Entity;
         }
 

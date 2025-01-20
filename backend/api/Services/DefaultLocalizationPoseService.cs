@@ -69,6 +69,7 @@ namespace Api.Services
         {
             var entry = context.Update(defaultLocalizationPose);
             await context.SaveChangesAsync();
+            DetachTracking(defaultLocalizationPose);
             return entry.Entity;
         }
 

@@ -218,6 +218,7 @@ namespace Api.Services
         {
             var entry = context.Update(area);
             await ApplyDatabaseUpdate(area.Installation);
+            DetachTracking(area);
             return entry.Entity;
         }
 
