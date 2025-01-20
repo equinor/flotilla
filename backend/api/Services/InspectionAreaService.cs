@@ -38,7 +38,7 @@ namespace Api.Services
 
         public Task<InspectionArea?> Delete(string id);
 
-        public void DetachTracking(InspectionArea inspectionArea);
+        public void DetachTracking(FlotillaDbContext context, InspectionArea inspectionArea);
     }
 
     [SuppressMessage(
@@ -194,7 +194,7 @@ namespace Api.Services
                 inspectionArea.Installation,
                 new InspectionAreaResponse(inspectionArea)
             );
-            DetachTracking(inspectionArea);
+            DetachTracking(context, inspectionArea);
             return inspectionArea!;
         }
 
@@ -207,7 +207,7 @@ namespace Api.Services
                 inspectionArea.Installation,
                 new InspectionAreaResponse(inspectionArea)
             );
-            DetachTracking(inspectionArea);
+            DetachTracking(context, inspectionArea);
             return entry.Entity;
         }
 
@@ -264,14 +264,25 @@ namespace Api.Services
                 );
         }
 
-        public void DetachTracking(InspectionArea inspectionArea)
+        public void DetachTracking(FlotillaDbContext context, InspectionArea inspectionArea)
         {
-            if (inspectionArea.Installation != null)
-                installationService.DetachTracking(inspectionArea.Installation);
-            if (inspectionArea.Plant != null)
-                plantService.DetachTracking(inspectionArea.Plant);
-            if (inspectionArea.DefaultLocalizationPose != null)
+            if (
+                inspectionArea.Installation != null
+                && context.Entry(inspectionArea.Installation).State != EntityState.Detached
+            )
+                installationService.DetachTracking(context, inspectionArea.Installation);
+            if (
+                inspectionArea.Plant != null
+                && context.Entry(inspectionArea.Plant).State != EntityState.Detached
+            )
+                plantService.DetachTracking(context, inspectionArea.Plant);
+            if (
+                inspectionArea.DefaultLocalizationPose != null
+                && context.Entry(inspectionArea.DefaultLocalizationPose).State
+                    != EntityState.Detached
+            )
                 defaultLocalizationPoseService.DetachTracking(
+                    context,
                     inspectionArea.DefaultLocalizationPose
                 );
             context.Entry(inspectionArea).State = EntityState.Detached;

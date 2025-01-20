@@ -18,7 +18,7 @@ namespace Api.Services
         );
         public Task<AccessRole?> ReadByInstallation(Installation installation);
         public Task<List<AccessRole>> ReadAll();
-        public void DetachTracking(AccessRole accessRole);
+        public void DetachTracking(FlotillaDbContext context, AccessRole accessRole);
     }
 
     public class AccessRoleService(
@@ -101,7 +101,7 @@ namespace Api.Services
 
             await context.AccessRoles.AddAsync(newAccessRole);
             await context.SaveChangesAsync();
-            DetachTracking(newAccessRole);
+            DetachTracking(context, newAccessRole);
             return newAccessRole!;
         }
 
@@ -135,7 +135,7 @@ namespace Api.Services
             return httpContextAccessor.HttpContext != null;
         }
 
-        public void DetachTracking(AccessRole accessRole)
+        public void DetachTracking(FlotillaDbContext context, AccessRole accessRole)
         {
             context.Entry(accessRole).State = EntityState.Detached;
         }

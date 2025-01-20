@@ -23,7 +23,7 @@ namespace Api.Services
 
         public abstract Task<Installation?> Delete(string id);
 
-        public void DetachTracking(Installation installation);
+        public void DetachTracking(FlotillaDbContext context, Installation installation);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -109,7 +109,7 @@ namespace Api.Services
                 };
                 await context.Installations.AddAsync(installation);
                 await ApplyUnprotectedDatabaseUpdate();
-                DetachTracking(installation);
+                DetachTracking(context, installation);
             }
 
             return installation;
@@ -119,7 +119,7 @@ namespace Api.Services
         {
             var entry = context.Update(installation);
             await ApplyDatabaseUpdate(installation);
-            DetachTracking(installation);
+            DetachTracking(context, installation);
             return entry.Entity;
         }
 
@@ -137,7 +137,7 @@ namespace Api.Services
             return installation;
         }
 
-        public void DetachTracking(Installation installation)
+        public void DetachTracking(FlotillaDbContext context, Installation installation)
         {
             context.Entry(installation).State = EntityState.Detached;
         }

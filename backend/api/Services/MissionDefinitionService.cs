@@ -39,7 +39,7 @@ namespace Api.Services
 
         public Task<MissionDefinition?> Delete(string id);
 
-        public void DetachTracking(MissionDefinition missionDefinition);
+        public void DetachTracking(FlotillaDbContext context, MissionDefinition missionDefinition);
     }
 
     [SuppressMessage(
@@ -84,7 +84,7 @@ namespace Api.Services
                 missionDefinition.InspectionArea?.Installation,
                 new MissionDefinitionResponse(missionDefinition)
             );
-            DetachTracking(missionDefinition);
+            DetachTracking(context, missionDefinition);
             return missionDefinition;
         }
 
@@ -192,7 +192,7 @@ namespace Api.Services
                 missionDefinition?.InspectionArea?.Installation,
                 missionDefinition != null ? new MissionDefinitionResponse(missionDefinition) : null
             );
-            DetachTracking(missionDefinition!);
+            DetachTracking(context, missionDefinition!);
             return entry.Entity;
         }
 
@@ -328,12 +328,12 @@ namespace Api.Services
             );
         }
 
-        public void DetachTracking(MissionDefinition missionDefinition)
+        public void DetachTracking(FlotillaDbContext context, MissionDefinition missionDefinition)
         {
             if (missionDefinition.LastSuccessfulRun != null)
-                missionRunService.DetachTracking(missionDefinition.LastSuccessfulRun);
+                missionRunService.DetachTracking(context, missionDefinition.LastSuccessfulRun);
             if (missionDefinition.Source != null)
-                sourceService.DetachTracking(missionDefinition.Source);
+                sourceService.DetachTracking(context, missionDefinition.Source);
             context.Entry(missionDefinition).State = EntityState.Detached;
         }
     }
