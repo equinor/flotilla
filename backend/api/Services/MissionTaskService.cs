@@ -49,6 +49,7 @@ namespace Api.Services
 
             var entry = context.Update(missionTask);
             await context.SaveChangesAsync();
+            DetachTracking(missionTask);
             return entry.Entity;
         }
 

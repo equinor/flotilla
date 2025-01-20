@@ -207,6 +207,7 @@ namespace Api.Services
                 inspectionArea.Installation,
                 new InspectionAreaResponse(inspectionArea)
             );
+            DetachTracking(inspectionArea);
             return entry.Entity;
         }
 

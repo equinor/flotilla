@@ -192,6 +192,7 @@ namespace Api.Services
                 missionDefinition?.InspectionArea?.Installation,
                 missionDefinition != null ? new MissionDefinitionResponse(missionDefinition) : null
             );
+            DetachTracking(missionDefinition!);
             return entry.Entity;
         }
 
