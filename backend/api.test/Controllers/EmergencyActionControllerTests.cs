@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Api.Services;
 using Api.Test.Database;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Api.Test.Controllers
