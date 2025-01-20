@@ -252,7 +252,7 @@ namespace Api.Controllers
             {
                 var inspectionArea = await inspectionAreaService.ReadById(
                     inspectionAreaId,
-                    readOnly: false
+                    readOnly: true
                 );
                 if (inspectionArea is null)
                 {

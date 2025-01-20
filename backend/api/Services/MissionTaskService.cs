@@ -30,7 +30,7 @@ namespace Api.Services
             IsarTaskStatus isarTaskStatus
         )
         {
-            var missionTask = await ReadByIsarTaskId(isarTaskId, readOnly: false);
+            var missionTask = await ReadByIsarTaskId(isarTaskId, readOnly: true);
             if (missionTask is null)
             {
                 string errorMessage = $"Inspection with ID {isarTaskId} could not be found";

@@ -52,7 +52,7 @@ namespace Api.Test.Services
             var installation = await DatabaseUtilities.NewInstallation();
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
 
-            var robotById = await RobotService.ReadById(robot.Id, readOnly: false);
+            var robotById = await RobotService.ReadById(robot.Id, readOnly: true);
 
             Assert.Equal(robot.Id, robotById!.Id);
         }

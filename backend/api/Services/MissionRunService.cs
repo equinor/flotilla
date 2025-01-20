@@ -630,7 +630,7 @@ namespace Api.Services
             MissionRunType missionRunType
         )
         {
-            var missionRun = await ReadById(missionRunId, readOnly: false);
+            var missionRun = await ReadById(missionRunId, readOnly: true);
             if (missionRun is null)
             {
                 string errorMessage = $"Mission with mission Id {missionRunId} was not found";
@@ -646,7 +646,7 @@ namespace Api.Services
             MissionStatus missionStatus
         )
         {
-            var missionRun = await ReadByIsarMissionId(isarMissionId, readOnly: false);
+            var missionRun = await ReadByIsarMissionId(isarMissionId, readOnly: true);
             if (missionRun is null)
             {
                 string errorMessage = $"Mission with isar mission Id {isarMissionId} was not found";
@@ -682,7 +682,7 @@ namespace Api.Services
             object? value
         )
         {
-            var missionRun = await ReadById(missionRunId, readOnly: false);
+            var missionRun = await ReadById(missionRunId, readOnly: true);
             if (missionRun is null)
             {
                 string errorMessage =
@@ -754,7 +754,7 @@ namespace Api.Services
         )
         {
             var missionRun =
-                await ReadById(missionRunId, readOnly: false)
+                await ReadById(missionRunId, readOnly: true)
                 ?? throw new MissionRunNotFoundException(
                     $"Could not find mission run with ID {missionRunId}"
                 );
@@ -792,7 +792,7 @@ namespace Api.Services
         )
         {
             var missionRun =
-                await ReadById(missionRunId, readOnly: false)
+                await ReadById(missionRunId, readOnly: true)
                 ?? throw new MissionRunNotFoundException(
                     $"Could not find mission run with ID {missionRunId}"
                 );

@@ -147,7 +147,7 @@ namespace Api.Controllers
                 return BadRequest("Invalid data.");
             }
 
-            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: false);
+            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: true);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id '{id}'");
@@ -198,7 +198,7 @@ namespace Api.Controllers
                 return BadRequest("Invalid data.");
             }
 
-            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: false);
+            var missionDefinition = await missionDefinitionService.ReadById(id, readOnly: true);
             if (missionDefinition == null)
             {
                 return NotFound($"Could not find mission definition with id '{id}'");

@@ -68,7 +68,7 @@ namespace Api.Services
 
         public async Task<UserInfo?> Delete(string id)
         {
-            var userInfo = await GetUsersInfo(readOnly: false)
+            var userInfo = await GetUsersInfo(readOnly: true)
                 .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (userInfo is null)
             {
@@ -92,7 +92,7 @@ namespace Api.Services
                 logger.LogWarning("User objectId is null so it will not be added to the database.");
                 return null;
             }
-            var userInfo = await ReadByOid(objectId, readOnly: false);
+            var userInfo = await ReadByOid(objectId, readOnly: true);
             if (userInfo is null)
             {
                 var newUserInfo = new UserInfo { Oid = objectId };
