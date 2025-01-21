@@ -94,7 +94,7 @@ namespace Api.Test.EventHandlers
 
             // Act
             await MissionRunService.Create(missionRun);
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
 
             // Assert
             var postTestMissionRun = await MissionRunService.ReadById(
