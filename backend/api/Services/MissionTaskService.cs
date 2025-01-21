@@ -75,6 +75,8 @@ namespace Api.Services
         public void DetachTracking(FlotillaDbContext context, MissionTask missionTask)
         {
             context.Entry(missionTask).State = EntityState.Detached;
+            if (missionTask.Inspection != null)
+                context.Entry(missionTask.Inspection).State = EntityState.Detached;
         }
     }
 }
