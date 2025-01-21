@@ -298,10 +298,18 @@ namespace Api.Services
 
         public async Task<MissionRun> Update(MissionRun missionRun)
         {
-            context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+            if (missionRun.Robot is not null)
+            {
+                context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+            }
             if (missionRun.InspectionArea is not null)
             {
                 context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
+            }
+            foreach (var task in missionRun.Tasks)
+            {
+                if (task.Inspection != null)
+                    context.Entry(task.Inspection).State = EntityState.Unchanged;
             }
 
             var entry = context.Update(missionRun);
