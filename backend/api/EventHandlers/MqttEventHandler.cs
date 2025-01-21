@@ -454,7 +454,7 @@ namespace Api.EventHandlers
             if (updatedFlotillaMissionRun.MissionId == null)
             {
                 _logger.LogInformation(
-                    "Mission run {missionRunId} does not have a mission definition assosiated with it",
+                    "Mission run {missionRunId} does not have a mission definition associated with it",
                     updatedFlotillaMissionRun.Id
                 );
                 return;

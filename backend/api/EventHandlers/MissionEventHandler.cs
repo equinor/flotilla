@@ -89,6 +89,14 @@ namespace Api.EventHandlers
 
         private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
         {
+            if (e.Robot.Status != RobotStatus.Available)
+            {
+                _logger.LogWarning(
+                    "OnRobotAvailable was triggered while robot was {robotStatus}",
+                    e.Robot.Status
+                );
+                return;
+            }
             _startMissionSemaphore.WaitOne();
             try
             {
