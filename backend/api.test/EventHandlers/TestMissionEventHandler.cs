@@ -14,6 +14,7 @@ using Api.Test.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Api.Test.EventHandlers
@@ -24,6 +25,7 @@ namespace Api.Test.EventHandlers
         public required TestWebApplicationFactory<Program> Factory;
         public required IServiceProvider ServiceProvider;
 
+        public required PostgreSqlContainer Container;
         public required string ConnectionString;
 
         public required DatabaseUtilities DatabaseUtilities;
@@ -36,14 +38,15 @@ namespace Api.Test.EventHandlers
 
         public async Task InitializeAsync()
         {
-            string databaseName = Guid.NewGuid().ToString();
-            (ConnectionString, _) = await TestSetupHelpers.ConfigureSqLiteDatabase(databaseName);
+            (Container, ConnectionString, var connection) =
+                await TestSetupHelpers.ConfigurePostgreSqlDatabase();
+            Factory = TestSetupHelpers.ConfigureWebApplicationFactory(
+                postgreSqlConnectionString: ConnectionString
+            );
 
-            DatabaseUtilities = new DatabaseUtilities(Context);
-
-            Factory = TestSetupHelpers.ConfigureWebApplicationFactory(databaseName);
             ServiceProvider = TestSetupHelpers.ConfigureServiceProvider(Factory);
 
+            DatabaseUtilities = new DatabaseUtilities(Context);
             MissionRunService = ServiceProvider.GetRequiredService<IMissionRunService>();
             RobotService = ServiceProvider.GetRequiredService<IRobotService>();
             MissionSchedulingService =
@@ -55,8 +58,7 @@ namespace Api.Test.EventHandlers
 
         public async Task DisposeAsync()
         {
-            await Context.Database.EnsureDeletedAsync();
-            await Context.Database.EnsureCreatedAsync();
+            await Task.CompletedTask;
         }
 
         async ValueTask IAsyncDisposable.DisposeAsync()
@@ -66,7 +68,7 @@ namespace Api.Test.EventHandlers
 
         private FlotillaDbContext CreateContext()
         {
-            return TestSetupHelpers.ConfigureSqLiteContext(ConnectionString);
+            return TestSetupHelpers.ConfigurePostgreSqlContext(ConnectionString);
         }
 
         [Fact]
@@ -270,7 +272,7 @@ namespace Api.Test.EventHandlers
 
             // Act (Ensure first mission is started)
             await MissionRunService.Create(missionRunOne);
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
 
             // Assert
             var postStartMissionRunOne = await MissionRunService.ReadById(
@@ -282,7 +284,7 @@ namespace Api.Test.EventHandlers
 
             // Act (Ensure second mission is started for second robot)
             await MissionRunService.Create(missionRunTwo);
-            Thread.Sleep(100);
+            Thread.Sleep(1000);
 
             // Assert
             var postStartMissionRunTwo = await MissionRunService.ReadById(
@@ -352,6 +354,8 @@ namespace Api.Test.EventHandlers
                 nameof(Api.Services.MissionSchedulingService.RobotAvailable),
                 robotAvailableEventArgs
             );
+
+            Thread.Sleep(100);
 
             // Assert
             var postTestMissionRunOne = await MissionRunService.ReadById(
