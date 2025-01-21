@@ -296,7 +296,7 @@ namespace Api.Services
             );
         }
 
-        public async Task<MissionRun> Update(MissionRun missionRun)
+        public async Task Update(MissionRun missionRun)
         {
             if (missionRun.Robot is not null)
             {
@@ -320,7 +320,6 @@ namespace Api.Services
                 missionRun != null ? new MissionRunResponse(missionRun) : null
             );
             DetachTracking(context, missionRun!);
-            return entry.Entity;
         }
 
         public async Task<MissionRun?> Delete(string id)
@@ -664,11 +663,7 @@ namespace Api.Services
 
             missionRun.Status = missionStatus;
 
-            missionRun = await UpdateMissionRunProperty(
-                missionRun.Id,
-                "MissionStatus",
-                missionStatus
-            );
+            missionRun = await UpdateMissionRunProperty(missionRun.Id, "Status", missionStatus);
 
             if (missionRun.Status == MissionStatus.Failed)
             {
@@ -716,7 +711,7 @@ namespace Api.Services
 
             try
             {
-                missionRun = await Update(missionRun);
+                await Update(missionRun);
             }
             catch (InvalidOperationException e)
             {
@@ -778,7 +773,8 @@ namespace Api.Services
                     task.Inspection.Status = InspectionStatus.Failed;
                 }
             }
-            return await Update(missionRun);
+            await Update(missionRun);
+            return missionRun;
         }
 
         public void DetachTracking(FlotillaDbContext context, MissionRun missionRun)
@@ -818,7 +814,8 @@ namespace Api.Services
                 var task = missionRun.GetTaskByIsarId(isarTask.IsarTaskId);
                 task?.UpdateWithIsarInfo(isarTask);
             }
-            return await Update(missionRun);
+            await Update(missionRun);
+            return missionRun;
         }
     }
 }
