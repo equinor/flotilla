@@ -524,20 +524,10 @@ namespace Api.Services
 
         private async Task StartMissionRun(MissionRun queuedMissionRun, Robot robot)
         {
-            string missionRunId = queuedMissionRun.Id;
-
-            var missionRun = await missionRunService.ReadById(missionRunId, readOnly: true);
-            if (missionRun == null)
-            {
-                string errorMessage = $"Could not find mission run with id {missionRunId}";
-                logger.LogError("{Message}", errorMessage);
-                throw new MissionRunNotFoundException(errorMessage);
-            }
-
             IsarMission isarMission;
             try
             {
-                isarMission = await isarService.StartMission(robot, missionRun);
+                isarMission = await isarService.StartMission(robot, queuedMissionRun);
             }
             catch (HttpRequestException e)
             {
@@ -559,16 +549,16 @@ namespace Api.Services
                 throw new IsarCommunicationException(ErrorMessage);
             }
 
-            await missionRunService.UpdateWithIsarInfo(missionRun.Id, isarMission);
+            await missionRunService.UpdateWithIsarInfo(queuedMissionRun.Id, isarMission);
             await missionRunService.UpdateMissionRunProperty(
-                missionRun.Id,
+                queuedMissionRun.Id,
                 "Status",
                 MissionStatus.Ongoing
             );
 
             robot.Status = RobotStatus.Busy;
             await robotService.UpdateRobotStatus(robot.Id, RobotStatus.Busy);
-            await robotService.UpdateCurrentMissionId(robot.Id, missionRun.Id);
+            await robotService.UpdateCurrentMissionId(robot.Id, queuedMissionRun.Id);
 
             logger.LogInformation("Started mission run '{Id}'", queuedMissionRun.Id);
         }
