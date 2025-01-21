@@ -104,7 +104,7 @@ namespace Api.Services
 
         public void DetachTracking(FlotillaDbContext context, RobotModel robotModel)
         {
-            _context.Entry(robotModel).State = EntityState.Detached;
+            context.Entry(robotModel).State = EntityState.Detached;
         }
     }
 }
