@@ -23,7 +23,7 @@ namespace Api.Services
         {
             string relativePath = $"{installationCode}/tag?tagNo={tag}";
 
-            var response = await stidApi.CallApiForAppAsync(
+            var response = await stidApi.CallApiForUserAsync(
                 ServiceName,
                 options =>
                 {
