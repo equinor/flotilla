@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using Api.Controllers.Models;
 using Api.Database.Context;
