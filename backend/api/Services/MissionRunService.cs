@@ -321,6 +321,27 @@ namespace Api.Services
             DetachTracking(context, missionRun!);
         }
 
+        public async Task UpdateWithInspections(MissionRun missionRun)
+        {
+            if (missionRun.Robot is not null)
+            {
+                context.Entry(missionRun.Robot).State = EntityState.Unchanged;
+            }
+            if (missionRun.InspectionArea is not null)
+            {
+                context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
+            }
+
+            var entry = context.Update(missionRun);
+            await ApplyDatabaseUpdate(missionRun.InspectionArea?.Installation);
+            _ = signalRService.SendMessageAsync(
+                "Mission run updated",
+                missionRun?.InspectionArea?.Installation,
+                missionRun != null ? new MissionRunResponse(missionRun) : null
+            );
+            DetachTracking(context, missionRun!);
+        }
+
         public async Task<MissionRun?> Delete(string id)
         {
             var missionRun = await GetMissionRunsWithSubModels()
@@ -813,7 +834,7 @@ namespace Api.Services
                 var task = missionRun.GetTaskByIsarId(isarTask.IsarTaskId);
                 task?.UpdateWithIsarInfo(isarTask);
             }
-            await Update(missionRun);
+            await UpdateWithInspections(missionRun);
             return missionRun;
         }
     }
