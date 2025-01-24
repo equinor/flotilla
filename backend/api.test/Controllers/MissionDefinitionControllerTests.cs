@@ -80,5 +80,17 @@ namespace Api.Test.Controllers
 
             Assert.Single(missionDefinitions!);
         }
+
+        [Fact]
+        public async Task CheckThatListAllMissionDefinitionsSucceedWhenThereAreNoMissionDefinitions()
+        {
+            var response = await Client.GetAsync("missions/definitions");
+
+            var missionDefinitions = await response.Content.ReadFromJsonAsync<
+                List<MissionDefinitionResponse>
+            >(SerializerOptions);
+
+            Assert.Empty(missionDefinitions!);
+        }
     }
 }
