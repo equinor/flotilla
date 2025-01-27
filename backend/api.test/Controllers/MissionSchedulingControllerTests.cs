@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
@@ -260,6 +261,7 @@ namespace Api.Test.Controllers
                     SerializerOptions
                 );
 
+            Thread.Sleep(1000);
             // Act
             string nextMissionUrl = $"missions/definitions/{activeMissionRun.MissionId}/next-run";
             var nextMissionResponse = await Client.GetAsync(nextMissionUrl);
