@@ -20,8 +20,8 @@ namespace Api.Database.Models
         [MaxLength(10)]
         public string InstallationCode
         {
-            get => _installationCode.ToUpper(System.Globalization.CultureInfo.CurrentCulture);
-            set => _installationCode = value;
+            get => _installationCode.ToUpper();
+            set => _installationCode = value.ToUpper();
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Api.Controllers.Models
 
         public string InstallationCode { get; set; }
 
-        public InspectionAreaResponse? InspectionArea { get; set; }
+        public List<InspectionGroupResponse> InspectionGroups { get; set; }
 
         public virtual RobotResponse Robot { get; set; }
 
@@ -56,11 +56,8 @@ namespace Api.Controllers.Models
             Description = mission.Description;
             StatusReason = mission.StatusReason;
             Comment = mission.Comment;
-            InstallationCode = mission.InstallationCode;
-            InspectionArea =
-                mission.InspectionArea != null
-                    ? new InspectionAreaResponse(mission.InspectionArea)
-                    : null;
+            InstallationCode = mission.Installation.InstallationCode;
+            InspectionGroups = (List<InspectionGroupResponse>?)mission.InspectionGroups ?? [];
             Robot = new RobotResponse(mission.Robot);
             Status = mission.Status;
             IsCompleted = mission.IsCompleted;

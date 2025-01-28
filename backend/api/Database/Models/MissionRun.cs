@@ -37,8 +37,7 @@ namespace Api.Database.Models
         }
 
         [Required]
-        [MaxLength(200)]
-        public string InstallationCode { get; set; }
+        public Installation Installation { get; set; }
 
         [Required]
         public DateTime DesiredStartTime { get; set; }
@@ -50,7 +49,7 @@ namespace Api.Database.Models
         [Required]
         public IList<MissionTask> Tasks
         {
-            get => _tasks.OrderBy(t => t.TaskOrder).ToList();
+            get => [.. _tasks.OrderBy(t => t.TaskOrder)];
             set => _tasks = value;
         }
 
@@ -69,7 +68,7 @@ namespace Api.Database.Models
         [MaxLength(1000)]
         public string? Comment { get; set; }
 
-        public InspectionArea? InspectionArea { get; set; }
+        public virtual IList<InspectionGroup> InspectionGroups { get; set; } = [];
 
         public bool IsCompleted =>
             _status

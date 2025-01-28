@@ -49,10 +49,7 @@ namespace Api.Services
 
                 if (installation != null)
                     await _signalRHub
-                        .Clients.Group(
-                            localDevUser
-                                + installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
-                        )
+                        .Clients.Group(localDevUser + installation.InstallationCode)
                         .SendAsync(label, "all", message);
                 else
                     await _signalRHub.Clients.Group(localDevUser).SendAsync(label, "all", message);
@@ -61,9 +58,7 @@ namespace Api.Services
             {
                 if (installation != null)
                     await _signalRHub
-                        .Clients.Group(
-                            installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
-                        )
+                        .Clients.Group(installation.InstallationCode)
                         .SendAsync(label, "all", message);
                 else
                     await _signalRHub.Clients.All.SendAsync(label, "all", message);

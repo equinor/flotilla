@@ -321,7 +321,8 @@ namespace Api.Services
             if (response.StatusCode == HttpStatusCode.NoContent)
             {
                 logger.LogDebug(
-                    $"Robot with id {robot.Id} did not return any content for media stream config. This is likely because the robot doesn't have a media stream."
+                    "Robot with id {robotId} did not return any content for media stream config. This is likely because the robot doesn't have a media stream.",
+                    robot.Id
                 );
                 return null;
             }

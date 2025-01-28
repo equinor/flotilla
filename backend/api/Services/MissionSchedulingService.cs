@@ -27,7 +27,7 @@ namespace Api.Services
 
         public void TriggerRobotAvailable(RobotAvailableEventArgs e);
 
-        public Task AbortActiveReturnToHomeMission(string robotId);
+        // public Task AbortActiveReturnToHomeMission(string robotId);
     }
 
     public class MissionSchedulingService(
@@ -35,8 +35,7 @@ namespace Api.Services
         IMissionRunService missionRunService,
         IRobotService robotService,
         IIsarService isarService,
-        ILocalizationService localizationService,
-        IReturnToHomeService returnToHomeService,
+        // IReturnToHomeService returnToHomeService,
         ISignalRService signalRService,
         IErrorHandlingService errorHandlingService
     ) : IMissionSchedulingService
@@ -44,10 +43,9 @@ namespace Api.Services
         public async Task StartNextMissionRunIfSystemIsAvailable(Robot robot)
         {
             logger.LogInformation(
-                "Robot {robotName} has status {robotStatus} and current area {areaName}",
+                "Robot {robotName} has status {robotStatus}",
                 robot.Name,
-                robot.Status,
-                robot.CurrentInspectionArea?.Name
+                robot.Status
             );
 
             MissionRun? missionRun;
@@ -85,55 +83,56 @@ namespace Api.Services
                 return;
             }
 
-            if (missionRun.InspectionArea == null)
-            {
-                logger.LogWarning(
-                    "Mission {MissionRunId} cannot be started as it does not have an inspection area",
-                    missionRun.Id
-                );
-                return;
-            }
+            // TODO Remove
+            // if (missionRun.InspectionArea == null)
+            // {
+            //     logger.LogWarning(
+            //         "Mission {MissionRunId} cannot be started as it does not have an inspection area",
+            //         missionRun.Id
+            //     );
+            //     return;
+            // }
 
-            if (robot.CurrentInspectionArea == null)
-            {
-                await robotService.UpdateCurrentInspectionArea(
-                    robot.Id,
-                    missionRun.InspectionArea!.Id
-                );
-                robot.CurrentInspectionArea = missionRun.InspectionArea!;
-            }
-            else if (
-                !await localizationService.RobotIsOnSameInspectionAreaAsMission(
-                    robot.Id,
-                    missionRun.InspectionArea!.Id
-                )
-            )
-            {
-                logger.LogError(
-                    "Robot {RobotNAme} with Id {RobotId} is not on the same inspection area as the mission run with Id {MissionRunId}. Aborting all mission runs",
-                    robot.Name,
-                    robot.Id,
-                    missionRun.Id
-                );
-                try
-                {
-                    await AbortAllScheduledNormalMissions(
-                        robot.Id,
-                        $"All missions aborted: Robot {robot.Name} is on inspection area {robot.CurrentInspectionArea?.Name} "
-                            + $"and mission run was on inspection area {missionRun.InspectionArea?.Name}"
-                    );
-                }
-                catch (RobotNotFoundException)
-                {
-                    logger.LogError(
-                        "Failed to abort all scheduled missions for robot {RobotName} with Id {RobotId}",
-                        robot.Name,
-                        robot.Id
-                    );
-                }
+            // if (robot.CurrentInspectionArea == null)
+            // {
+            //     await robotService.UpdateCurrentInspectionArea(
+            //         robot.Id,
+            //         missionRun.InspectionArea!.Id
+            //     );
+            //     robot.CurrentInspectionArea = missionRun.InspectionArea!;
+            // }
+            // else if (
+            //     !await localizationService.RobotIsOnSameInspectionAreaAsMission(
+            //         robot.Id,
+            //         missionRun.InspectionArea!.Id
+            //     )
+            // )
+            // {
+            //     logger.LogError(
+            //         "Robot {RobotNAme} with Id {RobotId} is not on the same inspection area as the mission run with Id {MissionRunId}. Aborting all mission runs",
+            //         robot.Name,
+            //         robot.Id,
+            //         missionRun.Id
+            //     );
+            //     try
+            //     {
+            //         await AbortAllScheduledNormalMissions(
+            //             robot.Id,
+            //             $"All missions aborted: Robot {robot.Name} is on inspection area {robot.CurrentInspectionArea?.Name} "
+            //                 + $"and mission run was on inspection area {missionRun.InspectionArea?.Name}"
+            //         );
+            //     }
+            //     catch (RobotNotFoundException)
+            //     {
+            //         logger.LogError(
+            //             "Failed to abort all scheduled missions for robot {RobotName} with Id {RobotId}",
+            //             robot.Name,
+            //             robot.Id
+            //         );
+            //     }
 
-                return;
-            }
+            //     return;
+            // }
 
             if (
                 (robot.IsRobotPressureTooLow() || robot.IsRobotBatteryTooLow())
@@ -183,25 +182,24 @@ namespace Api.Services
                 return;
             }
 
-            try
-            {
-                robot.CurrentInspectionArea ??= missionRun.InspectionArea;
-                await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
-                    robot
-                );
-            }
-            catch (ReturnToHomeMissionFailedToScheduleException)
-            {
-                signalRService.ReportGeneralFailToSignalR(
-                    robot,
-                    $"Failed to schedule return home for robot {robot.Name}",
-                    ""
-                );
-                logger.LogError(
-                    "Failed to schedule a return home mission for robot {RobotId}",
-                    robot.Id
-                );
-            }
+            // try
+            // {
+            //     await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
+            //         robot
+            //     );
+            // }
+            // catch (ReturnToHomeMissionFailedToScheduleException)
+            // {
+            //     signalRService.ReportGeneralFailToSignalR(
+            //         robot,
+            //         $"Failed to schedule return home for robot {robot.Name}",
+            //         ""
+            //     );
+            //     logger.LogError(
+            //         "Failed to schedule a return home mission for robot {RobotId}",
+            //         robot.Id
+            //     );
+            // }
         }
 
         public async Task HandleBatteryAndPressureLevel(Robot robot)
@@ -380,38 +378,18 @@ namespace Api.Services
                 return;
             }
 
-            Pose robotPose;
-
-            if (robot.CurrentInspectionArea != null)
-            {
-                if (robot.CurrentInspectionArea?.DefaultLocalizationPose == null)
-                {
-                    robotPose = new Pose();
-                }
-                else
-                {
-                    robotPose = robot.CurrentInspectionArea.DefaultLocalizationPose.Pose;
-                }
-            }
-            else
-            {
-                string errorMessage =
-                    $"Robot with ID {robotId} could return home as it did not have an inspection area";
-                logger.LogError("{Message}", errorMessage);
-                throw new InspectionAreaNotFoundException(errorMessage);
-            }
+            Pose robotPose = new();
 
             // Cloning to avoid tracking same object
             var clonedPose = ObjectCopier.Clone(robotPose);
             var customTaskQuery = new CustomTaskQuery { RobotPose = clonedPose, TaskOrder = 0 };
-
             var missionRun = new MissionRun
             {
                 Name = "Return home",
                 Robot = robot,
                 MissionRunType = MissionRunType.Emergency,
-                InstallationCode = robot.CurrentInstallation.InstallationCode,
-                InspectionArea = robot.CurrentInspectionArea!,
+                Installation = robot.CurrentInstallation,
+                // TODO fix
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.UtcNow,
                 Tasks = new List<MissionTask>([new MissionTask(customTaskQuery)]),
@@ -506,8 +484,8 @@ namespace Api.Services
                     Name = missionRun.Name,
                     Robot = missionRun.Robot,
                     MissionRunType = missionRun.MissionRunType,
-                    InstallationCode = missionRun.InspectionArea!.Installation.InstallationCode,
-                    InspectionArea = missionRun.InspectionArea,
+                    Installation = missionRun.Installation,
+                    InspectionGroups = missionRun.InspectionGroups,
                     Status = MissionStatus.Pending,
                     DesiredStartTime = DateTime.UtcNow,
                     Tasks = unfinishedTasks,
@@ -634,46 +612,46 @@ namespace Api.Services
             return true;
         }
 
-        public async Task AbortActiveReturnToHomeMission(string robotId)
-        {
-            var activeReturnToHomeMission =
-                await returnToHomeService.GetActiveReturnToHomeMissionRun(robotId, readOnly: true);
+        // public async Task AbortActiveReturnToHomeMission(string robotId)
+        // {
+        //     var activeReturnToHomeMission =
+        //         await returnToHomeService.GetActiveReturnToHomeMissionRun(robotId, readOnly: true);
 
-            if (activeReturnToHomeMission == null)
-            {
-                logger.LogWarning(
-                    "Attempted to abort active Return home mission for robot with Id {RobotId} but none was found",
-                    robotId
-                );
-                return;
-            }
+        //     if (activeReturnToHomeMission == null)
+        //     {
+        //         logger.LogWarning(
+        //             "Attempted to abort active Return home mission for robot with Id {RobotId} but none was found",
+        //             robotId
+        //         );
+        //         return;
+        //     }
 
-            try
-            {
-                await missionRunService.UpdateMissionRunProperty(
-                    activeReturnToHomeMission.Id,
-                    "Status",
-                    MissionStatus.Aborted
-                );
-            }
-            catch (MissionRunNotFoundException)
-            {
-                return;
-            }
+        //     try
+        //     {
+        //         await missionRunService.UpdateMissionRunProperty(
+        //             activeReturnToHomeMission.Id,
+        //             "Status",
+        //             MissionStatus.Aborted
+        //         );
+        //     }
+        //     catch (MissionRunNotFoundException)
+        //     {
+        //         return;
+        //     }
 
-            try
-            {
-                await StopCurrentMissionRun(activeReturnToHomeMission.Robot.Id);
-            }
-            catch (RobotNotFoundException)
-            {
-                return;
-            }
-            catch (MissionRunNotFoundException)
-            {
-                return;
-            }
-        }
+        //     try
+        //     {
+        //         await StopCurrentMissionRun(activeReturnToHomeMission.Robot.Id);
+        //     }
+        //     catch (RobotNotFoundException)
+        //     {
+        //         return;
+        //     }
+        //     catch (MissionRunNotFoundException)
+        //     {
+        //         return;
+        //     }
+        // }
 
         protected virtual void OnRobotAvailable(RobotAvailableEventArgs e)
         {

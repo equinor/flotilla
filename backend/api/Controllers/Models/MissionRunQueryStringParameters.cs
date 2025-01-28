@@ -23,7 +23,7 @@ namespace Api.Controllers.Models
         /// <summary>
         /// Filter for the inspection area of the mission
         /// </summary>
-        public string? InspectionArea { get; set; }
+        public string? InspectionGroup { get; set; }
 
         /// <summary>
         /// Filter for the robot id of the robot assigned to the mission

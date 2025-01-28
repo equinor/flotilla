@@ -78,9 +78,7 @@ namespace Api.Services
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
             if (
                 installation == null
-                || accessibleInstallationCodes.Contains(
-                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
-                )
+                || accessibleInstallationCodes.Contains(installation.InstallationCode)
             )
                 await context.SaveChangesAsync();
             else
@@ -94,8 +92,8 @@ namespace Api.Services
             var entry = context.Update(inspection);
 
             var missionRun = await context
-                .MissionRuns.Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(area => area != null ? area.Installation : null)
+                .MissionRuns.Include(missionRun => missionRun.InspectionGroups)
+                .ThenInclude(group => group.Installation != null ? group.Installation : null)
                 .Include(missionRun => missionRun.Robot)
                 .Where(missionRun =>
                     missionRun.Tasks.Any(missionTask =>
@@ -104,7 +102,7 @@ namespace Api.Services
                 )
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
-            var installation = missionRun?.InspectionArea?.Installation;
+            var installation = missionRun?.Installation;
 
             await ApplyDatabaseUpdate(installation);
             DetachTracking(context, inspection);

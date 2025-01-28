@@ -6,6 +6,7 @@
         {
             // Default order is installation code
             OrderBy = "InstallationCode installationCode";
+            InspectionGroups = [];
         }
 
         /// <summary>
@@ -14,9 +15,9 @@
         public string? InstallationCode { get; set; }
 
         /// <summary>
-        /// Filter for the inspection area of the mission
+        /// Filter for the inspection groups of the mission
         /// </summary>
-        public string? InspectionArea { get; set; }
+        public List<string> InspectionGroups { get; set; }
 
         /// <summary>
         /// The search parameter for the mission name

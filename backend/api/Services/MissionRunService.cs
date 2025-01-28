@@ -95,18 +95,13 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    [SuppressMessage(
-        "Globalization",
-        "CA1304:Specify CultureInfo",
-        Justification = "Entity framework does not support translating culture info to SQL calls"
-    )]
     public class MissionRunService(
         FlotillaDbContext context,
         ISignalRService signalRService,
         ILogger<MissionRunService> logger,
         IAccessRoleService accessRoleService,
         IMissionTaskService missionTaskService,
-        IInspectionAreaService inspectionAreaService,
+        // IInspectionGroupService inspectionGroupService, TODO
         IRobotService robotService,
         IUserInfoService userInfoService
     ) : IMissionRunService
@@ -125,20 +120,26 @@ namespace Api.Services
                 );
             }
 
-            if (missionRun.InspectionArea is not null)
+            // TODO Fix
+            if (missionRun.InspectionGroups.Any())
             {
-                context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
+                // TODO Check
+                foreach (var inspectionGroup in missionRun.InspectionGroups)
+                {
+                    context.Entry(inspectionGroup).State = EntityState.Unchanged;
+                    // context.Entry(inspectionGroup.Installation).State = EntityState.Unchanged;
+                }
             }
             if (missionRun.Robot is not null)
             {
                 context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             }
             await context.MissionRuns.AddAsync(missionRun);
-            await ApplyDatabaseUpdate(missionRun.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionRun.Installation);
 
             _ = signalRService.SendMessageAsync(
                 "Mission run created",
-                missionRun.InspectionArea?.Installation,
+                missionRun.Installation,
                 new MissionRunResponse(missionRun)
             );
 
@@ -153,7 +154,10 @@ namespace Api.Services
             var userInfo = await userInfoService.GetRequestedUserInfo();
             if (userInfo != null)
             {
-                logger.LogInformation($"Mission run created by user with Id {userInfo.Id}");
+                logger.LogInformation(
+                    "Mission run created by user with Id {userInfoId}",
+                    userInfo.Id
+                );
             }
 
             return missionRun;
@@ -184,6 +188,8 @@ namespace Api.Services
 
         public async Task<MissionRun?> ReadById(string id, bool readOnly = true)
         {
+            // var missionRuns = await GetMissionRunsWithSubModels(readOnly: readOnly).ToListAsync();
+
             return await GetMissionRunsWithSubModels(readOnly: readOnly)
                 .FirstOrDefaultAsync(missionRun => missionRun.Id.Equals(id));
         }
@@ -298,10 +304,11 @@ namespace Api.Services
             {
                 context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             }
-            if (missionRun.InspectionArea is not null)
-            {
-                context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
-            }
+            // if (missionRun.InspectionGroups.Any())
+            // {
+            //     // TODO fix
+            //     context.Entry(missionRun.InspectionGroups).State = EntityState.Unchanged;
+            // }
             foreach (var task in missionRun.Tasks)
             {
                 if (task.Inspection != null)
@@ -309,10 +316,10 @@ namespace Api.Services
             }
 
             var entry = context.Update(missionRun);
-            await ApplyDatabaseUpdate(missionRun.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionRun.Installation);
             _ = signalRService.SendMessageAsync(
                 "Mission run updated",
-                missionRun?.InspectionArea?.Installation,
+                missionRun?.Installation,
                 missionRun != null ? new MissionRunResponse(missionRun) : null
             );
             DetachTracking(context, missionRun!);
@@ -324,16 +331,17 @@ namespace Api.Services
             {
                 context.Entry(missionRun.Robot).State = EntityState.Unchanged;
             }
-            if (missionRun.InspectionArea is not null)
+            if (missionRun.InspectionGroups.Any())
             {
-                context.Entry(missionRun.InspectionArea).State = EntityState.Unchanged;
+                // TODO Fix
+                context.Entry(missionRun.InspectionGroups).State = EntityState.Unchanged;
             }
 
             var entry = context.Update(missionRun);
-            await ApplyDatabaseUpdate(missionRun.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionRun.Installation);
             _ = signalRService.SendMessageAsync(
                 "Mission run updated",
-                missionRun?.InspectionArea?.Installation,
+                missionRun?.Installation,
                 missionRun != null ? new MissionRunResponse(missionRun) : null
             );
             DetachTracking(context, missionRun!);
@@ -351,7 +359,7 @@ namespace Api.Services
             await UpdateMissionRunProperty(missionRun.Id, "IsDeprecated", true);
             _ = signalRService.SendMessageAsync(
                 "Mission run deleted",
-                missionRun?.InspectionArea?.Installation,
+                missionRun?.Installation,
                 missionRun != null ? new MissionRunResponse(missionRun) : null
             );
 
@@ -362,29 +370,17 @@ namespace Api.Services
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context
-                .MissionRuns.Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(inspectionArea => inspectionArea != null ? inspectionArea.Plant : null)
-                .ThenInclude(plant => plant != null ? plant.Installation : null)
-                .Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(area => area != null ? area.Plant : null)
-                .ThenInclude(plant => plant != null ? plant.Installation : null)
-                .Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(area => area != null ? area.Installation : null)
-                .Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(inspectionArea =>
-                    inspectionArea != null ? inspectionArea.DefaultLocalizationPose : null
+                .MissionRuns.Include(missionRun => missionRun.InspectionGroups)
+                .ThenInclude(inspectionGroup =>
+                    inspectionGroup != null ? inspectionGroup.Installation : null
+                )
+                .Include(missionRun => missionRun.InspectionGroups)
+                .ThenInclude(inspectionGroup =>
+                    inspectionGroup != null ? inspectionGroup.DefaultLocalizationPose : null
                 )
                 .ThenInclude(defaultLocalizationPose =>
                     defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null
                 )
-                .Include(missionRun => missionRun.Robot)
-                .Include(missionRun => missionRun.Robot)
-                .ThenInclude(robot => robot.CurrentInspectionArea)
-                .ThenInclude(a => a != null ? a.Installation : null)
-                .Include(missionRun => missionRun.Robot)
-                .ThenInclude(robot => robot.CurrentInspectionArea)
-                .ThenInclude(a => a != null ? a.Plant : null)
-                .ThenInclude(p => p != null ? p.Installation : null)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.Model)
                 .Include(missionRun => missionRun.Tasks)
@@ -394,13 +390,13 @@ namespace Api.Services
                 )
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.CurrentInstallation)
-                .Where(
-                    (m) =>
-                        m.InspectionArea == null
-                        || accessibleInstallationCodes.Result.Contains(
-                            m.InspectionArea.Installation.InstallationCode.ToUpper()
-                        )
-                )
+                // .Where(
+                //     (m) =>
+                //         !m.InspectionGroups.Any()
+                //         || accessibleInstallationCodes.Result.Contains(
+                //             m.InspectionGroups.Installation.InstallationCode.ToUpper()
+                //         )
+                // ) // TODO Fix
                 .Where((m) => m.IsDeprecated == false);
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
@@ -417,9 +413,7 @@ namespace Api.Services
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
             if (
                 installation == null
-                || accessibleInstallationCodes.Contains(
-                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
-                )
+                || accessibleInstallationCodes.Contains(installation.InstallationCode)
             )
                 await context.SaveChangesAsync();
             else
@@ -435,11 +429,13 @@ namespace Api.Services
                 return;
             }
 
-#pragma warning disable CA1862
             missionRuns = missionRuns.Where(missionRun =>
-                missionRun.Name != null && missionRun.Name.ToLower().Contains(name.ToLower().Trim())
+                missionRun.Name != null
+                && missionRun.Name.Contains(
+                    name.Trim(),
+                    StringComparison.InvariantCultureIgnoreCase
+                )
             );
-#pragma warning restore CA1862
         }
 
         private static void SearchByRobotName(
@@ -452,11 +448,12 @@ namespace Api.Services
                 return;
             }
 
-#pragma warning disable CA1862
             missionRuns = missionRuns.Where(missionRun =>
-                missionRun.Robot.Name.ToLower().Contains(robotName.ToLower().Trim())
+                missionRun.Robot.Name.Contains(
+                    robotName.Trim(),
+                    StringComparison.InvariantCultureIgnoreCase
+                )
             );
-#pragma warning restore CA1862
         }
 
         private static void SearchByTag(ref IQueryable<MissionRun> missionRuns, string? tag)
@@ -468,16 +465,15 @@ namespace Api.Services
 
             missionRuns = missionRuns.Where(missionRun =>
                 missionRun.Tasks.Any(task =>
-#pragma warning disable CA1307
-                    task.TagId != null && task.TagId.Contains(tag.Trim())
-#pragma warning restore CA1307
+                    task.TagId != null
+                    && task.TagId.Contains(tag.Trim(), StringComparison.InvariantCultureIgnoreCase)
                 )
             );
         }
 
         /// <summary>
         ///     Filters by <see cref="MissionRunQueryStringParameters.InstallationCode" />,
-        ///     <see cref="MissionRunQueryStringParameters.InspectionArea" />,
+        ///     <see cref="MissionRunQueryStringParameters.InspectionGroup" />,
         ///     <see cref="MissionRunQueryStringParameters.Statuses" />,
         ///     <see cref="MissionRunQueryStringParameters.RobotId" />,
         ///     <see cref="MissionRunQueryStringParameters.RobotModelType" />,
@@ -502,22 +498,26 @@ namespace Api.Services
             MissionRunQueryStringParameters parameters
         )
         {
-            Expression<Func<MissionRun, bool>> inspectionAreaFilter = parameters.InspectionArea
+            Expression<Func<MissionRun, bool>> inspectionAreaFilter = parameters.InspectionGroup
                 is null
                 ? missionRun => true
                 : missionRun =>
-                    missionRun.InspectionArea != null
-                    && missionRun
-                        .InspectionArea.Name.ToLower()
-                        .Equals(parameters.InspectionArea.Trim().ToLower());
+                    missionRun.InspectionGroups != null
+                    && missionRun.InspectionGroups.Any(inspectionGroup =>
+                        inspectionGroup.Name.Equals(
+                            parameters.InspectionGroup.Trim(),
+                            StringComparison.CurrentCultureIgnoreCase
+                        )
+                    );
 
             Expression<Func<MissionRun, bool>> installationFilter = parameters.InstallationCode
                 is null
                 ? missionRun => true
                 : missionRun =>
-                    missionRun
-                        .InstallationCode.ToLower()
-                        .Equals(parameters.InstallationCode.Trim().ToLower());
+                    missionRun.Installation.InstallationCode.Equals(
+                        parameters.InstallationCode.Trim(),
+                        StringComparison.InvariantCultureIgnoreCase
+                    );
 
             Expression<Func<MissionRun, bool>> statusFilter = parameters.Statuses is null
                 ? mission => true
@@ -686,7 +686,7 @@ namespace Api.Services
             {
                 _ = signalRService.SendMessageAsync(
                     "Mission run failed",
-                    missionRun?.InspectionArea?.Installation,
+                    missionRun?.Installation,
                     missionRun != null ? new MissionRunResponse(missionRun) : null
                 );
             }
@@ -802,11 +802,12 @@ namespace Api.Services
                 if (context.Entry(task).State != EntityState.Detached)
                     missionTaskService.DetachTracking(context, task);
             }
-            if (
-                missionRun.InspectionArea != null
-                && context.Entry(missionRun.InspectionArea).State != EntityState.Detached
-            )
-                inspectionAreaService.DetachTracking(context, missionRun.InspectionArea);
+            // TODO fix
+            // if (
+            //     missionRun.InspectionArea != null
+            //     && context.Entry(missionRun.InspectionArea).State != EntityState.Detached
+            // )
+            //     inspectionGroupService.DetachTracking(context, missionRun.InspectionArea);
             if (
                 missionRun.Robot != null
                 && context.Entry(missionRun.Robot).State != EntityState.Detached

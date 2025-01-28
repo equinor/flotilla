@@ -27,15 +27,14 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
             var query = readOnly
                 ? context.MissionRuns.AsNoTracking()
                 : context.MissionRuns.AsTracking();
 
-#pragma warning disable CA1304
             return await query
-                .Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(area => area != null ? area.Plant : null)
+                .Include(missionRun => missionRun.InspectionGroups)
+                .ThenInclude(group => group != null ? group.Installation : null)
                 .Include(missionRun => missionRun.Robot)
                 .Include(missionRun => missionRun.Tasks)
                 .ThenInclude(task => task.Inspection)
@@ -46,13 +45,27 @@ namespace Api.Services
                 )
                 .Where(
                     (m) =>
-                        m.InspectionArea == null
-                        || accessibleInstallationCodes.Result.Contains(
-                            m.InspectionArea.Installation.InstallationCode.ToUpper()
-                        )
+                        m
+                            .InspectionGroups.Select(group =>
+                                group.Installation.InstallationCode.Trim()
+                            )
+                            .Any(installationCode =>
+                                accessibleInstallationCodes
+                                    .Select(code => code.Trim())
+                                    .Contains(installationCode)
+                            )
                 )
                 .FirstOrDefaultAsync();
-#pragma warning restore CA1304
+
+            // && missionDefinition
+            //             .InspectionGroups.Select(group => group.Name.Trim().ToLower())
+            //             .Any(groupName =>
+            //                 parameters
+            //                     .InspectionGroups.Select(paramGroup =>
+            //                         paramGroup.Trim().ToLower()
+            //                     )
+            //                     .Contains(groupName)
+            //             );
         }
 
         public async Task<MissionTask?> GetMissionTaskByIsarInspectionId(

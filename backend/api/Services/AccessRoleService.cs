@@ -38,7 +38,7 @@ namespace Api.Services
             if (httpContextAccessor.HttpContext == null)
                 return await context
                     .Installations.AsNoTracking()
-                    .Select((i) => i.InstallationCode.ToUpperInvariant())
+                    .Select((i) => i.InstallationCode)
                     .ToListAsync();
 
             var roles = httpContextAccessor.HttpContext.GetRequestedRoleNames();
@@ -51,18 +51,13 @@ namespace Api.Services
             if (roles.Contains(SUPER_ADMIN_ROLE_NAME))
                 return await context
                     .Installations.AsNoTracking()
-                    .Select((i) => i.InstallationCode.ToUpperInvariant())
+                    .Select((i) => i.InstallationCode)
                     .ToListAsync();
             else
                 return await GetAccessRoles(readOnly: true)
                     .Include((r) => r.Installation)
                     .Where((r) => roles.Contains(r.RoleName))
-                    .Select(
-                        (r) =>
-                            r.Installation != null
-                                ? r.Installation.InstallationCode.ToUpperInvariant()
-                                : ""
-                    )
+                    .Select((r) => r.Installation != null ? r.Installation.InstallationCode : "")
                     .ToListAsync();
         }
 

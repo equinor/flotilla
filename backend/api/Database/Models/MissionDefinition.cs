@@ -18,7 +18,7 @@ namespace Api.Database.Models
         public string Name { get; set; }
 
         [Required]
-        public string InstallationCode { get; set; }
+        public Installation Installation { get; set; }
 
         [MaxLength(1000)]
         public string? Comment { get; set; }
@@ -28,7 +28,7 @@ namespace Api.Database.Models
 
         public virtual MissionRun? LastSuccessfulRun { get; set; }
 
-        public InspectionArea? InspectionArea { get; set; }
+        public virtual IList<InspectionGroup> InspectionGroups { get; set; } = [];
 
         public MapMetadata? Map { get; set; }
 

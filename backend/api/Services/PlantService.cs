@@ -47,11 +47,6 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    [SuppressMessage(
-        "Globalization",
-        "CA1304:Specify CultureInfo",
-        Justification = "Entity framework does not support translating culture info to SQL calls"
-    )]
     public class PlantService(
         FlotillaDbContext context,
         IInstallationService installationService,
@@ -88,9 +83,13 @@ namespace Api.Services
 
         public async Task<Plant?> ReadByPlantCode(string plantCode, bool readOnly = true)
         {
-            return await GetPlants(readOnly: readOnly)
-                .Where(a => a.PlantCode.ToLower().Equals(plantCode.ToLower()))
-                .FirstOrDefaultAsync();
+            var plants = await GetPlants(readOnly: readOnly).ToListAsync();
+
+            return plants
+                .Where(a =>
+                    a.PlantCode.Equals(plantCode, StringComparison.InvariantCultureIgnoreCase)
+                )
+                .FirstOrDefault();
         }
 
         public async Task<Plant?> ReadByInstallationAndPlantCode(
@@ -99,13 +98,15 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetPlants(readOnly: readOnly)
+            var plants = await GetPlants(readOnly: readOnly).ToListAsync();
+
+            return plants
                 .Where(a =>
-                    a.PlantCode.ToLower().Equals(plantCode.ToLower())
+                    a.PlantCode.Equals(plantCode, StringComparison.InvariantCultureIgnoreCase)
                     && a.Installation != null
                     && a.Installation.Id.Equals(installation.Id)
                 )
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
         }
 
         public async Task<Plant?> ReadByInstallationAndPlantCode(
@@ -122,13 +123,14 @@ namespace Api.Services
             {
                 return null;
             }
-            return await GetPlants(readOnly: readOnly)
+            var plants = await GetPlants(readOnly: readOnly).ToListAsync();
+            return plants
                 .Where(a =>
                     a.Installation != null
                     && a.Installation.Id.Equals(installation.Id)
-                    && a.PlantCode.ToLower().Equals(plantCode.ToLower())
+                    && a.PlantCode.Equals(plantCode, StringComparison.InvariantCultureIgnoreCase)
                 )
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
         }
 
         public async Task<Plant> Create(CreatePlantQuery newPlantQuery)
@@ -192,9 +194,7 @@ namespace Api.Services
                 .Plants.Include(i => i.Installation)
                 .Where(
                     (p) =>
-                        accessibleInstallationCodes.Result.Contains(
-                            p.Installation.InstallationCode.ToUpper()
-                        )
+                        accessibleInstallationCodes.Result.Contains(p.Installation.InstallationCode)
                 );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
@@ -204,9 +204,7 @@ namespace Api.Services
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
             if (
                 installation == null
-                || accessibleInstallationCodes.Contains(
-                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
-                )
+                || accessibleInstallationCodes.Contains(installation.InstallationCode)
             )
                 await context.SaveChangesAsync();
             else

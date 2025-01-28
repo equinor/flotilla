@@ -2,6 +2,7 @@
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
@@ -24,6 +25,11 @@ namespace Api.Services
         public abstract Task<Installation?> Delete(string id);
 
         public void DetachTracking(FlotillaDbContext context, Installation installation);
+
+        public void RobotIsOnSameInstallationAsMission(
+            Robot robot,
+            MissionDefinition missionDefinition
+        );
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -31,14 +37,10 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Globalization",
-        "CA1304:Specify CultureInfo",
-        Justification = "Entity framework does not support translating culture info to SQL calls"
-    )]
     public class InstallationService(
         FlotillaDbContext context,
-        IAccessRoleService accessRoleService
+        IAccessRoleService accessRoleService,
+        ILogger<InstallationService> logger
     ) : IInstallationService
     {
         public async Task<IEnumerable<Installation>> ReadAll(bool readOnly = true)
@@ -50,7 +52,7 @@ namespace Api.Services
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context.Installations.Where(
-                (i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode.ToUpper())
+                (i) => accessibleInstallationCodes.Result.Contains(i.InstallationCode)
             );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
@@ -65,9 +67,7 @@ namespace Api.Services
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
             if (
                 installation == null
-                || accessibleInstallationCodes.Contains(
-                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
-                )
+                || accessibleInstallationCodes.Contains(installation.InstallationCode)
             )
                 await context.SaveChangesAsync();
             else
@@ -89,9 +89,17 @@ namespace Api.Services
         {
             if (installationCode == null)
                 return null;
-            return await GetInstallations(readOnly: readOnly)
-                .Where(a => a.InstallationCode.ToLower().Equals(installationCode.ToLower()))
-                .FirstOrDefaultAsync();
+
+            var installations = await GetInstallations(readOnly: readOnly).ToListAsync();
+
+            return installations
+                .Where(a =>
+                    a.InstallationCode.Equals(
+                        installationCode,
+                        StringComparison.InvariantCultureIgnoreCase
+                    )
+                )
+                .FirstOrDefault();
         }
 
         public async Task<Installation> Create(CreateInstallationQuery newInstallationQuery)
@@ -140,6 +148,34 @@ namespace Api.Services
         public void DetachTracking(FlotillaDbContext context, Installation installation)
         {
             context.Entry(installation).State = EntityState.Detached;
+        }
+
+        public void RobotIsOnSameInstallationAsMission(
+            Robot robot,
+            MissionDefinition missionDefinition
+        )
+        {
+            // TODO: MissionDefinition.Installation is required, this if should not be needed
+            // var missionInstallation = await ReadByInstallationCode(
+            //     missionDefinition.InstallationCode,
+            //     readOnly: true
+            // );
+
+            // if (missionInstallation is null)
+            // {
+            //     string errorMessage =
+            //         $"Could not find installation for installation code {missionDefinition.InstallationCode}";
+            //     logger.LogError("{Message}", errorMessage);
+            //     throw new InstallationNotFoundException(errorMessage);
+            // }
+
+            if (robot.CurrentInstallation.Id != missionDefinition.Installation.Id)
+            {
+                string errorMessage =
+                    $"The robot {robot.Name} is on installation {robot.CurrentInstallation.Name} which is not the same as the mission installation {missionDefinition.Installation.Name}";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotInSameInstallationAsMissionException(errorMessage);
+            }
         }
     }
 }

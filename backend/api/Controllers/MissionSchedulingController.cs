@@ -19,11 +19,9 @@ namespace Api.Controllers
         IMissionLoader missionLoader,
         ILogger<MissionSchedulingController> logger,
         IMapService mapService,
-        IStidService stidService,
-        ILocalizationService localizationService,
         IRobotService robotService,
         ISourceService sourceService,
-        IInspectionAreaService inspectionAreaService
+        IInspectionGroupService inspectionGroupService
     ) : ControllerBase
     {
         /// <summary>
@@ -94,8 +92,8 @@ namespace Api.Controllers
                 MissionRunType = MissionRunType.Normal,
                 Tasks = missionTasks,
                 DesiredStartTime = scheduledMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
-                InstallationCode = missionRun.InstallationCode,
-                InspectionArea = missionRun.InspectionArea,
+                Installation = missionRun.Installation,
+                InspectionGroups = missionRun.InspectionGroups,
             };
 
             if (newMissionRun.Tasks.Any())
@@ -163,29 +161,30 @@ namespace Api.Controllers
             {
                 return NotFound("Mission definition not found");
             }
-            else if (missionDefinition.InspectionArea == null)
+            else if (!missionDefinition.InspectionGroups.Any())
             {
-                logger.LogWarning(
-                    "Mission definition with ID {id} does not have an inspection area when scheduling",
+                logger.LogInformation(
+                    "Mission definition with ID {id} does not have an inspection group when scheduling",
                     missionDefinition.Id
                 );
             }
 
-            try
-            {
-                await localizationService.EnsureRobotIsOnSameInstallationAsMission(
-                    robot,
-                    missionDefinition
-                );
-            }
-            catch (InstallationNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (RobotNotInSameInstallationAsMissionException e)
-            {
-                return Conflict(e.Message);
-            }
+            // TODO: Remove
+            // try
+            // {
+            //     await installationService.EnsureRobotIsOnSameInstallationAsMission(
+            //         robot,
+            //         missionDefinition
+            //     );
+            // }
+            // catch (InstallationNotFoundException e)
+            // {
+            //     return NotFound(e.Message);
+            // }
+            // catch (RobotNotInSameInstallationAsMissionException e)
+            // {
+            //     return Conflict(e.Message);
+            // }
 
             var missionTasks = await missionLoader.GetTasksForMission(
                 missionDefinition.Source.SourceId
@@ -202,8 +201,8 @@ namespace Api.Controllers
                 MissionRunType = MissionRunType.Normal,
                 DesiredStartTime = scheduledMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
                 Tasks = missionTasks,
-                InstallationCode = missionDefinition.InstallationCode,
-                InspectionArea = missionDefinition.InspectionArea,
+                Installation = missionDefinition.Installation,
+                InspectionGroups = missionDefinition.InspectionGroups,
             };
 
             if (missionDefinition.Map == null)
@@ -313,54 +312,6 @@ namespace Api.Controllers
 
             var missionTasks = await missionLoader.GetTasksForMission(missionSourceId);
 
-            List<Area?> missionAreas;
-            missionAreas = missionTasks
-                .Where(t => t.TagId != null)
-                .Select(t =>
-                    stidService.GetTagArea(t.TagId!, scheduledMissionQuery.InstallationCode).Result
-                )
-                .ToList();
-
-            var missionInspectionAreaNames = missionAreas
-                .Where(a => a != null)
-                .Select(a => a!.InspectionArea.Name)
-                .Distinct()
-                .ToList();
-            if (missionInspectionAreaNames.Count > 1)
-            {
-                string joinedMissionInspectionAreaNames = string.Join(
-                    ", ",
-                    [.. missionInspectionAreaNames]
-                );
-                logger.LogWarning(
-                    "Mission {missionDefinition} has tags on more than one inspection area. The inspection areas are: {joinedMissionInspectionAreaNames}.",
-                    missionDefinition.Name,
-                    joinedMissionInspectionAreaNames
-                );
-            }
-
-            var sortedAreas = missionAreas
-                .GroupBy(i => i)
-                .OrderByDescending(grp => grp.Count())
-                .Select(grp => grp.Key);
-            var area = sortedAreas.First();
-
-            if (area == null && sortedAreas.Count() > 1)
-            {
-                logger.LogWarning(
-                    "Most common area in mission {missionDefinition} is null. Will use second most common area.",
-                    missionDefinition.Name
-                );
-                area = sortedAreas.Skip(1).First();
-            }
-            if (area == null)
-            {
-                logger.LogError(
-                    $"Mission {missionDefinition.Name} doesn't have any tags with valid area."
-                );
-                return NotFound($"No area found for mission '{missionDefinition.Name}'.");
-            }
-
             var source = await sourceService.CheckForExistingSource(
                 scheduledMissionQuery.MissionSourceId
             );
@@ -380,12 +331,17 @@ namespace Api.Controllers
                 if (missionDefinitions.Count > 0)
                 {
                     existingMissionDefinition = missionDefinitions.First();
-                    if (existingMissionDefinition.InspectionArea == null)
-                    {
-                        existingMissionDefinition.InspectionArea = area.InspectionArea;
-                        await missionDefinitionService.Update(existingMissionDefinition);
-                    }
                 }
+            }
+            var installation = await installationService.ReadByInstallationCode(
+                scheduledMissionQuery.InstallationCode,
+                readOnly: true
+            );
+            if (installation == null)
+            {
+                return NotFound(
+                    $"Could not find installation with name {scheduledMissionQuery.InstallationCode}"
+                );
             }
 
             var scheduledMissionDefinition =
@@ -396,15 +352,14 @@ namespace Api.Controllers
                     Source = source,
                     Name = missionDefinition.Name,
                     InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
-                    InstallationCode = scheduledMissionQuery.InstallationCode,
-                    InspectionArea = area.InspectionArea,
+                    Installation = installation,
                     Map = new MapMetadata(),
                 };
 
-            if (scheduledMissionDefinition.InspectionArea == null)
+            if (!scheduledMissionDefinition.InspectionGroups.Any())
             {
-                logger.LogWarning(
-                    "Mission definition with ID {id} does not have an inspection area when scheduling",
+                logger.LogInformation(
+                    "Mission definition with ID {id} does not have an inspection group when scheduling",
                     scheduledMissionDefinition.Id
                 );
             }
@@ -418,8 +373,8 @@ namespace Api.Controllers
                 MissionRunType = MissionRunType.Normal,
                 DesiredStartTime = scheduledMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
                 Tasks = missionTasks,
-                InstallationCode = scheduledMissionQuery.InstallationCode,
-                InspectionArea = scheduledMissionDefinition.InspectionArea,
+                Installation = installation,
+                InspectionGroups = scheduledMissionDefinition.InspectionGroups,
             };
 
             scheduledMissionDefinition.Map = await mapService.ChooseMapFromMissionRunTasks(
@@ -434,19 +389,6 @@ namespace Api.Controllers
             if (existingMissionDefinition == null)
             {
                 await missionDefinitionService.Create(scheduledMissionDefinition);
-            }
-
-            if (
-                missionRun.Robot.CurrentInspectionArea != null
-                && !await localizationService.RobotIsOnSameInspectionAreaAsMission(
-                    missionRun.Robot.Id,
-                    missionRun.InspectionArea!.Id
-                )
-            )
-            {
-                return Conflict(
-                    $"The robot {missionRun.Robot.Name} is assumed to be in a different inspection area so the mission was not scheduled."
-                );
             }
 
             MissionRun newMissionRun;
@@ -517,21 +459,21 @@ namespace Api.Controllers
                 .ToList();
 
             MissionDefinition? customMissionDefinition;
-            InspectionArea? inspectionArea = null;
+            InspectionGroup? inspectionGroup = null;
             try
             {
-                if (customMissionQuery.InspectionAreaName != null)
+                if (customMissionQuery.InspectionGroupName != null)
                 {
-                    inspectionArea = await inspectionAreaService.ReadByInstallationAndName(
+                    inspectionGroup = await inspectionGroupService.ReadByInstallationAndName(
                         customMissionQuery.InstallationCode,
-                        customMissionQuery.InspectionAreaName,
+                        customMissionQuery.InspectionGroupName,
                         readOnly: true
                     );
                 }
-                if (inspectionArea == null)
+                if (inspectionGroup == null)
                 {
-                    throw new AreaNotFoundException(
-                        $"No inspection area with name {customMissionQuery.InspectionAreaName} in installation {customMissionQuery.InstallationCode} was found"
+                    throw new InspectionGroupNotFoundException(
+                        $"No inspection group with name {customMissionQuery.InspectionGroupName} in installation {customMissionQuery.InstallationCode} was found"
                     );
                 }
 
@@ -562,8 +504,8 @@ namespace Api.Controllers
                         Source = source,
                         Name = customMissionQuery.Name,
                         InspectionFrequency = customMissionQuery.InspectionFrequency,
-                        InstallationCode = customMissionQuery.InstallationCode,
-                        InspectionArea = inspectionArea,
+                        Installation = installation,
+                        InspectionGroups = [inspectionGroup],
                     };
 
                 customMissionDefinition.Map ??= await mapService.ChooseMapFromPositions(
@@ -580,27 +522,11 @@ namespace Api.Controllers
             {
                 return StatusCode(StatusCodes.Status502BadGateway, e.Message);
             }
-            catch (AreaNotFoundException)
+            catch (InspectionGroupNotFoundException)
             {
                 return NotFound(
-                    $"No area with name {customMissionQuery.InspectionAreaName} in installation {customMissionQuery.InstallationCode} was found"
+                    $"No group with name {customMissionQuery.InspectionGroupName} in installation {customMissionQuery.InstallationCode} was found"
                 );
-            }
-
-            try
-            {
-                await localizationService.EnsureRobotIsOnSameInstallationAsMission(
-                    robot,
-                    customMissionDefinition
-                );
-            }
-            catch (InstallationNotFoundException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (RobotNotInSameInstallationAsMissionException e)
-            {
-                return Conflict(e.Message);
             }
 
             MissionRun? newMissionRun;
@@ -617,37 +543,38 @@ namespace Api.Controllers
                     MissionRunType = MissionRunType.Normal,
                     DesiredStartTime = customMissionQuery.DesiredStartTime ?? DateTime.UtcNow,
                     Tasks = missionTasks,
-                    InstallationCode = customMissionQuery.InstallationCode,
-                    InspectionArea = inspectionArea,
+                    Installation = installation,
+                    InspectionGroups = [inspectionGroup],
                 };
 
                 if (scheduledMission.Tasks.Any())
                 {
                     scheduledMission.SetEstimatedTaskDuration();
                 }
-                else if (
-                    scheduledMission.Robot.CurrentInspectionArea != null
-                    && !await localizationService.RobotIsOnSameInspectionAreaAsMission(
-                        scheduledMission.Robot.Id,
-                        scheduledMission.InspectionArea.Id
-                    )
-                )
-                {
-                    scheduledMission.SetEstimatedTaskDuration();
-                }
+                // TODO Probably remove
+                // else if (
+                //     scheduledMission.Robot.CurrentInspectionArea != null
+                //     && !await localizationService.RobotIsOnSameInspectionAreaAsMission(
+                //         scheduledMission.Robot.Id,
+                //         scheduledMission.InspectionArea.Id
+                //     )
+                // )
+                // {
+                //     scheduledMission.SetEstimatedTaskDuration();
+                // }
 
-                if (
-                    scheduledMission.Robot.CurrentInspectionArea != null
-                    && !await localizationService.RobotIsOnSameInspectionAreaAsMission(
-                        scheduledMission.Robot.Id,
-                        scheduledMission.InspectionArea.Id
-                    )
-                )
-                {
-                    return Conflict(
-                        $"The robot {scheduledMission.Robot.Name} is assumed to be in a different inspection area so the mission was not scheduled."
-                    );
-                }
+                // if (
+                //     scheduledMission.Robot.CurrentInspectionArea != null
+                //     && !await localizationService.RobotIsOnSameInspectionAreaAsMission(
+                //         scheduledMission.Robot.Id,
+                //         scheduledMission.InspectionArea.Id
+                //     )
+                // )
+                // {
+                //     return Conflict(
+                //         $"The robot {scheduledMission.Robot.Name} is assumed to be in a different inspection area so the mission was not scheduled."
+                //     );
+                // }
 
                 newMissionRun = await missionRunService.Create(scheduledMission);
             }

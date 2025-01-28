@@ -68,10 +68,10 @@ namespace Api.EventHandlers
 
             _startMissionSemaphore.WaitOne();
 
-            if (missionRun.MissionRunType != MissionRunType.ReturnHome)
-            {
-                await MissionScheduling.AbortActiveReturnToHomeMission(missionRun.Robot.Id);
-            }
+            // if (missionRun.MissionRunType != MissionRunType.ReturnHome)
+            // {
+            //     await MissionScheduling.AbortActiveReturnToHomeMission(missionRun.Robot.Id);
+            // }
 
             try
             {

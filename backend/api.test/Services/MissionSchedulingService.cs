@@ -41,14 +41,12 @@ namespace Api.Test.Services
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
             await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea,
                 writeToDatabase: true

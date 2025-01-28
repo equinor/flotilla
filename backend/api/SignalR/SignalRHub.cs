@@ -35,16 +35,13 @@ namespace Api.SignalRHubs
                     foreach (string installationCode in installationCodes)
                         await Groups.AddToGroupAsync(
                             Context.ConnectionId,
-                            localDevUser + installationCode.ToUpperInvariant()
+                            localDevUser + installationCode
                         );
                 }
                 else
                 {
                     foreach (string installationCode in installationCodes)
-                        await Groups.AddToGroupAsync(
-                            Context.ConnectionId,
-                            installationCode.ToUpperInvariant()
-                        );
+                        await Groups.AddToGroupAsync(Context.ConnectionId, installationCode);
                 }
             }
 

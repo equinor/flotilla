@@ -76,18 +76,12 @@ namespace Api.Test.EventHandlers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
-                installation,
-                inspectionArea
-            );
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea
             );
@@ -109,23 +103,17 @@ namespace Api.Test.EventHandlers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
-                installation,
-                inspectionArea
-            );
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRunOne = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea
             );
             var missionRunTwo = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea
             );
@@ -153,18 +141,12 @@ namespace Api.Test.EventHandlers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Busy,
-                installation,
-                inspectionArea
-            );
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
             var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea
             );
@@ -199,16 +181,7 @@ namespace Api.Test.EventHandlers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Busy,
-                installation,
-                inspectionArea
-            );
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
             robot.RobotCapabilities!.Remove(RobotCapabilitiesEnum.return_to_home);
             await RobotService.Update(robot);
 
@@ -244,28 +217,18 @@ namespace Api.Test.EventHandlers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
-            var robotOne = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
-                installation,
-                inspectionArea
-            );
-            var robotTwo = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
-                installation,
-                inspectionArea
-            );
+            var robotOne = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
+            var robotTwo = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRunOne = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robotOne,
                 inspectionArea
             );
             var missionRunTwo = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robotTwo,
                 inspectionArea
             );
@@ -300,20 +263,18 @@ namespace Api.Test.EventHandlers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation, null);
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRunOne = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea,
                 true
             );
             var missionRunTwo = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea,
                 true
@@ -377,18 +338,12 @@ namespace Api.Test.EventHandlers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
-                installation,
-                inspectionArea
-            );
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
             var missionRun1 = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea,
                 true,
@@ -397,7 +352,7 @@ namespace Api.Test.EventHandlers
                 Guid.NewGuid().ToString()
             );
             var missionRun2 = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea,
                 true
@@ -464,18 +419,12 @@ namespace Api.Test.EventHandlers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Busy,
-                installation,
-                inspectionArea
-            );
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
             var returnToHomeMission = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea,
                 true,
@@ -484,7 +433,7 @@ namespace Api.Test.EventHandlers
                 Guid.NewGuid().ToString()
             );
             var missionRun = await DatabaseUtilities.NewMissionRun(
-                installation.InstallationCode,
+                installation,
                 robot,
                 inspectionArea,
                 true,

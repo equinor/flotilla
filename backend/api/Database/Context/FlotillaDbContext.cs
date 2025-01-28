@@ -24,8 +24,7 @@ namespace Api.Database.Context
         public DbSet<MissionDefinition> MissionDefinitions => Set<MissionDefinition>();
         public DbSet<Plant> Plants => Set<Plant>();
         public DbSet<Installation> Installations => Set<Installation>();
-        public DbSet<InspectionArea> InspectionAreas => Set<InspectionArea>();
-        public DbSet<Area> Areas => Set<Area>();
+        public DbSet<InspectionGroup> InspectionGroups => Set<InspectionGroup>();
         public DbSet<Source> Sources => Set<Source>();
         public DbSet<DefaultLocalizationPose> DefaultLocalizationPoses =>
             Set<DefaultLocalizationPose>();
@@ -76,16 +75,6 @@ namespace Api.Database.Context
                 .OwnsOne(m => m.Map)
                 .OwnsOne(t => t.TransformationMatrices);
             modelBuilder.Entity<MissionDefinition>().OwnsOne(m => m.Map).OwnsOne(b => b.Boundary);
-            modelBuilder
-                .Entity<MissionDefinition>()
-                .HasOne(m => m.InspectionArea)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder
-                .Entity<MissionRun>()
-                .HasOne(m => m.InspectionArea)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
             modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
 
@@ -108,38 +97,14 @@ namespace Api.Database.Context
                 .Entity<Installation>()
                 .HasIndex(a => new { a.InstallationCode })
                 .IsUnique();
+
             modelBuilder.Entity<Plant>().HasIndex(a => new { a.PlantCode }).IsUnique();
 
             modelBuilder
-                .Entity<Area>()
-                .HasOne(a => a.InspectionArea)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder
-                .Entity<Area>()
-                .HasOne(a => a.Plant)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder
-                .Entity<Area>()
-                .HasOne(a => a.Installation)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder
-                .Entity<InspectionArea>()
-                .HasOne(d => d.Plant)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder
-                .Entity<InspectionArea>()
+                .Entity<InspectionGroup>()
                 .HasOne(d => d.Installation)
                 .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder
-                .Entity<Plant>()
-                .HasOne(p => p.Installation)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

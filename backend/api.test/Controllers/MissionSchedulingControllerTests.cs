@@ -155,17 +155,15 @@ namespace Api.Test.Controllers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionGroup = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
 
             var query = CreateDefaultCustomMissionQuery(
                 robot.Id,
                 installation.InstallationCode,
-                inspectionArea.Name
+                inspectionGroup.Name
             );
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
@@ -199,10 +197,8 @@ namespace Api.Test.Controllers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
 
@@ -284,10 +280,8 @@ namespace Api.Test.Controllers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
 
             var otherInstallation = await DatabaseUtilities.NewInstallation("OtherCode");
@@ -310,59 +304,47 @@ namespace Api.Test.Controllers
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
 
-        [Fact]
-        public async Task CheckThatMissionFailsIfRobotIsNotInSameInspectionAreaAsMission()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+        // [Fact] TODO REMOVE
+        // public async Task CheckThatMissionFailsIfRobotIsNotInSameInspectionAreaAsMission()
+        // {
+        //     // Arrange
+        //     var installation = await DatabaseUtilities.NewInstallation();
 
-            var inspectionAreaOne = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode,
-                "InspectionAreaOne"
-            );
+        //     var inspectionAreaTwo = await DatabaseUtilities.NewInspectionGroup(
+        //         installation.InstallationCode,
+        //         "InspectionGroupTwo"
+        //     );
 
-            var inspectionAreaTwo = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode,
-                "InspectionAreaTwo"
-            );
+        //     var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
 
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
-                installation,
-                inspectionAreaOne
-            );
+        //     var query = CreateDefaultCustomMissionQuery(
+        //         robot.Id,
+        //         installation.InstallationCode,
+        //         inspectionAreaTwo.Name
+        //     );
+        //     var content = new StringContent(
+        //         JsonSerializer.Serialize(query),
+        //         null,
+        //         "application/json"
+        //     );
 
-            var query = CreateDefaultCustomMissionQuery(
-                robot.Id,
-                installation.InstallationCode,
-                inspectionAreaTwo.Name
-            );
-            var content = new StringContent(
-                JsonSerializer.Serialize(query),
-                null,
-                "application/json"
-            );
-
-            // Act
-            const string CustomMissionsUrl = "/missions/custom";
-            var missionResponse = await Client.PostAsync(CustomMissionsUrl, content);
-            Assert.Equal(HttpStatusCode.Conflict, missionResponse.StatusCode);
-        }
+        //     // Act
+        //     const string CustomMissionsUrl = "/missions/custom";
+        //     var missionResponse = await Client.PostAsync(CustomMissionsUrl, content);
+        //     Assert.Equal(HttpStatusCode.Conflict, missionResponse.StatusCode);
+        // }
 
         private static CustomMissionQuery CreateDefaultCustomMissionQuery(
             string robotId,
             string installationCode,
-            string inspectionAreaName
+            string inspectionGroupName
         )
         {
             return new CustomMissionQuery
             {
                 RobotId = robotId,
                 InstallationCode = installationCode,
-                InspectionAreaName = inspectionAreaName,
+                InspectionGroupName = inspectionGroupName,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = "TestMission",

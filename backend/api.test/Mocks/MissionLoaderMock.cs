@@ -76,10 +76,10 @@ namespace Api.Test.Mocks
         private readonly MissionDefinition _mockMissionDefinition =
             new()
             {
-                InspectionArea = new InspectionArea(),
+                InspectionGroups = [new InspectionGroup()],
                 Comment = "",
                 Id = "",
-                InstallationCode = "TTT",
+                Installation = new Installation(),
                 IsDeprecated = false,
                 Name = "test",
                 Source = new Source { Id = "", SourceId = "" },

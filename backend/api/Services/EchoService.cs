@@ -26,8 +26,8 @@ namespace Api.Services
         ILogger<EchoService> logger,
         IDownstreamApi echoApi,
         ISourceService sourceService,
-        IStidService stidService,
-        FlotillaDbContext context
+        FlotillaDbContext context,
+        IInstallationService installationService
     ) : IEchoService
     {
         public const string ServiceName = "EchoApi";
@@ -126,53 +126,16 @@ namespace Api.Services
             var source =
                 await sourceService.CheckForExistingSource(echoMission.Id)
                 ?? await sourceService.Create(new Source { SourceId = $"{echoMission.Id}" });
-            var missionTasks = echoMission.Tags;
-            List<Area?> missionAreas;
-            missionAreas =
-            [
-                .. missionTasks
-                    .Where(t => t.TagId != null)
-                    .Select(t =>
-                        stidService.GetTagArea(t.TagId, echoMission.InstallationCode).Result
-                    ),
-            ];
-
-            var missionInspectionAreaNames = missionAreas
-                .Where(a => a != null)
-                .Select(a => a!.InspectionArea.Name)
-                .Distinct()
-                .ToList();
-            if (missionInspectionAreaNames.Count > 1)
-            {
-                string joinedMissionInspectionAreaNames = string.Join(
-                    ", ",
-                    [.. missionInspectionAreaNames]
-                );
-                logger.LogWarning(
-                    "Mission {echoMissionName} has tags on more than one inspection area. The inspection areas are: {joinedMissionInspectionAreaNames}.",
-                    echoMission.Name,
-                    joinedMissionInspectionAreaNames
-                );
-            }
-
-            var sortedAreas = missionAreas
-                .GroupBy(i => i)
-                .OrderByDescending(grp => grp.Count())
-                .Select(grp => grp.Key);
-            var area = sortedAreas.First();
-
-            if (area == null && sortedAreas.Count() > 1)
+            // var missionTasks = echoMission.Tags;
+            // TODO: Check this
+            var installation = await installationService.ReadByInstallationCode(
+                echoMission.InstallationCode
+            );
+            if (installation == null)
             {
                 logger.LogWarning(
-                    "Most common area in mission {echoMissionName} is null. Will use second most common area.",
-                    echoMission.Name
-                );
-                area = sortedAreas.Skip(1).First();
-            }
-            if (area == null)
-            {
-                logger.LogError(
-                    "Mission {echoMissionName} doesn't have any tags with valid area.",
+                    "Installation with code '{InstallationCode}' not found for mission '{MissionName}'",
+                    echoMission.InstallationCode,
                     echoMission.Name
                 );
                 return null;
@@ -183,8 +146,7 @@ namespace Api.Services
                 Id = Guid.NewGuid().ToString(),
                 Source = source,
                 Name = echoMission.Name,
-                InstallationCode = echoMission.InstallationCode,
-                InspectionArea = area.InspectionArea,
+                Installation = installation,
             };
             return missionDefinition;
         }

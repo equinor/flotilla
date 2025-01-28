@@ -92,10 +92,8 @@ namespace Api.Test.Controllers
             var installation = await DatabaseUtilities.NewInstallation();
 
             var wrongInstallation = await DatabaseUtilities.NewInstallation("wrongCode");
-            var wrongPlant = await DatabaseUtilities.NewPlant(wrongInstallation.InstallationCode);
-            var wrongInspectionArea = await DatabaseUtilities.NewInspectionArea(
-                wrongInstallation.InstallationCode,
-                wrongPlant.PlantCode
+            var wrongInspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                wrongInstallation.InstallationCode
             );
 
             var robotQuery = new CreateRobotQuery

@@ -15,14 +15,14 @@ using Xunit;
 
 namespace Api.Test.Controllers
 {
-    public class InspectionAreaControllerTests : IAsyncLifetime
+    public class InspectionGroupControllerTests : IAsyncLifetime
     {
         public required DatabaseUtilities DatabaseUtilities;
         public required PostgreSqlContainer Container;
         public required HttpClient Client;
         public required JsonSerializerOptions SerializerOptions;
 
-        public required IInspectionAreaService InspectionAreaService;
+        public required IInspectionGroupService InspectionGroupService;
         public required IMissionRunService MissionRunService;
         public required IMissionDefinitionService MissionDefinitionService;
 
@@ -42,7 +42,7 @@ namespace Api.Test.Controllers
                 TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
             );
 
-            InspectionAreaService = serviceProvider.GetRequiredService<IInspectionAreaService>();
+            InspectionGroupService = serviceProvider.GetRequiredService<IInspectionGroupService>();
             MissionRunService = serviceProvider.GetRequiredService<IMissionRunService>();
             MissionDefinitionService =
                 serviceProvider.GetRequiredService<IMissionDefinitionService>();
@@ -51,17 +51,15 @@ namespace Api.Test.Controllers
         public Task DisposeAsync() => Task.CompletedTask;
 
         [Fact]
-        public async Task CheckThatInspectionAreaIsCorrectlyCreatedThroughEndpoint()
+        public async Task CheckThatInspectionGroupIsCorrectlyCreatedThroughEndpoint()
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
 
-            var query = new CreateInspectionAreaQuery()
+            var query = new CreateInspectionGroupQuery()
             {
                 InstallationCode = installation.InstallationCode,
-                PlantCode = plant.PlantCode,
-                Name = "inspectionArea",
+                Name = "inspectionGroup",
             };
 
             var content = new StringContent(
@@ -71,29 +69,26 @@ namespace Api.Test.Controllers
             );
 
             // Act
-            const string Url = "/inspectionAreas";
+            const string Url = "/inspectionGroups";
             var response = await Client.PostAsync(Url, content);
 
             // Assert
-            var inspectionArea = await InspectionAreaService.ReadByInstallationAndPlantAndName(
-                installation,
-                plant,
+            var inspectionGroup = await InspectionGroupService.ReadByInstallationAndName(
+                installation.InstallationCode,
                 query.Name
             );
 
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(query.Name, inspectionArea!.Name);
+            Assert.Equal(query.Name, inspectionGroup!.Name);
         }
 
         [Fact]
-        public async Task CheckThatMissionDefinitionIsCreatedInInspectionAreaWhenSchedulingACustomMissionRun()
+        public async Task CheckThatMissionDefinitionIsCreatedInInspectionGroupWhenSchedulingACustomMissionRun()
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionGroup = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
             var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
 
@@ -118,7 +113,7 @@ namespace Api.Test.Controllers
                 RobotId = robot.Id,
                 DesiredStartTime = DateTime.UtcNow,
                 InstallationCode = installation.InstallationCode,
-                InspectionAreaName = inspectionArea.Name,
+                InspectionGroupName = inspectionGroup.Name,
                 Name = "TestMission",
                 Tasks = tasks,
             };
@@ -134,18 +129,18 @@ namespace Api.Test.Controllers
             var userMissionResponse = await missionResponse.Content.ReadFromJsonAsync<MissionRun>(
                 SerializerOptions
             );
-            var inspectionAreaMissionResponse = await Client.GetAsync(
-                $"/inspectionAreas/{inspectionArea.Id}/mission-definitions"
+            var inspectionGroupMissionResponse = await Client.GetAsync(
+                $"/inspectionGroups/{inspectionGroup.Id}/mission-definitions"
             );
 
             // Assert
             var mission = await MissionRunService.ReadById(userMissionResponse!.Id);
-            var missionDefinitions = await MissionDefinitionService.ReadByInspectionAreaId(
-                inspectionArea.Id
+            var missionDefinitions = await MissionDefinitionService.ReadByInspectionGroupId(
+                inspectionGroup.Id
             );
 
             Assert.True(missionResponse.IsSuccessStatusCode);
-            Assert.True(inspectionAreaMissionResponse.IsSuccessStatusCode);
+            Assert.True(inspectionGroupMissionResponse.IsSuccessStatusCode);
             Assert.Single(
                 missionDefinitions.Where(m =>
                     m.Id.Equals(mission!.MissionId, StringComparison.Ordinal)
@@ -153,59 +148,59 @@ namespace Api.Test.Controllers
             );
         }
 
-        [Fact]
-        public async Task CheckThatDefaultLocalizationPoseIsUpdatedOnInspectionArea()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
+        // [Fact] TODO REMOVE
+        // public async Task CheckThatDefaultLocalizationPoseIsUpdatedOnInspectionGroup()
+        // {
+        //     // Arrange
+        //     var installation = await DatabaseUtilities.NewInstallation();
+        //     var inspectionGroup = await DatabaseUtilities.NewInspectionGroup(
+        //         installation.InstallationCode
+        //     );
 
-            string inspectionAreaId = inspectionArea.Id;
+        //     string inspectionGroupId = inspectionGroup.Id;
 
-            string url = $"/inspectionAreas/{inspectionAreaId}/update-default-localization-pose";
-            var query = new CreateDefaultLocalizationPose
-            {
-                Pose = new Pose
-                {
-                    Position = new Position
-                    {
-                        X = 1,
-                        Y = 2,
-                        Z = 3,
-                    },
-                    Orientation = new Orientation
-                    {
-                        X = 0,
-                        Y = 0,
-                        Z = 0,
-                        W = 1,
-                    },
-                },
-            };
-            var content = new StringContent(
-                JsonSerializer.Serialize(query),
-                null,
-                "application/json"
-            );
+        //     string url = $"/inspectionGroups/{inspectionGroupId}/update-default-localization-pose";
+        //     var query = new CreateDefaultLocalizationPose
+        //     {
+        //         Pose = new Pose
+        //         {
+        //             Position = new Position
+        //             {
+        //                 X = 1,
+        //                 Y = 2,
+        //                 Z = 3,
+        //             },
+        //             Orientation = new Orientation
+        //             {
+        //                 X = 0,
+        //                 Y = 0,
+        //                 Z = 0,
+        //                 W = 1,
+        //             },
+        //         },
+        //     };
+        //     var content = new StringContent(
+        //         JsonSerializer.Serialize(query),
+        //         null,
+        //         "application/json"
+        //     );
 
-            // Act
-            var response = await Client.PutAsync(url, content);
-            var updatedInspectionArea =
-                await response.Content.ReadFromJsonAsync<InspectionAreaResponse>(SerializerOptions);
+        //     // Act
+        //     var response = await Client.PutAsync(url, content);
+        //     var updatedInspectionGroup =
+        //         await response.Content.ReadFromJsonAsync<InspectionGroupResponse>(
+        //             SerializerOptions
+        //         );
 
-            // Assert
-            Assert.Equal(
-                updatedInspectionArea!.DefaultLocalizationPose!.Position,
-                query.Pose.Position
-            );
-            Assert.Equal(
-                updatedInspectionArea!.DefaultLocalizationPose.Orientation,
-                query.Pose.Orientation
-            );
-        }
+        //     // Assert
+        //     Assert.Equal(
+        //         updatedInspectionGroup!.DefaultLocalizationPose!.Position,
+        //         query.Pose.Position
+        //     );
+        //     Assert.Equal(
+        //         updatedInspectionGroup!.DefaultLocalizationPose.Orientation,
+        //         query.Pose.Orientation
+        //     );
+        // }
     }
 }

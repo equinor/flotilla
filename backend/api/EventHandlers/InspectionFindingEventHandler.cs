@@ -2,13 +2,13 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Api.Database.Models;
 using Api.Services;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using NCrontab;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Api.EventHandlers
 {
@@ -113,8 +113,10 @@ namespace Api.EventHandlers
                 {
                     var finding = new Finding(
                         task.TagId ?? "NA",
-                        missionRun.InspectionArea?.Plant.Name ?? "NA",
-                        missionRun.InspectionArea?.Name ?? "NA",
+                        missionRun.Installation.InstallationCode ?? "NA",
+                        missionRun.InspectionGroups != null
+                            ? (List<string>)missionRun.InspectionGroups
+                            : ["NA"],
                         inspectionFinding.Finding,
                         inspectionFinding.InspectionDate
                     );
@@ -131,85 +133,55 @@ namespace Api.EventHandlers
             List<Finding> findingsReports
         )
         {
-            var findingsJsonArray = new JArray();
+            var findingsJsonArray = new List<JsonElement>();
 
             foreach (var finding in findingsReports)
             {
-                var factsArray = new JArray(
-                    new JObject(
-                        new JProperty("name", "Anlegg"),
-                        new JProperty("value", finding.PlantName)
+                var factsArray = new List<JsonElement>
+                {
+                    JsonSerializer.Deserialize<JsonElement>(
+                        $"{{\"name\": \"Anlegg\", \"value\": \"{finding.Installation}\"}}"
                     ),
-                    new JObject(
-                        new JProperty("name", "Område"),
-                        new JProperty("value", finding.InspectionAreaName)
+                    JsonSerializer.Deserialize<JsonElement>(
+                        $"{{\"name\": \"Område\", \"value\": \"{finding.InspectionGroups}\"}}"
                     ),
-                    new JObject(
-                        new JProperty("name", "Tag Number"),
-                        new JProperty("value", finding.TagId)
+                    JsonSerializer.Deserialize<JsonElement>(
+                        $"{{\"name\": \"Tag Number\", \"value\": \"{finding.TagId}\"}}"
                     ),
-                    new JObject(
-                        new JProperty("name", "Beskrivelse"),
-                        new JProperty("value", finding.FindingDescription)
+                    JsonSerializer.Deserialize<JsonElement>(
+                        $"{{\"name\": \"Beskrivelse\", \"value\": \"{finding.FindingDescription}\"}}"
                     ),
-                    new JObject(
-                        new JProperty("name", "Tidspunkt"),
-                        new JProperty(
-                            "value",
-                            finding.Timestamp.ToString(
-                                "yyyy-MM-dd HH:mm:ss",
-                                CultureInfo.InvariantCulture
-                            )
-                        )
-                    )
-                );
+                    JsonSerializer.Deserialize<JsonElement>(
+                        $"{{\"name\": \"Tidspunkt\", \"value\": \"{finding.Timestamp.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)}\"}}"
+                    ),
+                };
 
-                var findingObj = new JObject(
-                    new JProperty("activityTitle", $"Finding ID: \"{finding.TagId}\""),
-                    new JProperty("facts", factsArray)
+                var findingObj = JsonSerializer.Deserialize<JsonElement>(
+                    $"{{\"activityTitle\": \"Finding ID: \\\"{finding.TagId}\\\"\", \"facts\": {JsonSerializer.Serialize(factsArray)}}}"
                 );
                 findingsJsonArray.Add(findingObj);
             }
 
-            var sections = new JArray(
-                new JObject(
-                    new JProperty(
-                        "activityTitle",
-                        $"Inspection report for \"{findingsReports[0].PlantName}\""
-                    ),
-                    new JProperty(
-                        "activitySubtitle",
-                        $"Generated on: {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)}"
-                    ),
-                    new JProperty(
-                        "facts",
-                        new JArray(
-                            new JObject(
-                                new JProperty("name", "Number of findings:"),
-                                new JProperty("value", numberOfFindings)
-                            )
-                        )
-                    )
+            var sections = new List<JsonElement>
+            {
+                JsonSerializer.Deserialize<JsonElement>(
+                    $"{{\"activityTitle\": \"Inspection report for \\\"{findingsReports[0].Installation}\\\"\", \"activitySubtitle\": \"Generated on: {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)}\", \"facts\": [{{\"name\": \"Number of findings:\", \"value\": \"{numberOfFindings}\"}}]}}"
                 ),
-                new JObject(
-                    new JProperty(
-                        "activityTitle",
-                        "The following inspection findings were identified:"
-                    )
-                )
+                JsonSerializer.Deserialize<JsonElement>(
+                    "{\"activityTitle\": \"The following inspection findings were identified:\"}"
+                ),
+            };
+
+            sections.AddRange(findingsJsonArray);
+
+            var adaptiveCardObj = JsonSerializer.Deserialize<JsonElement>(
+                $"{{\"summary\": \"Inspection Findings Report\", \"themeColor\": \"0078D7\", \"title\": \"Inspection Findings: \\\"{title}\\\"\", \"sections\": {JsonSerializer.Serialize(sections)}}}"
             );
 
-            foreach (var findingObj in findingsJsonArray)
-                sections.Add(findingObj);
-
-            var adaptiveCardObj = new JObject(
-                new JProperty("summary", "Inspection Findings Report"),
-                new JProperty("themeColor", "0078D7"),
-                new JProperty("title", $"Inspection Findings: \"{title}\""),
-                new JProperty("sections", sections)
+            return JsonSerializer.Serialize(
+                adaptiveCardObj,
+                new JsonSerializerOptions { WriteIndented = true }
             );
-
-            return adaptiveCardObj.ToString(Formatting.Indented);
         }
 
         public static string GetWebhookURL(IConfiguration configuration, string secretName)
@@ -233,15 +205,15 @@ namespace Api.EventHandlers
 
     public class Finding(
         string tagId,
-        string plantName,
-        string inspectionAreaName,
+        string installation,
+        List<string> inspectionGroups,
         string findingDescription,
         DateTime timestamp
     )
     {
         public string TagId { get; set; } = tagId;
-        public string PlantName { get; set; } = plantName;
-        public string InspectionAreaName { get; set; } = inspectionAreaName;
+        public string Installation { get; set; } = installation;
+        public List<string> InspectionGroups { get; set; } = inspectionGroups;
         public string FindingDescription { get; set; } = findingDescription;
         public DateTime Timestamp { get; set; } = timestamp;
     }

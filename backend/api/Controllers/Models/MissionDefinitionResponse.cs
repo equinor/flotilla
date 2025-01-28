@@ -25,8 +25,8 @@ namespace Api.Controllers.Models
         [JsonPropertyName("lastSuccessfulRun")]
         public virtual MissionRun? LastSuccessfulRun { get; set; }
 
-        [JsonPropertyName("inspectionArea")]
-        public InspectionAreaResponse? InspectionArea { get; set; }
+        [JsonPropertyName("inspectionGroups")]
+        public List<InspectionGroupResponse> InspectionGroups { get; set; } = [];
 
         [JsonPropertyName("isDeprecated")]
         public bool IsDeprecated { get; set; }
@@ -44,13 +44,13 @@ namespace Api.Controllers.Models
         {
             Id = missionDefinition.Id;
             Name = missionDefinition.Name;
-            InstallationCode = missionDefinition.InstallationCode;
+            InstallationCode = missionDefinition.Installation.InstallationCode;
             Comment = missionDefinition.Comment;
             InspectionFrequency = missionDefinition.InspectionFrequency;
-            InspectionArea =
-                missionDefinition.InspectionArea != null
-                    ? new InspectionAreaResponse(missionDefinition.InspectionArea)
-                    : null;
+            InspectionGroups =
+                missionDefinition.InspectionGroups != null
+                    ? (List<InspectionGroupResponse>)missionDefinition.InspectionGroups
+                    : [];
             LastSuccessfulRun = missionDefinition.LastSuccessfulRun;
             IsDeprecated = missionDefinition.IsDeprecated;
             SourceId = missionDefinition.Source.SourceId;
@@ -74,7 +74,7 @@ namespace Api.Controllers.Models
         public string Name { get; } = missionDefinition.Name;
 
         [JsonPropertyName("installationCode")]
-        public string InstallationCode { get; } = missionDefinition.InstallationCode;
+        public string InstallationCode { get; } = missionDefinition.Installation.InstallationCode;
 
         [JsonPropertyName("comment")]
         public string? Comment { get; } = missionDefinition.Comment;
@@ -85,8 +85,9 @@ namespace Api.Controllers.Models
         [JsonPropertyName("lastSuccessfulRun")]
         public virtual MissionRun? LastSuccessfulRun { get; } = missionDefinition.LastSuccessfulRun;
 
-        [JsonPropertyName("inspectionArea")]
-        public InspectionArea? InspectionArea { get; } = missionDefinition.InspectionArea;
+        [JsonPropertyName("inspectionGroups")]
+        public List<InspectionGroup> InspectionGroups { get; } =
+            (List<InspectionGroup>)missionDefinition.InspectionGroups;
 
         [JsonPropertyName("isDeprecated")]
         public bool IsDeprecated { get; } = missionDefinition.IsDeprecated;

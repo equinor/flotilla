@@ -270,7 +270,7 @@ The access matrix looks like this:
 |                            | **Read Only** | **User** | **Admin** |
 | -------------------------- | ------------- | -------- | --------- |
 | Area                       | Read          | Read     | CRUD      |
-| InspectionArea             | Read          | Read     | CRUD      |
+| InspectionGroup            | Read          | Read     | CRUD      |
 | Plant                      | Read          | Read     | CRUD      |
 | Installation               | Read          | Read     | CRUD      |
 | MissionLoader              | Read          | Read     | CRUD      |

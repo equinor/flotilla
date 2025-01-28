@@ -1,9 +1,9 @@
-﻿namespace Api.Database.Models
+﻿using Api.Database.Models;
+
+namespace Api.Controllers.Models
 {
     public class UpdateRobotQuery
     {
-        public string? InspectionAreaId { get; set; }
-
         public Pose? Pose { get; set; }
 
         public string? MissionId { get; set; }

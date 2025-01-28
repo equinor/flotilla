@@ -169,15 +169,16 @@ namespace Api.Controllers
                 );
             }
 
-            plants = plants.Select(p => p.ToLower(CultureInfo.CurrentCulture));
+            plants = plants.Select(p => p.ToLowerInvariant());
 
             try
             {
                 var plantInfos = await missionLoader.GetPlantInfos();
 
-                plantInfos = plantInfos
-                    .Where(p => plants.Contains(p.PlantCode.ToLower(CultureInfo.CurrentCulture)))
-                    .ToList();
+                plantInfos =
+                [
+                    .. plantInfos.Where(p => plants.Contains(p.PlantCode.ToLowerInvariant())),
+                ];
                 return Ok(plantInfos);
             }
             catch (HttpRequestException e)

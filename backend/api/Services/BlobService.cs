@@ -123,7 +123,7 @@ namespace Api.Services
                 )
             );
             var containerClient = serviceClient.GetBlobContainerClient(
-                containerName.ToLower(CultureInfo.CurrentCulture)
+                containerName.ToLowerInvariant()
             );
             return containerClient;
         }

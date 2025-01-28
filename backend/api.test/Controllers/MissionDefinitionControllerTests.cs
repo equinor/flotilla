@@ -51,10 +51,8 @@ namespace Api.Test.Controllers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
+            var inspectionArea = await DatabaseUtilities.NewInspectionGroup(
+                installation.InstallationCode
             );
 
             var source = await SourceService.CreateSourceIfDoesNotExist([]);
@@ -62,9 +60,9 @@ namespace Api.Test.Controllers
             var missionDefinition = new MissionDefinition()
             {
                 Source = source,
-                InstallationCode = installation.InstallationCode,
+                Installation = installation,
                 Name = "Test Mission Definition",
-                InspectionArea = inspectionArea,
+                InspectionGroups = [inspectionArea],
                 IsDeprecated = false,
             };
 

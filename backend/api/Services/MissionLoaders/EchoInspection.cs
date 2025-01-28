@@ -20,8 +20,7 @@ namespace Api.Services.MissionLoaders
             InspectionType = InspectionTypeFromEchoSensorType(echoSensorType.Key);
             TimeInSeconds = (float?)echoSensorType.TimeInSeconds;
             InspectionPoint = inspectionPoint;
-            InspectionPointName =
-                inspectionPointName != "Stid Coordinate" ? inspectionPointName : null;
+            InspectionPointName = inspectionPointName != "Coordinate" ? inspectionPointName : null;
         }
 
         public InspectionType InspectionType { get; set; }

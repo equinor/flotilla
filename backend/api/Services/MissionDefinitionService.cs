@@ -21,8 +21,8 @@ namespace Api.Services
             bool readOnly = true
         );
 
-        public Task<List<MissionDefinition>> ReadByInspectionAreaId(
-            string inspectionAreaId,
+        public Task<List<MissionDefinition>> ReadByInspectionGroupId(
+            string inspectionGroupId,
             bool readOnly = true
         );
 
@@ -47,11 +47,6 @@ namespace Api.Services
         "CA1309:Use ordinal StringComparison",
         Justification = "EF Core refrains from translating string comparison overloads to SQL"
     )]
-    [SuppressMessage(
-        "Globalization",
-        "CA1304:Specify CultureInfo",
-        Justification = "Entity framework does not support translating culture info to SQL calls"
-    )]
     public class MissionDefinitionService(
         FlotillaDbContext context,
         IMissionLoader missionLoader,
@@ -68,9 +63,13 @@ namespace Api.Services
             {
                 context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged;
             }
-            if (missionDefinition.InspectionArea is not null)
+            if (missionDefinition.InspectionGroups is not null)
             {
-                context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
+                foreach (var inspectionGroup in missionDefinition.InspectionGroups)
+                {
+                    context.Entry(inspectionGroup).State = EntityState.Unchanged;
+                    // context.Entry(inspectionGroup.Installation).State = EntityState.Unchanged;
+                }
             }
             if (missionDefinition.Source is not null)
             {
@@ -78,10 +77,10 @@ namespace Api.Services
             }
 
             await context.MissionDefinitions.AddAsync(missionDefinition);
-            await ApplyDatabaseUpdate(missionDefinition.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionDefinition.Installation);
             _ = signalRService.SendMessageAsync(
                 "Mission definition created",
-                missionDefinition.InspectionArea?.Installation,
+                missionDefinition.Installation,
                 new MissionDefinitionResponse(missionDefinition)
             );
             DetachTracking(context, missionDefinition);
@@ -90,7 +89,7 @@ namespace Api.Services
 
         public async Task<MissionDefinition?> ReadById(string id, bool readOnly = true)
         {
-            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+            return await GetAccessibleMissionDefinitions(readOnly: readOnly)
                 .Where(m => m.IsDeprecated == false)
                 .FirstOrDefaultAsync(missionDefinition => missionDefinition.Id.Equals(id));
         }
@@ -100,7 +99,7 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var query = GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+            var query = GetAccessibleMissionDefinitions(readOnly: readOnly)
                 .Where(m => m.IsDeprecated == false);
             var filter = ConstructFilter(parameters);
 
@@ -117,16 +116,15 @@ namespace Api.Services
             );
         }
 
-        public async Task<List<MissionDefinition>> ReadByInspectionAreaId(
-            string inspectionAreaId,
+        public async Task<List<MissionDefinition>> ReadByInspectionGroupId(
+            string inspectionGroupId,
             bool readOnly = true
         )
         {
-            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+            return await GetAccessibleMissionDefinitions(readOnly: readOnly)
                 .Where(m =>
                     m.IsDeprecated == false
-                    && m.InspectionArea != null
-                    && m.InspectionArea.Id == inspectionAreaId
+                    && m.InspectionGroups.Any(ig => ig.Id == inspectionGroupId)
                 )
                 .ToListAsync();
         }
@@ -136,7 +134,7 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+            return await GetAccessibleMissionDefinitions(readOnly: readOnly)
                 .Where(m =>
                     m.IsDeprecated == false
                     && m.Source.SourceId != null
@@ -180,16 +178,25 @@ namespace Api.Services
             {
                 context.Entry(missionDefinition.LastSuccessfulRun).State = EntityState.Unchanged;
             }
-            if (missionDefinition.InspectionArea is not null)
+            if (missionDefinition.Installation is not null)
             {
-                context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
+                context.Entry(missionDefinition.Installation).State = EntityState.Unchanged;
+            }
+            if (missionDefinition.InspectionGroups.Any())
+            {
+                // TODO Fix this to apply to lists
+                foreach (var inspectionGroup in missionDefinition.InspectionGroups)
+                {
+                    context.Entry(inspectionGroup).State = EntityState.Unchanged;
+                    // context.Entry(inspectionGroup.Installation).State = EntityState.Unchanged;
+                }
             }
 
             var entry = context.Update(missionDefinition);
-            await ApplyDatabaseUpdate(missionDefinition.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionDefinition.Installation);
             _ = signalRService.SendMessageAsync(
                 "Mission definition updated",
-                missionDefinition?.InspectionArea?.Installation,
+                missionDefinition?.Installation,
                 missionDefinition != null ? new MissionDefinitionResponse(missionDefinition) : null
             );
             DetachTracking(context, missionDefinition!);
@@ -206,7 +213,7 @@ namespace Api.Services
             }
 
             missionDefinition.IsDeprecated = true;
-            await ApplyDatabaseUpdate(missionDefinition.InspectionArea?.Installation);
+            await ApplyDatabaseUpdate(missionDefinition.Installation);
 
             return missionDefinition;
         }
@@ -221,9 +228,7 @@ namespace Api.Services
             var accessibleInstallationCodes = await accessRoleService.GetAllowedInstallationCodes();
             if (
                 installation == null
-                || accessibleInstallationCodes.Contains(
-                    installation.InstallationCode.ToUpper(CultureInfo.CurrentCulture)
-                )
+                || accessibleInstallationCodes.Contains(installation.InstallationCode)
             )
                 await context.SaveChangesAsync();
             else
@@ -236,13 +241,12 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context
-                .MissionDefinitions.Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(inspectionArea => inspectionArea!.Plant)
+                .MissionDefinitions.Include(missionDefinition => missionDefinition.InspectionGroups)
+                .ThenInclude(inspectionGroup => inspectionGroup!)
                 .ThenInclude(plant => plant.Installation)
-                .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(area => area!.Installation)
+                .Include(missionDefinition => missionDefinition.InspectionGroups)
+                .ThenInclude(Group => Group!.Installation)
                 .Include(missionDefinition => missionDefinition.Source)
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
@@ -250,19 +254,25 @@ namespace Api.Services
                 .ThenInclude(inspection =>
                     inspection != null ? inspection.InspectionFindings : null
                 )
-                .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(inspectionArea => inspectionArea!.DefaultLocalizationPose)
+                .Include(missionDefinition => missionDefinition.InspectionGroups)
+                .ThenInclude(inspectionGroup => inspectionGroup!.DefaultLocalizationPose)
                 .ThenInclude(defaultLocalizationPose =>
                     defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null
                 )
-                .Where(
-                    (m) =>
-                        m.InspectionArea == null
-                        || accessibleInstallationCodes.Result.Contains(
-                            m.InspectionArea.Installation.InstallationCode.ToUpper()
-                        )
-                )
                 .Include(missionDefinition => missionDefinition.Map);
+            return readOnly ? query.AsNoTracking() : query.AsTracking();
+        }
+
+        private IQueryable<MissionDefinition> GetAccessibleMissionDefinitions(bool readOnly = true)
+        {
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var query = GetMissionDefinitionsWithSubModels(readOnly);
+            query = query.Where(missionDefinition =>
+                missionDefinition.Installation != null
+                && accessibleInstallationCodes.Result.Contains(
+                    missionDefinition.Installation.InstallationCode
+                )
+            );
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
@@ -283,7 +293,7 @@ namespace Api.Services
 
         /// <summary>
         ///     Filters by <see cref="MissionDefinitionQueryStringParameters.InstallationCode" />
-        ///     and <see cref="MissionDefinitionQueryStringParameters.InspectionArea" />
+        ///     and <see cref="MissionDefinitionQueryStringParameters.InspectionGroups" />
         ///     and <see cref="MissionDefinitionQueryStringParameters.NameSearch" />
         ///     <para>
         ///         Uses LINQ Expression trees (see
@@ -295,22 +305,29 @@ namespace Api.Services
             MissionDefinitionQueryStringParameters parameters
         )
         {
-            Expression<Func<MissionDefinition, bool>> inspectionAreaFilter =
-                parameters.InspectionArea is null
+            Expression<Func<MissionDefinition, bool>> inspectionGroupFilter =
+                parameters.InspectionGroups is null
                     ? missionDefinition => true
                     : missionDefinition =>
-                        missionDefinition.InspectionArea != null
+                        missionDefinition.InspectionGroups != null
                         && missionDefinition
-                            .InspectionArea.Name.ToLower()
-                            .Equals(parameters.InspectionArea.Trim().ToLower());
+                            .InspectionGroups.Select(group => group.Name.Trim().ToLowerInvariant())
+                            .Any(groupName =>
+                                parameters
+                                    .InspectionGroups.Select(paramGroup =>
+                                        paramGroup.Trim().ToLowerInvariant()
+                                    )
+                                    .Contains(groupName)
+                            );
 
             Expression<Func<MissionDefinition, bool>> installationFilter =
                 parameters.InstallationCode is null
                     ? missionDefinition => true
                     : missionDefinition =>
-                        missionDefinition
-                            .InstallationCode.ToLower()
-                            .Equals(parameters.InstallationCode.Trim().ToLower());
+                        missionDefinition.Installation.InstallationCode.Equals(
+                            parameters.InstallationCode.Trim(),
+                            StringComparison.InvariantCultureIgnoreCase
+                        );
 
             // The parameter of the filter expression
             var missionDefinitionExpression = Expression.Parameter(typeof(MissionDefinition));
@@ -318,7 +335,7 @@ namespace Api.Services
             // Combining the body of the filters to create the combined filter, using invoke to force parameter substitution
             Expression body = Expression.AndAlso(
                 Expression.Invoke(installationFilter, missionDefinitionExpression),
-                Expression.Invoke(inspectionAreaFilter, missionDefinitionExpression)
+                Expression.Invoke(inspectionGroupFilter, missionDefinitionExpression)
             );
 
             // Constructing the resulting lambda expression by combining parameter and body

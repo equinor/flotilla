@@ -15,8 +15,8 @@ namespace Api.Test.EventHandlers
             int numberOfFindings = 2;
             var findingsReports = new List<Finding>
             {
-                new("Tag1", "Plant1", "Area1", "Finding1", DateTime.UtcNow),
-                new("Tag2", "Plant1", "Area2", "Finding2", DateTime.UtcNow),
+                new("Tag1", "Plant1", ["InspectionGroup1"], "Finding1", DateTime.UtcNow),
+                new("Tag2", "Plant1", ["InspectoinGroup2"], "Finding2", DateTime.UtcNow),
             };
 
             // Act

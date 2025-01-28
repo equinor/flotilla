@@ -8,117 +8,116 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers
 {
     [ApiController]
-    [Route("inspectionAreas")]
-    public class InspectionAreaController(
-        ILogger<InspectionAreaController> logger,
+    [Route("inspectionGroups")]
+    public class InspectionGroupController(
+        ILogger<InspectionGroupController> logger,
         IMapService mapService,
-        IInspectionAreaService inspectionAreaService,
+        IInspectionGroupService inspectionGroupService,
         IDefaultLocalizationPoseService defaultLocalizationPoseService,
         IInstallationService installationService,
-        IPlantService plantService,
         IMissionDefinitionService missionDefinitionService
     ) : ControllerBase
     {
         /// <summary>
-        /// List all inspection areas in the Flotilla database
+        /// List all inspection groups in the Flotilla database
         /// </summary>
         /// <remarks>
-        /// <para> This query gets all inspection areas </para>
+        /// <para> This query gets all inspection groups </para>
         /// </remarks>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(IList<InspectionAreaResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<InspectionGroupResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<InspectionAreaResponse>>> GetInspectionAreas()
+        public async Task<ActionResult<IList<InspectionGroupResponse>>> GetInspectionGroups()
         {
             try
             {
-                var inspectionAreas = await inspectionAreaService.ReadAll(readOnly: true);
-                var inspectionAreaResponses = inspectionAreas
-                    .Select(d => new InspectionAreaResponse(d))
+                var inspectionGroups = await inspectionGroupService.ReadAll(readOnly: true);
+                var inspectionGroupResponses = inspectionGroups
+                    .Select(d => new InspectionGroupResponse(d))
                     .ToList();
-                return Ok(inspectionAreaResponses);
+                return Ok(inspectionGroupResponses);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error during GET of inspection areas from database");
+                logger.LogError(e, "Error during GET of inspection groups from database");
                 throw;
             }
         }
 
         /// <summary>
-        /// List all inspection areas in the specified installation
+        /// List all inspection groups in the specified installation
         /// </summary>
         /// <remarks>
-        /// <para> This query gets all inspection areas in specified installation</para>
+        /// <para> This query gets all inspection groups in specified installation</para>
         /// </remarks>
         [HttpGet("installation/{installationCode}")]
         [Authorize(Roles = Role.Any)]
-        [ProducesResponseType(typeof(IList<InspectionAreaResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<InspectionGroupResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<
-            ActionResult<IList<InspectionAreaResponse>>
-        > GetInspectionAreasByInstallationCode([FromRoute] string installationCode)
+            ActionResult<IList<InspectionGroupResponse>>
+        > GetInspectionGroupsByInstallationCode([FromRoute] string installationCode)
         {
             try
             {
-                var inspectionAreas = await inspectionAreaService.ReadByInstallation(
+                var inspectionGroups = await inspectionGroupService.ReadByInstallation(
                     installationCode,
                     readOnly: true
                 );
-                var inspectionAreaResponses = inspectionAreas
-                    .Select(d => new InspectionAreaResponse(d))
+                var inspectionGroupResponses = inspectionGroups
+                    .Select(d => new InspectionGroupResponse(d))
                     .ToList();
-                return Ok(inspectionAreaResponses);
+                return Ok(inspectionGroupResponses);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error during GET of inspection areas from database");
+                logger.LogError(e, "Error during GET of inspection groups from database");
                 throw;
             }
         }
 
         /// <summary>
-        /// Lookup inspection area by specified id.
+        /// Lookup inspection group by specified id.
         /// </summary>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(InspectionGroupResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionAreaResponse>> GetInspectionAreaById(
+        public async Task<ActionResult<InspectionGroupResponse>> GetInspectionGroupById(
             [FromRoute] string id
         )
         {
             try
             {
-                var inspectionArea = await inspectionAreaService.ReadById(id, readOnly: true);
-                if (inspectionArea == null)
-                    return NotFound($"Could not find inspection area with id {id}");
-                return Ok(new InspectionAreaResponse(inspectionArea));
+                var inspectionGroup = await inspectionGroupService.ReadById(id, readOnly: true);
+                if (inspectionGroup == null)
+                    return NotFound($"Could not find inspection group with id {id}");
+                return Ok(new InspectionGroupResponse(inspectionGroup));
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error during GET of inspection area from database");
+                logger.LogError(e, "Error during GET of inspection group from database");
                 throw;
             }
         }
 
         /// <summary>
-        /// Lookup all the mission definitions related to a inspection area
+        /// Lookup all the mission definitions related to a inspection group
         /// </summary>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
-        [Route("{inspectionAreaId}/mission-definitions")]
+        [Route("{inspectionGroupId}/mission-definitions")]
         [ProducesResponseType(typeof(MissionDefinitionResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -126,19 +125,19 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<
             ActionResult<IList<MissionDefinitionResponse>>
-        > GetMissionDefinitionsInInspectionArea([FromRoute] string inspectionAreaId)
+        > GetMissionDefinitionsInInspectionGroup([FromRoute] string inspectionGroupId)
         {
             try
             {
-                var inspectionArea = await inspectionAreaService.ReadById(
-                    inspectionAreaId,
+                var inspectionGroup = await inspectionGroupService.ReadById(
+                    inspectionGroupId,
                     readOnly: true
                 );
-                if (inspectionArea == null)
-                    return NotFound($"Could not find inspection area with id {inspectionAreaId}");
+                if (inspectionGroup == null)
+                    return NotFound($"Could not find inspection group with id {inspectionGroupId}");
 
-                var missionDefinitions = await missionDefinitionService.ReadByInspectionAreaId(
-                    inspectionArea.Id,
+                var missionDefinitions = await missionDefinitionService.ReadByInspectionGroupId(
+                    inspectionGroup.Id,
                     readOnly: true
                 );
                 var missionDefinitionResponses = missionDefinitions
@@ -148,79 +147,69 @@ namespace Api.Controllers
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error during GET of inspection area missions from database");
+                logger.LogError(e, "Error during GET of inspection group missions from database");
                 throw;
             }
         }
 
         /// <summary>
-        /// Add a new inspection area
+        /// Add a new inspection Group
         /// </summary>
         /// <remarks>
-        /// <para> This query adds a new inspection area to the database </para>
+        /// <para> This query adds a new inspection Group to the database </para>
         /// </remarks>
         [HttpPost]
         [Authorize(Roles = Role.Admin)]
-        [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(InspectionGroupResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionAreaResponse>> Create(
-            [FromBody] CreateInspectionAreaQuery inspectionArea
+        public async Task<ActionResult<InspectionGroupResponse>> Create(
+            [FromBody] CreateInspectionGroupQuery inspectionGroup
         )
         {
-            logger.LogInformation("Creating new inspection area");
+            logger.LogInformation("Creating new inspection group");
             try
             {
                 var existingInstallation = await installationService.ReadByInstallationCode(
-                    inspectionArea.InstallationCode,
+                    inspectionGroup.InstallationCode,
                     readOnly: true
                 );
                 if (existingInstallation == null)
                 {
                     return NotFound(
-                        $"Could not find installation with name {inspectionArea.InstallationCode}"
+                        $"Could not find installation with name {inspectionGroup.InstallationCode}"
                     );
                 }
-                var existingPlant = await plantService.ReadByInstallationAndPlantCode(
-                    existingInstallation,
-                    inspectionArea.PlantCode,
-                    readOnly: true
-                );
-                if (existingPlant == null)
-                {
-                    return NotFound($"Could not find plant with name {inspectionArea.PlantCode}");
-                }
-                var existingInspectionArea =
-                    await inspectionAreaService.ReadByInstallationAndPlantAndName(
-                        existingInstallation,
-                        existingPlant,
-                        inspectionArea.Name,
+                var existingInspectionGroup =
+                    await inspectionGroupService.ReadByInstallationAndName(
+                        existingInstallation.InstallationCode,
+                        inspectionGroup.Name,
                         readOnly: true
                     );
-                if (existingInspectionArea != null)
+                if (existingInspectionGroup != null)
                 {
                     logger.LogInformation(
-                        "An inspection area for given name and inspection area already exists"
+                        "An inspection group for given name and inspection group already exists"
                     );
-                    return BadRequest($"InspectionArea already exists");
+                    return BadRequest($"InspectionGroup already exists");
                 }
 
-                var newInspectionArea = await inspectionAreaService.Create(inspectionArea);
+                var newInspectionGroup = await inspectionGroupService.Create(inspectionGroup);
                 logger.LogInformation(
-                    "Succesfully created new inspection area with id '{inspectionAreaId}'",
-                    newInspectionArea.Id
+                    "Succesfully created new inspection group with id '{inspectionGroupId}'",
+                    newInspectionGroup.Id
                 );
                 return CreatedAtAction(
-                    nameof(GetInspectionAreaById),
-                    new { id = newInspectionArea.Id },
-                    new InspectionAreaResponse(newInspectionArea)
+                    nameof(GetInspectionGroupById),
+                    new { id = newInspectionGroup.Id },
+                    new InspectionGroupResponse(newInspectionGroup)
                 );
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error while creating new inspection area");
+                logger.LogError(e, "Error while creating new inspection group");
                 throw;
             }
         }
@@ -229,59 +218,59 @@ namespace Api.Controllers
         /// Updates default localization pose
         /// </summary>
         /// <remarks>
-        /// <para> This query updates the default localization pose for a inspection area </para>
+        /// <para> This query updates the default localization pose for a inspection group </para>
         /// </remarks>
         [HttpPut]
         [Authorize(Roles = Role.Admin)]
-        [Route("{inspectionAreaId}/update-default-localization-pose")]
-        [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status201Created)]
+        [Route("{inspectionGroupId}/update-default-localization-pose")]
+        [ProducesResponseType(typeof(InspectionGroupResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionAreaResponse>> UpdateDefaultLocalizationPose(
-            [FromRoute] string inspectionAreaId,
+        public async Task<ActionResult<InspectionGroupResponse>> UpdateDefaultLocalizationPose(
+            [FromRoute] string inspectionGroupId,
             [FromBody] CreateDefaultLocalizationPose newDefaultLocalizationPose
         )
         {
             logger.LogInformation(
-                "Updating default localization pose on inspection area '{inspectionAreaId}'",
-                inspectionAreaId
+                "Updating default localization pose on inspection group '{inspectionGroupId}'",
+                inspectionGroupId
             );
             try
             {
-                var inspectionArea = await inspectionAreaService.ReadById(
-                    inspectionAreaId,
+                var inspectionGroup = await inspectionGroupService.ReadById(
+                    inspectionGroupId,
                     readOnly: true
                 );
-                if (inspectionArea is null)
+                if (inspectionGroup is null)
                 {
                     logger.LogInformation(
-                        "A inspection area with id '{inspectionAreaId}' does not exist",
-                        inspectionAreaId
+                        "A inspection group with id '{inspectionGroupId}' does not exist",
+                        inspectionGroupId
                     );
-                    return NotFound("InspectionArea does not exists");
+                    return NotFound("InspectionGroup does not exists");
                 }
 
-                if (inspectionArea.DefaultLocalizationPose != null)
+                if (inspectionGroup.DefaultLocalizationPose != null)
                 {
-                    inspectionArea.DefaultLocalizationPose.Pose = newDefaultLocalizationPose.Pose;
-                    inspectionArea.DefaultLocalizationPose.DockingEnabled =
+                    inspectionGroup.DefaultLocalizationPose.Pose = newDefaultLocalizationPose.Pose;
+                    inspectionGroup.DefaultLocalizationPose.DockingEnabled =
                         newDefaultLocalizationPose.IsDockingStation;
                     _ = await defaultLocalizationPoseService.Update(
-                        inspectionArea.DefaultLocalizationPose
+                        inspectionGroup.DefaultLocalizationPose
                     );
                 }
                 else
                 {
-                    inspectionArea.DefaultLocalizationPose = new DefaultLocalizationPose(
+                    inspectionGroup.DefaultLocalizationPose = new DefaultLocalizationPose(
                         newDefaultLocalizationPose.Pose,
                         newDefaultLocalizationPose.IsDockingStation
                     );
-                    inspectionArea = await inspectionAreaService.Update(inspectionArea);
+                    inspectionGroup = await inspectionGroupService.Update(inspectionGroup);
                 }
 
-                return Ok(new InspectionAreaResponse(inspectionArea));
+                return Ok(new InspectionGroupResponse(inspectionGroup));
             }
             catch (Exception e)
             {
@@ -291,28 +280,28 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// Deletes the inspection area with the specified id from the database.
+        /// Deletes the inspection group with the specified id from the database.
         /// </summary>
         [HttpDelete]
         [Authorize(Roles = Role.Admin)]
         [Route("{id}")]
-        [ProducesResponseType(typeof(InspectionAreaResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(InspectionGroupResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<InspectionAreaResponse>> DeleteInspectionArea(
+        public async Task<ActionResult<InspectionGroupResponse>> DeleteInspectionGroup(
             [FromRoute] string id
         )
         {
-            var inspectionArea = await inspectionAreaService.Delete(id);
-            if (inspectionArea is null)
-                return NotFound($"InspectionArea with id {id} not found");
-            return Ok(new InspectionAreaResponse(inspectionArea));
+            var inspectionGroup = await inspectionGroupService.Delete(id);
+            if (inspectionGroup is null)
+                return NotFound($"InspectionGroup with id {id} not found");
+            return Ok(new InspectionGroupResponse(inspectionGroup));
         }
 
         /// <summary>
-        /// Gets map metadata for localization poses belonging to inspection area with specified id
+        /// Gets map metadata for localization poses belonging to inspection group with specified id
         /// </summary>
         [HttpGet]
         [Authorize(Roles = Role.Any)]
@@ -324,24 +313,24 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<MapMetadata>> GetMapMetadata([FromRoute] string id)
         {
-            var inspectionArea = await inspectionAreaService.ReadById(id, readOnly: true);
-            if (inspectionArea is null)
+            var inspectionGroup = await inspectionGroupService.ReadById(id, readOnly: true);
+            if (inspectionGroup is null)
             {
-                string errorMessage = $"InspectionArea not found for inspectionArea with ID {id}";
+                string errorMessage = $"InspectionGroup not found for inspectionGroup with ID {id}";
                 logger.LogError("{ErrorMessage}", errorMessage);
                 return NotFound(errorMessage);
             }
-            if (inspectionArea.Installation == null)
+            if (inspectionGroup.Installation == null)
             {
-                string errorMessage = "Installation missing from inspection area";
-                logger.LogWarning(errorMessage);
+                string errorMessage = "Installation missing from inspection group";
+                logger.LogWarning("{errorMessage}", errorMessage);
                 return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
             }
 
-            if (inspectionArea.DefaultLocalizationPose is null)
+            if (inspectionGroup.DefaultLocalizationPose is null)
             {
                 string errorMessage =
-                    $"InspectionArea with id '{inspectionArea.Id}' does not have a default localization pose";
+                    $"InspectionGroup with id '{inspectionGroup.Id}' does not have a default localization pose";
                 logger.LogInformation("{ErrorMessage}", errorMessage);
                 return NotFound(errorMessage);
             }
@@ -349,26 +338,26 @@ namespace Api.Controllers
             MapMetadata? mapMetadata;
             var positions = new List<Position>
             {
-                inspectionArea.DefaultLocalizationPose.Pose.Position,
+                inspectionGroup.DefaultLocalizationPose.Pose.Position,
             };
             try
             {
                 mapMetadata = await mapService.ChooseMapFromPositions(
                     positions,
-                    inspectionArea.Installation.InstallationCode
+                    inspectionGroup.Installation.InstallationCode
                 );
             }
             catch (RequestFailedException e)
             {
                 string errorMessage =
-                    $"An error occurred while retrieving the map for inspection area {inspectionArea.Id}";
+                    $"An error occurred while retrieving the map for inspection group {inspectionGroup.Id}";
                 logger.LogError(e, "{ErrorMessage}", errorMessage);
                 return StatusCode(StatusCodes.Status502BadGateway, errorMessage);
             }
             catch (ArgumentOutOfRangeException e)
             {
                 string errorMessage =
-                    $"Could not find a suitable map for inspection area {inspectionArea.Id}";
+                    $"Could not find a suitable map for inspection group {inspectionGroup.Id}";
                 logger.LogError(e, "{ErrorMessage}", errorMessage);
                 return NotFound(errorMessage);
             }

@@ -95,7 +95,10 @@ namespace Api.Services
             }
             try
             {
-                mapMetadata = await ChooseMapFromPositions(positions, missionRun.InstallationCode);
+                mapMetadata = await ChooseMapFromPositions(
+                    positions,
+                    missionRun.Installation.InstallationCode
+                );
             }
             catch (ArgumentOutOfRangeException)
             {

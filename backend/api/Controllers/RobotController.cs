@@ -17,7 +17,7 @@ namespace Api.Controllers
         IIsarService isarService,
         IMissionSchedulingService missionSchedulingService,
         IRobotModelService robotModelService,
-        IInspectionAreaService inspectionAreaService,
+        // IInspectionGroupService inspectionGroupService, TODO
         IErrorHandlingService errorHandlingService
     ) : ControllerBase
     {
@@ -224,26 +224,6 @@ namespace Api.Controllers
 
                 switch (fieldName)
                 {
-                    case "currentInspectionAreaId":
-                        if (query.InspectionAreaId == null)
-                        {
-                            await robotService.UpdateCurrentInspectionArea(id, null);
-                            robot.CurrentInspectionArea = null;
-                        }
-                        else
-                        {
-                            var inspectionArea = await inspectionAreaService.ReadById(
-                                query.InspectionAreaId,
-                                readOnly: true
-                            );
-                            if (inspectionArea == null)
-                                return NotFound(
-                                    $"No inspection area with ID {query.InspectionAreaId} was found"
-                                );
-                            await robotService.UpdateCurrentInspectionArea(id, inspectionArea.Id);
-                            robot.CurrentInspectionArea = inspectionArea;
-                        }
-                        break;
                     case "pose":
                         if (query.Pose == null)
                             return BadRequest("Cannot set robot pose to null");
