@@ -43,6 +43,8 @@ import {
     blocked,
     close_circle_outlined,
     file_description,
+    skip_next,
+    pause,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -89,6 +91,8 @@ Icon.add({
     blocked,
     close_circle_outlined,
     file_description,
+    skip_next,
+    pause,
 })
 
 export enum Icons {
@@ -129,10 +133,12 @@ export enum Icons {
     Settings = 'settings',
     Platform = 'platform',
     LibraryAdd = 'library_add',
-    PlayTriangle = 'play',
+    PlayStandard = 'play',
     Edit = 'edit',
     Info = 'info_circle',
     Blocked = 'blocked',
     ClosedCircleOutlined = 'close_circle_outlined',
     FileDescription = 'file_description',
+    Next = 'skip_next',
+    PauseStandard = 'pause',
 }
