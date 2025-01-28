@@ -56,19 +56,19 @@ const DialogContent = ({ missionTaskType }: { missionTaskType: TaskType | undefi
             return (
                 <StyledText>
                     <Typography variant="body_long">
-                        {TranslateText('Stop button pressed during return home warning text')}
+                        {TranslateText('Skip button pressed during return home warning text')}
                     </Typography>
                     <Typography variant="body_long">
-                        {TranslateText('Stop button pressed confirmation text')}
+                        {TranslateText('Skip button pressed confirmation text')}
                     </Typography>
                 </StyledText>
             )
         case TaskType.Inspection:
             return (
                 <StyledText>
-                    <Typography variant="body_long">{TranslateText('Stop button pressed warning text')}</Typography>
+                    <Typography variant="body_long">{TranslateText('Skip button pressed warning text')}</Typography>
                     <Typography variant="body_long">
-                        {TranslateText('Stop button pressed confirmation text')}
+                        {TranslateText('Skip button pressed confirmation text')}
                     </Typography>
                 </StyledText>
             )
@@ -76,32 +76,32 @@ const DialogContent = ({ missionTaskType }: { missionTaskType: TaskType | undefi
             return (
                 <StyledText>
                     <Typography variant="body_long">
-                        {TranslateText('Stop button pressed with no tasktype warning text')}
+                        {TranslateText('Skip button pressed with no tasktype warning text')}
                     </Typography>
                     <Typography variant="body_long">
-                        {TranslateText('Stop button pressed with no mission confirmation text')}
+                        {TranslateText('Skip button pressed with no mission confirmation text')}
                     </Typography>
                 </StyledText>
             )
     }
 }
 
-export const StopMissionDialog = ({
+export const SkipMissionDialog = ({
     missionName,
     robotId,
     missionTaskType,
-    isStopMissionDialogOpen,
+    isSkipMissionDialogOpen,
     toggleDialog,
-}: MissionProps & { isStopMissionDialogOpen: boolean; toggleDialog: () => void }): JSX.Element => {
+}: MissionProps & { isSkipMissionDialogOpen: boolean; toggleDialog: () => void }): JSX.Element => {
     const { TranslateText } = useLanguageContext()
     const { updateRobotMissionState } = useMissionControlContext()
 
     return (
-        <StyledDialog open={isStopMissionDialogOpen} isDismissable>
+        <StyledDialog open={isSkipMissionDialogOpen} isDismissable>
             <Dialog.Header>
                 <Dialog.Title>
                     <Typography variant="h5">
-                        {missionName ? TranslateText('Stop mission:') : TranslateText('No mission running')}{' '}
+                        {missionName ? TranslateText('Skip mission:') : TranslateText('No mission running')}{' '}
                         {missionName}
                     </Typography>
                 </Dialog.Title>
@@ -119,7 +119,7 @@ export const StopMissionDialog = ({
                         color="danger"
                         onClick={() => updateRobotMissionState(MissionStatusRequest.Stop, robotId)}
                     >
-                        {TranslateText('Stop mission')}
+                        {TranslateText('Skip mission')}
                     </Button>
                 </StyledDisplayButtons>
             </Dialog.Actions>
