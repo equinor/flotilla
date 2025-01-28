@@ -214,7 +214,10 @@ namespace Api.EventHandlers
             }
             catch (DbUpdateException)
             {
-                _logger.LogError($"Failed to add robot {robotQuery.Name} with to the database");
+                _logger.LogError(
+                    "Failed to add robot {robotQueryName} with to the database",
+                    robotQuery.Name
+                );
                 return;
             }
         }

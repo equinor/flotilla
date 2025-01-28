@@ -83,7 +83,9 @@ namespace Api.EventHandlers
                     {
                         string errorBody = await response.Content.ReadAsStringAsync(stoppingToken);
                         logger.LogWarning(
-                            $"Webhook request failed with status code {response.StatusCode}. Response body: {errorBody}"
+                            "Webhook request failed with status code {statusCode}. Response body: {errorBody}",
+                            response.StatusCode,
+                            errorBody
                         );
                     }
                 }

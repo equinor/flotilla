@@ -106,12 +106,11 @@ export const getDeadlineInspection = (deadline: Date): InspectionAreaCardColors 
     const deadlineDays = getDeadlineInDays(deadline)
     switch (true) {
         case deadlineDays <= 1:
+        case 1 < deadlineDays && deadlineDays <= 7:
             return InspectionAreaCardColors.Red
-        case deadlineDays > 1 && deadlineDays <= 7:
-            return InspectionAreaCardColors.Red
-        case deadlineDays > 7 && deadlineDays <= 14:
+        case 7 < deadlineDays && deadlineDays <= 14:
             return InspectionAreaCardColors.Orange
-        case deadlineDays > 7 && deadlineDays <= 30:
+        case 7 < deadlineDays && deadlineDays <= 30:
             return InspectionAreaCardColors.Green
     }
     return InspectionAreaCardColors.Green

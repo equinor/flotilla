@@ -93,20 +93,27 @@ export const MissionMapView = ({ mission }: MissionProps) => {
                     imageObjectURL.current = NoMap
                 })
                 .then(() => {
-                    getMeta(imageObjectURL.current).then((img) => {
-                        const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement
-                        if (mapCanvas) {
-                            mapCanvas.width = img.width
-                            mapCanvas.height = img.height
-                            const context = mapCanvas?.getContext('2d')
-                            if (context) {
-                                setMapContext(context)
-                                context.drawImage(img, 0, 0)
+                    getMeta(imageObjectURL.current)
+                        .then((img) => {
+                            const mapCanvas = document.getElementById('mapCanvas') as HTMLCanvasElement
+                            if (mapCanvas) {
+                                mapCanvas.width = img.width
+                                mapCanvas.height = img.height
+                                const context = mapCanvas?.getContext('2d')
+                                if (context) {
+                                    setMapContext(context)
+                                    context.drawImage(img, 0, 0)
+                                }
+                                setMapCanvas(mapCanvas)
                             }
-                            setMapCanvas(mapCanvas)
-                        }
-                        setMapImage(img)
-                    })
+                            setMapImage(img)
+                        })
+                        .catch((error) => {
+                            console.error('Failed to get image metadata:', error)
+                        })
+                })
+                .catch((error) => {
+                    console.error('Failed to process map image:', error)
                 })
         } else {
             imageObjectURL.current = NoMap

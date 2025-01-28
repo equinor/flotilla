@@ -113,7 +113,7 @@ export const StopMissionDialog = ({
                 <Dialog.Title>
                     <Typography variant="h5">
                         {missionName ? TranslateText('Stop mission:') : TranslateText('No mission running')}{' '}
-                        {missionName && missionName}
+                        {missionName}
                     </Typography>
                 </Dialog.Title>
             </Dialog.Header>

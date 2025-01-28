@@ -3,14 +3,12 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Robot, RobotFlotillaStatus } from 'models/Robot'
 
 const isBatteryTooLow = (robot: Robot): boolean => {
-    if (robot.batteryLevel === undefined || robot.batteryLevel === null) return false
-
-    if (robot.model.batteryWarningThreshold && robot.batteryLevel < robot.model.batteryWarningThreshold) {
-        return true
-    } else if (
-        robot.model.batteryMissionStartThreshold &&
-        robot.batteryLevel < robot.model.batteryMissionStartThreshold &&
-        robot.flotillaStatus === RobotFlotillaStatus.Recharging
+    if (robot.batteryLevel == null) return false
+    if (
+        (robot.model.batteryWarningThreshold && robot.batteryLevel < robot.model.batteryWarningThreshold) ||
+        (robot.model.batteryMissionStartThreshold &&
+            robot.batteryLevel < robot.model.batteryMissionStartThreshold &&
+            robot.flotillaStatus === RobotFlotillaStatus.Recharging)
     ) {
         return true
     }

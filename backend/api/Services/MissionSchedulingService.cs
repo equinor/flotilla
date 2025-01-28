@@ -516,7 +516,8 @@ namespace Api.Services
                 catch (UnsupportedRobotCapabilityException)
                 {
                     logger.LogError(
-                        $"Unsupported robot capability detected when restarting interrupted missions for robot {missionRun.Robot.Name}. This should not happen."
+                        "Unsupported robot capability detected when restarting interrupted missions for robot {robotName}. This should not happen.",
+                        missionRun.Robot.Name
                     );
                 }
             }

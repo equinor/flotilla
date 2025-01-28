@@ -63,7 +63,7 @@ export const InspectionAreaMapView = ({ inspectionArea, markedRobotPosition }: I
         }
     }, [mapCanvas, mapImage, mapMetadata, markedRobotPosition])
 
-    let mapName = mapMetadata?.mapName.split('.')[0].replace(/[^0-9a-z-A-Z ]/g, ' ')
+    let mapName = mapMetadata?.mapName.split('.')[0].replace(/[^0-9a-zA-Z ]/g, ' ')
     mapName = mapName ? mapName.charAt(0).toUpperCase() + mapName.slice(1) : ' '
 
     useEffect(() => {
@@ -71,19 +71,23 @@ export const InspectionAreaMapView = ({ inspectionArea, markedRobotPosition }: I
             const imageObjectURL = typeof imageBlob === 'string' ? imageBlob : URL.createObjectURL(imageBlob as Blob)
             if (!imageObjectURL) return
 
-            getMeta(imageObjectURL as string).then((img) => {
-                const mapCanvas = document.getElementById('inspectionAreaMapCanvas') as HTMLCanvasElement
-                if (!mapCanvas) return
-                mapCanvas.width = img.width
-                mapCanvas.height = img.height
-                const context = mapCanvas?.getContext('2d')
-                if (context) {
-                    setMapContext(context)
-                    context.drawImage(img, 0, 0)
-                }
-                setMapCanvas(mapCanvas)
-                setMapImage(img)
-            })
+            getMeta(imageObjectURL as string)
+                .then((img) => {
+                    const mapCanvas = document.getElementById('inspectionAreaMapCanvas') as HTMLCanvasElement
+                    if (!mapCanvas) return
+                    mapCanvas.width = img.width
+                    mapCanvas.height = img.height
+                    const context = mapCanvas?.getContext('2d')
+                    if (context) {
+                        setMapContext(context)
+                        context.drawImage(img, 0, 0)
+                    }
+                    setMapCanvas(mapCanvas)
+                    setMapImage(img)
+                })
+                .catch((error) => {
+                    console.error('Failed to get image metadata:', error)
+                })
             setIsLoading(false)
         }
 

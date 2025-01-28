@@ -32,12 +32,12 @@ export const BatteryStatusDisplay = ({
         switch (true) {
             case batteryState === BatteryStatus.Charging:
                 return Icons.BatteryCharging
-            case batteryLevel === null || batteryLevel === undefined:
-                return Icons.BatteryUnknown
-            case !batteryWarningLimit || batteryLevel! > batteryWarningLimit:
+            case !batteryWarningLimit:
+            case batteryWarningLimit !== undefined && batteryLevel! > batteryWarningLimit:
                 return Icons.Battery
             case batteryWarningLimit && batteryLevel! <= batteryWarningLimit:
                 return Icons.BatteryAlert
+            case batteryLevel == null:
             default:
                 return Icons.BatteryUnknown
         }
@@ -52,7 +52,7 @@ export const BatteryStatusDisplay = ({
 
     return (
         <BatteryAlignment style={{ alignItems: textAlignedBottom ? 'end' : 'center' }}>
-            <Icon name={batteryIcon} color={iconColor} size={itemSize} />
+            {batteryIcon && <Icon name={batteryIcon} color={iconColor} size={itemSize} />}
             <StyledTypography $fontSize={itemSize}>{batteryValue}</StyledTypography>
         </BatteryAlignment>
     )

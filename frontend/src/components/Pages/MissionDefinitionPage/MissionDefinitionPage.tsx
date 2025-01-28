@@ -208,7 +208,7 @@ const MissionDefinitionEditDialog = ({
                             unit={TranslateText('days')}
                             value={inspectionFrequencyDays}
                             onChange={(changes: ChangeEvent<HTMLInputElement>) => {
-                                if (!isNaN(+changes.target.value))
+                                if (!Number.isNaN(+changes.target.value))
                                     updateInspectionFrequencyFormDays(changes.target.value)
                             }}
                         />
