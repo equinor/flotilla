@@ -5,7 +5,10 @@ namespace Api.Services
 {
     public interface IReturnToHomeService
     {
-        public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(Robot robot);
+        public Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
+            Robot robot,
+            bool shouldTriggerMissionCreatedEvent = false
+        );
         public Task<MissionRun?> GetActiveReturnToHomeMissionRun(
             string robotId,
             bool readOnly = true
@@ -18,18 +21,21 @@ namespace Api.Services
     ) : IReturnToHomeService
     {
         public async Task<MissionRun?> ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
-            Robot robot
+            Robot robot,
+            bool shouldTriggerMissionCreatedEvent = false
         )
         {
             logger.LogInformation(
-                "Scheduling return home mission if not already scheduled or the robot is home for robot {RobotId}",
+                "Scheduling return home mission if not already scheduled and the robot is not home for Robot {RobotName} with Id {RobotId}",
+                robot.Name,
                 robot.Id
             );
 
             if (await IsReturnToHomeMissionAlreadyScheduled(robot.Id))
             {
                 logger.LogInformation(
-                    "ReturnToHomeMission is already scheduled for Robot {RobotId}",
+                    "Return Home Mission already scheduled for Robot {RobotName} with Id {RobotId}",
+                    robot.Name,
                     robot.Id
                 );
                 return null;
@@ -38,7 +44,10 @@ namespace Api.Services
             MissionRun missionRun;
             try
             {
-                missionRun = await ScheduleReturnToHomeMissionRun(robot);
+                missionRun = await ScheduleReturnToHomeMissionRun(
+                    robot,
+                    shouldTriggerMissionCreatedEvent
+                );
             }
             catch (Exception ex)
                 when (ex
@@ -61,9 +70,12 @@ namespace Api.Services
             return await missionRunService.PendingOrOngoingReturnToHomeMissionRunExists(robotId);
         }
 
-        private async Task<MissionRun> ScheduleReturnToHomeMissionRun(Robot robot)
+        private async Task<MissionRun> ScheduleReturnToHomeMissionRun(
+            Robot robot,
+            bool shouldTriggerMissionCreatedEvent = false
+        )
         {
-            Pose? return_to_home_pose;
+            Pose? returnToHomePose;
             InspectionArea? currentInspectionArea;
             if (
                 robot.RobotCapabilities is not null
@@ -75,7 +87,7 @@ namespace Api.Services
                     readOnly: true
                 );
                 currentInspectionArea = previousMissionRun?.InspectionArea;
-                return_to_home_pose =
+                returnToHomePose =
                     previousMissionRun?.InspectionArea?.DefaultLocalizationPose?.Pose == null
                         ? new Pose()
                         : new Pose(previousMissionRun.InspectionArea.DefaultLocalizationPose.Pose);
@@ -83,7 +95,7 @@ namespace Api.Services
             else
             {
                 currentInspectionArea = robot.CurrentInspectionArea;
-                return_to_home_pose =
+                returnToHomePose =
                     robot.CurrentInspectionArea?.DefaultLocalizationPose?.Pose == null
                         ? new Pose()
                         : new Pose(robot.CurrentInspectionArea.DefaultLocalizationPose.Pose);
@@ -92,26 +104,29 @@ namespace Api.Services
             if (currentInspectionArea == null)
             {
                 string errorMessage =
-                    $"Robot with ID {robot.Id} could return home as it did not have an inspection area";
-                logger.LogError("{Message}", errorMessage);
+                    $"Robot with ID {robot.Id} could not return to home because it does not have an inspection area";
+                logger.LogError("Message: {Message}", errorMessage);
                 throw new InspectionAreaNotFoundException(errorMessage);
             }
 
             var returnToHomeMissionRun = new MissionRun
             {
-                Name = "Return home",
+                Name = "Return Home",
                 Robot = robot,
                 InstallationCode = robot.CurrentInstallation.InstallationCode,
                 MissionRunType = MissionRunType.ReturnHome,
                 InspectionArea = currentInspectionArea!,
                 Status = MissionStatus.Pending,
                 DesiredStartTime = DateTime.UtcNow,
-                Tasks = [new(return_to_home_pose, MissionTaskType.ReturnHome)],
+                Tasks = [new(returnToHomePose, MissionTaskType.ReturnHome)],
             };
 
-            var missionRun = await missionRunService.Create(returnToHomeMissionRun, false);
+            var missionRun = await missionRunService.Create(
+                returnToHomeMissionRun,
+                shouldTriggerMissionCreatedEvent
+            );
             logger.LogInformation(
-                "Scheduled a mission for the robot {RobotName} to return to home location on inspection area {InspectionAreaName}",
+                "Scheduled Return to Home mission for robot {RobotName} on Inspection Area {InspectionAreaName}",
                 robot.Name,
                 currentInspectionArea?.Name
             );

@@ -31,17 +31,18 @@ namespace Api.Controllers
             var robot = await robotService.ReadById(robotId, readOnly: true);
             if (robot is null)
             {
-                logger.LogWarning("Could not find robot with id={Id}", robotId);
+                logger.LogWarning("Could not find robot with id {Id}", robotId);
                 return NotFound();
             }
 
             var returnToHomeMission =
                 await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
-                    robot
+                    robot,
+                    true
                 );
             if (returnToHomeMission is null)
             {
-                string errorMessage = "Error while scheduling Return home mission";
+                string errorMessage = "Error while scheduling Return Home mission";
                 logger.LogError(errorMessage);
                 return StatusCode(StatusCodes.Status502BadGateway, $"{errorMessage}");
             }
