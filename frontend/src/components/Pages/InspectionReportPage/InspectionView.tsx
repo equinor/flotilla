@@ -72,7 +72,7 @@ export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogVi
                         </StyledDialogHeader>
                         <StyledDialogInspectionView>
                             <div>
-                                <StyledInspection src={data} />
+                                <StyledInspection $otherContentHeight={'174px'} src={data} />
                                 <StyledBottomContent>
                                     <StyledInfoContent>
                                         <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>
