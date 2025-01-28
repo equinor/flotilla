@@ -267,21 +267,18 @@ namespace Api.Services
 
         public async Task<bool> PendingOrOngoingReturnToHomeMissionRunExists(string robotId)
         {
-            var pendingMissionRuns = await ReadNextScheduledMissionRun(
-                robotId,
-                type: MissionRunType.ReturnHome,
-                readOnly: true
-            );
-            if (pendingMissionRuns != null)
-                return true;
-
-            var ongoingMissionRuns = await GetMissionRunsWithSubModels(readOnly: true)
+            var pendingAndOngoingMissionRuns = await GetMissionRunsWithSubModels(readOnly: true)
                 .Where(missionRun =>
-                    missionRun.Robot.Id == robotId && missionRun.Status == MissionStatus.Ongoing
+                    missionRun.Robot.Id == robotId
+                    && (
+                        missionRun.Status == MissionStatus.Ongoing
+                        || missionRun.Status == MissionStatus.Paused
+                        || missionRun.Status == MissionStatus.Pending
+                    )
                 )
                 .OrderBy(missionRun => missionRun.DesiredStartTime)
                 .ToListAsync();
-            return ongoingMissionRuns.Any((m) => m.IsReturnHomeMission());
+            return pendingAndOngoingMissionRuns.Any((m) => m.IsReturnHomeMission());
         }
 
         public bool IncludesUnsupportedInspectionType(MissionRun missionRun)

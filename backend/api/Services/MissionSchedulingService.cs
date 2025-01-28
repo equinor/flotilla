@@ -70,7 +70,7 @@ namespace Api.Services
             )
             {
                 logger.LogInformation(
-                    "Robot {robotName} was ready to start a mission but its mission queue was frozen",
+                    "Robot {robotName} is ready to start a mission but its mission queue is frozen",
                     robot.Name
                 );
                 return;
@@ -88,19 +88,19 @@ namespace Api.Services
             if (missionRun.InspectionArea == null)
             {
                 logger.LogWarning(
-                    "Mission {MissionRunId} does not have an inspection area and was therefore not started",
+                    "Mission {MissionRunId} cannot be started as it does not have an inspection area",
                     missionRun.Id
                 );
                 return;
             }
 
-            if (robot.CurrentInspectionArea == null && missionRun.InspectionArea != null)
+            if (robot.CurrentInspectionArea == null)
             {
                 await robotService.UpdateCurrentInspectionArea(
                     robot.Id,
-                    missionRun.InspectionArea.Id
+                    missionRun.InspectionArea!.Id
                 );
-                robot.CurrentInspectionArea = missionRun.InspectionArea;
+                robot.CurrentInspectionArea = missionRun.InspectionArea!;
             }
             else if (
                 !await localizationService.RobotIsOnSameInspectionAreaAsMission(
@@ -110,7 +110,8 @@ namespace Api.Services
             )
             {
                 logger.LogError(
-                    "Robot {RobotId} is not on the same inspection area as the mission run {MissionRunId}. Aborting all mission runs",
+                    "Robot {RobotNAme} with Id {RobotId} is not on the same inspection area as the mission run with Id {MissionRunId}. Aborting all mission runs",
+                    robot.Name,
                     robot.Id,
                     missionRun.Id
                 );
@@ -118,13 +119,15 @@ namespace Api.Services
                 {
                     await AbortAllScheduledNormalMissions(
                         robot.Id,
-                        "Aborted: Robot was at different inspection area"
+                        $"All missions aborted: Robot {robot.Name} is on inspection area {robot.CurrentInspectionArea?.Name} "
+                            + $"and mission run was on inspection area {missionRun.InspectionArea?.Name}"
                     );
                 }
                 catch (RobotNotFoundException)
                 {
                     logger.LogError(
-                        "Failed to abort scheduled missions for robot {RobotId}",
+                        "Failed to abort all scheduled missions for robot {RobotName} with Id {RobotId}",
+                        robot.Name,
                         robot.Id
                     );
                 }
@@ -232,12 +235,16 @@ namespace Api.Services
             {
                 await AbortAllScheduledNormalMissions(
                     robot.Id,
-                    "Aborted: Robot pressure or battery values are too low."
+                    $"Mission aborted for robot {robot.Name}: pressure or battery values too low."
                 );
             }
             catch (RobotNotFoundException)
             {
-                logger.LogError("Failed to abort scheduled missions for robot {RobotId}", robot.Id);
+                logger.LogError(
+                    "Failed to abort scheduled missions for robot {RobotName} with Id {RobotId} since the robot was not found",
+                    robot.Name,
+                    robot.Id
+                );
             }
         }
 
