@@ -143,7 +143,8 @@ namespace Api.Services
             if (activeReturnToHomeMissions.Count > 1)
             {
                 logger.LogError(
-                    $"Two Return home missions should not be queued or ongoing simoultaneously for robot with Id {robotId}."
+                    "Two Return home missions should not be queued or ongoing simoultaneously for robot with Id {robotId}.",
+                    robotId
                 );
             }
 

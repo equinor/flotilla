@@ -333,7 +333,9 @@ namespace Api.Controllers
                     [.. missionInspectionAreaNames]
                 );
                 logger.LogWarning(
-                    $"Mission {missionDefinition.Name} has tags on more than one inspection area. The inspection areas are: {joinedMissionInspectionAreaNames}."
+                    "Mission {missionDefinition} has tags on more than one inspection area. The inspection areas are: {joinedMissionInspectionAreaNames}.",
+                    missionDefinition.Name,
+                    joinedMissionInspectionAreaNames
                 );
             }
 
@@ -346,7 +348,8 @@ namespace Api.Controllers
             if (area == null && sortedAreas.Count() > 1)
             {
                 logger.LogWarning(
-                    $"Most common area in mission {missionDefinition.Name} is null. Will use second most common area."
+                    "Most common area in mission {missionDefinition} is null. Will use second most common area.",
+                    missionDefinition.Name
                 );
                 area = sortedAreas.Skip(1).First();
             }
@@ -564,7 +567,7 @@ namespace Api.Controllers
                     };
 
                 customMissionDefinition.Map ??= await mapService.ChooseMapFromPositions(
-                    missionTasks.Select(t => t.RobotPose.Position).ToList(),
+                    [.. missionTasks.Select(t => t.RobotPose.Position)],
                     customMissionQuery.InstallationCode
                 );
 

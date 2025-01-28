@@ -20,14 +20,10 @@ export const StatusReason = ({ statusReason, status }: MissionProps) => {
     let warningLevel: 'default' | 'info' | 'warning' | 'danger' = 'info'
     switch (status) {
         case MissionStatus.Failed:
-            warningLevel = 'danger'
-            break
         case MissionStatus.Aborted:
             warningLevel = 'danger'
             break
         case MissionStatus.Cancelled:
-            warningLevel = 'warning'
-            break
         case MissionStatus.PartiallySuccessful:
             warningLevel = 'warning'
             break

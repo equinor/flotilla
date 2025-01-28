@@ -16,9 +16,13 @@ export const AuthProvider = (props: Props) => {
     const [accessToken, setAccessToken] = useState('')
 
     const VerifyToken = useCallback(() => {
-        fetchAccessToken(msalContext).then((accessToken) => {
-            setAccessToken(accessToken)
-        })
+        fetchAccessToken(msalContext)
+            .then((accessToken) => {
+                setAccessToken(accessToken)
+            })
+            .catch((error) => {
+                console.error('Failed to fetch access token:', error)
+            })
     }, [msalContext])
 
     useEffect(() => {

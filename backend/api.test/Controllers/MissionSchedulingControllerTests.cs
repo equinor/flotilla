@@ -28,7 +28,7 @@ namespace Api.Test.Controllers
 
         public async Task InitializeAsync()
         {
-            (Container, string connectionString, var connection) =
+            (Container, string connectionString, var _) =
                 await TestSetupHelpers.ConfigurePostgreSqlDatabase();
             var factory = TestSetupHelpers.ConfigureWebApplicationFactory(
                 postgreSqlConnectionString: connectionString

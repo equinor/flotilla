@@ -386,7 +386,7 @@ export class BackendAPICaller {
     }
 
     static async reRunMission(missionId: string, failedTasksOnly: boolean = false): Promise<Mission> {
-        const mission = await this.getMissionRunById(missionId)
+        const mission = await BackendAPICaller.getMissionRunById(missionId)
 
         if (failedTasksOnly) {
             const path = `missions/rerun/${mission.id}`

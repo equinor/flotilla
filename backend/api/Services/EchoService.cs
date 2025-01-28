@@ -128,10 +128,14 @@ namespace Api.Services
                 ?? await sourceService.Create(new Source { SourceId = $"{echoMission.Id}" });
             var missionTasks = echoMission.Tags;
             List<Area?> missionAreas;
-            missionAreas = missionTasks
-                .Where(t => t.TagId != null)
-                .Select(t => stidService.GetTagArea(t.TagId, echoMission.InstallationCode).Result)
-                .ToList();
+            missionAreas =
+            [
+                .. missionTasks
+                    .Where(t => t.TagId != null)
+                    .Select(t =>
+                        stidService.GetTagArea(t.TagId, echoMission.InstallationCode).Result
+                    ),
+            ];
 
             var missionInspectionAreaNames = missionAreas
                 .Where(a => a != null)
@@ -145,7 +149,9 @@ namespace Api.Services
                     [.. missionInspectionAreaNames]
                 );
                 logger.LogWarning(
-                    $"Mission {echoMission.Name} has tags on more than one inspection area. The inspection areas are: {joinedMissionInspectionAreaNames}."
+                    "Mission {echoMissionName} has tags on more than one inspection area. The inspection areas are: {joinedMissionInspectionAreaNames}.",
+                    echoMission.Name,
+                    joinedMissionInspectionAreaNames
                 );
             }
 
@@ -158,14 +164,16 @@ namespace Api.Services
             if (area == null && sortedAreas.Count() > 1)
             {
                 logger.LogWarning(
-                    $"Most common area in mission {echoMission.Name} is null. Will use second most common area."
+                    "Most common area in mission {echoMissionName} is null. Will use second most common area.",
+                    echoMission.Name
                 );
                 area = sortedAreas.Skip(1).First();
             }
             if (area == null)
             {
                 logger.LogError(
-                    $"Mission {echoMission.Name} doesn't have any tags with valid area."
+                    "Mission {echoMissionName} doesn't have any tags with valid area.",
+                    echoMission.Name
                 );
                 return null;
             }
@@ -242,14 +250,16 @@ namespace Api.Services
                     URL = new Uri(
                         $"https://stid.equinor.com/{installationCode}/tag?tagNo={planItem.Tag}"
                     ),
-                    Inspections = planItem
-                        .SensorTypes.Select(sensor => new EchoInspection(
-                            sensor,
-                            planItem.InspectionPoint.EnuPosition.ToPosition(),
-                            planItem.InspectionPoint.Name
-                        ))
-                        .Distinct(new EchoInspectionComparer())
-                        .ToList(),
+                    Inspections =
+                    [
+                        .. planItem
+                            .SensorTypes.Select(sensor => new EchoInspection(
+                                sensor,
+                                planItem.InspectionPoint.EnuPosition.ToPosition(),
+                                planItem.InspectionPoint.Name
+                            ))
+                            .Distinct(new EchoInspectionComparer()),
+                    ],
                 };
 
                 if (tag.Inspections.Count < 1)
