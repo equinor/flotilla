@@ -21,7 +21,7 @@ import { VideoStreamWindow } from '../MissionPage/VideoStream/VideoStreamWindow'
 import { MoveRobotArmSection } from './RobotArmMovement'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { StopMissionDialog } from '../FrontPage/MissionOverview/StopDialogs'
+import { SkipMissionDialog } from '../FrontPage/MissionOverview/StopDialogs'
 import { TaskType } from 'models/Task'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { ReturnHomeButton } from './ReturnHomeButton'
@@ -67,7 +67,7 @@ export const RobotPage = () => {
     const selectedRobot = enabledRobots.find((robot) => robot.id === robotId)
 
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const toggleStopMissionDialog = () => {
+    const toggleSkipMissionDialog = () => {
         setIsDialogOpen(!isDialogOpen)
     }
 
@@ -136,7 +136,7 @@ export const RobotPage = () => {
                         <StyledTextButton
                             variant="contained"
                             onClick={() => {
-                                toggleStopMissionDialog()
+                                toggleSkipMissionDialog()
                             }}
                         >
                             <Icon
@@ -145,14 +145,14 @@ export const RobotPage = () => {
                                 size={24}
                             />
                             {TranslateText('Stop')} {selectedRobot.name}
-                            <StopMissionDialog
-                                missionName={mission?.name}
-                                robotId={selectedRobot.id}
-                                missionTaskType={missionTaskType}
-                                isStopMissionDialogOpen={isDialogOpen}
-                                toggleDialog={toggleStopMissionDialog}
-                            />
                         </StyledTextButton>
+                        <SkipMissionDialog
+                            missionName={mission?.name}
+                            robotId={selectedRobot.id}
+                            missionTaskType={missionTaskType}
+                            isSkipMissionDialogOpen={isDialogOpen}
+                            toggleDialog={toggleSkipMissionDialog}
+                        />
                         {selectedRobot && <ReturnHomeButton robot={selectedRobot} />}
 
                         {selectedRobot.model.type === RobotType.TaurobInspector && (
