@@ -17,9 +17,10 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledPage } from 'components/Styles/StyledComponents'
-import { InspectionDialogView, InspectionsViewSection } from '../InspectionReportPage/InspectionView'
+import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
 import { useInspectionsContext } from 'components/Contexts/InpectionsContext'
 import { Typography } from '@equinor/eds-core-react'
+import { InspectionOverview } from '../InspectionReportPage/InspectionOverview'
 
 const StyledMissionPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
@@ -147,7 +148,7 @@ export const MissionPage = () => {
                         {selectedInspectionTask && selectedInspectionTask.isarTaskId && (
                             <InspectionDialogView selectedTask={selectedInspectionTask} tasks={selectedMission.tasks} />
                         )}
-                        <InspectionsViewSection tasks={selectedMission.tasks} />
+                        <InspectionOverview tasks={selectedMission.tasks} />
                     </StyledMissionPageContent>
                 )}
             </StyledMissionPage>
