@@ -36,6 +36,7 @@
                 "take_video" => IsarTaskType.TakeVideo,
                 "take_thermal_image" => IsarTaskType.TakeThermalImage,
                 "take_thermal_video" => IsarTaskType.TakeThermalVideo,
+                "take_gas_measurement" => IsarTaskType.TakeGasMeasurement,
                 "return_to_home" => IsarTaskType.ReturnToHome,
                 "move_arm" => IsarTaskType.MoveArm,
                 _ => throw new ArgumentException(
@@ -63,6 +64,7 @@
         TakeVideo,
         TakeThermalImage,
         TakeThermalVideo,
+        TakeGasMeasurement,
         RecordAudio,
         MoveArm,
     }
