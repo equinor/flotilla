@@ -7,7 +7,8 @@ import {
     StyledInspectionCards,
     StyledInspectionContent,
     StyledInspectionData,
-    StyledSection,
+    StyledInspectionOverviewDialogView,
+    StyledInspectionOverviewSection,
 } from './InspectionStyles'
 import { Typography } from '@equinor/eds-core-react'
 import { GetInspectionImage } from './InspectionReportUtilities'
@@ -59,31 +60,17 @@ export const InspectionOverviewSection = ({ tasks }: { tasks: Task[] }) => {
     const { TranslateText } = useLanguageContext()
 
     return (
-        <StyledSection
-            style={{
-                width: 'auto',
-                borderColor: 'auto',
-                padding: 'auto',
-                maxHeight: 'auto',
-            }}
-        >
+        <StyledInspectionOverviewSection>
             <Typography variant="h4">{TranslateText('Last completed inspection')}</Typography>
             <InspectionOverview tasks={tasks} />
-        </StyledSection>
+        </StyledInspectionOverviewSection>
     )
 }
 
 export const InspectionOverviewDialogView = ({ tasks }: { tasks: Task[] }) => {
     return (
-        <StyledSection
-            style={{
-                width: '350px',
-                borderColor: 'white',
-                padding: '0px',
-                maxHeight: '60vh',
-            }}
-        >
+        <StyledInspectionOverviewDialogView>
             <InspectionOverview tasks={tasks} />
-        </StyledSection>
+        </StyledInspectionOverviewDialogView>
     )
 }

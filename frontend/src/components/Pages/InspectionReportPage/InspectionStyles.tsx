@@ -60,7 +60,7 @@ export const StyledInfoContent = styled.div`
     align-items: flex-start;
 `
 
-export const StyledSection = styled.div`
+export const StyledInspectionOverviewSection = styled.div`
     display: flex;
     padding: 24px;
     min-width: 240px;
@@ -68,8 +68,17 @@ export const StyledSection = styled.div`
     align-items: flex-start;
     gap: 8px;
     border-radius: 6px;
-    border: 1.194px solid ${tokens.colors.ui.background__medium.hex};
+    border: 1px solid ${tokens.colors.ui.background__medium.hex};
     background: ${tokens.colors.ui.background__default.hex};
+`
+
+export const StyledInspectionOverviewDialogView = styled.div`
+    display: flex;
+    max-height: 60vh;
+    width: 350px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
     overflow-y: scroll;
 `
 
