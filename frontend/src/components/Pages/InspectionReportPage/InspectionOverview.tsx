@@ -13,61 +13,77 @@ import { Typography } from '@equinor/eds-core-react'
 import { GetInspectionImage } from './InspectionReportUtilities'
 import { formatDateTime } from 'utils/StringFormatting'
 
-interface InspectionsOverviewProps {
-    tasks: Task[]
-    dialogView?: boolean | undefined
-}
-
-export const InspectionOverview = ({ tasks, dialogView }: InspectionsOverviewProps) => {
+const InspectionOverview = ({ tasks }: { tasks: Task[] }) => {
     const { TranslateText } = useLanguageContext()
     const { switchSelectedInspectionTask } = useInspectionsContext()
 
     return (
+        <StyledImagesSection>
+            <StyledInspectionCards>
+                {Object.keys(tasks).length > 0 &&
+                    tasks.map(
+                        (task) =>
+                            task.status === TaskStatus.Successful && (
+                                <StyledImageCard
+                                    key={task.isarTaskId}
+                                    onClick={() => switchSelectedInspectionTask(task)}
+                                >
+                                    <GetInspectionImage task={task} />
+                                    <StyledInspectionData>
+                                        {task.tagId && (
+                                            <StyledInspectionContent>
+                                                <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
+                                                <Typography variant="body_short">{task.tagId}</Typography>
+                                            </StyledInspectionContent>
+                                        )}
+                                        {task.endTime && (
+                                            <StyledInspectionContent>
+                                                <Typography variant="caption">
+                                                    {TranslateText('Timestamp') + ':'}
+                                                </Typography>
+                                                <Typography variant="body_short">
+                                                    {formatDateTime(task.endTime!, 'dd.MM.yy - HH:mm')}
+                                                </Typography>
+                                            </StyledInspectionContent>
+                                        )}
+                                    </StyledInspectionData>
+                                </StyledImageCard>
+                            )
+                    )}
+            </StyledInspectionCards>
+        </StyledImagesSection>
+    )
+}
+
+export const InspectionOverviewSection = ({ tasks }: { tasks: Task[] }) => {
+    const { TranslateText } = useLanguageContext()
+
+    return (
         <StyledSection
             style={{
-                width: dialogView ? '350px' : 'auto',
-                borderColor: dialogView ? 'white' : 'auto',
-                padding: dialogView ? '0px' : 'auto',
-                maxHeight: dialogView ? '60vh' : 'auto',
+                width: 'auto',
+                borderColor: 'auto',
+                padding: 'auto',
+                maxHeight: 'auto',
             }}
         >
-            {!dialogView && <Typography variant="h4">{TranslateText('Last completed inspection')}</Typography>}
-            <StyledImagesSection>
-                <StyledInspectionCards>
-                    {Object.keys(tasks).length > 0 &&
-                        tasks.map(
-                            (task) =>
-                                task.status === TaskStatus.Successful && (
-                                    <StyledImageCard
-                                        key={task.isarTaskId}
-                                        onClick={() => switchSelectedInspectionTask(task)}
-                                    >
-                                        <GetInspectionImage task={task} />
-                                        <StyledInspectionData>
-                                            {task.tagId && (
-                                                <StyledInspectionContent>
-                                                    <Typography variant="caption">
-                                                        {TranslateText('Tag') + ':'}
-                                                    </Typography>
-                                                    <Typography variant="body_short">{task.tagId}</Typography>
-                                                </StyledInspectionContent>
-                                            )}
-                                            {task.endTime && (
-                                                <StyledInspectionContent>
-                                                    <Typography variant="caption">
-                                                        {TranslateText('Timestamp') + ':'}
-                                                    </Typography>
-                                                    <Typography variant="body_short">
-                                                        {formatDateTime(task.endTime!, 'dd.MM.yy - HH:mm')}
-                                                    </Typography>
-                                                </StyledInspectionContent>
-                                            )}
-                                        </StyledInspectionData>
-                                    </StyledImageCard>
-                                )
-                        )}
-                </StyledInspectionCards>
-            </StyledImagesSection>
+            <Typography variant="h4">{TranslateText('Last completed inspection')}</Typography>
+            <InspectionOverview tasks={tasks} />
+        </StyledSection>
+    )
+}
+
+export const InspectionOverviewDialogView = ({ tasks }: { tasks: Task[] }) => {
+    return (
+        <StyledSection
+            style={{
+                width: '350px',
+                borderColor: 'white',
+                padding: '0px',
+                maxHeight: '60vh',
+            }}
+        >
+            <InspectionOverview tasks={tasks} />
         </StyledSection>
     )
 }
