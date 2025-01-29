@@ -15,7 +15,7 @@ import {
     StyledInfoContent,
     StyledInspection,
 } from './InspectionStyles'
-import { InspectionOverview } from './InspectionOverview'
+import { InspectionOverviewDialogView } from './InspectionOverview'
 import { fetchImageData } from './InspectionReportUtilities'
 
 interface InspectionDialogViewProps {
@@ -78,7 +78,7 @@ export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogVi
                                     )}
                                 </StyledBottomContent>
                             </div>
-                            <InspectionOverview tasks={tasks} dialogView={true} />
+                            <InspectionOverviewDialogView tasks={tasks} />
                         </StyledDialogInspectionView>
                     </StyledDialogContent>
                 </StyledDialog>
