@@ -26,15 +26,15 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { useQuery } from '@tanstack/react-query'
 
 interface InspectionDialogViewProps {
-    task: Task
+    selectedTask: Task
     tasks: Task[]
 }
 
-export const InspectionDialogView = ({ task, tasks }: InspectionDialogViewProps) => {
+export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogViewProps) => {
     const { TranslateText } = useLanguageContext()
     const { installationName } = useInstallationContext()
     const { switchSelectedInspectionTask } = useInspectionsContext()
-    const { data } = FetchImageData(task)
+    const { data } = fetchImageData(selectedTask)
 
     const closeDialog = () => {
         switchSelectedInspectionTask(undefined)
@@ -63,23 +63,23 @@ export const InspectionDialogView = ({ task, tasks }: InspectionDialogViewProps)
                                     </StyledInfoContent>
                                     <StyledInfoContent>
                                         <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
-                                        <Typography variant="body_short">{task.tagId}</Typography>
+                                        <Typography variant="body_short">{selectedTask.tagId}</Typography>
                                     </StyledInfoContent>
-                                    {task.description && (
+                                    {selectedTask.description && (
                                         <StyledInfoContent>
                                             <Typography variant="caption">
                                                 {TranslateText('Description') + ':'}
                                             </Typography>
-                                            <Typography variant="body_short">{task.description}</Typography>
+                                            <Typography variant="body_short">{selectedTask.description}</Typography>
                                         </StyledInfoContent>
                                     )}
-                                    {task.endTime && (
+                                    {selectedTask.endTime && (
                                         <StyledInfoContent>
                                             <Typography variant="caption">
                                                 {TranslateText('Timestamp') + ':'}
                                             </Typography>
                                             <Typography variant="body_short">
-                                                {formatDateTime(task.endTime, 'dd.MM.yy - HH:mm')}
+                                                {formatDateTime(selectedTask.endTime, 'dd.MM.yy - HH:mm')}
                                             </Typography>
                                         </StyledInfoContent>
                                     )}
@@ -104,66 +104,64 @@ export const InspectionsViewSection = ({ tasks, dialogView }: InspectionsViewSec
     const { switchSelectedInspectionTask } = useInspectionsContext()
 
     return (
-        <>
-            <StyledSection
-                style={{
-                    width: dialogView ? '350px' : 'auto',
-                    borderColor: dialogView ? 'white' : 'auto',
-                    padding: dialogView ? '0px' : 'auto',
-                    maxHeight: dialogView ? '60vh' : 'auto',
-                }}
-            >
-                {!dialogView && <Typography variant="h4">{TranslateText('Last completed inspection')}</Typography>}
-                <StyledImagesSection>
-                    <StyledInspectionCards>
-                        {Object.keys(tasks).length > 0 &&
-                            tasks.map(
-                                (task) =>
-                                    task.status === TaskStatus.Successful && (
-                                        <StyledImageCard
-                                            key={task.isarTaskId}
-                                            onClick={() => switchSelectedInspectionTask(task)}
-                                        >
-                                            <GetInspectionImage task={task} />
-                                            <StyledInspectionData>
-                                                {task.tagId && (
-                                                    <StyledInspectionContent>
-                                                        <Typography variant="caption">
-                                                            {TranslateText('Tag') + ':'}
-                                                        </Typography>
-                                                        <Typography variant="body_short">{task.tagId}</Typography>
-                                                    </StyledInspectionContent>
-                                                )}
-                                                {task.endTime && (
-                                                    <StyledInspectionContent>
-                                                        <Typography variant="caption">
-                                                            {TranslateText('Timestamp') + ':'}
-                                                        </Typography>
-                                                        <Typography variant="body_short">
-                                                            {formatDateTime(task.endTime!, 'dd.MM.yy - HH:mm')}
-                                                        </Typography>
-                                                    </StyledInspectionContent>
-                                                )}
-                                            </StyledInspectionData>
-                                        </StyledImageCard>
-                                    )
-                            )}
-                    </StyledInspectionCards>
-                </StyledImagesSection>
-            </StyledSection>
-        </>
+        <StyledSection
+            style={{
+                width: dialogView ? '350px' : 'auto',
+                borderColor: dialogView ? 'white' : 'auto',
+                padding: dialogView ? '0px' : 'auto',
+                maxHeight: dialogView ? '60vh' : 'auto',
+            }}
+        >
+            {!dialogView && <Typography variant="h4">{TranslateText('Last completed inspection')}</Typography>}
+            <StyledImagesSection>
+                <StyledInspectionCards>
+                    {Object.keys(tasks).length > 0 &&
+                        tasks.map(
+                            (task) =>
+                                task.status === TaskStatus.Successful && (
+                                    <StyledImageCard
+                                        key={task.isarTaskId}
+                                        onClick={() => switchSelectedInspectionTask(task)}
+                                    >
+                                        <GetInspectionImage task={task} />
+                                        <StyledInspectionData>
+                                            {task.tagId && (
+                                                <StyledInspectionContent>
+                                                    <Typography variant="caption">
+                                                        {TranslateText('Tag') + ':'}
+                                                    </Typography>
+                                                    <Typography variant="body_short">{task.tagId}</Typography>
+                                                </StyledInspectionContent>
+                                            )}
+                                            {task.endTime && (
+                                                <StyledInspectionContent>
+                                                    <Typography variant="caption">
+                                                        {TranslateText('Timestamp') + ':'}
+                                                    </Typography>
+                                                    <Typography variant="body_short">
+                                                        {formatDateTime(task.endTime!, 'dd.MM.yy - HH:mm')}
+                                                    </Typography>
+                                                </StyledInspectionContent>
+                                            )}
+                                        </StyledInspectionData>
+                                    </StyledImageCard>
+                                )
+                        )}
+                </StyledInspectionCards>
+            </StyledImagesSection>
+        </StyledSection>
     )
 }
 
-const FetchImageData = (task: Task) => {
+const fetchImageData = (task: Task) => {
     const data = useQuery({
         queryKey: ['fetchInspectionData', task.isarTaskId],
         queryFn: async () => {
             const imageBlob = await BackendAPICaller.getInspection(task.inspection.isarInspectionId)
             return URL.createObjectURL(imageBlob)
         },
-        retryDelay: 60 * 1000, // Will always wait 1 min to retry, regardless of how many retries
-        staleTime: 10 * 60 * 1000, //  I don't want an API call for 10 min after the first time I get data
+        retryDelay: 60 * 1000, // Waits 1 min before retrying, regardless of how many retries
+        staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
         enabled:
             task.status === TaskStatus.Successful &&
             task.isarTaskId !== undefined &&
@@ -172,11 +170,8 @@ const FetchImageData = (task: Task) => {
     return data
 }
 
-interface IGetInspectionImageProps {
-    task: Task
-}
 
-const GetInspectionImage = ({ task }: IGetInspectionImageProps) => {
-    const { data } = FetchImageData(task)
+const GetInspectionImage = ({ task }: { task: Task }) => {
+    const { data } = fetchImageData(task)
     return <>{data !== undefined && <StyledInspectionImage src={data} />}</>
 }
