@@ -17,6 +17,7 @@ import {
 } from './InspectionStyles'
 import { InspectionOverviewDialogView } from './InspectionOverview'
 import { fetchImageData } from './InspectionReportUtilities'
+import { useState } from 'react'
 
 interface InspectionDialogViewProps {
     selectedTask: Task
@@ -29,9 +30,32 @@ export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogVi
     const { switchSelectedInspectionTask } = useInspectionsContext()
     const { data } = fetchImageData(selectedTask)
 
+    const [switchImageDirection, setSwitchImageDirection] = useState<number>(0)
+
     const closeDialog = () => {
         switchSelectedInspectionTask(undefined)
     }
+
+    document.addEventListener('keydown', (event) => {
+        if (event.code === 'ArrowLeft' && switchImageDirection !== -1) {
+            setSwitchImageDirection(-1)
+        } else if (event.code === 'ArrowRight' && switchImageDirection !== 1) {
+            setSwitchImageDirection(1)
+        }
+    })
+
+    document.addEventListener('keyup', (event) => {
+        if (
+            (event.code === 'ArrowLeft' && switchImageDirection === -1) ||
+            (event.code === 'ArrowRight' && switchImageDirection === 1)
+        ) {
+            const nextTask = tasks.indexOf(selectedTask) + switchImageDirection
+            if (nextTask >= 0 && nextTask < tasks.length) {
+                switchSelectedInspectionTask(tasks[nextTask])
+            }
+            setSwitchImageDirection(0)
+        }
+    })
 
     return (
         <>
