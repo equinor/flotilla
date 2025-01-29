@@ -145,7 +145,7 @@ export const MissionPage = () => {
                             )}
                         </VideoStreamSection>
                         {selectedInspectionTask && selectedInspectionTask.isarTaskId && (
-                            <InspectionDialogView task={selectedInspectionTask} tasks={selectedMission.tasks} />
+                            <InspectionDialogView selectedTask={selectedInspectionTask} tasks={selectedMission.tasks} />
                         )}
                         <InspectionsViewSection tasks={selectedMission.tasks} />
                     </StyledMissionPageContent>
