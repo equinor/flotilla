@@ -17,7 +17,7 @@ import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledPage } from 'components/Styles/StyledComponents'
-import { InspectionDialogView, InspectionsViewSection } from '../InspectionReportPage.tsx/InspectionView'
+import { InspectionDialogView, InspectionsViewSection } from '../InspectionReportPage/InspectionView'
 import { useInspectionsContext } from 'components/Contexts/InpectionsContext'
 import { Typography } from '@equinor/eds-core-react'
 
