@@ -276,5 +276,8 @@
     "Pressure is too high to start a mission.": "Pressure is too high to start a mission.",
     "Pressure is too low to start a mission. Queued missions will start when the pressure is over {0}mBar.": "Pressure is too low to start a mission. Queued missions will start when the pressure is over {0}mBar.",
     "Pressure is too low to start a mission.": "Pressure is too low to start a mission.",
-    "Queued Missions": "Queued Missions"
+    "Queued Missions": "Queued Missions",
+    "Waiting for inspection result": "Waiting for inspection result",
+    "Viewing of the inspection type is not supported": "Viewing of the inspection type is not supported",
+    "No inspection could be found": "No inspection could be found"
 }

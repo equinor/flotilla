@@ -276,5 +276,8 @@
     "Pressure is too high to start a mission.": "Trykket er for høyt til å starte oppdrag.",
     "Pressure is too low to start a mission. Queued missions will start when the pressure is over {0}mBar.": "Trykket er for lavt til å starte oppdrag. Oppdrag i kø vil starte når trykket er over {0}mBar.",
     "Pressure is too low to start a mission.": "Trykket er for lavt til å starte oppdrag.",
-    "Queued Missions": "Oppdragskø"
+    "Queued Missions": "Oppdragskø",
+    "Waiting for inspection result": "Venter på inspeksjonsresultat",
+    "Viewing of the inspection type is not supported": "Visning av inspeksjonstypen støttes ikke",
+    "No inspection could be found": "Ingen inspeksjon ble funnet"
 }

@@ -31,6 +31,8 @@ export enum InspectionType {
     Audio = 'Audio',
 }
 
+export const ValidInspectionReportInspectionTypes: InspectionType[] = [InspectionType.Image]
+
 export interface IdaInspectionVisualizationReady {
     inspectionId: string
     storageAccount: string
