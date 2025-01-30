@@ -2,19 +2,19 @@
 
 namespace Api.Services.ActionServices
 {
-    public interface IBatteryTimeseriesService
+    public interface IBatteryLevelService
     {
-        public Task<Robot?> AddBatteryEntry(float batteryLevel, string isarId);
+        public Task<Robot?> UpdateBatteryLevel(float batteryLevel, string isarId);
     }
 
-    public class BatteryTimeseriesService(
-        ILogger<BatteryTimeseriesService> logger,
+    public class BatteryLevelService(
+        ILogger<BatteryLevelService> logger,
         IRobotService robotService
-    ) : IBatteryTimeseriesService
+    ) : IBatteryLevelService
     {
         private const double Tolerance = 1E-05D;
 
-        public async Task<Robot?> AddBatteryEntry(float batteryLevel, string isarId)
+        public async Task<Robot?> UpdateBatteryLevel(float batteryLevel, string isarId)
         {
             var robot = await robotService.ReadByIsarId(isarId, readOnly: true);
             if (robot == null)

@@ -90,9 +90,9 @@ builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();
 builder.Services.AddScoped<IEmergencyActionService, EmergencyActionService>();
 builder.Services.AddScoped<ITeamsMessageService, TeamsMessageService>();
 
-builder.Services.AddScoped<IBatteryTimeseriesService, BatteryTimeseriesService>();
-builder.Services.AddScoped<IPressureTimeseriesService, PressureTimeseriesService>();
-builder.Services.AddScoped<IPoseTimeseriesService, PoseTimeseriesService>();
+builder.Services.AddScoped<IBatteryLevelService, BatteryLevelService>();
+builder.Services.AddScoped<IPressureLevelService, PressureLevelService>();
+builder.Services.AddScoped<IRobotPoseService, RobotPoseService>();
 
 bool useInMemoryDatabase = builder
     .Configuration.GetSection("Database")
