@@ -44,8 +44,10 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
         setSelectedInspectionTask(selectedTask)
     }
 
-    const fetchImageData = (inspectionId: string) => {
-        const data = useQuery({
+    const fetchImageData = (
+        inspectionId: string
+    ): { data: string | undefined; isPending: boolean; isError: boolean } => {
+        const result = useQuery({
             queryKey: ['fetchInspectionData', inspectionId],
             queryFn: async () => {
                 const imageBlob = await BackendAPICaller.getInspection(inspectionId)
@@ -55,7 +57,8 @@ export const InspectionsProvider: FC<Props> = ({ children }) => {
             staleTime: 10 * 60 * 1000, // If data is received, stale time is 10 min before making new API call
             enabled: inspectionId !== undefined,
         })
-        return data
+
+        return { data: result.data, isPending: result.isPending, isError: result.isError }
     }
 
     return (

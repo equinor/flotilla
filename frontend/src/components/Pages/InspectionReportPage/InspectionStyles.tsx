@@ -48,6 +48,7 @@ export const StyledDialogHeader = styled.div`
 export const StyledBottomContent = styled.div`
     display: flex;
     padding: 16px;
+    gap: 16px;
     justify-content: space-between;
     align-items: center;
     align-self: stretch;

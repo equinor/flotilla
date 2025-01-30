@@ -13,10 +13,10 @@ import {
     StyledDialogHeader,
     StyledDialogInspectionView,
     StyledInfoContent,
-    StyledInspection,
 } from './InspectionStyles'
 import { InspectionOverviewDialogView } from './InspectionOverview'
 import { useState } from 'react'
+import { LargeDialogInspectionImage } from './InspectionReportImage'
 interface InspectionDialogViewProps {
     selectedTask: Task
     tasks: Task[]
@@ -26,9 +26,9 @@ export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogVi
     const { TranslateText } = useLanguageContext()
     const { installationName } = useInstallationContext()
     const { switchSelectedInspectionTask } = useInspectionsContext()
-    const { fetchImageData } = useInspectionsContext()
-    const { data } = fetchImageData(selectedTask.inspection.isarInspectionId)
     const [switchImageDirection, setSwitchImageDirection] = useState<number>(0)
+
+    const successfullyCompletedTasks = tasks.filter((task) => task.status === 'Successful')
 
     const closeDialog = () => {
         switchSelectedInspectionTask(undefined)
@@ -47,64 +47,56 @@ export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogVi
             (event.code === 'ArrowLeft' && switchImageDirection === -1) ||
             (event.code === 'ArrowRight' && switchImageDirection === 1)
         ) {
-            const nextTask = tasks.indexOf(selectedTask) + switchImageDirection
-            if (nextTask >= 0 && nextTask < tasks.length) {
-                switchSelectedInspectionTask(tasks[nextTask])
+            const nextTask = successfullyCompletedTasks.indexOf(selectedTask) + switchImageDirection
+            if (nextTask >= 0 && nextTask < successfullyCompletedTasks.length) {
+                switchSelectedInspectionTask(successfullyCompletedTasks[nextTask])
             }
             setSwitchImageDirection(0)
         }
     })
 
     return (
-        <>
-            {data !== undefined && (
-                <StyledDialog open={true} isDismissable onClose={closeDialog}>
-                    <StyledDialogContent>
-                        <StyledDialogHeader>
-                            <Typography variant="accordion_header" group="ui">
-                                {TranslateText('Inspection report')}
-                            </Typography>
-                            <StyledCloseButton variant="ghost" onClick={closeDialog}>
-                                <Icon name={Icons.Clear} size={24} />
-                            </StyledCloseButton>
-                        </StyledDialogHeader>
-                        <StyledDialogInspectionView>
-                            <div>
-                                <StyledInspection $otherContentHeight={'174px'} src={data} />
-                                <StyledBottomContent>
-                                    <StyledInfoContent>
-                                        <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>
-                                        <Typography variant="body_short">{installationName}</Typography>
-                                    </StyledInfoContent>
-                                    <StyledInfoContent>
-                                        <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
-                                        <Typography variant="body_short">{selectedTask.tagId}</Typography>
-                                    </StyledInfoContent>
-                                    {selectedTask.description && (
-                                        <StyledInfoContent>
-                                            <Typography variant="caption">
-                                                {TranslateText('Description') + ':'}
-                                            </Typography>
-                                            <Typography variant="body_short">{selectedTask.description}</Typography>
-                                        </StyledInfoContent>
-                                    )}
-                                    {selectedTask.endTime && (
-                                        <StyledInfoContent>
-                                            <Typography variant="caption">
-                                                {TranslateText('Timestamp') + ':'}
-                                            </Typography>
-                                            <Typography variant="body_short">
-                                                {formatDateTime(selectedTask.endTime, 'dd.MM.yy - HH:mm')}
-                                            </Typography>
-                                        </StyledInfoContent>
-                                    )}
-                                </StyledBottomContent>
-                            </div>
-                            <InspectionOverviewDialogView tasks={tasks} />
-                        </StyledDialogInspectionView>
-                    </StyledDialogContent>
-                </StyledDialog>
-            )}
-        </>
+        <StyledDialog open={true} isDismissable onClose={closeDialog}>
+            <StyledDialogContent>
+                <StyledDialogHeader>
+                    <Typography variant="accordion_header" group="ui">
+                        {TranslateText('Inspection report')}
+                    </Typography>
+                    <StyledCloseButton variant="ghost" onClick={closeDialog}>
+                        <Icon name={Icons.Clear} size={24} />
+                    </StyledCloseButton>
+                </StyledDialogHeader>
+                <StyledDialogInspectionView>
+                    <div>
+                        <LargeDialogInspectionImage task={selectedTask} />
+                        <StyledBottomContent>
+                            <StyledInfoContent>
+                                <Typography variant="caption">{TranslateText('Installation') + ':'}</Typography>
+                                <Typography variant="body_short">{installationName}</Typography>
+                            </StyledInfoContent>
+                            <StyledInfoContent>
+                                <Typography variant="caption">{TranslateText('Tag') + ':'}</Typography>
+                                <Typography variant="body_short">{selectedTask.tagId}</Typography>
+                            </StyledInfoContent>
+                            {selectedTask.description && (
+                                <StyledInfoContent>
+                                    <Typography variant="caption">{TranslateText('Description') + ':'}</Typography>
+                                    <Typography variant="body_short">{selectedTask.description}</Typography>
+                                </StyledInfoContent>
+                            )}
+                            {selectedTask.endTime && (
+                                <StyledInfoContent>
+                                    <Typography variant="caption">{TranslateText('Timestamp') + ':'}</Typography>
+                                    <Typography variant="body_short">
+                                        {formatDateTime(selectedTask.endTime, 'dd.MM.yy - HH:mm')}
+                                    </Typography>
+                                </StyledInfoContent>
+                            )}
+                        </StyledBottomContent>
+                    </div>
+                    <InspectionOverviewDialogView tasks={tasks} />
+                </StyledDialogInspectionView>
+            </StyledDialogContent>
+        </StyledDialog>
     )
 }
