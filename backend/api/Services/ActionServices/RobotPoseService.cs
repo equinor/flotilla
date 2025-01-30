@@ -2,17 +2,15 @@
 
 namespace Api.Services.ActionServices
 {
-    public interface IPoseTimeseriesService
+    public interface IRobotPoseService
     {
-        public Task AddPoseEntry(Pose pose, string isarId);
+        public Task UpdateRobotPose(Pose pose, string isarId);
     }
 
-    public class PoseTimeseriesService(
-        ILogger<PoseTimeseriesService> logger,
-        IRobotService robotService
-    ) : IPoseTimeseriesService
+    public class RobotPoseService(ILogger<RobotPoseService> logger, IRobotService robotService)
+        : IRobotPoseService
     {
-        public async Task AddPoseEntry(Pose pose, string isarId)
+        public async Task UpdateRobotPose(Pose pose, string isarId)
         {
             var robot = await robotService.ReadByIsarId(isarId, readOnly: true);
             if (robot == null)

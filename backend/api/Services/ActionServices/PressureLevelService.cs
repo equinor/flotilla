@@ -2,19 +2,19 @@
 
 namespace Api.Services.ActionServices
 {
-    public interface IPressureTimeseriesService
+    public interface IPressureLevelService
     {
-        public Task<Robot?> AddPressureEntry(float pressureLevel, string isarId);
+        public Task<Robot?> UpdatePressureLevel(float pressureLevel, string isarId);
     }
 
-    public class PressureTimeseriesService(
-        ILogger<PressureTimeseriesService> logger,
+    public class PressureLevelService(
+        ILogger<PressureLevelService> logger,
         IRobotService robotService
-    ) : IPressureTimeseriesService
+    ) : IPressureLevelService
     {
         private const double Tolerance = 1E-05D;
 
-        public async Task<Robot?> AddPressureEntry(float pressureLevel, string isarId)
+        public async Task<Robot?> UpdatePressureLevel(float pressureLevel, string isarId)
         {
             var robot = await robotService.ReadByIsarId(isarId, readOnly: true);
             if (robot == null)

@@ -32,10 +32,8 @@ namespace Api.EventHandlers
             Subscribe();
         }
 
-        private IBatteryTimeseriesService BatteryTimeseriesService =>
-            _scopeFactory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<IBatteryTimeseriesService>();
+        private IBatteryLevelService BatteryLevelService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IBatteryLevelService>();
         private IInspectionService InspectionService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IInspectionService>();
         private IInstallationService InstallationService =>
@@ -52,16 +50,12 @@ namespace Api.EventHandlers
                 .ServiceProvider.GetRequiredService<IMissionSchedulingService>();
         private IMissionTaskService MissionTaskService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionTaskService>();
-        private IPressureTimeseriesService PressureTimeseriesService =>
-            _scopeFactory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<IPressureTimeseriesService>();
+        private IPressureLevelService PressureLevelService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IPressureLevelService>();
         private IRobotService RobotService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotService>();
-        private IPoseTimeseriesService PoseTimeseriesService =>
-            _scopeFactory
-                .CreateScope()
-                .ServiceProvider.GetRequiredService<IPoseTimeseriesService>();
+        private IRobotPoseService RobotPoseService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IRobotPoseService>();
         private ISignalRService SignalRService =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
         private ITaskDurationService TaskDurationService =>
@@ -553,7 +547,7 @@ namespace Api.EventHandlers
             _updateRobotSemaphore.WaitOne();
             _logger.LogDebug("Semaphore acquired for updating battery");
 
-            var robot = await BatteryTimeseriesService.AddBatteryEntry(
+            var robot = await BatteryLevelService.UpdateBatteryLevel(
                 batteryStatus.BatteryLevel,
                 batteryStatus.IsarId
             );
@@ -601,7 +595,7 @@ namespace Api.EventHandlers
             _updateRobotSemaphore.WaitOne();
             _logger.LogDebug("Semaphore acquired for updating pressure");
 
-            var robot = await PressureTimeseriesService.AddPressureEntry(
+            var robot = await PressureLevelService.UpdatePressureLevel(
                 pressureStatus.PressureLevel,
                 pressureStatus.IsarId
             );
@@ -649,7 +643,7 @@ namespace Api.EventHandlers
             _updateRobotSemaphore.WaitOne();
             _logger.LogDebug("Semaphore acquired for updating pose");
 
-            await PoseTimeseriesService.AddPoseEntry(pose, poseStatus.IsarId);
+            await RobotPoseService.UpdateRobotPose(pose, poseStatus.IsarId);
 
             _updateRobotSemaphore.Release();
             _logger.LogDebug("Semaphore released after updating pose");
