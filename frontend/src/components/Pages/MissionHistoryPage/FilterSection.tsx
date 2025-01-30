@@ -2,6 +2,7 @@ import {
     Autocomplete,
     AutocompleteChanges,
     Button,
+    Checkbox,
     Dialog,
     Icon,
     Search,
@@ -108,6 +109,13 @@ export const FilterSection = () => {
                             <Icon name={Icons.Clear} size={32} />
                         </Button>
                     </Dialog.Header>
+                    <Checkbox
+                        label={TranslateText('Only show inspection missions')}
+                        defaultChecked={filterState.excludeReturnToHome}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            filterFunctions.switchExcludeReturnToHome(e.target.checked)
+                        }}
+                    />
                     <Autocomplete
                         options={Array.from(missionStatusTranslationMap.keys())}
                         onOptionsChange={(changes: AutocompleteChanges<string>) => {

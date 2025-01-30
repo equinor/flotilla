@@ -138,9 +138,11 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
 
     const toDisplayValue = (
         filterName: string,
-        value: string | number | MissionStatusFilterOptions[] | InspectionType[]
+        value: boolean | string | number | MissionStatusFilterOptions[] | InspectionType[]
     ) => {
-        if (typeof value === 'string') {
+        if (typeof value === 'boolean') {
+            return ''
+        } else if (typeof value === 'string') {
             return value
         } else if (typeof value === 'number') {
             // We currently assume these are dates. We may want
@@ -233,6 +235,29 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
         switchPage(newPage)
     }
 
+    const ActiveFilterContent = () => {
+        return flatten(filterState)
+            .filter((filter) => !filterFunctions.isSet(filter.name, filter.value))
+            .map((filter) => {
+                const valueToDisplay = toDisplayValue(filter.name, filter.value!)
+                const filterName = valueToDisplay ? `${TranslateText(filter.name)}: ` : TranslateText(filter.name)
+                return (
+                    <Chip
+                        style={{
+                            backgroundColor: checkBoxWhiteBackgroundColor,
+                            borderColor: checkBoxBorderColour,
+                            height: '2rem',
+                            paddingLeft: '10px',
+                        }}
+                        key={filter.name}
+                        onDelete={() => filterFunctions.removeFilter(filter.name)}
+                    >
+                        {filterName} {valueToDisplay}
+                    </Chip>
+                )
+            })
+    }
+
     return (
         <TableWithHeader>
             <Typography variant="h1">{TranslateText('Mission History')}</Typography>
@@ -244,22 +269,7 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
                         {':'}
                     </Typography>
                     <ActiveFilterList>
-                        {flatten(filterState)
-                            .filter((filter) => !filterFunctions.isSet(filter.name, filter.value))
-                            .map((filter) => (
-                                <Chip
-                                    style={{
-                                        backgroundColor: checkBoxWhiteBackgroundColor,
-                                        borderColor: checkBoxBorderColour,
-                                        height: '2rem',
-                                        paddingLeft: '10px',
-                                    }}
-                                    key={filter.name}
-                                    onDelete={() => filterFunctions.removeFilter(filter.name)}
-                                >
-                                    {TranslateText(filter.name)}: {toDisplayValue(filter.name, filter.value!)}
-                                </Chip>
-                            ))}
+                        <ActiveFilterContent />
                     </ActiveFilterList>
                 </StyledActiveFilterList>
             )}
