@@ -8,6 +8,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Icons } from 'utils/icons'
 import { StyledDialog } from 'components/Styles/StyledComponents'
 import { tokens } from '@equinor/eds-tokens'
+import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
 
 interface MissionQueueCardProps {
     order: number
@@ -159,23 +160,24 @@ const RemoveMissionDialog = ({
 const MissionDetails = ({ mission }: { mission: Mission }) => {
     const { TranslateText } = useLanguageContext()
 
-    const estimatedDuration = () => {
+    const getEstimatedDuration = () => {
         const translateEstimatedDuration = TranslateText('Estimated duration')
         const translateH = TranslateText('h')
         const translateMin = TranslateText('min')
         const translateNotAvailable = TranslateText('Estimated duration: not available')
-        if (mission.estimatedDuration !== undefined) {
-            const hours = Math.floor(mission.estimatedDuration / 3600)
-            const remainingSeconds = mission.estimatedDuration % 3600
-            const minutes = Math.ceil(remainingSeconds / 60)
 
-            return `${translateEstimatedDuration}: ${hours} ${translateH} ${minutes} ${translateMin}`
+        if (mission.estimatedTaskDuration) {
+            const estimatedDuration = calculateRemaindingTimeInMinutes(mission.tasks, mission.estimatedTaskDuration)
+            const hours = Math.floor(estimatedDuration / 60)
+            const remainingMinutes = Math.ceil(estimatedDuration % 60)
+
+            return `${translateEstimatedDuration}: ${hours} ${translateH} ${remainingMinutes} ${translateMin}`
         }
         return translateNotAvailable
     }
 
     const tasks = `${TranslateText('Tasks')}: ${mission.tasks.length}`
-    const missionDetails = `${tasks} | ${estimatedDuration()}`
+    const missionDetails = `${tasks} | ${getEstimatedDuration()}`
 
     return (
         <Typography variant="caption" color={tokens.colors.text.static_icons__tertiary.hex}>

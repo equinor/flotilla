@@ -84,9 +84,9 @@ namespace Api.Database.Models
         public DateTime? EndTime { get; private set; }
 
         /// <summary>
-        ///     The estimated duration of the mission in seconds
+        ///     The estimated duration of each task in the mission in seconds
         /// </summary>
-        public uint? EstimatedDuration { get; set; }
+        public uint? EstimatedTaskDuration { get; set; }
 
         [Required]
         [MaxLength(200)]
@@ -129,42 +129,11 @@ namespace Api.Database.Models
             };
         }
 
-        public void CalculateEstimatedDuration()
+        public void SetEstimatedTaskDuration()
         {
             if (Robot.Model.AverageDurationPerTag is not null)
             {
-                float totalInspectionDuration = Tasks.Sum(task =>
-                    task.Inspection?.VideoDuration ?? 0
-                );
-                EstimatedDuration = (uint)(
-                    (Robot.Model.AverageDurationPerTag * Tasks.Count) + totalInspectionDuration
-                );
-            }
-            else
-            {
-                const double RobotVelocity = 1.5 * 1000 / 60; // km/t => m/min
-                const double EfficiencyFactor = 0.20;
-                const double InspectionTime = 2; // min/tag
-                const int AssumedXyMetersFromFirst = 20;
-
-                double distance = 0;
-                var prevPosition = new Position(
-                    Tasks.First().RobotPose.Position.X + AssumedXyMetersFromFirst,
-                    Tasks.First().RobotPose.Position.Y + AssumedXyMetersFromFirst,
-                    Tasks.First().RobotPose.Position.Z
-                );
-                foreach (var task in Tasks)
-                {
-                    var currentPosition = task.RobotPose.Position;
-                    distance +=
-                        Math.Abs(currentPosition.X - prevPosition.X)
-                        + Math.Abs(currentPosition.Y - prevPosition.Y);
-                    prevPosition = currentPosition;
-                }
-                int estimate = (int)(
-                    (distance / (RobotVelocity * EfficiencyFactor)) + InspectionTime
-                );
-                EstimatedDuration = (uint)estimate * 60;
+                EstimatedTaskDuration = (uint)Robot.Model.AverageDurationPerTag;
             }
         }
 

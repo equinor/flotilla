@@ -136,10 +136,6 @@ namespace Api.Services.Models
             {
                 { "map", mapName },
                 { "description", missionRun.Description },
-                {
-                    "estimated_duration",
-                    missionRun.EstimatedDuration?.ToString("D", CultureInfo.InvariantCulture)
-                },
                 { "asset_code", missionRun.InstallationCode },
                 { "mission_name", missionRun.Name },
                 { "status_reason", missionRun.StatusReason },

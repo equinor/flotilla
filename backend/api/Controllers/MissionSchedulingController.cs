@@ -100,7 +100,7 @@ namespace Api.Controllers
 
             if (newMissionRun.Tasks.Any())
             {
-                newMissionRun.CalculateEstimatedDuration();
+                newMissionRun.SetEstimatedTaskDuration();
             }
 
             // Compare with GetTasksFromSource
@@ -221,7 +221,7 @@ namespace Api.Controllers
 
             if (missionRun.Tasks.Any())
             {
-                missionRun.CalculateEstimatedDuration();
+                missionRun.SetEstimatedTaskDuration();
             }
 
             MissionRun newMissionRun;
@@ -428,7 +428,7 @@ namespace Api.Controllers
 
             if (missionRun.Tasks.Any())
             {
-                missionRun.CalculateEstimatedDuration();
+                missionRun.SetEstimatedTaskDuration();
             }
 
             if (existingMissionDefinition == null)
@@ -623,7 +623,7 @@ namespace Api.Controllers
 
                 if (scheduledMission.Tasks.Any())
                 {
-                    scheduledMission.CalculateEstimatedDuration();
+                    scheduledMission.SetEstimatedTaskDuration();
                 }
                 else if (
                     scheduledMission.Robot.CurrentInspectionArea != null
@@ -633,7 +633,7 @@ namespace Api.Controllers
                     )
                 )
                 {
-                    scheduledMission.CalculateEstimatedDuration();
+                    scheduledMission.SetEstimatedTaskDuration();
                 }
 
                 if (
