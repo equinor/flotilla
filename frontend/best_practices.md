@@ -1,13 +1,13 @@
-# Flotilla frontend development best practises
+# Flotilla frontend development best practices
 
--   [Flotilla frontend development best practises](#flotilla-frontend-development-best-practises)
+-   [Flotilla frontend development best practices](#flotilla-frontend-development-best-practices)
     -   [Setup](#setup)
         -   [Prettier](#prettier)
         -   [ESLint](#eslint)
     -   [Folder structure](#folder-structure)
     -   [Components](#react-components)
         -   [React arguments](#react-arguments)
-        -   [React functions](#react-state)
+        -   [React functions](#react-functions)
         -   [React state](#react-state)
         -   [Nesting](#nesting)
     -   [Contexts](#contexts)
@@ -35,21 +35,21 @@ npx eslint [path to src]
 
 ## Folder structure
 
-The frontend src folder is organised into 6 main folders.
+The frontend src folder is organized into 6 main folders.
 
 -   Alerts contains code which displays alerts on the top of the page
 -   Contexts contain react contexts (see [the context section for more information](#contexts))
--   Displays contain visual react component which are used on more than one page
+-   Displays contains visual react components which are used on more than one page
 -   Header contains code related to the page header
 -   Pages contains the bulk of the code, as all the code related to the website pages are kept here, if there are no other relevant folders
 -   Language contains translations between the supported languages for text on the Flotilla web page
 -   MediaAssets contains the static image files displayed on the page
 -   Models contains the data models
--   Utils contain utility functions which are relevant in several parts of the code
+-   Utils contains utility functions which are relevant in several parts of the code
 
 ## Function syntax
 
-In this code we generally avoid using the "function" for the sake of consistency. This means that if you wish to define a function, you should define a variable which is set to the value of a lambda function. Therefore
+In this code we generally avoid using the "function" keyword for the sake of consistency. This means that if you wish to define a function, you should define a variable which is set to the value of a lambda function. Therefore
 
     function foo(x: number, y: number) { return x + y }
 
@@ -57,19 +57,19 @@ becomes
 
     const foo = (x:number, y: number) => { return x + y }
 
-It is also preferred to simplify the syntax when possible to make it more readable. When the code in a codeblock only requires one line for instance, the {} brackets may be ommited, along with the return statement. So the function above becomes
+It is also preferred to simplify the syntax when possible to make it more readable. When the code in a code block only requires one line for instance, the {} brackets may be omitted, along with the return statement. So the function above becomes
 
     const foo = (x:number, y: number) => x + y
 
 ## React components
 
-The flotilla frontend is programmed in Typescript using the React framework. In this framework all HTML components are defined using React components, which are pieces of code which define what the HTML should look like depending on the state of the system. We only utilise React Functions, which means that components are described in the form of functions which accept the component attributes are function arguments, and return the HTML at the end of the function. React classes should be avoided.
+The Flotilla frontend is programmed in TypeScript using the React framework. In this framework, all HTML components are defined using React components, which are pieces of code that define what the HTML should look like depending on the state of the system. We only utilize React Functions, which means that components are described in the form of functions that accept the component attributes as function arguments and return the HTML at the end of the function. React classes should be avoided.
 
 ### React arguments
 
-React arguments should be descriptively named in relation to the components name, so that someone would not need to investigate the parent component to learn what the data represents. If only parts of the provided data is utilised, then it is often better to only send the relevant data (eg only send mission name instead of the whole mission if only the name is used). Additionally, an interface should be utilised when there are many components, so as to make it easier to read. This interface should be placed just above, or at least nearby, the function itself.
+React arguments should be descriptively named in relation to the component's name, so that someone would not need to investigate the parent component to learn what the data represents. If only parts of the provided data are utilized, then it is often better to only send the relevant data (e.g., only send mission name instead of the whole mission if only the name is used). Additionally, an interface should be utilized when there are many components, so as to make it easier to read. This interface should be placed just above, or at least nearby, the function itself.
 
-Good (although the interface is not strictly neccessary here):
+Good (although the interface is not strictly necessary here):
 
 ```
 interface MissionTitleComponentProps {
@@ -91,7 +91,7 @@ export const RobotComponent = ({ mission, setColor } : {mission: MissionDefiniti
 
 ### React state
 
-React provides the useState hook which allows the user to define variables which persist between renders. Although it is tempting to use these for all variables, it is worth noting that unless the variable has some information which needs to be kept for another render in order to update another variable, it can be kept as a normal Typescript variable.
+React provides the useState hook which allows the user to define variables that persist between renders. Although it is tempting to use these for all variables, it is worth noting that unless the variable has some information which needs to be kept for another render in order to update another variable, it can be kept as a normal TypeScript variable.
 
 So if you have a simple component as such:
 
@@ -138,7 +138,7 @@ useEffect(() => {
 }, [x])
 ```
 
-we do not yet see the updated value of x in the same render we updated it. Additionally, if we call setX several times in one render (ie. inside the same useEffect), they will overwrite each other. 'x' will be 1 at the end of this render, not 2. In order to prevent this overwriting we can instead pass a function to the set function which describes how to update the variable using its current value. This will be done in turn for each call to setX in this case, prevent updates from being overwritten.
+we do not yet see the updated value of x in the same render we updated it. Additionally, if we call setX several times in one render (i.e., inside the same useEffect), they will overwrite each other. 'x' will be 1 at the end of this render, not 2. In order to prevent this overwriting we can instead pass a function to the set function which describes how to update the variable using its current value. This will be done in turn for each call to setX in this case, preventing updates from being overwritten.
 
 ```
 const [x, setX] = useState<number>(0)
@@ -179,7 +179,7 @@ In react there are two main side-effects, updating react state using set functio
 
 Making the code as functional as possible does not only make it more readable, it also reduces the chances of errors being introduced as it forces us to make many simple functions which do isolated operations. Additionally it moves the state operations to one place, making any previous mistakes more obvious.
 
-Using coding styles common in functional languages are also encouraged in Typescript. This involves using data pipelines, such as map/filter/reduce/etc. If formatted on several lines it can be just as readable as using temporary variables, but this should be done within reason. Temporary variables are not neccessarily worse than doing the above approach, as long the as the temporary variables are kept within the scope of a pure function.
+Using coding styles common in functional languages are also encouraged in TypeScript. This involves using data pipelines, such as map/filter/reduce/etc. If formatted on several lines it can be just as readable as using temporary variables, but this should be done within reason. Temporary variables are not neccessarily worse than doing the above approach, as long the as the temporary variables are kept within the scope of a pure function.
 
 In the following examples the functions are kept simple for the sake of demonstration.
 

@@ -5,11 +5,11 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/0b37a44f66044dbc81fff906344b476e)](https://www.codacy.com/gh/equinor/flotilla/dashboard?utm_source=github.com&utm_medium=referral&utm_content=equinor/flotilla&utm_campaign=Badge_Grade)
 
 Flotilla is the main point of access for operators to interact with multiple robots in multiple facilities.  
-The application consists of a [frontend](frontend) in React, a [backend](backend) in ASP.NET and a Mosquitto MQTT [Broker](broker).
+The application consists of a [frontend](frontend) in React, a [backend](backend) in ASP.NET, and a Mosquitto MQTT [Broker](broker).
 
 ## Deployments
 
-We currently have 3 environment (Development, Staging and Production) deployed to Aurora.
+We currently have 3 environments (Development, Staging, and Production) deployed to Aurora.
 
 | Environment | Deployment                                                                                                                                                | Status                                                                                                                                                                                      |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -32,17 +32,17 @@ Please see separate installation guides for the [frontend](frontend), [backend](
 Run the [setup.sh](./setup.sh) to automatically set up your dev environment for the components.
 This script will ask you for the `Client Secret` for the backend and the `MQTT broker server key` for the MQTT broker.
 
-## Run with docker
+## Run with Docker
 
-Install [docker](https://docs.docker.com/engine/install/ubuntu/) and [docker compose](https://docs.docker.com/compose/install/).
+Install [Docker](https://docs.docker.com/engine/install/ubuntu/) and [Docker Compose](https://docs.docker.com/compose/install/).
 
-Build the docker container:
+Build the Docker container:
 
 ```
 docker compose build
 ```
 
-Setup a .env file in the backend directory with the following environment variables:
+Set up a .env file in the backend directory with the following environment variables:
 
 ```
 AZURE_CLIENT_ID
@@ -66,4 +66,4 @@ docker compose up --build
 
 Equinor welcomes all kinds of contributions, including code, bug reports, issues, feature requests, and documentation.
 Please initiate your contribution by creating an [issue](https://github.com/equinor/isar/issues) or by forking the
-project and making a pull requests. Commit messages shall be written according to [this guide](https://cbea.ms/git-commit/).
+project and making a pull request. Commit messages shall be written according to [this guide](https://cbea.ms/git-commit/).

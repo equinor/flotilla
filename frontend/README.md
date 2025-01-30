@@ -1,6 +1,6 @@
 # Flotilla frontend
 
-This document describes how to run the frontend. For information on best practises related to development, [see the best practises document](./best_practises.md).
+This document describes how to run the frontend. For information on best practices related to development, [see the best practices document](./best_practices.md).
 
 ## Setup
 
@@ -11,7 +11,7 @@ The application reads environment variables from the `.env` file in the `fronten
 
 ### Automatic environment setup
 
-See [Flotilla readme](../README.md#automatic-environment-setup)
+See [Flotilla readme](../README.md#automatic-environment-setup).
 
 ### Manual environment setup
 
@@ -33,13 +33,13 @@ To start the app, run the following command in the root folder:
 npm start
 ```
 
-This command runs the app in the development mode. Open [http://localhost:3001/robotics-frontend](http://localhost:3001/robotics-frontend) to view it in the browser.
+This command runs the app in development mode. Open [http://localhost:3001/robotics-frontend](http://localhost:3001/robotics-frontend) to view it in the browser.
 
 The page will reload if you make edits. You will also be able to see any lint errors in the console.
 
 ## Run in Docker
 
-To run the frontend in docker, run the following command in the root folder of flotilla:
+To run the frontend in Docker, run the following command in the root folder of Flotilla:
 
 ```
 docker compose up --build frontend
@@ -47,39 +47,39 @@ docker compose up --build frontend
 
 ## Authentication
 
-Authentication is implemented for the frontend following the [official Microsoft tutorial on Oauth2 flow in React](https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-react).
+Authentication is implemented for the frontend following the [official Microsoft tutorial on OAuth2 flow in React](https://docs.microsoft.com/en-us/azure/active-directory/develop/tutorial-v2-react).
 
 ## Automatically generated models
 
-The typescript models have been automatically generated using an [openapi-to-typescript npm package](https://www.npmjs.com/package/openapi-typescript).
+The TypeScript models have been automatically generated using an [openapi-to-typescript npm package](https://www.npmjs.com/package/openapi-typescript).
 This can be updated by cloning the [flotilla-openapi](https://github.com/equinor/flotilla-openapi) repository and then running:
 
 ```bash
-    npx openapi-typescript <path-to-flotilla-openapi>/openapi.yaml --output ./src/models/schema.ts
+npx openapi-typescript <path-to-flotilla-openapi>/openapi.yaml --output ./src/models/schema.ts
 ```
 
 ## Formatting
 
-We use prettier for formatting.
-To test the formatting locally, run
+We use Prettier for formatting.
+To test the formatting locally, run:
 
 ```
 npm run prettier_check
 ```
 
-We recommend to install the [prettier extension for vs code](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-and set the `format on save` option for vs code to true.
-You can do this by going to `File` -> `Preferences` -> `Settings` and then searching for "Format On Save" and tick the box.
+We recommend installing the [Prettier extension for VS Code](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+and setting the `format on save` option for VS Code to true.
+You can do this by going to `File` -> `Preferences` -> `Settings` and then searching for "Format On Save" and ticking the box.
 
 ## Config
 
-The application reads custom environment variables from the `.env` file on startup. The files need to be prefixed `VITE_` to be included in the application.
+The application reads custom environment variables from the `.env` file on startup. The variables need to be prefixed with `VITE_` to be included in the application.
 These are parsed and defined in [config.ts](./src/config.ts).
 
 ## Run locally with Staging and Prod Databases
 
-To run locally towards the databases follow the steps below:
+To run locally towards the databases, follow the steps below:
 
-1. Change UseInMemoryDatabase to false on appsettings.Local and set ASPNETCORE_ENVIRONMENT to the correct environment on launchSettings.json.
-2. Update AZURE_CLIENT_ID and AZURE_CLIENT_SECRET in the .env located in backend/api folder.
-3. Update VITE_BACKEND_API_SCOPE in the .env located in the frontend folder.
+1. Change `UseInMemoryDatabase` to `false` in `appsettings.Local` and set `ASPNETCORE_ENVIRONMENT` to the correct environment in `launchSettings.json`.
+2. Update `AZURE_CLIENT_ID` and `AZURE_CLIENT_SECRET` in the `.env` file located in the `backend/api` folder.
+3. Update `VITE_BACKEND_API_SCOPE` in the `.env` file located in the `frontend` folder.
