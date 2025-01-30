@@ -35,7 +35,7 @@ namespace Api.Controllers.Models
 
         public DateTime? EndTime { get; private set; }
 
-        public uint? EstimatedDuration { get; set; }
+        public uint? EstimatedTaskDuration { get; set; }
 
         public IList<MissionTask> Tasks { get; set; }
 
@@ -67,7 +67,7 @@ namespace Api.Controllers.Models
             DesiredStartTime = mission.DesiredStartTime;
             StartTime = mission.StartTime;
             EndTime = mission.EndTime;
-            EstimatedDuration = mission.EstimatedDuration;
+            EstimatedTaskDuration = mission.EstimatedTaskDuration;
             Tasks = mission.Tasks;
             MissionRunType = mission.MissionRunType;
         }

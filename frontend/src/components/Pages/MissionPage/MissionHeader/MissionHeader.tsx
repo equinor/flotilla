@@ -10,6 +10,7 @@ import { StatusReason } from '../StatusReason'
 import { MissionRestartButton } from 'components/Displays/MissionButtons/MissionRestartButton'
 import { TaskStatus, TaskType } from 'models/Task'
 import { convertUTCDateToLocalDate, formatDateTime } from 'utils/StringFormatting'
+import { calculateRemaindingTimeInMinutes } from 'utils/CalculateRemaingingTime'
 
 const HeaderSection = styled(Card)`
     width: 100%;
@@ -96,11 +97,6 @@ const getStartUsedAndRemainingTime = (
     let startDate: string
     let remainingTime: string
     let usedTimeInMinutes: number
-    let estimatedDurationInMinutes: number | undefined
-    if (mission.estimatedDuration) {
-        // Convert from seconds to minutes, rounding up
-        estimatedDurationInMinutes = Math.ceil(mission.estimatedDuration / 60)
-    }
 
     if (mission.endTime) {
         startTime = mission.startTime
@@ -121,14 +117,17 @@ const getStartUsedAndRemainingTime = (
         startTime = formatDateTime(mission.startTime, 'HH:mm')
         startDate = formatDateTime(mission.startTime, 'dd/MM/yyy')
         usedTimeInMinutes = differenceInMinutes(Date.now(), convertUTCDateToLocalDate(mission.startTime))
-        if (estimatedDurationInMinutes)
-            remainingTime = Math.max(estimatedDurationInMinutes - usedTimeInMinutes, 0) + ' ' + translatedMinutes
+        if (mission.estimatedTaskDuration)
+            remainingTime =
+                calculateRemaindingTimeInMinutes(mission.tasks, mission.estimatedTaskDuration) + ' ' + translatedMinutes
         else remainingTime = 'N/A'
     } else {
         startTime = 'N/A'
         startDate = 'N/A'
         usedTimeInMinutes = 0
-        if (estimatedDurationInMinutes) remainingTime = estimatedDurationInMinutes + ' ' + translatedMinutes
+        if (mission.estimatedTaskDuration)
+            remainingTime =
+                calculateRemaindingTimeInMinutes(mission.tasks, mission.estimatedTaskDuration) + ' ' + translatedMinutes
         else remainingTime = 'N/A'
     }
     const usedTime: string = usedTimeInMinutes + ' ' + translatedMinutes
