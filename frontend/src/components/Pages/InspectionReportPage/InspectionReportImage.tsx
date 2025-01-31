@@ -1,4 +1,4 @@
-import { useInspectionsContext } from 'components/Contexts/InpectionsContext'
+import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import { Task } from 'models/Task'
 import { StyledInspection, StyledInspectionImage } from './InspectionStyles'
 import { tokens } from '@equinor/eds-tokens'

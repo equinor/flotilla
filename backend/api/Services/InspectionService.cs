@@ -14,7 +14,7 @@ namespace Api.Services
 {
     public interface IInspectionService
     {
-        public Task<byte[]?> FetchInpectionImageFromIsarInspectionId(string isarInspectionId);
+        public Task<byte[]?> FetchInspectionImageFromIsarInspectionId(string isarInspectionId);
         public Task<Inspection> UpdateInspectionStatus(
             string isarTaskId,
             IsarTaskStatus isarTaskStatus
@@ -41,7 +41,7 @@ namespace Api.Services
     {
         public const string ServiceName = "IDA";
 
-        public async Task<byte[]?> FetchInpectionImageFromIsarInspectionId(string isarInspectionId)
+        public async Task<byte[]?> FetchInspectionImageFromIsarInspectionId(string isarInspectionId)
         {
             var inspectionData =
                 await GetInspectionStorageInfo(isarInspectionId)
