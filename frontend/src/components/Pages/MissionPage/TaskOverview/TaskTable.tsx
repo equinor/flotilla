@@ -6,7 +6,7 @@ import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
 import { InspectionType } from 'models/Inspection'
-import { useInspectionsContext } from 'components/Contexts/InpectionsContext'
+import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 
 const StyledTable = styled(Table)`
     display: block;

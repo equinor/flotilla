@@ -1,4 +1,4 @@
-import { useInspectionsContext } from 'components/Contexts/InpectionsContext'
+import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import {

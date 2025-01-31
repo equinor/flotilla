@@ -15,7 +15,7 @@ import { config } from 'config'
 import { MissionDefinitionsProvider } from 'components/Contexts/MissionDefinitionsContext'
 import { MediaStreamProvider } from 'components/Contexts/MediaStreamContext'
 import { DockProvider } from 'components/Contexts/DockContext'
-import { InspectionsProvider } from 'components/Contexts/InpectionsContext'
+import { InspectionsProvider } from 'components/Contexts/InspectionsContext'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const appInsights = new ApplicationInsights({

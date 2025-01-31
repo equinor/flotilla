@@ -4,7 +4,7 @@ import { useInstallationContext } from 'components/Contexts/InstallationContext'
 import { Icons } from 'utils/icons'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
-import { useInspectionsContext } from 'components/Contexts/InpectionsContext'
+import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import {
     StyledBottomContent,
     StyledCloseButton,

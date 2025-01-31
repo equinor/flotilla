@@ -18,7 +18,7 @@ import { useMediaStreamContext } from 'components/Contexts/MediaStreamContext'
 import { tokens } from '@equinor/eds-tokens'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import { InspectionDialogView } from '../InspectionReportPage/InspectionView'
-import { useInspectionsContext } from 'components/Contexts/InpectionsContext'
+import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import { Typography } from '@equinor/eds-core-react'
 import { InspectionOverviewSection } from '../InspectionReportPage/InspectionOverview'
 

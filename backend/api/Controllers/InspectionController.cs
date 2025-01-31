@@ -73,7 +73,7 @@ namespace Api.Controllers
             try
             {
                 byte[]? inspectionStream =
-                    await inspectionService.FetchInpectionImageFromIsarInspectionId(
+                    await inspectionService.FetchInspectionImageFromIsarInspectionId(
                         isarInspectionId
                     );
 
