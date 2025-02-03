@@ -566,10 +566,19 @@ namespace Api.Controllers
                         InspectionArea = inspectionArea,
                     };
 
-                customMissionDefinition.Map ??= await mapService.ChooseMapFromPositions(
-                    [.. missionTasks.Select(t => t.RobotPose.Position)],
-                    customMissionQuery.InstallationCode
-                );
+                try
+                {
+                    customMissionDefinition.Map ??= await mapService.ChooseMapFromPositions(
+                        [.. missionTasks.Select(t => t.RobotPose.Position)],
+                        customMissionQuery.InstallationCode
+                    );
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    logger.LogWarning(
+                        $"Could not find a suitable map for mission definition {customMissionDefinition.Id}"
+                    );
+                }
 
                 if (existingMissionDefinition == null)
                 {
