@@ -57,7 +57,6 @@ const StyledMissionPageContent = styled.div`
 const StyledCardsWidth = styled.div`
     display: flex;
     flex-direction: column;
-    min-width: 50%;
     max-width: fit-content;
     gap: 20px;
 `
@@ -139,16 +138,19 @@ export const MissionPage = () => {
                                     {selectedMission.missionId && <MissionMapView mission={selectedMission} />}
                                 </StyledTableAndMap>
                             </TaskAndMapSection>
-                        </StyledCardsWidth>
-                        <VideoStreamSection>
-                            {videoMediaStreams && videoMediaStreams.length > 0 && (
-                                <VideoStreamWindow videoStreams={videoMediaStreams} />
+                            <VideoStreamSection>
+                                {videoMediaStreams && videoMediaStreams.length > 0 && (
+                                    <VideoStreamWindow videoStreams={videoMediaStreams} />
+                                )}
+                            </VideoStreamSection>
+                            {selectedInspectionTask && selectedInspectionTask.isarTaskId && (
+                                <InspectionDialogView
+                                    selectedTask={selectedInspectionTask}
+                                    tasks={selectedMission.tasks}
+                                />
                             )}
-                        </VideoStreamSection>
-                        {selectedInspectionTask && selectedInspectionTask.isarTaskId && (
-                            <InspectionDialogView selectedTask={selectedInspectionTask} tasks={selectedMission.tasks} />
-                        )}
-                        <InspectionOverviewSection tasks={selectedMission.tasks} />
+                            <InspectionOverviewSection tasks={selectedMission.tasks} />
+                        </StyledCardsWidth>
                     </StyledMissionPageContent>
                 )}
             </StyledMissionPage>
