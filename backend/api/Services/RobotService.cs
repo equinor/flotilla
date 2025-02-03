@@ -184,7 +184,12 @@ namespace Api.Services
 
         public async Task UpdateRobotPressureLevel(string robotId, float? pressureLevel)
         {
-            await UpdateRobotProperty(robotId, "PressureLevel", pressureLevel);
+            await UpdateRobotProperty(
+                robotId,
+                "PressureLevel",
+                pressureLevel,
+                isLogLevelDebug: true
+            );
         }
 
         private void ThrowIfRobotIsNull(Robot? robot, string robotId)
