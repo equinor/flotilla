@@ -5,7 +5,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { Task, TaskStatus } from 'models/Task'
 import { tokens } from '@equinor/eds-tokens'
 import { getColorsFromTaskStatus } from 'utils/MarkerStyles'
-import { InspectionType } from 'models/Inspection'
+import { ValidInspectionReportInspectionTypes } from 'models/Inspection'
 import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 
 const StyledTable = styled(Table)`
@@ -109,24 +109,18 @@ const InspectionTypesDisplay = ({ task }: InspectionTypesDisplayProps) => {
     return (
         <>
             {task.inspection &&
-                (task.inspection.inspectionType === InspectionType.Image ? (
-                    task.status === TaskStatus.Successful ? (
-                        <Button
-                            key={task.id + task.inspection.id + 'insp'}
-                            variant="ghost"
-                            onClick={() => switchSelectedInspectionTask(task)}
-                        >
-                            <Typography variant="body_short_link">
-                                {TranslateText(task.inspection.inspectionType as string)}
-                            </Typography>
-                        </Button>
-                    ) : (
-                        <Button key={task.id + task.inspection.id + 'insp'} variant="ghost">
-                            <Typography variant="body_short">
-                                {TranslateText(task.inspection.inspectionType as string)}
-                            </Typography>
-                        </Button>
-                    )
+                (ValidInspectionReportInspectionTypes.includes(task.inspection.inspectionType) &&
+                task.status === TaskStatus.Successful ? (
+                    <Button
+                        key={task.id + task.inspection.id + 'insp'}
+                        variant="ghost"
+                        onClick={() => switchSelectedInspectionTask(task)}
+                        style={{ padding: 0 }}
+                    >
+                        <Typography variant="body_short_link">
+                            {TranslateText(task.inspection.inspectionType as string)}
+                        </Typography>
+                    </Button>
                 ) : (
                     <Typography key={task.id + task.inspection.id + 'insp'}>
                         {TranslateText(task.inspection.inspectionType as string)}
