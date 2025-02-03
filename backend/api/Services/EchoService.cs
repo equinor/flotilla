@@ -352,7 +352,7 @@ namespace Api.Services
                         inspection: inspection,
                         tagLink: echoTag.URL,
                         tagId: echoTag.TagId,
-                        robotPose: echoTag.Pose,
+                        robotPose: new Pose(echoTag.Pose),
                         poseId: echoTag.PoseId,
                         taskOrder: echoTag.PlanOrder,
                         taskDescription: inspection.InspectionTargetName,
