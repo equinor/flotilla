@@ -20,12 +20,6 @@ namespace Api.Services.Models
         [JsonPropertyName("start_pose")]
         public IsarPose? StartPose { get; set; } = null;
 
-        [JsonPropertyName("dock")]
-        public bool? Dock { get; set; } = null;
-
-        [JsonPropertyName("undock")]
-        public bool? Undock { get; set; } = null;
-
         public IsarMissionDefinition(List<IsarTaskDefinition> tasks)
         {
             Name = null;
@@ -48,14 +42,6 @@ namespace Api.Services.Models
                     includeStartPose && missionRun.InspectionArea.DefaultLocalizationPose != null
                         ? new IsarPose(missionRun.InspectionArea.DefaultLocalizationPose.Pose)
                         : null;
-                Undock =
-                    includeStartPose
-                    && missionRun.InspectionArea.DefaultLocalizationPose != null
-                    && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled;
-                Dock =
-                    missionRun.InspectionArea.DefaultLocalizationPose != null
-                    && missionRun.InspectionArea.DefaultLocalizationPose.DockingEnabled
-                    && missionRun.IsReturnHomeMission();
             }
         }
     }
