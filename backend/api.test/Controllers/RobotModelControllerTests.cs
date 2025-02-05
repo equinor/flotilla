@@ -65,4 +65,18 @@ public class RobotModelControllerTests : IAsyncLifetime
 
         Assert.Equal(RobotType, robotModel!.Type);
     }
+
+    [Fact]
+    public async Task CheckThatLookupRobotModelByIdReturnsSuccess()
+    {
+        var robotModel = await RobotModelService.ReadByRobotType(RobotType.Robot);
+
+        var response = await Client.GetAsync("/robot-models/" + robotModel!.Id);
+        var robotModelFromResponse = await response.Content.ReadFromJsonAsync<RobotModel>(
+            SerializerOptions
+        );
+
+        Assert.Equal(robotModel.Id, robotModelFromResponse!.Id);
+        Assert.Equal(robotModel.Type, robotModelFromResponse!.Type);
+    }
 }
