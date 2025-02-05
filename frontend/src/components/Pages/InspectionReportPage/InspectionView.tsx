@@ -6,6 +6,7 @@ import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { formatDateTime } from 'utils/StringFormatting'
 import { useInspectionsContext } from 'components/Contexts/InspectionsContext'
 import {
+    HiddenOnSmallScreen,
     StyledBottomContent,
     StyledCloseButton,
     StyledDialog,
@@ -94,7 +95,9 @@ export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogVi
                             )}
                         </StyledBottomContent>
                     </div>
-                    <InspectionOverviewDialogView tasks={tasks} />
+                    <HiddenOnSmallScreen>
+                        <InspectionOverviewDialogView tasks={tasks} />
+                    </HiddenOnSmallScreen>
                 </StyledDialogInspectionView>
             </StyledDialogContent>
         </StyledDialog>
