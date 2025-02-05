@@ -4,7 +4,9 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Api.Database.Models;
+using Api.Services;
 using Api.Test.Database;
+using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -17,6 +19,8 @@ public class RobotModelControllerTests : IAsyncLifetime
     public required HttpClient Client;
     public required JsonSerializerOptions SerializerOptions;
 
+    public required IRobotModelService RobotModelService;
+
     public async Task InitializeAsync()
     {
         (Container, var connectionString, var connection) =
@@ -24,12 +28,16 @@ public class RobotModelControllerTests : IAsyncLifetime
         var factory = TestSetupHelpers.ConfigureWebApplicationFactory(
             postgreSqlConnectionString: connectionString
         );
+        var serviceProvider = TestSetupHelpers.ConfigureServiceProvider(factory);
+
         Client = TestSetupHelpers.ConfigureHttpClient(factory);
         SerializerOptions = TestSetupHelpers.ConfigureJsonSerializerOptions();
 
         DatabaseUtilities = new DatabaseUtilities(
             TestSetupHelpers.ConfigurePostgreSqlContext(connectionString)
         );
+
+        RobotModelService = serviceProvider.GetRequiredService<IRobotModelService>();
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -45,5 +53,16 @@ public class RobotModelControllerTests : IAsyncLifetime
         // Seven models are added by default to the database
         // This number must be changed if new robots are introduced
         Assert.Equal(7, robotModels!.Count);
+    }
+
+    [Fact]
+    public async Task CheckThatLookupRobotModelByRobotTypeReturnsSuccess()
+    {
+        const RobotType RobotType = RobotType.Robot;
+
+        var response = await Client.GetAsync("/robot-models/type/" + RobotType);
+        var robotModel = await response.Content.ReadFromJsonAsync<RobotModel>(SerializerOptions);
+
+        Assert.Equal(RobotType, robotModel!.Type);
     }
 }
