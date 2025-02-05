@@ -166,8 +166,7 @@ namespace Api.Services
             {
                 defaultLocalizationPose = await defaultLocalizationPoseService.Create(
                     new DefaultLocalizationPose(
-                        newInspectionAreaQuery.DefaultLocalizationPose.Value.Pose,
-                        newInspectionAreaQuery.DefaultLocalizationPose.Value.IsDockingStation
+                        newInspectionAreaQuery.DefaultLocalizationPose.Value.Pose
                     )
                 );
             }

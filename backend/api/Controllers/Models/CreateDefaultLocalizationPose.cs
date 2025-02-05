@@ -10,6 +10,5 @@ namespace Api.Controllers.Models
         }
 
         public Pose Pose { get; set; }
-        public bool IsDockingStation { get; set; } = false;
     }
 }
