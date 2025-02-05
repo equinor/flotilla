@@ -266,8 +266,6 @@ namespace Api.Controllers
                 if (inspectionArea.DefaultLocalizationPose != null)
                 {
                     inspectionArea.DefaultLocalizationPose.Pose = newDefaultLocalizationPose.Pose;
-                    inspectionArea.DefaultLocalizationPose.DockingEnabled =
-                        newDefaultLocalizationPose.IsDockingStation;
                     _ = await defaultLocalizationPoseService.Update(
                         inspectionArea.DefaultLocalizationPose
                     );
@@ -275,8 +273,7 @@ namespace Api.Controllers
                 else
                 {
                     inspectionArea.DefaultLocalizationPose = new DefaultLocalizationPose(
-                        newDefaultLocalizationPose.Pose,
-                        newDefaultLocalizationPose.IsDockingStation
+                        newDefaultLocalizationPose.Pose
                     );
                     inspectionArea = await inspectionAreaService.Update(inspectionArea);
                 }
