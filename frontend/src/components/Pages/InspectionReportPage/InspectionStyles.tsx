@@ -2,13 +2,15 @@ import { Button, Card, Dialog } from '@equinor/eds-core-react'
 import { tokens } from '@equinor/eds-tokens'
 import { styled } from 'styled-components'
 
+export const HiddenOnSmallScreen = styled.div`
+    @media (max-width: 600px) {
+        display: none;
+    }
+`
+
 export const StyledInspection = styled.img<{ $otherContentHeight?: string }>`
     max-height: calc(80vh - ${(props) => props.$otherContentHeight});
     max-width: 100%;
-
-    @media (max-width: 600px) {
-        width: 95vw;
-    }
 `
 
 export const StyledInspectionImage = styled.img`
@@ -21,10 +23,6 @@ export const StyledDialog = styled(Dialog)`
     display: flex;
     width: 100%;
     max-height: 80vh;
-
-    @media (max-width: 600px) {
-        display: none;
-    }
 `
 export const StyledCloseButton = styled(Button)`
     width: 24px;
@@ -47,6 +45,7 @@ export const StyledDialogHeader = styled.div`
 
 export const StyledBottomContent = styled.div`
     display: flex;
+    flex-wrap: wrap;
     padding: 16px;
     gap: 16px;
     justify-content: space-between;
