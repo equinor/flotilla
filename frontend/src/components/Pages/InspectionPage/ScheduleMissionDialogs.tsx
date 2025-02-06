@@ -11,9 +11,9 @@ import { StyledAutoComplete, StyledButton, StyledDialog } from 'components/Style
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { ScheduleMissionWithConfirmDialogs } from 'components/Displays/ConfirmScheduleDialogs/ConfirmScheduleDialog'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { ScheduleMissionWithInspectionAreaVerification } from 'components/Displays/InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
 
 interface IProps {
     selectedMissions: MissionDefinition[]
@@ -55,7 +55,7 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     const { enabledRobots } = useRobotContext()
     const { setLoadingRobotMissionSet } = useMissionsContext()
     const { setAlert, setListAlert } = useAlertContext()
-    const [isLocalizationVerificationDialogOpen, setIsLocalizationVerificationDialog] = useState<boolean>(false)
+    const [isInspectionAreaVerificationDialogOpen, setIsInspectionAreaVerificationDialogOpen] = useState<boolean>(false)
     const [missionsToSchedule, setMissionsToSchedule] = useState<MissionDefinition[]>()
     const filteredRobots = enabledRobots.filter(
         (r) =>
@@ -76,11 +76,11 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
         if (!selectedRobot) return
 
         setMissionsToSchedule(missions)
-        setIsLocalizationVerificationDialog(true)
+        setIsInspectionAreaVerificationDialogOpen(true)
     }
 
     const scheduleMissions = () => {
-        setIsLocalizationVerificationDialog(false)
+        setIsInspectionAreaVerificationDialogOpen(false)
 
         if (!selectedRobot || !missionsToSchedule) return
 
@@ -132,14 +132,14 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
     }
 
     const closeScheduleDialogs = () => {
-        setIsLocalizationVerificationDialog(false)
+        setIsInspectionAreaVerificationDialogOpen(false)
         props.closeDialog()
     }
 
     return (
         <>
             <StyledMissionDialog>
-                <StyledDialog open={!isLocalizationVerificationDialogOpen}>
+                <StyledDialog open={!isInspectionAreaVerificationDialogOpen}>
                     <StyledDialogContent>
                         <Typography variant="h4">{TranslateText('Add mission to the queue')}</Typography>
                         {props.isAlreadyScheduled && (
@@ -195,8 +195,8 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                     </StyledDialogContent>
                 </StyledDialog>
             </StyledMissionDialog>
-            {isLocalizationVerificationDialogOpen && (
-                <ScheduleMissionWithConfirmDialogs
+            {isInspectionAreaVerificationDialogOpen && (
+                <ScheduleMissionWithInspectionAreaVerification
                     scheduleMissions={scheduleMissions}
                     closeDialog={closeScheduleDialogs}
                     robotId={selectedRobot!.id}

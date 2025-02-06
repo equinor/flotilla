@@ -53,7 +53,7 @@ export const placeholderRobot: Robot = {
     deprecated: false,
 }
 
-export enum RobotCapabilitiesEnum {
+enum RobotCapabilitiesEnum {
     take_thermal_image = 'take_thermal_image',
     take_image = 'take_image',
     take_video = 'take_video',

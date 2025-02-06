@@ -1,13 +1,11 @@
 import { Robot } from 'models/Robot'
 import { useEffect, useState } from 'react'
-import { ConfirmLocalizationDialog } from './ConfirmLocalizationDialog'
 import {
     ConflictingMissionInspectionAreasDialog,
     ConflictingRobotInspectionAreaDialog,
-} from './ConflictingLocalizationDialog'
+} from './ConflictingInspectionAreaDialog'
 import { UnknownInspectionAreaDialog } from './UnknownInspectionAreaDialog'
 import { useRobotContext } from 'components/Contexts/RobotContext'
-import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 
 interface IProps {
     scheduleMissions: () => void
@@ -17,14 +15,13 @@ interface IProps {
 }
 
 enum DialogTypes {
-    verifyInspectionArea,
     unknownNewInspectionArea,
     conflictingMissionInspectionAreas,
     conflictingRobotInspectionArea,
     unknown,
 }
 
-export const ScheduleMissionWithLocalizationVerificationDialog = ({
+export const ScheduleMissionWithInspectionAreaVerification = ({
     robotId,
     missionInspectionAreaNames,
     scheduleMissions,
@@ -33,19 +30,11 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
     const { enabledRobots } = useRobotContext()
     const [dialogToOpen, setDialogToOpen] = useState<DialogTypes>(DialogTypes.unknown)
     const [selectedRobot, setSelectedRobot] = useState<Robot>()
-    const { ongoingMissions } = useMissionsContext()
 
     const unikMissionInspectionAreaNames = missionInspectionAreaNames.filter(
         (inspectionAreaName, index) =>
             inspectionAreaName !== '' && missionInspectionAreaNames.indexOf(inspectionAreaName) === index
     )
-
-    const ongoingLocalizationMissionOnSameInspectionAreaExists =
-        ongoingMissions.filter(
-            (mission) =>
-                mission.robot?.id === selectedRobot?.id &&
-                mission.inspectionArea?.inspectionAreaName === unikMissionInspectionAreaNames[0]
-        ).length > 0
 
     useEffect(() => {
         setSelectedRobot(enabledRobots.find((robot) => robot.id === robotId))
@@ -53,16 +42,6 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
 
     useEffect(() => {
         if (!selectedRobot) return
-
-        if (
-            (unikMissionInspectionAreaNames.length === 1 &&
-                selectedRobot.currentInspectionArea?.inspectionAreaName &&
-                unikMissionInspectionAreaNames[0] === selectedRobot?.currentInspectionArea?.inspectionAreaName) ||
-            ongoingLocalizationMissionOnSameInspectionAreaExists
-        ) {
-            scheduleMissions()
-            return
-        }
 
         if (unikMissionInspectionAreaNames.length > 1) {
             setDialogToOpen(DialogTypes.conflictingMissionInspectionAreas)
@@ -75,29 +54,18 @@ export const ScheduleMissionWithLocalizationVerificationDialog = ({
         }
 
         if (
-            !selectedRobot.currentInspectionArea?.inspectionAreaName &&
-            !ongoingLocalizationMissionOnSameInspectionAreaExists
+            selectedRobot.currentInspectionArea?.inspectionAreaName &&
+            unikMissionInspectionAreaNames[0] !== selectedRobot.currentInspectionArea?.inspectionAreaName
         ) {
-            setDialogToOpen(DialogTypes.verifyInspectionArea)
-            return
-        }
-
-        if (unikMissionInspectionAreaNames[0] !== selectedRobot.currentInspectionArea?.inspectionAreaName) {
             setDialogToOpen(DialogTypes.conflictingRobotInspectionArea)
             return
         }
+
+        scheduleMissions()
     }, [unikMissionInspectionAreaNames, selectedRobot?.currentInspectionArea?.inspectionAreaName])
 
     return (
         <>
-            {dialogToOpen === DialogTypes.verifyInspectionArea && (
-                <ConfirmLocalizationDialog
-                    closeDialog={closeDialog}
-                    scheduleMissions={scheduleMissions}
-                    robot={selectedRobot!}
-                    newInspectionAreaName={unikMissionInspectionAreaNames![0]}
-                />
-            )}
             {dialogToOpen === DialogTypes.conflictingMissionInspectionAreas && (
                 <ConflictingMissionInspectionAreasDialog
                     closeDialog={closeDialog}
