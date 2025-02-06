@@ -30,6 +30,5 @@ export enum TaskStatus {
 
 export enum TaskType {
     Inspection = 'Inspection',
-    Localization = 'Localization',
     ReturnHome = 'ReturnHome',
 }

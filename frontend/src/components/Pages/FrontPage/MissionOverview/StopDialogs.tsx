@@ -52,17 +52,6 @@ export enum MissionStatusRequest {
 const DialogContent = ({ missionTaskType }: { missionTaskType: TaskType | undefined }) => {
     const { TranslateText } = useLanguageContext()
     switch (missionTaskType) {
-        case TaskType.Localization:
-            return (
-                <StyledText>
-                    <Typography variant="body_long">
-                        {TranslateText('Stop button pressed during localization warning text')}
-                    </Typography>
-                    <Typography variant="body_long">
-                        {TranslateText('Stop button pressed confirmation text')}
-                    </Typography>
-                </StyledText>
-            )
         case TaskType.ReturnHome:
             return (
                 <StyledText>
