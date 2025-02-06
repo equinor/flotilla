@@ -63,6 +63,5 @@ export enum RobotCapabilitiesEnum {
     localize = 'localize',
     auto_localize = 'auto_localize',
     auto_return_to_home = 'auto_return_to_home',
-    docking_procedure = 'docking_procedure',
     return_to_home = 'return_to_home',
 }

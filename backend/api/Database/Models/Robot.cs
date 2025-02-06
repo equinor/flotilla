@@ -197,7 +197,6 @@ namespace Api.Database.Models
         localize,
         auto_localize,
         auto_return_to_home,
-        docking_procedure,
         return_to_home,
     }
 
