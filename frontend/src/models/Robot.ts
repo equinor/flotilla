@@ -60,7 +60,6 @@ export enum RobotCapabilitiesEnum {
     take_thermal_video = 'take_thermal_video',
     take_gas_measurement = 'take_gas_measurement',
     record_audio = 'record_audio',
-    localize = 'localize',
     auto_localize = 'auto_localize',
     auto_return_to_home = 'auto_return_to_home',
     return_to_home = 'return_to_home',
