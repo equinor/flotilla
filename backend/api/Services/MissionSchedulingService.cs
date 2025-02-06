@@ -384,14 +384,7 @@ namespace Api.Services
 
             if (robot.CurrentInspectionArea != null)
             {
-                if (robot.CurrentInspectionArea?.DefaultLocalizationPose == null)
-                {
-                    robotPose = new Pose();
-                }
-                else
-                {
-                    robotPose = robot.CurrentInspectionArea.DefaultLocalizationPose.Pose;
-                }
+                robotPose = new Pose();
             }
             else
             {

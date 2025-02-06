@@ -32,8 +32,6 @@ namespace Api.Test.Database
 
         public DatabaseUtilities(FlotillaDbContext context)
         {
-            var defaultLocalizationPoseService = new DefaultLocalizationPoseService(context);
-
             _accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
             _installationService = new InstallationService(context, _accessRoleService);
             _missionTaskService = new MissionTaskService(
@@ -43,7 +41,6 @@ namespace Api.Test.Database
             _plantService = new PlantService(context, _installationService, _accessRoleService);
             _inspectionAreaService = new InspectionAreaService(
                 context,
-                defaultLocalizationPoseService,
                 _installationService,
                 _plantService,
                 _accessRoleService,
@@ -54,7 +51,6 @@ namespace Api.Test.Database
                 _installationService,
                 _plantService,
                 _inspectionAreaService,
-                defaultLocalizationPoseService,
                 _accessRoleService
             );
             _userInfoService = new UserInfoService(
@@ -164,7 +160,6 @@ namespace Api.Test.Database
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
                 Name = inspectionAreaName,
-                DefaultLocalizationPose = new CreateDefaultLocalizationPose() { Pose = new Pose() },
             };
 
             return await _inspectionAreaService.Create(createInspectionAreaQuery);
@@ -185,7 +180,6 @@ namespace Api.Test.Database
                 PlantCode = plantCode,
                 InspectionAreaName = inspectionAreaName,
                 AreaName = areaName,
-                DefaultLocalizationPose = new Pose(),
             };
 
             return await _areaService.Create(createAreaQuery);

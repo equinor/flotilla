@@ -87,18 +87,12 @@ namespace Api.Services
                     readOnly: true
                 );
                 currentInspectionArea = previousMissionRun?.InspectionArea;
-                returnToHomePose =
-                    previousMissionRun?.InspectionArea?.DefaultLocalizationPose?.Pose == null
-                        ? new Pose()
-                        : new Pose(previousMissionRun.InspectionArea.DefaultLocalizationPose.Pose);
+                returnToHomePose = new Pose();
             }
             else
             {
                 currentInspectionArea = robot.CurrentInspectionArea;
-                returnToHomePose =
-                    robot.CurrentInspectionArea?.DefaultLocalizationPose?.Pose == null
-                        ? new Pose()
-                        : new Pose(robot.CurrentInspectionArea.DefaultLocalizationPose.Pose);
+                returnToHomePose = new Pose();
             }
 
             if (currentInspectionArea == null)

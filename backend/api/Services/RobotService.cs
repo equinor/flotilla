@@ -366,13 +366,6 @@ namespace Api.Services
                 .Include(r => r.Model)
                 .Include(r => r.CurrentInstallation)
                 .Include(r => r.CurrentInspectionArea)
-                .ThenInclude(inspectionArea =>
-                    inspectionArea != null ? inspectionArea.DefaultLocalizationPose : null
-                )
-                .ThenInclude(defaultLocalizationPose =>
-                    defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null
-                )
-                .Include(r => r.CurrentInspectionArea)
                 .ThenInclude(area => area != null ? area.Plant : null)
                 .Include(r => r.CurrentInspectionArea)
                 .ThenInclude(area => area != null ? area.Installation : null)

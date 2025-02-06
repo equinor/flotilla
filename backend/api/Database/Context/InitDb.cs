@@ -87,7 +87,6 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
                 Name = "TestInspectionArea",
             };
 
@@ -96,7 +95,6 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
                 Name = "TestInspectionArea2",
             };
 
@@ -105,7 +103,6 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
                 Name = "TestInspectionArea3",
             };
 
@@ -114,7 +111,6 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
                 Name = "TestInspectionArea4",
             };
 
@@ -123,7 +119,6 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[0],
                 Installation = plants[0].Installation,
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
                 Name = "Huldra Mezzanine InspectionArea",
             };
 
@@ -132,7 +127,6 @@ namespace Api.Database.Context
                 Id = Guid.NewGuid().ToString(),
                 Plant = plants[1],
                 Installation = plants[1].Installation,
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
                 Name = "K-Lab",
             };
 
@@ -158,7 +152,6 @@ namespace Api.Database.Context
                 Installation = inspectionAreas[0].Installation,
                 Name = "testArea",
                 MapMetadata = new MapMetadata(),
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
             };
 
             var area2 = new Area
@@ -169,7 +162,6 @@ namespace Api.Database.Context
                 Installation = inspectionAreas[0].Installation,
                 Name = "testArea2",
                 MapMetadata = new MapMetadata(),
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
             };
 
             var area3 = new Area
@@ -180,7 +172,6 @@ namespace Api.Database.Context
                 Installation = inspectionAreas[0].Installation,
                 Name = "testArea3",
                 MapMetadata = new MapMetadata(),
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
             };
 
             var area4 = new Area
@@ -191,7 +182,6 @@ namespace Api.Database.Context
                 Installation = inspectionAreas[1].Installation,
                 Name = "testArea4",
                 MapMetadata = new MapMetadata(),
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
             };
 
             var area5 = new Area
@@ -202,7 +192,6 @@ namespace Api.Database.Context
                 Installation = inspectionAreas[2].Installation,
                 Name = "testArea5",
                 MapMetadata = new MapMetadata(),
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
             };
 
             var area6 = new Area
@@ -213,7 +202,6 @@ namespace Api.Database.Context
                 Installation = inspectionAreas[3].Installation,
                 Name = "testArea6",
                 MapMetadata = new MapMetadata(),
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
             };
 
             var areaHuldraHB = new Area
@@ -224,7 +212,6 @@ namespace Api.Database.Context
                 Installation = inspectionAreas[4].Installation,
                 Name = "HB",
                 MapMetadata = new MapMetadata(),
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
             };
 
             var areaKLab = new Area
@@ -235,7 +222,6 @@ namespace Api.Database.Context
                 Installation = inspectionAreas[5].Installation,
                 Name = "K-lab",
                 MapMetadata = new MapMetadata(),
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
             };
 
             return new List<Area>(

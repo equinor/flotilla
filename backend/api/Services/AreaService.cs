@@ -53,7 +53,6 @@ namespace Api.Services
         IInstallationService installationService,
         IPlantService plantService,
         IInspectionAreaService inspectionAreaService,
-        IDefaultLocalizationPoseService defaultLocalizationPoseService,
         IAccessRoleService accessRoleService
     ) : IAreaService
     {
@@ -180,18 +179,9 @@ namespace Api.Services
                 );
             }
 
-            DefaultLocalizationPose? defaultLocalizationPose = null;
-            if (newAreaQuery.DefaultLocalizationPose != null)
-            {
-                defaultLocalizationPose = await defaultLocalizationPoseService.Create(
-                    new DefaultLocalizationPose(newAreaQuery.DefaultLocalizationPose)
-                );
-            }
-
             var newArea = new Area
             {
                 Name = newAreaQuery.AreaName,
-                DefaultLocalizationPose = defaultLocalizationPose,
                 MapMetadata = new MapMetadata(),
                 InspectionArea = inspectionArea!,
                 Plant = plant!,
@@ -201,11 +191,6 @@ namespace Api.Services
             context.Entry(newArea.Installation).State = EntityState.Unchanged;
             context.Entry(newArea.Plant).State = EntityState.Unchanged;
             context.Entry(newArea.InspectionArea).State = EntityState.Unchanged;
-
-            if (newArea.DefaultLocalizationPose is not null)
-            {
-                context.Entry(newArea.DefaultLocalizationPose).State = EntityState.Modified;
-            }
 
             await context.Areas.AddAsync(newArea);
             await ApplyDatabaseUpdate(installation);
@@ -256,11 +241,7 @@ namespace Api.Services
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context
-                .Areas.Include(area => area.DefaultLocalizationPose)
-                .Include(area => area.InspectionArea)
-                .ThenInclude(inspectionArea =>
-                    inspectionArea != null ? inspectionArea.DefaultLocalizationPose : null
-                )
+                .Areas.Include(area => area.InspectionArea)
                 .Include(area => area.InspectionArea)
                 .ThenInclude(inspectionArea => inspectionArea.Plant)
                 .ThenInclude(plant => plant.Installation)
@@ -290,7 +271,6 @@ namespace Api.Services
                 .Include(a => a.Plant)
                 .ThenInclude(plant => plant != null ? plant.Installation : null)
                 .Include(a => a.Installation)
-                .Include(a => a.DefaultLocalizationPose)
                 .Where(a =>
                     a.Installation != null
                     && accessibleInstallationCodes.Result.Contains(
@@ -361,11 +341,6 @@ namespace Api.Services
                 plantService.DetachTracking(context, area.Plant);
             if (area.InspectionArea != null)
                 inspectionAreaService.DetachTracking(context, area.InspectionArea);
-            if (area.DefaultLocalizationPose != null)
-                defaultLocalizationPoseService.DetachTracking(
-                    context,
-                    area.DefaultLocalizationPose
-                );
             context.Entry(area).State = EntityState.Detached;
         }
     }
