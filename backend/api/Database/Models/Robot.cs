@@ -194,7 +194,6 @@ namespace Api.Database.Models
         take_thermal_video,
         take_gas_measurement,
         record_audio,
-        localize,
         auto_localize,
         auto_return_to_home,
         return_to_home,

@@ -213,7 +213,6 @@ namespace Api.Test.Database
                 [
                     RobotCapabilitiesEnum.take_image,
                     RobotCapabilitiesEnum.return_to_home,
-                    RobotCapabilitiesEnum.localize,
                 ],
             };
 
