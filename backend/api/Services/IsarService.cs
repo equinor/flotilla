@@ -43,11 +43,7 @@ namespace Api.Services
 
             var isarMissionDefinition = new
             {
-                mission_definition = new IsarMissionDefinition(
-                    missionRun,
-                    mapName: mapName,
-                    includeStartPose: true
-                ),
+                mission_definition = new IsarMissionDefinition(missionRun, mapName: mapName),
             };
 
             HttpResponseMessage? response;
