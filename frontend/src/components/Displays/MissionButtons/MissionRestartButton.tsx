@@ -9,8 +9,8 @@ import { useRef, useState } from 'react'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { Mission } from 'models/Mission'
-import { ScheduleMissionWithConfirmDialogs } from '../ConfirmScheduleDialogs/ConfirmScheduleDialog'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import { ScheduleMissionWithInspectionAreaVerification } from '../InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
 
 const Centered = styled.div`
     display: flex;
@@ -114,7 +114,7 @@ export const MissionRestartButton = ({ mission, hasFailedTasks, smallButton }: M
                 </Menu>
             </EdsProvider>
             {isLocationVerificationOpen && (
-                <ScheduleMissionWithConfirmDialogs
+                <ScheduleMissionWithInspectionAreaVerification
                     scheduleMissions={() => startReRun(selectedRerunOption!)}
                     closeDialog={() => setIsLocationVerificationOpen(false)}
                     robotId={mission.robot.id}

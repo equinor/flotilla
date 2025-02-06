@@ -8,7 +8,6 @@ import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'model
 import { Area } from 'models/Area'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
-import { MapMetadata } from 'models/MapMetadata'
 import { MissionDefinition, PlantInfo } from 'models/MissionDefinition'
 import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { InspectionArea } from 'models/InspectionArea'
@@ -370,15 +369,6 @@ export class BackendAPICaller {
     static async getInspectionAreasByInstallationCode(installationCode: string): Promise<InspectionArea[]> {
         const path: string = 'inspectionAreas/installation/' + installationCode
         const result = await this.GET<InspectionArea[]>(path).catch((e) => {
-            console.error(`Failed to GET /${path}: ` + e)
-            throw e
-        })
-        return result.content
-    }
-
-    static async getInspectionAreaMapMetadata(id: string): Promise<MapMetadata> {
-        const path: string = 'inspectionAreas/' + id + '/map-metadata'
-        const result = await this.GET<MapMetadata>(path).catch((e) => {
             console.error(`Failed to GET /${path}: ` + e)
             throw e
         })

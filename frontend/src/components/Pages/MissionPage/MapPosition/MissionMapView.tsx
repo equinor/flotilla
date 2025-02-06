@@ -30,7 +30,7 @@ const StyledElements = styled.div`
     align-items: end;
 `
 
-export const getMeta = async (url: string) => {
+const getMeta = async (url: string) => {
     const image = new Image()
     image.src = url
     await image.decode()
