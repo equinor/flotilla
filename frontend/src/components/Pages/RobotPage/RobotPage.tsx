@@ -76,7 +76,6 @@ export const RobotPage = () => {
     let missionTaskType = undefined
     if (mission?.tasks.every((task) => task.type === TaskType.Inspection)) missionTaskType = TaskType.Inspection
     if (mission?.tasks.every((task) => task.type === TaskType.ReturnHome)) missionTaskType = TaskType.ReturnHome
-    if (mission?.tasks.every((task) => task.type === TaskType.Localization)) missionTaskType = TaskType.Localization
 
     useEffect(() => {
         if (robotId && mediaStreams && Object.keys(mediaStreams).includes(robotId)) {

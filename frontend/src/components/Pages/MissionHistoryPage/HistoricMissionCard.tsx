@@ -68,7 +68,7 @@ export const HistoricMissionCard = ({ index, mission }: IndexedMissionProps) => 
                 <MissionEndTimeDisplay mission={mission} />
             </Table.Cell>
             <Table.Cell id={InspectionTableColumns.Rerun}>
-                {mission.tasks[0]?.type !== TaskType.ReturnHome && mission.tasks[0]?.type !== TaskType.Localization && (
+                {mission.tasks[0]?.type !== TaskType.ReturnHome && (
                     <MissionRestartButton mission={mission} hasFailedTasks={missionHasFailedTasks} smallButton={true} />
                 )}
             </Table.Cell>

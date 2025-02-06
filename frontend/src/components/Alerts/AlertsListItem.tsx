@@ -96,15 +96,13 @@ export const AlertListContents = ({ icon, iconColor, alertTitle, alertText, miss
             <StyledListItem>
                 <Typography variant="caption">{alertText}</Typography>
                 <Right>
-                    {mission !== undefined &&
-                        mission.tasks[0]?.type !== TaskType.ReturnHome &&
-                        mission.tasks[0]?.type !== TaskType.Localization && (
-                            <MissionRestartButton
-                                mission={mission}
-                                hasFailedTasks={missionHasFailedTasks}
-                                smallButton={false}
-                            />
-                        )}
+                    {mission !== undefined && mission.tasks[0]?.type !== TaskType.ReturnHome && (
+                        <MissionRestartButton
+                            mission={mission}
+                            hasFailedTasks={missionHasFailedTasks}
+                            smallButton={false}
+                        />
+                    )}
                 </Right>
             </StyledListItem>
         </StyledListContainer>

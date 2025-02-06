@@ -164,7 +164,6 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
 
     let missionTaskType = TaskType.Inspection
     if (mission.tasks.every((task) => task.type === TaskType.ReturnHome)) missionTaskType = TaskType.ReturnHome
-    if (mission.tasks.every((task) => task.type === TaskType.Localization)) missionTaskType = TaskType.Localization
 
     return (
         <>
@@ -179,15 +178,13 @@ export const MissionHeader = ({ mission }: { mission: Mission }) => {
                             missionStatus={mission.status}
                         />
                     )}
-                    {mission.endTime &&
-                        mission.tasks[0]?.type !== TaskType.ReturnHome &&
-                        mission.tasks[0]?.type !== TaskType.Localization && (
-                            <MissionRestartButton
-                                mission={mission}
-                                hasFailedTasks={missionHasFailedTasks}
-                                smallButton={false}
-                            />
-                        )}
+                    {mission.endTime && mission.tasks[0]?.type !== TaskType.ReturnHome && (
+                        <MissionRestartButton
+                            mission={mission}
+                            hasFailedTasks={missionHasFailedTasks}
+                            smallButton={false}
+                        />
+                    )}
                 </TitleSection>
                 <Typography
                     variant="body_long"

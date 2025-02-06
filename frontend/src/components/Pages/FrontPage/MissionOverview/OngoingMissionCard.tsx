@@ -81,7 +81,6 @@ export const OngoingMissionCard = ({ mission }: MissionProps): JSX.Element => {
 
     let missionTaskType = TaskType.Inspection
     if (mission.tasks.every((task) => task.type === TaskType.ReturnHome)) missionTaskType = TaskType.ReturnHome
-    if (mission.tasks.every((task) => task.type === TaskType.Localization)) missionTaskType = TaskType.Localization
 
     const SmallScreenContent = (
         <StyledSmallScreenMissionCard>
