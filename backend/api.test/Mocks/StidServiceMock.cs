@@ -25,7 +25,6 @@ namespace Api.Test.Mocks
                 .ThenInclude(p => p.Installation)
                 .Include(d => d.Plant)
                 .Include(i => i.Installation)
-                .Include(d => d.DefaultLocalizationPose)
                 .Where(area => area.Name.Contains(testAreaName))
                 .ToList()
                 .FirstOrDefault();
@@ -54,7 +53,6 @@ namespace Api.Test.Mocks
                 Id = Guid.NewGuid().ToString(),
                 Plant = testPlant,
                 Installation = testPlant.Installation,
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
                 Name = "StidServiceMockInspectionArea",
             };
 
@@ -66,7 +64,6 @@ namespace Api.Test.Mocks
                 Installation = testInspectionArea.Plant.Installation,
                 Name = testAreaName,
                 MapMetadata = new MapMetadata(),
-                DefaultLocalizationPose = new DefaultLocalizationPose(),
             };
 
             context.Add(testInstallation);

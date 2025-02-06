@@ -61,7 +61,6 @@ namespace Api.Test.Controllers
                 PlantCode = plant.PlantCode,
                 InspectionAreaName = inspectionArea.Name,
                 AreaName = "TestArea",
-                DefaultLocalizationPose = new Pose(),
             };
 
             var areaContent = new StringContent(
@@ -105,7 +104,6 @@ namespace Api.Test.Controllers
                 PlantCode = plant.PlantCode,
                 InspectionAreaName = inspectionArea.Name,
                 AreaName = area.Name,
-                DefaultLocalizationPose = new Pose(),
             };
 
             var areaContent = new StringContent(
@@ -145,7 +143,6 @@ namespace Api.Test.Controllers
                 PlantCode = plant.PlantCode,
                 InspectionAreaName = inspectionArea.Name,
                 AreaName = "MyNameIsNotTestAreaIAmUnique",
-                DefaultLocalizationPose = new Pose(),
             };
             var areaContent = new StringContent(
                 JsonSerializer.Serialize(areaQuery),

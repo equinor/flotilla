@@ -12,7 +12,6 @@ namespace Api.Controllers
     public class AreaController(
         ILogger<AreaController> logger,
         IAreaService areaService,
-        IDefaultLocalizationPoseService defaultLocalizationPoseService,
         IMissionDefinitionService missionDefinitionService
     ) : ControllerBase
     {
@@ -57,57 +56,6 @@ namespace Api.Controllers
             catch (Exception e)
             {
                 logger.LogError(e, "Error while creating new area");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Updates default localization pose
-        /// </summary>
-        /// <remarks>
-        /// <para> This query updates the default localization pose for an inspection area </para>
-        /// </remarks>
-        [HttpPut]
-        [Authorize(Roles = Role.Admin)]
-        [Route("{areaId}/update-default-localization-pose")]
-        [ProducesResponseType(typeof(AreaResponse), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<AreaResponse>> UpdateDefaultLocalizationPose(
-            [FromRoute] string areaId,
-            [FromBody] Pose newDefaultLocalizationPose
-        )
-        {
-            logger.LogInformation("Updating default localization pose on area '{areaId}'", areaId);
-            try
-            {
-                var area = await areaService.ReadById(areaId, readOnly: true);
-                if (area is null)
-                {
-                    logger.LogInformation("A area with id '{areaId}' does not exist", areaId);
-                    return NotFound("Area does not exists");
-                }
-
-                if (area.DefaultLocalizationPose != null)
-                {
-                    area.DefaultLocalizationPose.Pose = newDefaultLocalizationPose;
-                    _ = await defaultLocalizationPoseService.Update(area.DefaultLocalizationPose);
-                }
-                else
-                {
-                    area.DefaultLocalizationPose = new DefaultLocalizationPose(
-                        newDefaultLocalizationPose
-                    );
-                    area = await areaService.Update(area);
-                }
-
-                return Ok(new AreaResponse(area));
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "Error while updating the default localization pose");
                 throw;
             }
         }

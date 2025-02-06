@@ -25,7 +25,5 @@ namespace Api.Database.Models
 
         [Required]
         public MapMetadata MapMetadata { get; set; }
-
-        public DefaultLocalizationPose? DefaultLocalizationPose { get; set; }
     }
 }

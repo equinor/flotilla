@@ -27,8 +27,6 @@ namespace Api.Database.Context
         public DbSet<InspectionArea> InspectionAreas => Set<InspectionArea>();
         public DbSet<Area> Areas => Set<Area>();
         public DbSet<Source> Sources => Set<Source>();
-        public DbSet<DefaultLocalizationPose> DefaultLocalizationPoses =>
-            Set<DefaultLocalizationPose>();
         public DbSet<AccessRole> AccessRoles => Set<AccessRole>();
         public DbSet<UserInfo> UserInfos => Set<UserInfo>();
         public DbSet<TagInspectionMetadata> TagInspectionMetadata => Set<TagInspectionMetadata>();
@@ -88,17 +86,6 @@ namespace Api.Database.Context
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Orientation);
             modelBuilder.Entity<Robot>().OwnsOne(r => r.Pose).OwnsOne(p => p.Position);
-
-            modelBuilder
-                .Entity<DefaultLocalizationPose>()
-                .OwnsOne(
-                    d => d.Pose,
-                    poseBuilder =>
-                    {
-                        poseBuilder.OwnsOne(pose => pose.Position);
-                        poseBuilder.OwnsOne(pose => pose.Orientation);
-                    }
-                );
 
             // There can only be one robot model per robot type
             modelBuilder.Entity<RobotModel>().HasIndex(model => model.Type).IsUnique();

@@ -16,8 +16,6 @@ namespace Api.Database.Models
         [Required]
         public virtual Installation Installation { get; set; }
 
-        public DefaultLocalizationPose? DefaultLocalizationPose { get; set; }
-
         [Required]
         [MaxLength(200)]
         public string Name { get; set; }

@@ -251,10 +251,6 @@ namespace Api.Services
                     inspection != null ? inspection.InspectionFindings : null
                 )
                 .Include(missionDefinition => missionDefinition.InspectionArea)
-                .ThenInclude(inspectionArea => inspectionArea!.DefaultLocalizationPose)
-                .ThenInclude(defaultLocalizationPose =>
-                    defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null
-                )
                 .Where(
                     (m) =>
                         m.InspectionArea == null

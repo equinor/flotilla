@@ -13,8 +13,6 @@ namespace Api.Controllers.Models
 
         public string InstallationCode { get; set; }
 
-        public Pose? DefaultLocalizationPose { get; set; }
-
         [JsonConstructor]
 #nullable disable
         public InspectionAreaResponse() { }
@@ -27,7 +25,6 @@ namespace Api.Controllers.Models
             InspectionAreaName = inspectionArea.Name;
             PlantCode = inspectionArea.Plant.PlantCode;
             InstallationCode = inspectionArea.Installation.InstallationCode;
-            DefaultLocalizationPose = inspectionArea.DefaultLocalizationPose?.Pose;
         }
     }
 }

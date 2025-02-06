@@ -53,7 +53,6 @@ namespace Api.Services
     )]
     public class InspectionAreaService(
         FlotillaDbContext context,
-        IDefaultLocalizationPoseService defaultLocalizationPoseService,
         IInstallationService installationService,
         IPlantService plantService,
         IAccessRoleService accessRoleService,
@@ -161,30 +160,15 @@ namespace Api.Services
                 );
             }
 
-            DefaultLocalizationPose? defaultLocalizationPose = null;
-            if (newInspectionAreaQuery.DefaultLocalizationPose != null)
-            {
-                defaultLocalizationPose = await defaultLocalizationPoseService.Create(
-                    new DefaultLocalizationPose(
-                        newInspectionAreaQuery.DefaultLocalizationPose.Value.Pose
-                    )
-                );
-            }
-
             var inspectionArea = new InspectionArea
             {
                 Name = newInspectionAreaQuery.Name,
                 Installation = installation,
                 Plant = plant,
-                DefaultLocalizationPose = defaultLocalizationPose,
             };
 
             context.Entry(inspectionArea.Installation).State = EntityState.Unchanged;
             context.Entry(inspectionArea.Plant).State = EntityState.Unchanged;
-            if (inspectionArea.DefaultLocalizationPose is not null)
-            {
-                context.Entry(inspectionArea.DefaultLocalizationPose).State = EntityState.Modified;
-            }
 
             await context.InspectionAreas.AddAsync(inspectionArea);
             await ApplyDatabaseUpdate(inspectionArea.Installation);
@@ -237,7 +221,6 @@ namespace Api.Services
                 .InspectionAreas.Include(p => p.Plant)
                 .ThenInclude(p => p.Installation)
                 .Include(i => i.Installation)
-                .Include(d => d.DefaultLocalizationPose)
                 .Where(
                     (d) =>
                         accessibleInstallationCodes.Result.Contains(
@@ -275,15 +258,6 @@ namespace Api.Services
                 && context.Entry(inspectionArea.Plant).State != EntityState.Detached
             )
                 plantService.DetachTracking(context, inspectionArea.Plant);
-            if (
-                inspectionArea.DefaultLocalizationPose != null
-                && context.Entry(inspectionArea.DefaultLocalizationPose).State
-                    != EntityState.Detached
-            )
-                defaultLocalizationPoseService.DetachTracking(
-                    context,
-                    inspectionArea.DefaultLocalizationPose
-                );
             context.Entry(inspectionArea).State = EntityState.Detached;
         }
     }

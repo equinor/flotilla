@@ -8,7 +8,5 @@ namespace Api.Controllers.Models
         public string PlantCode { get; set; }
         public string InspectionAreaName { get; set; }
         public string AreaName { get; set; }
-
-        public Pose? DefaultLocalizationPose { get; set; }
     }
 }

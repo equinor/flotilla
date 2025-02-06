@@ -371,12 +371,6 @@ namespace Api.Services
                 .Include(missionRun => missionRun.InspectionArea)
                 .ThenInclude(area => area != null ? area.Installation : null)
                 .Include(missionRun => missionRun.InspectionArea)
-                .ThenInclude(inspectionArea =>
-                    inspectionArea != null ? inspectionArea.DefaultLocalizationPose : null
-                )
-                .ThenInclude(defaultLocalizationPose =>
-                    defaultLocalizationPose != null ? defaultLocalizationPose.Pose : null
-                )
                 .Include(missionRun => missionRun.Robot)
                 .Include(missionRun => missionRun.Robot)
                 .ThenInclude(robot => robot.CurrentInspectionArea)

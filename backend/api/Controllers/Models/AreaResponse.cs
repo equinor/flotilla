@@ -19,8 +19,6 @@ namespace Api.Controllers.Models
 
         public MapMetadata MapMetadata { get; set; }
 
-        public Pose? DefaultLocalizationPose { get; set; }
-
         [JsonConstructor]
 #nullable disable
         public AreaResponse() { }
@@ -36,7 +34,6 @@ namespace Api.Controllers.Models
             InstallationCode = area.Installation.InstallationCode;
             AreaName = area.Name;
             MapMetadata = area.MapMetadata;
-            DefaultLocalizationPose = area.DefaultLocalizationPose?.Pose;
         }
     }
 }
