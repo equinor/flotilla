@@ -62,12 +62,12 @@ namespace Api.Services
     {
         public async Task<IEnumerable<InspectionArea>> ReadAll(bool readOnly = true)
         {
-            return await GetInspectionAreas(readOnly: readOnly).ToListAsync();
+            return await GetAccessibleInspectionAreas(readOnly: readOnly).ToListAsync();
         }
 
         public async Task<InspectionArea?> ReadById(string id, bool readOnly = true)
         {
-            return await GetInspectionAreas(readOnly: readOnly)
+            return await GetAccessibleInspectionAreas(readOnly: readOnly)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id));
         }
 
@@ -84,7 +84,7 @@ namespace Api.Services
             {
                 return [];
             }
-            return await GetInspectionAreas(readOnly: readOnly)
+            return await GetAccessibleInspectionAreas(readOnly: readOnly)
                 .Where(a => a.Installation != null && a.Installation.Id.Equals(installation.Id))
                 .ToListAsync();
         }
@@ -99,7 +99,7 @@ namespace Api.Services
             {
                 return null;
             }
-            return await GetInspectionAreas(readOnly: readOnly)
+            return await GetAccessibleInspectionAreas(readOnly: readOnly)
                 .Where(a =>
                     a.Installation != null
                     && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower())
@@ -115,7 +115,7 @@ namespace Api.Services
             bool readOnly = true
         )
         {
-            return await GetInspectionAreas(readOnly: readOnly)
+            return await GetAccessibleInspectionAreas(readOnly: readOnly)
                 .Where(a =>
                     a.Plant != null
                     && a.Plant.Id.Equals(plant.Id)
@@ -212,7 +212,7 @@ namespace Api.Services
 
         public async Task<InspectionArea?> Delete(string id)
         {
-            var inspectionArea = await GetInspectionAreas()
+            var inspectionArea = await GetAccessibleInspectionAreas()
                 .FirstOrDefaultAsync(ev => ev.Id.Equals(id));
             if (inspectionArea is null)
             {
@@ -230,6 +230,19 @@ namespace Api.Services
             return inspectionArea;
         }
 
+        private IQueryable<InspectionArea> GetAccessibleInspectionAreas(bool readOnly = true)
+        {
+            var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
+            var query = GetInspectionAreas(readOnly: readOnly)
+                .Where(
+                    (d) =>
+                        accessibleInstallationCodes.Result.Contains(
+                            d.Installation.InstallationCode.ToUpper()
+                        )
+                );
+            return query;
+        }
+
         private IQueryable<InspectionArea> GetInspectionAreas(bool readOnly = true)
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
@@ -237,13 +250,8 @@ namespace Api.Services
                 .InspectionAreas.Include(p => p.Plant)
                 .ThenInclude(p => p.Installation)
                 .Include(i => i.Installation)
-                .Include(d => d.DefaultLocalizationPose)
-                .Where(
-                    (d) =>
-                        accessibleInstallationCodes.Result.Contains(
-                            d.Installation.InstallationCode.ToUpper()
-                        )
-                );
+                .Include(d => d.DefaultLocalizationPose);
+
             return readOnly ? query.AsNoTracking() : query.AsTracking();
         }
 
