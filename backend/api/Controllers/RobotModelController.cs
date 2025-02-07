@@ -188,25 +188,6 @@ public class RobotModelController(
         return await UpdateModel(robotModel, robotModelQuery);
     }
 
-    /// <summary>
-    /// Deletes the robot model with the specified id from the database.
-    /// </summary>
-    [HttpDelete]
-    [Authorize(Roles = Role.Admin)]
-    [Route("{id}")]
-    [ProducesResponseType(typeof(RobotModel), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<RobotModel>> DeleteRobotModel([FromRoute] string id)
-    {
-        var robotModel = await robotModelService.Delete(id);
-        if (robotModel is null)
-            return NotFound($"Area with id {id} not found");
-        return Ok(robotModel);
-    }
-
     private async Task<ActionResult<Robot>> UpdateModel(
         RobotModel robotModel,
         UpdateRobotModelQuery robotModelQuery
