@@ -90,31 +90,8 @@ namespace Api.Services
                     );
                 }
 
-                InspectionArea? inspectionArea = null;
-                if (robotQuery.CurrentInspectionAreaName is not null)
-                {
-                    inspectionArea = await inspectionAreaService.ReadByInstallationAndName(
-                        robotQuery.CurrentInstallationCode,
-                        robotQuery.CurrentInspectionAreaName,
-                        readOnly: true
-                    );
-                    if (inspectionArea is null)
-                    {
-                        logger.LogError(
-                            "Inspection area '{CurrentInspectionAreaName}' does not exist in installation {CurrentInstallation}",
-                            robotQuery.CurrentInspectionAreaName,
-                            robotQuery.CurrentInstallationCode
-                        );
-                        throw new DbUpdateException(
-                            $"Could not create new robot in database as inspection area '{robotQuery.CurrentInspectionAreaName}' does not exist in installation {robotQuery.CurrentInstallationCode}"
-                        );
-                    }
-                }
+                var newRobot = new Robot(robotQuery, installation, robotModel);
 
-                var newRobot = new Robot(robotQuery, installation, robotModel, inspectionArea);
-
-                if (newRobot.CurrentInspectionArea is not null)
-                    context.Entry(newRobot.CurrentInspectionArea).State = EntityState.Unchanged;
                 if (newRobot.CurrentInstallation != null)
                     context.Entry(newRobot.CurrentInstallation).State = EntityState.Unchanged;
                 if (newRobot.Model != null)
@@ -253,8 +230,11 @@ namespace Api.Services
                 return;
             }
 
-            var area = await inspectionAreaService.ReadById(inspectionAreaId, readOnly: true);
-            if (area is null)
+            var inspectionArea = await inspectionAreaService.ReadById(
+                inspectionAreaId,
+                readOnly: true
+            );
+            if (inspectionArea is null)
             {
                 logger.LogError(
                     "Could not find inspection area '{InspectionAreaId}' setting robot '{IsarId}' inspection area to null",
@@ -265,7 +245,7 @@ namespace Api.Services
             }
             else
             {
-                await UpdateRobotProperty(robotId, "CurrentInspectionArea", area);
+                await UpdateRobotProperty(robotId, "CurrentInspectionArea", inspectionArea);
             }
         }
 

@@ -84,44 +84,5 @@ namespace Api.Test.Controllers
             // Assert
             Assert.Equal(receivedRobot!.Id, robot.Id);
         }
-
-        [Fact]
-        public async Task CheckThatRobotIsNotCreatedWhenInspectionAreaIsNotInInstallation()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-
-            var wrongInstallation = await DatabaseUtilities.NewInstallation("wrongCode");
-            var wrongPlant = await DatabaseUtilities.NewPlant(wrongInstallation.InstallationCode);
-            var wrongInspectionArea = await DatabaseUtilities.NewInspectionArea(
-                wrongInstallation.InstallationCode,
-                wrongPlant.PlantCode
-            );
-
-            var robotQuery = new CreateRobotQuery
-            {
-                IsarId = Guid.NewGuid().ToString(),
-                Name = "TestRobot",
-                SerialNumber = "TestRobotSN",
-                RobotType = RobotType.Robot,
-                Status = RobotStatus.Available,
-                Host = "localhost",
-                Port = 3000,
-                CurrentInstallationCode = installation.InstallationCode,
-                CurrentInspectionAreaName = wrongInspectionArea.Name,
-            };
-
-            // Act
-            const string RobotUrl = "/robots";
-            var content = new StringContent(
-                JsonSerializer.Serialize(robotQuery),
-                null,
-                "application/json"
-            );
-
-            // Assert
-            var response = await Client.PostAsync(RobotUrl, content);
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
     }
 }
