@@ -53,7 +53,7 @@ namespace Api.Services
         public async Task StartNextMissionRunIfSystemIsAvailable(Robot robot)
         {
             logger.LogInformation(
-                "Robot {robotName} has status {robotStatus} and current area {areaName}",
+                "Robot {robotName} has status {robotStatus} and current inspection area {areaName}",
                 robot.Name,
                 robot.Status,
                 robot.CurrentInspectionArea?.Name
@@ -103,22 +103,22 @@ namespace Api.Services
                     "Mission {MissionRunId} cannot be started as it does not have an inspection area",
                     missionRun.Id
                 );
-                return;
             }
 
             if (robot.CurrentInspectionArea == null)
             {
-                await robotService.UpdateCurrentInspectionArea(
-                    robot.Id,
-                    missionRun.InspectionArea!.Id
+                logger.LogError(
+                    "Robot {RobotName} with Id {RobotId} is not on an inspection area.",
+                    robot.Name,
+                    robot.Id
                 );
-                robot.CurrentInspectionArea = missionRun.InspectionArea!;
+                return;
             }
             else if (
                 !missionRun.IsReturnHomeOrEmergencyMission()
                 && !inspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
                     (List<MissionTask>)missionRun.Tasks,
-                    missionRun.InspectionArea
+                    robot.CurrentInspectionArea
                 )
             )
             {
@@ -198,7 +198,6 @@ namespace Api.Services
 
             try
             {
-                robot.CurrentInspectionArea ??= missionRun.InspectionArea;
                 await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
                     robot
                 );
@@ -210,7 +209,7 @@ namespace Api.Services
                     $"Failed to schedule return home for robot {robot.Name}",
                     ""
                 );
-                logger.LogError(
+                logger.LogWarning(
                     "Failed to schedule a return home mission for robot {RobotId}",
                     robot.Id
                 );

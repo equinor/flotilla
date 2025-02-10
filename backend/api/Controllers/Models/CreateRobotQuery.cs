@@ -14,8 +14,6 @@ namespace Api.Controllers.Models
 
         public string CurrentInstallationCode { get; set; }
 
-        public string? CurrentInspectionAreaName { get; set; }
-
         public IList<CreateDocumentationQuery> Documentation { get; set; }
 
         public string Host { get; set; }

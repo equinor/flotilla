@@ -7,7 +7,6 @@ import { getInspectionDeadline } from 'utils/StringFormatting'
 import { InspectionTable } from './InspectionTable'
 import { StyledDict, compareInspections } from './InspectionUtilities'
 import { InspectionAreaCards } from './InspectionAreaCards'
-import { Area } from 'models/Area'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 
@@ -17,19 +16,17 @@ export interface Inspection {
 }
 
 export interface InspectionAreaInspectionTuple {
-    areas: Area[]
     inspections: Inspection[]
     inspectionArea: InspectionArea
 }
 
 interface InspectionAreaAreaTuple {
-    areas: Area[]
     inspectionArea: InspectionArea
 }
 
 export const InspectionSection = () => {
     const { ongoingMissions, missionQueue } = useMissionsContext()
-    const { installationInspectionAreas, installationAreas } = useInstallationContext()
+    const { installationInspectionAreas } = useInstallationContext()
     const { missionDefinitions } = useMissionDefinitionsContext()
     const [selectedMissions, setSelectedMissions] = useState<MissionDefinition[]>()
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
@@ -39,13 +36,12 @@ export const InspectionSection = () => {
 
     const inspectionAreas: InspectionAreaAreaTuple[] = installationInspectionAreas.map((inspectionArea) => {
         return {
-            areas: installationAreas.filter((a) => a.inspectionAreaName === inspectionArea.inspectionAreaName),
             inspectionArea: inspectionArea,
         }
     })
 
     const inspectionAreaInspections: InspectionAreaInspectionTuple[] =
-        inspectionAreas?.map(({ areas, inspectionArea }) => {
+        inspectionAreas?.map(({ inspectionArea }) => {
             const missionDefinitionsInInspectionArea = missionDefinitions.filter(
                 (m) => m.inspectionArea?.inspectionAreaName === inspectionArea.inspectionAreaName
             )
@@ -58,7 +54,6 @@ export const InspectionSection = () => {
                             : undefined,
                     }
                 }),
-                areas: areas,
                 inspectionArea: inspectionArea,
             }
         }) ?? []

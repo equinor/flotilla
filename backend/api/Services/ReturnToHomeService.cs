@@ -52,7 +52,6 @@ namespace Api.Services
             catch (Exception ex)
                 when (ex
                         is RobotNotFoundException
-                            or AreaNotFoundException
                             or InspectionAreaNotFoundException
                             or PoseNotFoundException
                             or UnsupportedRobotCapabilityException
@@ -99,7 +98,7 @@ namespace Api.Services
             {
                 string errorMessage =
                     $"Robot with ID {robot.Id} could not return to home because it does not have an inspection area";
-                logger.LogError("Message: {Message}", errorMessage);
+                logger.LogWarning("Message: {Message}", errorMessage);
                 throw new InspectionAreaNotFoundException(errorMessage);
             }
 

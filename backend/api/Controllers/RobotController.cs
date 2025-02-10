@@ -224,26 +224,6 @@ namespace Api.Controllers
 
                 switch (fieldName)
                 {
-                    case "currentInspectionAreaId":
-                        if (query.InspectionAreaId == null)
-                        {
-                            await robotService.UpdateCurrentInspectionArea(id, null);
-                            robot.CurrentInspectionArea = null;
-                        }
-                        else
-                        {
-                            var inspectionArea = await inspectionAreaService.ReadById(
-                                query.InspectionAreaId,
-                                readOnly: true
-                            );
-                            if (inspectionArea == null)
-                                return NotFound(
-                                    $"No inspection area with ID {query.InspectionAreaId} was found"
-                                );
-                            await robotService.UpdateCurrentInspectionArea(id, inspectionArea.Id);
-                            robot.CurrentInspectionArea = inspectionArea;
-                        }
-                        break;
                     case "pose":
                         if (query.Pose == null)
                             return BadRequest("Cannot set robot pose to null");
@@ -312,6 +292,65 @@ namespace Api.Controllers
 
                 var robotResponse = new RobotResponse(robot);
                 logger.LogInformation("Successful updated deprecated on robot to database");
+
+                return Ok(robotResponse);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error while updating robot with id={Id}", id);
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Updates current inspection area field of a robot in the database
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        /// <response code="200"> The current inspection area was successfully updated </response>
+        /// <response code="404"> There was no robot with the given ID in the database </response>
+        [HttpPatch]
+        [Authorize(Roles = Role.Admin)]
+        [Route("{id}/currentInspectionArea/{currentInspectionAreaId}")]
+        [ProducesResponseType(typeof(RobotResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<RobotResponse>> UpdateRobotCurrentInspectionArea(
+            [FromRoute] string id,
+            [FromRoute] string currentInspectionAreaId
+        )
+        {
+            logger.LogInformation(
+                "Updating current inspection area with id {currentInspectionAreaId} on robot with id={Id}",
+                currentInspectionAreaId,
+                id
+            );
+
+            try
+            {
+                var robot = await robotService.ReadById(id);
+                if (robot == null)
+                {
+                    string errorMessage = $"No robot with id: {id} could be found";
+                    logger.LogError("{Message}", errorMessage);
+                    return NotFound(errorMessage);
+                }
+
+                var inspectionArea = await inspectionAreaService.ReadById(currentInspectionAreaId);
+
+                if (inspectionArea == null)
+                    return NotFound(
+                        $"No inspection area with ID {currentInspectionAreaId} was found"
+                    );
+
+                await robotService.UpdateCurrentInspectionArea(id, inspectionArea.Id);
+                robot.CurrentInspectionArea = inspectionArea;
+
+                var robotResponse = new RobotResponse(robot);
+                logger.LogInformation("Successful updated current inspection area on robot");
 
                 return Ok(robotResponse);
             }
@@ -644,7 +683,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///   Empties the mission queue for the robot, stops the ongoing mission, sets the robot to available and current area is set to null
+        ///   Empties the mission queue for the robot, stops the ongoing mission, sets the robot to available and current inspection area is set to null
         /// </summary>
         /// <remarks>
         ///     <para> This query resets the robot </para>

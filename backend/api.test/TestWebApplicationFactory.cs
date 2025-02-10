@@ -73,7 +73,6 @@ namespace Api.Test
                 services.AddSingleton<IHttpContextAccessor, MockHttpContextAccessor>();
                 services.AddScoped<IMapService, MockMapService>();
                 services.AddScoped<IBlobService, MockBlobService>();
-                services.AddScoped<IStidService, MockStidService>();
                 services.AddScoped<IMissionLoader, MockMissionLoader>();
                 services
                     .AddAuthorizationBuilder()
