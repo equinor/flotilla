@@ -3,7 +3,6 @@ import { BackendAPICaller } from 'api/ApiCaller'
 import { PlantInfo } from 'models/MissionDefinition'
 import { InspectionArea } from 'models/InspectionArea'
 import { SignalREventLabels, useSignalRContext } from './SignalRContext'
-import { Area } from 'models/Area'
 import { useLanguageContext } from './LanguageContext'
 import { AlertType, useAlertContext } from './AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
@@ -13,7 +12,6 @@ interface IInstallationContext {
     installationCode: string
     installationName: string
     installationInspectionAreas: InspectionArea[]
-    installationAreas: Area[]
     switchInstallation: (selectedName: string) => void
 }
 
@@ -33,7 +31,6 @@ const defaultInstallation = {
     installationCode: '',
     installationName: '',
     installationInspectionAreas: [],
-    installationAreas: [],
     switchInstallation: () => {},
 }
 
@@ -48,7 +45,6 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
         window.localStorage.getItem('installationName') || ''
     )
     const [installationInspectionAreas, setInstallationInspectionAreas] = useState<InspectionArea[]>([])
-    const [installationAreas, setInstallationAreas] = useState<Area[]>([])
 
     const installationCode = (allPlantsMap.get(installationName) || '').toUpperCase()
 
@@ -79,43 +75,6 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
             BackendAPICaller.getInspectionAreasByInstallationCode(installationCode)
                 .then((inspectionAreas: InspectionArea[]) => {
                     setInstallationInspectionAreas(inspectionAreas)
-                    inspectionAreas.forEach((inspectionArea) =>
-                        BackendAPICaller.getAreasByInspectionAreaId(inspectionArea.id)
-                            .then((areas) =>
-                                setInstallationAreas((oldAreas) => {
-                                    const areasCopy = [...oldAreas]
-                                    let newAreas: Area[] = []
-                                    areas.forEach((area) => {
-                                        const indexBeUpdated = areasCopy.findIndex((a) => a.id === area.id)
-                                        if (indexBeUpdated === -1) newAreas = [...newAreas, area]
-                                        else areasCopy[indexBeUpdated] = area
-                                    })
-                                    return areasCopy.concat(newAreas)
-                                })
-                            )
-                            .catch(() => {
-                                setAlert(
-                                    AlertType.RequestFail,
-                                    <FailedRequestAlertContent
-                                        translatedMessage={TranslateText(
-                                            'Failed to retrieve areas on inspection area {0}',
-                                            [inspectionArea.inspectionAreaName]
-                                        )}
-                                    />,
-                                    AlertCategory.ERROR
-                                )
-                                setListAlert(
-                                    AlertType.RequestFail,
-                                    <FailedRequestAlertListContent
-                                        translatedMessage={TranslateText(
-                                            'Failed to retrieve areas on inspection area {0}',
-                                            [inspectionArea.inspectionAreaName]
-                                        )}
-                                    />,
-                                    AlertCategory.ERROR
-                                )
-                            })
-                    )
                 })
                 .catch(() => {
                     setAlert(
@@ -188,13 +147,11 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
     }
 
     const [filteredInstallationInspectionAreas, setFilteredInstallationInspectionAreas] = useState<InspectionArea[]>([])
-    const [filteredInstallationAreas, setFilteredInstallationAreas] = useState<Area[]>([])
     useEffect(() => {
         setFilteredInstallationInspectionAreas(
             installationInspectionAreas.filter((d) => d.installationCode === installationCode)
         )
-        setFilteredInstallationAreas(installationAreas.filter((a) => a.installationCode === installationCode))
-    }, [installationCode, installationInspectionAreas, installationAreas])
+    }, [installationCode, installationInspectionAreas])
 
     return (
         <InstallationContext.Provider
@@ -202,7 +159,6 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                 installationCode,
                 installationName,
                 installationInspectionAreas: filteredInstallationInspectionAreas,
-                installationAreas: filteredInstallationAreas,
                 switchInstallation,
             }}
         >

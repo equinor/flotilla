@@ -26,8 +26,6 @@
 
     public class InspectionAreaNotFoundException(string message) : Exception(message) { }
 
-    public class AreaNotFoundException(string message) : Exception(message) { }
-
     public class MissionNotFoundException(string message) : Exception(message) { }
 
     public class InspectionNotFoundException(string message) : Exception(message) { }

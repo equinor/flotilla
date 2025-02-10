@@ -11,7 +11,6 @@ namespace Api.Database.Context
         private static readonly List<Robot> robots = GetRobots();
         private static readonly List<Plant> plants = GetPlants();
         private static readonly List<InspectionArea> inspectionAreas = GetInspectionAreas();
-        private static readonly List<Area> areas = GetAreas();
         private static readonly List<Source> sources = GetSources();
         private static readonly List<MissionTask> tasks = GetMissionTasks();
         private static readonly List<MissionDefinition> missionDefinitions =
@@ -139,93 +138,6 @@ namespace Api.Database.Context
                     inspectionAreaHuldraMezzanine,
                     inspectionAreaKLab,
                 ]
-            );
-        }
-
-        private static List<Area> GetAreas()
-        {
-            var area1 = new Area
-            {
-                Id = Guid.NewGuid().ToString(),
-                InspectionArea = inspectionAreas[0],
-                Plant = inspectionAreas[0].Plant,
-                Installation = inspectionAreas[0].Installation,
-                Name = "testArea",
-                MapMetadata = new MapMetadata(),
-            };
-
-            var area2 = new Area
-            {
-                Id = Guid.NewGuid().ToString(),
-                InspectionArea = inspectionAreas[0],
-                Plant = inspectionAreas[0].Plant,
-                Installation = inspectionAreas[0].Installation,
-                Name = "testArea2",
-                MapMetadata = new MapMetadata(),
-            };
-
-            var area3 = new Area
-            {
-                Id = Guid.NewGuid().ToString(),
-                InspectionArea = inspectionAreas[0],
-                Plant = inspectionAreas[0].Plant,
-                Installation = inspectionAreas[0].Installation,
-                Name = "testArea3",
-                MapMetadata = new MapMetadata(),
-            };
-
-            var area4 = new Area
-            {
-                Id = Guid.NewGuid().ToString(),
-                InspectionArea = inspectionAreas[1],
-                Plant = inspectionAreas[1].Plant,
-                Installation = inspectionAreas[1].Installation,
-                Name = "testArea4",
-                MapMetadata = new MapMetadata(),
-            };
-
-            var area5 = new Area
-            {
-                Id = Guid.NewGuid().ToString(),
-                InspectionArea = inspectionAreas[2],
-                Plant = inspectionAreas[2].Plant,
-                Installation = inspectionAreas[2].Installation,
-                Name = "testArea5",
-                MapMetadata = new MapMetadata(),
-            };
-
-            var area6 = new Area
-            {
-                Id = Guid.NewGuid().ToString(),
-                InspectionArea = inspectionAreas[3],
-                Plant = inspectionAreas[3].Plant,
-                Installation = inspectionAreas[3].Installation,
-                Name = "testArea6",
-                MapMetadata = new MapMetadata(),
-            };
-
-            var areaHuldraHB = new Area
-            {
-                Id = Guid.NewGuid().ToString(),
-                InspectionArea = inspectionAreas[4],
-                Plant = inspectionAreas[4].Plant,
-                Installation = inspectionAreas[4].Installation,
-                Name = "HB",
-                MapMetadata = new MapMetadata(),
-            };
-
-            var areaKLab = new Area
-            {
-                Id = Guid.NewGuid().ToString(),
-                InspectionArea = inspectionAreas[5],
-                Plant = inspectionAreas[5].Plant,
-                Installation = inspectionAreas[5].Installation,
-                Name = "K-lab",
-                MapMetadata = new MapMetadata(),
-            };
-
-            return new List<Area>(
-                [area1, area2, area3, area4, area5, area6, areaHuldraHB, areaKLab]
             );
         }
 
@@ -375,7 +287,7 @@ namespace Api.Database.Context
 
         private static List<MissionTask> GetMissionTasks()
         {
-            var url = new Uri("https://stid.equinor.com/hua/tag?tagNo=ABCD");
+            var url = new Uri("https://dummyurl/tag?tagNo=ABCD");
             var task1 = new MissionTask(
                 inspection: new Inspection(),
                 robotPose: new Pose(300.0f, 50.0f, 200.0f, 0.0f, 0.0f, 0.0f, 1.0f),
@@ -595,7 +507,6 @@ namespace Api.Database.Context
             context.AddRange(robots);
             context.AddRange(plants);
             context.AddRange(inspectionAreas);
-            context.AddRange(areas);
             context.AddRange(sources);
 
             var tasks = GetMissionTasks();
