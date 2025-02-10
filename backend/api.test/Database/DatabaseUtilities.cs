@@ -15,7 +15,6 @@ namespace Api.Test.Database
     {
         private readonly AccessRoleService _accessRoleService;
         private readonly MissionTaskService _missionTaskService;
-        private readonly AreaService _areaService;
         private readonly InspectionAreaService _inspectionAreaService;
         private readonly InstallationService _installationService;
         private readonly MissionRunService _missionRunService;
@@ -28,7 +27,6 @@ namespace Api.Test.Database
         private readonly string _testInstallationName = "Installation";
         private readonly string _testPlantCode = "PlantCode";
         private readonly string _testInspectionAreaName = "InspectionArea";
-        private readonly string _testAreaName = "Area";
 
         public DatabaseUtilities(FlotillaDbContext context)
         {
@@ -45,13 +43,6 @@ namespace Api.Test.Database
                 _plantService,
                 _accessRoleService,
                 new MockSignalRService()
-            );
-            _areaService = new AreaService(
-                context,
-                _installationService,
-                _plantService,
-                _inspectionAreaService,
-                _accessRoleService
             );
             _userInfoService = new UserInfoService(
                 context,
@@ -163,26 +154,6 @@ namespace Api.Test.Database
             };
 
             return await _inspectionAreaService.Create(createInspectionAreaQuery);
-        }
-
-        public async Task<Area> NewArea(
-            string installationCode,
-            string plantCode,
-            string inspectionAreaName,
-            string areaName = ""
-        )
-        {
-            if (string.IsNullOrEmpty(areaName))
-                areaName = _testAreaName;
-            var createAreaQuery = new CreateAreaQuery
-            {
-                InstallationCode = installationCode,
-                PlantCode = plantCode,
-                InspectionAreaName = inspectionAreaName,
-                AreaName = areaName,
-            };
-
-            return await _areaService.Create(createAreaQuery);
         }
 
         public async Task<Robot> NewRobot(

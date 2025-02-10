@@ -318,48 +318,6 @@ namespace Api.Test.Controllers
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
 
-        [Fact]
-        public async Task CheckThatMissionFailsIfRobotIsNotInSameInspectionAreaAsMission()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-
-            var inspectionAreaOne = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode,
-                "InspectionAreaOne"
-            );
-
-            var inspectionAreaTwo = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode,
-                "InspectionAreaTwo"
-            );
-
-            var robot = await DatabaseUtilities.NewRobot(
-                RobotStatus.Available,
-                installation,
-                inspectionAreaOne
-            );
-
-            var query = CreateDefaultCustomMissionQuery(
-                robot.Id,
-                installation.InstallationCode,
-                inspectionAreaTwo.Name
-            );
-            var content = new StringContent(
-                JsonSerializer.Serialize(query),
-                null,
-                "application/json"
-            );
-
-            // Act
-            const string CustomMissionsUrl = "/missions/custom";
-            var missionResponse = await Client.PostAsync(CustomMissionsUrl, content);
-            Assert.Equal(HttpStatusCode.Conflict, missionResponse.StatusCode);
-        }
-
         private static CustomMissionQuery CreateDefaultCustomMissionQuery(
             string robotId,
             string installationCode,

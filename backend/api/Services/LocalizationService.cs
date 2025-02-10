@@ -9,17 +9,11 @@ namespace Api.Services
             Robot robot,
             MissionDefinition missionDefinition
         );
-        public Task<bool> RobotIsOnSameInspectionAreaAsMission(
-            string robotId,
-            string inspectionAreaId
-        );
     }
 
     public class LocalizationService(
         ILogger<LocalizationService> logger,
-        IRobotService robotService,
-        IInstallationService installationService,
-        IInspectionAreaService inspectionAreaService
+        IInstallationService installationService
     ) : ILocalizationService
     {
         public async Task EnsureRobotIsOnSameInstallationAsMission(
@@ -47,58 +41,6 @@ namespace Api.Services
                 logger.LogError("{Message}", errorMessage);
                 throw new RobotNotInSameInstallationAsMissionException(errorMessage);
             }
-        }
-
-        public async Task<bool> RobotIsOnSameInspectionAreaAsMission(
-            string robotId,
-            string inspectionAreaId
-        )
-        {
-            var robot = await robotService.ReadById(robotId, readOnly: true);
-            if (robot is null)
-            {
-                string errorMessage = $"The robot with ID {robotId} was not found";
-                logger.LogError("{Message}", errorMessage);
-                throw new RobotNotFoundException(errorMessage);
-            }
-
-            if (
-                robot.RobotCapabilities is not null
-                && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_localize)
-            )
-            {
-                return true;
-            }
-
-            if (robot.CurrentInspectionArea is null)
-            {
-                const string ErrorMessage =
-                    "The robot is not associated with an inspection area and a mission may not be started";
-                logger.LogError("{Message}", ErrorMessage);
-                throw new RobotCurrentAreaMissingException(ErrorMessage);
-            }
-
-            var missionInspectionArea = await inspectionAreaService.ReadById(
-                inspectionAreaId,
-                readOnly: true
-            );
-            if (missionInspectionArea is null)
-            {
-                const string ErrorMessage =
-                    "The mission does not have an associated inspection area";
-                logger.LogError("{Message}", ErrorMessage);
-                throw new InspectionAreaNotFoundException(ErrorMessage);
-            }
-
-            if (robot.CurrentInspectionArea is null)
-            {
-                const string ErrorMessage =
-                    "The robot area is not associated with any inspection area";
-                logger.LogError("{Message}", ErrorMessage);
-                throw new InspectionAreaNotFoundException(ErrorMessage);
-            }
-
-            return robot.CurrentInspectionArea.Id == missionInspectionArea.Id;
         }
     }
 }
