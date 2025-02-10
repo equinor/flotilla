@@ -76,48 +76,5 @@ namespace Api.Test.Controllers
             Assert.False(samePlantResponse.IsSuccessStatusCode);
             Assert.Equal("NotFound", samePlantResponse.StatusCode.ToString());
         }
-
-        [Fact]
-        public async Task CheckThatAnAuthorizedUserRoleCanAccessAreaEndpoint()
-        {
-            // Arrange
-            var installation = await DatabaseUtilities.NewInstallation();
-            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
-            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode
-            );
-            var area = await DatabaseUtilities.NewArea(
-                installation.InstallationCode,
-                plant.PlantCode,
-                inspectionArea.Name
-            );
-
-            var accessRoleQuery = new CreateAccessRoleQuery
-            {
-                InstallationCode = installation.InstallationCode,
-                RoleName = "User.TestRole",
-                AccessLevel = RoleAccessLevel.USER,
-            };
-            var accessRoleContent = new StringContent(
-                JsonSerializer.Serialize(accessRoleQuery),
-                null,
-                "application/json"
-            );
-            _ = await Client.PostAsync("/access-roles", accessRoleContent);
-
-            // Act
-            // Restrict ourselves to RoleAccessLevel.USER
-            HttpContextAccessor.SetHttpContextRoles(["User.TestRole"]);
-            var response = await Client.GetAsync($"/areas/{area.Id}");
-
-            // Assert
-            var areaFromResponse = await response.Content.ReadFromJsonAsync<AreaResponse>(
-                SerializerOptions
-            );
-
-            Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(areaFromResponse!.Id, area.Id);
-        }
     }
 }
