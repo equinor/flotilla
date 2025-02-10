@@ -5,7 +5,6 @@ import { filterRobots } from 'utils/filtersAndSorts'
 import { MissionRunQueryParameters } from 'models/MissionRunQueryParameters'
 import { MissionDefinitionQueryParameters } from 'models/MissionDefinitionQueryParameters'
 import { PaginatedResponse, PaginationHeader, PaginationHeaderName } from 'models/PaginatedResponse'
-import { Area } from 'models/Area'
 import { timeout } from 'utils/timeout'
 import { tokenReverificationInterval } from 'components/Contexts/AuthProvider'
 import { MissionDefinition, PlantInfo } from 'models/MissionDefinition'
@@ -223,15 +222,6 @@ export class BackendAPICaller {
         return { pagination: pagination, content: result.content }
     }
 
-    static async getMissionDefinitionsInArea(area: Area): Promise<MissionDefinition[]> {
-        const path: string = 'areas/' + area.id + '/mission-definitions'
-
-        const result = await BackendAPICaller.GET<MissionDefinition[]>(path).catch(
-            BackendAPICaller.handleError('GET', path)
-        )
-        return result.content
-    }
-
     static async getMissionDefinitionsInInspectionArea(inspectionArea: InspectionArea): Promise<MissionDefinition[]> {
         const path: string = 'inspectionAreas/' + inspectionArea.id + '/mission-definitions'
 
@@ -345,18 +335,6 @@ export class BackendAPICaller {
         return BackendAPICaller.GET<Blob>(path, 'image/png')
             .then((response) => response.content)
             .catch(BackendAPICaller.handleError('GET', path))
-    }
-
-    static async getAreas(): Promise<Area[]> {
-        const path: string = 'areas'
-        const result = await this.GET<Area[]>(path).catch(BackendAPICaller.handleError('GET', path))
-        return result.content
-    }
-
-    static async getAreasByInspectionAreaId(inspectionAreaId: string): Promise<Area[]> {
-        const path: string = 'areas/inspectionArea/' + inspectionAreaId
-        const result = await this.GET<Area[]>(path).catch(BackendAPICaller.handleError('GET', path))
-        return result.content
     }
 
     static async getInspectionAreas(): Promise<InspectionArea[]> {

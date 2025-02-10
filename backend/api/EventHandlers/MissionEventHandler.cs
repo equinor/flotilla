@@ -159,7 +159,7 @@ namespace Api.EventHandlers
             }
             catch (DockException ex)
             {
-                _logger.LogError(
+                _logger.LogWarning(
                     ex,
                     "Failed to schedule return to dock mission on robot {RobotName} because: {ErrorMessage}",
                     robot.Name,

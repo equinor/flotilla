@@ -39,6 +39,16 @@ namespace Api.Services
             InspectionArea inspectionArea
         );
 
+        public Task<List<InspectionArea>> ReadInspectionAreasByInstallation(
+            string installationCode,
+            bool readOnly = true
+        );
+
+        public Task<InspectionArea?> TryFindInspectionAreaForMissionTasks(
+            List<MissionTask> missionTasks,
+            string installationCode
+        );
+
         public Task<InspectionArea> Create(CreateInspectionAreaQuery newInspectionArea);
 
         public Task<InspectionArea> Update(InspectionArea inspectionArea);
@@ -135,6 +145,28 @@ namespace Api.Services
                 .FirstOrDefaultAsync();
         }
 
+        public Task<InspectionArea?> TryFindInspectionAreaForMissionTasks(
+            List<MissionTask> missionTasks,
+            string installationCode
+        )
+        {
+            var inspectionAreas = GetInspectionAreas()
+                .Where(a =>
+                    a.Installation != null
+                    && a.Installation.InstallationCode.ToLower().Equals(installationCode.ToLower())
+                )
+                .Where(a => MissionTasksAreInsideInspectionAreaPolygon(missionTasks, a));
+
+            if (inspectionAreas.Count() > 1)
+            {
+                logger.LogWarning(
+                    "Multiple inspection areas found for mission tasks in installation {installationCode}",
+                    installationCode
+                );
+            }
+            return inspectionAreas.FirstOrDefaultAsync();
+        }
+
         public bool MissionTasksAreInsideInspectionAreaPolygon(
             List<MissionTask> missionTasks,
             InspectionArea inspectionArea
@@ -220,6 +252,20 @@ namespace Api.Services
             }
 
             return inside;
+        }
+
+        public async Task<List<InspectionArea>> ReadInspectionAreasByInstallation(
+            string installationCode,
+            bool readOnly = true
+        )
+        {
+            var inspectionAreas = await GetInspectionAreas(readOnly: readOnly)
+                .Where(a =>
+                    a.Installation != null
+                    && a.Installation.InstallationCode.Equals(installationCode)
+                )
+                .ToListAsync();
+            return inspectionAreas;
         }
 
         public async Task<InspectionArea> Create(CreateInspectionAreaQuery newInspectionAreaQuery)

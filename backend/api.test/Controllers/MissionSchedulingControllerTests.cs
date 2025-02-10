@@ -53,7 +53,16 @@ namespace Api.Test.Controllers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea
+            );
             string missionsUrl = "/missions";
 
             // Act
@@ -86,7 +95,16 @@ namespace Api.Test.Controllers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea
+            );
 
             // Act
             var query = new ScheduledMissionQuery
