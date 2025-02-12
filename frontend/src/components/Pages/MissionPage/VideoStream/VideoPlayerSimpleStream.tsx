@@ -1,5 +1,6 @@
-export const VideoPlayerSimpleStream = ({ videoStream }: { videoStream: MediaStream }) => (
+export const VideoPlayerSimpleStream = ({ videoStream, id }: { videoStream: MediaStream; id: string }) => (
     <video
+        id={id}
         autoPlay
         muted
         playsInline
