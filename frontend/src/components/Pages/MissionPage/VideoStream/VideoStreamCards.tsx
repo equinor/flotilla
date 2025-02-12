@@ -24,32 +24,27 @@ const StyledVideoSection = styled.div`
 interface IVideoStreamCardProps {
     videoStream: MediaStream
     videoStreamName?: string
-    toggleFullScreenMode: VoidFunction
-    setFullScreenStream: (videoStream: MediaStream) => void
+    videoStreamId: string
 }
 
-export const VideoStreamCard = ({
-    videoStream,
-    videoStreamName,
-    toggleFullScreenMode,
-    setFullScreenStream,
-}: IVideoStreamCardProps) => {
-    const turnOnFullScreen = () => {
-        setFullScreenStream(videoStream)
-        toggleFullScreenMode()
+export const VideoStreamCard = ({ videoStream, videoStreamName, videoStreamId }: IVideoStreamCardProps) => {
+    const setFullScreen = () => {
+        const elem = document.getElementById(videoStreamId)
+        if (elem && elem.requestFullscreen) {
+            elem.requestFullscreen()
+        }
     }
-
     const fullScreenButton = (
-        <FullscreenButton color="secondary" onClick={turnOnFullScreen}>
+        <FullscreenButton color="secondary" onClick={setFullScreen}>
             <Icon name={Icons.Fullscreen} size={32} />
         </FullscreenButton>
     )
 
     return (
         <VideoCard style={{ boxShadow: tokens.elevation.raised }}>
-            <div onDoubleClick={turnOnFullScreen}>
+            <div onDoubleClick={setFullScreen}>
                 <StyledVideoSection>
-                    <VideoPlayerSimpleStream videoStream={videoStream} />
+                    <VideoPlayerSimpleStream videoStream={videoStream} id={videoStreamId} />
                     {fullScreenButton}
                 </StyledVideoSection>
             </div>
