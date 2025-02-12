@@ -81,6 +81,26 @@ public class RobotModelControllerTests : IAsyncLifetime
         Assert.Equal(robotModel.Type, robotModelFromResponse!.Type);
     }
 
+    [Fact]
+    public async Task CheckThatCreateRobotModelReturnsSuccess()
+    {
+        // Arrange
+        var modelBefore = await RobotModelService.ReadByRobotType(RobotType.Robot);
+        _ = await RobotModelService.Delete(modelBefore!.Id);
+
+        var query = new CreateRobotModelQuery { RobotType = RobotType.Robot };
+        var content = new StringContent(JsonSerializer.Serialize(query), null, "application/json");
+
+        // Act
+        var response = await Client.PostAsync("/robot-models", content);
+
+        // Assert
+        var modelAfter = await RobotModelService.ReadByRobotType(RobotType.Robot);
+
+        Assert.True(response.IsSuccessStatusCode);
+        Assert.NotEqual(modelBefore!.Id, modelAfter!.Id);
+    }
+
     [Theory]
     [InlineData(10, 90, 10, 50, true)]
     [InlineData(-1, -10, 10, 50, false)]
