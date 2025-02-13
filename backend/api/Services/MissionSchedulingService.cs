@@ -2,6 +2,7 @@
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services.Events;
+using Api.Services.Helpers;
 using Api.Services.Models;
 using Api.Utilities;
 
@@ -76,7 +77,13 @@ namespace Api.Services
                 return;
             }
 
-            if (!TheSystemIsAvailableToRunAMission(robot, missionRun))
+            if (
+                !MissionSchedulingHelpers.TheSystemIsAvailableToRunAMission(
+                    robot,
+                    missionRun,
+                    logger
+                )
+            )
             {
                 logger.LogInformation(
                     "Mission {MissionRunId} was put on the queue as the system may not start a mission now",
@@ -581,50 +588,6 @@ namespace Api.Services
             );
 
             return ongoingMissions;
-        }
-
-        private bool TheSystemIsAvailableToRunAMission(Robot robot, MissionRun missionRun)
-        {
-            if (
-                robot.MissionQueueFrozen
-                && !(missionRun.IsEmergencyMission() || missionRun.IsReturnHomeMission())
-            )
-            {
-                logger.LogInformation(
-                    "Mission run {MissionRunId} was not started as the mission run queue for robot {RobotName} is frozen",
-                    missionRun.Id,
-                    robot.Name
-                );
-                return false;
-            }
-
-            if (robot.Status is not RobotStatus.Available)
-            {
-                logger.LogInformation(
-                    "Mission run {MissionRunId} was not started as the robot is not available",
-                    missionRun.Id
-                );
-                return false;
-            }
-            if (!robot.IsarConnected)
-            {
-                logger.LogWarning(
-                    "Mission run {MissionRunId} was not started as the robots {RobotId} isar instance is disconnected",
-                    missionRun.Id,
-                    robot.Id
-                );
-                return false;
-            }
-            if (robot.Deprecated)
-            {
-                logger.LogWarning(
-                    "Mission run {MissionRunId} was not started as the robot {RobotId} is deprecated",
-                    missionRun.Id,
-                    robot.Id
-                );
-                return false;
-            }
-            return true;
         }
 
         public async Task AbortActiveReturnToHomeMission(string robotId)
