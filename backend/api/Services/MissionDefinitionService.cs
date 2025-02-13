@@ -247,9 +247,6 @@ namespace Api.Services
                 .Include(missionDefinition => missionDefinition.LastSuccessfulRun)
                 .ThenInclude(missionRun => missionRun != null ? missionRun.Tasks : null)!
                 .ThenInclude(missionTask => missionTask.Inspection)
-                .ThenInclude(inspection =>
-                    inspection != null ? inspection.InspectionFindings : null
-                )
                 .Include(missionDefinition => missionDefinition.InspectionArea)
                 .Where(
                     (m) =>

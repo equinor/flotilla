@@ -20,10 +20,6 @@ namespace Api.Services
             IsarTaskStatus isarTaskStatus
         );
         public Task<Inspection?> ReadByIsarTaskId(string id, bool readOnly = true);
-        public Task<Inspection?> AddFinding(
-            InspectionFindingQuery inspectionFindingsQuery,
-            string isarTaskId
-        );
     }
 
     [SuppressMessage(
@@ -123,35 +119,11 @@ namespace Api.Services
             if (accessRoleService.IsUserAdmin() || !accessRoleService.IsAuthenticationAvailable())
                 return (
                     readOnly ? context.Inspections.AsNoTracking() : context.Inspections.AsTracking()
-                ).Include(inspection => inspection.InspectionFindings);
+                );
             else
                 throw new UnauthorizedAccessException(
                     $"User does not have permission to view inspections"
                 );
-        }
-
-        public async Task<Inspection?> AddFinding(
-            InspectionFindingQuery inspectionFindingQuery,
-            string isarTaskId
-        )
-        {
-            var inspection = await ReadByIsarTaskId(isarTaskId, readOnly: true);
-
-            if (inspection is null)
-            {
-                return null;
-            }
-
-            var inspectionFinding = new InspectionFinding
-            {
-                InspectionDate = inspectionFindingQuery.InspectionDate.ToUniversalTime(),
-                Finding = inspectionFindingQuery.Finding,
-                IsarTaskId = isarTaskId,
-            };
-
-            inspection.InspectionFindings.Add(inspectionFinding);
-            await Update(inspection);
-            return inspection;
         }
 
         private async Task<IDAInspectionDataResponse?> GetInspectionStorageInfo(string inspectionId)
@@ -229,10 +201,6 @@ namespace Api.Services
 
         public void DetachTracking(FlotillaDbContext context, Inspection inspection)
         {
-            foreach (var inspectionFinding in inspection.InspectionFindings)
-            {
-                context.Entry(inspectionFinding).State = EntityState.Detached;
-            }
             context.Entry(inspection).State = EntityState.Detached;
         }
     }

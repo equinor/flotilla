@@ -117,8 +117,6 @@ namespace Api.Database.Models
 
         public DateTime? EndTime { get; private set; }
 
-        public List<InspectionFinding> InspectionFindings { get; set; }
-
         public void UpdateWithIsarInfo(IsarTask isarTask)
         {
             UpdateStatus(isarTask.TaskStatus);
