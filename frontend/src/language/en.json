@@ -184,7 +184,7 @@
     "Conflicting inspection areas": "Conflicting inspection areas",
     "The missions you are trying to add are on": "The missions you are trying to add are on",
     "but the robot is currently running missions on": "but the robot is currently running missions on",
-    "Will not be added dialog text": "These missions won't be added. If you want to add these missions you first have to empty the queue and stop ongoing missions.",
+    "Will not be added dialog text": "These missions won't be added.",
     "The missions you are trying to add are on these inspection areas:": "The missions you are trying to add are on these inspection areas:",
     "You can only add missions from one inspection area.": "You can only add missions from one inspection area.",
     "Unknown inspection area": "Unknown inspection area",
