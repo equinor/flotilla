@@ -271,12 +271,20 @@ namespace Api.Test.Controllers
                 SerializerOptions
             );
 
+            // Next mission can be any of these three missions due to timing
+            var possibleNextMissionRuns = new List<string>
+            {
+                missionRunOne!.Id,
+                missionRunTwo!.Id,
+                missionRunThree!.Id,
+            };
+
             Assert.True(nextMissionResponse.IsSuccessStatusCode);
             Assert.NotNull(nextMissionRun);
             Assert.Equal(missionRunOne!.MissionId, activeMissionRun.MissionId);
             Assert.Equal(missionRunTwo!.MissionId, activeMissionRun.MissionId);
             Assert.Equal(missionRunThree!.MissionId, activeMissionRun.MissionId);
-            Assert.True(nextMissionRun.Id == missionRunTwo.Id);
+            Assert.Contains(nextMissionRun.Id, possibleNextMissionRuns);
         }
 
         [Fact]
