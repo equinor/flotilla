@@ -65,11 +65,7 @@ namespace Api.Services
         {
             return (
                 readOnly ? context.MissionTasks.AsNoTracking() : context.MissionTasks.AsTracking()
-            )
-                .Include(missionTask => missionTask.Inspection)
-                .ThenInclude(inspection =>
-                    inspection != null ? inspection.InspectionFindings : null
-                );
+            ).Include(missionTask => missionTask.Inspection);
         }
 
         public void DetachTracking(FlotillaDbContext context, MissionTask missionTask)

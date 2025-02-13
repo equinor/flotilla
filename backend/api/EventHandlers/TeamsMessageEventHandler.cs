@@ -4,6 +4,8 @@ using System.Text;
 using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -42,10 +44,7 @@ namespace Api.EventHandlers
 
         private async void OnTeamsMessageReceived(object? sender, TeamsMessageEventArgs e)
         {
-            string url = InspectionFindingEventHandler.GetWebhookURL(
-                _configuration,
-                "TeamsSystemStatusNotification"
-            );
+            string url = GetWebhookURL(_configuration, "TeamsSystemStatusNotification");
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json")
@@ -93,6 +92,24 @@ namespace Api.EventHandlers
             var content = new StringContent(jsonMessage, Encoding.UTF8, "application/json");
 
             return content;
+        }
+
+        private static string GetWebhookURL(IConfiguration configuration, string secretName)
+        {
+            string? keyVaultUri =
+                configuration.GetSection("KeyVault")["VaultUri"]
+                ?? throw new KeyNotFoundException("No key vault in config");
+
+            var keyVault = new SecretClient(
+                new Uri(keyVaultUri),
+                new DefaultAzureCredential(
+                    new DefaultAzureCredentialOptions { ExcludeSharedTokenCacheCredential = true }
+                )
+            );
+
+            string webhookURL = keyVault.GetSecret(secretName).Value.Value;
+
+            return webhookURL;
         }
     }
 }
