@@ -1,24 +1,27 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
+using System.IO;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using AdaptiveCards.Templating;
 using Api.Services;
 using Api.Services.Events;
 using Api.Utilities;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Api.EventHandlers
 {
     public class TeamsMessageEventHandler : EventHandlerBase
     {
         private readonly IConfiguration _configuration;
-        private readonly ILogger<MissionEventHandler> _logger;
+        private readonly ILogger<TeamsMessageEventHandler> _logger;
 
         public TeamsMessageEventHandler(
             IConfiguration configuration,
-            ILogger<MissionEventHandler> logger
+            ILogger<TeamsMessageEventHandler> logger
         )
         {
             _configuration = configuration;
@@ -71,25 +74,21 @@ namespace Api.EventHandlers
             }
         }
 
-        private static StringContent CreateTeamsMessageCard(string message)
+        private StringContent CreateTeamsMessageCard(string message)
         {
-            string jsonMessage = new JObject(
-                new JProperty("title", "System Status:"),
-                new JProperty("text", message),
-                new JProperty(
-                    "sections",
-                    new JArray(
-                        new JObject(
-                            new JProperty(
-                                "activitySubtitle",
-                                $"Generated on: {DateTime.UtcNow.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.CurrentCulture)}"
-                            )
-                        )
-                    )
-                )
-            ).ToString(Formatting.Indented);
+            var adaptiveCardJson = File.ReadAllText("Utilities/TeamsAdaptiveCard.json");
 
-            var content = new StringContent(jsonMessage, Encoding.UTF8, "application/json");
+            AdaptiveCardTemplate template = new AdaptiveCardTemplate(adaptiveCardJson);
+
+            string cardJson = template.Expand(
+                new
+                {
+                    Message = message,
+                    Date = DateTime.UtcNow.ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture),
+                }
+            );
+
+            var content = new StringContent(cardJson, Encoding.UTF8, "application/json");
 
             return content;
         }
