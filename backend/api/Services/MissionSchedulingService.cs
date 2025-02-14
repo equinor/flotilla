@@ -35,7 +35,6 @@ namespace Api.Services
         IMissionRunService missionRunService,
         IRobotService robotService,
         IIsarService isarService,
-        ILocalizationService localizationService,
         IReturnToHomeService returnToHomeService,
         ISignalRService signalRService,
         IErrorHandlingService errorHandlingService
@@ -44,7 +43,7 @@ namespace Api.Services
         public async Task StartNextMissionRunIfSystemIsAvailable(Robot robot)
         {
             logger.LogInformation(
-                "Robot {robotName} has status {robotStatus} and current area {areaName}",
+                "Robot {robotName} has status {robotStatus} and current inspection area {areaName}",
                 robot.Name,
                 robot.Status,
                 robot.CurrentInspectionArea?.Name
@@ -91,48 +90,15 @@ namespace Api.Services
                     "Mission {MissionRunId} cannot be started as it does not have an inspection area",
                     missionRun.Id
                 );
-                return;
             }
 
-            if (robot.CurrentInspectionArea == null)
+            if (robot.CurrentInspectionArea == null && missionRun.InspectionArea != null)
             {
                 await robotService.UpdateCurrentInspectionArea(
                     robot.Id,
-                    missionRun.InspectionArea!.Id
+                    missionRun.InspectionArea.Id
                 );
-                robot.CurrentInspectionArea = missionRun.InspectionArea!;
-            }
-            else if (
-                !await localizationService.RobotIsOnSameInspectionAreaAsMission(
-                    robot.Id,
-                    missionRun.InspectionArea!.Id
-                )
-            )
-            {
-                logger.LogError(
-                    "Robot {RobotNAme} with Id {RobotId} is not on the same inspection area as the mission run with Id {MissionRunId}. Aborting all mission runs",
-                    robot.Name,
-                    robot.Id,
-                    missionRun.Id
-                );
-                try
-                {
-                    await AbortAllScheduledNormalMissions(
-                        robot.Id,
-                        $"All missions aborted: Robot {robot.Name} is on inspection area {robot.CurrentInspectionArea?.Name} "
-                            + $"and mission run was on inspection area {missionRun.InspectionArea?.Name}"
-                    );
-                }
-                catch (RobotNotFoundException)
-                {
-                    logger.LogError(
-                        "Failed to abort all scheduled missions for robot {RobotName} with Id {RobotId}",
-                        robot.Name,
-                        robot.Id
-                    );
-                }
-
-                return;
+                robot.CurrentInspectionArea = missionRun.InspectionArea;
             }
 
             if (
@@ -197,7 +163,7 @@ namespace Api.Services
                     $"Failed to schedule return home for robot {robot.Name}",
                     ""
                 );
-                logger.LogError(
+                logger.LogWarning(
                     "Failed to schedule a return home mission for robot {RobotId}",
                     robot.Id
                 );

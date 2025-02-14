@@ -644,7 +644,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///   Empties the mission queue for the robot, stops the ongoing mission, sets the robot to available and current area is set to null
+        ///   Empties the mission queue for the robot, stops the ongoing mission, sets the robot to available and current inspection area is set to null
         /// </summary>
         /// <remarks>
         ///     <para> This query resets the robot </para>
