@@ -62,14 +62,6 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            if (
-                robot.RobotCapabilities is not null
-                && robot.RobotCapabilities.Contains(RobotCapabilitiesEnum.auto_localize)
-            )
-            {
-                return true;
-            }
-
             if (robot.CurrentInspectionArea is null)
             {
                 const string ErrorMessage =
