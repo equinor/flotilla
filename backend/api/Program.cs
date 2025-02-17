@@ -82,7 +82,6 @@ builder.Services.AddScoped<IInspectionAreaService, InspectionAreaService>();
 builder.Services.AddScoped<IAreaService, AreaService>();
 
 builder.Services.AddScoped<IErrorHandlingService, ErrorHandlingService>();
-builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 builder.Services.AddScoped<IReturnToHomeService, ReturnToHomeService>();
 builder.Services.AddScoped<ITaskDurationService, TaskDurationService>();
 builder.Services.AddScoped<ILastMissionRunService, LastMissionRunService>();

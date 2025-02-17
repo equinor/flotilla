@@ -71,4 +71,6 @@
     public class UnsupportedRobotCapabilityException(string message) : Exception(message) { }
 
     public class DatabaseUpdateException(string message) : Exception(message) { }
+
+    public class InvalidPolygonException(string message) : Exception(message) { }
 }

@@ -2,6 +2,7 @@
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Services
@@ -23,6 +24,11 @@ namespace Api.Services
 
         public abstract Task<Installation?> Delete(string id);
 
+        public Task AssertRobotIsOnSameInstallationAsMission(
+            Robot robot,
+            MissionDefinition missionDefinition
+        );
+
         public void DetachTracking(FlotillaDbContext context, Installation installation);
     }
 
@@ -38,7 +44,8 @@ namespace Api.Services
     )]
     public class InstallationService(
         FlotillaDbContext context,
-        IAccessRoleService accessRoleService
+        IAccessRoleService accessRoleService,
+        ILogger<InstallationService> logger
     ) : IInstallationService
     {
         public async Task<IEnumerable<Installation>> ReadAll(bool readOnly = true)
@@ -135,6 +142,32 @@ namespace Api.Services
             await ApplyDatabaseUpdate(installation);
 
             return installation;
+        }
+
+        public async Task AssertRobotIsOnSameInstallationAsMission(
+            Robot robot,
+            MissionDefinition missionDefinition
+        )
+        {
+            var missionInstallation = await ReadByInstallationCode(
+                missionDefinition.InstallationCode
+            );
+
+            if (missionInstallation is null)
+            {
+                string errorMessage =
+                    $"Could not find installation for installation code {missionDefinition.InstallationCode}";
+                logger.LogError("{Message}", errorMessage);
+                throw new InstallationNotFoundException(errorMessage);
+            }
+
+            if (robot.CurrentInstallation.Id != missionInstallation.Id)
+            {
+                string errorMessage =
+                    $"The robot {robot.Name} is on installation {robot.CurrentInstallation.Name} which is not the same as the mission installation {missionInstallation.Name}";
+                logger.LogError("{Message}", errorMessage);
+                throw new RobotNotInSameInstallationAsMissionException(errorMessage);
+            }
         }
 
         public void DetachTracking(FlotillaDbContext context, Installation installation)

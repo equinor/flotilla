@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -151,6 +152,119 @@ namespace Api.Test.Controllers
                     m.Id.Equals(mission!.MissionId, StringComparison.Ordinal)
                 )
             );
+        }
+
+        [Fact]
+        public async Task TestUpdatingInspectionAreaPolygon()
+        {
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+
+            var jsonString =
+                @"{
+                    ""zmin"": 0,
+                    ""zmax"": 10,
+                    ""positions"": [
+                        { ""x"": 0, ""y"": 0 },
+                        { ""x"": 0, ""y"": 10 },
+                        { ""x"": 10, ""y"": 10 },
+                        { ""x"": 10, ""y"": 0 }
+                    ]
+                }";
+
+            var content = new StringContent(jsonString, null, "application/json");
+
+            var expecedJsonString = await content.ReadAsStringAsync();
+            expecedJsonString = expecedJsonString.Replace("\n", "").Replace(" ", "");
+
+            // Act
+            var response = await Client.PatchAsync(
+                $"/inspectionAreas/{inspectionArea.Id}/area-polygon",
+                content
+            );
+            var inspectionAreaResponse = await response.Content.ReadFromJsonAsync<InspectionArea>(
+                SerializerOptions
+            );
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(expecedJsonString, inspectionAreaResponse!.AreaPolygonJson!);
+        }
+
+        [Fact]
+        public async Task ScheduleMissionOutsideInspectionAreaPolygonFails()
+        {
+            // Arrange
+            var installation = await DatabaseUtilities.NewInstallation();
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var jsonString =
+                @"{
+                    ""zmin"": 0,
+                    ""zmax"": 10,
+                    ""positions"": [
+                        { ""x"": 0, ""y"": 0 },
+                        { ""x"": 0, ""y"": 10 },
+                        { ""x"": 10, ""y"": 10 },
+                        { ""x"": 10, ""y"": 0 }
+                    ]
+                }";
+
+            var content = new StringContent(jsonString, null, "application/json");
+            var response = await Client.PatchAsync(
+                $"/inspectionAreas/{inspectionArea.Id}/area-polygon",
+                content
+            );
+
+            Assert.True(response.IsSuccessStatusCode);
+
+            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
+
+            var inspection = new CustomInspectionQuery
+            {
+                AnalysisType = AnalysisType.CarSeal,
+                InspectionTarget = new Position(),
+                InspectionType = InspectionType.Image,
+            };
+            var tasks = new List<CustomTaskQuery>
+            {
+                new()
+                {
+                    Inspection = inspection,
+                    TagId = "test",
+                    RobotPose = new Pose(11, 11, 11, 0, 0, 0, 1), // Position outside polygon
+                    TaskOrder = 0,
+                },
+            };
+            var missionQuery = new CustomMissionQuery
+            {
+                RobotId = robot.Id,
+                DesiredStartTime = DateTime.UtcNow,
+                InstallationCode = installation.InstallationCode,
+                InspectionAreaName = inspectionArea.Name,
+                Name = "TestMission",
+                Tasks = tasks,
+            };
+
+            var missionContent = new StringContent(
+                JsonSerializer.Serialize(missionQuery),
+                null,
+                "application/json"
+            );
+
+            // Act
+            var missionResponse = await Client.PostAsync("/missions/custom", missionContent);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, missionResponse.StatusCode);
         }
     }
 }

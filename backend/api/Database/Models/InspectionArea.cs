@@ -19,5 +19,7 @@ namespace Api.Database.Models
         [Required]
         [MaxLength(200)]
         public string Name { get; set; }
+
+        public string? AreaPolygonJson { get; set; } = "";
     }
 }

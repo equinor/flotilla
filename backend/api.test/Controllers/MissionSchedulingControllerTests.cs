@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
+using Api.Services.Models;
 using Api.Test.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
@@ -325,16 +326,42 @@ namespace Api.Test.Controllers
             var installation = await DatabaseUtilities.NewInstallation();
             var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
 
+            var inspectionPolygonOne = new InspectionAreaPolygon
+            {
+                ZMin = 0,
+                ZMax = 10,
+                Positions =
+                [
+                    new XYPosition { X = 0, Y = 0 },
+                    new XYPosition { X = 0, Y = 10 },
+                    new XYPosition { X = 10, Y = 10 },
+                    new XYPosition { X = 10, Y = 0 },
+                ],
+            };
             var inspectionAreaOne = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode,
-                "InspectionAreaOne"
+                "InspectionAreaOne",
+                inspectionPolygonOne
             );
 
+            var inspectionPolygonTwo = new InspectionAreaPolygon
+            {
+                ZMin = 0,
+                ZMax = 10,
+                Positions =
+                [
+                    new XYPosition { X = 11, Y = 11 },
+                    new XYPosition { X = 11, Y = 20 },
+                    new XYPosition { X = 20, Y = 20 },
+                    new XYPosition { X = 20, Y = 11 },
+                ],
+            };
             var inspectionAreaTwo = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode,
-                "InspectionAreaTwo"
+                "InspectionAreaTwo",
+                inspectionPolygonTwo
             );
 
             var robot = await DatabaseUtilities.NewRobot(
@@ -357,7 +384,7 @@ namespace Api.Test.Controllers
             // Act
             const string CustomMissionsUrl = "/missions/custom";
             var missionResponse = await Client.PostAsync(CustomMissionsUrl, content);
-            Assert.Equal(HttpStatusCode.Conflict, missionResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, missionResponse.StatusCode);
         }
 
         private static CustomMissionQuery CreateDefaultCustomMissionQuery(
