@@ -1,7 +1,9 @@
-﻿using Api.Controllers.Models;
+﻿using System.Text.Json;
+using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
-using Azure;
+using Api.Services.Models;
+using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -152,6 +154,43 @@ namespace Api.Controllers
         }
 
         /// <summary>
+        /// Update the inspection area json polygon
+        /// </summary>
+        [HttpPatch]
+        [Authorize(Roles = Role.Any)]
+        [Route("{inspectionAreaId}/area-polygon")]
+        [ProducesResponseType(typeof(ActionResult<InspectionArea>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<InspectionArea>> UpdateInspectionAreaJsonPolygon(
+            [FromRoute] string inspectionAreaId,
+            [FromBody] InspectionAreaPolygon areaPolygonJson
+        )
+        {
+            try
+            {
+                var inspectionArea = await inspectionAreaService.ReadById(
+                    inspectionAreaId,
+                    readOnly: true
+                );
+                if (inspectionArea == null)
+                    return NotFound($"Could not find inspection area with id {inspectionAreaId}");
+
+                var jsonString = JsonSerializer.Serialize(areaPolygonJson);
+                inspectionArea.AreaPolygonJson = jsonString;
+                var updatedInspectionArea = await inspectionAreaService.Update(inspectionArea);
+                return Ok(inspectionArea);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error during updating inspection area polygon");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
         /// Add a new inspection area
         /// </summary>
         /// <remarks>
@@ -163,7 +202,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<InspectionAreaResponse>> Create(
             [FromBody] CreateInspectionAreaQuery inspectionArea
         )
@@ -216,10 +255,15 @@ namespace Api.Controllers
                     new InspectionAreaResponse(newInspectionArea)
                 );
             }
+            catch (InvalidPolygonException e)
+            {
+                logger.LogError(e, "Invalid polygon");
+                return BadRequest("Invalid polygon");
+            }
             catch (Exception e)
             {
                 logger.LogError(e, "Error while creating new inspection area");
-                throw;
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
 

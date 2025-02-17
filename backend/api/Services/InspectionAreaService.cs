@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Text.Json;
 using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
+using Api.Services.Models;
 using Api.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +34,11 @@ namespace Api.Services
             bool readOnly = true
         );
 
+        public bool MissionTasksAreInsideInspectionAreaPolygon(
+            List<MissionTask> missionTasks,
+            InspectionArea inspectionArea
+        );
+
         public Task<InspectionArea> Create(CreateInspectionAreaQuery newInspectionArea);
 
         public Task<InspectionArea> Update(InspectionArea inspectionArea);
@@ -56,7 +63,8 @@ namespace Api.Services
         IInstallationService installationService,
         IPlantService plantService,
         IAccessRoleService accessRoleService,
-        ISignalRService signalRService
+        ISignalRService signalRService,
+        ILogger<InspectionAreaService> logger
     ) : IInspectionAreaService
     {
         public async Task<IEnumerable<InspectionArea>> ReadAll(bool readOnly = true)
@@ -127,6 +135,88 @@ namespace Api.Services
                 .FirstOrDefaultAsync();
         }
 
+        public bool MissionTasksAreInsideInspectionAreaPolygon(
+            List<MissionTask> missionTasks,
+            InspectionArea inspectionArea
+        )
+        {
+            if (string.IsNullOrEmpty(inspectionArea.AreaPolygonJson))
+            {
+                logger.LogWarning(
+                    "No polygon defined for inspection area {inspectionAreaName}",
+                    inspectionArea.Name
+                );
+                return true;
+            }
+
+            var inspectionAreaPolygon = JsonSerializer.Deserialize<InspectionAreaPolygon>(
+                inspectionArea.AreaPolygonJson
+            );
+
+            if (inspectionAreaPolygon == null)
+            {
+                logger.LogWarning(
+                    "Invalid polygon defined for inspection area {inspectionAreaName}",
+                    inspectionArea.Name
+                );
+                return true;
+            }
+
+            foreach (var missionTask in missionTasks)
+            {
+                var robotPosition = missionTask.RobotPose.Position;
+                if (
+                    !IsPositionInsidePolygon(
+                        inspectionAreaPolygon.Positions,
+                        robotPosition,
+                        inspectionAreaPolygon.ZMin,
+                        inspectionAreaPolygon.ZMax
+                    )
+                )
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsPositionInsidePolygon(
+            List<XYPosition> polygon,
+            Position position,
+            double zMin,
+            double zMax
+        )
+        {
+            var x = position.X;
+            var y = position.Y;
+            var z = position.Z;
+
+            if (z < zMin || z > zMax)
+            {
+                return false;
+            }
+
+            // Ray-casting algorithm for checking if the point is inside the polygon
+            var inside = false;
+            for (int i = 0, j = polygon.Count - 1; i < polygon.Count; j = i++)
+            {
+                var xi = polygon[i].X;
+                var yi = polygon[i].Y;
+                var xj = polygon[j].X;
+                var yj = polygon[j].Y;
+
+                var intersect =
+                    ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect)
+                {
+                    inside = !inside;
+                }
+            }
+
+            return inside;
+        }
+
         public async Task<InspectionArea> Create(CreateInspectionAreaQuery newInspectionAreaQuery)
         {
             var installation =
@@ -160,11 +250,29 @@ namespace Api.Services
                 );
             }
 
+            string inspectionAreaPolygon = "";
+            if (newInspectionAreaQuery.AreaPolygonJson != null)
+            {
+                try
+                {
+                    inspectionAreaPolygon = JsonSerializer.Serialize(
+                        newInspectionAreaQuery.AreaPolygonJson
+                    );
+                }
+                catch (Exception)
+                {
+                    throw new InvalidPolygonException(
+                        "The polygon is invalid and could not be parsed"
+                    );
+                }
+            }
+
             var inspectionArea = new InspectionArea
             {
                 Name = newInspectionAreaQuery.Name,
                 Installation = installation,
                 Plant = plant,
+                AreaPolygonJson = inspectionAreaPolygon,
             };
 
             context.Entry(inspectionArea.Installation).State = EntityState.Unchanged;
@@ -183,6 +291,14 @@ namespace Api.Services
 
         public async Task<InspectionArea> Update(InspectionArea inspectionArea)
         {
+            if (inspectionArea.Installation is not null)
+            {
+                context.Entry(inspectionArea.Installation).State = EntityState.Unchanged;
+            }
+            if (inspectionArea.Plant is not null)
+            {
+                context.Entry(inspectionArea.Plant).State = EntityState.Unchanged;
+            }
             var entry = context.Update(inspectionArea);
             await ApplyDatabaseUpdate(inspectionArea.Installation);
             _ = signalRService.SendMessageAsync(

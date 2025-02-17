@@ -4,6 +4,7 @@ using Api.Controllers.Models;
 using Api.Database.Context;
 using Api.Database.Models;
 using Api.Services;
+using Api.Services.Models;
 using Api.Test.Mocks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -33,7 +34,11 @@ namespace Api.Test.Database
         public DatabaseUtilities(FlotillaDbContext context)
         {
             _accessRoleService = new AccessRoleService(context, new HttpContextAccessor());
-            _installationService = new InstallationService(context, _accessRoleService);
+            _installationService = new InstallationService(
+                context,
+                _accessRoleService,
+                new Mock<ILogger<InstallationService>>().Object
+            );
             _missionTaskService = new MissionTaskService(
                 context,
                 new Mock<ILogger<MissionTaskService>>().Object
@@ -44,7 +49,8 @@ namespace Api.Test.Database
                 _installationService,
                 _plantService,
                 _accessRoleService,
-                new MockSignalRService()
+                new MockSignalRService(),
+                new Mock<ILogger<InspectionAreaService>>().Object
             );
             _areaService = new AreaService(
                 context,
@@ -150,7 +156,8 @@ namespace Api.Test.Database
         public async Task<InspectionArea> NewInspectionArea(
             string installationCode,
             string plantCode,
-            string inspectionAreaName = ""
+            string inspectionAreaName = "",
+            InspectionAreaPolygon? areaPolygonJson = null
         )
         {
             if (string.IsNullOrEmpty(inspectionAreaName))
@@ -160,6 +167,7 @@ namespace Api.Test.Database
                 InstallationCode = installationCode,
                 PlantCode = plantCode,
                 Name = inspectionAreaName,
+                AreaPolygonJson = areaPolygonJson,
             };
 
             return await _inspectionAreaService.Create(createInspectionAreaQuery);

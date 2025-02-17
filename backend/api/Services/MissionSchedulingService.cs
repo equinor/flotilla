@@ -35,10 +35,10 @@ namespace Api.Services
         IMissionRunService missionRunService,
         IRobotService robotService,
         IIsarService isarService,
-        ILocalizationService localizationService,
         IReturnToHomeService returnToHomeService,
         ISignalRService signalRService,
-        IErrorHandlingService errorHandlingService
+        IErrorHandlingService errorHandlingService,
+        IInspectionAreaService inspectionAreaService
     ) : IMissionSchedulingService
     {
         public async Task StartNextMissionRunIfSystemIsAvailable(Robot robot)
@@ -103,9 +103,9 @@ namespace Api.Services
                 robot.CurrentInspectionArea = missionRun.InspectionArea!;
             }
             else if (
-                !await localizationService.RobotIsOnSameInspectionAreaAsMission(
-                    robot.Id,
-                    missionRun.InspectionArea!.Id
+                !inspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
+                    (List<MissionTask>)missionRun.Tasks,
+                    missionRun.InspectionArea
                 )
             )
             {

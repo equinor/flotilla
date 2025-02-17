@@ -12,6 +12,7 @@ namespace Api.Controllers.Models
         public string PlantCode { get; set; }
 
         public string InstallationCode { get; set; }
+        public string? AreaPolygonJson { get; set; }
 
         [JsonConstructor]
 #nullable disable
@@ -25,6 +26,7 @@ namespace Api.Controllers.Models
             InspectionAreaName = inspectionArea.Name;
             PlantCode = inspectionArea.Plant.PlantCode;
             InstallationCode = inspectionArea.Installation.InstallationCode;
+            AreaPolygonJson = inspectionArea.AreaPolygonJson;
         }
     }
 }

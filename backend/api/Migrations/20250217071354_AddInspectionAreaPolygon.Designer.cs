@@ -3,6 +3,7 @@ using System;
 using Api.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Api.Migrations
 {
     [DbContext(typeof(FlotillaDbContext))]
-    partial class FlotillaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250217071354_AddInspectionAreaPolygon")]
+    partial class AddInspectionAreaPolygon
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,6 +160,33 @@ namespace Api.Migrations
                     b.HasIndex("PlantId");
 
                     b.ToTable("InspectionAreas");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.InspectionFinding", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Finding")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("InspectionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("InspectionId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IsarTaskId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InspectionId");
+
+                    b.ToTable("InspectionFindings");
                 });
 
             modelBuilder.Entity("Api.Database.Models.Installation", b =>
@@ -715,6 +745,13 @@ namespace Api.Migrations
                     b.Navigation("Plant");
                 });
 
+            modelBuilder.Entity("Api.Database.Models.InspectionFinding", b =>
+                {
+                    b.HasOne("Api.Database.Models.Inspection", null)
+                        .WithMany("InspectionFindings")
+                        .HasForeignKey("InspectionId");
+                });
+
             modelBuilder.Entity("Api.Database.Models.MissionDefinition", b =>
                 {
                     b.HasOne("Api.Database.Models.InspectionArea", "InspectionArea")
@@ -731,27 +768,6 @@ namespace Api.Migrations
                         .HasForeignKey("SourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.OwnsOne("Api.Database.Models.AutoScheduleFrequency", "AutoScheduleFrequency", b1 =>
-                        {
-                            b1.Property<string>("MissionDefinitionId")
-                                .HasColumnType("text");
-
-                            b1.Property<int[]>("DaysOfWeek")
-                                .IsRequired()
-                                .HasColumnType("integer[]");
-
-                            b1.Property<TimeOnly[]>("TimesOfDay")
-                                .IsRequired()
-                                .HasColumnType("time without time zone[]");
-
-                            b1.HasKey("MissionDefinitionId");
-
-                            b1.ToTable("MissionDefinitions");
-
-                            b1.WithOwner()
-                                .HasForeignKey("MissionDefinitionId");
-                        });
 
                     b.OwnsOne("Api.Database.Models.MapMetadata", "Map", b1 =>
                         {
@@ -832,8 +848,6 @@ namespace Api.Migrations
                             b1.Navigation("TransformationMatrices")
                                 .IsRequired();
                         });
-
-                    b.Navigation("AutoScheduleFrequency");
 
                     b.Navigation("InspectionArea");
 
@@ -1128,6 +1142,11 @@ namespace Api.Migrations
                         });
 
                     b.Navigation("ZoomDescription");
+                });
+
+            modelBuilder.Entity("Api.Database.Models.Inspection", b =>
+                {
+                    b.Navigation("InspectionFindings");
                 });
 
             modelBuilder.Entity("Api.Database.Models.MissionRun", b =>
