@@ -322,6 +322,8 @@ namespace Api.Services
                 robot?.CurrentInstallation,
                 robot != null ? new RobotResponse(robot) : null
             );
+            if (robot!.CurrentInstallation != null)
+                NotifySignalROfUpdatedRobot(robot!, robot!.CurrentInstallation!);
             DetachTracking(context, robot!);
         }
 
@@ -397,33 +399,57 @@ namespace Api.Services
                 throw new RobotNotFoundException(errorMessage);
             }
 
-            foreach (var property in typeof(Robot).GetProperties())
+            var updatedProperty = typeof(Robot)
+                .GetProperties()
+                .FirstOrDefault((property) => property.Name == propertyName);
+
+            if (updatedProperty == null)
             {
-                if (property.Name == propertyName)
-                {
-                    if (isLogLevelDebug)
-                        logger.LogDebug(
-                            "Setting {robotName} field {propertyName} from {oldValue} to {NewValue}",
-                            robot.Name,
-                            propertyName,
-                            property.GetValue(robot),
-                            value
-                        );
-                    else
-                        logger.LogInformation(
-                            "Setting {robotName} field {propertyName} from {oldValue} to {NewValue}",
-                            robot.Name,
-                            propertyName,
-                            property.GetValue(robot),
-                            value
-                        );
-                    property.SetValue(robot, value);
-                }
+                logger.LogError(
+                    "Failed to update {robotName} as it did not have the property {property}",
+                    robot.Name,
+                    propertyName
+                );
+                DetachTracking(robot);
+                return;
             }
+
+            if (isLogLevelDebug)
+                logger.LogDebug(
+                    "Setting {robotName} field {propertyName} from {oldValue} to {NewValue}",
+                    robot.Name,
+                    propertyName,
+                    updatedProperty.GetValue(robot),
+                    value
+                );
+            else
+                logger.LogInformation(
+                    "Setting {robotName} field {propertyName} from {oldValue} to {NewValue}",
+                    robot.Name,
+                    propertyName,
+                    updatedProperty.GetValue(robot),
+                    value
+                );
+
+            updatedProperty.SetValue(robot, value);
 
             try
             {
-                await Update(robot);
+                if (robot.CurrentInspectionArea is not null)
+                    context.Entry(robot.CurrentInspectionArea).State = EntityState.Unchanged;
+                context.Entry(robot.Model).State = EntityState.Unchanged;
+
+                context.Update(robot);
+                await ApplyDatabaseUpdate(robot.CurrentInstallation);
+                if (robot.CurrentInstallation != null)
+                    NotifySignalROfUpdatedRobot(
+                        robot!,
+                        robot!.CurrentInstallation!,
+                        propertyName,
+                        value
+                    );
+
+                DetachTracking(robot!);
             }
             catch (InvalidOperationException e)
             {
@@ -465,6 +491,37 @@ namespace Api.Services
             throw new UnauthorizedAccessException(
                 $"User does not have permission to update robot in installation {installation.Name}"
             );
+        }
+
+        private void NotifySignalROfUpdatedRobot(
+            Robot robot,
+            Installation installation,
+            string propertyName,
+            object? propertyValue
+        )
+        {
+            try
+            {
+                if (propertyName == typeof(InspectionArea).Name)
+                {
+                    if (propertyValue != null)
+                        propertyValue = new InspectionAreaResponse((InspectionArea)propertyValue);
+                    propertyValue = (InspectionAreaResponse?)propertyValue;
+                }
+
+                var responseObject = new RobotAttributeResponse(
+                    robot.Id,
+                    propertyName,
+                    propertyName
+                );
+
+                _ = signalRService.SendMessageAsync(
+                    "Robot attribute updated",
+                    installation,
+                    robot != null ? responseObject : null
+                );
+            }
+            catch (ArgumentException) { }
         }
 
         private void NotifySignalROfUpdatedRobot(Robot robot, Installation installation)
