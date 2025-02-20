@@ -7,6 +7,7 @@ export const StyledDict = {
         justify-content: center;
         padding: 8px;
         gap: 25px;
+        max-width: 340px;
     `,
 
     ButtonSection: styled.div`

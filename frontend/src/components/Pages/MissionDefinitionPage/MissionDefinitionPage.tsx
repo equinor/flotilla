@@ -1,7 +1,7 @@
 import { ChangeEvent, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MissionDefinitionHeader } from './MissionDefinitionHeader/MissionDefinitionHeader'
-import { BackButton } from '../../../utils/BackButton'
+import { BackButton } from 'utils/BackButton'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { Header } from 'components/Header/Header'
 import { MissionDefinition } from 'models/MissionDefinition'
@@ -11,13 +11,18 @@ import { MissionDefinitionUpdateForm } from 'models/MissionDefinitionUpdateForm'
 import { config } from 'config'
 import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
-import { StyledDict } from './MissionDefinitionStyledComponents'
+import { StyledDict } from 'components/Pages/MissionDefinitionPage/MissionDefinitionStyledComponents'
 import { useMissionDefinitionsContext } from 'components/Contexts/MissionDefinitionsContext'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import styled from 'styled-components'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
+import {
+    displayAutoScheduleFrequency,
+    EditAutoScheduleDialogContent,
+} from 'components/Pages/MissionDefinitionPage/EditAutoScheduleDialogContent'
+import { AutoScheduleFrequency } from 'models/AutoScheduleFrequency'
 
 const StyledDictCard = styled(StyledDict.Card)`
     box-shadow: ${tokens.elevation.raised};
@@ -26,7 +31,17 @@ const StyledDictCard = styled(StyledDict.Card)`
     overflow-y: hidden;
 `
 
-const MetadataItem = ({ title, content, onEdit }: { title: string; content: any; onEdit?: () => void }) => {
+const MetadataItem = ({
+    title,
+    content,
+    onEdit,
+    onDelete,
+}: {
+    title: string
+    content: any
+    onEdit?: () => void
+    onDelete?: () => void
+}) => {
     return (
         <StyledDict.FormItem>
             <StyledDictCard>
@@ -37,6 +52,11 @@ const MetadataItem = ({ title, content, onEdit }: { title: string; content: any;
                     {onEdit && (
                         <StyledDict.EditButton variant="ghost" onClick={onEdit}>
                             <Icon name={Icons.Edit} size={16} />
+                        </StyledDict.EditButton>
+                    )}
+                    {onDelete && (
+                        <StyledDict.EditButton variant="ghost" onClick={onDelete}>
+                            <Icon name={Icons.Delete} size={16} />
                         </StyledDict.EditButton>
                     )}
                 </StyledDict.TitleComponent>
@@ -54,6 +74,7 @@ const MetadataItem = ({ title, content, onEdit }: { title: string; content: any;
 
 const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: MissionDefinition }) => {
     const { TranslateText } = useLanguageContext()
+    const { setAlert, setListAlert } = useAlertContext()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState<boolean>(false)
     const [selectedField, setSelectedField] = useState<string>('')
     const navigate = useNavigate()
@@ -74,6 +95,32 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
             setIsEditDialogOpen(true)
             setSelectedField(editType)
         }
+    }
+
+    const onDeleteAutoSchedule = () => {
+        const defaultMissionDefinitionForm: MissionDefinitionUpdateForm = {
+            comment: missionDefinition.comment,
+            inspectionFrequency: missionDefinition.inspectionFrequency,
+            autoScheduleFrequency: undefined,
+            name: missionDefinition.name,
+            isDeprecated: false,
+        }
+        BackendAPICaller.updateMissionDefinition(missionDefinition.id, defaultMissionDefinitionForm).catch(() => {
+            setAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertContent
+                    translatedMessage={TranslateText('Failed to delete auto schedule frequency')}
+                />,
+                AlertCategory.ERROR
+            )
+            setListAlert(
+                AlertType.RequestFail,
+                <FailedRequestAlertListContent
+                    translatedMessage={TranslateText('Failed to delete auto schedule frequency')}
+                />,
+                AlertCategory.ERROR
+            )
+        })
     }
 
     return (
@@ -99,6 +146,12 @@ const MissionDefinitionPageBody = ({ missionDefinition }: { missionDefinition: M
                     title={TranslateText('Inspection frequency')}
                     content={displayInspectionFrequency(missionDefinition.inspectionFrequency)}
                     onEdit={onEdit('inspectionFrequency')}
+                />
+                <MetadataItem
+                    title={TranslateText('Automated scheduling')}
+                    content={displayAutoScheduleFrequency(missionDefinition.autoScheduleFrequency, TranslateText)}
+                    onEdit={onEdit('autoScheduleFrequency')}
+                    onDelete={onDeleteAutoSchedule}
                 />
                 <MetadataItem
                     title={TranslateText('Comment')}
@@ -140,6 +193,7 @@ const MissionDefinitionEditDialog = ({
     const defaultMissionDefinitionForm: MissionDefinitionUpdateForm = {
         comment: missionDefinition.comment,
         inspectionFrequency: missionDefinition.inspectionFrequency,
+        autoScheduleFrequency: missionDefinition.autoScheduleFrequency,
         name: missionDefinition.name,
         isDeprecated: false,
     }
@@ -171,6 +225,13 @@ const MissionDefinitionEditDialog = ({
         return [+inspectionParts[0], +inspectionParts[1]]
     }
 
+    const isUpdateButtonDisabled = () => {
+        if (fieldName !== 'autoScheduleFrequency') return false
+        if (form.autoScheduleFrequency?.daysOfWeek.length === 0) return true
+        if (form.autoScheduleFrequency?.timesOfDay.length === 0) return true
+        return false
+    }
+
     const handleSubmit = () => {
         const daysAndHours = getDayAndHoursFromInspectionFrequency(form.inspectionFrequency)
         if (daysAndHours[0] === 0 && daysAndHours[1] === 0) form.inspectionFrequency = undefined
@@ -197,6 +258,10 @@ const MissionDefinitionEditDialog = ({
     const inspectionFrequencyDays =
         !inspectionFrequency[0] || inspectionFrequency[0] === 0 ? '' : String(inspectionFrequency[0])
 
+    const changedAutoScheduleFrequency = (newAutoScheduleFrequency: AutoScheduleFrequency) => {
+        setForm({ ...form, autoScheduleFrequency: newAutoScheduleFrequency })
+    }
+
     const getFormItem = () => {
         switch (fieldName) {
             case 'inspectionFrequency':
@@ -213,6 +278,13 @@ const MissionDefinitionEditDialog = ({
                             }}
                         />
                     </StyledDict.InspectionFrequencyDiv>
+                )
+            case 'autoScheduleFrequency':
+                return (
+                    <EditAutoScheduleDialogContent
+                        currentAutoScheduleFrequency={missionDefinition.autoScheduleFrequency}
+                        changedAutoScheduleFrequency={changedAutoScheduleFrequency}
+                    />
                 )
             case 'comment':
                 return (
@@ -253,7 +325,12 @@ const MissionDefinitionEditDialog = ({
                     <Button onClick={() => closeEditDialog()} variant="outlined" color="primary">
                         {TranslateText('Cancel')}
                     </Button>
-                    <Button onClick={handleSubmit} variant="contained" color="primary">
+                    <Button
+                        onClick={handleSubmit}
+                        disabled={isUpdateButtonDisabled()}
+                        variant="contained"
+                        color="primary"
+                    >
                         {TranslateText('Update')}
                     </Button>
                 </StyledDict.ButtonSection>
