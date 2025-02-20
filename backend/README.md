@@ -22,7 +22,6 @@ Useful documentation of concepts and features in the .NET frameworks can be foun
     - [Applying migrations to staging and production databases](#applying-migrations-to-staging-and-production-databases)
   - [Formatting](#formatting)
     - [CSharpier](#csharpier)
-    - [Dotnet format](#dotnet-format)
   - [Monitoring](#monitoring)
   - [Authorization](#authorization)
 
