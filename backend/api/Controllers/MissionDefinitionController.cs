@@ -158,10 +158,19 @@ namespace Api.Controllers
                 return BadRequest("Name cannot be null.");
             }
 
+            try
+            {
+                missionDefinitionQuery.AutoScheduleFrequency?.ValidateAutoScheduleFrequency();
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
+
             missionDefinition.Name = missionDefinitionQuery.Name;
             missionDefinition.Comment = missionDefinitionQuery.Comment;
             missionDefinition.InspectionFrequency = missionDefinitionQuery.InspectionFrequency;
-
+            missionDefinition.AutoScheduleFrequency = missionDefinitionQuery.AutoScheduleFrequency;
             var newMissionDefinition = await missionDefinitionService.Update(missionDefinition);
             return new MissionDefinitionResponse(newMissionDefinition);
         }

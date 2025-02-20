@@ -1,4 +1,6 @@
-﻿namespace Api.Controllers.Models
+﻿using Api.Database.Models;
+
+namespace Api.Controllers.Models
 {
     public struct UpdateMissionDefinitionQuery
     {
@@ -16,5 +18,10 @@
         /// Change the inspection frequency
         /// </summary>
         public TimeSpan? InspectionFrequency { get; set; }
+
+        /// <summary>
+        /// Change the automated scheduling frequency
+        /// </summary>
+        public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
     }
 }
