@@ -89,7 +89,7 @@ namespace Api.EventHandlers
 
         private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
         {
-            if (e.Robot.Status != RobotStatus.Available)
+            if (!(e.Robot.Status is RobotStatus.Available or RobotStatus.Docked))
             {
                 _logger.LogWarning(
                     "OnRobotAvailable was triggered while robot was {robotStatus}",

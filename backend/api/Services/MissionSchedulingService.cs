@@ -183,25 +183,25 @@ namespace Api.Services
                 return;
             }
 
-            try
-            {
-                robot.CurrentInspectionArea ??= missionRun.InspectionArea;
-                await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
-                    robot
-                );
-            }
-            catch (ReturnToHomeMissionFailedToScheduleException)
-            {
-                signalRService.ReportGeneralFailToSignalR(
-                    robot,
-                    $"Failed to schedule return home for robot {robot.Name}",
-                    ""
-                );
-                logger.LogError(
-                    "Failed to schedule a return home mission for robot {RobotId}",
-                    robot.Id
-                );
-            }
+            // try
+            // {
+            //     robot.CurrentInspectionArea ??= missionRun.InspectionArea;
+            //     await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
+            //         robot
+            //     );
+            // }
+            // catch (ReturnToHomeMissionFailedToScheduleException)
+            // {
+            //     signalRService.ReportGeneralFailToSignalR(
+            //         robot,
+            //         $"Failed to schedule return home for robot {robot.Name}",
+            //         ""
+            //     );
+            //     logger.LogError(
+            //         "Failed to schedule a return home mission for robot {RobotId}",
+            //         robot.Id
+            //     );
+            // }
         }
 
         public async Task HandleBatteryAndPressureLevel(Robot robot)
@@ -598,7 +598,7 @@ namespace Api.Services
                 return false;
             }
 
-            if (robot.Status is not RobotStatus.Available)
+            if (!(robot.Status is RobotStatus.Available or RobotStatus.Docked))
             {
                 logger.LogInformation(
                     "Mission run {MissionRunId} was not started as the robot is not available",
