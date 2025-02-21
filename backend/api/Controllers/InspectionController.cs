@@ -60,13 +60,13 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet("{isarInspectionId}")]
         [Authorize(Roles = Role.User)]
-        [ProducesResponseType(typeof(Inspection), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FileResult), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Inspection>> GetInspectionImageByIsarInspectionId(
+        public async Task<ActionResult> GetInspectionImageByIsarInspectionId(
             [FromRoute] string isarInspectionId
         )
         {
