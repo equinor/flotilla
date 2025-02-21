@@ -135,7 +135,7 @@ export const StopRobotDialog = () => {
     const { installationCode } = useInstallationContext()
     const { setAlert, setListAlert } = useAlertContext()
 
-    const dockActivated = enabledRobots.find((r) => r.flotillaStatus === RobotFlotillaStatus.Docked) !== undefined
+    const dockActivated = enabledRobots.find((r) => r.flotillaStatus === RobotFlotillaStatus.Home) !== undefined
 
     const openDialog = async () => {
         setIsStopRobotDialogOpen(true)

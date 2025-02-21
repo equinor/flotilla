@@ -42,7 +42,7 @@ namespace Api.Controllers
             foreach (var robot in robots)
             {
                 emergencyActionService.SendRobotToDock(
-                    new RobotEmergencyEventArgs(robot, Database.Models.RobotFlotillaStatus.Docked)
+                    new RobotEmergencyEventArgs(robot, Database.Models.RobotFlotillaStatus.Home)
                 );
             }
 
