@@ -298,5 +298,6 @@
     "No automated scheduling set": "Automatisk kjøring er ikke satt",
     "No days have been selected. Please select days": "Ingen dager er valgt. Vennligst velg dager",
     "No times have been selected. Please add time": "Ingen tidspunkt er valgt. Vennligst legg til tidspunkt",
-    "Mission source id": "Mission source id"
+    "Mission source id": "Mission source id",
+    "Skip": "Neste"
 }

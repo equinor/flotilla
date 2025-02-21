@@ -99,7 +99,7 @@ const OngoingMissionButton = ({ missionName, robotId, missionTaskType }: Mission
                 <ButtonIcon variant="contained_icon" onClick={toggleSkipMissionDialog}>
                     <Icon name={Icons.Next} size={24} />
                 </ButtonIcon>
-                <Typography variant="caption">{TranslateText('Stop')}</Typography>
+                <Typography variant="caption">{TranslateText('Skip')}</Typography>
                 <SkipMissionDialog
                     missionName={missionName}
                     robotId={robotId}
@@ -135,7 +135,7 @@ const PausedMissionButton = ({ missionName, robotId, missionTaskType }: MissionP
                 <ButtonIcon variant="contained_icon" onClick={toggleSkipMissionDialog}>
                     <Icon name={Icons.Next} size={24} />
                 </ButtonIcon>
-                <Typography variant="caption">{TranslateText('Stop')}</Typography>
+                <Typography variant="caption">{TranslateText('Skip')}</Typography>
                 <SkipMissionDialog
                     missionName={missionName}
                     robotId={robotId}
