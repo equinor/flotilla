@@ -50,7 +50,10 @@ namespace Api.Database.Models
         [Required]
         public IList<MissionTask> Tasks
         {
-            get => _tasks.OrderBy(t => t.TaskOrder).ToList();
+            get =>
+                _tasks != null
+                    ? _tasks.OrderBy(t => t.TaskOrder).ToList()
+                    : new List<MissionTask>();
             set => _tasks = value;
         }
 
