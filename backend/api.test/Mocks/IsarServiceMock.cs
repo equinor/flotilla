@@ -21,6 +21,19 @@ namespace Api.Test.Mocks
             return isarServiceMissionResponse;
         }
 
+        public async Task<IsarMission> ReturnHome(Robot robot, MissionRun mission)
+        {
+            await Task.Run(() => Thread.Sleep(1));
+            var isarServiceMissionResponse = new IsarMission(
+                new IsarStartMissionResponse
+                {
+                    MissionId = System.Guid.NewGuid().ToString(),
+                    Tasks = [],
+                }
+            );
+            return isarServiceMissionResponse;
+        }
+
         public async Task<IsarControlMissionResponse> StopMission(Robot robot)
         {
             await Task.Run(() => Thread.Sleep(1));

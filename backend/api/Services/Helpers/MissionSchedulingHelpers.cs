@@ -20,14 +20,20 @@ public static class MissionSchedulingHelpers
             return false;
         }
 
-        if (robot.Status is not RobotStatus.Available)
+        switch (robot.Status)
         {
-            logger.LogInformation(
-                "Mission run {MissionRunId} was not started as the robot is not available",
-                missionRun.Id
-            );
-            return false;
+            case RobotStatus.Available:
+            case RobotStatus.Home:
+            case RobotStatus.ReturningHome:
+                break;
+            default:
+                logger.LogInformation(
+                    "Mission run {MissionRunId} was not started as the robot is not available, home or returning home",
+                    missionRun.Id
+                );
+                return false;
         }
+
         if (!robot.IsarConnected)
         {
             logger.LogWarning(

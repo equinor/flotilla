@@ -1,6 +1,7 @@
 ﻿using Api.Controllers.Models;
-using Api.Database.Models;
 using Api.Services;
+using Api.Services.Models;
+using Api.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,8 +11,8 @@ namespace Api.Controllers
     [Route("return-to-home")]
     public class ReturnToHomeController(
         ILogger<RobotController> logger,
-        IReturnToHomeService returnToHomeService,
-        IRobotService robotService
+        IRobotService robotService,
+        IIsarService isarService
     ) : ControllerBase
     {
         /// <summary>
@@ -19,12 +20,13 @@ namespace Api.Controllers
         /// </summary>
         [HttpPost("schedule-return-to-home/{robotId}")]
         [Authorize(Roles = Role.User)]
-        [ProducesResponseType(typeof(MissionRun), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<MissionRun>>> ScheduleReturnToHomeMission(
+        public async Task<ActionResult<IsarMission>> ScheduleReturnToHomeMission(
             [FromRoute] string robotId
         )
         {
@@ -35,19 +37,21 @@ namespace Api.Controllers
                 return NotFound();
             }
 
-            var returnToHomeMission =
-                await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
-                    robot,
-                    true
-                );
-            if (returnToHomeMission is null)
+            IsarMission returnHomeMission;
+            try
             {
-                string errorMessage = "Error while scheduling Return Home mission";
-                logger.LogError(errorMessage);
-                return StatusCode(StatusCodes.Status502BadGateway, $"{errorMessage}");
+                returnHomeMission = await isarService.ReturnHome(robot);
+                logger.LogError("all good");
+            }
+            catch (RobotBusyException e)
+            {
+                string errorMessage =
+                    $"Failed to create return to home mission for robot {robotId}";
+                logger.LogError(e, "{Message}", errorMessage);
+                return StatusCode(StatusCodes.Status409Conflict);
             }
 
-            return Ok(returnToHomeMission);
+            return Ok(returnHomeMission);
         }
     }
 }
