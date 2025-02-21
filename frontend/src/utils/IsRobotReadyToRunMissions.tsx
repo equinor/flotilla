@@ -35,21 +35,21 @@ export const NoMissionReason = ({ robot }: { robot: Robot }): JSX.Element => {
     if (isBatteryTooLow(robot)) {
         message = robot.model.batteryMissionStartThreshold
             ? TranslateText(
-                  'Battery is too low to start a mission. Queued missions will start when the battery is over {0}%.',
+                  'Battery is too low to start a mission. Queued missions will run when the battery is over {0}',
                   [robot.model.batteryMissionStartThreshold.toString()]
-              )
+              ) + '%.'
             : TranslateText('Battery is too low to start a mission.')
     } else if (isRobotPressureTooHigh(robot)) {
         message = robot.model.upperPressureWarningThreshold
             ? TranslateText(
-                  'Pressure is too high to start a mission. Queued missions will start when the pressure is under {0}mBar.',
+                  'Pressure is too high to start a mission. Queued missions will run when the pressure is under {0}mBar.',
                   [(robot.model.upperPressureWarningThreshold * 1000).toString()]
               )
             : TranslateText('Pressure is too high to start a mission.')
     } else if (isRobotPressureTooLow(robot)) {
         message = robot.model.lowerPressureWarningThreshold
             ? TranslateText(
-                  'Pressure is too low to start a mission. Queued missions will start when the pressure is over {0}mBar.',
+                  'Pressure is too low to start a mission. Queued missions will run when the pressure is over {0}mBar.',
                   [(robot.model.lowerPressureWarningThreshold * 1000).toString()]
               )
             : TranslateText('Pressure is too low to start a mission.')
