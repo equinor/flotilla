@@ -164,6 +164,8 @@ const SelectRobotComponent = memo(
                 options={enabledRobots.filter(
                     (r) =>
                         (r.status === RobotStatus.Available ||
+                            r.status === RobotStatus.Docked ||
+                            r.status === RobotStatus.ReturningHome ||
                             r.status === RobotStatus.Busy ||
                             r.status === RobotStatus.Recharging) &&
                         r.isarConnected

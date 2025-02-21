@@ -200,6 +200,7 @@
     "No robot available": "Ingen robot tilgjengelig",
     "Failed to schedule mission": "Kunne ikke planlegge oppdrag",
     "Return robot to home": "Send roboten hjem",
+    "ReturningHome": "På vei hjem",
     "Dock failure": "Ladestasjon feilet",
     "Failure to schedule": "Kunne ikke planlegge oppdrag",
     "WARNING": "ADVARSEL",

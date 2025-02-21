@@ -13,7 +13,9 @@ export enum RobotStatus {
     BlockedProtectiveStop = 'BlockedProtectiveStop',
     Docked = 'Docked',
     Recharging = 'Recharging',
+    ReturningHome = 'ReturningHome',
     ConnectionIssues = 'Connection Issues',
+    UnkownStatus = 'UnknownStatus',
 }
 
 export enum RobotFlotillaStatus {
