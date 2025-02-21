@@ -3,6 +3,7 @@ using Api.Configurations;
 using Api.Controllers;
 using Api.Controllers.Models;
 using Api.EventHandlers;
+using Api.HostedServices;
 using Api.Mqtt;
 using Api.Options;
 using Api.Services;
@@ -10,6 +11,7 @@ using Api.Services.ActionServices;
 using Api.SignalRHubs;
 using Api.Utilities;
 using Azure.Identity;
+using Hangfire;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Connections;
@@ -106,9 +108,13 @@ builder.Services.AddHostedService<MissionEventHandler>();
 builder.Services.AddHostedService<MqttService>();
 builder.Services.AddHostedService<IsarConnectionEventHandler>();
 builder.Services.AddHostedService<TeamsMessageEventHandler>();
+builder.Services.AddHostedService<AutoSchedulingHostedService>();
 
 builder.Services.Configure<AzureAdOptions>(builder.Configuration.GetSection("AzureAd"));
 builder.Services.Configure<MapBlobOptions>(builder.Configuration.GetSection("Maps"));
+
+builder.Services.AddHangfire(Configuration => Configuration.UseInMemoryStorage());
+builder.Services.AddHangfireServer();
 
 builder
     .Services.AddControllers()
