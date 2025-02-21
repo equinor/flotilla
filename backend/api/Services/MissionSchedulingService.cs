@@ -28,8 +28,6 @@ namespace Api.Services
 
         public void TriggerRobotAvailable(RobotAvailableEventArgs e);
 
-        public Task AbortActiveReturnToHomeMission(string robotId);
-
         public Task ScheduleMissionRunFromMissionDefinitionLastSuccessfullRun(
             string missionDefinitionId,
             string robotId
@@ -43,7 +41,6 @@ namespace Api.Services
         IMapService mapService,
         IRobotService robotService,
         IIsarService isarService,
-        IReturnToHomeService returnToHomeService,
         ISignalRService signalRService,
         IErrorHandlingService errorHandlingService,
         IInspectionAreaService inspectionAreaService,
@@ -196,25 +193,6 @@ namespace Api.Services
             catch (RobotBusyException)
             {
                 return;
-            }
-
-            try
-            {
-                await returnToHomeService.ScheduleReturnToHomeMissionRunIfNotAlreadyScheduled(
-                    robot
-                );
-            }
-            catch (ReturnToHomeMissionFailedToScheduleException)
-            {
-                signalRService.ReportGeneralFailToSignalR(
-                    robot,
-                    $"Failed to schedule return home for robot {robot.Name}",
-                    ""
-                );
-                logger.LogWarning(
-                    "Failed to schedule a return home mission for robot {RobotId}",
-                    robot.Id
-                );
             }
         }
 
@@ -609,47 +587,6 @@ namespace Api.Services
             );
 
             return ongoingMissions;
-        }
-
-        public async Task AbortActiveReturnToHomeMission(string robotId)
-        {
-            var activeReturnToHomeMission =
-                await returnToHomeService.GetActiveReturnToHomeMissionRun(robotId, readOnly: true);
-
-            if (activeReturnToHomeMission == null)
-            {
-                logger.LogWarning(
-                    "Attempted to abort active Return home mission for robot with Id {RobotId} but none was found",
-                    robotId
-                );
-                return;
-            }
-
-            try
-            {
-                await missionRunService.UpdateMissionRunProperty(
-                    activeReturnToHomeMission.Id,
-                    "Status",
-                    MissionStatus.Aborted
-                );
-            }
-            catch (MissionRunNotFoundException)
-            {
-                return;
-            }
-
-            try
-            {
-                await StopCurrentMissionRun(activeReturnToHomeMission.Robot.Id);
-            }
-            catch (RobotNotFoundException)
-            {
-                return;
-            }
-            catch (MissionRunNotFoundException)
-            {
-                return;
-            }
         }
 
         protected virtual void OnRobotAvailable(RobotAvailableEventArgs e)

@@ -68,11 +68,6 @@ namespace Api.EventHandlers
 
             _startMissionSemaphore.WaitOne();
 
-            if (missionRun.MissionRunType != MissionRunType.ReturnHome)
-            {
-                await MissionScheduling.AbortActiveReturnToHomeMission(missionRun.Robot.Id);
-            }
-
             try
             {
                 await MissionScheduling.StartNextMissionRunIfSystemIsAvailable(missionRun.Robot);
@@ -89,7 +84,14 @@ namespace Api.EventHandlers
 
         private async void OnRobotAvailable(object? sender, RobotAvailableEventArgs e)
         {
-            if (e.Robot.Status != RobotStatus.Available)
+            if (
+                !(
+                    e.Robot.Status
+                    is RobotStatus.Available
+                        or RobotStatus.Home
+                        or RobotStatus.ReturningHome
+                )
+            )
             {
                 _logger.LogWarning(
                     "OnRobotAvailable was triggered while robot was {robotStatus}",
