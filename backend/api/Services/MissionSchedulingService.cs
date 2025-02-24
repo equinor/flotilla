@@ -389,7 +389,7 @@ namespace Api.Services
             else
             {
                 string errorMessage =
-                    $"Robot with ID {robotId} could return home as it did not have an inspection area";
+                    $"Robot with ID {robotId} couldn't return home as it did not have an inspection area";
                 logger.LogError("{Message}", errorMessage);
                 throw new InspectionAreaNotFoundException(errorMessage);
             }
