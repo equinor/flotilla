@@ -157,7 +157,7 @@ namespace Api.EventHandlers
             {
                 await MissionScheduling.ScheduleMissionToDriveToDockPosition(robot.Id);
             }
-            catch (DockException ex)
+            catch (Exception ex) when (ex is DockException || ex is InspectionAreaNotFoundException)
             {
                 _logger.LogError(
                     ex,
