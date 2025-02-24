@@ -207,6 +207,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
                 <Centered>
                     {!isScheduled && (
                         <Button
+                            style={{ width: isScheduleButtonDisabled ? '110px' : '' }}
                             variant="ghost_icon"
                             disabled={isScheduleButtonDisabled}
                             onClick={() => {
