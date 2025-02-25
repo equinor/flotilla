@@ -6,11 +6,12 @@ import { SelectLanguage } from './LanguageSelector'
 import { Icons } from 'utils/icons'
 import { useAlertContext } from 'components/Contexts/AlertContext'
 import { AlertListItem } from 'components/Alerts/AlertsListItem'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { tokens } from '@equinor/eds-tokens'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
+import { useNavigate } from 'react-router-dom'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;
@@ -68,10 +69,18 @@ const Circle = styled.div`
     height: 9px;
     border-radius: 50%;
 `
+
 export const Header = ({ page }: { page: string }) => {
     const { alerts, listAlerts } = useAlertContext()
     const { installationName } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        if (installationName === '') {
+            navigate(`${config.FRONTEND_BASE_ROUTE}/`)
+        }
+    }, [installationName])
 
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState<boolean>(false)
     const referenceElementNotifications = useRef<HTMLButtonElement>(null)
@@ -90,7 +99,9 @@ export const Header = ({ page }: { page: string }) => {
                 <StyledWrapper>
                     <TopBar.Header
                         onClick={() => {
-                            window.location.href = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
+                            window.location.href = installationName
+                                ? `${config.FRONTEND_BASE_ROUTE}/FrontPage`
+                                : `${config.FRONTEND_BASE_ROUTE}/`
                         }}
                     >
                         <StyledTopBarHeader>

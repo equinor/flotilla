@@ -4,6 +4,7 @@ import { InspectionOverviewSection } from 'components/Pages/InspectionPage/Inspe
 import { StopRobotDialog } from './MissionOverview/StopDialogs'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionControlSection } from './MissionOverview/MissionControlSection'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 const StyledFrontPage = styled.div`
     display: flex;
@@ -15,14 +16,18 @@ const StyledFrontPage = styled.div`
 `
 
 export const FrontPage = () => {
+    const { installationCode } = useInstallationContext()
+
     return (
         <>
             <Header page={'frontPage'} />
-            <StyledFrontPage>
-                <StopRobotDialog />
-                <MissionControlSection />
-                <InspectionOverviewSection />
-            </StyledFrontPage>
+            {installationCode !== '' && (
+                <StyledFrontPage>
+                    <StopRobotDialog />
+                    <MissionControlSection />
+                    <InspectionOverviewSection />
+                </StyledFrontPage>
+            )}
         </>
     )
 }
