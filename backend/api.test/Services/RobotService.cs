@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Api.Controllers.Models;
 using Api.Database.Models;
 using Api.Services;
 using Api.Test.Database;
