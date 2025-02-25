@@ -372,10 +372,13 @@ namespace Api.Services
 #pragma warning disable CA1304
                 .Where(
                     (r) =>
-                        r.CurrentInstallation == null
-                        || r.CurrentInstallation.InstallationCode == null
-                        || accessibleInstallationCodes.Result.Contains(
-                            r.CurrentInstallation.InstallationCode.ToUpper()
+                        !r.Deprecated
+                        && (
+                            r.CurrentInstallation == null
+                            || r.CurrentInstallation.InstallationCode == null
+                            || accessibleInstallationCodes.Result.Contains(
+                                r.CurrentInstallation.InstallationCode.ToUpper()
+                            )
                         )
                 );
 #pragma warning restore CA1304
