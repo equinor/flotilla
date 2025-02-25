@@ -4,6 +4,7 @@ import { Header } from 'components/Header/Header'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import { styled } from 'styled-components'
 import { tokens } from '@equinor/eds-tokens'
+import { useInstallationContext } from 'components/Contexts/InstallationContext'
 
 export type RefreshProps = {
     refreshInterval: number
@@ -14,14 +15,16 @@ const StyledMissionHistoryPage = styled(StyledPage)`
 `
 export const MissionHistoryPage = () => {
     const refreshInterval = 1000
-
+    const { installationCode } = useInstallationContext()
     return (
         <>
             <Header page={'history'} />
-            <StyledMissionHistoryPage>
-                <BackButton />
-                <MissionHistoryView refreshInterval={refreshInterval} />
-            </StyledMissionHistoryPage>
+            {installationCode !== '' && (
+                <StyledMissionHistoryPage>
+                    <BackButton />
+                    <MissionHistoryView refreshInterval={refreshInterval} />
+                </StyledMissionHistoryPage>
+            )}
         </>
     )
 }

@@ -98,7 +98,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                                     AlertType.RequestFail,
                                     <FailedRequestAlertContent
                                         translatedMessage={TranslateText(
-                                            'Failed to retrieve areas on inspectionArea {0}',
+                                            'Failed to retrieve areas on inspection area {0}',
                                             [inspectionArea.inspectionAreaName]
                                         )}
                                     />,
@@ -108,7 +108,7 @@ export const InstallationProvider: FC<Props> = ({ children }) => {
                                     AlertType.RequestFail,
                                     <FailedRequestAlertListContent
                                         translatedMessage={TranslateText(
-                                            'Failed to retrieve areas on inspectionArea {0}',
+                                            'Failed to retrieve areas on inspection area {0}',
                                             [inspectionArea.inspectionAreaName]
                                         )}
                                     />,
