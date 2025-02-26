@@ -4,6 +4,7 @@ import { InspectionOverviewSection } from 'components/Pages/InspectionPage/Inspe
 import { StopRobotDialog } from './MissionOverview/StopDialogs'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionControlSection } from './MissionOverview/MissionControlSection'
+import { redirectIfNoInstallationSelected } from 'utils/RedirectIfNoInstallationSelected'
 
 const StyledFrontPage = styled.div`
     display: flex;
@@ -15,6 +16,8 @@ const StyledFrontPage = styled.div`
 `
 
 export const FrontPage = () => {
+    redirectIfNoInstallationSelected()
+
     return (
         <>
             <Header page={'frontPage'} />

@@ -4,6 +4,7 @@ import { Header } from 'components/Header/Header'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import { styled } from 'styled-components'
 import { tokens } from '@equinor/eds-tokens'
+import { redirectIfNoInstallationSelected } from 'utils/RedirectIfNoInstallationSelected'
 
 export type RefreshProps = {
     refreshInterval: number
@@ -14,6 +15,8 @@ const StyledMissionHistoryPage = styled(StyledPage)`
 `
 export const MissionHistoryPage = () => {
     const refreshInterval = 1000
+
+    redirectIfNoInstallationSelected()
 
     return (
         <>
