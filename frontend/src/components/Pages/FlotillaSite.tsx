@@ -2,11 +2,16 @@ import { config } from 'config'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { FrontPage } from './FrontPage/FrontPage'
 import { MissionPage } from './MissionPage/MissionPage'
-import { MissionHistoryPage } from './MissionHistoryPage/MissionHistoryPage'
 import { RobotPage } from './RobotPage/RobotPage'
 import { APIUpdater } from 'components/Contexts/APIUpdater'
 import { MissionDefinitionPage } from './MissionDefinitionPage/MissionDefinitionPage'
 import { AssetSelectionPage } from './AssetSelectionPage/AssetSelectionPage'
+import {
+    DeckOverviewPage,
+    MissionControlPage,
+    MissionHistoryPage,
+    PredefinedMissionsPage,
+} from '../NavigationMenu/NavigationMenuPages'
 
 export const FlotillaSite = () => {
     return (
@@ -23,6 +28,15 @@ export const FlotillaSite = () => {
                         />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/history`} element={<MissionHistoryPage />} />
                         <Route path={`${config.FRONTEND_BASE_ROUTE}/robot/:robotId`} element={<RobotPage />} />
+                        <Route path={`${config.FRONTEND_BASE_ROUTE}/missionControl`} element={<MissionControlPage />} />
+                        <Route
+                            path={`${config.FRONTEND_BASE_ROUTE}/inspectionOverview`}
+                            element={<DeckOverviewPage />}
+                        />
+                        <Route
+                            path={`${config.FRONTEND_BASE_ROUTE}/predefinedMissions`}
+                            element={<PredefinedMissionsPage />}
+                        />
                     </Routes>
                 </BrowserRouter>
             </APIUpdater>

@@ -1,6 +1,5 @@
-import { Icon, Tabs, Typography, Tooltip } from '@equinor/eds-core-react'
+import { Icon, Typography, Tooltip } from '@equinor/eds-core-react'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
-import { InspectionSection } from './InspectionSection'
 import { useRef, useState } from 'react'
 import { BackendAPICaller } from 'api/ApiCaller'
 import { AllInspectionsTable } from './InspectionTable'
@@ -22,6 +21,9 @@ const StyledContent = styled.div`
     display: flex;
     flex-direction: column;
     align-items: end;
+    @media (max-width: 600px) {
+        align-items: start;
+    }
 `
 const StyledMissionButton = styled.div`
     display: flex;
@@ -47,7 +49,6 @@ export const InspectionOverviewSection = () => {
     const [isFetchingMissions, setIsFetchingMissions] = useState<boolean>(false)
     const [isScheduleMissionDialogOpen, setIsScheduleMissionDialogOpen] = useState<boolean>(false)
     const [missions, setMissions] = useState<MissionDefinition[]>([])
-    const [activeTab, setActiveTab] = useState(0)
 
     const isScheduleButtonDisabled = enabledRobots.length === 0 || installationCode === ''
 
@@ -99,43 +100,30 @@ export const InspectionOverviewSection = () => {
     )
 
     return (
-        <Tabs activeTab={activeTab} onChange={setActiveTab}>
-            <Tabs.List>
-                <Tabs.Tab>{TranslateText('Inspection Overview')}</Tabs.Tab>
-                <Tabs.Tab>{TranslateText('Predefined Missions')}</Tabs.Tab>
-            </Tabs.List>
-            <Tabs.Panels>
-                <Tabs.Panel>
-                    <InspectionSection />
-                </Tabs.Panel>
-                <Tabs.Panel>
-                    <StyledView>
-                        <StyledContent>
-                            <StyledMissionButton>
-                                {isScheduleMissionDialogOpen && (
-                                    <ScheduleMissionDialog
-                                        isFetchingMissions={isFetchingMissions}
-                                        missions={missions}
-                                        onClose={() => setIsScheduleMissionDialogOpen(false)}
-                                    />
-                                )}
-                                <AddPredefinedMissionsButton />
-                            </StyledMissionButton>
-                            {allInspections.length > 0 ? (
-                                <AllInspectionsTable inspections={allInspections} />
-                            ) : (
-                                <StyledPlaceholderContent>
-                                    <StyledDict.Placeholder>
-                                        <Typography variant="h4" color="disabled">
-                                            {TranslateText('No predefined missions available')}
-                                        </Typography>
-                                    </StyledDict.Placeholder>
-                                </StyledPlaceholderContent>
-                            )}
-                        </StyledContent>
-                    </StyledView>
-                </Tabs.Panel>
-            </Tabs.Panels>
-        </Tabs>
+        <StyledView>
+            <StyledContent>
+                <StyledMissionButton>
+                    {isScheduleMissionDialogOpen && (
+                        <ScheduleMissionDialog
+                            isFetchingMissions={isFetchingMissions}
+                            missions={missions}
+                            onClose={() => setIsScheduleMissionDialogOpen(false)}
+                        />
+                    )}
+                    <AddPredefinedMissionsButton />
+                </StyledMissionButton>
+                {allInspections.length > 0 ? (
+                    <AllInspectionsTable inspections={allInspections} />
+                ) : (
+                    <StyledPlaceholderContent>
+                        <StyledDict.Placeholder>
+                            <Typography variant="h4" color="disabled">
+                                {TranslateText('No predefined missions available')}
+                            </Typography>
+                        </StyledDict.Placeholder>
+                    </StyledPlaceholderContent>
+                )}
+            </StyledContent>
+        </StyledView>
     )
 }

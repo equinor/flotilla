@@ -88,6 +88,14 @@ export const AssetSelectionPage = () => {
     )
 }
 
+export const findNavigationPage = () => {
+    if (window.innerWidth <= 600) {
+        return `${config.FRONTEND_BASE_ROUTE}/missionControl`
+    } else {
+        return `${config.FRONTEND_BASE_ROUTE}/FrontPage`
+    }
+}
+
 const InstallationPicker = () => {
     const { installationName, switchInstallation } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
@@ -159,7 +167,7 @@ const InstallationPicker = () => {
             <StyledButton
                 onClick={() => switchInstallation(selectedInstallation)}
                 disabled={!selectedInstallation}
-                href={`${config.FRONTEND_BASE_ROUTE}/FrontPage`}
+                href={findNavigationPage()}
             >
                 {TranslateText('Confirm installation')}
             </StyledButton>
