@@ -1,26 +1,27 @@
-import { MissionHistoryView } from './MissionHistoryView'
 import { BackButton } from 'utils/BackButton'
 import { Header } from 'components/Header/Header'
 import { StyledPage } from 'components/Styles/StyledComponents'
 import { styled } from 'styled-components'
 import { tokens } from '@equinor/eds-tokens'
-
-export type RefreshProps = {
-    refreshInterval: number
-}
+import { ReactNode } from 'react'
+import { StopRobotDialog } from '../FrontPage/MissionOverview/StopDialogs'
 
 const StyledMissionHistoryPage = styled(StyledPage)`
     background-color: ${tokens.colors.ui.background__light.hex};
 `
-export const MissionHistoryPage = () => {
-    const refreshInterval = 1000
+interface DefaultPageProps {
+    children: ReactNode
+    pageName: string
+}
 
+export const DefaultPage = ({ children, pageName }: DefaultPageProps) => {
     return (
         <>
-            <Header page={'history'} />
+            <Header page={pageName} />
             <StyledMissionHistoryPage>
                 <BackButton />
-                <MissionHistoryView refreshInterval={refreshInterval} />
+                <StopRobotDialog />
+                {children}
             </StyledMissionHistoryPage>
         </>
     )

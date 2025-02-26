@@ -6,7 +6,6 @@ import { useRobotContext } from 'components/Contexts/RobotContext'
 import { tokens } from '@equinor/eds-tokens'
 import { OngoingMissionCard, OngoingMissionPlaceholderCard } from './OngoingMissionCard'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { MissionHistoryButton } from './MissionHistoryButton'
 import { Robot } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
@@ -74,7 +73,6 @@ export const MissionControlSection = (): JSX.Element => {
                 {enabledRobots.length > 0 && missionControlCards}
                 {enabledRobots.length === 0 && <MissionControlPlaceholderCard />}
             </MissionControlBody>
-            <MissionHistoryButton />
         </MissionControlStyle>
     )
 }

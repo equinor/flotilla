@@ -4,24 +4,56 @@ import { InspectionOverviewSection } from 'components/Pages/InspectionPage/Inspe
 import { StopRobotDialog } from './MissionOverview/StopDialogs'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionControlSection } from './MissionOverview/MissionControlSection'
+import { useState } from 'react'
+import { Tabs } from '@equinor/eds-core-react'
+import { useLanguageContext } from 'components/Contexts/LanguageContext'
+import { InspectionSection } from '../InspectionPage/InspectionSection'
+import { MissionHistoryView } from '../MissionHistory/MissionHistoryView'
 
 const StyledFrontPage = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 3rem;
-    padding: 15px 15px;
+    gap: 1rem;
+    padding: 20px 20px;
     background-color: ${tokens.colors.ui.background__light.hex};
     min-height: calc(100vh - 65px);
+
+    @media (max-width: 600px) {
+        display: none;
+    }
 `
 
 export const FrontPage = () => {
+    const [activeTab, setActiveTab] = useState(0)
+    const { TranslateText } = useLanguageContext()
+
     return (
         <>
             <Header page={'frontPage'} />
             <StyledFrontPage>
                 <StopRobotDialog />
-                <MissionControlSection />
-                <InspectionOverviewSection />
+                <Tabs activeTab={activeTab} onChange={setActiveTab}>
+                    <Tabs.List>
+                        <Tabs.Tab>{TranslateText('Mission Control')}</Tabs.Tab>
+                        <Tabs.Tab>{TranslateText('Inspection Overview')}</Tabs.Tab>
+                        <Tabs.Tab>{TranslateText('Predefined Missions')}</Tabs.Tab>
+                        <Tabs.Tab>{TranslateText('Mission History')}</Tabs.Tab>
+                    </Tabs.List>
+                    <Tabs.Panels>
+                        <Tabs.Panel>
+                            <MissionControlSection />
+                        </Tabs.Panel>
+                        <Tabs.Panel>
+                            <InspectionSection />
+                        </Tabs.Panel>
+                        <Tabs.Panel>
+                            <InspectionOverviewSection />
+                        </Tabs.Panel>
+                        <Tabs.Panel>
+                            <MissionHistoryView refreshInterval={1000} />
+                        </Tabs.Panel>
+                    </Tabs.Panels>
+                </Tabs>
             </StyledFrontPage>
         </>
     )

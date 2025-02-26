@@ -46,6 +46,7 @@ import {
     skip_next,
     pause,
     delete_to_trash,
+    menu,
 } from '@equinor/eds-icons'
 
 Icon.add({
@@ -95,6 +96,7 @@ Icon.add({
     skip_next,
     pause,
     delete_to_trash,
+    menu,
 })
 
 export enum Icons {
@@ -144,4 +146,5 @@ export enum Icons {
     Next = 'skip_next',
     PauseStandard = 'pause',
     Delete = 'delete_to_trash',
+    Menu = 'menu',
 }
