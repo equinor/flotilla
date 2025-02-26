@@ -68,6 +68,7 @@ const Circle = styled.div`
     height: 9px;
     border-radius: 50%;
 `
+
 export const Header = ({ page }: { page: string }) => {
     const { alerts, listAlerts } = useAlertContext()
     const { installationName } = useInstallationContext()
@@ -90,7 +91,9 @@ export const Header = ({ page }: { page: string }) => {
                 <StyledWrapper>
                     <TopBar.Header
                         onClick={() => {
-                            window.location.href = `${config.FRONTEND_BASE_ROUTE}/FrontPage`
+                            window.location.href = installationName
+                                ? `${config.FRONTEND_BASE_ROUTE}/FrontPage`
+                                : `${config.FRONTEND_BASE_ROUTE}/`
                         }}
                     >
                         <StyledTopBarHeader>
