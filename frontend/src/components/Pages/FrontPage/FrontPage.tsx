@@ -5,6 +5,7 @@ import { StopRobotDialog } from './MissionOverview/StopDialogs'
 import { tokens } from '@equinor/eds-tokens'
 import { MissionControlSection } from './MissionOverview/MissionControlSection'
 import { redirectIfNoInstallationSelected } from 'utils/RedirectIfNoInstallationSelected'
+import { AutoScheduleSection } from './AutoScheduleSection/AutoScheduleSection'
 
 const StyledFrontPage = styled.div`
     display: flex;
@@ -24,6 +25,7 @@ export const FrontPage = () => {
             <StyledFrontPage>
                 <StopRobotDialog />
                 <MissionControlSection />
+                <AutoScheduleSection />
                 <InspectionOverviewSection />
             </StyledFrontPage>
         </>
