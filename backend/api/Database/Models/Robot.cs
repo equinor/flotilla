@@ -174,9 +174,11 @@ namespace Api.Database.Models
     {
         Available,
         Busy,
+        Docked,
         Offline,
         Blocked,
         BlockedProtectiveStop,
+        ReturningHome,
     }
 
     public enum RobotFlotillaStatus
