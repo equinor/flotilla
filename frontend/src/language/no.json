@@ -157,7 +157,7 @@
     "lookout": "Hevet posisjon",
     "transport": "Transport",
     "Queue the missions": "Legg oppdragene i kø",
-    "Inspection Overview": "Inspeksjonsoversikt",
+    "Deck Overview": "Inspeksjonsoversikt",
     "Predefined Missions": "Forhåndsdefinerte oppdrag",
     "Create new mission": "Lag nytt oppdrag",
     "Must be inspected this week": "Må inspiseres denne uken",
@@ -303,5 +303,6 @@
     "No missions": "Ingen oppdrag",
     "Auto Scheduling": "Automatisk kjøring",
     "These missions will be automatically scheduled at the specified time": "Disse oppdragene vil automatisk bli kjørt på de spesifiserte tidspunktene",
-    "Failed to Auto Schedule Missions": "Kunne ikke planlegge automatisk start av oppdrag"
+    "Failed to Auto Schedule Missions": "Kunne ikke planlegge automatisk start av oppdrag",
+    "Menu": "Meny"
 }

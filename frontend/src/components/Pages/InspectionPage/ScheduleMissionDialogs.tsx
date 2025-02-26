@@ -11,7 +11,6 @@ import { StyledAutoComplete, StyledButton, StyledDialog } from 'components/Style
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
 import { FailedRequestAlertContent, FailedRequestAlertListContent } from 'components/Alerts/FailedRequestAlert'
 import { AlertType, useAlertContext } from 'components/Contexts/AlertContext'
-import { FrontPageSectionId } from 'models/FrontPageSectionId'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { ScheduleMissionWithInspectionAreaVerification } from 'components/Displays/InspectionAreaVerificationDialogs/ScheduleMissionWithInspectionAreaVerification'
 
@@ -116,15 +115,6 @@ export const ScheduleMissionDialog = (props: IProps): JSX.Element => {
                 return updatedSet
             })
         })
-
-        if (missionsToSchedule.length > 0) {
-            const robotCard = document.getElementById(FrontPageSectionId.RobotCard + selectedRobot.id)
-            const topBarHeight = document.getElementById(FrontPageSectionId.TopBar)?.offsetHeight ?? 0
-
-            if (robotCard) {
-                window.scroll({ top: robotCard.offsetTop - topBarHeight, behavior: 'smooth' })
-            }
-        }
 
         setMissionsToSchedule(undefined)
         setSelectedRobot(undefined)

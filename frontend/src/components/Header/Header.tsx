@@ -11,6 +11,8 @@ import { tokens } from '@equinor/eds-tokens'
 import { AlertBanner } from 'components/Alerts/AlertsBanner'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
+import { NavigationMenu } from 'components/NavigationMenu/NavigationMenu'
+import { findNavigationPage } from 'components/Pages/AssetSelectionPage/AssetSelectionPage'
 
 const StyledTopBar = styled(TopBar)`
     align-items: center;
@@ -69,6 +71,13 @@ const Circle = styled.div`
     border-radius: 50%;
 `
 
+const StyledNavigationMenu = styled.div`
+    display: none;
+    @media (max-width: 600px) {
+        display: block;
+    }
+`
+
 export const Header = ({ page }: { page: string }) => {
     const { alerts, listAlerts } = useAlertContext()
     const { installationName } = useInstallationContext()
@@ -91,9 +100,7 @@ export const Header = ({ page }: { page: string }) => {
                 <StyledWrapper>
                     <TopBar.Header
                         onClick={() => {
-                            window.location.href = installationName
-                                ? `${config.FRONTEND_BASE_ROUTE}/FrontPage`
-                                : `${config.FRONTEND_BASE_ROUTE}/`
+                            window.location.href = findNavigationPage()
                         }}
                     >
                         <StyledTopBarHeader>
@@ -171,6 +178,9 @@ export const Header = ({ page }: { page: string }) => {
                     )}
                 </Popover.Content>
             </Popover>
+            <StyledNavigationMenu>
+                <NavigationMenu />
+            </StyledNavigationMenu>
             {Object.entries(alerts).length > 0 && installationName && page !== 'root' && (
                 <StyledAlertList>
                     {Object.entries(alerts).map(([key, value]) => (

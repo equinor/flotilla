@@ -2,7 +2,6 @@ import { CircularProgress, Pagination, Table, Typography, Chip, Button, Dialog }
 import { Mission, MissionStatusFilterOptions } from 'models/Mission'
 import { useCallback, useEffect, useState } from 'react'
 import { HistoricMissionCard } from './HistoricMissionCard'
-import { RefreshProps } from './MissionHistoryPage'
 import styled from 'styled-components'
 import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { PaginationHeader } from 'models/PaginatedResponse'
@@ -104,6 +103,10 @@ const flatten = (filters: IFilterState) => {
         allFilters.push({ name: filterName, value: filterValue })
     }
     return allFilters
+}
+
+type RefreshProps = {
+    refreshInterval: number
 }
 
 export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
@@ -260,7 +263,6 @@ export const MissionHistoryView = ({ refreshInterval }: RefreshProps) => {
 
     return (
         <TableWithHeader>
-            <Typography variant="h1">{TranslateText('Mission History')}</Typography>
             <FilterSection />
             {filterIsSet && (
                 <StyledActiveFilterList>
