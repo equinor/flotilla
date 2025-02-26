@@ -1,12 +1,10 @@
-import { Card, Typography } from '@equinor/eds-core-react'
+import { Card } from '@equinor/eds-core-react'
 import styled from 'styled-components'
-import { useLanguageContext } from 'components/Contexts/LanguageContext'
 import { RobotCard, RobotCardPlaceholder } from './RobotCard'
 import { useRobotContext } from 'components/Contexts/RobotContext'
 import { tokens } from '@equinor/eds-tokens'
 import { OngoingMissionCard, OngoingMissionPlaceholderCard } from './OngoingMissionCard'
 import { useMissionsContext } from 'components/Contexts/MissionRunsContext'
-import { MissionHistoryButton } from './MissionHistoryButton'
 import { Robot } from 'models/Robot'
 import { RobotMissionQueueView } from './MissionQueueView'
 import { FrontPageSectionId } from 'models/FrontPageSectionId'
@@ -21,11 +19,6 @@ const MissionControlBody = styled.div`
     flex-wrap: wrap;
     align-items: flex-start;
     gap: 16px;
-`
-const MissionControlHeader = styled.div`
-    display: grid;
-    grid-direction: column;
-    gap: 0.5rem;
 `
 const MissionControlCardStyle = styled(Card)`
     display: flex;
@@ -56,7 +49,6 @@ const OngoingMissionControlCardStyle = styled.div`
 `
 
 export const MissionControlSection = (): JSX.Element => {
-    const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
 
     const missionControlCards = enabledRobots.map((robot, index) => {
@@ -65,16 +57,10 @@ export const MissionControlSection = (): JSX.Element => {
 
     return (
         <MissionControlStyle>
-            <MissionControlHeader>
-                <Typography variant="h1" color="resting">
-                    {TranslateText('Mission Control')}
-                </Typography>
-            </MissionControlHeader>
             <MissionControlBody>
                 {enabledRobots.length > 0 && missionControlCards}
                 {enabledRobots.length === 0 && <MissionControlPlaceholderCard />}
             </MissionControlBody>
-            <MissionHistoryButton />
         </MissionControlStyle>
     )
 }

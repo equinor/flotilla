@@ -245,13 +245,7 @@ const InspectionRow = ({ inspection, openDialog, setMissions, openScheduledDialo
     )
 }
 
-export const InspectionTable = ({
-    inspectionArea,
-    inspections,
-    scrollOnToggle,
-    openDialog,
-    setSelectedMissions,
-}: IProps) => {
+export const InspectionTable = ({ inspectionArea, inspections, openDialog, setSelectedMissions }: IProps) => {
     const { TranslateText } = useLanguageContext()
 
     const [isScheduledDialogOpen, setIsScheduledDialogOpen] = useState<boolean>(false)
@@ -276,26 +270,13 @@ export const InspectionTable = ({
             />
         ))
 
-    useEffect(() => {
-        const inspectionTable = document.getElementById(FrontPageSectionId.InspectionTable)
-        const topBarHeight = document.getElementById(FrontPageSectionId.TopBar)?.offsetHeight ?? 0
-
-        if (inspectionTable) {
-            window.scroll({ top: inspectionTable.offsetTop - topBarHeight, behavior: 'smooth' })
-        }
-    }, [scrollOnToggle])
-
     return (
         <StyledTable id={FrontPageSectionId.InspectionTable}>
             <HideColumnsOnSmallScreen>
                 <Table>
                     <Table.Caption>
                         <Typography variant="h3" style={{ marginBottom: '14px' }}>
-                            {TranslateText('Inspection Missions') +
-                                ' ' +
-                                TranslateText('for') +
-                                ' ' +
-                                inspectionArea.inspectionAreaName}
+                            {inspectionArea.inspectionAreaName}
                         </Typography>
                         <SmallScreenInfoText />
                     </Table.Caption>

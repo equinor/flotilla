@@ -98,9 +98,6 @@ const AutoScheduleList = () => {
             {autoScheduleMissionDefinitions.length > 0 && (
                 <StyledSection>
                     <StyledHeader>
-                        <Typography variant="h1" color="resting">
-                            {TranslateText('Auto Scheduling')}
-                        </Typography>
                         <Typography>
                             {TranslateText('These missions will be automatically scheduled at the specified time')}
                         </Typography>

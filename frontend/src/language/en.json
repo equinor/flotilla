@@ -157,7 +157,7 @@
     "lookout": "Lookout",
     "transport": "Transport",
     "Queue the missions": "Queue the missions",
-    "Inspection Overview": "Inspection Overview",
+    "Deck Overview": "Deck Overview",
     "Predefined Missions": "Predefined Missions",
     "Create new mission": "Create new mission",
     "Must be inspected this week": "Must be inspected this week",
@@ -303,5 +303,6 @@
     "No missions": "No missions",
     "Auto Scheduling": "Auto Scheduling",
     "These missions will be automatically scheduled at the specified time": "These missions will be automatically scheduled at the specified time",
-    "Failed to Auto Schedule Missions": "Failed to Auto Schedule Missions"
+    "Failed to Auto Schedule Missions": "Failed to Auto Schedule Missions",
+    "Menu": "Menu"
 }
