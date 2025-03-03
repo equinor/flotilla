@@ -8,23 +8,21 @@ namespace Api.Database.Models
     [Owned]
     public class AutoScheduleFrequency
     {
-        [Required]
         // In local time
-        public IList<TimeOnly> TimesOfDay { get; set; }
+        public IList<TimeOnly>? TimesOfDay { get; set; }
 
-        [Required]
-        public IList<DayOfWeek> DaysOfWeek { get; set; }
+        public IList<DayOfWeek>? DaysOfWeek { get; set; }
 
         public void ValidateAutoScheduleFrequency()
         {
-            if (TimesOfDay.Count == 0)
+            if (TimesOfDay is null || TimesOfDay.Count == 0)
             {
                 throw new ArgumentException(
                     "AutoScheduleFrequency must have at least one time of day"
                 );
             }
 
-            if (DaysOfWeek.Count == 0)
+            if (DaysOfWeek is null || DaysOfWeek.Count == 0)
             {
                 throw new ArgumentException(
                     "AutoScheduleFrequency must have at least one day of week"
@@ -34,6 +32,11 @@ namespace Api.Database.Models
 
         public IList<TimeSpan>? GetSchedulingTimesForNext24Hours()
         {
+            if (TimesOfDay is null || DaysOfWeek is null)
+            {
+                return null;
+            }
+
             // NCS is always in CET
             TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(
                 "Central European Standard Time"

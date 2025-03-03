@@ -87,7 +87,8 @@ namespace Api.Controllers.Models
         public TimeSpan? InspectionFrequency { get; } = missionDefinition.InspectionFrequency;
 
         [JsonPropertyName("autoScheduleFrequency")]
-        public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
+        public AutoScheduleFrequency? AutoScheduleFrequency { get; } =
+            missionDefinition.AutoScheduleFrequency;
 
         [JsonPropertyName("lastSuccessfulRun")]
         public virtual MissionRun? LastSuccessfulRun { get; } = missionDefinition.LastSuccessfulRun;
