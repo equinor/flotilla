@@ -43,13 +43,17 @@ namespace Api.HostedServices
         {
             _logger.LogInformation("Auto Scheduling Hosted Service Running.");
 
-            var timeUntilMidnight = (DateTime.UtcNow.Date.AddDays(1) - DateTime.UtcNow).TotalSeconds;
+            var timeUntilMidnight = (
+                DateTime.UtcNow.Date.AddDays(1) - DateTime.UtcNow
+            ).TotalSeconds;
             _timer = new Timer(
                 DoWork,
                 null,
                 TimeSpan.FromSeconds(timeUntilMidnight),
                 TimeSpan.FromDays(1)
             );
+
+            DoWork(null);
             return Task.CompletedTask;
         }
 
@@ -60,7 +64,8 @@ namespace Api.HostedServices
             List<MissionDefinition>? missionDefinitions;
             try
             {
-                missionDefinitions = await MissionDefinitionService.ReadByHasAutoScheduleFrequency();
+                missionDefinitions =
+                    await MissionDefinitionService.ReadByHasAutoScheduleFrequency();
             }
             catch (InvalidDataException e)
             {
@@ -76,7 +81,7 @@ namespace Api.HostedServices
 
             var selectedMissionDefinitions = missionDefinitions.Where(m =>
                 m.AutoScheduleFrequency != null
-                && m.AutoScheduleFrequency.GetSchedulingTimesForNext24Hours() != null
+                && m.AutoScheduleFrequency.GetSchedulingTimesUntilMidnight() != null
             );
 
             if (selectedMissionDefinitions.Any() == false)
@@ -99,7 +104,7 @@ namespace Api.HostedServices
                 }
 
                 var jobDelays =
-                    missionDefinition.AutoScheduleFrequency!.GetSchedulingTimesForNext24Hours();
+                    missionDefinition.AutoScheduleFrequency!.GetSchedulingTimesUntilMidnight();
 
                 if (jobDelays == null)
                 {
