@@ -10,10 +10,15 @@ namespace Api.Database.Models
     {
         [Required]
         // In local time
-        public IList<TimeOnly> TimesOfDay { get; set; }
+        public IList<TimeOnly> TimesOfDay { get; set; } = new List<TimeOnly>();
 
         [Required]
-        public IList<DayOfWeek> DaysOfWeek { get; set; }
+        public IList<DayOfWeek> DaysOfWeek { get; set; } = new List<DayOfWeek>();
+
+        public bool HasValidValue()
+        {
+            return TimesOfDay.Count != 0 && DaysOfWeek.Count != 0;
+        }
 
         public void ValidateAutoScheduleFrequency()
         {
