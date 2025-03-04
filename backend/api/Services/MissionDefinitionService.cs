@@ -185,6 +185,9 @@ namespace Api.Services
                 context.Entry(missionDefinition.InspectionArea).State = EntityState.Unchanged;
             }
 
+            // Owned optional properties are not nullable
+            missionDefinition.AutoScheduleFrequency ??= new AutoScheduleFrequency();
+
             var entry = context.Update(missionDefinition);
             await ApplyDatabaseUpdate(missionDefinition.InspectionArea?.Installation);
             _ = signalRService.SendMessageAsync(
@@ -238,7 +241,10 @@ namespace Api.Services
         {
             var accessibleInstallationCodes = accessRoleService.GetAllowedInstallationCodes();
             var query = context
-                .MissionDefinitions.Include(missionDefinition => missionDefinition.InspectionArea)
+                .MissionDefinitions.Include(missionDefinition =>
+                    missionDefinition.AutoScheduleFrequency
+                )
+                .Include(missionDefinition => missionDefinition.InspectionArea)
                 .ThenInclude(inspectionArea => inspectionArea!.Plant)
                 .ThenInclude(plant => plant.Installation)
                 .Include(missionDefinition => missionDefinition.InspectionArea)

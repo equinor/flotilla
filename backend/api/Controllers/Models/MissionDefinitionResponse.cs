@@ -50,7 +50,13 @@ namespace Api.Controllers.Models
             InstallationCode = missionDefinition.InstallationCode;
             Comment = missionDefinition.Comment;
             InspectionFrequency = missionDefinition.InspectionFrequency;
-            AutoScheduleFrequency = missionDefinition.AutoScheduleFrequency;
+            AutoScheduleFrequency =
+                (
+                    missionDefinition.AutoScheduleFrequency is not null
+                    && missionDefinition.AutoScheduleFrequency.HasValidValue()
+                )
+                    ? missionDefinition.AutoScheduleFrequency
+                    : null;
             InspectionArea =
                 missionDefinition.InspectionArea != null
                     ? new InspectionAreaResponse(missionDefinition.InspectionArea)
@@ -87,7 +93,13 @@ namespace Api.Controllers.Models
         public TimeSpan? InspectionFrequency { get; } = missionDefinition.InspectionFrequency;
 
         [JsonPropertyName("autoScheduleFrequency")]
-        public AutoScheduleFrequency? AutoScheduleFrequency { get; set; }
+        public AutoScheduleFrequency? AutoScheduleFrequency { get; } =
+            (
+                missionDefinition.AutoScheduleFrequency is not null
+                && missionDefinition.AutoScheduleFrequency.HasValidValue()
+            )
+                ? missionDefinition.AutoScheduleFrequency
+                : null;
 
         [JsonPropertyName("lastSuccessfulRun")]
         public virtual MissionRun? LastSuccessfulRun { get; } = missionDefinition.LastSuccessfulRun;
