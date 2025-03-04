@@ -37,37 +37,27 @@ namespace Api.Database.Models
             }
         }
 
-        public IList<TimeSpan>? GetSchedulingTimesForNext24Hours()
+        public IList<TimeSpan>? GetSchedulingTimesUntilMidnight()
         {
             // NCS is always in CET
             TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById(
                 "Central European Standard Time"
             );
             DateTime nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, tzi);
-            TimeOnly nowLocalTimeOnly = new(nowLocal.Hour, nowLocal.Minute, nowLocal.Second);
+            TimeOnly nowLocalTimeOnly = TimeOnly.FromDateTime(nowLocal);
 
-            var autoScheduleNext24Hours = new List<TimeSpan>();
+            var autoScheduleNext = new List<TimeSpan>();
+
             if (DaysOfWeek.Contains(nowLocal.DayOfWeek))
             {
-                foreach (TimeOnly time in TimesOfDay)
-                {
-                    if (time > nowLocalTimeOnly)
-                    {
-                        autoScheduleNext24Hours.Add(time - nowLocalTimeOnly);
-                    }
-                }
+                autoScheduleNext.AddRange(
+                    TimesOfDay
+                        .Where(time => time >= nowLocalTimeOnly)
+                        .Select(time => time - nowLocalTimeOnly)
+                );
             }
-            if (DaysOfWeek.Contains(nowLocal.DayOfWeek + 1))
-            {
-                foreach (TimeOnly time in TimesOfDay)
-                {
-                    if (time <= nowLocalTimeOnly)
-                    {
-                        autoScheduleNext24Hours.Add(time - nowLocalTimeOnly);
-                    }
-                }
-            }
-            return autoScheduleNext24Hours.Count > 0 ? autoScheduleNext24Hours : null;
+
+            return autoScheduleNext.Count > 0 ? autoScheduleNext : null;
         }
     }
 }
