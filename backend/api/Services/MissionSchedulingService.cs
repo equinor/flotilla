@@ -110,7 +110,8 @@ namespace Api.Services
                 robot.CurrentInspectionArea = missionRun.InspectionArea!;
             }
             else if (
-                !inspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
+                !missionRun.IsReturnHomeMission()
+                && !inspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
                     (List<MissionTask>)missionRun.Tasks,
                     missionRun.InspectionArea
                 )
