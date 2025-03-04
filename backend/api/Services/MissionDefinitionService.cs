@@ -26,6 +26,8 @@ namespace Api.Services
             bool readOnly = true
         );
 
+        public Task<List<MissionDefinition>?> ReadByHasAutoScheduleFrequency(bool readOnly = true);
+
         public Task<List<MissionTask>?> GetTasksFromSource(Source source);
 
         public Task<List<MissionDefinition>> ReadBySourceId(string sourceId, bool readOnly = true);
@@ -143,6 +145,17 @@ namespace Api.Services
                     && m.Source.SourceId == sourceId
                 )
                 .ToListAsync();
+        }
+
+        public async Task<List<MissionDefinition>?> ReadByHasAutoScheduleFrequency(
+            bool readOnly = true
+        )
+        {
+            var missions = await GetMissionDefinitionsWithSubModels(readOnly: readOnly)
+                .Where(m => m.IsDeprecated == false && m.AutoScheduleFrequency != null)
+                .ToListAsync();
+
+            return missions;
         }
 
         public async Task<MissionDefinition> UpdateLastSuccessfulMissionRun(
