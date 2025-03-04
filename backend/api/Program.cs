@@ -70,7 +70,6 @@ builder.Services.AddScoped<ISourceService, SourceService>();
 builder.Services.AddScoped<IMissionSchedulingService, MissionSchedulingService>();
 
 builder.Services.AddScoped<IIsarService, IsarService>();
-builder.Services.AddScoped<IStidService, StidService>();
 builder.Services.AddScoped<IEchoService, EchoService>();
 
 builder.Services.AddScoped<IMapService, MapService>();
@@ -79,7 +78,6 @@ builder.Services.AddScoped<IBlobService, BlobService>();
 builder.Services.AddScoped<IInstallationService, InstallationService>();
 builder.Services.AddScoped<IPlantService, PlantService>();
 builder.Services.AddScoped<IInspectionAreaService, InspectionAreaService>();
-builder.Services.AddScoped<IAreaService, AreaService>();
 
 builder.Services.AddScoped<IErrorHandlingService, ErrorHandlingService>();
 builder.Services.AddScoped<IReturnToHomeService, ReturnToHomeService>();
@@ -128,7 +126,6 @@ builder
     .EnableTokenAcquisitionToCallDownstreamApi()
     .AddInMemoryTokenCaches()
     .AddDownstreamApi(EchoService.ServiceName, builder.Configuration.GetSection("Echo"))
-    .AddDownstreamApi(StidService.ServiceName, builder.Configuration.GetSection("Stid"))
     .AddDownstreamApi(InspectionService.ServiceName, builder.Configuration.GetSection("IDA"))
     .AddDownstreamApi(IsarService.ServiceName, builder.Configuration.GetSection("Isar"));
 

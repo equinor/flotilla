@@ -253,8 +253,11 @@ namespace Api.Services
                 return;
             }
 
-            var area = await inspectionAreaService.ReadById(inspectionAreaId, readOnly: true);
-            if (area is null)
+            var inspectionArea = await inspectionAreaService.ReadById(
+                inspectionAreaId,
+                readOnly: true
+            );
+            if (inspectionArea is null)
             {
                 logger.LogError(
                     "Could not find inspection area '{InspectionAreaId}' setting robot '{IsarId}' inspection area to null",
@@ -265,7 +268,7 @@ namespace Api.Services
             }
             else
             {
-                await UpdateRobotProperty(robotId, "CurrentInspectionArea", area);
+                await UpdateRobotProperty(robotId, "CurrentInspectionArea", inspectionArea);
             }
         }
 

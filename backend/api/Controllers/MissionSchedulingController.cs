@@ -19,7 +19,6 @@ namespace Api.Controllers
         IMissionLoader missionLoader,
         ILogger<MissionSchedulingController> logger,
         IMapService mapService,
-        IStidService stidService,
         IRobotService robotService,
         ISourceService sourceService,
         IInspectionAreaService inspectionAreaService
@@ -312,58 +311,15 @@ namespace Api.Controllers
 
             var missionTasks = await missionLoader.GetTasksForMission(missionSourceId);
 
-            List<Area?> missionAreas;
-            missionAreas = missionTasks
-                .Where(t => t.TagId != null)
-                .Select(t =>
-                    stidService.GetTagArea(t.TagId!, scheduledMissionQuery.InstallationCode).Result
-                )
-                .ToList();
-
-            var missionInspectionAreaNames = missionAreas
-                .Where(a => a != null)
-                .Select(a => a!.InspectionArea.Name)
-                .Distinct()
-                .ToList();
-            if (missionInspectionAreaNames.Count > 1)
+            if (robot.CurrentInspectionArea == null)
             {
-                string joinedMissionInspectionAreaNames = string.Join(
-                    ", ",
-                    [.. missionInspectionAreaNames]
-                );
-                logger.LogWarning(
-                    "Mission {missionDefinition} has tags on more than one inspection area. The inspection areas are: {joinedMissionInspectionAreaNames}.",
-                    missionDefinition.Name,
-                    joinedMissionInspectionAreaNames
-                );
-            }
-
-            var sortedAreas = missionAreas
-                .GroupBy(i => i)
-                .OrderByDescending(grp => grp.Count())
-                .Select(grp => grp.Key);
-            var area = sortedAreas.First();
-
-            if (area == null && sortedAreas.Count() > 1)
-            {
-                logger.LogWarning(
-                    "Most common area in mission {missionDefinition} is null. Will use second most common area.",
-                    missionDefinition.Name
-                );
-                area = sortedAreas.Skip(1).First();
-            }
-            if (area == null)
-            {
-                logger.LogError(
-                    $"Mission {missionDefinition.Name} doesn't have any tags with valid area."
-                );
-                return NotFound($"No area found for mission '{missionDefinition.Name}'.");
+                return BadRequest("Robot does not have an inspection area");
             }
 
             if (
                 !inspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
                     missionTasks,
-                    area.InspectionArea
+                    robot.CurrentInspectionArea
                 )
             )
             {
@@ -388,15 +344,6 @@ namespace Api.Controllers
                     source.SourceId,
                     readOnly: true
                 );
-                if (missionDefinitions.Count > 0)
-                {
-                    existingMissionDefinition = missionDefinitions.First();
-                    if (existingMissionDefinition.InspectionArea == null)
-                    {
-                        existingMissionDefinition.InspectionArea = area.InspectionArea;
-                        await missionDefinitionService.Update(existingMissionDefinition);
-                    }
-                }
             }
 
             var scheduledMissionDefinition =
@@ -408,7 +355,6 @@ namespace Api.Controllers
                     Name = missionDefinition.Name,
                     InspectionFrequency = scheduledMissionQuery.InspectionFrequency,
                     InstallationCode = scheduledMissionQuery.InstallationCode,
-                    InspectionArea = area.InspectionArea,
                     Map = new MapMetadata(),
                 };
 
@@ -527,7 +473,7 @@ namespace Api.Controllers
                 }
                 if (inspectionArea == null)
                 {
-                    throw new AreaNotFoundException(
+                    throw new InspectionAreaNotFoundException(
                         $"No inspection area with name {customMissionQuery.InspectionAreaName} in installation {customMissionQuery.InstallationCode} was found"
                     );
                 }
@@ -598,7 +544,7 @@ namespace Api.Controllers
             {
                 return StatusCode(StatusCodes.Status502BadGateway, e.Message);
             }
-            catch (AreaNotFoundException)
+            catch (InspectionAreaNotFoundException)
             {
                 return NotFound(
                     $"No area with name {customMissionQuery.InspectionAreaName} in installation {customMissionQuery.InstallationCode} was found"
