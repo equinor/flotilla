@@ -174,6 +174,11 @@ namespace Api.Services
                     )
                 )
                 {
+                    logger.LogWarning(
+                        "Robot position {robotPosition} is outside the inspection area polygon for task {taskId}",
+                        robotPosition,
+                        missionTask.Id
+                    );
                     return false;
                 }
             }
