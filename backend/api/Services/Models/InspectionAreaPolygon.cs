@@ -16,6 +16,14 @@ public class InspectionAreaPolygon
 
 public class XYPosition
 {
+    public XYPosition() { }
+
+    public XYPosition(float x = 0, float y = 0)
+    {
+        X = x;
+        Y = y;
+    }
+
     [JsonPropertyName("x")]
     public double X { get; set; }
 
