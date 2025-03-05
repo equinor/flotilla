@@ -146,6 +146,11 @@ namespace Api.Database.Models
         {
             return MissionRunType == MissionRunType.Emergency;
         }
+
+        public bool IsReturnHomeOrEmergencyMission()
+        {
+            return IsReturnHomeMission() || IsEmergencyMission();
+        }
     }
 
     public enum MissionStatus
