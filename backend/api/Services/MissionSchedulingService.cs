@@ -65,10 +65,7 @@ namespace Api.Services
             if (missionRun == null)
                 return;
 
-            if (
-                robot.MissionQueueFrozen
-                && !(missionRun.IsEmergencyMission() || missionRun.IsReturnHomeMission())
-            )
+            if (robot.MissionQueueFrozen && !missionRun.IsReturnHomeOrEmergencyMission())
             {
                 logger.LogInformation(
                     "Robot {robotName} is ready to start a mission but its mission queue is frozen",
@@ -110,7 +107,7 @@ namespace Api.Services
                 robot.CurrentInspectionArea = missionRun.InspectionArea!;
             }
             else if (
-                !missionRun.IsReturnHomeMission()
+                !missionRun.IsReturnHomeOrEmergencyMission()
                 && !inspectionAreaService.MissionTasksAreInsideInspectionAreaPolygon(
                     (List<MissionTask>)missionRun.Tasks,
                     missionRun.InspectionArea
@@ -145,7 +142,8 @@ namespace Api.Services
 
             if (
                 (robot.IsRobotPressureTooLow() || robot.IsRobotBatteryTooLow())
-                && !(missionRun.IsReturnHomeMission() || missionRun.IsEmergencyMission())
+                    && !missionRun.IsReturnHomeOrEmergencyMission()
+                || missionRun.IsEmergencyMission()
             )
             {
                 await HandleBatteryAndPressureLevel(robot);

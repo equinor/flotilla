@@ -10,10 +10,7 @@ public static class MissionSchedulingHelpers
         ILogger logger
     )
     {
-        if (
-            robot.MissionQueueFrozen
-            && !(missionRun.IsEmergencyMission() || missionRun.IsReturnHomeMission())
-        )
+        if (robot.MissionQueueFrozen && !missionRun.IsReturnHomeOrEmergencyMission())
         {
             logger.LogInformation(
                 "Mission run {MissionRunId} was not started as the mission run queue for robot {RobotName} is frozen",
