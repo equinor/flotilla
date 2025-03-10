@@ -46,7 +46,11 @@ namespace Api.Test.Services
                 installation.InstallationCode,
                 plant.PlantCode
             );
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                inspectionArea
+            );
             await DatabaseUtilities.NewMissionRun(
                 installation.InstallationCode,
                 robot,
@@ -55,8 +59,7 @@ namespace Api.Test.Services
             );
 
             var reportsBefore = await MissionRunService.ReadAll(
-                new MissionRunQueryStringParameters(),
-                readOnly: true
+                new MissionRunQueryStringParameters()
             );
             int nReportsBefore = reportsBefore.Count;
 

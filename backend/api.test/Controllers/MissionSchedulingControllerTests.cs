@@ -53,7 +53,16 @@ namespace Api.Test.Controllers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea
+            );
             string missionsUrl = "/missions";
 
             // Act
@@ -86,7 +95,16 @@ namespace Api.Test.Controllers
         {
             // Arrange
             var installation = await DatabaseUtilities.NewInstallation();
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
+            var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
+            var inspectionArea = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode
+            );
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea
+            );
 
             // Act
             var query = new ScheduledMissionQuery
@@ -161,13 +179,13 @@ namespace Api.Test.Controllers
                 installation.InstallationCode,
                 plant.PlantCode
             );
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Busy, installation);
-
-            var query = CreateDefaultCustomMissionQuery(
-                robot.Id,
-                installation.InstallationCode,
-                inspectionArea.Name
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Busy,
+                installation,
+                inspectionArea
             );
+
+            var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
                 null,
@@ -205,13 +223,13 @@ namespace Api.Test.Controllers
                 installation.InstallationCode,
                 plant.PlantCode
             );
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
-
-            var query = CreateDefaultCustomMissionQuery(
-                robot.Id,
-                installation.InstallationCode,
-                inspectionArea.Name
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                inspectionArea
             );
+
+            var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
                 null,
@@ -300,13 +318,13 @@ namespace Api.Test.Controllers
             );
 
             var otherInstallation = await DatabaseUtilities.NewInstallation("OtherCode");
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, otherInstallation);
-
-            var query = CreateDefaultCustomMissionQuery(
-                robot.Id,
-                installation.InstallationCode,
-                inspectionArea.Name
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Available,
+                otherInstallation,
+                inspectionArea
             );
+
+            var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
                 null,
@@ -326,26 +344,7 @@ namespace Api.Test.Controllers
             var installation = await DatabaseUtilities.NewInstallation();
             var plant = await DatabaseUtilities.NewPlant(installation.InstallationCode);
 
-            var inspectionPolygonOne = new InspectionAreaPolygon
-            {
-                ZMin = 0,
-                ZMax = 10,
-                Positions =
-                [
-                    new XYPosition { X = 0, Y = 0 },
-                    new XYPosition { X = 0, Y = 10 },
-                    new XYPosition { X = 10, Y = 10 },
-                    new XYPosition { X = 10, Y = 0 },
-                ],
-            };
-            var inspectionAreaOne = await DatabaseUtilities.NewInspectionArea(
-                installation.InstallationCode,
-                plant.PlantCode,
-                "InspectionAreaOne",
-                inspectionPolygonOne
-            );
-
-            var inspectionPolygonTwo = new InspectionAreaPolygon
+            var inspectionPolygonRobot = new InspectionAreaPolygon
             {
                 ZMin = 0,
                 ZMax = 10,
@@ -357,24 +356,40 @@ namespace Api.Test.Controllers
                     new XYPosition { X = 20, Y = 11 },
                 ],
             };
-            var inspectionAreaTwo = await DatabaseUtilities.NewInspectionArea(
+
+            var inspectionAreaRobot = await DatabaseUtilities.NewInspectionArea(
                 installation.InstallationCode,
                 plant.PlantCode,
-                "InspectionAreaTwo",
-                inspectionPolygonTwo
+                "InspectionAreaRobot",
+                inspectionPolygonRobot
+            );
+
+            var inspectionPolygonMission = new InspectionAreaPolygon
+            {
+                ZMin = 0,
+                ZMax = 10,
+                Positions =
+                [
+                    new XYPosition { X = 0, Y = 0 },
+                    new XYPosition { X = 0, Y = 10 },
+                    new XYPosition { X = 10, Y = 10 },
+                    new XYPosition { X = 10, Y = 0 },
+                ],
+            };
+            var _inspectionAreaMission = await DatabaseUtilities.NewInspectionArea(
+                installation.InstallationCode,
+                plant.PlantCode,
+                "InspectionAreaMission",
+                inspectionPolygonMission
             );
 
             var robot = await DatabaseUtilities.NewRobot(
                 RobotStatus.Available,
                 installation,
-                inspectionAreaOne
+                inspectionAreaRobot
             );
 
-            var query = CreateDefaultCustomMissionQuery(
-                robot.Id,
-                installation.InstallationCode,
-                inspectionAreaTwo.Name
-            );
+            var query = CreateDefaultCustomMissionQuery(robot.Id, installation.InstallationCode);
             var content = new StringContent(
                 JsonSerializer.Serialize(query),
                 null,
@@ -389,15 +404,13 @@ namespace Api.Test.Controllers
 
         private static CustomMissionQuery CreateDefaultCustomMissionQuery(
             string robotId,
-            string installationCode,
-            string inspectionAreaName
+            string installationCode
         )
         {
             return new CustomMissionQuery
             {
                 RobotId = robotId,
                 InstallationCode = installationCode,
-                InspectionAreaName = inspectionAreaName,
                 DesiredStartTime = DateTime.SpecifyKind(new DateTime(3050, 1, 1), DateTimeKind.Utc),
                 InspectionFrequency = new TimeSpan(14, 0, 0, 0),
                 Name = "TestMission",

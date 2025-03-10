@@ -96,7 +96,11 @@ namespace Api.Test.Controllers
                 installation.InstallationCode,
                 plant.PlantCode
             );
-            var robot = await DatabaseUtilities.NewRobot(RobotStatus.Available, installation);
+            var robot = await DatabaseUtilities.NewRobot(
+                RobotStatus.Available,
+                installation,
+                inspectionArea
+            );
 
             var inspection = new CustomInspectionQuery
             {
@@ -119,7 +123,6 @@ namespace Api.Test.Controllers
                 RobotId = robot.Id,
                 DesiredStartTime = DateTime.UtcNow,
                 InstallationCode = installation.InstallationCode,
-                InspectionAreaName = inspectionArea.Name,
                 Name = "TestMission",
                 Tasks = tasks,
             };
@@ -249,7 +252,6 @@ namespace Api.Test.Controllers
                 RobotId = robot.Id,
                 DesiredStartTime = DateTime.UtcNow,
                 InstallationCode = installation.InstallationCode,
-                InspectionAreaName = inspectionArea.Name,
                 Name = "TestMission",
                 Tasks = tasks,
             };
