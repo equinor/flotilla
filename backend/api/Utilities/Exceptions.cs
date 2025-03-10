@@ -57,14 +57,16 @@
     public class RobotBusyException(string message) : Exception(message) { }
 
     public class RobotNotInSameInstallationAsMissionException(string message)
-        : Exception(message) { }
+        : Exception(message)
+    { }
 
     public class PoseNotFoundException(string message) : Exception(message) { }
 
     public class IsarCommunicationException(string message) : Exception(message) { }
 
     public class ReturnToHomeMissionFailedToScheduleException(string message)
-        : Exception(message) { }
+        : Exception(message)
+    { }
 
     public class RobotCurrentAreaMissingException(string message) : Exception(message) { }
 
