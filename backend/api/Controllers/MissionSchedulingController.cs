@@ -71,7 +71,7 @@ namespace Api.Controllers
                         t.Status != Database.Models.TaskStatus.Successful
                         && t.Status != Database.Models.TaskStatus.PartiallySuccessful
                 )
-                .Select((t) => new MissionTask(t, Database.Models.TaskStatus.NotStarted))
+                .Select((t) => new MissionTask(t))
                 .ToList();
 
             if (missionTasks == null || missionTasks.Count == 0)

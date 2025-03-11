@@ -89,7 +89,7 @@ namespace Api.Database.Models
         }
 
         // Creates a copy of the provided task
-        public MissionTask(MissionTask copy, TaskStatus? status = null)
+        public MissionTask(MissionTask copy)
         {
             TaskOrder = copy.TaskOrder;
             TagId = copy.TagId;
@@ -98,7 +98,7 @@ namespace Api.Database.Models
             TagLink = copy.TagLink;
             RobotPose = new Pose(copy.RobotPose);
             PoseId = copy.PoseId;
-            Status = status ?? copy.Status;
+            Status = TaskStatus.NotStarted;
             IsarZoomDescription = copy.IsarZoomDescription;
             if (copy.Inspection is not null)
             {
