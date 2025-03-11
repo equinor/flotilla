@@ -150,8 +150,7 @@ namespace Api.Services
 
             if (
                 (robot.IsRobotPressureTooLow() || robot.IsRobotBatteryTooLow())
-                    && !missionRun.IsReturnHomeOrEmergencyMission()
-                || missionRun.IsEmergencyMission()
+                && !missionRun.IsReturnHomeOrEmergencyMission()
             )
             {
                 await HandleBatteryAndPressureLevel(robot);
