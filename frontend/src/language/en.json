@@ -302,5 +302,6 @@
     "Skip": "Skip",
     "No missions": "No missions",
     "Auto Scheduling": "Auto Scheduling",
-    "These missions will be automatically scheduled at the specified time": "These missions will be automatically scheduled at the specified time"
+    "These missions will be automatically scheduled at the specified time": "These missions will be automatically scheduled at the specified time",
+    "Failed to Auto Schedule Missions": "Failed to Auto Schedule Missions"
 }
