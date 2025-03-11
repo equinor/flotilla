@@ -5,17 +5,18 @@ import { Icons } from 'utils/icons'
 import { tokens } from '@equinor/eds-tokens'
 import { TextAlignedButton } from 'components/Styles/StyledComponents'
 import { AlertListContents } from './AlertsListItem'
+import { AutoScheduleFailedMissionDict } from 'components/Contexts/AlertContext'
 
 const StyledDiv = styled.div`
     align-items: center;
 `
 const StyledAlertTitle = styled.div`
     display: flex;
-    gap: 0.3em;
+    gap: 0.5em;
     align-items: flex-end;
 `
 const Indent = styled.div`
-    padding: 0px 9px;
+    padding: 5px 9px;
 `
 
 export const FailedAlertContent = ({ title, message }: { title: string; message: string }) => {
@@ -47,5 +48,30 @@ export const FailedAlertListContent = ({ title, message }: { title: string; mess
             alertTitle={TranslateText(title)}
             alertText={TranslateText(message)}
         />
+    )
+}
+
+export const FailedAutoMissionAlertContent = ({
+    autoScheduleFailedMissionDict,
+}: {
+    autoScheduleFailedMissionDict: AutoScheduleFailedMissionDict
+}) => {
+    const { TranslateText } = useLanguageContext()
+    const iconColor = tokens.colors.interactive.danger__resting.rgba
+
+    return (
+        <StyledDiv>
+            <StyledAlertTitle>
+                <Icon name={Icons.Failed} style={{ color: iconColor }} />
+                <Typography>{TranslateText('Failed to Auto Schedule Missions')}</Typography>
+            </StyledAlertTitle>
+            <Indent>
+                {Object.keys(autoScheduleFailedMissionDict).map((missionId) => (
+                    <Typography variant="caption" key={missionId}>
+                        {autoScheduleFailedMissionDict[missionId]}
+                    </Typography>
+                ))}
+            </Indent>
+        </StyledDiv>
     )
 }

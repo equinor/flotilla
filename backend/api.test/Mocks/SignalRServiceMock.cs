@@ -36,5 +36,14 @@ namespace Api.Test.Mocks
         {
             return;
         }
+
+        public void ReportAutoScheduleFailToSignalR(
+            string missionDefinitionId,
+            string message,
+            string installationCode
+        )
+        {
+            return;
+        }
     }
 }

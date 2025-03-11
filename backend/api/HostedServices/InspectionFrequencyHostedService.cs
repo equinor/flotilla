@@ -39,6 +39,9 @@ namespace Api.HostedServices
         private IMissionLoader MissionLoader =>
             _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IMissionLoader>();
 
+        private ISignalRService SignalRService =>
+            _scopeFactory.CreateScope().ServiceProvider.GetRequiredService<ISignalRService>();
+
         public Task StartAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Auto Scheduling Hosted Service Running.");
@@ -96,9 +99,12 @@ namespace Api.HostedServices
             {
                 if (missionDefinition.LastSuccessfulRun == null)
                 {
-                    _logger.LogInformation(
-                        "Mission definition with Id {MissionDefinitionId} does not have a last successfull mission run.",
-                        missionDefinition.Id
+                    string message =
+                        $"Mission definition with Id {missionDefinition.Id} does not have a last successful mission run.";
+                    ReportMessageToSignalR(
+                        message,
+                        missionDefinition.Id,
+                        missionDefinition.InstallationCode
                     );
                     continue;
                 }
@@ -139,9 +145,12 @@ namespace Api.HostedServices
 
             if (missionDefinition.InspectionArea == null)
             {
-                _logger.LogWarning(
-                    "Mission definition {MissionDefinitionId} has no inspection area.",
-                    missionDefinition.Id
+                string message =
+                    $"Mission definition {missionDefinition.Id} has no inspection area.";
+                ReportMessageToSignalR(
+                    message,
+                    missionDefinition.Id,
+                    missionDefinition.InstallationCode
                 );
                 return;
             }
@@ -161,8 +170,11 @@ namespace Api.HostedServices
 
             if (robots == null)
             {
-                _logger.LogInformation(
-                    "No robots found for installation code {InstallationCode}.",
+                string message =
+                    $"No robots found for installation code {missionDefinition.InstallationCode}.";
+                ReportMessageToSignalR(
+                    message,
+                    missionDefinition.Id,
                     missionDefinition.InstallationCode
                 );
                 return;
@@ -173,11 +185,14 @@ namespace Api.HostedServices
             );
             if (robot == null)
             {
-                _logger.LogWarning(
-                    "No robot found for mission definition {MissionDefinitionId} and inspection area {InspectionAreaId}.",
+                string message =
+                    $"No robot found for mission definition {missionDefinition.Id} and inspection area {missionDefinition.InspectionArea.Id}.";
+                ReportMessageToSignalR(
+                    message,
                     missionDefinition.Id,
-                    missionDefinition.InspectionArea.Id
+                    missionDefinition.InstallationCode
                 );
+
                 return;
             }
 
@@ -201,6 +216,21 @@ namespace Api.HostedServices
             }
 
             return;
+        }
+
+        private void ReportMessageToSignalR(
+            string message,
+            string missionDefinitionId,
+            string installationCode
+        )
+        {
+            _logger.LogError(message);
+
+            SignalRService.ReportAutoScheduleFailToSignalR(
+                missionDefinitionId,
+                message,
+                installationCode
+            );
         }
 
         public Task StopAsync(CancellationToken stoppingToken)

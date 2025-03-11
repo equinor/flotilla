@@ -9,7 +9,11 @@ import { Alert } from 'models/Alert'
 import { useRobotContext } from './RobotContext'
 import { BlockedRobotAlertContent, BlockedRobotAlertListContent } from 'components/Alerts/BlockedRobotAlert'
 import { RobotStatus } from 'models/Robot'
-import { FailedAlertContent, FailedAlertListContent } from 'components/Alerts/FailedAlertContent'
+import {
+    FailedAlertContent,
+    FailedAlertListContent,
+    FailedAutoMissionAlertContent,
+} from 'components/Alerts/FailedAlertContent'
 import { convertUTCDateToLocalDate } from 'utils/StringFormatting'
 import { AlertCategory } from 'components/Alerts/AlertsBanner'
 import { DockAlertContent, DockAlertListContent } from 'components/Alerts/DockAlert'
@@ -24,12 +28,14 @@ export enum AlertType {
     RequestDock,
     DismissDock,
     DockSuccess,
+    AutoScheduleFail,
 }
 
 const alertTypeEnumMap: { [key: string]: AlertType } = {
     DockFailure: AlertType.DockFail,
     generalFailure: AlertType.RequestFail,
     DockSuccess: AlertType.DockSuccess,
+    autoSchedule: AlertType.AutoScheduleFail,
 }
 
 type AlertDictionaryType = {
@@ -62,6 +68,10 @@ const defaultAlertInterface = {
     clearListAlert: () => {},
 }
 
+export interface AutoScheduleFailedMissionDict {
+    [key: string]: string
+}
+
 const AlertContext = createContext<IAlertContext>(defaultAlertInterface)
 
 export const AlertProvider: FC<Props> = ({ children }) => {
@@ -73,6 +83,9 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const { installationCode } = useInstallationContext()
     const { TranslateText } = useLanguageContext()
     const { enabledRobots } = useRobotContext()
+    const [autoScheduleFailedMissionDict, setAutoScheduleFailedMissionDict] = useState<AutoScheduleFailedMissionDict>(
+        JSON.parse(window.localStorage.getItem('autoScheduleFailedMissionDict') || '{}')
+    )
 
     const pageSize: number = 100
     // The default amount of minutes in the past for failed missions to generate an alert
@@ -95,6 +108,11 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const clearAlert = (source: AlertType) => {
         if (source === AlertType.MissionFail)
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
+
+        if (source === AlertType.AutoScheduleFail) {
+            setAutoScheduleFailedMissionDict({})
+            window.localStorage.setItem('autoScheduleFailedMissionDict', JSON.stringify({}))
+        }
 
         setAlerts((oldAlerts) => {
             const newAlerts = { ...oldAlerts }
@@ -121,6 +139,11 @@ export const AlertProvider: FC<Props> = ({ children }) => {
     const clearListAlert = (source: AlertType) => {
         if (source === AlertType.MissionFail)
             sessionStorage.setItem(dismissMissionFailTimeKey, JSON.stringify(Date.now()))
+
+        if (source === AlertType.AutoScheduleFail) {
+            setAutoScheduleFailedMissionDict({})
+            window.localStorage.setItem('autoScheduleFailedMissionDict', JSON.stringify({}))
+        }
 
         setListAlerts((oldListAlerts) => {
             const newListAlerts = { ...oldListAlerts }
@@ -211,6 +234,19 @@ export const AlertProvider: FC<Props> = ({ children }) => {
 
                 if (backendAlert.robotId !== null && !enabledRobots.filter((r) => r.id === backendAlert.robotId)) return
 
+                if (alertType === AlertType.AutoScheduleFail) {
+                    const newAutoScheduleFailedMissionDict: AutoScheduleFailedMissionDict = {
+                        ...autoScheduleFailedMissionDict,
+                    }
+                    newAutoScheduleFailedMissionDict[backendAlert.alertTitle] = backendAlert.alertMessage
+                    setAutoScheduleFailedMissionDict(newAutoScheduleFailedMissionDict)
+                    window.localStorage.setItem(
+                        'autoScheduleFailedMissionDict',
+                        JSON.stringify(newAutoScheduleFailedMissionDict)
+                    )
+                    return
+                }
+
                 if (alertType === AlertType.DockSuccess) {
                     setAlert(
                         alertType,
@@ -238,7 +274,7 @@ export const AlertProvider: FC<Props> = ({ children }) => {
                 }
             })
         }
-    }, [registerEvent, connectionReady, installationCode, enabledRobots])
+    }, [registerEvent, connectionReady, installationCode, enabledRobots, autoScheduleFailedMissionDict])
 
     useEffect(() => {
         if (newFailedMissions.length > 0) {
@@ -284,6 +320,21 @@ export const AlertProvider: FC<Props> = ({ children }) => {
         }
         setBlockedRobotNames(newBlockedRobotNames)
     }, [enabledRobots, installationCode])
+
+    useEffect(() => {
+        if (Object.keys(autoScheduleFailedMissionDict).length > 0) {
+            setListAlert(
+                AlertType.AutoScheduleFail,
+                <FailedAutoMissionAlertContent autoScheduleFailedMissionDict={autoScheduleFailedMissionDict} />,
+                AlertCategory.ERROR
+            )
+            setAlert(
+                AlertType.AutoScheduleFail,
+                <FailedAutoMissionAlertContent autoScheduleFailedMissionDict={autoScheduleFailedMissionDict} />,
+                AlertCategory.ERROR
+            )
+        }
+    }, [connectionReady, autoScheduleFailedMissionDict])
 
     return (
         <AlertContext.Provider
