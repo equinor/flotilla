@@ -36,3 +36,7 @@ export const getDeadlineInDays = (deadlineDate: Date): number =>
 
 export const formatDateTime = (dateTime: Date, dateFormat: string): string =>
     format(convertUTCDateToLocalDate(dateTime), dateFormat)
+
+export const capitalizeFirstLetter = (str: string) => {
+    return str.charAt(0).toUpperCase() + str.slice(1)
+}
