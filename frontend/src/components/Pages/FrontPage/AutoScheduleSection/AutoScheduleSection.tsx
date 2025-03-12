@@ -6,6 +6,7 @@ import { DaysOfWeek } from 'models/AutoScheduleFrequency'
 import { config } from 'config'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
+import { capitalizeFirstLetter } from 'utils/StringFormatting'
 
 const StyledSection = styled.div`
     display: flex;
@@ -61,7 +62,7 @@ const AutoScheduleList = () => {
                 <Table key={day}>
                     <Table.Head>
                         <Table.Row>
-                            <StyledTableCell>{TranslateText(day)}</StyledTableCell>
+                            <StyledTableCell>{capitalizeFirstLetter(TranslateText(day))}</StyledTableCell>
                         </Table.Row>
                     </Table.Head>
                     <StyledTableBody>
