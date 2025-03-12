@@ -61,7 +61,7 @@ export const InspectionDialogView = ({ selectedTask, tasks }: InspectionDialogVi
             <StyledDialogContent>
                 <StyledDialogHeader>
                     <Typography variant="accordion_header" group="ui">
-                        {TranslateText('Inspection report')}
+                        {TranslateText('Inspection report for task') + ' ' + (selectedTask.taskOrder + 1)}
                     </Typography>
                     <StyledCloseButton variant="ghost" onClick={closeDialog}>
                         <Icon name={Icons.Clear} size={24} />
